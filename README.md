@@ -1,4 +1,4 @@
-Scanamo
+Scanamo [![Build Status](https://travis-ci.org/guardian/scanamo.svg?branch=master)](https://travis-ci.org/guardian/scanamo)
 =======
 
 Scanamo is a library for using [DynamoDB](https://aws.amazon.com/documentation/dynamodb/) from Scala.
