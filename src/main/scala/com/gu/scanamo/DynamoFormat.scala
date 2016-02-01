@@ -1,6 +1,8 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import shapeless._
+import shapeless.labelled._
 import simulacrum.typeclass
 import collection.convert.decorateAll._
 
@@ -9,9 +11,18 @@ import collection.convert.decorateAll._
   * DynamoDB's `AttributeValue`
   *
   * {{{
-  * >>> val f = DynamoFormat[Map[String, List[Int]]]
-  * >>> f.read(f.write(Map("foo" -> List(1, 2, 3), "bar" -> List(3, 2, 1))))
+  * >>> val mapF = DynamoFormat[Map[String, List[Int]]]
+  * >>> mapF.read(mapF.write(Map("foo" -> List(1, 2, 3), "bar" -> List(3, 2, 1))))
   * Map(foo -> List(1, 2, 3), bar -> List(3, 2, 1))
+  * }}}
+  *
+  * Also supports automatic derivation for case classes
+  *
+  * {{{
+  * >>> case class Foo(a: String, b: Long)
+  * >>> val fooF = DynamoFormat[Foo]
+  * >>> fooF.read(fooF.write(Foo("x", 42L)))
+  * Foo(x,42)
   * }}}
   */
 @typeclass trait DynamoFormat[T] {
@@ -19,7 +30,7 @@ import collection.convert.decorateAll._
   def write(t: T): AttributeValue
 }
 
-object DynamoFormat  {
+object DynamoFormat extends DerivedDynamoFormat {
   def format[T](decode: AttributeValue => T)(encode: AttributeValue => T => AttributeValue): DynamoFormat[T] = {
     new DynamoFormat[T] {
       override def read(item: AttributeValue): T = decode(item)
@@ -76,4 +87,33 @@ object DynamoFormat  {
         Some(f.read(i))
       }
   )(av => t => t.map(f.write).getOrElse(av.withNULL(true)))
+}
+
+trait DerivedDynamoFormat {
+  implicit val hnil: DynamoFormat[HNil] =
+    new DynamoFormat[HNil] {
+      def read(av: AttributeValue): HNil = HNil
+      def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty.asJava)
+    }
+
+  implicit def hcons[K <: Symbol, V, T <: HList](implicit
+    headFormat: Lazy[DynamoFormat[V]],
+    tailFormat: Lazy[DynamoFormat[T]],
+    fieldWitness: Witness.Aux[K]
+  ): DynamoFormat[FieldType[K, V] :: T] =
+    new DynamoFormat[FieldType[K, V] :: T] {
+      def read(av: AttributeValue): FieldType[K, V] :: T =
+        field[K](headFormat.value.read(av.getM.asScala(fieldWitness.value.name))) :: tailFormat.value.read(av)
+
+      def write(t: FieldType[K, V] :: T): AttributeValue = {
+        val tailValue = tailFormat.value.write(t.tail)
+        tailValue.withM((tailValue.getM.asScala + (fieldWitness.value.name -> headFormat.value.write(t.head))).asJava)
+      }
+    }
+
+  implicit def generic[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[DynamoFormat[R]]): DynamoFormat[T] =
+    new DynamoFormat[T] {
+      def read(av: AttributeValue): T = gen.from(formatR.value.read(av))
+      def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
+    }
 }
