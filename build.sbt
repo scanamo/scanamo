@@ -13,6 +13,13 @@ libraryDependencies ++= Seq(
   "org.scalacheck" %% "scalacheck" % "1.12.4" % Test
 )
 
+tutSettings
+site.settings
+site.addMappingsToSiteDir(tut, "tut")
+site.includeScaladoc()
+ghpages.settings
+git.remoteRepo := "git@github.com:guardian/scanamo.git"
+
 doctestSettings
 doctestTestFramework := DoctestTestFramework.ScalaTest
 
