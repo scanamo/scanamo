@@ -13,3 +13,38 @@ libraryDependencies ++= Seq(
 
 doctestSettings
 doctestTestFramework := DoctestTestFramework.ScalaTest
+
+homepage := Some(url("https://github.com/guardian/scanamo"))
+licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
+publishMavenStyle := true
+publishArtifact in Test := false
+scmInfo := Some(ScmInfo(
+  url("https://github.com/guardian/scanamo"),
+  "scm:git:git@github.com:guardian/scanamo.git"
+))
+
+pomExtra := {
+  <developers>
+    <developer>
+      <id>philwills</id>
+      <name>Phil Wills</name>
+      <url>https://github.com/philwills</url>
+    </developer>
+  </developers>
+}
+
+import ReleaseTransformations._
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  ReleaseStep(action = Command.process("publishSigned", _)),
+  setNextVersion,
+  commitNextVersion,
+  ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
+  pushChanges
+)
