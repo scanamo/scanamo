@@ -1,0 +1,1 @@
+Index.PACKAGES = {"com" : [], "com.gu" : [], "com.gu.scanamo" : [{"trait" : "com\/gu\/scanamo\/DerivedDynamoFormat.html", "name" : "com.gu.scanamo.DerivedDynamoFormat"}, {"object" : "com\/gu\/scanamo\/DynamoFormat$.html", "trait" : "com\/gu\/scanamo\/DynamoFormat.html", "name" : "com.gu.scanamo.DynamoFormat"}]};
