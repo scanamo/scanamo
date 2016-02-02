@@ -1,5 +1,4 @@
 name: Scanamo Documentation
-markdown: redcarpet
 highlighter: pygments
 baseurl: /scanamo
 

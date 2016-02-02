@@ -18,6 +18,7 @@ site.settings
 site.addMappingsToSiteDir(tut, "")
 site.includeScaladoc()
 ghpages.settings
+com.typesafe.sbt.SbtGhPages.GhPagesKeys.ghpagesNoJekyll := false
 git.remoteRepo := "git@github.com:guardian/scanamo.git"
 
 doctestSettings
