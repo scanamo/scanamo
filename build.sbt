@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
 
 tutSettings
 site.settings
-site.addMappingsToSiteDir(tut, "tut")
+site.addMappingsToSiteDir(tut, "")
 site.includeScaladoc()
 ghpages.settings
 git.remoteRepo := "git@github.com:guardian/scanamo.git"
