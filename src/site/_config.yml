@@ -1,6 +1,5 @@
 name: Scanamo Documentation
 highlighter: pygments
-baseurl: /scanamo
 
 collections:
   tut:
