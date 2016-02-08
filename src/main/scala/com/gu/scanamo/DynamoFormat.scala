@@ -25,17 +25,18 @@ import collection.convert.decorateAll._
   * Also supports automatic derivation for case classes
   *
   * {{{
-  * >>> case class Foo(a: String, b: Long, c: Int)
-  * >>> val fooF = DynamoFormat[Foo]
-  * >>> fooF.read(fooF.write(Foo("x", 42L, 12)))
-  * Valid(Foo(x,42,12))
+  * >>> case class Farm(animals: List[String])
+  * >>> case class Farmer(name: String, age: Long, farm: Farm)
+  * >>> val farmerF = DynamoFormat[Farmer]
+  * >>> farmerF.read(farmerF.write(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
+  * Valid(Farmer(McDonald,156,Farm(List(sheep, cow))))
   * }}}
   *
   * Problems reading a value are detailed
   * {{{
-  * >>> case class Bar(a: String, b: String, d: Int)
-  * >>> DynamoFormat[Foo].read(DynamoFormat[Bar].write(Bar("a", "b", 5)))
-  * Invalid(OneAnd(NoPropertyOfType(N),List(MissingProperty(c))))
+  * >>> case class Developer(name: String, age: String, problems: Int)
+  * >>> DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
+  * Invalid(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),List())),List(PropertyReadError(farm,OneAnd(MissingProperty,List())))))
   * }}}
   */
 @typeclass trait DynamoFormat[T] {
@@ -56,8 +57,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     }
   }
   def xmap[T, U](f: DynamoFormat[T])(r: T => ValidatedNel[DynamoReadError, U])(w: U => T) = new DynamoFormat[U] {
-    override def read(item: AttributeValue): ValidatedNel[DynamoReadError, U] =
-      f.read(item).toXor.flatMap(r(_).toXor).toValidated
+    override def read(item: AttributeValue): ValidatedNel[DynamoReadError, U] = f.read(item).andThen(r)
     override def write(t: U): AttributeValue = f.write(w(t))
   }
 
@@ -133,11 +133,16 @@ trait DerivedDynamoFormat {
     new DynamoFormat[FieldType[K, V] :: T] {
       def read(av: AttributeValue): ValidatedNel[DynamoReadError, FieldType[K, V] :: T] = {
         val fieldName = fieldWitness.value.name
-        val possibleValue = Xor.fromOption(
-          av.getM.asScala.get(fieldName), NonEmptyList[DynamoReadError](MissingProperty(fieldName))
+        val possibleValue = Validated.fromOption(
+          av.getM.asScala.get(fieldName), NonEmptyList[DynamoReadError](PropertyReadError(fieldName, NonEmptyList(MissingProperty)))
         )
-        val head = possibleValue.flatMap(headFormat.value.read(_).toXor).toValidated.map(field[K](_))
+        def withPropertyError(x: Validated[NonEmptyList[DynamoReadError], V]): Validated[NonEmptyList[DynamoReadError], V] =
+          x.leftMap{e: NonEmptyList[DynamoReadError] => NonEmptyList(PropertyReadError(fieldName, e))}
+
+        val head: ValidatedNel[DynamoReadError, FieldType[K, V]] =
+          possibleValue.andThen(pv => withPropertyError(headFormat.value.read(pv))).map(field[K](_))
         val tail = tailFormat.value.read(av)
+
         head.map2(tail)(_ :: _)
       }
       def write(t: FieldType[K, V] :: T): AttributeValue = {
@@ -154,6 +159,7 @@ trait DerivedDynamoFormat {
 }
 
 sealed trait DynamoReadError
+case class PropertyReadError(name: String, problem: NonEmptyList[DynamoReadError]) extends DynamoReadError
 case class NoPropertyOfType(propertyType: String) extends DynamoReadError
 case class TypeCoercionError(e: Exception) extends DynamoReadError
-case class MissingProperty(property: String) extends DynamoReadError
+case object MissingProperty extends DynamoReadError
