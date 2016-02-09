@@ -1,6 +1,5 @@
 package com.gu.scanamo
 
-import cats.Applicative
 import cats.data._
 import cats.std.list._
 import cats.std.map._
@@ -38,10 +37,18 @@ import collection.convert.decorateAll._
   * >>> DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
   * Invalid(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),List())),List(PropertyReadError(farm,OneAnd(MissingProperty,List())))))
   * }}}
+  *
+  * Optional properties are defaulted to None
+  * {{{
+  * >>> case class LargelyOptional(a: Option[String], b: Option[Int])
+  * >>> DynamoFormat[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
+  * Invalid(OneAnd(PropertyReadError(b,OneAnd(NoPropertyOfType(N),List())),List()))
+  * }}}
   */
 @typeclass trait DynamoFormat[T] {
   def read(av: AttributeValue): ValidatedNel[DynamoReadError, T]
   def write(t: T): AttributeValue
+  def default: Option[T] = None
 }
 
 object DynamoFormat extends DerivedDynamoFormat {
@@ -115,6 +122,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     }
 
     def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(new AttributeValue().withNULL(true))
+    override val default = Some(None)
   }
 }
 
@@ -133,14 +141,15 @@ trait DerivedDynamoFormat {
     new DynamoFormat[FieldType[K, V] :: T] {
       def read(av: AttributeValue): ValidatedNel[DynamoReadError, FieldType[K, V] :: T] = {
         val fieldName = fieldWitness.value.name
-        val possibleValue = Validated.fromOption(
-          av.getM.asScala.get(fieldName), NonEmptyList[DynamoReadError](PropertyReadError(fieldName, NonEmptyList(MissingProperty)))
-        )
-        def withPropertyError(x: Validated[NonEmptyList[DynamoReadError], V]): Validated[NonEmptyList[DynamoReadError], V] =
-          x.leftMap{e: NonEmptyList[DynamoReadError] => NonEmptyList(PropertyReadError(fieldName, e))}
 
-        val head: ValidatedNel[DynamoReadError, FieldType[K, V]] =
-          possibleValue.andThen(pv => withPropertyError(headFormat.value.read(pv))).map(field[K](_))
+        val possibleValue = av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Validated.valid))
+
+        val validatedValue = possibleValue.getOrElse(Validated.invalidNel[DynamoReadError, V](MissingProperty))
+
+        def withPropertyError(x: Validated[NonEmptyList[DynamoReadError], V]): Validated[NonEmptyList[DynamoReadError], V] =
+          x.leftMap(e => NonEmptyList(PropertyReadError(fieldName, e)))
+
+        val head: ValidatedNel[DynamoReadError, FieldType[K, V]] = withPropertyError(validatedValue).map(field[K](_))
         val tail = tailFormat.value.read(av)
 
         head.map2(tail)(_ :: _)
