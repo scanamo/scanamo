@@ -1,5 +1,6 @@
 package com.gu.scanamo
 
+import cats.Show
 import cats.data._
 import cats.std.list._
 import cats.std.map._
@@ -34,15 +35,17 @@ import collection.convert.decorateAll._
   * Problems reading a value are detailed
   * {{{
   * >>> case class Developer(name: String, age: String, problems: Int)
-  * >>> DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
+  * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
   * Invalid(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),List())),List(PropertyReadError(farm,OneAnd(MissingProperty,List())))))
+  * >>> invalid.leftMap(DynamoReadError.describeAll(_))
+  * Invalid('age': not of type: 'N', 'farm': missing)
   * }}}
   *
   * Optional properties are defaulted to None
   * {{{
-  * >>> case class LargelyOptional(a: Option[String], b: Option[Int])
+  * >>> case class LargelyOptional(a: Option[String], b: Option[String])
   * >>> DynamoFormat[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
-  * Invalid(OneAnd(PropertyReadError(b,OneAnd(NoPropertyOfType(N),List())),List()))
+  * Valid(LargelyOptional(None,Some(X)))
   * }}}
   */
 @typeclass trait DynamoFormat[T] {
@@ -172,3 +175,13 @@ case class PropertyReadError(name: String, problem: NonEmptyList[DynamoReadError
 case class NoPropertyOfType(propertyType: String) extends DynamoReadError
 case class TypeCoercionError(e: Exception) extends DynamoReadError
 case object MissingProperty extends DynamoReadError
+
+object DynamoReadError {
+  def describeAll(l: NonEmptyList[DynamoReadError]): String = l.unwrap.map(describe(_)).mkString(", ")
+  def describe(d: DynamoReadError): String =  d match {
+    case PropertyReadError(name, problem) => s"'${name}': ${describeAll(problem)}"
+    case NoPropertyOfType(propertyType) => s"not of type: '$propertyType'"
+    case TypeCoercionError(e) => s"could not be converted to desired type: $e"
+    case MissingProperty => "missing"
+  }
+}
