@@ -15,6 +15,10 @@ libraryDependencies ++= Seq(
 // for simulacrum
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
+startDynamoDBLocal <<= startDynamoDBLocal.dependsOn(compile in Test)
+test in Test <<= (test in Test).dependsOn(startDynamoDBLocal)
+test in Test <<= (test in Test, stopDynamoDBLocal) { (test, stop) => test doFinally stop }
+
 tutSettings
 site.settings
 site.addMappingsToSiteDir(tut, "")
