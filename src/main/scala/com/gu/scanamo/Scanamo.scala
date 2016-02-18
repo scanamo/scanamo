@@ -7,14 +7,9 @@ import collection.convert.decorateAsJava._
 
 /**
   * {{{
-  * >>> import com.amazonaws.services.dynamodbv2._
   * >>> import com.amazonaws.services.dynamodbv2.model._
-  * >>> import collection.convert.decorateAsJava._
-  * >>> val client = { val c = new AmazonDynamoDBClient(new com.amazonaws.auth.BasicAWSCredentials("key", "secret")); c.setEndpoint("http://localhost:8000"); c }
-  * >>> val tableResult = client.createTable(
-  * ...   List(new AttributeDefinition("name", ScalarAttributeType.S)).asJava, "farmers", List(new KeySchemaElement("name", KeyType.HASH)).asJava,
-  * ...   new ProvisionedThroughput(1, 1)
-  * ... )
+  * >>> val client = LocalDynamoDB.client()
+  * >>> val createTableResult = LocalDynamoDB.createTable(client, "farmers", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
   * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
