@@ -47,13 +47,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">DynamoFormat</span><span class="result"> extends <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></span>
+        <span class="name">DynamoFormat</span><span class="result"> extends <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -71,7 +71,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.gu.scanamo.DynamoFormat"><span>DynamoFormat</span></li><li class="in" name="com.gu.scanamo.DerivedDynamoFormat"><span>DerivedDynamoFormat</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.gu.scanamo.DynamoFormat"><span>DynamoFormat</span></li><li class="in" name="scala.Serializable"><span>Serializable</span></li><li class="in" name="java.io.Serializable"><span>Serializable</span></li><li class="in" name="com.gu.scanamo.DerivedDynamoFormat"><span>DerivedDynamoFormat</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -201,7 +201,7 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.gu.scanamo.DynamoFormat#apply" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.gu.scanamo.DynamoFormat#apply" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="apply[T](implicitinstance:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.DynamoFormat[T]"></a>
       <a id="apply[T](DynamoFormat[T]):DynamoFormat[T]"></a>
       <h4 class="signature">
@@ -217,7 +217,10 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Annotations</dt><dd>
+                <span class="name">@inline</span><span class="args">()</span>
+              
+        </dd></dl></div>
     </li><li name="scala.Any#asInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <a id="asInstanceOf[T0]:T0"></a>
@@ -235,6 +238,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.DynamoFormat#attribute" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="attribute[T](decode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;T,propertyType:String)(encode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;(T=&gt;com.amazonaws.services.dynamodbv2.model.AttributeValue)):com.gu.scanamo.DynamoFormat[T]"></a>
+      <a id="attribute[T]((AttributeValue)⇒T,String)((AttributeValue)⇒(T)⇒AttributeValue):DynamoFormat[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">attribute</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="decode">decode: (<span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>) ⇒ <span class="extype" name="com.gu.scanamo.DynamoFormat.attribute.T">T</span></span>, <span name="propertyType">propertyType: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="encode">encode: (<span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>) ⇒ (<span class="extype" name="com.gu.scanamo.DynamoFormat.attribute.T">T</span>) ⇒ <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span></span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.attribute.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@attribute[T](decode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;T,propertyType:String)(encode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;(T=&gt;com.amazonaws.services.dynamodbv2.model.AttributeValue)):com.gu.scanamo.DynamoFormat[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.gu.scanamo.DynamoFormat#booleanFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="booleanFormat:com.gu.scanamo.DynamoFormat[Boolean]"></a>
       <a id="booleanFormat:DynamoFormat[Boolean]"></a>
@@ -251,7 +271,7 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">prop&gt; (b: Boolean) =&gt; DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == b
+      <p class="shortcomment cmt">prop&gt; (b: Boolean) =&gt; DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == cats.data.Validated.valid(b)
 </p>
     </li><li name="scala.AnyRef#clone" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a>
@@ -276,6 +296,23 @@
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.gu.scanamo.DynamoFormat#coerce" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="coerce[N](f:String=&gt;N):String=&gt;cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,N]"></a>
+      <a id="coerce[N]((String)⇒N):(String)⇒ValidatedNel[DynamoReadError,N]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">coerce</span><span class="tparams">[<span name="N">N</span>]</span><span class="params">(<span name="f">f: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="com.gu.scanamo.DynamoFormat.coerce.N">N</span></span>)</span><span class="result">: (<span class="extype" name="scala.Predef.String">String</span>) ⇒ <span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.DynamoFormat.coerce.N">N</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@coerce[N](f:String=&gt;N):String=&gt;cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,N]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
       <a id="eq(AnyRef):Boolean"></a>
@@ -333,23 +370,6 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.gu.scanamo.DynamoFormat#format" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="format[T](decode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;T)(encode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;(T=&gt;com.amazonaws.services.dynamodbv2.model.AttributeValue)):com.gu.scanamo.DynamoFormat[T]"></a>
-      <a id="format[T]((AttributeValue)⇒T)((AttributeValue)⇒(T)⇒AttributeValue):DynamoFormat[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">format</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="decode">decode: (<span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>) ⇒ <span class="extype" name="com.gu.scanamo.DynamoFormat.format.T">T</span></span>)</span><span class="params">(<span name="encode">encode: (<span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>) ⇒ (<span class="extype" name="com.gu.scanamo.DynamoFormat.format.T">T</span>) ⇒ <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span></span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.format.T">T</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@format[T](decode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;T)(encode:com.amazonaws.services.dynamodbv2.model.AttributeValue=&gt;(T=&gt;com.amazonaws.services.dynamodbv2.model.AttributeValue)):com.gu.scanamo.DynamoFormat[T]" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
     </li><li name="com.gu.scanamo.DerivedDynamoFormat#generic" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="generic[T,R](implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[com.gu.scanamo.DynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]"></a>
       <a id="generic[T,R](Aux[T,R],Lazy[DynamoFormat[R]]):DynamoFormat[T]"></a>
@@ -451,7 +471,7 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">prop&gt; (i: Int) =&gt; DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == i
+      <p class="shortcomment cmt">prop&gt; (i: Int) =&gt; DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == cats.data.Validated.valid(i)
 </p>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -487,6 +507,40 @@
       </a>
     </span>
       
+    </li><li name="com.gu.scanamo.DynamoFormat#javaListFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="javaListFormat:com.gu.scanamo.DynamoFormat[java.util.List[com.amazonaws.services.dynamodbv2.model.AttributeValue]]"></a>
+      <a id="javaListFormat:DynamoFormat[List[AttributeValue]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">javaListFormat</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="java.util.List">List</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@javaListFormat:com.gu.scanamo.DynamoFormat[java.util.List[com.amazonaws.services.dynamodbv2.model.AttributeValue]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.DynamoFormat#javaMapFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="javaMapFormat:com.gu.scanamo.DynamoFormat[java.util.Map[String,com.amazonaws.services.dynamodbv2.model.AttributeValue]]"></a>
+      <a id="javaMapFormat:DynamoFormat[Map[String,AttributeValue]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">javaMapFormat</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="java.lang.String">String</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@javaMapFormat:com.gu.scanamo.DynamoFormat[java.util.Map[String,com.amazonaws.services.dynamodbv2.model.AttributeValue]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.gu.scanamo.DynamoFormat#listFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="listFormat[T](implicitf:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.DynamoFormat[List[T]]"></a>
       <a id="listFormat[T](DynamoFormat[T]):DynamoFormat[List[T]]"></a>
@@ -503,7 +557,7 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">prop&gt; (l: List[String]) =&gt; DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) == l
+      <p class="shortcomment cmt">prop&gt; (l: List[String]) =&gt; DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) == cats.data.Validated.valid(l)
 </p>
     </li><li name="com.gu.scanamo.DynamoFormat#longFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="longFormat:com.gu.scanamo.DynamoFormat[Long]"></a>
@@ -521,7 +575,7 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">prop&gt; (l: Long) =&gt; DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == l
+      <p class="shortcomment cmt">prop&gt; (l: Long) =&gt; DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == cats.data.Validated.valid(l)
 </p>
     </li><li name="com.gu.scanamo.DynamoFormat#mapFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="mapFormat[V](implicitf:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.DynamoFormat[Map[String,V]]"></a>
@@ -539,7 +593,7 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">prop&gt; (m: Map[String, Int]) =&gt; DynamoFormat[Map[String, Int]].read(DynamoFormat[Map[String, Int]].write(m)) == m
+      <p class="shortcomment cmt">prop&gt; (m: Map[String, Int]) =&gt; DynamoFormat[Map[String, Int]].read(DynamoFormat[Map[String, Int]].write(m)) == cats.data.Validated.valid(m)
 </p>
     </li><li name="scala.AnyRef#ne" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a>
@@ -558,6 +612,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.gu.scanamo.DynamoFormat.nonInheritedOps" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="nonInheritedOps"></a>
+      <a id="nonInheritedOps:nonInheritedOps"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DynamoFormat$$nonInheritedOps$.html"><span class="name">nonInheritedOps</span></a><span class="result"> extends <a href="DynamoFormat$$ToDynamoFormatOps.html" class="extype" name="com.gu.scanamo.DynamoFormat.ToDynamoFormatOps">ToDynamoFormatOps</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@nonInheritedOps" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#notify" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <a id="notify():Unit"></a>
@@ -592,6 +663,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.gu.scanamo.DynamoFormat#numFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="numFormat:com.gu.scanamo.DynamoFormat[String]"></a>
+      <a id="numFormat:DynamoFormat[String]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">numFormat</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="java.lang.String">String</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@numFormat:com.gu.scanamo.DynamoFormat[String]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.gu.scanamo.DynamoFormat.ops" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ops"></a>
       <a id="ops:ops"></a>
@@ -610,22 +698,22 @@
     </span>
       
     </li><li name="com.gu.scanamo.DynamoFormat#optionFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="optionFormat[T](implicitf:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.DynamoFormat[Option[T]]"></a>
-      <a id="optionFormat[T](DynamoFormat[T]):DynamoFormat[Option[T]]"></a>
+      <a id="optionFormat[T](implicitf:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.DynamoFormat[Option[T]]{valdefault:Some[None.type]}"></a>
+      <a id="optionFormat[T](DynamoFormat[T]):DynamoFormat[Option[T]]{valdefault:Some[None.type]}"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">implicit </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">optionFormat</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.optionFormat.T">T</span>]</span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.gu.scanamo.DynamoFormat.optionFormat.T">T</span>]]</span>
+        <span class="name">optionFormat</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.optionFormat.T">T</span>]</span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="scala.Option">Option</span>[<span class="extype" name="com.gu.scanamo.DynamoFormat.optionFormat.T">T</span>]] { val default: Some[None.type] }</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@optionFormat[T](implicitf:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.DynamoFormat[Option[T]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@optionFormat[T](implicitf:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.DynamoFormat[Option[T]]{valdefault:Some[None.type]}" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">prop&gt; (o: Option[Long]) =&gt; DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) == o
+      <p class="shortcomment cmt">prop&gt; (o: Option[Long]) =&gt; DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) == cats.data.Validated.valid(o)
 </p>
     </li><li name="com.gu.scanamo.DynamoFormat#stringFormat" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="stringFormat:com.gu.scanamo.DynamoFormat[String]"></a>
@@ -643,7 +731,7 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">prop&gt; (s: String) =&gt; DynamoFormat[String].read(DynamoFormat[String].write(s)) == s
+      <p class="shortcomment cmt">prop&gt; (s: String) =&gt; DynamoFormat[String].read(DynamoFormat[String].write(s)) == cats.data.Validated.valid(s)
 </p>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
@@ -749,18 +837,18 @@
               
         </dd></dl></div>
     </li><li name="com.gu.scanamo.DynamoFormat#xmap" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="xmap[T,U](f:com.gu.scanamo.DynamoFormat[T])(r:T=&gt;U)(w:U=&gt;T):com.gu.scanamo.DynamoFormat[U]"></a>
-      <a id="xmap[T,U](DynamoFormat[T])((T)⇒U)((U)⇒T):DynamoFormat[U]"></a>
+      <a id="xmap[T,U](f:com.gu.scanamo.DynamoFormat[T])(r:T=&gt;cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,U])(w:U=&gt;T):com.gu.scanamo.DynamoFormat[U]"></a>
+      <a id="xmap[T,U](DynamoFormat[T])((T)⇒ValidatedNel[DynamoReadError,U])((U)⇒T):DynamoFormat[U]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">xmap</span><span class="tparams">[<span name="T">T</span>, <span name="U">U</span>]</span><span class="params">(<span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.T">T</span>]</span>)</span><span class="params">(<span name="r">r: (<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.T">T</span>) ⇒ <span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.U">U</span></span>)</span><span class="params">(<span name="w">w: (<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.U">U</span>) ⇒ <span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.T">T</span></span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.U">U</span>]</span>
+        <span class="name">xmap</span><span class="tparams">[<span name="T">T</span>, <span name="U">U</span>]</span><span class="params">(<span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.T">T</span>]</span>)</span><span class="params">(<span name="r">r: (<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.T">T</span>) ⇒ <span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.U">U</span>]</span>)</span><span class="params">(<span name="w">w: (<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.U">U</span>) ⇒ <span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.T">T</span></span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoFormat.xmap.U">U</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@xmap[T,U](f:com.gu.scanamo.DynamoFormat[T])(r:T=&gt;U)(w:U=&gt;T):com.gu.scanamo.DynamoFormat[U]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat$@xmap[T,U](f:com.gu.scanamo.DynamoFormat[T])(r:T=&gt;cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,U])(w:U=&gt;T):com.gu.scanamo.DynamoFormat[U]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -774,7 +862,11 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.gu.scanamo.DerivedDynamoFormat">
+        <div class="parent" name="scala.Serializable">
+              <h3>Inherited from <span class="extype" name="scala.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="java.io.Serializable">
+              <h3>Inherited from <span class="extype" name="java.io.Serializable">Serializable</span></h3>
+            </div><div class="parent" name="com.gu.scanamo.DerivedDynamoFormat">
               <h3>Inherited from <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></h3>
             </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>

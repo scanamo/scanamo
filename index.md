@@ -15,7 +15,7 @@ scala> val av = DynamoFormat[String].write("blah")
 av: com.amazonaws.services.dynamodbv2.model.AttributeValue = {S: blah,}
 
 scala> DynamoFormat[String].read(av)
-res0: String = blah
+res0: cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,String] = Valid(blah)
 ```
 
 It also uses Shapeless to provide serialisation of case classes:
@@ -29,5 +29,5 @@ scala> val fooAsAv = fooFormat.write(Foo("abc", List(1L, 2L, 3L)))
 fooAsAv: com.amazonaws.services.dynamodbv2.model.AttributeValue = {M: {a={S: abc,}, b={L: [{N: 1,}, {N: 2,}, {N: 3,}],}},}
 
 scala> fooFormat.read(fooAsAv)
-res1: Foo = Foo(abc,List(1, 2, 3))
+res1: cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,Foo] = Valid(Foo(abc,List(1, 2, 3)))
 ```

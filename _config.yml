@@ -1,0 +1,6 @@
+name: Scanamo Documentation
+highlighter: pygments
+
+collections:
+  tut:
+    output: true

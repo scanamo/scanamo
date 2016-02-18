@@ -84,7 +84,7 @@
     </span>
       
     </li><li name="com.gu.scanamo.DynamoFormat" visbl="pub" data-isabs="true" fullComment="yes" group="Ungrouped">
-      <a id="DynamoFormat[T]extendsAnyRef"></a>
+      <a id="DynamoFormat[T]extendsAnywithSerializable"></a>
       <a id="DynamoFormat[T]:DynamoFormat[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -92,10 +92,10 @@
         <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <a href="DynamoFormat.html"><span class="name">DynamoFormat</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="DynamoFormat.html"><span class="name">DynamoFormat</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package@DynamoFormat[T]extendsAnyRef" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package@DynamoFormat[T]extendsAnywithSerializable" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -103,10 +103,85 @@
 DynamoDB's <code>AttributeValue</code></p><div class="fullcomment"><div class="comment cmt"><p>Type class for defining serialisation to and from
 DynamoDB's <code>AttributeValue</code></p><pre>&gt;&gt;&gt; <span class="kw">val</span> mapF = DynamoFormat[<span class="std">Map</span>[<span class="std">String</span>, <span class="std">List</span>[<span class="std">Int</span>]]]
 &gt;&gt;&gt; mapF.read(mapF.write(<span class="std">Map</span>(<span class="lit">"foo"</span> -&gt; <span class="std">List</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>), <span class="lit">"bar"</span> -&gt; <span class="std">List</span>(<span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>))))
-<span class="std">Map</span>(foo -&gt; <span class="std">List</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>), bar -&gt; <span class="std">List</span>(<span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>))</pre><p>Also supports automatic derivation for case classes</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Foo(a: <span class="std">String</span>, b: <span class="std">Long</span>)
-&gt;&gt;&gt; <span class="kw">val</span> fooF = DynamoFormat[Foo]
-&gt;&gt;&gt; fooF.read(fooF.write(Foo(<span class="lit">"x"</span>, <span class="num">42</span>L)))
-Foo(x,<span class="num">42</span>)</pre></div></div>
+Valid(<span class="std">Map</span>(foo -&gt; <span class="std">List</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>), bar -&gt; <span class="std">List</span>(<span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>)))</pre><p>Also supports automatic derivation for case classes</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
+&gt;&gt;&gt; <span class="kw">val</span> farmerF = DynamoFormat[Farmer]
+&gt;&gt;&gt; farmerF.read(farmerF.write(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>)))))
+Valid(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow))))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Developer(name: <span class="std">String</span>, age: <span class="std">String</span>, problems: <span class="std">Int</span>)
+&gt;&gt;&gt; <span class="kw">val</span> invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer(<span class="lit">"Alice"</span>, <span class="lit">"none of your business"</span>, <span class="num">99</span>)))
+Invalid(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),<span class="std">List</span>())),<span class="std">List</span>(PropertyReadError(farm,OneAnd(MissingProperty,<span class="std">List</span>())))))
+&gt;&gt;&gt; invalid.leftMap(DynamoReadError.describeAll(_))
+Invalid(<span class="lit">'age'</span>: not of <span class="kw">type</span>: <span class="lit">'N'</span>, <span class="lit">'farm'</span>: missing)</pre><p>Optional properties are defaulted to None</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> LargelyOptional(a: <span class="std">Option</span>[<span class="std">String</span>], b: <span class="std">Option</span>[<span class="std">String</span>])
+&gt;&gt;&gt; DynamoFormat[LargelyOptional].read(DynamoFormat[<span class="std">Map</span>[<span class="std">String</span>, <span class="std">String</span>]].write(<span class="std">Map</span>(<span class="lit">"b"</span> -&gt; <span class="lit">"X"</span>)))
+Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span>(X)))</pre></div></div>
+    </li><li name="com.gu.scanamo.DynamoReadError" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DynamoReadErrorextendsAnyRef"></a>
+      <a id="DynamoReadError:DynamoReadError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DynamoReadError.html"><span class="name">DynamoReadError</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@DynamoReadErrorextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.NoPropertyOfType" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="NoPropertyOfTypeextendsDynamoReadErrorwithProductwithSerializable"></a>
+      <a id="NoPropertyOfType:NoPropertyOfType"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="NoPropertyOfType.html"><span class="name">NoPropertyOfType</span></a><span class="params">(<span name="propertyType">propertyType: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@NoPropertyOfTypeextendsDynamoReadErrorwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.PropertyReadError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="PropertyReadErrorextendsDynamoReadErrorwithProductwithSerializable"></a>
+      <a id="PropertyReadError:PropertyReadError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="PropertyReadError.html"><span class="name">PropertyReadError</span></a><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="problem">problem: <span class="extype" name="cats.data.NonEmptyList">NonEmptyList</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>]</span>)</span><span class="result"> extends <a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@PropertyReadErrorextendsDynamoReadErrorwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.TypeCoercionError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="TypeCoercionErrorextendsDynamoReadErrorwithProductwithSerializable"></a>
+      <a id="TypeCoercionError:TypeCoercionError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="TypeCoercionError.html"><span class="name">TypeCoercionError</span></a><span class="params">(<span name="e">e: <span class="extype" name="scala.Exception">Exception</span></span>)</span><span class="result"> extends <a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@TypeCoercionErrorextendsDynamoReadErrorwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
@@ -123,7 +198,7 @@ Foo(x,<span class="num">42</span>)</pre></div></div>
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <a href="DynamoFormat$.html"><span class="name">DynamoFormat</span></a><span class="result"> extends <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></span>
+        <a href="DynamoFormat$.html"><span class="name">DynamoFormat</span></a><span class="result"> extends <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.gu.scanamo.package@DynamoFormat" title="Permalink" target="_top">
@@ -131,6 +206,59 @@ Foo(x,<span class="num">42</span>)</pre></div></div>
       </a>
     </span>
       
+    </li><li name="com.gu.scanamo.DynamoReadError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DynamoReadError"></a>
+      <a id="DynamoReadError:DynamoReadError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DynamoReadError$.html"><span class="name">DynamoReadError</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@DynamoReadError" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.MissingProperty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MissingProperty"></a>
+      <a id="MissingProperty:MissingProperty"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="MissingProperty$.html"><span class="name">MissingProperty</span></a><span class="result"> extends <a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@MissingProperty" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.Scanamo" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="Scanamo"></a>
+      <a id="Scanamo:Scanamo"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="Scanamo$.html"><span class="name">Scanamo</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@Scanamo" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Scanamo provides a simplified interface for reading and writing case classes to DynamoDB</p><div class="fullcomment"><div class="comment cmt"><p>Scanamo provides a simplified interface for reading and writing case classes to DynamoDB</p><p>The examples in method documentation assume the following table has been created:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model._
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client, <span class="lit">"farmers"</span>, <span class="std">List</span>(<span class="lit">"name"</span> -&gt; ScalarAttributeType.S), <span class="std">List</span>(<span class="lit">"name"</span> -&gt; KeyType.HASH))</pre></div></div>
     </li></ol>
             </div>
 
