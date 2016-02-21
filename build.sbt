@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
 // for simulacrum
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 
+dynamoDBLocalDownloadDir := file(".dynamodb-local")
 startDynamoDBLocal <<= startDynamoDBLocal.dependsOn(compile in Test)
 test in Test <<= (test in Test).dependsOn(startDynamoDBLocal)
 test in Test <<= (test in Test, stopDynamoDBLocal) { (test, stop) => test doFinally stop }
@@ -30,6 +31,7 @@ com.typesafe.sbt.SbtGhPages.GhPagesKeys.ghpagesNoJekyll := false
 git.remoteRepo := "git@github.com:guardian/scanamo.git"
 
 doctestSettings
+doctestWithDependencies := false
 doctestTestFramework := DoctestTestFramework.ScalaTest
 
 homepage := Some(url("https://github.com/guardian/scanamo"))
