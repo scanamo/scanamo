@@ -1,4 +1,5 @@
 name := "scanamo"
+organization := "com.gu"
 
 scalaVersion := "2.11.7"
 
