@@ -1,9 +1,21 @@
-Scanamo [![Build Status](https://travis-ci.org/guardian/scanamo.svg?branch=master)](https://travis-ci.org/guardian/scanamo)
+Scanamo [![Build Status](https://travis-ci.org/guardian/scanamo.svg?branch=master)](https://travis-ci.org/guardian/scanamo) [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11)
 =======
 
 Scanamo is a library to make using [DynamoDB](https://aws.amazon.com/documentation/dynamodb/) with Scala case classes simpler.
 
-Assuming you have some DynamoDB `client` in scope, you can use it like:
+Installation
+------------
+
+```scala
+libraryDependencies ++= Seq(
+  "com.gu" %% "scanamo" % "0.1.0"
+)
+```
+
+Usage
+-----
+
+Assuming you have some DynamoDB `client` in scope, you can simply `put` case classes to and `get` them back from DynamoDB:
 
 ```scala
 scala> case class Farm(animals: List[String])
