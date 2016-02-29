@@ -12,4 +12,5 @@ cache:
 before_cache:
   - find $HOME/.sbt -name "*.lock" -type f -delete -print
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete -print
-script: sbt ++$TRAVIS_SCALA_VERSION test
+script: "sbt clean coverage test"
+after_success: "sbt coveralls"
