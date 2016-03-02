@@ -21,8 +21,10 @@ object Scanamo {
   /**
     * {{{
     * >>> val client = LocalDynamoDB.client()
+    *
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
     * >>> Scanamo.get[String, Farmer](client)("farmers")("name" -> "McDonald")
     * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
@@ -34,8 +36,10 @@ object Scanamo {
   /**
     * {{{
     * >>> val client = LocalDynamoDB.client()
+    *
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
     * >>> Scanamo.get[String, Farmer](client)("farmers")("name" -> "Maggot")
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
@@ -48,8 +52,10 @@ object Scanamo {
   /**
     * {{{
     * >>> val client = LocalDynamoDB.client()
+    *
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
     * >>> val deleteResult = Scanamo.delete[String, Farmer](client)("farmers")("name" -> "McGregor")
     * >>> Scanamo.get[String, Farmer](client)("farmers")("name" -> "McGregor")
@@ -68,8 +74,9 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model._
     * >>> val createTableResult = LocalDynamoDB.createTable(client, "bears", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
-    * >>>
+    *
     * >>> case class Bear(name: String, favouriteFood: String)
+    *
     * >>> val r1 = Scanamo.put(client)("bears")(Bear("Pooh", "honey"))
     * >>> val r2 = Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
     * >>> Scanamo.scan[Bear](client)("bears").toList
@@ -92,6 +99,7 @@ object Scanamo {
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    *
     * prop> (m: Map[String, Int], tableName: String) =>
     *     |   val putRequest = Scanamo.putRequest(tableName)(m)
     *     |   putRequest.getTableName == tableName &&
@@ -103,23 +111,29 @@ object Scanamo {
 
 
   /**
+    * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val getRequest = Scanamo.getRequest(tableName)(keyName -> keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
+*     }}}
     */
   def getRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
     new GetItemRequest().withTableName(tableName).withKey(Map(key: _*).mapValues(fk.write).asJava)
 
   /**
+    * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val deleteRequest = Scanamo.deleteRequest(tableName)(keyName -> keyValue)
     *     |   deleteRequest.getTableName == tableName &&
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
+    * }}}
     */
   def deleteRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
     new DeleteItemRequest().withTableName(tableName).withKey(Map(key: _*).mapValues(fk.write).asJava)
@@ -128,6 +142,7 @@ object Scanamo {
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    *
     * prop> (m: Map[String, Int]) =>
     *     |   Scanamo.read[Map[String, Int]](
     *     |     m.mapValues(i => new AttributeValue().withN(i.toString)).asJava

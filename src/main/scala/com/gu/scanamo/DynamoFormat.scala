@@ -66,53 +66,110 @@ object DynamoFormat extends DerivedDynamoFormat {
         encode(new AttributeValue())(t)
     }
   }
-  def xmap[T, U](f: DynamoFormat[T])(r: T => ValidatedNel[DynamoReadError, U])(w: U => T) = new DynamoFormat[U] {
-    override def read(item: AttributeValue): ValidatedNel[DynamoReadError, U] = f.read(item).andThen(r)
-    override def write(t: U): AttributeValue = f.write(w(t))
+
+  /**
+    * {{{
+    * >>> import org.joda.time._
+    * >>> import cats.data.Validated
+    * >>> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    *
+    * >>> implicit val jodaLongFormat = DynamoFormat.xmap[DateTime, Long](
+    * ...   l => Validated.valid(new DateTime(l))
+    * ... )(
+    * ...   _.getMillis
+    * ... )
+    * >>> DynamoFormat[DateTime].read(new AttributeValue().withN("0"))
+    * Valid(1970-01-01T01:00:00.000+01:00)
+    *
+    * >>> val jodaStringFormat = DynamoFormat.xmap[LocalDate, String](
+    * ...   s => Validated.valid(LocalDate.parse(s))
+    * ... )(
+    * ...   _.toString
+    * ... )
+    * >>> jodaStringFormat.read(jodaStringFormat.write(new LocalDate(2007, 8, 18)))
+    * Valid(2007-08-18)
+    * }}}
+    */
+  def xmap[A, B](r: B => ValidatedNel[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+    override def read(item: AttributeValue): ValidatedNel[DynamoReadError, A] = f.read(item).andThen(r)
+    override def write(t: A): AttributeValue = f.write(w(t))
   }
 
   /**
-    * prop> (s: String) => DynamoFormat[String].read(DynamoFormat[String].write(s)) == cats.data.Validated.valid(s)
+    * {{{
+    * prop> (s: String) =>
+    *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == cats.data.Validated.valid(s)
+    * }}}
     */
   implicit val stringFormat = attribute(_.getS, "S")(_.withS)
 
-  implicit val javaBooleanFormat = attribute[java.lang.Boolean](_.getBOOL, "BOOL")(_.withBOOL)
+  private val javaBooleanFormat = attribute[java.lang.Boolean](_.getBOOL, "BOOL")(_.withBOOL)
 
   /**
-    * prop> (b: Boolean) => DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == cats.data.Validated.valid(b)
+    * {{{
+    * prop> (b: Boolean) =>
+    *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == cats.data.Validated.valid(b)
+    * }}}
     */
-  implicit val booleanFormat = xmap(javaBooleanFormat)(b => Validated.valid(Boolean.unbox(b)))(Boolean.box)
+  implicit val booleanFormat = xmap[Boolean, java.lang.Boolean](
+    b => Validated.valid(Boolean.unbox(b)))(
+    Boolean.box
+  )(javaBooleanFormat)
 
 
-  val numFormat = attribute(_.getN, "N")(_.withN)
+  private val numFormat = attribute(_.getN, "N")(_.withN)
   def coerce[N](f: String => N): String => ValidatedNel[DynamoReadError, N] = s =>
     Validated.catchOnly[NumberFormatException](f(s)).leftMap(TypeCoercionError(_)).toValidatedNel
   /**
-    * prop> (l: Long) => DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == cats.data.Validated.valid(l)
+    * {{{
+    * prop> (l: Long) =>
+    *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == cats.data.Validated.valid(l)
+    * }}}
     */
-  implicit val longFormat = xmap(numFormat)(coerce(_.toLong))(_.toString)
+  implicit val longFormat = xmap(coerce(_.toLong))(_.toString)(numFormat)
   /**
-    * prop> (i: Int) => DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == cats.data.Validated.valid(i)
+    * {{{
+    * prop> (i: Int) =>
+    *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == cats.data.Validated.valid(i)
+    * }}}
     */
-  implicit val intFormat = xmap(numFormat)(coerce(_.toInt))(_.toString)
+  implicit val intFormat = xmap(coerce(_.toInt))(_.toString)(numFormat)
 
 
-  val javaListFormat = attribute(_.getL, "L")(_.withL)
+  private val javaListFormat = attribute(_.getL, "L")(_.withL)
   /**
-    * prop> (l: List[String]) => DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) == cats.data.Validated.valid(l)
+    * {{{
+    * prop> (l: List[String]) =>
+    *     | DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) ==
+    *     |   cats.data.Validated.valid(l)
+    * }}}
     */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    xmap(javaListFormat)(_.asScala.toList.traverseU(f.read))(_.map(f.write).asJava)
+    xmap[List[T], java.util.List[AttributeValue]](
+      _.asScala.toList.traverseU(f.read))(
+      _.map(f.write).asJava
+    )(javaListFormat)
 
-  val javaMapFormat = attribute(_.getM, "M")(_.withM)
+  private val javaMapFormat = attribute(_.getM, "M")(_.withM)
   /**
-    * prop> (m: Map[String, Int]) => DynamoFormat[Map[String, Int]].read(DynamoFormat[Map[String, Int]].write(m)) == cats.data.Validated.valid(m)
+    * {{{
+    * prop> (m: Map[String, Int]) =>
+    *     | DynamoFormat[Map[String, Int]].read(DynamoFormat[Map[String, Int]].write(m)) ==
+    *     |   cats.data.Validated.valid(m)
+    * }}}
     */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    xmap(javaMapFormat)(_.asScala.toMap.traverseU(f.read))(_.mapValues(f.write).asJava)
+    xmap[Map[String, V], java.util.Map[String, AttributeValue]](
+      _.asScala.toMap.traverseU(f.read))(
+      _.mapValues(f.write).asJava
+    )(javaMapFormat)
 
   /**
-    * prop> (o: Option[Long]) => DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) == cats.data.Validated.valid(o)
+    * {{{
+    * prop> (o: Option[Long]) =>
+    *     | DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) ==
+    *     |   cats.data.Validated.valid(o)
+    * }}}
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
     def read(av: AttributeValue): ValidatedNel[DynamoReadError, Option[T]] = {

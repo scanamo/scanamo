@@ -10,6 +10,11 @@ libraryDependencies ++= Seq(
 
   "com.github.mpilquist" %% "simulacrum" % "0.7.0",
   "org.typelevel" %% "discipline" % "0.4",
+
+  // Use Joda for custom conversion example
+  "org.joda" % "joda-convert" % "1.7" % "provided",
+  "joda-time" % "joda-time" % "2.8.2" % Test,
+
 	"org.scalatest" %% "scalatest" % "2.2.5" % Test,
   "org.scalacheck" %% "scalacheck" % "1.12.4" % Test
 )
