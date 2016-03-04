@@ -33,7 +33,7 @@ object ScanamoRequest {
 *     }}}
     */
   def getRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
-    new GetItemRequest().withTableName(tableName).withKey(Map(key: _*).mapValues(fk.write).asJava)
+    new GetItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
 
   /**
     * {{{
@@ -47,5 +47,16 @@ object ScanamoRequest {
     * }}}
     */
   def deleteRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(Map(key: _*).mapValues(fk.write).asJava)
+    new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
+
+  def queryRequest[K](tableName: String)(key: (String, K))(implicit fk: DynamoFormat[K]): QueryRequest = {
+    val (k, v) = key
+    new QueryRequest().withTableName(tableName)
+      .withKeyConditionExpression(s"#K = :$k")
+      .withExpressionAttributeNames(Map("#K" -> k).asJava)
+      .withExpressionAttributeValues(asAVMap(s":$k" -> v))
+  }
+
+  private def asAVMap[K](kvs: (String, K)*)(implicit fk: DynamoFormat[K]) =
+    Map(kvs: _*).mapValues(fk.write).asJava
 }

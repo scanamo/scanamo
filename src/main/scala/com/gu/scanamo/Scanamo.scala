@@ -98,6 +98,29 @@ object Scanamo {
   }
 
   /**
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> case class Bear(name: String, favouriteFood: String)
+    *
+    * >>> val r1 = Scanamo.put(client)("bears")(Bear("Pooh", "honey"))
+    * >>> val r2 = Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
+    * >>> Scanamo.query[Bear, String](client)("bears")("name" -> "Pooh").toList
+    * List(Valid(Bear(Pooh,honey)))
+    * }}}
+    */
+  def query[T, K](client: AmazonDynamoDB)(tableName: String)(key: (String, K))(
+    implicit f: DynamoFormat[T], kf: DynamoFormat[K]
+  ): Streaming[ValidatedNel[DynamoReadError, T]] = {
+    def queryMore(lastKey: Option[java.util.Map[String, AttributeValue]]): Streaming[ValidatedNel[DynamoReadError, T]] = {
+      val queryReq = queryRequest(tableName)(key)
+      val queryResult = client.query(lastKey.foldLeft(queryReq)(_.withExclusiveStartKey(_)))
+      val items = Streaming.fromIterable(queryResult.getItems.asScala.map(read[T]))
+      Option(queryResult.getLastEvaluatedKey).foldLeft(items)((is, k) => is ++ Later(queryMore(Some(k))))
+    }
+    queryMore(None)
+  }
+
+  /**
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
