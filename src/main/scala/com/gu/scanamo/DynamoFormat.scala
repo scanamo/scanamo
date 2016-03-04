@@ -1,6 +1,5 @@
 package com.gu.scanamo
 
-import cats.Show
 import cats.data._
 import cats.std.list._
 import cats.std.map._
@@ -55,7 +54,7 @@ import collection.convert.decorateAll._
 }
 
 object DynamoFormat extends DerivedDynamoFormat {
-  def attribute[T](
+  private def attribute[T](
     decode: AttributeValue => T, propertyType: String)(
     encode: AttributeValue => T => AttributeValue
   ): DynamoFormat[T] = {
@@ -118,8 +117,9 @@ object DynamoFormat extends DerivedDynamoFormat {
 
 
   private val numFormat = attribute(_.getN, "N")(_.withN)
-  def coerce[N](f: String => N): String => ValidatedNel[DynamoReadError, N] = s =>
+  private def coerce[N](f: String => N): String => ValidatedNel[DynamoReadError, N] = s =>
     Validated.catchOnly[NumberFormatException](f(s)).leftMap(TypeCoercionError(_)).toValidatedNel
+
   /**
     * {{{
     * prop> (l: Long) =>

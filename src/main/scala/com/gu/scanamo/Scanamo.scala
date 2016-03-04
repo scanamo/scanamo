@@ -18,6 +18,8 @@ import collection.convert.decorateAll._
   * }}}
   */
 object Scanamo {
+  import ScanamoRequest._
+
   /**
     * {{{
     * >>> val client = LocalDynamoDB.client()
@@ -94,49 +96,6 @@ object Scanamo {
     }
     scanMore(None)
   }
-
-  /**
-    * {{{
-    * prop> import collection.convert.decorateAsJava._
-    * prop> import com.amazonaws.services.dynamodbv2.model._
-    *
-    * prop> (m: Map[String, Int], tableName: String) =>
-    *     |   val putRequest = Scanamo.putRequest(tableName)(m)
-    *     |   putRequest.getTableName == tableName &&
-    *     |   putRequest.getItem == m.mapValues(i => new AttributeValue().withN(i.toString)).asJava
-    * }}}
-    */
-  def putRequest[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): PutItemRequest =
-    new PutItemRequest().withTableName(tableName).withItem(f.write(item).getM)
-
-
-  /**
-    * {{{
-    * prop> import collection.convert.decorateAsJava._
-    * prop> import com.amazonaws.services.dynamodbv2.model._
-    *
-    * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val getRequest = Scanamo.getRequest(tableName)(keyName -> keyValue)
-    *     |   getRequest.getTableName == tableName &&
-    *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
-*     }}}
-    */
-  def getRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
-    new GetItemRequest().withTableName(tableName).withKey(Map(key: _*).mapValues(fk.write).asJava)
-
-  /**
-    * {{{
-    * prop> import collection.convert.decorateAsJava._
-    * prop> import com.amazonaws.services.dynamodbv2.model._
-    *
-    * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val deleteRequest = Scanamo.deleteRequest(tableName)(keyName -> keyValue)
-    *     |   deleteRequest.getTableName == tableName &&
-    *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
-    * }}}
-    */
-  def deleteRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(Map(key: _*).mapValues(fk.write).asJava)
 
   /**
     * {{{
