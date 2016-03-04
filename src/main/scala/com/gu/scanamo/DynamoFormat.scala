@@ -73,12 +73,12 @@ object DynamoFormat extends DerivedDynamoFormat {
     * >>> import com.amazonaws.services.dynamodbv2.model.AttributeValue
     *
     * >>> implicit val jodaLongFormat = DynamoFormat.xmap[DateTime, Long](
-    * ...   l => Validated.valid(new DateTime(l))
+    * ...   l => Validated.valid(new DateTime(l).withZoneRetainFields(DateTimeZone.UTC))
     * ... )(
     * ...   _.getMillis
     * ... )
     * >>> DynamoFormat[DateTime].read(new AttributeValue().withN("0"))
-    * Valid(1970-01-01T01:00:00.000+01:00)
+    * Valid(1970-01-01T01:00:00.000Z)
     *
     * >>> val jodaStringFormat = DynamoFormat.xmap[LocalDate, String](
     * ...   s => Validated.valid(LocalDate.parse(s))
