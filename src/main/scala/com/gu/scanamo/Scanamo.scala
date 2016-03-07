@@ -1,11 +1,9 @@
 package com.gu.scanamo
 
-import cats.Later
 import cats.data.{Streaming, ValidatedNel}
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model._
-
-import collection.convert.decorateAll._
+import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 
 /**
   * Scanamo provides a simplified interface for reading and writing case classes to DynamoDB
@@ -83,18 +81,18 @@ object Scanamo {
     * >>> val r2 = Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
     * >>> Scanamo.scan[Bear](client)("bears").toList
     * List(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))
+    *
+    * >>> val lemmingTableResult = LocalDynamoDB.createTable(client, "lemmings", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
+    * >>> case class Lemming(name: String, stuff: String)
+    * >>> val lemmingResults = for { _ <- 0 until 100 } yield Scanamo.put(client)("lemmings")(Lemming(util.Random.nextString(500), util.Random.nextString(5000)))
+    * >>> Scanamo.scan[Lemming](client)("lemmings").toList.size
+    * 100
     * }}}
     */
   def scan[T](client: AmazonDynamoDB)(tableName: String)(implicit f: DynamoFormat[T]): Streaming[ValidatedNel[DynamoReadError, T]] = {
-    def scanMore(lastKey: Option[java.util.Map[String, AttributeValue]]): Streaming[ValidatedNel[DynamoReadError, T]] = {
-      val tableRequest = new ScanRequest().withTableName(tableName)
-      val scanResult = client.scan(lastKey.map(k => tableRequest.withExclusiveStartKey(k)).getOrElse(tableRequest))
-      val items = Streaming.fromIterable(scanResult.getItems.asScala.map(read[T]))
-      Option(scanResult.getLastEvaluatedKey).map { key =>
-        items ++ Later(scanMore(Some(key)))
-      }.getOrElse(items)
-    }
-    scanMore(None)
+    ScanResultStream.stream[T](client)(
+      new ScanRequest().withTableName(tableName)
+    )
   }
 
   /**
@@ -109,15 +107,11 @@ object Scanamo {
     * }}}
     */
   def query[T, K](client: AmazonDynamoDB)(tableName: String)(key: (String, K))(
-    implicit f: DynamoFormat[T], kf: DynamoFormat[K]
-  ): Streaming[ValidatedNel[DynamoReadError, T]] = {
-    def queryMore(lastKey: Option[java.util.Map[String, AttributeValue]]): Streaming[ValidatedNel[DynamoReadError, T]] = {
-      val queryReq = queryRequest(tableName)(key)
-      val queryResult = client.query(lastKey.foldLeft(queryReq)(_.withExclusiveStartKey(_)))
-      val items = Streaming.fromIterable(queryResult.getItems.asScala.map(read[T]))
-      Option(queryResult.getLastEvaluatedKey).foldLeft(items)((is, k) => is ++ Later(queryMore(Some(k))))
-    }
-    queryMore(None)
+    implicit f: DynamoFormat[T], kf: DynamoFormat[K]): Streaming[ValidatedNel[DynamoReadError, T]] = {
+
+    QueryResultStream.stream[T](client)(
+      queryRequest(tableName)(key)
+    )
   }
 
   /**
