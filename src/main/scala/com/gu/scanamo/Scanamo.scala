@@ -96,6 +96,7 @@ object Scanamo {
   }
 
   /**
+    * {{{
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> case class Bear(name: String, favouriteFood: String)
