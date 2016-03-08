@@ -27,12 +27,12 @@ object ScanamoRequest {
     * prop> import com.amazonaws.services.dynamodbv2.model._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(keyName -> keyValue)
+    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) -> keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
 *     }}}
     */
-  def getRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
+  def getRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
     new GetItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
 
   /**
@@ -41,22 +41,22 @@ object ScanamoRequest {
     * prop> import com.amazonaws.services.dynamodbv2.model._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(keyName -> keyValue)
+    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
     *     |   deleteRequest.getTableName == tableName &&
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest[K](tableName: String)(key: (String, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
+  def deleteRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
     new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
 
-  def queryRequest[K](tableName: String)(key: (String, K))(implicit fk: DynamoFormat[K]): QueryRequest = {
+  def queryRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): QueryRequest = {
     val (k, v) = key
     new QueryRequest().withTableName(tableName)
-      .withKeyConditionExpression(s"#K = :$k")
-      .withExpressionAttributeNames(Map("#K" -> k).asJava)
-      .withExpressionAttributeValues(asAVMap(s":$k" -> v))
+      .withKeyConditionExpression(s"#K = :${k.name}")
+      .withExpressionAttributeNames(Map("#K" -> k.name).asJava)
+      .withExpressionAttributeValues(asAVMap(Symbol(s":${k.name}") -> v))
   }
 
-  private def asAVMap[K](kvs: (String, K)*)(implicit fk: DynamoFormat[K]) =
-    Map(kvs: _*).mapValues(fk.write).asJava
+  private def asAVMap[K](kvs: (Symbol, K)*)(implicit fk: DynamoFormat[K]) =
+    Map(kvs: _*).map { case (k,v) => (k.name, fk.write(v)) }.asJava
 }
