@@ -59,14 +59,8 @@ object ScanamoRequest {
   def deleteRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
     new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
 
-  def queryRequest[K](tableName: String)(keyCondition: DynamoKeyCondition[K])(implicit fk: DynamoFormat[K]): QueryRequest = {
+  def queryRequest(tableName: String)(keyCondition: QueryableKeyCondition): QueryRequest = {
     keyCondition(new QueryRequest().withTableName(tableName))
-  }
-
-  def queryRequest[K, R](tableName: String, hashKeyCondition: EqualsKeyCondition[K], rangeKeyCondition: DynamoKeyCondition[R])(
-    implicit fk: DynamoFormat[K],fr: DynamoFormat[R]
-  ): QueryRequest = {
-    (hashKeyCondition and rangeKeyCondition)(new QueryRequest().withTableName(tableName))
   }
 
   def asAVMap[K](kvs: (Symbol, K)*)(implicit fk: DynamoFormat[K]) =

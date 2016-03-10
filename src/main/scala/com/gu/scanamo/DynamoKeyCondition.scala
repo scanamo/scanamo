@@ -4,31 +4,30 @@ import com.amazonaws.services.dynamodbv2.model.QueryRequest
 
 import collection.convert.decorateAsJava._
 
-sealed trait DynamoOperator { val op: String }
-object LT  extends DynamoOperator { val op = "<"  }
-object LTE extends DynamoOperator { val op = "<=" }
-object GT  extends DynamoOperator { val op = ">"  }
-object GTE extends DynamoOperator { val op = ">=" }
+sealed abstract class DynamoOperator(val op: String)
+object LT  extends DynamoOperator("<")
+object LTE extends DynamoOperator("<=")
+object GT  extends DynamoOperator(">")
+object GTE extends DynamoOperator(">=")
 
-sealed trait DynamoKeyCondition[V] {
-  def keyConditionExpression(s: String): String
-  val key: Symbol
-  val v: V
-  def apply(req: QueryRequest)(implicit f: DynamoFormat[V]): QueryRequest =
-    req.withKeyConditionExpression(keyConditionExpression("K"))
+sealed abstract class QueryableKeyCondition {
+  def apply(req: QueryRequest): QueryRequest
+}
+
+case class EqualsKeyCondition[V](key: Symbol, v: V)(implicit f: DynamoFormat[V]) extends QueryableKeyCondition {
+  def apply(req: QueryRequest): QueryRequest =
+    req.withKeyConditionExpression(s"#K = :${key.name}")
       .withExpressionAttributeNames(Map("#K" -> key.name).asJava)
       .withExpressionAttributeValues(ScanamoRequest.asAVMap(Symbol(s":${key.name}") -> v))
-}
-
-case class EqualsKeyCondition[V](val key: Symbol, val v: V) extends DynamoKeyCondition[V] {
-  override def keyConditionExpression(s: String): String = s"#$s = :${key.name}"
-  def and[R](rangeKeyCondition: DynamoKeyCondition[R]) =
+  def and[R](rangeKeyCondition: SimpleKeyCondition[R])(implicit fR: DynamoFormat[R]) =
     AndKeyCondition(this, rangeKeyCondition)
 }
-case class AndKeyCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCondition: DynamoKeyCondition[R]) {
-  def apply(req: QueryRequest)(implicit fH: DynamoFormat[H], fR: DynamoFormat[R]): QueryRequest =
+case class AndKeyCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCondition: SimpleKeyCondition[R])
+  (implicit fH: DynamoFormat[H], fR: DynamoFormat[R]) extends QueryableKeyCondition
+{
+  def apply(req: QueryRequest): QueryRequest =
     req.withKeyConditionExpression(
-      s"${hashCondition.keyConditionExpression("K")} AND ${rangeCondition.keyConditionExpression("R")}"
+      s"#K = :${hashCondition.key.name} AND ${rangeCondition.keyConditionExpression("R")}"
     )
       .withExpressionAttributeNames(Map("#K" -> hashCondition.key.name, "#R" -> rangeCondition.key.name).asJava)
       .withExpressionAttributeValues(
@@ -39,8 +38,8 @@ case class AndKeyCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCond
       )
 }
 
-case class SimpleKeyCondition[V](val key: Symbol, val v: V, operator: DynamoOperator) extends DynamoKeyCondition[V] {
-  override def keyConditionExpression(s: String): String = s"#$s ${operator.op} :${key.name}"
+case class SimpleKeyCondition[V](val key: Symbol, val v: V, operator: DynamoOperator) {
+  def keyConditionExpression(s: String): String = s"#$s ${operator.op} :${key.name}"
 }
 
 object DynamoKeyCondition {

@@ -154,51 +154,28 @@ object Scanamo {
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
     * >>> import DynamoKeyCondition.syntax._
-    * >>> Scanamo.query[Animal, String](client)("animals")('species === "Pig").toList
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig").toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    *
+    *  >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number < 3).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
+    *
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number > 1).toList
+    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    *
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number <= 2).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
+    *
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number >= 2).toList
+    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     * }}}
     */
-  def query[T, K](client: AmazonDynamoDB)(tableName: String)(keyCondition: EqualsKeyCondition[K])(
-    implicit f: DynamoFormat[T], kf: DynamoFormat[K]): Streaming[ValidatedNel[DynamoReadError, T]] = {
+  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: QueryableKeyCondition)(
+    implicit f: DynamoFormat[T]
+  ) : Streaming[ValidatedNel[DynamoReadError, T]] = {
 
     QueryResultStream.stream[T](client)(
       queryRequest(tableName)(keyCondition)
-    )
-  }
-
-  /**
-    * {{{
-    * >>> val client = LocalDynamoDB.client()
-    * >> import com.amazonaws.services.dynamodbv2.model._
-    * >> val createTableResult = LocalDynamoDB.createTable(client, "animals",
-    * ...   List("species" -> ScalarAttributeType.S, "number" -> ScalarAttributeType.N),
-    * ...   List("species" -> KeyType.HASH, "number" -> KeyType.RANGE))
-    *
-    * >>> case class Animal(species: String, number: Int)
-    *
-    * >> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
-    * >> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
-    * >>> import DynamoKeyCondition.syntax._
-    * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number < 3).toList
-    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
-    *
-    * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number > 1).toList
-    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
-    *
-    * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number <= 2).toList
-    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
-    *
-    * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number >= 2).toList
-    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
-    * }}}
-    */
-  def query[T, H, R](client: AmazonDynamoDB)(tableName: String)(
-    hashKeyCondition: EqualsKeyCondition[H], rangeKeyCondition: DynamoKeyCondition[R])(
-    implicit f: DynamoFormat[T], hf: DynamoFormat[H], rf: DynamoFormat[R]
-  ): Streaming[ValidatedNel[DynamoReadError, T]] = {
-
-    QueryResultStream.stream[T](client)(
-      queryRequest(tableName, hashKeyCondition, rangeKeyCondition)
     )
   }
 
