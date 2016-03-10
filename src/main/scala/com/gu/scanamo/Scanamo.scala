@@ -181,6 +181,15 @@ object Scanamo {
     * >>> import DynamoKeyCondition.syntax._
     * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number < 3).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
+    *
+    * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number > 1).toList
+    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    *
+    * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number <= 2).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
+    *
+    * >>> Scanamo.query[Animal, String, Int](client)("animals")('species === "Pig", 'number >= 2).toList
+    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     * }}}
     */
   def query[T, H, R](client: AmazonDynamoDB)(tableName: String)(

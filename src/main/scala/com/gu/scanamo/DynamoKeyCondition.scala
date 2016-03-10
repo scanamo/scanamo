@@ -1,9 +1,14 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.document.RangeKeyCondition
 import com.amazonaws.services.dynamodbv2.model.QueryRequest
 
 import collection.convert.decorateAsJava._
+
+sealed trait DynamoOperator { val op: String }
+object LT  extends DynamoOperator { val op = "<"  }
+object LTE extends DynamoOperator { val op = "<=" }
+object GT  extends DynamoOperator { val op = ">"  }
+object GTE extends DynamoOperator { val op = ">=" }
 
 sealed trait DynamoKeyCondition[V] {
   def keyConditionExpression(s: String): String
@@ -34,8 +39,8 @@ case class AndKeyCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCond
       )
 }
 
-case class LessThanKeyCondition[V](val key: Symbol, val v: V) extends DynamoKeyCondition[V] {
-  override def keyConditionExpression(s: String): String = s"#$s < :${key.name}"
+case class SimpleKeyCondition[V](val key: Symbol, val v: V, operator: DynamoOperator) extends DynamoKeyCondition[V] {
+  override def keyConditionExpression(s: String): String = s"#$s ${operator.op} :${key.name}"
 }
 
 object DynamoKeyCondition {
@@ -43,7 +48,10 @@ object DynamoKeyCondition {
     implicit class SymbolKeyCondition(s: Symbol) {
       def ===[V](v: V)(implicit f: DynamoFormat[V]) = EqualsKeyCondition(s, v)
 
-      def <[V](v: V)(implicit f: DynamoFormat[V]) = LessThanKeyCondition(s, v)
+      def <[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, LT)
+      def >[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, GT)
+      def <=[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, LTE)
+      def >=[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, GTE)
     }
   }
 }
