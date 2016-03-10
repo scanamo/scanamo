@@ -1,5 +1,6 @@
 package com.gu.scanamo
 
+import com.amazonaws.services.dynamodbv2.document.RangeKeyCondition
 import com.amazonaws.services.dynamodbv2.model._
 
 import scala.collection.convert.decorateAll._
@@ -58,14 +59,16 @@ object ScanamoRequest {
   def deleteRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
     new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
 
-  def queryRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): QueryRequest = {
-    val (k, v) = key
-    new QueryRequest().withTableName(tableName)
-      .withKeyConditionExpression(s"#K = :${k.name}")
-      .withExpressionAttributeNames(Map("#K" -> k.name).asJava)
-      .withExpressionAttributeValues(asAVMap(Symbol(s":${k.name}") -> v))
+  def queryRequest[K](tableName: String)(keyCondition: DynamoKeyCondition[K])(implicit fk: DynamoFormat[K]): QueryRequest = {
+    keyCondition(new QueryRequest().withTableName(tableName))
   }
 
-  private def asAVMap[K](kvs: (Symbol, K)*)(implicit fk: DynamoFormat[K]) =
+  def queryRequest[K, R](tableName: String, hashKeyCondition: EqualsKeyCondition[K], rangeKeyCondition: DynamoKeyCondition[R])(
+    implicit fk: DynamoFormat[K],fr: DynamoFormat[R]
+  ): QueryRequest = {
+    (hashKeyCondition and rangeKeyCondition)(new QueryRequest().withTableName(tableName))
+  }
+
+  def asAVMap[K](kvs: (Symbol, K)*)(implicit fk: DynamoFormat[K]) =
     Map(kvs: _*).map { case (k,v) => (k.name, fk.write(v)) }.asJava
 }
