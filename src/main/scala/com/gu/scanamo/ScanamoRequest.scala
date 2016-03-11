@@ -36,8 +36,8 @@ object ScanamoRequest {
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
 *     }}}
     */
-  def getRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
-    new GetItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
+  def getRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): GetItemRequest =
+    new GetItemRequest().withTableName(tableName).withKey(asAVMap(key))
 
   def batchGetRequest[K](tableName: String)(keys: (Symbol, List[K]))(implicit fk: DynamoFormat[K]): BatchGetItemRequest =
     new BatchGetItemRequest().withRequestItems(Map(tableName ->
@@ -55,8 +55,8 @@ object ScanamoRequest {
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
+  def deleteRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): DeleteItemRequest =
+    new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key))
 
   def queryRequest(tableName: String)(keyCondition: QueryableKeyCondition): QueryRequest = {
     keyCondition(new QueryRequest().withTableName(tableName))

@@ -107,9 +107,9 @@ object Scanamo {
     * None
     * }}}
     */
-  def delete[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K)*)
+  def delete[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))
     (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): DeleteItemResult =
-    client.deleteItem(deleteRequest(tableName)(key: _*))
+    client.deleteItem(deleteRequest(tableName)(key))
 
   /**
     * Lazily scans a DynamoDB table
