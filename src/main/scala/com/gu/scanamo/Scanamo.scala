@@ -102,13 +102,13 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
-    * >>> val deleteResult = Scanamo.delete[String, Farmer](client)("farmers")('name -> "McGregor")
+    * >>> val deleteResult = Scanamo.delete(client)("farmers")('name -> "McGregor")
     * >>> Scanamo.get[String, Farmer](client)("farmers")('name -> "McGregor")
     * None
     * }}}
     */
-  def delete[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): DeleteItemResult =
+  def delete[K](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))
+    (implicit fk: DynamoFormat[K]): DeleteItemResult =
     client.deleteItem(deleteRequest(tableName)(key))
 
   /**
