@@ -1,6 +1,5 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.document.RangeKeyCondition
 import com.amazonaws.services.dynamodbv2.model._
 
 import scala.collection.convert.decorateAll._

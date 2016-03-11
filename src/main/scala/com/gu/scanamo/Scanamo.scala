@@ -2,7 +2,6 @@ package com.gu.scanamo
 
 import cats.data.{Streaming, ValidatedNel}
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.document.RangeKeyCondition
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 
@@ -168,6 +167,19 @@ object Scanamo {
     *
     * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number >= 2).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    *
+    * >>> val transportTableResult = LocalDynamoDB.createTable(client, "transport",
+    * ...   List("mode" -> ScalarAttributeType.S, "line" -> ScalarAttributeType.S),
+    * ...   List("mode" -> KeyType.HASH, "line" -> KeyType.RANGE))
+    *
+    * >>> case class Transport(mode: String, line: String)
+    *
+    * >>> val circle = Scanamo.put(client)("transport")(Transport("Underground", "Circle"))
+    * >>> val metropolitan = Scanamo.put(client)("transport")(Transport("Underground", "Metropolitan"))
+    * >>> val central = Scanamo.put(client)("transport")(Transport("Underground", "Central"))
+    *
+    * >>> Scanamo.query[Transport](client)("transport")('mode === "Underground" and ('line beginsWith "C")).toList
+    * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
     * }}}
     */
   def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: QueryableKeyCondition)(
