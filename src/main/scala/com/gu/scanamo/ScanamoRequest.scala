@@ -27,13 +27,28 @@ object ScanamoRequest {
     * prop> import com.amazonaws.services.dynamodbv2.model._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) -> keyValue)
+    *     |   val getRequest = ScanamoRequest.getRequest[Long](tableName)(Symbol(keyName) -> keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
-*     }}}
+    * }}}
     */
-  def getRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
-    new GetItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
+  def getRequest[HK](tableName: String)(hashkey: (Symbol, HK))(implicit fhk: DynamoFormat[HK]): GetItemRequest =
+    new GetItemRequest().withTableName(tableName).withKey(asAVMap(hashkey))
+
+  /**
+    * {{{
+    * prop> import collection.convert.decorateAsJava._
+    * prop> import com.amazonaws.services.dynamodbv2.model._
+    *
+    * prop> (hashKeyName: String, hashKeyValue: String, rangeKeyName: String, rangeKeyValue: Long, tableName: String) =>
+    *     |   val getRequest = ScanamoRequest.getRequest[String, Long](tableName)(Symbol(hashKeyName) -> hashKeyValue, Symbol(rangeKeyName) -> rangeKeyValue)
+    *     |   getRequest.getTableName == tableName &&
+    *     |   getRequest.getKey == Map(hashKeyName -> new AttributeValue().withS(hashKeyValue), rangeKeyName -> new AttributeValue().withN(rangeKeyValue.toString)).asJava
+    * }}}
+    */
+  def getRequest[HK, RK](tableName: String)(hashkey: (Symbol, HK), rangekey: (Symbol, RK))
+    (implicit fhk: DynamoFormat[HK], frk: DynamoFormat[RK]): GetItemRequest =
+    new GetItemRequest().withTableName(tableName).withKey(mergeAVMaps(asAVMap(hashkey), asAVMap(rangekey)))
 
   /**
     * {{{
@@ -41,13 +56,28 @@ object ScanamoRequest {
     * prop> import com.amazonaws.services.dynamodbv2.model._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
+    *     |   val deleteRequest = ScanamoRequest.deleteRequest[Long](tableName)(Symbol(keyName) -> keyValue)
     *     |   deleteRequest.getTableName == tableName &&
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
+  def deleteRequest[HK](tableName: String)(hashkey: (Symbol, HK))(implicit fk: DynamoFormat[HK]): DeleteItemRequest =
+    new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(hashkey))
+
+  /**
+    * {{{
+    * prop> import collection.convert.decorateAsJava._
+    * prop> import com.amazonaws.services.dynamodbv2.model._
+    *
+    * prop> (hashKeyName: String, hashKeyValue: String, rangeKeyName: String, rangeKeyValue: Long, tableName: String) =>
+    *     |   val deleteRequest = ScanamoRequest.deleteRequest[String, Long](tableName)(Symbol(hashKeyName) -> hashKeyValue, Symbol(rangeKeyName) -> rangeKeyValue)
+    *     |   deleteRequest.getTableName == tableName &&
+    *     |   deleteRequest.getKey == Map(hashKeyName -> new AttributeValue().withS(hashKeyValue), rangeKeyName -> new AttributeValue().withN(rangeKeyValue.toString)).asJava
+    * }}}
+    */
+  def deleteRequest[HK, RK](tableName: String)(hashkey: (Symbol, HK), rangekey: (Symbol, RK))
+    (implicit fhk: DynamoFormat[HK], frk: DynamoFormat[RK]): DeleteItemRequest =
+    new DeleteItemRequest().withTableName(tableName).withKey(mergeAVMaps(asAVMap(hashkey), asAVMap(rangekey)))
 
   def queryRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): QueryRequest = {
     val (k, v) = key
@@ -59,4 +89,11 @@ object ScanamoRequest {
 
   private def asAVMap[K](kvs: (Symbol, K)*)(implicit fk: DynamoFormat[K]) =
     Map(kvs: _*).map { case (k,v) => (k.name, fk.write(v)) }.asJava
+
+  private def mergeAVMaps(maps: java.util.Map[String, AttributeValue]*) = {
+    val map = new java.util.HashMap[String, AttributeValue]()
+    maps.foreach(m => map.putAll(m))
+    map
+  }
+
 }
