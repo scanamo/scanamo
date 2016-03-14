@@ -29,6 +29,7 @@ object ScanamoRequest {
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    * prop> import DynamoKeyCondition.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) -> keyValue)
@@ -36,8 +37,8 @@ object ScanamoRequest {
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
 *     }}}
     */
-  def getRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): GetItemRequest =
-    new GetItemRequest().withTableName(tableName).withKey(asAVMap(key))
+  def getRequest(tableName: String)(key: HashKeyCondition): GetItemRequest =
+    new GetItemRequest().withTableName(tableName).withKey(key.asAVMap)
 
   def batchGetRequest[K](tableName: String)(keys: (Symbol, List[K]))(implicit fk: DynamoFormat[K]): BatchGetItemRequest =
     new BatchGetItemRequest().withRequestItems(Map(tableName ->
@@ -48,6 +49,7 @@ object ScanamoRequest {
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    * prop> import DynamoKeyCondition.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
@@ -55,13 +57,10 @@ object ScanamoRequest {
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key))
+  def deleteRequest(tableName: String)(key: HashKeyCondition): DeleteItemRequest =
+    new DeleteItemRequest().withTableName(tableName).withKey(key.asAVMap)
 
   def queryRequest(tableName: String)(keyCondition: QueryableKeyCondition): QueryRequest = {
     keyCondition(new QueryRequest().withTableName(tableName))
   }
-
-  def asAVMap[K](kvs: (Symbol, K)*)(implicit fk: DynamoFormat[K]) =
-    Map(kvs: _*).map { case (k,v) => (k.name, fk.write(v)) }.asJava
 }

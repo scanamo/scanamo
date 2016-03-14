@@ -26,7 +26,8 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-    * >>> Scanamo.get[String, Farmer](client)("farmers")('name -> "McDonald")
+    * >>> import DynamoKeyCondition.syntax._
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McDonald")
     * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
@@ -58,12 +59,13 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
-    * >>> Scanamo.get[String, Farmer](client)("farmers")('name -> "Maggot")
+    * >>> import DynamoKeyCondition.syntax._
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "Maggot")
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
     */
-  def get[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
+  def get[T](client: AmazonDynamoDB)(tableName: String)(key: HashKeyCondition)
+    (implicit ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
     Option(client.getItem(getRequest(tableName)(key)).getItem).map(read[T])
 
   /**
@@ -102,13 +104,13 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
+    * >>> import DynamoKeyCondition.syntax._
     * >>> val deleteResult = Scanamo.delete(client)("farmers")('name -> "McGregor")
-    * >>> Scanamo.get[String, Farmer](client)("farmers")('name -> "McGregor")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McGregor")
     * None
     * }}}
     */
-  def delete[K](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))
-    (implicit fk: DynamoFormat[K]): DeleteItemResult =
+  def delete(client: AmazonDynamoDB)(tableName: String)(key: HashKeyCondition): DeleteItemResult =
     client.deleteItem(deleteRequest(tableName)(key))
 
   /**

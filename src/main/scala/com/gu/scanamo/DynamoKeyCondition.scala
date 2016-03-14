@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.QueryRequest
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryRequest}
 
 import collection.convert.decorateAsJava._
 
@@ -14,15 +14,24 @@ sealed abstract class QueryableKeyCondition {
   def apply(req: QueryRequest): QueryRequest
 }
 
-case class HashKeyCondition[V](key: Symbol, v: V)(implicit f: DynamoFormat[V]) extends QueryableKeyCondition {
+sealed trait HashKeyCondition {
+  def asAVMap: java.util.Map[String, AttributeValue]
+}
+
+case class EqualsKeyCondition[V](key: Symbol, v: V)(implicit f: DynamoFormat[V])
+  extends QueryableKeyCondition with  HashKeyCondition {
+
   def apply(req: QueryRequest): QueryRequest =
     req.withKeyConditionExpression(s"#K = :${key.name}")
       .withExpressionAttributeNames(Map("#K" -> key.name).asJava)
-      .withExpressionAttributeValues(ScanamoRequest.asAVMap(Symbol(s":${key.name}") -> v))
+      .withExpressionAttributeValues(Map(s":${key.name}" -> f.write(v)).asJava)
   def and[R](rangeKeyCondition: RangeKeyCondition[R])(implicit fR: DynamoFormat[R]) =
     AndKeyCondition(this, rangeKeyCondition)
+
+  def asAVMap: java.util.Map[String, AttributeValue] =
+    Map(key.name -> f.write(v)).asJava
 }
-case class AndKeyCondition[H, R](hashCondition: HashKeyCondition[H], rangeCondition: RangeKeyCondition[R])
+case class AndKeyCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCondition: RangeKeyCondition[R])
   (implicit fH: DynamoFormat[H], fR: DynamoFormat[R]) extends QueryableKeyCondition
 {
   def apply(req: QueryRequest): QueryRequest =
@@ -64,7 +73,7 @@ object DynamoKeyCondition {
     }
 
     implicit def symbolTupleToKeyCondition[V](pair: (Symbol, V))(implicit f: DynamoFormat[V]) =
-      HashKeyCondition(pair._1, pair._2)
+      EqualsKeyCondition(pair._1, pair._2)
   }
 }
 
