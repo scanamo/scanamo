@@ -153,19 +153,19 @@ object Scanamo {
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
     * >>> import DynamoKeyCondition.syntax._
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig").toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig").toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
-    *  >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number < 3).toList
+    *  >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number > 1).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number <= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number >= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
     * >>> val transportTableResult = LocalDynamoDB.createTable(client, "transport",
@@ -178,7 +178,7 @@ object Scanamo {
     * >>> val metropolitan = Scanamo.put(client)("transport")(Transport("Underground", "Metropolitan"))
     * >>> val central = Scanamo.put(client)("transport")(Transport("Underground", "Central"))
     *
-    * >>> Scanamo.query[Transport](client)("transport")('mode === "Underground" and ('line beginsWith "C")).toList
+    * >>> Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
     * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
     * }}}
     */

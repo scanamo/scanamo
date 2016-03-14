@@ -26,9 +26,10 @@ case class AndKeyCondition[H, R](hashCondition: HashKeyCondition[H], rangeCondit
   (implicit fH: DynamoFormat[H], fR: DynamoFormat[R]) extends QueryableKeyCondition
 {
   def apply(req: QueryRequest): QueryRequest =
-    req.withKeyConditionExpression(
-      s"#K = :${hashCondition.key.name} AND ${rangeCondition.keyConditionExpression("R")}"
-    )
+    req
+      .withKeyConditionExpression(
+        s"#K = :${hashCondition.key.name} AND ${rangeCondition.keyConditionExpression("R")}"
+      )
       .withExpressionAttributeNames(Map("#K" -> hashCondition.key.name, "#R" -> rangeCondition.key.name).asJava)
       .withExpressionAttributeValues(
         Map(
@@ -55,14 +56,15 @@ case class BeginsWithCondition[V](key: Symbol, v: V)(implicit f: DynamoFormat[V]
 object DynamoKeyCondition {
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
-      def ===[V](v: V)(implicit f: DynamoFormat[V]) = HashKeyCondition(s, v)
-
       def <[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, LT)
       def >[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, GT)
       def <=[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, LTE)
       def >=[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, GTE)
       def beginsWith[V](v: V)(implicit f: DynamoFormat[V]) = BeginsWithCondition(s, v)
     }
+
+    implicit def symbolTupleToKeyCondition[V](pair: (Symbol, V))(implicit f: DynamoFormat[V]) =
+      HashKeyCondition(pair._1, pair._2)
   }
 }
 
