@@ -12,7 +12,8 @@ import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
   * {{{
   * >>> import com.amazonaws.services.dynamodbv2.model._
   * >>> val client = LocalDynamoDB.client()
-  * >>> val createTableResult = LocalDynamoDB.createTable(client, "farmers", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
+  * >>> val createFarmersTableResult = LocalDynamoDB.createTable(client, "farmers", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
+  * >>> val createFarmHandsTableResult = LocalDynamoDB.createTable(client, "farmhands", List("boss" -> ScalarAttributeType.S, "employeeId" -> ScalarAttributeType.N), List("boss" -> KeyType.HASH, "employeeId" -> KeyType.RANGE))
   * }}}
   */
 object Scanamo {
@@ -45,9 +46,27 @@ object Scanamo {
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
     */
-  def get[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K)*)
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
-    Option(client.getItem(getRequest(tableName)(key: _*)).getItem).map(read[T])
+  def get[HK, T](client: AmazonDynamoDB)(tableName: String)(hashkey: (Symbol, HK))
+    (implicit fhk: DynamoFormat[HK], ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
+    Option(client.getItem(getRequest[HK](tableName)(hashkey)).getItem).map(read[T])
+
+  /**
+    * {{{
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> case class Farm(animals: List[String])
+    * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> case class FarmHand(boss: String, employeeId: Int, age: Long)
+    *
+    * >>> val putFarmerResult = Scanamo.put(client)("farmers")(Farmer("Maniappa", 75L, Farm(List("cow"))))
+    * >>> val putFarmHandResult = Scanamo.put(client)("farmhands")(FarmHand("Maniappa", 1, 27L))
+    * >>> Scanamo.get[String, Int, FarmHand](client)("farmhands")('boss -> "Maniappa", 'employeeId -> 1)
+    * Some(Valid(FarmHand(Maniappa,1,27)))
+    * }}}
+    */
+  def get[HK, RK, T](client: AmazonDynamoDB)(tableName: String)(hashkey: (Symbol, HK), rangekey: (Symbol, RK))
+    (implicit fhk: DynamoFormat[HK], frk: DynamoFormat[RK], ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
+    Option(client.getItem(getRequest[HK, RK](tableName)(hashkey, rangekey)).getItem).map(read[T])
 
   /**
     * {{{
@@ -62,9 +81,28 @@ object Scanamo {
     * None
     * }}}
     */
-  def delete[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K)*)
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): DeleteItemResult =
-    client.deleteItem(deleteRequest(tableName)(key: _*))
+  def delete[HK, T](client: AmazonDynamoDB)(tableName: String)(hashkey: (Symbol, HK))
+    (implicit fhk: DynamoFormat[HK], ft: DynamoFormat[T]): DeleteItemResult =
+    client.deleteItem(deleteRequest[HK](tableName)(hashkey))
+
+  /**
+    * {{{
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> case class Farm(animals: List[String])
+    * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> case class FarmHand(boss: String, employeeId: Int, age: Long)
+    *
+    * >>> val farmerPutResult = Scanamo.put(client)("farmers")(Farmer("Balthazar", 62L, Farm(List("rabbit"))))
+    * >>> val farmHandPutResult = Scanamo.put(client)("farmhands")(FarmHand("Balthazar", 123, 25L))
+    * >>> val deleteResult = Scanamo.delete[String, Int, FarmHand](client)("farmhands")('boss -> "Balthazar", 'employeeId -> 123)
+    * >>> Scanamo.get[String, Int, FarmHand](client)("farmhands")('boss -> "Balthazar", 'employeeId -> 123)
+    * None
+    * }}}
+    */
+  def delete[HK, RK, T](client: AmazonDynamoDB)(tableName: String)(hashkey: (Symbol, HK), rangekey: (Symbol, RK))
+    (implicit fhk: DynamoFormat[HK], frk: DynamoFormat[RK], ft: DynamoFormat[T]): DeleteItemResult =
+    client.deleteItem(deleteRequest[HK, RK](tableName)(hashkey, rangekey))
 
   /**
     * Lazily scans a DynamoDB table

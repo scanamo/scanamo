@@ -4,7 +4,7 @@ organization := "com.gu"
 scalaVersion := "2.11.7"
 
 libraryDependencies ++= Seq(
-	"com.amazonaws" % "aws-java-sdk-dynamodb" % "1.10.43",
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.10.43",
   "com.chuusai" %% "shapeless" % "2.2.5",
   "org.typelevel" %% "cats" % "0.4.1",
 
@@ -15,7 +15,7 @@ libraryDependencies ++= Seq(
   "org.joda" % "joda-convert" % "1.7" % "provided",
   "joda-time" % "joda-time" % "2.8.2" % Test,
 
-	"org.scalatest" %% "scalatest" % "2.2.5" % Test,
+  "org.scalatest" %% "scalatest" % "2.2.5" % Test,
   "org.scalacheck" %% "scalacheck" % "1.12.4" % Test
 )
 // for simulacrum
