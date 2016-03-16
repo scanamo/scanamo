@@ -26,7 +26,7 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-    * >>> import DynamoKeyCondition.syntax._
+    * >>> import com.gu.scanamo.syntax._
     * >>> Scanamo.get[Farmer](client)("farmers")('name === "McDonald")
     * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
@@ -59,7 +59,7 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
-    * >>> import DynamoKeyCondition.syntax._
+    * >>> import com.gu.scanamo.syntax._
     * >>> Scanamo.get[Farmer](client)("farmers")('name === "Maggot")
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
     *
@@ -113,7 +113,7 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
-    * >>> import DynamoKeyCondition.syntax._
+    * >>> import com.gu.scanamo.syntax._
     * >>> val deleteResult = Scanamo.delete(client)("farmers")('name === "McGregor")
     * >>> Scanamo.get[Farmer](client)("farmers")('name === "McGregor")
     * None
@@ -160,7 +160,7 @@ object Scanamo {
     *
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
-    * >>> import DynamoKeyCondition.syntax._
+    * >>> import com.gu.scanamo.syntax._
     * >>> Scanamo.query[Animal](client)("animals")('species === "Pig").toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *

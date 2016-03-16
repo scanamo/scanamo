@@ -29,7 +29,7 @@ object ScanamoRequest {
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
-    * prop> import DynamoKeyCondition.syntax._
+    * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) === keyValue)
@@ -49,7 +49,7 @@ object ScanamoRequest {
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
-    * prop> import DynamoKeyCondition.syntax._
+    * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) === keyValue)
