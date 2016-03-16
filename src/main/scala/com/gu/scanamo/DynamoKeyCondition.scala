@@ -1,6 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryRequest}
+import simulacrum.typeclass
 
 import collection.convert.decorateAsJava._
 
@@ -10,43 +11,65 @@ object LTE extends DynamoOperator("<=")
 object GT  extends DynamoOperator(">")
 object GTE extends DynamoOperator(">=")
 
-sealed abstract class QueryableKeyCondition {
+
+@typeclass trait QueryableKeyCondition[T] {
+  def apply(t: T)(req: QueryRequest): QueryRequest
+}
+
+trait Query {
   def apply(req: QueryRequest): QueryRequest
 }
 
-sealed trait HashKeyCondition {
-  def asAVMap: java.util.Map[String, AttributeValue]
+object QueryableKeyCondition {
+  implicit def equalsKeyCondition[V] = new QueryableKeyCondition[EqualsKeyCondition[V]] {
+    override def apply(t: EqualsKeyCondition[V])(req: QueryRequest): QueryRequest =
+      req.withKeyConditionExpression(s"#K = :${t.key.name}")
+        .withExpressionAttributeNames(Map("#K" -> t.key.name).asJava)
+        .withExpressionAttributeValues(Map(s":${t.key.name}" -> t.f.write(t.v)).asJava)
+  }
+  implicit def hashAndRangeQueryCondition[H, R] = new QueryableKeyCondition[AndQueryCondition[H, R]] {
+    override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest =
+      req
+        .withKeyConditionExpression(
+          s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}"
+        )
+        .withExpressionAttributeNames(Map("#K" -> t.hashCondition.key.name, "#R" -> t.rangeCondition.key.name).asJava)
+        .withExpressionAttributeValues(
+          Map(
+            s":${t.hashCondition.key.name}" -> t.fH.write(t.hashCondition.v),
+            s":${t.rangeCondition.key.name}" -> t.fR.write(t.rangeCondition.v)
+          ).asJava
+        )
+  }
 }
 
-case class EqualsKeyCondition[V](key: Symbol, v: V)(implicit f: DynamoFormat[V])
-  extends QueryableKeyCondition with  HashKeyCondition {
+trait AttributeValueMap {
+  def asAVMap: Map[String, AttributeValue]
+}
 
-  def apply(req: QueryRequest): QueryRequest =
-    req.withKeyConditionExpression(s"#K = :${key.name}")
-      .withExpressionAttributeNames(Map("#K" -> key.name).asJava)
-      .withExpressionAttributeValues(Map(s":${key.name}" -> f.write(v)).asJava)
+@typeclass trait UniqueKeyCondition[T] {
+  def asAVMap(t: T): Map[String, AttributeValue]
+}
+object UniqueKeyCondition {
+  implicit def uniqueEqualsKey[V] = new UniqueKeyCondition[EqualsKeyCondition[V]] {
+    override def asAVMap(t: EqualsKeyCondition[V]): Map[String, AttributeValue] =
+      Map(t.key.name -> t.f.write(t.v))
+  }
+  implicit def uniqueAndEqualsKey[H, R] = new UniqueKeyCondition[AndEqualsCondition[H, R]] {
+    override def asAVMap(t: AndEqualsCondition[H, R]): Map[String, AttributeValue] =
+      t.hashCondition.asAVMap(t.hashEquality) ++ t.rangeCondition.asAVMap(t.rangeEquality)
+  }
+}
+
+case class AndEqualsCondition[H, R](hashEquality: H, rangeEquality: R)(
+  implicit val hashCondition: UniqueKeyCondition[H], val rangeCondition: UniqueKeyCondition[R])
+
+case class EqualsKeyCondition[V](key: Symbol, v: V)(implicit val f: DynamoFormat[V]) {
   def and[R](rangeKeyCondition: RangeKeyCondition[R])(implicit fR: DynamoFormat[R]) =
-    AndKeyCondition(this, rangeKeyCondition)
-
-  def asAVMap: java.util.Map[String, AttributeValue] =
-    Map(key.name -> f.write(v)).asJava
+    AndQueryCondition(this, rangeKeyCondition)
 }
-case class AndKeyCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCondition: RangeKeyCondition[R])
-  (implicit fH: DynamoFormat[H], fR: DynamoFormat[R]) extends QueryableKeyCondition
-{
-  def apply(req: QueryRequest): QueryRequest =
-    req
-      .withKeyConditionExpression(
-        s"#K = :${hashCondition.key.name} AND ${rangeCondition.keyConditionExpression("R")}"
-      )
-      .withExpressionAttributeNames(Map("#K" -> hashCondition.key.name, "#R" -> rangeCondition.key.name).asJava)
-      .withExpressionAttributeValues(
-        Map(
-          s":${hashCondition.key.name}" -> fH.write(hashCondition.v),
-          s":${rangeCondition.key.name}" -> fR.write(rangeCondition.v)
-        ).asJava
-      )
-}
+case class AndQueryCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCondition: RangeKeyCondition[R])
+  (implicit val fH: DynamoFormat[H], val fR: DynamoFormat[R])
 
 sealed abstract class RangeKeyCondition[V](implicit f: DynamoFormat[V]) {
   val key: Symbol
@@ -70,10 +93,24 @@ object DynamoKeyCondition {
       def <=[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, LTE)
       def >=[V](v: V)(implicit f: DynamoFormat[V]) = SimpleKeyCondition(s, v, GTE)
       def beginsWith[V](v: V)(implicit f: DynamoFormat[V]) = BeginsWithCondition(s, v)
+
+
+      def ===[V](v: V)(implicit f: DynamoFormat[V]) = EqualsKeyCondition(s, v)
     }
+
 
     implicit def symbolTupleToKeyCondition[V](pair: (Symbol, V))(implicit f: DynamoFormat[V]) =
       EqualsKeyCondition(pair._1, pair._2)
+
+    implicit def toAVMap[T](t: T)(implicit kc: UniqueKeyCondition[T]) =
+      new AttributeValueMap {
+        override def asAVMap: Map[String, AttributeValue] = kc.asAVMap(t)
+      }
+
+    implicit def toQuery[T](t: T)(implicit queryableKeyCondition: QueryableKeyCondition[T]) =
+      new Query {
+        override def apply(req: QueryRequest): QueryRequest = queryableKeyCondition(t)(req)
+      }
   }
 }
 

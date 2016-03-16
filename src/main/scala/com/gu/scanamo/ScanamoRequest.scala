@@ -32,13 +32,13 @@ object ScanamoRequest {
     * prop> import DynamoKeyCondition.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) -> keyValue)
+    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) === keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
 *     }}}
     */
-  def getRequest(tableName: String)(key: HashKeyCondition): GetItemRequest =
-    new GetItemRequest().withTableName(tableName).withKey(key.asAVMap)
+  def getRequest[T](tableName: String)(key: AttributeValueMap): GetItemRequest =
+    new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
 
   def batchGetRequest[K](tableName: String)(keys: (Symbol, List[K]))(implicit fk: DynamoFormat[K]): BatchGetItemRequest =
     new BatchGetItemRequest().withRequestItems(Map(tableName ->
@@ -52,15 +52,15 @@ object ScanamoRequest {
     * prop> import DynamoKeyCondition.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
+    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) === keyValue)
     *     |   deleteRequest.getTableName == tableName &&
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest(tableName: String)(key: HashKeyCondition): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(key.asAVMap)
+  def deleteRequest[T](tableName: String)(key: AttributeValueMap): DeleteItemRequest =
+    new DeleteItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
 
-  def queryRequest(tableName: String)(keyCondition: QueryableKeyCondition): QueryRequest = {
-    keyCondition(new QueryRequest().withTableName(tableName))
+  def queryRequest[T](tableName: String)(query: Query): QueryRequest = {
+    query(new QueryRequest().withTableName(tableName))
   }
 }

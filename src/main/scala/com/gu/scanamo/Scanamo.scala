@@ -27,7 +27,7 @@ object Scanamo {
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
     * >>> import DynamoKeyCondition.syntax._
-    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McDonald")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name === "McDonald")
     * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
@@ -60,11 +60,11 @@ object Scanamo {
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
     * >>> import DynamoKeyCondition.syntax._
-    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "Maggot")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name === "Maggot")
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
     */
-  def get[T](client: AmazonDynamoDB)(tableName: String)(key: HashKeyCondition)
+  def get[T](client: AmazonDynamoDB)(tableName: String)(key: AttributeValueMap)
     (implicit ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
     Option(client.getItem(getRequest(tableName)(key)).getItem).map(read[T])
 
@@ -105,12 +105,12 @@ object Scanamo {
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
     * >>> import DynamoKeyCondition.syntax._
-    * >>> val deleteResult = Scanamo.delete(client)("farmers")('name -> "McGregor")
-    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McGregor")
+    * >>> val deleteResult = Scanamo.delete(client)("farmers")('name === "McGregor")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name === "McGregor")
     * None
     * }}}
     */
-  def delete(client: AmazonDynamoDB)(tableName: String)(key: HashKeyCondition): DeleteItemResult =
+  def delete(client: AmazonDynamoDB)(tableName: String)(key: AttributeValueMap): DeleteItemResult =
     client.deleteItem(deleteRequest(tableName)(key))
 
   /**
@@ -152,19 +152,19 @@ object Scanamo {
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
     * >>> import DynamoKeyCondition.syntax._
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig").toList
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig").toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
-    *  >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3).toList
+    *  >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number < 3).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number > 1).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number <= 2).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number >= 2).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
     * >>> val transportTableResult = LocalDynamoDB.createTable(client)("transport")('mode -> S, 'line -> S)
@@ -174,11 +174,11 @@ object Scanamo {
     * >>> val metropolitan = Scanamo.put(client)("transport")(Transport("Underground", "Metropolitan"))
     * >>> val central = Scanamo.put(client)("transport")(Transport("Underground", "Central"))
     *
-    * >>> Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
+    * >>> Scanamo.query[Transport](client)("transport")('mode === "Underground" and ('line beginsWith "C")).toList
     * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
     * }}}
     */
-  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: QueryableKeyCondition)(
+  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: Query)(
     implicit f: DynamoFormat[T]
   ) : Streaming[ValidatedNel[DynamoReadError, T]] = {
 
