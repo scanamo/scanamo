@@ -62,6 +62,15 @@ object Scanamo {
     * >>> import DynamoKeyCondition.syntax._
     * >>> Scanamo.get[Farmer](client)("farmers")('name === "Maggot")
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
+    *
+    * >>> import com.amazonaws.services.dynamodbv2.model._
+    * >>> val createTableResult = LocalDynamoDB.createTable(client, "engines",
+    * ... List("name" -> ScalarAttributeType.S, "number" -> ScalarAttributeType.N),
+    * ... List("name" -> KeyType.HASH, "number" -> KeyType.RANGE))
+    * >>> case class Engine(name: String, number: Int)
+    * >>> val thomas = Scanamo.put(client)("engines")(Engine("Thomas", 1))
+    * >>> Scanamo.get[Engine](client)("engines")('name === "Thomas" and 'number === 1)
+    * Some(Valid(Engine(Thomas,1)))
     * }}}
     */
   def get[T](client: AmazonDynamoDB)(tableName: String)(key: AttributeValueMap)

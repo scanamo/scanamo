@@ -67,6 +67,8 @@ case class AndEqualsCondition[H, R](hashEquality: H, rangeEquality: R)(
 case class EqualsKeyCondition[V](key: Symbol, v: V)(implicit val f: DynamoFormat[V]) {
   def and[R](rangeKeyCondition: RangeKeyCondition[R])(implicit fR: DynamoFormat[R]) =
     AndQueryCondition(this, rangeKeyCondition)
+  def and[R](equalsKeyCondition: EqualsKeyCondition[R])(implicit fR: DynamoFormat[R]) =
+    AndEqualsCondition(this, equalsKeyCondition)
 }
 case class AndQueryCondition[H, R](hashCondition: EqualsKeyCondition[H], rangeCondition: RangeKeyCondition[R])
   (implicit val fH: DynamoFormat[H], val fR: DynamoFormat[R])
