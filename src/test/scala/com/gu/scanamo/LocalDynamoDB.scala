@@ -14,14 +14,14 @@ object LocalDynamoDB {
   def createTable(
     client: AmazonDynamoDB,
     tableName: String,
-    attributeDefinitions: (String, ScalarAttributeType)*
+    attributeDefinitions: (Symbol, ScalarAttributeType)*
   ) = {
     val hashKeyWithType :: rangeKeyWithType = attributeDefinitions.toList
     val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
     client.createTable(
-      attributeDefinitions.map{ case (name, attributeType) => new AttributeDefinition(name, attributeType)}.asJava,
+      attributeDefinitions.map{ case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType)}.asJava,
       tableName,
-      keySchemas.map{ case (name, keyType) => new KeySchemaElement(name, keyType)}.asJava,
+      keySchemas.map{ case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType)}.asJava,
       new ProvisionedThroughput(1L, 1L)
     )
   }
