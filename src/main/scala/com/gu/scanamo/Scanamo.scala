@@ -10,9 +10,9 @@ import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
   *
   * The examples in method documentation assume the following table has been created:
   * {{{
-  * >>> import com.amazonaws.services.dynamodbv2.model._
+  * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
   * >>> val client = LocalDynamoDB.client()
-  * >>> val createTableResult = LocalDynamoDB.createTable(client, "farmers", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
+  * >>> val createTableResult = LocalDynamoDB.createTable(client, "farmers", "name" -> S)
   * }}}
   */
 object Scanamo {
@@ -72,8 +72,8 @@ object Scanamo {
     * Does not cache results by default
     * {{{
     * >>> val client = LocalDynamoDB.client()
-    * >>> import com.amazonaws.services.dynamodbv2.model._
-    * >>> val createTableResult = LocalDynamoDB.createTable(client, "bears", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val createTableResult = LocalDynamoDB.createTable(client, "bears", "name" -> S)
     *
     * >>> case class Bear(name: String, favouriteFood: String)
     *
@@ -82,7 +82,7 @@ object Scanamo {
     * >>> Scanamo.scan[Bear](client)("bears").toList
     * List(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))
     *
-    * >>> val lemmingTableResult = LocalDynamoDB.createTable(client, "lemmings", List("name" -> ScalarAttributeType.S), List("name" -> KeyType.HASH))
+    * >>> val lemmingTableResult = LocalDynamoDB.createTable(client, "lemmings", "name" -> S)
     * >>> case class Lemming(name: String, stuff: String)
     * >>> val lemmingResults = for { _ <- 0 until 100 } yield Scanamo.put(client)("lemmings")(Lemming(util.Random.nextString(500), util.Random.nextString(5000)))
     * >>> Scanamo.scan[Lemming](client)("lemmings").toList.size
