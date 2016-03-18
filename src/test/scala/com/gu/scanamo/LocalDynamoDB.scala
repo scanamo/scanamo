@@ -11,11 +11,7 @@ object LocalDynamoDB {
     c.setEndpoint("http://localhost:8000")
     c
   }
-  def createTable(
-    client: AmazonDynamoDB,
-    tableName: String,
-    attributeDefinitions: (Symbol, ScalarAttributeType)*
-  ) = {
+  def createTable(client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*) = {
     val hashKeyWithType :: rangeKeyWithType = attributeDefinitions.toList
     val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
     client.createTable(
