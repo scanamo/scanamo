@@ -36,6 +36,23 @@ object Scanamo {
   /**
     * {{{
     * >>> val client = LocalDynamoDB.client()
+    * >>> case class Rabbit(name: String)
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val createTableResult = LocalDynamoDB.createTable(client)("rabbits")('name -> S)
+    * >>> val multiPut = Scanamo.putAll(client)("rabbits")((
+    * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toList).toList
+    * >>> Scanamo.scan[Rabbit](client)("rabbits").toList.size
+    * 100
+    * }}}
+    */
+  def putAll[T](client: AmazonDynamoDB)(tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): Streaming[BatchWriteItemResult] =
+    Streaming.fromIteratorUnsafe(for {
+      batch <- items.grouped(25)
+    } yield client.batchWriteItem(batchPutRequest(tableName)(batch)))
+
+  /**
+    * {{{
+    * >>> val client = LocalDynamoDB.client()
     *
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
