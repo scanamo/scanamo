@@ -145,11 +145,8 @@ object Scanamo {
   /**
     * {{{
     * >>> val client = LocalDynamoDB.client()
-    * >>> import com.amazonaws.services.dynamodbv2.model._
-    * >>> val createTableResult = LocalDynamoDB.createTable(client, "animals",
-    * ...   List("species" -> ScalarAttributeType.S, "number" -> ScalarAttributeType.N),
-    * ...   List("species" -> KeyType.HASH, "number" -> KeyType.RANGE))
-    *
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val createTableResult = LocalDynamoDB.createTable(client)("animals")('species -> S, 'number -> N)
     * >>> case class Animal(species: String, number: Int)
     *
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
@@ -170,10 +167,7 @@ object Scanamo {
     * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
-    * >>> val transportTableResult = LocalDynamoDB.createTable(client, "transport",
-    * ...   List("mode" -> ScalarAttributeType.S, "line" -> ScalarAttributeType.S),
-    * ...   List("mode" -> KeyType.HASH, "line" -> KeyType.RANGE))
-    *
+    * >>> val transportTableResult = LocalDynamoDB.createTable(client)("transport")('mode -> S, 'line -> S)
     * >>> case class Transport(mode: String, line: String)
     *
     * >>> val circle = Scanamo.put(client)("transport")(Transport("Underground", "Circle"))
