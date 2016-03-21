@@ -62,9 +62,33 @@ object Scanamo {
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
     */
-  def get[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K)*)
+  def get[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))
     (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
-    Option(client.getItem(getRequest(tableName)(key: _*)).getItem).map(read[T])
+    Option(client.getItem(getRequest(tableName)(key)).getItem).map(read[T])
+
+  /**
+    * Returns all the items in the table with matching keys
+    *
+    * Note that results are NOT necessarily in the same order as the keys
+    *
+    * {{{
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> case class Farm(animals: List[String])
+    * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    *
+    * >>> val putResult = Scanamo.putAll(client)("farmers")(List(
+    * ...   Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
+    * ... ))
+    * >>> Scanamo.getAll[String, Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
+    * List(Valid(Farmer(Bean,55,Farm(List(turkey)))), Valid(Farmer(Boggis,43,Farm(List(chicken)))))
+    * }}}
+    */
+  def getAll[K, T](client: AmazonDynamoDB)(tableName: String)(keys: (Symbol, List[K]))
+    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): List[ValidatedNel[DynamoReadError, T]] = {
+    import collection.convert.decorateAsScala._
+    client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala.map(read[T]).toList
+  }
 
   /**
     * {{{
