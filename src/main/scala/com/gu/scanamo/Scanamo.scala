@@ -69,7 +69,7 @@ object Scanamo {
   /**
     * Returns all the items in the table with matching keys
     *
-    * Note that results are NOT necessarily in the same order as the keys
+    * Results are returned in the same order as the keys are provided
     *
     * {{{
     * >>> val client = LocalDynamoDB.client()
@@ -81,13 +81,17 @@ object Scanamo {
     * ...   Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ... ))
     * >>> Scanamo.getAll[String, Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
-    * List(Valid(Farmer(Bean,55,Farm(List(turkey)))), Valid(Farmer(Boggis,43,Farm(List(chicken)))))
+    * List(Valid(Farmer(Boggis,43,Farm(List(chicken)))), Valid(Farmer(Bean,55,Farm(List(turkey)))))
     * }}}
     */
   def getAll[K, T](client: AmazonDynamoDB)(tableName: String)(keys: (Symbol, List[K]))
     (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): List[ValidatedNel[DynamoReadError, T]] = {
     import collection.convert.decorateAsScala._
-    client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala.map(read[T]).toList
+    val keyValueOptions = keys._2.map(Option(_))
+    def keyValueOption(avMap: java.util.Map[String, AttributeValue]) = fk.read(avMap.get(keys._1.name)).toOption
+
+    client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala
+      .sortBy(i => keyValueOptions.indexOf(keyValueOption(i))).map(read[T]).toList
   }
 
   /**
