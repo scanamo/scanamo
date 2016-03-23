@@ -35,9 +35,9 @@ object ScanamoRequest {
     *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) === keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
-*     }}}
+    * }}}
     */
-  def getRequest[T](tableName: String)(key: AttributeValueMap): GetItemRequest =
+  def getRequest[T](tableName: String)(key: UniqueKey[_]): GetItemRequest =
     new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
 
   def batchGetRequest[K](tableName: String)(keys: (Symbol, List[K]))(implicit fk: DynamoFormat[K]): BatchGetItemRequest =
@@ -57,10 +57,10 @@ object ScanamoRequest {
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest[T](tableName: String)(key: AttributeValueMap): DeleteItemRequest =
+  def deleteRequest[T](tableName: String)(key: UniqueKey[_]): DeleteItemRequest =
     new DeleteItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
 
-  def queryRequest[T](tableName: String)(query: Query): QueryRequest = {
+  def queryRequest[T](tableName: String)(query: Query[_]): QueryRequest = {
     query(new QueryRequest().withTableName(tableName))
   }
 }

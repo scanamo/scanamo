@@ -71,7 +71,7 @@ object Scanamo {
     * Some(Valid(Engine(Thomas,1)))
     * }}}
     */
-  def get[T](client: AmazonDynamoDB)(tableName: String)(key: AttributeValueMap)
+  def get[T](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
     (implicit ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
     Option(client.getItem(getRequest(tableName)(key)).getItem).map(read[T])
 
@@ -117,7 +117,7 @@ object Scanamo {
     * None
     * }}}
     */
-  def delete(client: AmazonDynamoDB)(tableName: String)(key: AttributeValueMap): DeleteItemResult =
+  def delete(client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_]): DeleteItemResult =
     client.deleteItem(deleteRequest(tableName)(key))
 
   /**
@@ -162,6 +162,9 @@ object Scanamo {
     * >>> Scanamo.query[Animal](client)("animals")('species === "Pig").toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
+    * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    *
     *  >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number < 3).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
@@ -185,7 +188,7 @@ object Scanamo {
     * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
     * }}}
     */
-  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: Query)(
+  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: Query[_])(
     implicit f: DynamoFormat[T]
   ) : Streaming[ValidatedNel[DynamoReadError, T]] = {
 
