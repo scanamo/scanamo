@@ -19,6 +19,8 @@ object Scanamo {
   import ScanamoRequest._
 
   /**
+    * Puts a single item into a table
+    *
     * {{{
     * >>> val client = LocalDynamoDB.client()
     *
@@ -35,6 +37,8 @@ object Scanamo {
     client.putItem(putRequest(tableName)(item))
 
   /**
+    * Gets a single item from a table by a unique key
+    *
     * {{{
     * >>> val client = LocalDynamoDB.client()
     * >>> case class Rabbit(name: String)
@@ -59,10 +63,17 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
+    * >>> Scanamo.get[Farmer](client)("farmers")(UniqueKey(KeyEquals('name, "Maggot")))
+    * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
+    * }}}
+    * or with some added syntactic sugar:
+    * {{{
     * >>> import com.gu.scanamo.syntax._
     * >>> Scanamo.get[Farmer](client)("farmers")('name === "Maggot")
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
-    *
+    * }}}
+    * Can also be used with tables that have both a hash and a range key:
+    * {{{
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val createTableResult = LocalDynamoDB.createTable(client)("engines")('name -> S, 'number -> N)
     * >>> case class Engine(name: String, number: Int)
@@ -104,6 +115,8 @@ object Scanamo {
   }
 
   /**
+    * Deletes a single item from a table by a unique key
+    *
     * {{{
     * >>> val client = LocalDynamoDB.client()
     *
@@ -121,7 +134,7 @@ object Scanamo {
     client.deleteItem(deleteRequest(tableName)(key))
 
   /**
-    * Lazily scans a DynamoDB table
+    * Lazily scans a table
     *
     * Does not cache results by default
     * {{{
@@ -135,7 +148,9 @@ object Scanamo {
     * >>> val r2 = Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
     * >>> Scanamo.scan[Bear](client)("bears").toList
     * List(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))
-    *
+    * }}}
+    * Pagination is handled internally with `Streaming` result retrieving pages as necessary
+    * {{{
     * >>> val lemmingTableResult = LocalDynamoDB.createTable(client)("lemmings")('name -> S)
     * >>> case class Lemming(name: String, stuff: String)
     * >>> val lemmingResults = for { _ <- 0 until 100 } yield Scanamo.put(client)("lemmings")(Lemming(util.Random.nextString(500), util.Random.nextString(5000)))
@@ -150,6 +165,9 @@ object Scanamo {
   }
 
   /**
+    * Perform a query against a table
+    *
+    * This can be as simple as looking up by a hash key where a range key also exists
     * {{{
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -158,14 +176,18 @@ object Scanamo {
     *
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
+    * * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    * }}}
+    * or with some syntactic sugar
+    * {{{
     * >>> import com.gu.scanamo.syntax._
     * >>> Scanamo.query[Animal](client)("animals")('species === "Pig").toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
-    *
-    * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
-    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
-    *
-    *  >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number < 3).toList
+    * }}}
+    * It also supports various conditions on the range key
+    * {{{
+    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number < 3).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
     * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number > 1).toList
