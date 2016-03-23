@@ -20,6 +20,10 @@ object ScanamoRequest {
   def putRequest[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): PutItemRequest =
     new PutItemRequest().withTableName(tableName).withItem(f.write(item).getM)
 
+  def batchPutRequest[T](tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): BatchWriteItemRequest =
+    new BatchWriteItemRequest().withRequestItems(Map(tableName -> items.map(i =>
+      new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM))
+    ).asJava).asJava)
 
   /**
     * {{{
