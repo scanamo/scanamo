@@ -3,24 +3,24 @@ package com.gu
 package object scanamo {
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
-      def <[V](v: V)(implicit f: DynamoFormat[V]) = KeyIs(s, LT, v)
-      def >[V](v: V)(implicit f: DynamoFormat[V]) = KeyIs(s, GT, v)
-      def <=[V](v: V)(implicit f: DynamoFormat[V]) = KeyIs(s, LTE, v)
-      def >=[V](v: V)(implicit f: DynamoFormat[V]) = KeyIs(s, GTE, v)
-      def beginsWith[V](v: V)(implicit f: DynamoFormat[V]) = KeyBeginsWith(s, v)
-
-
-      def ===[V](v: V)(implicit f: DynamoFormat[V]) = KeyEquals(s, v)
+      def <[V: DynamoFormat](v: V) = KeyIs(s, LT, v)
+      def >[V: DynamoFormat](v: V) = KeyIs(s, GT, v)
+      def <=[V: DynamoFormat](v: V) = KeyIs(s, LTE, v)
+      def >=[V: DynamoFormat](v: V) = KeyIs(s, GTE, v)
+      def beginsWith[V: DynamoFormat](v: V) = KeyBeginsWith(s, v)
     }
 
+    implicit def symbolTupleToUniqueKey[V: DynamoFormat](pair: (Symbol, V)) =
+      UniqueKey(KeyEquals(pair._1, pair._2))
 
-    implicit def symbolTupleToKeyCondition[V](pair: (Symbol, V))(implicit f: DynamoFormat[V]) =
+    implicit def symbolTupleToKeyCondition[V: DynamoFormat](pair: (Symbol, V)) =
       KeyEquals(pair._1, pair._2)
 
-    implicit def toAVMap[T](t: T)(implicit kc: UniqueKeyCondition[T]) =
-      UniqueKey(t)(kc)
+    implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
 
-    implicit def toQuery[T](t: T)(implicit queryableKeyCondition: QueryableKeyCondition[T]) =
-      Query(t)(queryableKeyCondition)
+    implicit def symbolTupleToQuery[V: DynamoFormat](pair: (Symbol, V)) =
+      Query(KeyEquals(pair._1, pair._2))
+
+    implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
   }
 }

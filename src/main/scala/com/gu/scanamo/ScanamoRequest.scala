@@ -32,7 +32,7 @@ object ScanamoRequest {
     * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) === keyValue)
+    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) -> keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
@@ -52,7 +52,7 @@ object ScanamoRequest {
     * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) === keyValue)
+    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
     *     |   deleteRequest.getTableName == tableName &&
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}

@@ -29,7 +29,7 @@ object Scanamo {
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
     * >>> import com.gu.scanamo.syntax._
-    * >>> Scanamo.get[Farmer](client)("farmers")('name === "McDonald")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McDonald")
     * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
@@ -69,7 +69,7 @@ object Scanamo {
     * or with some added syntactic sugar:
     * {{{
     * >>> import com.gu.scanamo.syntax._
-    * >>> Scanamo.get[Farmer](client)("farmers")('name === "Maggot")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "Maggot")
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
     * Can also be used with tables that have both a hash and a range key:
@@ -78,7 +78,7 @@ object Scanamo {
     * >>> val createTableResult = LocalDynamoDB.createTable(client)("engines")('name -> S, 'number -> N)
     * >>> case class Engine(name: String, number: Int)
     * >>> val thomas = Scanamo.put(client)("engines")(Engine("Thomas", 1))
-    * >>> Scanamo.get[Engine](client)("engines")('name === "Thomas" and 'number === 1)
+    * >>> Scanamo.get[Engine](client)("engines")('name -> "Thomas" and 'number -> 1)
     * Some(Valid(Engine(Thomas,1)))
     * }}}
     */
@@ -125,8 +125,8 @@ object Scanamo {
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
     * >>> import com.gu.scanamo.syntax._
-    * >>> val deleteResult = Scanamo.delete(client)("farmers")('name === "McGregor")
-    * >>> Scanamo.get[Farmer](client)("farmers")('name === "McGregor")
+    * >>> val deleteResult = Scanamo.delete(client)("farmers")('name -> "McGregor")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McGregor")
     * None
     * }}}
     */
@@ -182,21 +182,21 @@ object Scanamo {
     * or with some syntactic sugar
     * {{{
     * >>> import com.gu.scanamo.syntax._
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig").toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig").toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     * }}}
     * It also supports various conditions on the range key
     * {{{
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number < 3).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number > 1).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number <= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2).toList
     * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species === "Pig" and 'number >= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
     * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
     *
     * >>> val transportTableResult = LocalDynamoDB.createTable(client)("transport")('mode -> S, 'line -> S)
@@ -206,7 +206,7 @@ object Scanamo {
     * >>> val metropolitan = Scanamo.put(client)("transport")(Transport("Underground", "Metropolitan"))
     * >>> val central = Scanamo.put(client)("transport")(Transport("Underground", "Central"))
     *
-    * >>> Scanamo.query[Transport](client)("transport")('mode === "Underground" and ('line beginsWith "C")).toList
+    * >>> Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
     * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
     * }}}
     */

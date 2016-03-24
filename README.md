@@ -23,7 +23,7 @@ scala> case class Farmer(name: String, age: Long, farm: Farm)
 scala> import com.gu.scanamo._
 scala> import com.gu.scanamo.syntax._
 scala> Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-scala> Scanamo.get[String, Farmer](client)("farmers")('name === "McDonald")
+scala> Scanamo.get[String, Farmer](client)("farmers")('name -> "McDonald")
 Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
