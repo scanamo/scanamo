@@ -39,6 +39,11 @@ object ScanamoRequest {
   def getRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
     new GetItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
 
+  def batchGetRequest[K](tableName: String)(keys: (Symbol, List[K]))(implicit fk: DynamoFormat[K]): BatchGetItemRequest =
+    new BatchGetItemRequest().withRequestItems(Map(tableName ->
+      new KeysAndAttributes().withKeys((keys._2.map(k => Map(keys._1.name -> fk.write(k)).asJava).asJava))
+    ).asJava)
+
   /**
     * {{{
     * prop> import collection.convert.decorateAsJava._
