@@ -100,18 +100,33 @@ object Scanamo {
     * >>> val putResult = Scanamo.putAll(client)("farmers")(List(
     * ...   Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ... ))
-    * >>> Scanamo.getAll[String, Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
+    * >>> Scanamo.getAll[Farmer](client)("farmers")(UniqueKeys(KeyList('name, List("Boggis", "Bean"))))
     * List(Valid(Farmer(Boggis,43,Farm(List(chicken)))), Valid(Farmer(Bean,55,Farm(List(turkey)))))
     * }}}
+    * or with some added syntactic sugar:
+    * {{{
+    * >>> import com.gu.scanamo.syntax._
+    * >>> Scanamo.getAll[Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
+    * List(Valid(Farmer(Boggis,43,Farm(List(chicken)))), Valid(Farmer(Bean,55,Farm(List(turkey)))))
+    * }}}
+    * You can also retrieve items from a table with both a hash and range key
+    * {{{
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> case class Doctor(actor: String, regeneration: Int)
+    * >>> val doctorsTableResult = LocalDynamoDB.createTable(client)("doctors")('actor -> S, 'regeneration -> N)
+    *
+    * >>> val putDoctorResult = Scanamo.putAll(client)("doctors")(
+    * ...   List(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+    * >>> Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11))
+    * List(Valid(Doctor(McCoy,9)), Valid(Doctor(Ecclestone,11)))
+    * }}}
     */
-  def getAll[K, T](client: AmazonDynamoDB)(tableName: String)(keys: (Symbol, List[K]))
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): List[ValidatedNel[DynamoReadError, T]] = {
+  def getAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_]): List[ValidatedNel[DynamoReadError, T]] = {
     import collection.convert.decorateAsScala._
-    val keyValueOptions = keys._2.map(Option(_))
-    def keyValueOption(avMap: java.util.Map[String, AttributeValue]) = fk.read(avMap.get(keys._1.name)).toOption
-
-    client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala
-      .sortBy(i => keyValueOptions.indexOf(keyValueOption(i))).map(read[T]).toList
+    keys.sortByKeys(client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala.toList)
+      .map(read[T])
   }
 
   /**

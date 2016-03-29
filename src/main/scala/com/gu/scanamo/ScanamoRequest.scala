@@ -40,9 +40,9 @@ object ScanamoRequest {
   def getRequest[T](tableName: String)(key: UniqueKey[_]): GetItemRequest =
     new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
 
-  def batchGetRequest[K](tableName: String)(keys: (Symbol, List[K]))(implicit fk: DynamoFormat[K]): BatchGetItemRequest =
+  def batchGetRequest[K: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): BatchGetItemRequest =
     new BatchGetItemRequest().withRequestItems(Map(tableName ->
-      new KeysAndAttributes().withKeys((keys._2.map(k => Map(keys._1.name -> fk.write(k)).asJava).asJava))
+      new KeysAndAttributes().withKeys(keys.asAVMap.map(_.asJava).asJava)
     ).asJava)
 
   /**
