@@ -217,9 +217,10 @@ object Scanamo {
     * >>> val transportTableResult = LocalDynamoDB.createTable(client)("transport")('mode -> S, 'line -> S)
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val circle = Scanamo.put(client)("transport")(Transport("Underground", "Circle"))
-    * >>> val metropolitan = Scanamo.put(client)("transport")(Transport("Underground", "Metropolitan"))
-    * >>> val central = Scanamo.put(client)("transport")(Transport("Underground", "Central"))
+    * >>> val lines = Scanamo.putAll(client)("transport")(List(
+    * ...   Transport("Underground", "Circle"),
+    * ...   Transport("Underground", "Metropolitan"),
+    * ...   Transport("Underground", "Central")))
     *
     * >>> Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
     * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))

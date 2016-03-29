@@ -12,7 +12,7 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "discipline" % "0.4",
 
   // Use Joda for custom conversion example
-  "org.joda" % "joda-convert" % "1.7" % "provided",
+  "org.joda" % "joda-convert" % "1.7" % Provided,
   "joda-time" % "joda-time" % "2.8.2" % Test,
 
 	"org.scalatest" %% "scalatest" % "2.2.5" % Test,
@@ -41,9 +41,7 @@ startDynamoDBLocal <<= startDynamoDBLocal.dependsOn(compile in Test)
 test in Test <<= (test in Test).dependsOn(startDynamoDBLocal)
 test in Test <<= (test in Test, stopDynamoDBLocal) { (test, stop) => test doFinally stop }
 
-tutSettings
 site.settings
-site.addMappingsToSiteDir(tut, "")
 site.includeScaladoc()
 import com.typesafe.sbt.SbtSite.SiteKeys.makeSite
 includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml"
@@ -51,7 +49,8 @@ ghpages.settings
 com.typesafe.sbt.SbtGhPages.GhPagesKeys.ghpagesNoJekyll := false
 git.remoteRepo := "git@github.com:guardian/scanamo.git"
 
-doctestSettings
+doctestMarkdownEnabled := true
+doctestDecodeHtmlEntities := true
 doctestWithDependencies := false
 doctestTestFramework := DoctestTestFramework.ScalaTest
 
