@@ -45,15 +45,15 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val createTableResult = LocalDynamoDB.createTable(client)("rabbits")('name -> S)
     * >>> val multiPut = Scanamo.putAll(client)("rabbits")((
-    * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toList).toList
+    * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toList)
     * >>> Scanamo.scan[Rabbit](client)("rabbits").toList.size
     * 100
     * }}}
     */
-  def putAll[T](client: AmazonDynamoDB)(tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): Streaming[BatchWriteItemResult] =
-    Streaming.fromIteratorUnsafe(for {
+  def putAll[T](client: AmazonDynamoDB)(tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): List[BatchWriteItemResult] =
+    (for {
       batch <- items.grouped(25)
-    } yield client.batchWriteItem(batchPutRequest(tableName)(batch)))
+    } yield client.batchWriteItem(batchPutRequest(tableName)(batch))).toList
 
   /**
     * {{{
@@ -168,7 +168,9 @@ object Scanamo {
     * {{{
     * >>> val lemmingTableResult = LocalDynamoDB.createTable(client)("lemmings")('name -> S)
     * >>> case class Lemming(name: String, stuff: String)
-    * >>> val lemmingResults = for { _ <- 0 until 100 } yield Scanamo.put(client)("lemmings")(Lemming(util.Random.nextString(500), util.Random.nextString(5000)))
+    * >>> val lemmingResults = Scanamo.putAll(client)("lemmings")(
+    * ...   (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toList
+    * ... )
     * >>> Scanamo.scan[Lemming](client)("lemmings").toList.size
     * 100
     * }}}
