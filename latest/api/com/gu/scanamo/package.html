@@ -47,13 +47,35 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"></div>
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">Linear Supertypes</span>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div></div>
         
 
       <div id="mbrsel">
         <div id="textfilter"><span class="pre"></span><span class="input"><input id="mbrsel-input" type="text" accesskey="/" /></span><span class="post"></span></div>
-        
-        
+        <div id="order">
+              <span class="filtertype">Ordering</span>
+              <ol>
+                
+                <li class="alpha in"><span>Alphabetic</span></li>
+                <li class="inherit out"><span>By inheritance</span></li>
+              </ol>
+            </div>
+        <div id="ancestors">
+                <span class="filtertype">Inherited<br />
+                </span>
+                <ol id="linearization">
+                  <li class="in" name="com.gu.scanamo"><span>scanamo</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                </ol>
+              </div><div id="ancestors">
+            <span class="filtertype"></span>
+            <ol>
+              <li class="hideall out"><span>Hide All</span></li>
+              <li class="showall in"><span>Show all</span></li>
+            </ol>
+          </div>
         <div id="visbl">
             <span class="filtertype">Visibility</span>
             <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
@@ -66,7 +88,41 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.gu.scanamo.DerivedDynamoFormat" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+              <ol><li name="com.gu.scanamo.AndEqualsCondition" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AndEqualsCondition[H,R]extendsProductwithSerializable"></a>
+      <a id="AndEqualsCondition[H,R]:AndEqualsCondition[H,R]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AndEqualsCondition.html"><span class="name">AndEqualsCondition</span></a><span class="tparams">[<span name="H">H</span>, <span name="R">R</span>]</span><span class="params">(<span name="hashEquality">hashEquality: <span class="extype" name="com.gu.scanamo.AndEqualsCondition.H">H</span></span>, <span name="rangeEquality">rangeEquality: <span class="extype" name="com.gu.scanamo.AndEqualsCondition.R">R</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$4">evidence$4: <a href="UniqueKeyCondition.html" class="extype" name="com.gu.scanamo.UniqueKeyCondition">UniqueKeyCondition</a>[<span class="extype" name="com.gu.scanamo.AndEqualsCondition.H">H</span>]</span>, <span name="evidence$5">evidence$5: <a href="UniqueKeyCondition.html" class="extype" name="com.gu.scanamo.UniqueKeyCondition">UniqueKeyCondition</a>[<span class="extype" name="com.gu.scanamo.AndEqualsCondition.R">R</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@AndEqualsCondition[H,R]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.AndQueryCondition" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="AndQueryCondition[H,R]extendsProductwithSerializable"></a>
+      <a id="AndQueryCondition[H,R]:AndQueryCondition[H,R]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="AndQueryCondition.html"><span class="name">AndQueryCondition</span></a><span class="tparams">[<span name="H">H</span>, <span name="R">R</span>]</span><span class="params">(<span name="hashCondition">hashCondition: <a href="KeyEquals.html" class="extype" name="com.gu.scanamo.KeyEquals">KeyEquals</a>[<span class="extype" name="com.gu.scanamo.AndQueryCondition.H">H</span>]</span>, <span name="rangeCondition">rangeCondition: <a href="RangeKeyCondition.html" class="extype" name="com.gu.scanamo.RangeKeyCondition">RangeKeyCondition</a>[<span class="extype" name="com.gu.scanamo.AndQueryCondition.R">R</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$6">evidence$6: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.AndQueryCondition.H">H</span>]</span>, <span name="evidence$7">evidence$7: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.AndQueryCondition.R">R</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@AndQueryCondition[H,R]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="DerivedDynamoFormatextendsAnyRef"></a>
       <a id="DerivedDynamoFormat:DerivedDynamoFormat"></a>
       <h4 class="signature">
@@ -114,6 +170,23 @@ Invalid(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),<span class="std
 Invalid(<span class="lit">'age'</span>: not of <span class="kw">type</span>: <span class="lit">'N'</span>, <span class="lit">'farm'</span>: missing)</pre><p>Optional properties are defaulted to None</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> LargelyOptional(a: <span class="std">Option</span>[<span class="std">String</span>], b: <span class="std">Option</span>[<span class="std">String</span>])
 &gt;&gt;&gt; DynamoFormat[LargelyOptional].read(DynamoFormat[<span class="std">Map</span>[<span class="std">String</span>, <span class="std">String</span>]].write(<span class="std">Map</span>(<span class="lit">"b"</span> -&gt; <span class="lit">"X"</span>)))
 Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span>(X)))</pre></div></div>
+    </li><li name="com.gu.scanamo.DynamoOperator" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DynamoOperatorextendsAnyRef"></a>
+      <a id="DynamoOperator:DynamoOperator"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="DynamoOperator.html"><span class="name">DynamoOperator</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@DynamoOperatorextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.gu.scanamo.DynamoReadError" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="DynamoReadErrorextendsAnyRef"></a>
       <a id="DynamoReadError:DynamoReadError"></a>
@@ -127,6 +200,108 @@ Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.gu.scanamo.package@DynamoReadErrorextendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.DynamoResultStream" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DynamoResultStream[Req,Res]extendsAnyRef"></a>
+      <a id="DynamoResultStream[Req,Res]:DynamoResultStream[Req,Res]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="DynamoResultStream.html"><span class="name">DynamoResultStream</span></a><span class="tparams">[<span name="Req">Req</span>, <span name="Res">Res</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@DynamoResultStream[Req,Res]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.KeyBeginsWith" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KeyBeginsWith[V]extendsRangeKeyCondition[V]withProductwithSerializable"></a>
+      <a id="KeyBeginsWith[V]:KeyBeginsWith[V]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="KeyBeginsWith.html"><span class="name">KeyBeginsWith</span></a><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Symbol">Symbol</span></span>, <span name="v">v: <span class="extype" name="com.gu.scanamo.KeyBeginsWith.V">V</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$9">evidence$9: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.KeyBeginsWith.V">V</span>]</span>)</span><span class="result"> extends <a href="RangeKeyCondition.html" class="extype" name="com.gu.scanamo.RangeKeyCondition">RangeKeyCondition</a>[<span class="extype" name="com.gu.scanamo.KeyBeginsWith.V">V</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@KeyBeginsWith[V]extendsRangeKeyCondition[V]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.KeyEquals" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KeyEquals[V]extendsProductwithSerializable"></a>
+      <a id="KeyEquals[V]:KeyEquals[V]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="KeyEquals.html"><span class="name">KeyEquals</span></a><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Symbol">Symbol</span></span>, <span name="v">v: <span class="extype" name="com.gu.scanamo.KeyEquals.V">V</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$1">evidence$1: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.KeyEquals.V">V</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@KeyEquals[V]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.KeyIs" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KeyIs[V]extendsRangeKeyCondition[V]withProductwithSerializable"></a>
+      <a id="KeyIs[V]:KeyIs[V]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="KeyIs.html"><span class="name">KeyIs</span></a><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Symbol">Symbol</span></span>, <span name="operator">operator: <a href="DynamoOperator.html" class="extype" name="com.gu.scanamo.DynamoOperator">DynamoOperator</a></span>, <span name="v">v: <span class="extype" name="com.gu.scanamo.KeyIs.V">V</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$8">evidence$8: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.KeyIs.V">V</span>]</span>)</span><span class="result"> extends <a href="RangeKeyCondition.html" class="extype" name="com.gu.scanamo.RangeKeyCondition">RangeKeyCondition</a>[<span class="extype" name="com.gu.scanamo.KeyIs.V">V</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@KeyIs[V]extendsRangeKeyCondition[V]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.KeyList" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="KeyList[T]extendsProductwithSerializable"></a>
+      <a id="KeyList[T]:KeyList[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="KeyList.html"><span class="name">KeyList</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="key">key: <span class="extype" name="scala.Symbol">Symbol</span></span>, <span name="values">values: <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.gu.scanamo.KeyList.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$9">evidence$9: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.KeyList.T">T</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@KeyList[T]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.MultipleKeyList" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="MultipleKeyList[H,R]extendsProductwithSerializable"></a>
+      <a id="MultipleKeyList[H,R]:MultipleKeyList[H,R]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="MultipleKeyList.html"><span class="name">MultipleKeyList</span></a><span class="tparams">[<span name="H">H</span>, <span name="R">R</span>]</span><span class="params">(<span name="keys">keys: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="scala.Symbol">Symbol</span>)</span>, <span name="values">values: <span class="extype" name="scala.List">List</span>[(<span class="extype" name="com.gu.scanamo.MultipleKeyList.H">H</span>, <span class="extype" name="com.gu.scanamo.MultipleKeyList.R">R</span>)]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$10">evidence$10: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.MultipleKeyList.H">H</span>]</span>, <span name="evidence$11">evidence$11: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.MultipleKeyList.R">R</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@MultipleKeyList[H,R]extendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -165,6 +340,57 @@ Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
       </a>
     </span>
       
+    </li><li name="com.gu.scanamo.Query" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Query[T]extendsProductwithSerializable"></a>
+      <a id="Query[T]:Query[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Query.html"><span class="name">Query</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.Query.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="qkc">qkc: <a href="QueryableKeyCondition.html" class="extype" name="com.gu.scanamo.QueryableKeyCondition">QueryableKeyCondition</a>[<span class="extype" name="com.gu.scanamo.Query.T">T</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@Query[T]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.QueryableKeyCondition" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="QueryableKeyCondition[T]extendsAnywithSerializable"></a>
+      <a id="QueryableKeyCondition[T]:QueryableKeyCondition[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryableKeyCondition.html"><span class="name">QueryableKeyCondition</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@QueryableKeyCondition[T]extendsAnywithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.RangeKeyCondition" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="RangeKeyCondition[V]extendsAnyRef"></a>
+      <a id="RangeKeyCondition[V]:RangeKeyCondition[V]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="RangeKeyCondition.html"><span class="name">RangeKeyCondition</span></a><span class="tparams">[<span name="V">V</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@RangeKeyCondition[V]extendsAnyRef" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.gu.scanamo.TypeCoercionError" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="TypeCoercionErrorextendsDynamoReadErrorwithProductwithSerializable"></a>
       <a id="TypeCoercionError:TypeCoercionError"></a>
@@ -178,6 +404,74 @@ Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.gu.scanamo.package@TypeCoercionErrorextendsDynamoReadErrorwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.UniqueKey" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UniqueKey[T]extendsProductwithSerializable"></a>
+      <a id="UniqueKey[T]:UniqueKey[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="UniqueKey.html"><span class="name">UniqueKey</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.UniqueKey.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$4">evidence$4: <a href="UniqueKeyCondition.html" class="extype" name="com.gu.scanamo.UniqueKeyCondition">UniqueKeyCondition</a>[<span class="extype" name="com.gu.scanamo.UniqueKey.T">T</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@UniqueKey[T]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.UniqueKeyCondition" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="UniqueKeyCondition[T]extendsAnywithSerializable"></a>
+      <a id="UniqueKeyCondition[T]:UniqueKeyCondition[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="UniqueKeyCondition.html"><span class="name">UniqueKeyCondition</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@UniqueKeyCondition[T]extendsAnywithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.UniqueKeyConditions" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="UniqueKeyConditions[T]extendsAnywithSerializable"></a>
+      <a id="UniqueKeyConditions[T]:UniqueKeyConditions[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a href="UniqueKeyConditions.html"><span class="name">UniqueKeyConditions</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@UniqueKeyConditions[T]extendsAnywithSerializable" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.UniqueKeys" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UniqueKeys[T]extendsProductwithSerializable"></a>
+      <a id="UniqueKeys[T]:UniqueKeys[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="UniqueKeys.html"><span class="name">UniqueKeys</span></a><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.UniqueKeys.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$8">evidence$8: <a href="UniqueKeyConditions.html" class="extype" name="com.gu.scanamo.UniqueKeyConditions">UniqueKeyConditions</a>[<span class="extype" name="com.gu.scanamo.UniqueKeys.T">T</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@UniqueKeys[T]extendsProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -223,6 +517,91 @@ Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
       </a>
     </span>
       
+    </li><li name="com.gu.scanamo.DynamoResultStream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="DynamoResultStream"></a>
+      <a id="DynamoResultStream:DynamoResultStream"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="DynamoResultStream$.html"><span class="name">DynamoResultStream</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@DynamoResultStream" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.GT" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GT"></a>
+      <a id="GT:GT"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="GT$.html"><span class="name">GT</span></a><span class="result"> extends <a href="DynamoOperator.html" class="extype" name="com.gu.scanamo.DynamoOperator">DynamoOperator</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@GT" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.GTE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="GTE"></a>
+      <a id="GTE:GTE"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="GTE$.html"><span class="name">GTE</span></a><span class="result"> extends <a href="DynamoOperator.html" class="extype" name="com.gu.scanamo.DynamoOperator">DynamoOperator</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@GTE" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.LT" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LT"></a>
+      <a id="LT:LT"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="LT$.html"><span class="name">LT</span></a><span class="result"> extends <a href="DynamoOperator.html" class="extype" name="com.gu.scanamo.DynamoOperator">DynamoOperator</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@LT" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.LTE" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="LTE"></a>
+      <a id="LTE:LTE"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="LTE$.html"><span class="name">LTE</span></a><span class="result"> extends <a href="DynamoOperator.html" class="extype" name="com.gu.scanamo.DynamoOperator">DynamoOperator</a></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@LTE" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="com.gu.scanamo.MissingProperty" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="MissingProperty"></a>
       <a id="MissingProperty:MissingProperty"></a>
@@ -236,6 +615,23 @@ Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.gu.scanamo.package@MissingProperty" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.QueryableKeyCondition" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="QueryableKeyCondition"></a>
+      <a id="QueryableKeyCondition:QueryableKeyCondition"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="QueryableKeyCondition$.html"><span class="name">QueryableKeyCondition</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@QueryableKeyCondition" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -256,9 +652,77 @@ Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Scanamo provides a simplified interface for reading and writing case classes to DynamoDB</p><div class="fullcomment"><div class="comment cmt"><p>Scanamo provides a simplified interface for reading and writing case classes to DynamoDB</p><p>The examples in method documentation assume the following table has been created:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model._
+      <p class="shortcomment cmt">Scanamo provides a simplified interface for reading and writing case classes to DynamoDB</p><div class="fullcomment"><div class="comment cmt"><p>Scanamo provides a simplified interface for reading and writing case classes to DynamoDB</p><p>The examples in method documentation assume the following table has been created:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 &gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
-&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client, <span class="lit">"farmers"</span>, <span class="std">List</span>(<span class="lit">"name"</span> -&gt; ScalarAttributeType.S), <span class="std">List</span>(<span class="lit">"name"</span> -&gt; KeyType.HASH))</pre></div></div>
+&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S)</pre></div></div>
+    </li><li name="com.gu.scanamo.ScanamoRequest" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ScanamoRequest"></a>
+      <a id="ScanamoRequest:ScanamoRequest"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="ScanamoRequest$.html"><span class="name">ScanamoRequest</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@ScanamoRequest" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.UniqueKeyCondition" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UniqueKeyCondition"></a>
+      <a id="UniqueKeyCondition:UniqueKeyCondition"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="UniqueKeyCondition$.html"><span class="name">UniqueKeyCondition</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@UniqueKeyCondition" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.UniqueKeyConditions" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UniqueKeyConditions"></a>
+      <a id="UniqueKeyConditions:UniqueKeyConditions"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="UniqueKeyConditions$.html"><span class="name">UniqueKeyConditions</span></a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@UniqueKeyConditions" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.syntax" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="syntax"></a>
+      <a id="syntax:syntax"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a href="package$$syntax$.html"><span class="name">syntax</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@syntax" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li></ol>
             </div>
 
@@ -268,7 +732,11 @@ Valid(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
         </div>
 
         <div id="inheritedMembers">
-        
+        <div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+            </div>
         
         </div>
 
