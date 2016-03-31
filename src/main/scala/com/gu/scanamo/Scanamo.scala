@@ -19,6 +19,8 @@ object Scanamo {
   import ScanamoRequest._
 
   /**
+    * Puts a single item into a table
+    *
     * {{{
     * >>> val client = LocalDynamoDB.client()
     *
@@ -26,7 +28,8 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-    * >>> Scanamo.get[String, Farmer](client)("farmers")('name -> "McDonald")
+    * >>> import com.gu.scanamo.syntax._
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McDonald")
     * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
@@ -34,21 +37,23 @@ object Scanamo {
     client.putItem(putRequest(tableName)(item))
 
   /**
+    * Gets a single item from a table by a unique key
+    *
     * {{{
     * >>> val client = LocalDynamoDB.client()
     * >>> case class Rabbit(name: String)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val createTableResult = LocalDynamoDB.createTable(client)("rabbits")('name -> S)
     * >>> val multiPut = Scanamo.putAll(client)("rabbits")((
-    * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toList).toList
+    * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toList)
     * >>> Scanamo.scan[Rabbit](client)("rabbits").toList.size
     * 100
     * }}}
     */
-  def putAll[T](client: AmazonDynamoDB)(tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): Streaming[BatchWriteItemResult] =
-    Streaming.fromIteratorUnsafe(for {
+  def putAll[T](client: AmazonDynamoDB)(tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): List[BatchWriteItemResult] =
+    (for {
       batch <- items.grouped(25)
-    } yield client.batchWriteItem(batchPutRequest(tableName)(batch)))
+    } yield client.batchWriteItem(batchPutRequest(tableName)(batch))).toList
 
   /**
     * {{{
@@ -58,12 +63,27 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
-    * >>> Scanamo.get[String, Farmer](client)("farmers")('name -> "Maggot")
+    * >>> Scanamo.get[Farmer](client)("farmers")(UniqueKey(KeyEquals('name, "Maggot")))
     * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
+    * or with some added syntactic sugar:
+    * {{{
+    * >>> import com.gu.scanamo.syntax._
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "Maggot")
+    * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
+    * }}}
+    * Can also be used with tables that have both a hash and a range key:
+    * {{{
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val createTableResult = LocalDynamoDB.createTable(client)("engines")('name -> S, 'number -> N)
+    * >>> case class Engine(name: String, number: Int)
+    * >>> val thomas = Scanamo.put(client)("engines")(Engine("Thomas", 1))
+    * >>> Scanamo.get[Engine](client)("engines")('name -> "Thomas" and 'number -> 1)
+    * Some(Valid(Engine(Thomas,1)))
+    * }}}
     */
-  def get[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
+  def get[T](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
+    (implicit ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
     Option(client.getItem(getRequest(tableName)(key)).getItem).map(read[T])
 
   /**
@@ -80,21 +100,38 @@ object Scanamo {
     * >>> val putResult = Scanamo.putAll(client)("farmers")(List(
     * ...   Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ... ))
-    * >>> Scanamo.getAll[String, Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
+    * >>> Scanamo.getAll[Farmer](client)("farmers")(UniqueKeys(KeyList('name, List("Boggis", "Bean"))))
     * List(Valid(Farmer(Boggis,43,Farm(List(chicken)))), Valid(Farmer(Bean,55,Farm(List(turkey)))))
     * }}}
+    * or with some added syntactic sugar:
+    * {{{
+    * >>> import com.gu.scanamo.syntax._
+    * >>> Scanamo.getAll[Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
+    * List(Valid(Farmer(Boggis,43,Farm(List(chicken)))), Valid(Farmer(Bean,55,Farm(List(turkey)))))
+    * }}}
+    * You can also retrieve items from a table with both a hash and range key
+    * {{{
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> case class Doctor(actor: String, regeneration: Int)
+    * >>> val doctorsTableResult = LocalDynamoDB.createTable(client)("doctors")('actor -> S, 'regeneration -> N)
+    *
+    * >>> val putDoctorResult = Scanamo.putAll(client)("doctors")(
+    * ...   List(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+    * >>> Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11))
+    * List(Valid(Doctor(McCoy,9)), Valid(Doctor(Ecclestone,11)))
+    * }}}
     */
-  def getAll[K, T](client: AmazonDynamoDB)(tableName: String)(keys: (Symbol, List[K]))
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): List[ValidatedNel[DynamoReadError, T]] = {
+  def getAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_]): List[ValidatedNel[DynamoReadError, T]] = {
     import collection.convert.decorateAsScala._
-    val keyValueOptions = keys._2.map(Option(_))
-    def keyValueOption(avMap: java.util.Map[String, AttributeValue]) = fk.read(avMap.get(keys._1.name)).toOption
-
-    client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala
-      .sortBy(i => keyValueOptions.indexOf(keyValueOption(i))).map(read[T]).toList
+    keys.sortByKeys(client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala.toList)
+      .map(read[T])
   }
 
   /**
+    * Deletes a single item from a table by a unique key
+    *
     * {{{
     * >>> val client = LocalDynamoDB.client()
     *
@@ -102,17 +139,17 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> val putResult = Scanamo.put(client)("farmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
-    * >>> val deleteResult = Scanamo.delete[String, Farmer](client)("farmers")('name -> "McGregor")
-    * >>> Scanamo.get[String, Farmer](client)("farmers")('name -> "McGregor")
+    * >>> import com.gu.scanamo.syntax._
+    * >>> val deleteResult = Scanamo.delete(client)("farmers")('name -> "McGregor")
+    * >>> Scanamo.get[Farmer](client)("farmers")('name -> "McGregor")
     * None
     * }}}
     */
-  def delete[K, T](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K)*)
-    (implicit fk: DynamoFormat[K], ft: DynamoFormat[T]): DeleteItemResult =
-    client.deleteItem(deleteRequest(tableName)(key: _*))
+  def delete(client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_]): DeleteItemResult =
+    client.deleteItem(deleteRequest(tableName)(key))
 
   /**
-    * Lazily scans a DynamoDB table
+    * Lazily scans a table
     *
     * Does not cache results by default
     * {{{
@@ -126,10 +163,14 @@ object Scanamo {
     * >>> val r2 = Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
     * >>> Scanamo.scan[Bear](client)("bears").toList
     * List(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))
-    *
+    * }}}
+    * Pagination is handled internally with `Streaming` result retrieving pages as necessary
+    * {{{
     * >>> val lemmingTableResult = LocalDynamoDB.createTable(client)("lemmings")('name -> S)
     * >>> case class Lemming(name: String, stuff: String)
-    * >>> val lemmingResults = for { _ <- 0 until 100 } yield Scanamo.put(client)("lemmings")(Lemming(util.Random.nextString(500), util.Random.nextString(5000)))
+    * >>> val lemmingResults = Scanamo.putAll(client)("lemmings")(
+    * ...   (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toList
+    * ... )
     * >>> Scanamo.scan[Lemming](client)("lemmings").toList.size
     * 100
     * }}}
@@ -141,22 +182,57 @@ object Scanamo {
   }
 
   /**
+    * Perform a query against a table
+    *
+    * This can be as simple as looking up by a hash key where a range key also exists
     * {{{
     * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val createTableResult = LocalDynamoDB.createTable(client)("animals")('species -> S, 'number -> N)
+    * >>> case class Animal(species: String, number: Int)
     *
-    * >>> case class Bear(name: String, favouriteFood: String)
+    * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
+    * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
+    * * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    * }}}
+    * or with some syntactic sugar
+    * {{{
+    * >>> import com.gu.scanamo.syntax._
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig").toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    * }}}
+    * It also supports various conditions on the range key
+    * {{{
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
     *
-    * >>> val r1 = Scanamo.put(client)("bears")(Bear("Pooh", "honey"))
-    * >>> val r2 = Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
-    * >>> Scanamo.query[Bear, String](client)("bears")('name -> "Pooh").toList
-    * List(Valid(Bear(Pooh,honey)))
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1).toList
+    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    *
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2).toList
+    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
+    *
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
+    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    *
+    * >>> val transportTableResult = LocalDynamoDB.createTable(client)("transport")('mode -> S, 'line -> S)
+    * >>> case class Transport(mode: String, line: String)
+    *
+    * >>> val circle = Scanamo.put(client)("transport")(Transport("Underground", "Circle"))
+    * >>> val metropolitan = Scanamo.put(client)("transport")(Transport("Underground", "Metropolitan"))
+    * >>> val central = Scanamo.put(client)("transport")(Transport("Underground", "Central"))
+    *
+    * >>> Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
+    * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
     * }}}
     */
-  def query[T, K](client: AmazonDynamoDB)(tableName: String)(key: (Symbol, K))(
-    implicit f: DynamoFormat[T], kf: DynamoFormat[K]): Streaming[ValidatedNel[DynamoReadError, T]] = {
+  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: Query[_])(
+    implicit f: DynamoFormat[T]
+  ) : Streaming[ValidatedNel[DynamoReadError, T]] = {
 
     QueryResultStream.stream[T](client)(
-      queryRequest(tableName)(key)
+      queryRequest(tableName)(keyCondition)
     )
   }
 

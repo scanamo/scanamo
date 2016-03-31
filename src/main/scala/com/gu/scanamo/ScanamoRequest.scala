@@ -29,25 +29,27 @@ object ScanamoRequest {
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) -> keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
-*     }}}
+    * }}}
     */
-  def getRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): GetItemRequest =
-    new GetItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
+  def getRequest[T](tableName: String)(key: UniqueKey[_]): GetItemRequest =
+    new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
 
-  def batchGetRequest[K](tableName: String)(keys: (Symbol, List[K]))(implicit fk: DynamoFormat[K]): BatchGetItemRequest =
+  def batchGetRequest[K: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): BatchGetItemRequest =
     new BatchGetItemRequest().withRequestItems(Map(tableName ->
-      new KeysAndAttributes().withKeys((keys._2.map(k => Map(keys._1.name -> fk.write(k)).asJava).asJava))
+      new KeysAndAttributes().withKeys(keys.asAVMap.map(_.asJava).asJava)
     ).asJava)
 
   /**
     * {{{
     * prop> import collection.convert.decorateAsJava._
     * prop> import com.amazonaws.services.dynamodbv2.model._
+    * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
     *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
@@ -55,17 +57,10 @@ object ScanamoRequest {
     *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest[K](tableName: String)(key: (Symbol, K)*)(implicit fk: DynamoFormat[K]): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(asAVMap(key: _*))
+  def deleteRequest[T](tableName: String)(key: UniqueKey[_]): DeleteItemRequest =
+    new DeleteItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
 
-  def queryRequest[K](tableName: String)(key: (Symbol, K))(implicit fk: DynamoFormat[K]): QueryRequest = {
-    val (k, v) = key
-    new QueryRequest().withTableName(tableName)
-      .withKeyConditionExpression(s"#K = :${k.name}")
-      .withExpressionAttributeNames(Map("#K" -> k.name).asJava)
-      .withExpressionAttributeValues(asAVMap(Symbol(s":${k.name}") -> v))
+  def queryRequest[T](tableName: String)(query: Query[_]): QueryRequest = {
+    query(new QueryRequest().withTableName(tableName))
   }
-
-  private def asAVMap[K](kvs: (Symbol, K)*)(implicit fk: DynamoFormat[K]) =
-    Map(kvs: _*).map { case (k,v) => (k.name, fk.write(v)) }.asJava
 }
