@@ -1,13 +1,13 @@
 package com.gu.scanamo
 
+import com.amazonaws.services.dynamodbv2._
 import com.amazonaws.services.dynamodbv2.model._
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBClient, model}
 
-import collection.convert.decorateAsJava._
+import scala.collection.convert.decorateAsJava._
 
 object LocalDynamoDB {
   def client() = {
-    val c = new AmazonDynamoDBClient(new com.amazonaws.auth.BasicAWSCredentials("key", "secret"))
+    val c = new AmazonDynamoDBAsyncClient(new com.amazonaws.auth.BasicAWSCredentials("key", "secret"))
     c.setEndpoint("http://localhost:8000")
     c
   }

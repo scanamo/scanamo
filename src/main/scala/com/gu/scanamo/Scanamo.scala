@@ -34,7 +34,7 @@ object Scanamo {
     * }}}
     */
   def put[T](client: AmazonDynamoDB)(tableName: String)(item: T)(implicit f: DynamoFormat[T]): PutItemResult =
-    client.putItem(putRequest(tableName)(item))
+    ScanamoFree.put(tableName)(item).foldMap(ScanamoInterpreters.id(client))
 
   /**
     * Gets a single item from a table by a unique key
@@ -84,7 +84,7 @@ object Scanamo {
     */
   def get[T](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
     (implicit ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
-    Option(client.getItem(getRequest(tableName)(key)).getItem).map(read[T])
+    ScanamoFree.get[T](tableName)(key).foldMap(ScanamoInterpreters.id(client))
 
   /**
     * Returns all the items in the table with matching keys
