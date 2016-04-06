@@ -4,6 +4,7 @@ import cats.data.Validated.Valid
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
@@ -13,7 +14,6 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   it("should put asynchronously") {
-    import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
@@ -34,7 +34,6 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   }
 
   it("should get asynchronously") {
-    import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
@@ -57,6 +56,27 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
     ScanamoAsync.get[Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
       .futureValue should equal(Some(Valid(Engine("Thomas",1))))
+
+    client.deleteTable("asyncFarmers")
+    ()
+  }
+
+  it("should delete asynchronously") {
+    LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
+
+    case class Farm(animals: List[String])
+
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    val putResult = Scanamo.put(client)("asyncFarmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
+
+    import com.gu.scanamo.syntax._
+
+    val deleteResult = ScanamoAsync.delete(client)("asyncFarmers")('name -> "McGregor")
+
+    val maybeFarmer = for (_ <-  deleteResult) yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McGregor")
+
+    maybeFarmer.futureValue should equal(None)
 
     client.deleteTable("asyncFarmers")
     ()

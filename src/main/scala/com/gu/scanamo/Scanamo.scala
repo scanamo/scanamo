@@ -18,6 +18,8 @@ import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 object Scanamo {
   import ScanamoRequest._
 
+  def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]) = op.foldMap(ScanamoInterpreters.id(client))
+
   /**
     * Puts a single item into a table
     *
@@ -34,7 +36,7 @@ object Scanamo {
     * }}}
     */
   def put[T](client: AmazonDynamoDB)(tableName: String)(item: T)(implicit f: DynamoFormat[T]): PutItemResult =
-    ScanamoFree.put(tableName)(item).foldMap(ScanamoInterpreters.id(client))
+    exec(client)(ScanamoFree.put(tableName)(item))
 
   /**
     * Gets a single item from a table by a unique key
@@ -84,7 +86,7 @@ object Scanamo {
     */
   def get[T](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
     (implicit ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
-    ScanamoFree.get[T](tableName)(key).foldMap(ScanamoInterpreters.id(client))
+    exec(client)(ScanamoFree.get[T](tableName)(key))
 
   /**
     * Returns all the items in the table with matching keys
@@ -146,7 +148,7 @@ object Scanamo {
     * }}}
     */
   def delete(client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_]): DeleteItemResult =
-    client.deleteItem(deleteRequest(tableName)(key))
+    exec(client)(ScanamoFree.delete(tableName)(key))
 
   /**
     * Lazily scans a table

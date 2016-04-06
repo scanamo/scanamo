@@ -30,8 +30,8 @@ object ScanamoFree {
       .map(read[T])
   }
 
-  def delete(client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_]): DeleteItemResult =
-    client.deleteItem(deleteRequest(tableName)(key))
+  def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
+    ScanamoOps.delete(deleteRequest(tableName)(key))
 
   def scan[T](client: AmazonDynamoDB)(tableName: String)(implicit f: DynamoFormat[T]): Streaming[ValidatedNel[DynamoReadError, T]] = {
     ScanResultStream.stream[T](client)(
