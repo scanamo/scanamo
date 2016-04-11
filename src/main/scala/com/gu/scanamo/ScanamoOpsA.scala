@@ -15,6 +15,8 @@ final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
 final case class Delete(req: DeleteItemRequest) extends ScanamoOpsA[DeleteItemResult]
 final case class Scan(req: ScanRequest) extends ScanamoOpsA[ScanResult]
 final case class QueryOp(req: QueryRequest) extends ScanamoOpsA[QueryResult]
+final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
+final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGetItemResult]
 
 object ScanamoOps {
   import cats.free.Free.liftF
@@ -24,6 +26,10 @@ object ScanamoOps {
   def delete(req: DeleteItemRequest): ScanamoOps[DeleteItemResult] = liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
   def scan(req: ScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
   def query(req: QueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](QueryOp(req))
+  def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResult] =
+    liftF[ScanamoOpsA, BatchWriteItemResult](BatchWrite(req))
+  def batchGet(req: BatchGetItemRequest): ScanamoOps[BatchGetItemResult] =
+    liftF[ScanamoOpsA, BatchGetItemResult](BatchGet(req))
 }
 
 object ScanamoInterpreters {
@@ -40,6 +46,10 @@ object ScanamoInterpreters {
         client.scan(req)
       case QueryOp(req) =>
         client.query(req)
+      case BatchWrite(req) =>
+        client.batchWriteItem(req)
+      case BatchGet(req) =>
+        client.batchGetItem(req)
     }
   }
 
@@ -65,6 +75,11 @@ object ScanamoInterpreters {
         futureOf(client.scanAsync, req)
       case QueryOp(req) =>
         futureOf(client.queryAsync, req)
+      // Overloading means we need explicit parameter types here
+      case BatchWrite(req) =>
+        futureOf(client.batchWriteItemAsync(_: BatchWriteItemRequest, _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]), req)
+      case BatchGet(req) =>
+        futureOf(client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]), req)
     }
   }
 }

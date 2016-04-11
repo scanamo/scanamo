@@ -154,4 +154,58 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     client.deleteTable("asyncTransport")
     ()
   }
+  
+  it("should put multiple items asynchronously") {
+    case class Rabbit(name: String)
+
+    LocalDynamoDB.createTable(client)("asyncRabbits")('name -> S)
+
+    val result = for {
+      _ <- ScanamoAsync.putAll(client)("asyncRabbits")((
+        for {_ <- 0 until 100} yield Rabbit(util.Random.nextString(500))
+      ).toList)
+    } yield Scanamo.scan[Rabbit](client)("asyncRabbits")
+
+    result.futureValue.toList.size should equal(100)
+
+    client.deleteTable("asyncRabbits")
+    ()
+  }
+
+  it("should get multiple items asynchronously") {
+    LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
+
+    case class Farm(animals: List[String])
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    Scanamo.putAll(client)("asyncFarmers")(List(
+      Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
+    ))
+
+    ScanamoAsync.getAll[Farmer](client)("asyncFarmers")(
+      UniqueKeys(KeyList('name, List("Boggis", "Bean")))
+    ).futureValue should equal(
+      List(Valid(Farmer("Boggis",43,Farm(List("chicken")))), Valid(Farmer("Bean",55,Farm(List("turkey"))))))
+
+    import com.gu.scanamo.syntax._
+
+    ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> List("Boggis", "Bean")).futureValue should equal(
+      List(Valid(Farmer("Boggis",43,Farm(List("chicken")))), Valid(Farmer("Bean",55,Farm(List("turkey"))))))
+
+    case class Doctor(actor: String, regeneration: Int)
+
+    LocalDynamoDB.createTable(client)("asyncDoctors")('actor -> S, 'regeneration -> N)
+
+    Scanamo.putAll(client)("asyncDoctors")(
+      List(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+
+    ScanamoAsync.getAll[Doctor](client)("asyncDoctors")(
+      ('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11)
+    ).futureValue should equal(
+      List(Valid(Doctor("McCoy",9)), Valid(Doctor("Ecclestone",11))))
+
+    client.deleteTable("asyncFarmers")
+    client.deleteTable("asyncDoctors")
+    ()
+  }
 }

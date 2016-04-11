@@ -3,7 +3,6 @@ package com.gu.scanamo
 import cats.data.{Streaming, ValidatedNel}
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 
 /**
   * Scanamo provides a simplified interface for reading and writing case classes to DynamoDB
@@ -16,7 +15,6 @@ import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
   * }}}
   */
 object Scanamo {
-  import ScanamoRequest._
 
   def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]) = op.foldMap(ScanamoInterpreters.id(client))
 
@@ -35,7 +33,7 @@ object Scanamo {
     * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
-  def put[T](client: AmazonDynamoDB)(tableName: String)(item: T)(implicit f: DynamoFormat[T]): PutItemResult =
+  def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): PutItemResult =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   /**
@@ -52,10 +50,8 @@ object Scanamo {
     * 100
     * }}}
     */
-  def putAll[T](client: AmazonDynamoDB)(tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): List[BatchWriteItemResult] =
-    (for {
-      batch <- items.grouped(25)
-    } yield client.batchWriteItem(batchPutRequest(tableName)(batch))).toList
+  def putAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(items: List[T]): List[BatchWriteItemResult] =
+    exec(client)(ScanamoFree.putAll(tableName)(items))
 
   /**
     * {{{
@@ -84,8 +80,8 @@ object Scanamo {
     * Some(Valid(Engine(Thomas,1)))
     * }}}
     */
-  def get[T](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
-    (implicit ft: DynamoFormat[T]): Option[ValidatedNel[DynamoReadError, T]] =
+  def get[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
+    : Option[ValidatedNel[DynamoReadError, T]] =
     exec(client)(ScanamoFree.get[T](tableName)(key))
 
   /**
@@ -125,11 +121,10 @@ object Scanamo {
     * List(Valid(Doctor(McCoy,9)), Valid(Doctor(Ecclestone,11)))
     * }}}
     */
-  def getAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_]): List[ValidatedNel[DynamoReadError, T]] = {
-    import collection.convert.decorateAsScala._
-    keys.sortByKeys(client.batchGetItem(batchGetRequest(tableName)(keys)).getResponses.get(tableName).asScala.toList)
-      .map(read[T])
-  }
+  def getAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_])
+    : List[ValidatedNel[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.getAll(tableName)(keys))
+
 
   /**
     * Deletes a single item from a table by a unique key
@@ -231,18 +226,4 @@ object Scanamo {
   def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
     : Streaming[ValidatedNel[DynamoReadError, T]] =
     exec(client)(ScanamoFree.query(tableName)(query))
-
-  /**
-    * {{{
-    * prop> import collection.convert.decorateAsJava._
-    * prop> import com.amazonaws.services.dynamodbv2.model._
-    *
-    * prop> (m: Map[String, Int]) =>
-    *     |   Scanamo.read[Map[String, Int]](
-    *     |     m.mapValues(i => new AttributeValue().withN(i.toString)).asJava
-    *     |   ) == cats.data.Validated.valid(m)
-    * }}}
-    */
-  def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): ValidatedNel[DynamoReadError, T] =
-    f.read(new AttributeValue().withM(m))
 }

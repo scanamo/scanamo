@@ -21,7 +21,7 @@ trait DynamoResultStream[Req, Res] {
     def streamMore(lastKey: Option[java.util.Map[String, AttributeValue]]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] = {
       for {
         queryResult <- exec(lastKey.foldLeft(req)(withExclusiveStartKey(_, _)))
-        results = Streaming.fromIterable(items(queryResult).asScala.map(Scanamo.read[T]))
+        results = Streaming.fromIterable(items(queryResult).asScala.map(ScanamoFree.read[T]))
         resultStream <-
           Option(lastEvaluatedKey(queryResult)).foldLeft(
             Free.pure[ScanamoOpsA, Streaming[ValidatedNel[DynamoReadError, T]]](results)
