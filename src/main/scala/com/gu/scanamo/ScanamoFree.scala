@@ -33,20 +33,11 @@ object ScanamoFree {
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
     ScanamoOps.delete(deleteRequest(tableName)(key))
 
-  def scan[T](client: AmazonDynamoDB)(tableName: String)(implicit f: DynamoFormat[T]): Streaming[ValidatedNel[DynamoReadError, T]] = {
-    ScanResultStream.stream[T](client)(
-      new ScanRequest().withTableName(tableName)
-    )
-  }
+  def scan[T: DynamoFormat](tableName: String): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    ScanResultStream.stream[T](new ScanRequest().withTableName(tableName))
 
-  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: Query[_])(
-    implicit f: DynamoFormat[T]
-  ) : Streaming[ValidatedNel[DynamoReadError, T]] = {
-
-    QueryResultStream.stream[T](client)(
-      queryRequest(tableName)(keyCondition)
-    )
-  }
+  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    QueryResultStream.stream[T](queryRequest(tableName)(query))
 
   def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): ValidatedNel[DynamoReadError, T] =
     f.read(new AttributeValue().withM(m))

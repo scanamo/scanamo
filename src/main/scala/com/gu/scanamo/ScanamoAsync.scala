@@ -25,4 +25,12 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[DeleteItemResult] =
     exec(client)(ScanamoFree.delete(tableName)(key))
 
+  def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
+    (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.scan(tableName))
+
+  def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
+    (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.query(tableName)(query))
+
 }

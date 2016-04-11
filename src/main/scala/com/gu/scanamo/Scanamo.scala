@@ -177,11 +177,9 @@ object Scanamo {
     * 100
     * }}}
     */
-  def scan[T](client: AmazonDynamoDB)(tableName: String)(implicit f: DynamoFormat[T]): Streaming[ValidatedNel[DynamoReadError, T]] = {
-    ScanResultStream.stream[T](client)(
-      new ScanRequest().withTableName(tableName)
-    )
-  }
+  def scan[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)
+    : Streaming[ValidatedNel[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.scan(tableName))
 
   /**
     * Perform a query against a table
@@ -230,14 +228,9 @@ object Scanamo {
     * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
     * }}}
     */
-  def query[T](client: AmazonDynamoDB)(tableName: String)(keyCondition: Query[_])(
-    implicit f: DynamoFormat[T]
-  ) : Streaming[ValidatedNel[DynamoReadError, T]] = {
-
-    QueryResultStream.stream[T](client)(
-      queryRequest(tableName)(keyCondition)
-    )
-  }
+  def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
+    : Streaming[ValidatedNel[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.query(tableName)(query))
 
   /**
     * {{{

@@ -10,9 +10,11 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
 
 sealed trait ScanamoOpsA[A]
-case class Put(req: PutItemRequest) extends ScanamoOpsA[PutItemResult]
-case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
-case class Delete(req: DeleteItemRequest) extends ScanamoOpsA[DeleteItemResult]
+final case class Put(req: PutItemRequest) extends ScanamoOpsA[PutItemResult]
+final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
+final case class Delete(req: DeleteItemRequest) extends ScanamoOpsA[DeleteItemResult]
+final case class Scan(req: ScanRequest) extends ScanamoOpsA[ScanResult]
+final case class QueryOp(req: QueryRequest) extends ScanamoOpsA[QueryResult]
 
 object ScanamoOps {
   import cats.free.Free.liftF
@@ -20,6 +22,8 @@ object ScanamoOps {
   def put(req: PutItemRequest): ScanamoOps[PutItemResult] = liftF[ScanamoOpsA, PutItemResult](Put(req))
   def get(req: GetItemRequest): ScanamoOps[GetItemResult] = liftF[ScanamoOpsA, GetItemResult](Get(req))
   def delete(req: DeleteItemRequest): ScanamoOps[DeleteItemResult] = liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
+  def scan(req: ScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
+  def query(req: QueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](QueryOp(req))
 }
 
 object ScanamoInterpreters {
@@ -32,6 +36,10 @@ object ScanamoInterpreters {
         client.getItem(req)
       case Delete(req) =>
         client.deleteItem(req)
+      case Scan(req) =>
+        client.scan(req)
+      case QueryOp(req) =>
+        client.query(req)
     }
   }
 
@@ -53,6 +61,10 @@ object ScanamoInterpreters {
         futureOf(client.getItemAsync, req)
       case Delete(req) =>
         futureOf(client.deleteItemAsync, req)
+      case Scan(req) =>
+        futureOf(client.scanAsync, req)
+      case QueryOp(req) =>
+        futureOf(client.queryAsync, req)
     }
   }
 }
