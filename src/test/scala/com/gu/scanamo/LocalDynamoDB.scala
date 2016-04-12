@@ -21,4 +21,13 @@ object LocalDynamoDB {
       new ProvisionedThroughput(1L, 1L)
     )
   }
+
+  def withTable[T](client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+        thunk: => T
+  ): T = {
+    createTable(client)(tableName)(attributeDefinitions: _*)
+    val res = thunk
+    client.deleteTable(tableName)
+    res
+  }
 }

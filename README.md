@@ -26,12 +26,15 @@ scala> import com.gu.scanamo._
 scala> import com.gu.scanamo.syntax._
  
 scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")('name -> S)
+
 scala> case class Farm(animals: List[String])
 scala> case class Farmer(name: String, age: Long, farm: Farm)
 
-scala> Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-scala> Scanamo.get[Farmer](client)("farmers")('name -> "McDonald")
-res0: Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
+scala> val putResult = Scanamo.put(client)("farmer")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+scala> Scanamo.get[Farmer](client)("farmer")('name -> "McDonald")
+res1: Option[cats.data.ValidatedNel[DynamoReadError, Farmer]] = Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
 It's also possible to make more complex queries:
@@ -42,18 +45,44 @@ scala> import com.gu.scanamo.syntax._
  
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val transportTableResult = LocalDynamoDB.createTable(client)("transport")('mode -> S, 'line -> S)
+scala> val transportTableResult = LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
 scala> case class Transport(mode: String, line: String)
 
-scala> val lines = Scanamo.putAll(client)("transport")(List(
+scala> val lines = Scanamo.putAll(client)("transports")(List(
      |       Transport("Underground", "Circle"),
      |       Transport("Underground", "Metropolitan"),
      |       Transport("Underground", "Central")
      | ))
-scala> Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
-res0: List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
+     
+scala> Scanamo.query[Transport](client)("transports")('mode -> "Underground" and ('line beginsWith "C")).toList
+res1: List[cats.data.ValidatedNel[DynamoReadError, Transport]] = List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
+```
 
-scala> val deleteTable = client.deleteTable("transport")
+Scanamo also supports asynchronous calls to Dynamo:
+
+```scala
+scala> import com.gu.scanamo._
+scala> import com.gu.scanamo.syntax._
+
+scala> import scala.concurrent.duration._
+scala> import scala.concurrent.ExecutionContext.Implicits.global
+ 
+scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farm")('name -> S)
+
+scala> case class Farm(animals: List[String])
+scala> case class Farmer(name: String, age: Long, farm: Farm)
+
+scala> val bunce = for {
+     |   _ <- ScanamoAsync.putAll(client)("farm")(List(
+     |       Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
+     |     ))
+     |   farmer <- ScanamoAsync.get[Farmer](client)("farm")('name -> "Bunce")
+     | } yield farmer
+     
+scala> concurrent.Await.result(bunce, 5.seconds)
+res1: Option[cats.data.ValidatedNel[DynamoReadError, Farmer]] = Some(Valid(Farmer(Bunce,52,Farm(List(goose)))))
 ```
 
 For more details see the [API docs](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
