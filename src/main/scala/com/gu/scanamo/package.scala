@@ -1,6 +1,10 @@
 package com.gu
 
+import cats.free.Free
+
 package object scanamo {
+  type ScanamoOps[A] = Free[ScanamoOpsA, A]
+
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
       def <[V: DynamoFormat](v: V) = KeyIs(s, LT, v)
