@@ -85,6 +85,30 @@ scala> concurrent.Await.result(bunce, 5.seconds)
 res1: Option[cats.data.ValidatedNel[DynamoReadError, Farmer]] = Some(Valid(Farmer(Bunce,52,Farm(List(goose)))))
 ```
 
+If you want to take a more pure functional approach and push the IO to the edge of your program, you can make 
+use of the underlying [Free](http://typelevel.org/cats/tut/freemonad.html) structure:
+
+```scala
+scala> import com.gu.scanamo._
+scala> import com.gu.scanamo.syntax._
+
+scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("free")('name -> S)
+
+scala> case class Free(name: String, number: Int)
+scala> val operations = for {
+     |      _           <- ScanamoFree.putAll("free")(List(Free("Monad", 1), Free("Applicative", 2), Free("Love", 3)))
+     |      maybeMonad  <- ScanamoFree.get[Free]("free")('name -> "Monad")
+     |      monad       = maybeMonad.flatMap(_.toOption).getOrElse(Free("oops", 9))
+     |      _           <- ScanamoFree.put("free")(monad.copy(number = monad.number * 10))
+     |      results     <- ScanamoFree.getAll[Free]("free")('name -> List("Monad", "Applicative"))
+     | } yield results
+     
+scala> Scanamo.exec(client)(operations).toList
+res1: List[cats.data.ValidatedNel[DynamoReadError, Free]] = List(Valid(Free(Monad,10)), Valid(Free(Applicative,2)))
+```
+
 For more details see the [API docs](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
 
 License
