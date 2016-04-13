@@ -37,4 +37,33 @@ object LocalDynamoDB {
     withTable(client)(tableName)(attributeDefinitions: _*)(thunk)
     ()
   }
+
+  def withTableWithSecondaryIndex[T](client: AmazonDynamoDB)(tableName: String, secondaryIndexName: String)
+    (primaryIndexAttributes: List[(Symbol, ScalarAttributeType)])(secondaryIndexAttributes: List[(Symbol, ScalarAttributeType)])(
+    thunk: => T
+  ): T = {
+    def keySchema(attributes: List[(Symbol, ScalarAttributeType)]) = {
+      val hashKeyWithType :: rangeKeyWithType = attributes.toList
+      val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
+      keySchemas.map{ case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType)}.asJava
+    }
+    client.createTable(
+      new CreateTableRequest().withTableName(tableName)
+          .withAttributeDefinitions(
+            (primaryIndexAttributes ++ secondaryIndexAttributes)
+              .map{ case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType)}.asJava
+          )
+          .withKeySchema(keySchema(primaryIndexAttributes))
+          .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
+          .withGlobalSecondaryIndexes(new GlobalSecondaryIndex()
+            .withIndexName(secondaryIndexName)
+            .withKeySchema(keySchema(secondaryIndexAttributes))
+            .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
+            .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
+          )
+    )
+    val res = thunk
+    client.deleteTable(tableName)
+    res
+  }
 }

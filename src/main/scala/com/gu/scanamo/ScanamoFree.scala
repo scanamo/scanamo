@@ -40,6 +40,9 @@ object ScanamoFree {
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query))
 
+  def queryByIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    QueryResultStream.stream[T](queryRequest(tableName)(query).withIndexName(indexName))
+
   /**
     * {{{
     * prop> import collection.convert.decorateAsJava._

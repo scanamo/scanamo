@@ -243,4 +243,27 @@ object Scanamo {
   def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
     : Streaming[ValidatedNel[DynamoReadError, T]] =
     exec(client)(ScanamoFree.query(tableName)(query))
+
+  /**
+    * Query a table using a secondary index
+    *
+    * {{{
+    * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(List('mode -> S, 'line -> S))(List(('colour -> S))) {
+    * ...   Scanamo.putAll(client)("transport")(List(
+    * ...     Transport("Underground", "Circle", "Yellow"),
+    * ...     Transport("Underground", "Metropolitan", "Maroon"),
+    * ...     Transport("Underground", "Central", "Red")))
+    * ...   Scanamo.queryByIndex[Transport](client)("transport", "colour-index")('colour -> "Maroon").toList
+    * ... }
+    * List(Valid(Transport(Underground,Metropolitan,Maroon)))
+    * }}}
+    */
+  def queryByIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
+  : Streaming[ValidatedNel[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.queryByIndex(tableName, indexName)(query))
 }
