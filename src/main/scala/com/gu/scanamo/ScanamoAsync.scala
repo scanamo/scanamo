@@ -6,6 +6,13 @@ import com.amazonaws.services.dynamodbv2.model._
 
 import scala.concurrent.{ExecutionContext, Future}
 
+/**
+  * Provides the same interface as [[com.gu.scanamo.Scanamo]], except that it requires an implicit
+  * concurrent.ExecutionContext and returns a concurrent.Future
+  *
+  * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
+  * java.util.concurrent.ExecutorService to make calls asynchronously
+  */
 object ScanamoAsync {
   import cats.std.future._
 

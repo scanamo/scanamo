@@ -5,7 +5,9 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model._
 
 /**
-  * Scanamo provides a simplified interface for reading and writing case classes to DynamoDB
+  * Provides a simplified interface for reading and writing case classes to DynamoDB
+  *
+  * To avoid blocking, use [[com.gu.scanamo.ScanamoAsync]]
   */
 object Scanamo {
 

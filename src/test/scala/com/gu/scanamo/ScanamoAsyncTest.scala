@@ -14,198 +14,182 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   it("should put asynchronously") {
-    LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
-    case class Farm(asyncAnimals: List[String])
-    case class Farmer(name: String, age: Long, farm: Farm)
+    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
 
-    val putResult =
-      ScanamoAsync.put(client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+      import com.gu.scanamo.syntax._
 
-    import com.gu.scanamo.syntax._
+      val result = for {
+        _ <- ScanamoAsync.put(client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+      } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
 
-    val result = for {
-      _ <- putResult
-    } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
-
-    result.futureValue should equal(Some(Valid(Farmer("McDonald",156,Farm(List("sheep", "cow"))))))
-
-    client.deleteTable("asyncFarmers")
-    ()
+      result.futureValue should equal(Some(Valid(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
+    }
   }
 
   it("should get asynchronously") {
-    LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
-    case class Farm(asyncAnimals: List[String])
-    case class Farmer(name: String, age: Long, farm: Farm)
+    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
 
-    val putResult = Scanamo.put(client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
+      Scanamo.put(client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
 
-    ScanamoAsync.get[Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
-      .futureValue should equal(Some(Valid(Farmer("Maggot",75,Farm(List("dog"))))))
+      ScanamoAsync.get[Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
+        .futureValue should equal(Some(Valid(Farmer("Maggot", 75, Farm(List("dog"))))))
 
-    import com.gu.scanamo.syntax._
+      import com.gu.scanamo.syntax._
 
-    ScanamoAsync.get[Farmer](client)("asyncFarmers")('name -> "Maggot")
-      .futureValue should equal(Some(Valid(Farmer("Maggot",75,Farm(List("dog"))))))
+      ScanamoAsync.get[Farmer](client)("asyncFarmers")('name -> "Maggot")
+        .futureValue should equal(Some(Valid(Farmer("Maggot", 75, Farm(List("dog"))))))
+    }
 
-    val createTableResult = LocalDynamoDB.createTable(client)("asyncEngines")('name -> S, 'number -> N)
+    LocalDynamoDB.usingTable(client)("asyncEngines")('name -> S, 'number -> N) {
+      case class Engine(name: String, number: Int)
 
-    case class Engine(name: String, number: Int)
+      Scanamo.put(client)("asyncEngines")(Engine("Thomas", 1))
 
-    val thomas = Scanamo.put(client)("asyncEngines")(Engine("Thomas", 1))
-
-    ScanamoAsync.get[Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
-      .futureValue should equal(Some(Valid(Engine("Thomas",1))))
-
-    client.deleteTable("asyncFarmers")
-    ()
+      import com.gu.scanamo.syntax._
+      ScanamoAsync.get[Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
+        .futureValue should equal(Some(Valid(Engine("Thomas", 1))))
+    }
   }
 
   it("should delete asynchronously") {
-    LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
+    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
 
-    case class Farm(asyncAnimals: List[String])
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
 
-    case class Farmer(name: String, age: Long, farm: Farm)
+      Scanamo.put(client)("asyncFarmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
 
-    val putResult = Scanamo.put(client)("asyncFarmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
+      import com.gu.scanamo.syntax._
 
-    import com.gu.scanamo.syntax._
+      val maybeFarmer = for {
+        _ <- ScanamoAsync.delete(client)("asyncFarmers")('name -> "McGregor")
+      } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McGregor")
 
-    val deleteResult = ScanamoAsync.delete(client)("asyncFarmers")('name -> "McGregor")
-
-    val maybeFarmer = for (_ <-  deleteResult) yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McGregor")
-
-    maybeFarmer.futureValue should equal(None)
-
-    client.deleteTable("asyncFarmers")
-    ()
+      maybeFarmer.futureValue should equal(None)
+    }
   }
   
   it("should scan asynchronously") {
-    LocalDynamoDB.createTable(client)("asyncBears")('name -> S)
+    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
 
-    case class Bear(name: String, favouriteFood: String)
+      case class Bear(name: String, favouriteFood: String)
 
-    val r1 = Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
 
-    val r2 = Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
+      ScanamoAsync.scan[Bear](client)("asyncBears").futureValue.toList should equal(
+        List(Valid(Bear("Pooh", "honey")), Valid(Bear("Yogi", "picnic baskets")))
+      )
+    }
 
-    ScanamoAsync.scan[Bear](client)("asyncBears").futureValue.toList should equal(
-      List(Valid(Bear("Pooh","honey")), Valid(Bear("Yogi","picnic baskets")))
-    )
+    LocalDynamoDB.usingTable(client)("asyncLemmings")('name -> S) {
 
-    client.deleteTable("asyncBears")
+      case class Lemming(name: String, stuff: String)
 
-    LocalDynamoDB.createTable(client)("asyncLemmings")('name -> S)
+      Scanamo.putAll(client)("asyncLemmings")(
+        (for {_ <- 0 until 100} yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toList
+      )
 
-    case class Lemming(name: String, stuff: String)
-
-    val lemmingResults = Scanamo.putAll(client)("asyncLemmings")(
-      (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toList
-    )
-
-    ScanamoAsync.scan[Lemming](client)("asyncLemmings").futureValue.toList.size should equal(100)
-
-    client.deleteTable("asyncLemmings")
-    ()
+      ScanamoAsync.scan[Lemming](client)("asyncLemmings").futureValue.toList.size should equal(100)
+    }
   }
 
   it("should query asynchronously") {
-    LocalDynamoDB.createTable(client)("asyncAnimals")('species -> S, 'number -> N)
+    LocalDynamoDB.usingTable(client)("asyncAnimals")('species -> S, 'number -> N) {
 
-    case class Animal(species: String, number: Int)
+      case class Animal(species: String, number: Int)
 
-    val r1 = Scanamo.put(client)("asyncAnimals")(Animal("Wolf", 1))
+      Scanamo.put(client)("asyncAnimals")(Animal("Wolf", 1))
 
-    val r2 = for { i <- 1 to 3 } Scanamo.put(client)("asyncAnimals")(Animal("Pig", i))
+      for {i <- 1 to 3} Scanamo.put(client)("asyncAnimals")(Animal("Pig", i))
 
-    import com.gu.scanamo.syntax._
+      import com.gu.scanamo.syntax._
 
-    ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig").futureValue.toList should equal(
-      List(Valid(Animal("Pig",1)), Valid(Animal("Pig",2)), Valid(Animal("Pig",3))))
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig").futureValue.toList should equal(
+        List(Valid(Animal("Pig", 1)), Valid(Animal("Pig", 2)), Valid(Animal("Pig", 3))))
 
-    ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number < 3).futureValue.toList should equal(
-      List(Valid(Animal("Pig",1)), Valid(Animal("Pig",2))))
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number < 3).futureValue.toList should equal(
+        List(Valid(Animal("Pig", 1)), Valid(Animal("Pig", 2))))
 
-    ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number > 1).futureValue.toList should equal(
-      List(Valid(Animal("Pig",2)), Valid(Animal("Pig",3))))
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number > 1).futureValue.toList should equal(
+        List(Valid(Animal("Pig", 2)), Valid(Animal("Pig", 3))))
 
-    ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number <= 2).futureValue.toList should equal(
-      List(Valid(Animal("Pig",1)), Valid(Animal("Pig",2))))
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number <= 2).futureValue.toList should equal(
+        List(Valid(Animal("Pig", 1)), Valid(Animal("Pig", 2))))
 
-    ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number >= 2).futureValue.toList should equal(
-      List(Valid(Animal("Pig",2)), Valid(Animal("Pig",3))))
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number >= 2).futureValue.toList should equal(
+        List(Valid(Animal("Pig", 2)), Valid(Animal("Pig", 3))))
 
-    client.deleteTable("asyncAnimals")
+    }
 
-    LocalDynamoDB.createTable(client)("asyncTransport")('mode -> S, 'line -> S)
+    LocalDynamoDB.usingTable(client)("asyncTransport")('mode -> S, 'line -> S) {
 
-    case class Transport(mode: String, line: String)
+      case class Transport(mode: String, line: String)
 
-    val lines = Scanamo.putAll(client)("asyncTransport")(List(
-      Transport("Underground", "Circle"),
-      Transport("Underground", "Metropolitan"),
-      Transport("Underground", "Central")))
+      import com.gu.scanamo.syntax._
 
-    ScanamoAsync.query[Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
-      List(Valid(Transport("Underground","Central")), Valid(Transport("Underground","Circle"))))
+      Scanamo.putAll(client)("asyncTransport")(List(
+        Transport("Underground", "Circle"),
+        Transport("Underground", "Metropolitan"),
+        Transport("Underground", "Central")))
 
-    client.deleteTable("asyncTransport")
-    ()
+      ScanamoAsync.query[Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
+        List(Valid(Transport("Underground", "Central")), Valid(Transport("Underground", "Circle"))))
+    }
   }
   
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
 
-    LocalDynamoDB.createTable(client)("asyncRabbits")('name -> S)
+    LocalDynamoDB.usingTable(client)("asyncRabbits")('name -> S) {
+      val result = for {
+        _ <- ScanamoAsync.putAll(client)("asyncRabbits")((
+          for {_ <- 0 until 100} yield Rabbit(util.Random.nextString(500))
+          ).toList)
+      } yield Scanamo.scan[Rabbit](client)("asyncRabbits")
 
-    val result = for {
-      _ <- ScanamoAsync.putAll(client)("asyncRabbits")((
-        for {_ <- 0 until 100} yield Rabbit(util.Random.nextString(500))
-      ).toList)
-    } yield Scanamo.scan[Rabbit](client)("asyncRabbits")
-
-    result.futureValue.toList.size should equal(100)
-
-    client.deleteTable("asyncRabbits")
+      result.futureValue.toList.size should equal(100)
+    }
     ()
   }
 
   it("should get multiple items asynchronously") {
-    LocalDynamoDB.createTable(client)("asyncFarmers")('name -> S)
+    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
 
-    case class Farm(animals: List[String])
-    case class Farmer(name: String, age: Long, farm: Farm)
+      case class Farm(animals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
 
-    Scanamo.putAll(client)("asyncFarmers")(List(
-      Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
-    ))
+      Scanamo.putAll(client)("asyncFarmers")(List(
+        Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
+      ))
 
-    ScanamoAsync.getAll[Farmer](client)("asyncFarmers")(
-      UniqueKeys(KeyList('name, List("Boggis", "Bean")))
-    ).futureValue should equal(
-      List(Valid(Farmer("Boggis",43,Farm(List("chicken")))), Valid(Farmer("Bean",55,Farm(List("turkey"))))))
+      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")(
+        UniqueKeys(KeyList('name, List("Boggis", "Bean")))
+      ).futureValue should equal(
+        List(Valid(Farmer("Boggis", 43, Farm(List("chicken")))), Valid(Farmer("Bean", 55, Farm(List("turkey"))))))
 
-    import com.gu.scanamo.syntax._
+      import com.gu.scanamo.syntax._
 
-    ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> List("Boggis", "Bean")).futureValue should equal(
-      List(Valid(Farmer("Boggis",43,Farm(List("chicken")))), Valid(Farmer("Bean",55,Farm(List("turkey"))))))
+      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> List("Boggis", "Bean")).futureValue should equal(
+        List(Valid(Farmer("Boggis", 43, Farm(List("chicken")))), Valid(Farmer("Bean", 55, Farm(List("turkey"))))))
+    }
 
-    case class Doctor(actor: String, regeneration: Int)
+    LocalDynamoDB.usingTable(client)("asyncDoctors")('actor -> S, 'regeneration -> N) {
+      case class Doctor(actor: String, regeneration: Int)
 
-    LocalDynamoDB.createTable(client)("asyncDoctors")('actor -> S, 'regeneration -> N)
+      Scanamo.putAll(client)("asyncDoctors")(
+        List(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
-    Scanamo.putAll(client)("asyncDoctors")(
-      List(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+      import com.gu.scanamo.syntax._
+      ScanamoAsync.getAll[Doctor](client)("asyncDoctors")(
+        ('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11)
+      ).futureValue should equal(
+        List(Valid(Doctor("McCoy", 9)), Valid(Doctor("Ecclestone", 11))))
 
-    ScanamoAsync.getAll[Doctor](client)("asyncDoctors")(
-      ('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11)
-    ).futureValue should equal(
-      List(Valid(Doctor("McCoy",9)), Valid(Doctor("Ecclestone",11))))
-
-    client.deleteTable("asyncFarmers")
-    client.deleteTable("asyncDoctors")
-    ()
+    }
   }
 }
