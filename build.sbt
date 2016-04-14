@@ -1,21 +1,21 @@
 name := "scanamo"
 organization := "com.gu"
 
-scalaVersion := "2.11.7"
+scalaVersion := "2.11.8"
 
 libraryDependencies ++= Seq(
-	"com.amazonaws" % "aws-java-sdk-dynamodb" % "1.10.43",
-  "com.chuusai" %% "shapeless" % "2.2.5",
+	"com.amazonaws" % "aws-java-sdk-dynamodb" % "1.10.69",
+  "com.chuusai" %% "shapeless" % "2.3.0",
   "org.typelevel" %% "cats" % "0.4.1",
 
   "com.github.mpilquist" %% "simulacrum" % "0.7.0",
   "org.typelevel" %% "discipline" % "0.4",
 
   // Use Joda for custom conversion example
-  "org.joda" % "joda-convert" % "1.7" % Provided,
-  "joda-time" % "joda-time" % "2.8.2" % Test,
+  "org.joda" % "joda-convert" % "1.8.1" % Provided,
+  "joda-time" % "joda-time" % "2.9.3" % Test,
 
-	"org.scalatest" %% "scalatest" % "2.2.5" % Test,
+	"org.scalatest" %% "scalatest" % "2.2.6" % Test,
   "org.scalacheck" %% "scalacheck" % "1.12.4" % Test
 )
 // for simulacrum
@@ -39,7 +39,7 @@ scalacOptions := Seq(
 dynamoDBLocalDownloadDir := file(".dynamodb-local")
 startDynamoDBLocal <<= startDynamoDBLocal.dependsOn(compile in Test)
 test in Test <<= (test in Test).dependsOn(startDynamoDBLocal)
-test in Test <<= (test in Test, stopDynamoDBLocal) { (test, stop) => test doFinally stop }
+testOptions in Test <+= dynamoDBLocalTestCleanup
 
 site.settings
 site.includeScaladoc()
