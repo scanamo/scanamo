@@ -1,8 +1,8 @@
 package com.gu.scanamo
 
-import cats.data.{Streaming, ValidatedNel}
+import cats.data.ValidatedNel
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{PutItemResult, BatchWriteItemResult, DeleteItemResult}
 
 /**
   * Provides a simplified interface for reading and writing case classes to DynamoDB
@@ -176,7 +176,7 @@ object Scanamo {
     * ... }
     * List(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))
     * }}}
-    * Pagination is handled internally with `Streaming` result retrieving pages as necessary
+    * Pagination is handled internally with `Stream` result retrieving pages as necessary
     * {{{
     * >>> case class Lemming(name: String, stuff: String)
     *
@@ -190,7 +190,7 @@ object Scanamo {
     * }}}
     */
   def scan[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)
-    : Streaming[ValidatedNel[DynamoReadError, T]] =
+    : Stream[ValidatedNel[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scan(tableName))
 
   /**
@@ -211,7 +211,7 @@ object Scanamo {
     * }}}
     */
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)
-  : Streaming[ValidatedNel[DynamoReadError, T]] =
+  : Stream[ValidatedNel[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   /**
@@ -262,7 +262,7 @@ object Scanamo {
     * }}}
     */
   def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
-    : Streaming[ValidatedNel[DynamoReadError, T]] =
+    : Stream[ValidatedNel[DynamoReadError, T]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
   /**
@@ -285,6 +285,6 @@ object Scanamo {
     * }}}
     */
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
-  : Streaming[ValidatedNel[DynamoReadError, T]] =
+  : Stream[ValidatedNel[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }
