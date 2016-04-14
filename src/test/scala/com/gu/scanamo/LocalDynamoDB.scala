@@ -11,14 +11,12 @@ object LocalDynamoDB {
     c.setEndpoint("http://localhost:8000")
     c
   }
-  def createTable(client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*) = {
-    val hashKeyWithType :: rangeKeyWithType = attributeDefinitions.toList
-    val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
+  def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) = {
     client.createTable(
-      attributeDefinitions.map{ case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType)}.asJava,
+      attributeDefinitions(attributes),
       tableName,
-      keySchemas.map{ case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType)}.asJava,
-      new ProvisionedThroughput(1L, 1L)
+      keySchema(attributes),
+      arbitraryThroughputThatIsIgnoredByDynamoDBLocal
     )
   }
 
@@ -42,23 +40,15 @@ object LocalDynamoDB {
     (primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
     thunk: => T
   ): T = {
-    def keySchema(attributes: List[(Symbol, ScalarAttributeType)]) = {
-      val hashKeyWithType :: rangeKeyWithType = attributes.toList
-      val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
-      keySchemas.map{ case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType)}.asJava
-    }
     client.createTable(
       new CreateTableRequest().withTableName(tableName)
-          .withAttributeDefinitions(
-            (primaryIndexAttributes ++ secondaryIndexAttributes)
-              .map{ case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType)}.asJava
-          )
-          .withKeySchema(keySchema(primaryIndexAttributes.toList))
-          .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
+          .withAttributeDefinitions(attributeDefinitions(primaryIndexAttributes ++ secondaryIndexAttributes))
+          .withKeySchema(keySchema(primaryIndexAttributes))
+          .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
           .withGlobalSecondaryIndexes(new GlobalSecondaryIndex()
             .withIndexName(secondaryIndexName)
-            .withKeySchema(keySchema(secondaryIndexAttributes.toList))
-            .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
+            .withKeySchema(keySchema(secondaryIndexAttributes))
+            .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
             .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
           )
     )
@@ -66,4 +56,16 @@ object LocalDynamoDB {
     client.deleteTable(tableName)
     res
   }
+
+  private def keySchema(attributes: Seq[(Symbol, ScalarAttributeType)]) = {
+    val hashKeyWithType :: rangeKeyWithType = attributes.toList
+    val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
+    keySchemas.map{ case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType)}.asJava
+  }
+
+  private def attributeDefinitions(attributes: Seq[(Symbol, ScalarAttributeType)]) = {
+    attributes.map{ case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType)}.asJava
+  }
+
+  private val arbitraryThroughputThatIsIgnoredByDynamoDBLocal = new ProvisionedThroughput(1L, 1L)
 }
