@@ -39,7 +39,7 @@ object LocalDynamoDB {
   }
 
   def withTableWithSecondaryIndex[T](client: AmazonDynamoDB)(tableName: String, secondaryIndexName: String)
-    (primaryIndexAttributes: List[(Symbol, ScalarAttributeType)])(secondaryIndexAttributes: List[(Symbol, ScalarAttributeType)])(
+    (primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
     thunk: => T
   ): T = {
     def keySchema(attributes: List[(Symbol, ScalarAttributeType)]) = {
@@ -53,11 +53,11 @@ object LocalDynamoDB {
             (primaryIndexAttributes ++ secondaryIndexAttributes)
               .map{ case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType)}.asJava
           )
-          .withKeySchema(keySchema(primaryIndexAttributes))
+          .withKeySchema(keySchema(primaryIndexAttributes.toList))
           .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
           .withGlobalSecondaryIndexes(new GlobalSecondaryIndex()
             .withIndexName(secondaryIndexName)
-            .withKeySchema(keySchema(secondaryIndexAttributes))
+            .withKeySchema(keySchema(secondaryIndexAttributes.toList))
             .withProvisionedThroughput(new ProvisionedThroughput(1L, 1L))
             .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
           )

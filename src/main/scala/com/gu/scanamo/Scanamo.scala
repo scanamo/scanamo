@@ -194,6 +194,27 @@ object Scanamo {
     exec(client)(ScanamoFree.scan(tableName))
 
   /**
+    * Returns a stream of all items present in the index
+    *
+    * {{{
+    * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
+    * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
+    * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
+    * ...   Scanamo.scanIndex[Bear](client)("bears", "alias-index").toList
+    * ... }
+    * List(Valid(Bear(Pooh,honey,Some(Winnie))))
+    * }}}
+    */
+  def scanIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)
+  : Streaming[ValidatedNel[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.scanIndex(tableName, indexName))
+
+  /**
     * Perform a query against a table
     *
     * This can be as simple as looking up by a hash key where a range key also exists
@@ -253,17 +274,17 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(List('mode -> S, 'line -> S))(List(('colour -> S))) {
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
     * ...   Scanamo.putAll(client)("transport")(List(
     * ...     Transport("Underground", "Circle", "Yellow"),
     * ...     Transport("Underground", "Metropolitan", "Maroon"),
     * ...     Transport("Underground", "Central", "Red")))
-    * ...   Scanamo.queryByIndex[Transport](client)("transport", "colour-index")('colour -> "Maroon").toList
+    * ...   Scanamo.queryIndex[Transport](client)("transport", "colour-index")('colour -> "Maroon").toList
     * ... }
     * List(Valid(Transport(Underground,Metropolitan,Maroon)))
     * }}}
     */
-  def queryByIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
+  def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
   : Streaming[ValidatedNel[DynamoReadError, T]] =
-    exec(client)(ScanamoFree.queryByIndex(tableName, indexName)(query))
+    exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }

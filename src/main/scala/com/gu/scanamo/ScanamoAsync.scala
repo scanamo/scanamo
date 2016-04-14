@@ -43,11 +43,15 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
+  def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
+    (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.scanIndex(tableName, indexName))
+
   def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
     (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
-  def queryByIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
+  def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
     (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
-    exec(client)(ScanamoFree.queryByIndex(tableName, indexName)(query))
+    exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }

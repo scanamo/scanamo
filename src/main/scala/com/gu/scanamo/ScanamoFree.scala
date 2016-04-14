@@ -5,6 +5,7 @@ import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 
 object ScanamoFree {
+
   import ScanamoRequest._
   import cats.std.list._
   import cats.syntax.traverse._
@@ -37,10 +38,13 @@ object ScanamoFree {
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName))
 
+  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withIndexName(indexName))
+
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query))
 
-  def queryByIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query).withIndexName(indexName))
 
   /**

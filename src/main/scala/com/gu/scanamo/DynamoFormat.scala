@@ -173,15 +173,11 @@ object DynamoFormat extends DerivedDynamoFormat {
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
     def read(av: AttributeValue): ValidatedNel[DynamoReadError, Option[T]] = {
-      // Yea, `isNull` can return null
-      if (Option(av.isNULL).map(_.booleanValue).getOrElse(false)) {
-        Validated.valid(None)
-      } else {
-        f.read(av).map(t => Some(t))
-      }
+      Option(av).map(f.read(_).map(Some(_)))
+        .getOrElse(Validated.valid(Option.empty[T]))
     }
 
-    def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(new AttributeValue().withNULL(true))
+    def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(null)
     override val default = Some(None)
   }
 }
