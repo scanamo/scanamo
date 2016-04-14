@@ -67,7 +67,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -80,7 +80,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -98,18 +98,18 @@
         <div id="values" class="values members">
               <h3>Abstract Value Members</h3>
               <ol><li name="com.gu.scanamo.DynamoResultStream#exec" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="exec(client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(req:Req):Res"></a>
-      <a id="exec(AmazonDynamoDB)(Req):Res"></a>
+      <a id="exec(req:Req):com.gu.scanamo.ScanamoOps[Res]"></a>
+      <a id="exec(Req):ScanamoOps[Res]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">exec</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="req">req: <span class="extype" name="com.gu.scanamo.DynamoResultStream.Req">Req</span></span>)</span><span class="result">: <span class="extype" name="com.gu.scanamo.DynamoResultStream.Res">Res</span></span>
+        <span class="name">exec</span><span class="params">(<span name="req">req: <span class="extype" name="com.gu.scanamo.DynamoResultStream.Req">Req</span></span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.gu.scanamo.DynamoResultStream.Res">Res</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.DynamoResultStream@exec(client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(req:Req):Res" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.DynamoResultStream@exec(req:Req):com.gu.scanamo.ScanamoOps[Res]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -421,18 +421,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.DynamoResultStream#stream" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="stream[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(req:Req)(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
-      <a id="stream[T](AmazonDynamoDB)(Req)(DynamoFormat[T]):Streaming[ValidatedNel[DynamoReadError,T]]"></a>
+      <a id="stream[T](req:Req)(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ScanamoOps[cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]]"></a>
+      <a id="stream[T](Req)(DynamoFormat[T]):ScanamoOps[Streaming[ValidatedNel[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">stream</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="req">req: <span class="extype" name="com.gu.scanamo.DynamoResultStream.Req">Req</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoResultStream.stream.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.DynamoResultStream.stream.T">T</span>]]</span>
+        <span class="name">stream</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="req">req: <span class="extype" name="com.gu.scanamo.DynamoResultStream.Req">Req</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DynamoResultStream.stream.T">T</span>]</span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ScanamoOps">ScanamoOps</a>[<span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.DynamoResultStream.stream.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.DynamoResultStream@stream[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(req:Req)(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.DynamoResultStream@stream[T](req:Req)(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ScanamoOps[cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

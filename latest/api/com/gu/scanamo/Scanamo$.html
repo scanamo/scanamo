@@ -49,9 +49,8 @@
       </span>
       </h4>
       
-          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Scanamo provides a simplified interface for reading and writing case classes to DynamoDB</p><p>The examples in method documentation assume the following table has been created:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
-&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S)</pre></div><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Provides a simplified interface for reading and writing case classes to DynamoDB</p><p>To avoid blocking, use <a href="ScanamoAsync$.html" class="extype" name="com.gu.scanamo.ScanamoAsync">com.gu.scanamo.ScanamoAsync</a>
+</p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
@@ -64,7 +63,7 @@
               <ol>
                 
                 <li class="alpha in"><span>Alphabetic</span></li>
-                <li class="inherit out"><span>By inheritance</span></li>
+                <li class="inherit out"><span>By Inheritance</span></li>
               </ol>
             </div>
         <div id="ancestors">
@@ -77,7 +76,7 @@
             <span class="filtertype"></span>
             <ol>
               <li class="hideall out"><span>Hide All</span></li>
-              <li class="showall in"><span>Show all</span></li>
+              <li class="showall in"><span>Show All</span></li>
             </ol>
           </div>
         <div id="visbl">
@@ -203,15 +202,18 @@
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Deletes a single item from a table by a unique key</p><div class="fullcomment"><div class="comment cmt"><p>Deletes a single item from a table by a unique key</p><pre>&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
-
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+      <p class="shortcomment cmt">Deletes a single item from a table by a unique key</p><div class="fullcomment"><div class="comment cmt"><p>Deletes a single item from a table by a unique key</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 
-&gt;&gt;&gt; <span class="kw">val</span> putResult = Scanamo.put(client)(<span class="lit">"farmers"</span>)(Farmer(<span class="lit">"McGregor"</span>, <span class="num">62</span>L, Farm(<span class="std">List</span>(<span class="lit">"rabbit"</span>))))
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 &gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
-&gt;&gt;&gt; <span class="kw">val</span> deleteResult = Scanamo.delete(client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"McGregor"</span>)
-&gt;&gt;&gt; Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"McGregor"</span>)
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S) {
+...   Scanamo.put(client)(<span class="lit">"farmers"</span>)(Farmer(<span class="lit">"McGregor"</span>, <span class="num">62</span>L, Farm(<span class="std">List</span>(<span class="lit">"rabbit"</span>))))
+...   Scanamo.delete(client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"McGregor"</span>)
+...   Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"McGregor"</span>)
+... }
 <span class="std">None</span></pre></div></div>
     </li><li name="scala.AnyRef#eq" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a>
@@ -247,6 +249,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.Scanamo#exec" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="exec[A](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(op:com.gu.scanamo.ScanamoOps[A]):cats.Id[A]"></a>
+      <a id="exec[A](AmazonDynamoDB)(ScanamoOps[A]):Id[A]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">exec</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="op">op: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.gu.scanamo.Scanamo.exec.A">A</span>]</span>)</span><span class="result">: <span class="extype" name="cats.Id">Id</span>[<span class="extype" name="com.gu.scanamo.Scanamo.exec.A">A</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@exec[A](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(op:com.gu.scanamo.ScanamoOps[A]):cats.Id[A]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <a id="finalize():Unit"></a>
@@ -271,7 +290,7 @@
               
         </dd></dl></div>
     </li><li name="com.gu.scanamo.Scanamo#get" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="get[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.UniqueKey[_])(implicitft:com.gu.scanamo.DynamoFormat[T]):Option[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
+      <a id="get[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.UniqueKey[_])(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):Option[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
       <a id="get[T](AmazonDynamoDB)(String)(UniqueKey[_])(DynamoFormat[T]):Option[ValidatedNel[DynamoReadError,T]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -279,30 +298,36 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="key">key: <a href="UniqueKey.html" class="extype" name="com.gu.scanamo.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ft">ft: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.get.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.get.T">T</span>]]</span>
+        <span class="name">get</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="key">key: <a href="UniqueKey.html" class="extype" name="com.gu.scanamo.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.get.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.get.T">T</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Scanamo$@get[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.UniqueKey[_])(implicitft:com.gu.scanamo.DynamoFormat[T]):Option[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@get[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.UniqueKey[_])(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):Option[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"><p></p><pre>&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
-
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"><p></p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 
-&gt;&gt;&gt; <span class="kw">val</span> putResult = Scanamo.put(client)(<span class="lit">"farmers"</span>)(Farmer(<span class="lit">"Maggot"</span>, <span class="num">75</span>L, Farm(<span class="std">List</span>(<span class="lit">"dog"</span>))))
-&gt;&gt;&gt; Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)(UniqueKey(KeyEquals('name, <span class="lit">"Maggot"</span>)))
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S) {
+...   Scanamo.put(client)(<span class="lit">"farmers"</span>)(Farmer(<span class="lit">"Maggot"</span>, <span class="num">75</span>L, Farm(<span class="std">List</span>(<span class="lit">"dog"</span>))))
+...   Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)(UniqueKey(KeyEquals('name, <span class="lit">"Maggot"</span>)))
+... }
 <span class="std">Some</span>(Valid(Farmer(Maggot,<span class="num">75</span>,Farm(<span class="std">List</span>(dog)))))</pre><p>or with some added syntactic sugar:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
-&gt;&gt;&gt; Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"Maggot"</span>)
-<span class="std">Some</span>(Valid(Farmer(Maggot,<span class="num">75</span>,Farm(<span class="std">List</span>(dog)))))</pre><p>Can also be used with tables that have both a hash and a range key:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"engines"</span>)('name -&gt; S, 'number -&gt; N)
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Engine(name: <span class="std">String</span>, number: <span class="std">Int</span>)
-&gt;&gt;&gt; <span class="kw">val</span> thomas = Scanamo.put(client)(<span class="lit">"engines"</span>)(Engine(<span class="lit">"Thomas"</span>, <span class="num">1</span>))
-&gt;&gt;&gt; Scanamo.get[Engine](client)(<span class="lit">"engines"</span>)('name -&gt; <span class="lit">"Thomas"</span> and 'number -&gt; <span class="num">1</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S) {
+...   Scanamo.put(client)(<span class="lit">"farmers"</span>)(Farmer(<span class="lit">"Maggot"</span>, <span class="num">75</span>L, Farm(<span class="std">List</span>(<span class="lit">"dog"</span>))))
+...   Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"Maggot"</span>)
+... }
+<span class="std">Some</span>(Valid(Farmer(Maggot,<span class="num">75</span>,Farm(<span class="std">List</span>(dog)))))</pre><p>Can also be used with tables that have both a hash and a range key:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Engine(name: <span class="std">String</span>, number: <span class="std">Int</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"engines"</span>)('name -&gt; S, 'number -&gt; N) {
+...   Scanamo.put(client)(<span class="lit">"engines"</span>)(Engine(<span class="lit">"Thomas"</span>, <span class="num">1</span>))
+...   Scanamo.get[Engine](client)(<span class="lit">"engines"</span>)('name -&gt; <span class="lit">"Thomas"</span> and 'number -&gt; <span class="num">1</span>)
+... }
 <span class="std">Some</span>(Valid(Engine(Thomas,<span class="num">1</span>)))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#getAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="getAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keys:com.gu.scanamo.UniqueKeys[_])(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):List[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
+      <a id="getAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keys:com.gu.scanamo.UniqueKeys[_])(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):List[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
       <a id="getAll[T](AmazonDynamoDB)(String)(UniqueKeys[_])(DynamoFormat[T]):List[ValidatedNel[DynamoReadError,T]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -313,30 +338,35 @@
         <span class="name">getAll</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="keys">keys: <a href="UniqueKeys.html" class="extype" name="com.gu.scanamo.UniqueKeys">UniqueKeys</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.getAll.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.getAll.T">T</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Scanamo$@getAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keys:com.gu.scanamo.UniqueKeys[_])(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):List[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@getAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keys:com.gu.scanamo.UniqueKeys[_])(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):List[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Returns all the items in the table with matching keys</p><div class="fullcomment"><div class="comment cmt"><p>Returns all the items in the table with matching keys</p><p>Results are returned in the same order as the keys are provided</p><pre>&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
-
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+      <p class="shortcomment cmt">Returns all the items in the table with matching keys</p><div class="fullcomment"><div class="comment cmt"><p>Returns all the items in the table with matching keys</p><p>Results are returned in the same order as the keys are provided</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 
-&gt;&gt;&gt; <span class="kw">val</span> putResult = Scanamo.putAll(client)(<span class="lit">"farmers"</span>)(<span class="std">List</span>(
-...   Farmer(<span class="lit">"Boggis"</span>, <span class="num">43</span>L, Farm(<span class="std">List</span>(<span class="lit">"chicken"</span>))), Farmer(<span class="lit">"Bunce"</span>, <span class="num">52</span>L, Farm(<span class="std">List</span>(<span class="lit">"goose"</span>))), Farmer(<span class="lit">"Bean"</span>, <span class="num">55</span>L, Farm(<span class="std">List</span>(<span class="lit">"turkey"</span>)))
-... ))
-&gt;&gt;&gt; Scanamo.getAll[Farmer](client)(<span class="lit">"farmers"</span>)(UniqueKeys(KeyList('name, <span class="std">List</span>(<span class="lit">"Boggis"</span>, <span class="lit">"Bean"</span>))))
-<span class="std">List</span>(Valid(Farmer(Boggis,<span class="num">43</span>,Farm(<span class="std">List</span>(chicken)))), Valid(Farmer(Bean,<span class="num">55</span>,Farm(<span class="std">List</span>(turkey)))))</pre><p>or with some added syntactic sugar:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
-&gt;&gt;&gt; Scanamo.getAll[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="std">List</span>(<span class="lit">"Boggis"</span>, <span class="lit">"Bean"</span>))
-<span class="std">List</span>(Valid(Farmer(Boggis,<span class="num">43</span>,Farm(<span class="std">List</span>(chicken)))), Valid(Farmer(Bean,<span class="num">55</span>,Farm(<span class="std">List</span>(turkey)))))</pre><p>You can also retrieve items from a table with both a hash and range key</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
 
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Doctor(actor: <span class="std">String</span>, regeneration: <span class="std">Int</span>)
-&gt;&gt;&gt; <span class="kw">val</span> doctorsTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"doctors"</span>)('actor -&gt; S, 'regeneration -&gt; N)
-
-&gt;&gt;&gt; <span class="kw">val</span> putDoctorResult = Scanamo.putAll(client)(<span class="lit">"doctors"</span>)(
-...   <span class="std">List</span>(Doctor(<span class="lit">"McCoy"</span>, <span class="num">9</span>), Doctor(<span class="lit">"Ecclestone"</span>, <span class="num">10</span>), Doctor(<span class="lit">"Ecclestone"</span>, <span class="num">11</span>)))
-&gt;&gt;&gt; Scanamo.getAll[Doctor](client)(<span class="lit">"doctors"</span>)(('actor and 'regeneration) -&gt; <span class="std">List</span>(<span class="lit">"McCoy"</span> -&gt; <span class="num">9</span>, <span class="lit">"Ecclestone"</span> -&gt; <span class="num">11</span>))
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S) {
+...   Scanamo.putAll(client)(<span class="lit">"farmers"</span>)(<span class="std">List</span>(
+...     Farmer(<span class="lit">"Boggis"</span>, <span class="num">43</span>L, Farm(<span class="std">List</span>(<span class="lit">"chicken"</span>))), Farmer(<span class="lit">"Bunce"</span>, <span class="num">52</span>L, Farm(<span class="std">List</span>(<span class="lit">"goose"</span>))), Farmer(<span class="lit">"Bean"</span>, <span class="num">55</span>L, Farm(<span class="std">List</span>(<span class="lit">"turkey"</span>)))
+...   ))
+...   Scanamo.getAll[Farmer](client)(<span class="lit">"farmers"</span>)(UniqueKeys(KeyList('name, <span class="std">List</span>(<span class="lit">"Boggis"</span>, <span class="lit">"Bean"</span>))))
+... }
+<span class="std">List</span>(Valid(Farmer(Boggis,<span class="num">43</span>,Farm(<span class="std">List</span>(chicken)))), Valid(Farmer(Bean,<span class="num">55</span>,Farm(<span class="std">List</span>(turkey)))))</pre><p>or with some added syntactic sugar:</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S) {
+...   Scanamo.putAll(client)(<span class="lit">"farmers"</span>)(<span class="std">List</span>(
+...     Farmer(<span class="lit">"Boggis"</span>, <span class="num">43</span>L, Farm(<span class="std">List</span>(<span class="lit">"chicken"</span>))), Farmer(<span class="lit">"Bunce"</span>, <span class="num">52</span>L, Farm(<span class="std">List</span>(<span class="lit">"goose"</span>))), Farmer(<span class="lit">"Bean"</span>, <span class="num">55</span>L, Farm(<span class="std">List</span>(<span class="lit">"turkey"</span>)))
+...   ))
+...   Scanamo.getAll[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="std">List</span>(<span class="lit">"Boggis"</span>, <span class="lit">"Bean"</span>))
+... }
+<span class="std">List</span>(Valid(Farmer(Boggis,<span class="num">43</span>,Farm(<span class="std">List</span>(chicken)))), Valid(Farmer(Bean,<span class="num">55</span>,Farm(<span class="std">List</span>(turkey)))))</pre><p>You can also retrieve items from a table with both a hash and range key</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Doctor(actor: <span class="std">String</span>, regeneration: <span class="std">Int</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"doctors"</span>)('actor -&gt; S, 'regeneration -&gt; N) {
+...   Scanamo.putAll(client)(<span class="lit">"doctors"</span>)(
+...     <span class="std">List</span>(Doctor(<span class="lit">"McCoy"</span>, <span class="num">9</span>), Doctor(<span class="lit">"Ecclestone"</span>, <span class="num">10</span>), Doctor(<span class="lit">"Ecclestone"</span>, <span class="num">11</span>)))
+...   Scanamo.getAll[Doctor](client)(<span class="lit">"doctors"</span>)(('actor and 'regeneration) -&gt; <span class="std">List</span>(<span class="lit">"McCoy"</span> -&gt; <span class="num">9</span>, <span class="lit">"Ecclestone"</span> -&gt; <span class="num">11</span>))
+... }
 <span class="std">List</span>(Valid(Doctor(McCoy,<span class="num">9</span>)), Valid(Doctor(Ecclestone,<span class="num">11</span>)))</pre></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
@@ -441,7 +471,7 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.Scanamo#put" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="put[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(item:T)(implicitf:com.gu.scanamo.DynamoFormat[T]):com.amazonaws.services.dynamodbv2.model.PutItemResult"></a>
+      <a id="put[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(item:T)(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):com.amazonaws.services.dynamodbv2.model.PutItemResult"></a>
       <a id="put[T](AmazonDynamoDB)(String)(T)(DynamoFormat[T]):PutItemResult"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -449,24 +479,27 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">put</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="item">item: <span class="extype" name="com.gu.scanamo.Scanamo.put.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.put.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span></span>
+        <span class="name">put</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="item">item: <span class="extype" name="com.gu.scanamo.Scanamo.put.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.put.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Scanamo$@put[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(item:T)(implicitf:com.gu.scanamo.DynamoFormat[T]):com.amazonaws.services.dynamodbv2.model.PutItemResult" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@put[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(item:T)(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):com.amazonaws.services.dynamodbv2.model.PutItemResult" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Puts a single item into a table</p><div class="fullcomment"><div class="comment cmt"><p>Puts a single item into a table</p><pre>&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
-
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+      <p class="shortcomment cmt">Puts a single item into a table</p><div class="fullcomment"><div class="comment cmt"><p>Puts a single item into a table</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 
-&gt;&gt;&gt; <span class="kw">val</span> putResult = Scanamo.put(client)(<span class="lit">"farmers"</span>)(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>))))
 &gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
-&gt;&gt;&gt; Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"McDonald"</span>)
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S) {
+...   Scanamo.put(client)(<span class="lit">"farmers"</span>)(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>))))
+...   Scanamo.get[Farmer](client)(<span class="lit">"farmers"</span>)('name -&gt; <span class="lit">"McDonald"</span>)
+... }
 <span class="std">Some</span>(Valid(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow)))))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#putAll" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="putAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(items:List[T])(implicitf:com.gu.scanamo.DynamoFormat[T]):List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]"></a>
+      <a id="putAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(items:List[T])(implicitevidence$2:com.gu.scanamo.DynamoFormat[T]):List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]"></a>
       <a id="putAll[T](AmazonDynamoDB)(String)(List[T])(DynamoFormat[T]):List[BatchWriteItemResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -474,23 +507,25 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">putAll</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="items">items: <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.gu.scanamo.Scanamo.putAll.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.putAll.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult">BatchWriteItemResult</span>]</span>
+        <span class="name">putAll</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="items">items: <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.gu.scanamo.Scanamo.putAll.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.putAll.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult">BatchWriteItemResult</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Scanamo$@putAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(items:List[T])(implicitf:com.gu.scanamo.DynamoFormat[T]):List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@putAll[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(items:List[T])(implicitevidence$2:com.gu.scanamo.DynamoFormat[T]):List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Gets a single item from a table by a unique key</p><div class="fullcomment"><div class="comment cmt"><p>Gets a single item from a table by a unique key</p><pre>&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Rabbit(name: <span class="std">String</span>)
+      <p class="shortcomment cmt">Gets a single item from a table by a unique key</p><div class="fullcomment"><div class="comment cmt"><p>Gets a single item from a table by a unique key</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Rabbit(name: <span class="std">String</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"rabbits"</span>)('name -&gt; S)
-&gt;&gt;&gt; <span class="kw">val</span> multiPut = Scanamo.putAll(client)(<span class="lit">"rabbits"</span>)((
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"rabbits"</span>)('name -&gt; S) {
+...   Scanamo.putAll(client)(<span class="lit">"rabbits"</span>)((
 ...   <span class="kw">for</span> { _ <span class="kw">&lt;-</span> <span class="num">0</span> until <span class="num">100</span> } <span class="kw">yield</span> Rabbit(util.Random.nextString(<span class="num">500</span>))).toList)
-&gt;&gt;&gt; Scanamo.scan[Rabbit](client)(<span class="lit">"rabbits"</span>).toList.size
+...   Scanamo.scan[Rabbit](client)(<span class="lit">"rabbits"</span>).toList.size
+... }
 <span class="num">100</span></pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#query" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keyCondition:com.gu.scanamo.Query[_])(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
+      <a id="query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.Query[_])(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
       <a id="query[T](AmazonDynamoDB)(String)(Query[_])(DynamoFormat[T]):Streaming[ValidatedNel[DynamoReadError,T]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -498,21 +533,22 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">query</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="keyCondition">keyCondition: <a href="Query.html" class="extype" name="com.gu.scanamo.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.query.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.query.T">T</span>]]</span>
+        <span class="name">query</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="Query.html" class="extype" name="com.gu.scanamo.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.query.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.query.T">T</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Scanamo$@query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keyCondition:com.gu.scanamo.Query[_])(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.Query[_])(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Perform a query against a table</p><div class="fullcomment"><div class="comment cmt"><p>Perform a query against a table</p><p>This can be as simple as looking up by a hash key where a range key also exists</p><pre>&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+      <p class="shortcomment cmt">Perform a query against a table</p><div class="fullcomment"><div class="comment cmt"><p>Perform a query against a table</p><p>This can be as simple as looking up by a hash key where a range key also exists</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Animal(species: <span class="std">String</span>, number: <span class="std">Int</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"animals"</span>)('species -&gt; S, 'number -&gt; N)
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Animal(species: <span class="std">String</span>, number: <span class="std">Int</span>)
+&gt;&gt;&gt; <span class="kw">val</span> tableResult = LocalDynamoDB.createTable(client)(<span class="lit">"animals"</span>)('species -&gt; S, 'number -&gt; N)
 
 &gt;&gt;&gt; <span class="kw">val</span> r1 = Scanamo.put(client)(<span class="lit">"animals"</span>)(Animal(<span class="lit">"Wolf"</span>, <span class="num">1</span>))
 &gt;&gt;&gt; <span class="kw">val</span> r2 = <span class="kw">for</span> { i <span class="kw">&lt;-</span> <span class="num">1</span> to <span class="num">3</span> } Scanamo.put(client)(<span class="lit">"animals"</span>)(Animal(<span class="lit">"Pig"</span>, i))
-* &gt;&gt;&gt; Scanamo.query[Animal](client)(<span class="lit">"animals"</span>)(Query(KeyEquals('species, <span class="lit">"Pig"</span>))).toList
+&gt;&gt;&gt; Scanamo.query[Animal](client)(<span class="lit">"animals"</span>)(Query(KeyEquals('species, <span class="lit">"Pig"</span>))).toList
 <span class="std">List</span>(Valid(Animal(Pig,<span class="num">1</span>)), Valid(Animal(Pig,<span class="num">2</span>)), Valid(Animal(Pig,<span class="num">3</span>)))</pre><p>or with some syntactic sugar</p><pre>&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
 &gt;&gt;&gt; Scanamo.query[Animal](client)(<span class="lit">"animals"</span>)('species -&gt; <span class="lit">"Pig"</span>).toList
 <span class="std">List</span>(Valid(Animal(Pig,<span class="num">1</span>)), Valid(Animal(Pig,<span class="num">2</span>)), Valid(Animal(Pig,<span class="num">3</span>)))</pre><p>It also supports various conditions on the range key</p><pre>&gt;&gt;&gt; Scanamo.query[Animal](client)(<span class="lit">"animals"</span>)('species -&gt; <span class="lit">"Pig"</span> and 'number &lt; <span class="num">3</span>).toList
@@ -527,41 +563,46 @@
 &gt;&gt;&gt; Scanamo.query[Animal](client)(<span class="lit">"animals"</span>)('species -&gt; <span class="lit">"Pig"</span> and 'number &gt;= <span class="num">2</span>).toList
 <span class="std">List</span>(Valid(Animal(Pig,<span class="num">2</span>)), Valid(Animal(Pig,<span class="num">3</span>)))
 
-&gt;&gt;&gt; <span class="kw">val</span> transportTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"transport"</span>)('mode -&gt; S, 'line -&gt; S)
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Transport(mode: <span class="std">String</span>, line: <span class="std">String</span>)
-
-&gt;&gt;&gt; <span class="kw">val</span> lines = Scanamo.putAll(client)(<span class="lit">"transport"</span>)(<span class="std">List</span>(
-...   Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>),
-...   Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>),
-...   Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>)))
-
-&gt;&gt;&gt; Scanamo.query[Transport](client)(<span class="lit">"transport"</span>)('mode -&gt; <span class="lit">"Underground"</span> and ('line beginsWith <span class="lit">"C"</span>)).toList
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"transport"</span>)('mode -&gt; S, 'line -&gt; S) {
+...   Scanamo.putAll(client)(<span class="lit">"transport"</span>)(<span class="std">List</span>(
+...     Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>),
+...     Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>),
+...     Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>)))
+...   Scanamo.query[Transport](client)(<span class="lit">"transport"</span>)('mode -&gt; <span class="lit">"Underground"</span> and ('line beginsWith <span class="lit">"C"</span>)).toList
+... }
 <span class="std">List</span>(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))</pre></div></div>
-    </li><li name="com.gu.scanamo.Scanamo#read" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="read[T](m:java.util.Map[String,com.amazonaws.services.dynamodbv2.model.AttributeValue])(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]"></a>
-      <a id="read[T](Map[String,AttributeValue])(DynamoFormat[T]):ValidatedNel[DynamoReadError,T]"></a>
+    </li><li name="com.gu.scanamo.Scanamo#queryIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
+      <a id="queryIndex[T](AmazonDynamoDB)(String,String)(Query[_])(DynamoFormat[T]):Streaming[ValidatedNel[DynamoReadError,T]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">read</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="m">m: <span class="extype" name="java.util.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.read.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.read.T">T</span>]</span>
+        <span class="name">queryIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="Query.html" class="extype" name="com.gu.scanamo.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.queryIndex.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.queryIndex.T">T</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Scanamo$@read[T](m:java.util.Map[String,com.amazonaws.services.dynamodbv2.model.AttributeValue])(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"><p></p><pre>prop&gt; <span class="kw">import</span> collection.convert.decorateAsJava._
-prop&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model._
+      <p class="shortcomment cmt">Query a table using a secondary index</p><div class="fullcomment"><div class="comment cmt"><p>Query a table using a secondary index</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Transport(mode: <span class="std">String</span>, line: <span class="std">String</span>, colour: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
 
-prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span class="std">Int</span>]) <span class="kw">=&gt;</span>
-    |   Scanamo.read[<span class="std">Map</span>[<span class="std">String</span>, <span class="std">Int</span>]](
-    |     m.mapValues(i <span class="kw">=&gt;</span> <span class="kw">new</span> AttributeValue().withN(i.toString)).asJava
-    |   ) == cats.data.Validated.valid(m)</pre></div></div>
+&gt;&gt;&gt; LocalDynamoDB.withTableWithSecondaryIndex(client)(<span class="lit">"transport"</span>, <span class="lit">"colour-index"</span>)('mode -&gt; S, 'line -&gt; S)('colour -&gt; S) {
+...   Scanamo.putAll(client)(<span class="lit">"transport"</span>)(<span class="std">List</span>(
+...     Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>, <span class="lit">"Yellow"</span>),
+...     Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>, <span class="lit">"Maroon"</span>),
+...     Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>, <span class="lit">"Red"</span>)))
+...   Scanamo.queryIndex[Transport](client)(<span class="lit">"transport"</span>, <span class="lit">"colour-index"</span>)('colour -&gt; <span class="lit">"Maroon"</span>).toList
+... }
+<span class="std">List</span>(Valid(Transport(Underground,Metropolitan,Maroon)))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#scan" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
+      <a id="scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
       <a id="scan[T](AmazonDynamoDB)(String)(DynamoFormat[T]):Streaming[ValidatedNel[DynamoReadError,T]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -569,29 +610,59 @@ prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scan</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="f">f: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.scan.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.scan.T">T</span>]]</span>
+        <span class="name">scan</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.scan.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.scan.T">T</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Scanamo$@scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitf:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
-      <p class="shortcomment cmt">Lazily scans a table</p><div class="fullcomment"><div class="comment cmt"><p>Lazily scans a table</p><p>Does not cache results by default</p><pre>&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+      <p class="shortcomment cmt">Lazily scans a table</p><div class="fullcomment"><div class="comment cmt"><p>Lazily scans a table</p><p>Does not cache results by default</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bear(name: <span class="std">String</span>, favouriteFood: <span class="std">String</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-&gt;&gt;&gt; <span class="kw">val</span> createTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"bears"</span>)('name -&gt; S)
 
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bear(name: <span class="std">String</span>, favouriteFood: <span class="std">String</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"bears"</span>)('name -&gt; S) {
+...   Scanamo.put(client)(<span class="lit">"bears"</span>)(Bear(<span class="lit">"Pooh"</span>, <span class="lit">"honey"</span>))
+...   Scanamo.put(client)(<span class="lit">"bears"</span>)(Bear(<span class="lit">"Yogi"</span>, <span class="lit">"picnic baskets"</span>))
+...   Scanamo.scan[Bear](client)(<span class="lit">"bears"</span>).toList
+... }
+<span class="std">List</span>(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))</pre><p>Pagination is handled internally with <code>Streaming</code> result retrieving pages as necessary</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Lemming(name: <span class="std">String</span>, stuff: <span class="std">String</span>)
 
-&gt;&gt;&gt; <span class="kw">val</span> r1 = Scanamo.put(client)(<span class="lit">"bears"</span>)(Bear(<span class="lit">"Pooh"</span>, <span class="lit">"honey"</span>))
-&gt;&gt;&gt; <span class="kw">val</span> r2 = Scanamo.put(client)(<span class="lit">"bears"</span>)(Bear(<span class="lit">"Yogi"</span>, <span class="lit">"picnic baskets"</span>))
-&gt;&gt;&gt; Scanamo.scan[Bear](client)(<span class="lit">"bears"</span>).toList
-<span class="std">List</span>(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))</pre><p>Pagination is handled internally with <code>Streaming</code> result retrieving pages as necessary</p><pre>&gt;&gt;&gt; <span class="kw">val</span> lemmingTableResult = LocalDynamoDB.createTable(client)(<span class="lit">"lemmings"</span>)('name -&gt; S)
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Lemming(name: <span class="std">String</span>, stuff: <span class="std">String</span>)
-&gt;&gt;&gt; <span class="kw">val</span> lemmingResults = Scanamo.putAll(client)(<span class="lit">"lemmings"</span>)(
-...   (<span class="kw">for</span> { _ <span class="kw">&lt;-</span> <span class="num">0</span> until <span class="num">100</span> } <span class="kw">yield</span> Lemming(util.Random.nextString(<span class="num">500</span>), util.Random.nextString(<span class="num">5000</span>))).toList
-... )
-&gt;&gt;&gt; Scanamo.scan[Lemming](client)(<span class="lit">"lemmings"</span>).toList.size
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"lemmings"</span>)('name -&gt; S) {
+...   Scanamo.putAll(client)(<span class="lit">"lemmings"</span>)(
+...     (<span class="kw">for</span> { _ <span class="kw">&lt;-</span> <span class="num">0</span> until <span class="num">100</span> } <span class="kw">yield</span> Lemming(util.Random.nextString(<span class="num">500</span>), util.Random.nextString(<span class="num">5000</span>))).toList
+...   )
+...   Scanamo.scan[Lemming](client)(<span class="lit">"lemmings"</span>).toList.size
+... }
 <span class="num">100</span></pre></div></div>
+    </li><li name="com.gu.scanamo.Scanamo#scanIndex" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]"></a>
+      <a id="scanIndex[T](AmazonDynamoDB)(String,String)(DynamoFormat[T]):Streaming[ValidatedNel[DynamoReadError,T]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scanIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.scanIndex.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="cats.data.Streaming">Streaming</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.scanIndex.T">T</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.Scanamo$@scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):cats.data.Streaming[cats.data.ValidatedNel[com.gu.scanamo.DynamoReadError,T]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Returns a stream of all items present in the index</p><div class="fullcomment"><div class="comment cmt"><p>Returns a stream of all items present in the index</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bear(name: <span class="std">String</span>, favouriteFood: <span class="std">String</span>, alias: <span class="std">Option</span>[<span class="std">String</span>])
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
+&gt;&gt;&gt; LocalDynamoDB.withTableWithSecondaryIndex(client)(<span class="lit">"bears"</span>, <span class="lit">"alias-index"</span>)('name -&gt; S)('alias -&gt; S) {
+...   Scanamo.put(client)(<span class="lit">"bears"</span>)(Bear(<span class="lit">"Pooh"</span>, <span class="lit">"honey"</span>, <span class="std">Some</span>(<span class="lit">"Winnie"</span>)))
+...   Scanamo.put(client)(<span class="lit">"bears"</span>)(Bear(<span class="lit">"Yogi"</span>, <span class="lit">"picnic baskets"</span>, <span class="std">None</span>))
+...   Scanamo.scanIndex[Bear](client)(<span class="lit">"bears"</span>, <span class="lit">"alias-index"</span>).toList
+... }
+<span class="std">List</span>(Valid(Bear(Pooh,honey,<span class="std">Some</span>(Winnie))))</pre></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
