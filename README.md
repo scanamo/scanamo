@@ -111,6 +111,37 @@ res1: List[cats.data.ValidatedNel[DynamoReadError, Free]] = List(Valid(Free(Mona
 
 For more details see the [API docs](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
 
+### Custom Formats
+
+To define a serialisation format for types which Scanamo doesn't already provide:
+  
+```scala
+scala> import org.joda.time._
+
+scala> import com.gu.scanamo._
+scala> import com.gu.scanamo.syntax._
+
+scala> case class Foo(dateTime: DateTime)
+
+scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("foo")('dateTime -> S)
+ 
+scala> implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
+     |   DateTime.parse(_).withZone(DateTimeZone.UTC)
+     | )(
+     |   _.toString
+     | )
+scala> val operations = for {
+     |      _           <- ScanamoFree.put("foo")(Foo(new DateTime(0)))
+     |      results     <- ScanamoFree.scan[Foo]("foo")
+     | } yield results
+ 
+scala> Scanamo.exec(client)(operations).toList
+res1: List[cats.data.ValidatedNel[DynamoReadError, Foo]] = List(Valid(Foo(1970-01-01T00:00:00.000Z)))
+```
+
+
 License
 -------
 
