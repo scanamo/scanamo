@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
-import cats.data.ValidatedNel
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, PutItemResult, BatchWriteItemResult, DeleteItemResult, ScanRequest}
+import cats.data.Validated
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 
 object ScanamoFree {
@@ -18,13 +18,13 @@ object ScanamoFree {
       ScanamoOps.batchWrite(batchPutRequest(tableName)(batch)))
 
   def get[T](tableName: String)(key: UniqueKey[_])
-    (implicit ft: DynamoFormat[T]): ScanamoOps[Option[ValidatedNel[DynamoReadError, T]]] =
+    (implicit ft: DynamoFormat[T]): ScanamoOps[Option[Validated[DynamoReadError, T]]] =
     for {
       res <- ScanamoOps.get(getRequest(tableName)(key))
     } yield
       Option(res.getItem).map(read[T])
 
-  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[List[ValidatedNel[DynamoReadError, T]]] = {
+  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[List[Validated[DynamoReadError, T]]] = {
     import collection.convert.decorateAsScala._
     for {
       res <- ScanamoOps.batchGet(batchGetRequest(tableName)(keys))
@@ -35,16 +35,17 @@ object ScanamoFree {
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
     ScanamoOps.delete(deleteRequest(tableName)(key))
 
-  def scan[T: DynamoFormat](tableName: String): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
+
+  def scan[T: DynamoFormat](tableName: String): ScanamoOps[Stream[Validated[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName))
 
-  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
+  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[Stream[Validated[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withIndexName(indexName))
 
-  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
+  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Stream[Validated[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query))
 
-  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
+  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Stream[Validated[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query).withIndexName(indexName))
 
   /**
@@ -58,6 +59,6 @@ object ScanamoFree {
     *     |   ) == cats.data.Validated.valid(m)
     * }}}
     */
-  def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): ValidatedNel[DynamoReadError, T] =
+  def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): Validated[DynamoReadError, T] =
     f.read(new AttributeValue().withM(m))
 }

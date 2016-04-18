@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import cats.data.ValidatedNel
+import cats.data.Validated
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.{PutItemResult, BatchWriteItemResult, DeleteItemResult}
 
@@ -87,7 +87,7 @@ object Scanamo {
     * }}}
     */
   def get[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
-    : Option[ValidatedNel[DynamoReadError, T]] =
+    : Option[Validated[DynamoReadError, T]] =
     exec(client)(ScanamoFree.get[T](tableName)(key))
 
   /**
@@ -133,7 +133,7 @@ object Scanamo {
     * }}}
     */
   def getAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_])
-    : List[ValidatedNel[DynamoReadError, T]] =
+    : List[Validated[DynamoReadError, T]] =
     exec(client)(ScanamoFree.getAll(tableName)(keys))
 
 
@@ -190,7 +190,7 @@ object Scanamo {
     * }}}
     */
   def scan[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)
-    : Stream[ValidatedNel[DynamoReadError, T]] =
+    : Stream[Validated[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scan(tableName))
 
   /**
@@ -211,7 +211,7 @@ object Scanamo {
     * }}}
     */
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)
-  : Stream[ValidatedNel[DynamoReadError, T]] =
+  : Stream[Validated[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   /**
@@ -262,7 +262,7 @@ object Scanamo {
     * }}}
     */
   def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
-    : Stream[ValidatedNel[DynamoReadError, T]] =
+    : Stream[Validated[DynamoReadError, T]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
   /**
@@ -285,6 +285,6 @@ object Scanamo {
     * }}}
     */
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
-  : Stream[ValidatedNel[DynamoReadError, T]] =
+  : Stream[Validated[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }
