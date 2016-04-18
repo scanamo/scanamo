@@ -34,7 +34,7 @@ scala> case class Farmer(name: String, age: Long, farm: Farm)
 
 scala> val putResult = Scanamo.put(client)("farmer")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
 scala> Scanamo.get[Farmer](client)("farmer")('name -> "McDonald")
-res1: Option[cats.data.ValidatedNel[DynamoReadError, Farmer]] = Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
+res1: Option[cats.data.Validated[DynamoReadError, Farmer]] = Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
 It's also possible to make more complex queries:
@@ -55,7 +55,7 @@ scala> val lines = Scanamo.putAll(client)("transports")(List(
      | ))
      
 scala> Scanamo.query[Transport](client)("transports")('mode -> "Underground" and ('line beginsWith "C")).toList
-res1: List[cats.data.ValidatedNel[DynamoReadError, Transport]] = List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
+res1: List[cats.data.Validated[DynamoReadError, Transport]] = List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
 ```
 
 Scanamo also supports asynchronous calls to Dynamo:
@@ -82,7 +82,7 @@ scala> val bunce = for {
      | } yield farmer
      
 scala> concurrent.Await.result(bunce, 5.seconds)
-res1: Option[cats.data.ValidatedNel[DynamoReadError, Farmer]] = Some(Valid(Farmer(Bunce,52,Farm(List(goose)))))
+res1: Option[cats.data.Validated[DynamoReadError, Farmer]] = Some(Valid(Farmer(Bunce,52,Farm(List(goose)))))
 ```
 
 If you want to take a more pure functional approach and push the IO to the edge of your program, you can make 
@@ -106,7 +106,7 @@ scala> val operations = for {
      | } yield results
      
 scala> Scanamo.exec(client)(operations).toList
-res1: List[cats.data.ValidatedNel[DynamoReadError, Free]] = List(Valid(Free(Monad,10)), Valid(Free(Applicative,2)))
+res1: List[cats.data.Validated[DynamoReadError, Free]] = List(Valid(Free(Monad,10)), Valid(Free(Applicative,2)))
 ```
 
 For more details see the [API docs](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
@@ -138,7 +138,7 @@ scala> val operations = for {
      | } yield results
  
 scala> Scanamo.exec(client)(operations).toList
-res1: List[cats.data.ValidatedNel[DynamoReadError, Foo]] = List(Valid(Foo(1970-01-01T00:00:00.000Z)))
+res1: List[cats.data.Validated[DynamoReadError, Foo]] = List(Valid(Foo(1970-01-01T00:00:00.000Z)))
 ```
 
 
