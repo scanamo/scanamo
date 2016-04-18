@@ -2,11 +2,9 @@ package com.gu.scanamo
 
 import java.util
 
-import cats.{Later, Monad}
 import cats.data._
 import cats.free.Free
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ScanRequest, ScanResult, QueryRequest, QueryResult}
 
 import collection.convert.decorateAsScala._
 
@@ -16,19 +14,19 @@ trait DynamoResultStream[Req, Res] {
   def withExclusiveStartKey(req: Req, key: java.util.Map[String, AttributeValue]): Req
   def exec(req: Req): ScanamoOps[Res]
 
-  def stream[T: DynamoFormat](req: Req): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] = {
+  def stream[T: DynamoFormat](req: Req): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] = {
 
-    def streamMore(lastKey: Option[java.util.Map[String, AttributeValue]]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] = {
+    def streamMore(lastKey: Option[java.util.Map[String, AttributeValue]]): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] = {
       for {
         queryResult <- exec(lastKey.foldLeft(req)(withExclusiveStartKey(_, _)))
-        results = Streaming.fromIterable(items(queryResult).asScala.map(ScanamoFree.read[T]))
+        results = items(queryResult).asScala.map(ScanamoFree.read[T]).toStream
         resultStream <-
           Option(lastEvaluatedKey(queryResult)).foldLeft(
-            Free.pure[ScanamoOpsA, Streaming[ValidatedNel[DynamoReadError, T]]](results)
+            Free.pure[ScanamoOpsA, Stream[ValidatedNel[DynamoReadError, T]]](results)
           )((rs, k) => for {
             items <- rs
             more <- streamMore(Some(k))
-          } yield items ++ more)
+          } yield items #::: more)
       } yield resultStream
     }
     streamMore(None)

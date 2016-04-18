@@ -1,8 +1,8 @@
 package com.gu.scanamo
 
-import cats.data.{Streaming, ValidatedNel}
+import cats.data.ValidatedNel
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{PutItemResult, BatchWriteItemResult, DeleteItemResult}
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -40,18 +40,18 @@ object ScanamoAsync {
     exec(client)(ScanamoFree.delete(tableName)(key))
 
   def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
-    (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[Stream[ValidatedNel[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
-    (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[Stream[ValidatedNel[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[Stream[ValidatedNel[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[Streaming[ValidatedNel[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[Stream[ValidatedNel[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }

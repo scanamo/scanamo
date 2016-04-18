@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
-import cats.data.{Streaming, ValidatedNel}
-import com.amazonaws.services.dynamodbv2.model._
+import cats.data.ValidatedNel
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, PutItemResult, BatchWriteItemResult, DeleteItemResult, ScanRequest}
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 
 object ScanamoFree {
@@ -35,16 +35,16 @@ object ScanamoFree {
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
     ScanamoOps.delete(deleteRequest(tableName)(key))
 
-  def scan[T: DynamoFormat](tableName: String): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+  def scan[T: DynamoFormat](tableName: String): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName))
 
-  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withIndexName(indexName))
 
-  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query))
 
-  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Streaming[ValidatedNel[DynamoReadError, T]]] =
+  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Stream[ValidatedNel[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query).withIndexName(indexName))
 
   /**
