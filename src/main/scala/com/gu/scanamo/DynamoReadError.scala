@@ -6,7 +6,7 @@ import cats.std.list._
 sealed abstract class DynamoReadError
 case class PropertyReadError(name: String, problem: NonEmptyList[DynamoReadError]) extends DynamoReadError
 case class NoPropertyOfType(propertyType: String) extends DynamoReadError
-case class TypeCoercionError(e: Exception) extends DynamoReadError
+case class TypeCoercionError(t: Throwable) extends DynamoReadError
 case object MissingProperty extends DynamoReadError
 
 object DynamoReadError {

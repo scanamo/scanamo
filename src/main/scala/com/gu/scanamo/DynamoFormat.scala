@@ -1,5 +1,6 @@
 package com.gu.scanamo
 
+import cats.NotNull
 import cats.data._
 import cats.std.list._
 import cats.std.map._
@@ -9,7 +10,9 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import shapeless._
 import shapeless.labelled._
 import simulacrum.typeclass
+
 import collection.convert.decorateAll._
+import scala.reflect.ClassTag
 
 /**
   * Type class for defining serialisation to and from
@@ -46,6 +49,8 @@ import collection.convert.decorateAll._
   * >>> DynamoFormat[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
   * Valid(LargelyOptional(None,Some(X)))
   * }}}
+  *
+  * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]] or [[DynamoFormat.xmap]]
   */
 @typeclass trait DynamoFormat[T] {
   def read(av: AttributeValue): ValidatedNel[DynamoReadError, T]
@@ -79,20 +84,35 @@ object DynamoFormat extends DerivedDynamoFormat {
     * ... )
     * >>> DynamoFormat[DateTime].read(new AttributeValue().withN("0"))
     * Valid(1970-01-01T00:00:00.000Z)
-    *
-    * >>> val jodaStringFormat = DynamoFormat.xmap[LocalDate, String](
-    * ...   s => Validated.valid(LocalDate.parse(s))
-    * ... )(
-    * ...   _.toString
-    * ... )
-    * >>> jodaStringFormat.read(jodaStringFormat.write(new LocalDate(2007, 8, 18)))
-    * Valid(2007-08-18)
     * }}}
     */
   def xmap[A, B](r: B => ValidatedNel[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     override def read(item: AttributeValue): ValidatedNel[DynamoReadError, A] = f.read(item).andThen(r)
     override def write(t: A): AttributeValue = f.write(w(t))
   }
+
+  /**
+    * Returns a [[DynamoFormat]] for the case where `A` can always be converted `B`,
+    * with `write`, but `read` may throw an exception for some value of `B`
+    *
+    * {{{
+    * >>> import org.joda.time._
+    *
+    * >>> val jodaStringFormat = DynamoFormat.coercedXmap[LocalDate, String, IllegalArgumentException](
+    * ...   LocalDate.parse
+    * ... )(
+    * ...   _.toString
+    * ... )
+    * >>> jodaStringFormat.read(jodaStringFormat.write(new LocalDate(2007, 8, 18)))
+    * Valid(2007-08-18)
+    *
+    * >>> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * >>> jodaStringFormat.read(new AttributeValue().withS("Togtogdenoggleplop"))
+    * Invalid(OneAnd(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"),List()))
+    * }}}
+    */
+  def coercedXmap[A, B, T >: scala.Null <: scala.Throwable](read: B => A)(write: A => B)(implicit f: DynamoFormat[B], T: ClassTag[T], NT: NotNull[T]) =
+    xmap(coerce[B, A, T](read))(write)
 
   /**
     * {{{
@@ -117,8 +137,11 @@ object DynamoFormat extends DerivedDynamoFormat {
 
 
   private val numFormat = attribute(_.getN, "N")(_.withN)
-  private def coerce[N](f: String => N): String => ValidatedNel[DynamoReadError, N] = s =>
-    Validated.catchOnly[NumberFormatException](f(s)).leftMap(TypeCoercionError(_)).toValidatedNel
+  private def coerceNumber[N](f: String => N): String => ValidatedNel[DynamoReadError, N] =
+    coerce[String, N, NumberFormatException](f)
+
+  private def coerce[A, B, T >: scala.Null <: scala.Throwable](f: A => B)(implicit T: ClassTag[T], NT: NotNull[T]): A => ValidatedNel[DynamoReadError, B] = a =>
+    Validated.catchOnly[T](f(a)).leftMap(TypeCoercionError(_)).toValidatedNel
 
   /**
     * {{{
@@ -126,14 +149,14 @@ object DynamoFormat extends DerivedDynamoFormat {
     *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == cats.data.Validated.valid(l)
     * }}}
     */
-  implicit val longFormat = xmap(coerce(_.toLong))(_.toString)(numFormat)
+  implicit val longFormat = xmap(coerceNumber(_.toLong))(_.toString)(numFormat)
   /**
     * {{{
     * prop> (i: Int) =>
     *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == cats.data.Validated.valid(i)
     * }}}
     */
-  implicit val intFormat = xmap(coerce(_.toInt))(_.toString)(numFormat)
+  implicit val intFormat = xmap(coerceNumber(_.toInt))(_.toString)(numFormat)
 
 
   private val javaListFormat = attribute(_.getL, "L")(_.withL)
