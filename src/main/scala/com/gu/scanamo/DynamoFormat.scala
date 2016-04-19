@@ -21,7 +21,7 @@ import scala.reflect.ClassTag
   * {{{
   * >>> val mapF = DynamoFormat[Map[String, List[Int]]]
   * >>> mapF.read(mapF.write(Map("foo" -> List(1, 2, 3), "bar" -> List(3, 2, 1))))
-  * Valid(Map(foo -> List(1, 2, 3), bar -> List(3, 2, 1)))
+  * Right(Map(foo -> List(1, 2, 3), bar -> List(3, 2, 1)))
   * }}}
   *
   * Also supports automatic derivation for case classes
@@ -31,29 +31,29 @@ import scala.reflect.ClassTag
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
   * >>> val farmerF = DynamoFormat[Farmer]
   * >>> farmerF.read(farmerF.write(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
-  * Valid(Farmer(McDonald,156,Farm(List(sheep, cow))))
+  * Right(Farmer(McDonald,156,Farm(List(sheep, cow))))
   * }}}
   *
   * Problems reading a value are detailed
   * {{{
   * >>> case class Developer(name: String, age: String, problems: Int)
   * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
-  * Invalid(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),List())),List(PropertyReadError(farm,OneAnd(MissingProperty,List())))))
+  * Left(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),List())),List(PropertyReadError(farm,OneAnd(MissingProperty,List())))))
   * >>> invalid.leftMap(DynamoReadError.describe)
-  * Invalid('age': not of type: 'N', 'farm': missing)
+  * Left('age': not of type: 'N', 'farm': missing)
   * }}}
   *
   * Optional properties are defaulted to None
   * {{{
   * >>> case class LargelyOptional(a: Option[String], b: Option[String])
   * >>> DynamoFormat[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
-  * Valid(LargelyOptional(None,Some(X)))
+  * Right(LargelyOptional(None,Some(X)))
   * }}}
   *
   * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]] or [[DynamoFormat.xmap]]
   */
 @typeclass trait DynamoFormat[T] {
-  def read(av: AttributeValue): Validated[DynamoReadError, T]
+  def read(av: AttributeValue): Xor[DynamoReadError, T]
   def write(t: T): AttributeValue
   def default: Option[T] = None
 }
@@ -64,8 +64,8 @@ object DynamoFormat extends DerivedDynamoFormat {
     encode: AttributeValue => T => AttributeValue
   ): DynamoFormat[T] = {
     new DynamoFormat[T] {
-      override def read(av: AttributeValue): Validated[DynamoReadError, T] =
-        Validated.fromOption(Option(decode(av)), NoPropertyOfType(propertyType))
+      override def read(av: AttributeValue): Xor[DynamoReadError, T] =
+        Xor.fromOption(Option(decode(av)), NoPropertyOfType(propertyType))
       override def write(t: T): AttributeValue =
         encode(new AttributeValue())(t)
     }
@@ -74,20 +74,20 @@ object DynamoFormat extends DerivedDynamoFormat {
   /**
     * {{{
     * >>> import org.joda.time._
-    * >>> import cats.data.Validated
+    * >>> import cats.data.Xor
     * >>> import com.amazonaws.services.dynamodbv2.model.AttributeValue
     *
     * >>> implicit val jodaLongFormat = DynamoFormat.xmap[DateTime, Long](
-    * ...   l => Validated.valid(new DateTime(l).withZone(DateTimeZone.UTC))
+    * ...   l => Xor.right(new DateTime(l).withZone(DateTimeZone.UTC))
     * ... )(
     * ...   _.withZone(DateTimeZone.UTC).getMillis
     * ... )
     * >>> DynamoFormat[DateTime].read(new AttributeValue().withN("0"))
-    * Valid(1970-01-01T00:00:00.000Z)
+    * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Validated[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
-    override def read(item: AttributeValue): Validated[DynamoReadError, A] = f.read(item).andThen(r)
+  def xmap[A, B](r: B => Xor[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+    override def read(item: AttributeValue): Xor[DynamoReadError, A] = f.read(item).flatMap(r)
     override def write(t: A): AttributeValue = f.write(w(t))
   }
 
@@ -104,11 +104,11 @@ object DynamoFormat extends DerivedDynamoFormat {
     * ...   _.toString
     * ... )
     * >>> jodaStringFormat.read(jodaStringFormat.write(new LocalDate(2007, 8, 18)))
-    * Valid(2007-08-18)
+    * Right(2007-08-18)
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.AttributeValue
     * >>> jodaStringFormat.read(new AttributeValue().withS("Togtogdenoggleplop"))
-    * Invalid(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
+    * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
   def coercedXmap[A, B, T >: scala.Null <: scala.Throwable](read: B => A)(write: A => B)(implicit f: DynamoFormat[B], T: ClassTag[T], NT: NotNull[T]) =
@@ -117,7 +117,7 @@ object DynamoFormat extends DerivedDynamoFormat {
   /**
     * {{{
     * prop> (s: String) =>
-    *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == cats.data.Validated.valid(s)
+    *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == cats.data.Xor.right(s)
     * }}}
     */
   implicit val stringFormat = attribute(_.getS, "S")(_.withS)
@@ -127,33 +127,33 @@ object DynamoFormat extends DerivedDynamoFormat {
   /**
     * {{{
     * prop> (b: Boolean) =>
-    *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == cats.data.Validated.valid(b)
+    *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == cats.data.Xor.right(b)
     * }}}
     */
   implicit val booleanFormat = xmap[Boolean, java.lang.Boolean](
-    b => Validated.valid(Boolean.unbox(b)))(
+    b => Xor.right(Boolean.unbox(b)))(
     Boolean.box
   )(javaBooleanFormat)
 
 
   private val numFormat = attribute(_.getN, "N")(_.withN)
-  private def coerceNumber[N](f: String => N): String => Validated[DynamoReadError, N] =
+  private def coerceNumber[N](f: String => N): String => Xor[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
 
-  private def coerce[A, B, T >: scala.Null <: scala.Throwable](f: A => B)(implicit T: ClassTag[T], NT: NotNull[T]): A => Validated[DynamoReadError, B] = a =>
-    Validated.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
+  private def coerce[A, B, T >: scala.Null <: scala.Throwable](f: A => B)(implicit T: ClassTag[T], NT: NotNull[T]): A => Xor[DynamoReadError, B] = a =>
+    Xor.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
 
   /**
     * {{{
     * prop> (l: Long) =>
-    *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == cats.data.Validated.valid(l)
+    *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == cats.data.Xor.right(l)
     * }}}
     */
   implicit val longFormat = xmap(coerceNumber(_.toLong))(_.toString)(numFormat)
   /**
     * {{{
     * prop> (i: Int) =>
-    *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == cats.data.Validated.valid(i)
+    *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == cats.data.Xor.right(i)
     * }}}
     */
   implicit val intFormat = xmap(coerceNumber(_.toInt))(_.toString)(numFormat)
@@ -164,7 +164,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * {{{
     * prop> (l: List[String]) =>
     *     | DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) ==
-    *     |   cats.data.Validated.valid(l)
+    *     |   cats.data.Xor.right(l)
     * }}}
     */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
@@ -178,7 +178,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * {{{
     * prop> (m: Map[String, Int]) =>
     *     | DynamoFormat[Map[String, Int]].read(DynamoFormat[Map[String, Int]].write(m)) ==
-    *     |   cats.data.Validated.valid(m)
+    *     |   cats.data.Xor.right(m)
     * }}}
     */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
@@ -191,13 +191,13 @@ object DynamoFormat extends DerivedDynamoFormat {
     * {{{
     * prop> (o: Option[Long]) =>
     *     | DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) ==
-    *     |   cats.data.Validated.valid(o)
+    *     |   cats.data.Xor.right(o)
     * }}}
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
-    def read(av: AttributeValue): Validated[DynamoReadError, Option[T]] = {
+    def read(av: AttributeValue): Xor[DynamoReadError, Option[T]] = {
       Option(av).map(f.read(_).map(Some(_)))
-        .getOrElse(Validated.valid(Option.empty[T]))
+        .getOrElse(Xor.right(Option.empty[T]))
     }
 
     def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(null)
@@ -206,29 +206,35 @@ object DynamoFormat extends DerivedDynamoFormat {
 }
 
 trait DerivedDynamoFormat {
-  implicit val hnil: DynamoFormat[HNil] =
-    new DynamoFormat[HNil] {
+  trait ConstructedDynamoFormat[T] {
+    def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
+    def write(t: T): AttributeValue
+    def default: Option[T] = None
+  }
+
+  implicit val hnil: ConstructedDynamoFormat[HNil] =
+    new ConstructedDynamoFormat[HNil] {
       def read(av: AttributeValue) = Validated.valid(HNil)
       def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty.asJava)
     }
 
   implicit def hcons[K <: Symbol, V, T <: HList](implicit
     headFormat: Lazy[DynamoFormat[V]],
-    tailFormat: Lazy[DynamoFormat[T]],
+    tailFormat: Lazy[ConstructedDynamoFormat[T]],
     fieldWitness: Witness.Aux[K]
-  ): DynamoFormat[FieldType[K, V] :: T] =
-    new DynamoFormat[FieldType[K, V] :: T] {
-      def read(av: AttributeValue): Validated[DynamoReadError, FieldType[K, V] :: T] = {
+  ): ConstructedDynamoFormat[FieldType[K, V] :: T] =
+    new ConstructedDynamoFormat[FieldType[K, V] :: T] {
+      def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :: T] = {
         val fieldName = fieldWitness.value.name
 
-        val possibleValue = av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Validated.valid))
+        val possibleValue = av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Xor.right))
 
-        val validatedValue = possibleValue.getOrElse(Validated.invalid[DynamoReadError, V](MissingProperty))
+        val validatedValue = possibleValue.getOrElse(Xor.left[DynamoReadError, V](MissingProperty))
 
-        def withPropertyError(x: Validated[DynamoReadError, V]): Validated[DynamoReadError, V] =
-          x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e))))
+        def withPropertyError(x: Xor[DynamoReadError, V]): Validated[InvalidPropertiesError, V] =
+          x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e)))).toValidated
 
-        val head: Validated[DynamoReadError, FieldType[K, V]] = withPropertyError(validatedValue).map(field[K](_))
+        val head: Validated[InvalidPropertiesError, FieldType[K, V]] = withPropertyError(validatedValue).map(field[K](_))
         val tail = tailFormat.value.read(av)
 
         head.map2(tail)(_ :: _)
@@ -239,9 +245,9 @@ trait DerivedDynamoFormat {
       }
     }
 
-  implicit def generic[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[DynamoFormat[R]]): DynamoFormat[T] =
+  implicit def generic[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
-      def read(av: AttributeValue): Validated[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
+      def read(av: AttributeValue): Xor[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toXor
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 }

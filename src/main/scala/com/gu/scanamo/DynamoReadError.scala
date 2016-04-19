@@ -11,6 +11,13 @@ final case object MissingProperty extends DynamoReadError
 
 final case class PropertyReadError(name: String, problem: DynamoReadError)
 final case class InvalidPropertiesError(errors: NonEmptyList[PropertyReadError]) extends DynamoReadError
+object InvalidPropertiesError {
+  import cats.syntax.semigroup._
+  implicit object SemigroupInstance extends Semigroup[InvalidPropertiesError] {
+    override def combine(x: InvalidPropertiesError, y: InvalidPropertiesError): InvalidPropertiesError =
+      InvalidPropertiesError(x.errors |+| y.errors)
+  }
+}
 
 object DynamoReadError {
   import cats.syntax.functor._
@@ -20,18 +27,5 @@ object DynamoReadError {
     case NoPropertyOfType(propertyType) => s"not of type: '$propertyType'"
     case TypeCoercionError(e) => s"could not be converted to desired type: $e"
     case MissingProperty => "missing"
-  }
-
-  import cats.syntax.semigroup._
-
-  implicit object SemigroupInstance extends Semigroup[DynamoReadError] {
-    override def combine(x: DynamoReadError, y: DynamoReadError): DynamoReadError = x match  {
-      case InvalidPropertiesError(xErrors) => y match {
-        case InvalidPropertiesError(yErrors) => InvalidPropertiesError(xErrors |+| yErrors)
-        case _  => x
-      }
-      case _ => x
-    }
-
   }
 }
