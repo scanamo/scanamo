@@ -1,9 +1,8 @@
 package com.gu
 
-import cats.free.Free
+import com.gu.scanamo.query._
 
 package object scanamo {
-  type ScanamoOps[A] = Free[ScanamoOpsA, A]
 
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
@@ -31,8 +30,6 @@ package object scanamo {
 
     implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, List[(H, R)])) =
       UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
-
-    implicit def toUniqueKeys[T: UniqueKeyConditions](t: T) = UniqueKeys(t)
 
     implicit def symbolTupleToQuery[V: DynamoFormat](pair: (Symbol, V)) =
       Query(KeyEquals(pair._1, pair._2))

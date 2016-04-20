@@ -1,10 +1,11 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model._
+import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 
 import scala.collection.convert.decorateAll._
 
-object ScanamoRequest {
+private object ScanamoRequest {
 
   /**
     * {{{

@@ -1,4 +1,6 @@
-package com.gu.scanamo
+package com.gu.scanamo.query
+
+import com.gu.scanamo.DynamoFormat
 
 case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
   def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]) =

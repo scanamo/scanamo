@@ -1,6 +1,6 @@
-package com.gu.scanamo
+package com.gu.scanamo.error
 
-import cats.Semigroup
+import cats.{Semigroup, Show}
 import cats.data.NonEmptyList
 import cats.std.list._
 
@@ -20,10 +20,12 @@ object InvalidPropertiesError {
 }
 
 object DynamoReadError {
-  import cats.syntax.functor._
+  implicit object ShowInstance extends Show[DynamoReadError] {
+    def show(e: DynamoReadError): String = describe(e)
+  }
 
   def describe(d: DynamoReadError): String =  d match {
-    case InvalidPropertiesError(problems) => problems.map(p => s"'${p.name}': ${describe(p.problem)}").unwrap.mkString(", ")
+    case InvalidPropertiesError(problems) => problems.unwrap.map(p => s"'${p.name}': ${describe(p.problem)}").mkString(", ")
     case NoPropertyOfType(propertyType) => s"not of type: '$propertyType'"
     case TypeCoercionError(e) => s"could not be converted to desired type: $e"
     case MissingProperty => "missing"

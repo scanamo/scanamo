@@ -7,6 +7,7 @@ import cats.std.map._
 import cats.syntax.traverse._
 import cats.syntax.apply._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.gu.scanamo.error._
 import shapeless._
 import shapeless.labelled._
 import simulacrum.typeclass
@@ -38,8 +39,10 @@ import scala.reflect.ClassTag
   * {{{
   * >>> case class Developer(name: String, age: String, problems: Int)
   * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
-  * Left(OneAnd(PropertyReadError(age,OneAnd(NoPropertyOfType(N),List())),List(PropertyReadError(farm,OneAnd(MissingProperty,List())))))
-  * >>> invalid.leftMap(DynamoReadError.describe)
+  * >>> invalid
+  * Left(InvalidPropertiesError(OneAnd(PropertyReadError(age,NoPropertyOfType(N)),List(PropertyReadError(farm,MissingProperty)))))
+  *
+  * >>> invalid.leftMap(cats.Show[error.DynamoReadError].show)
   * Left('age': not of type: 'N', 'farm': missing)
   * }}}
   *

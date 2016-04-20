@@ -1,8 +1,11 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, PutItemResult, BatchWriteItemResult, DeleteItemResult, ScanRequest}
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, BatchWriteItemResult, DeleteItemResult, PutItemResult, ScanRequest}
 import cats.data.Xor
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.ScanamoOps
+import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 
 object ScanamoFree {
 

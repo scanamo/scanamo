@@ -5,6 +5,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import cats.data.Xor.Right
+import com.gu.scanamo.query.{KeyEquals, KeyList, UniqueKey, UniqueKeys}
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =

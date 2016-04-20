@@ -4,11 +4,13 @@ import java.util
 
 import cats.data._
 import cats.free.Free
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ScanRequest, ScanResult, QueryRequest, QueryResult}
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryRequest, QueryResult, ScanRequest, ScanResult}
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
 
 import collection.convert.decorateAsScala._
 
-trait DynamoResultStream[Req, Res] {
+private[scanamo] trait DynamoResultStream[Req, Res] {
   def items(res: Res): java.util.List[java.util.Map[String, AttributeValue]]
   def lastEvaluatedKey(res: Res): java.util.Map[String, AttributeValue]
   def withExclusiveStartKey(req: Req, key: java.util.Map[String, AttributeValue]): Req
@@ -33,7 +35,7 @@ trait DynamoResultStream[Req, Res] {
   }
 }
 
-object DynamoResultStream {
+private[scanamo] object DynamoResultStream {
   object ScanResultStream extends DynamoResultStream[ScanRequest, ScanResult] {
     override def items(res: ScanResult): util.List[util.Map[String, AttributeValue]] = res.getItems
     override def lastEvaluatedKey(res: ScanResult): util.Map[String, AttributeValue] = res.getLastEvaluatedKey
