@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import cats.data.ValidatedNel
+import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.{PutItemResult, BatchWriteItemResult, DeleteItemResult}
 
@@ -28,7 +28,7 @@ object Scanamo {
     * ...   Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
     * ...   Scanamo.get[Farmer](client)("farmers")('name -> "McDonald")
     * ... }
-    * Some(Valid(Farmer(McDonald,156,Farm(List(sheep, cow)))))
+    * Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
   def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): PutItemResult =
@@ -65,7 +65,7 @@ object Scanamo {
     * ...   Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
     * ...   Scanamo.get[Farmer](client)("farmers")(UniqueKey(KeyEquals('name, "Maggot")))
     * ... }
-    * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
+    * Some(Right(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
     * or with some added syntactic sugar:
     * {{{
@@ -74,7 +74,7 @@ object Scanamo {
     * ...   Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
     * ...   Scanamo.get[Farmer](client)("farmers")('name -> "Maggot")
     * ... }
-    * Some(Valid(Farmer(Maggot,75,Farm(List(dog)))))
+    * Some(Right(Farmer(Maggot,75,Farm(List(dog)))))
     * }}}
     * Can also be used with tables that have both a hash and a range key:
     * {{{
@@ -83,11 +83,11 @@ object Scanamo {
     * ...   Scanamo.put(client)("engines")(Engine("Thomas", 1))
     * ...   Scanamo.get[Engine](client)("engines")('name -> "Thomas" and 'number -> 1)
     * ... }
-    * Some(Valid(Engine(Thomas,1)))
+    * Some(Right(Engine(Thomas,1)))
     * }}}
     */
   def get[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
-    : Option[ValidatedNel[DynamoReadError, T]] =
+    : Option[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.get[T](tableName)(key))
 
   /**
@@ -108,7 +108,7 @@ object Scanamo {
     * ...   ))
     * ...   Scanamo.getAll[Farmer](client)("farmers")(UniqueKeys(KeyList('name, List("Boggis", "Bean"))))
     * ... }
-    * List(Valid(Farmer(Boggis,43,Farm(List(chicken)))), Valid(Farmer(Bean,55,Farm(List(turkey)))))
+    * List(Right(Farmer(Boggis,43,Farm(List(chicken)))), Right(Farmer(Bean,55,Farm(List(turkey)))))
     * }}}
     * or with some added syntactic sugar:
     * {{{
@@ -119,7 +119,7 @@ object Scanamo {
     * ...   ))
     * ...   Scanamo.getAll[Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
     * ... }
-    * List(Valid(Farmer(Boggis,43,Farm(List(chicken)))), Valid(Farmer(Bean,55,Farm(List(turkey)))))
+    * List(Right(Farmer(Boggis,43,Farm(List(chicken)))), Right(Farmer(Bean,55,Farm(List(turkey)))))
     * }}}
     * You can also retrieve items from a table with both a hash and range key
     * {{{
@@ -129,11 +129,11 @@ object Scanamo {
     * ...     List(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
     * ...   Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11))
     * ... }
-    * List(Valid(Doctor(McCoy,9)), Valid(Doctor(Ecclestone,11)))
+    * List(Right(Doctor(McCoy,9)), Right(Doctor(Ecclestone,11)))
     * }}}
     */
   def getAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_])
-    : List[ValidatedNel[DynamoReadError, T]] =
+    : List[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.getAll(tableName)(keys))
 
 
@@ -174,7 +174,7 @@ object Scanamo {
     * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
     * ...   Scanamo.scan[Bear](client)("bears").toList
     * ... }
-    * List(Valid(Bear(Pooh,honey)), Valid(Bear(Yogi,picnic baskets)))
+    * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
     * }}}
     * Pagination is handled internally with `Stream` result retrieving pages as necessary
     * {{{
@@ -190,7 +190,7 @@ object Scanamo {
     * }}}
     */
   def scan[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)
-    : Stream[ValidatedNel[DynamoReadError, T]] =
+    : Stream[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scan(tableName))
 
   /**
@@ -207,11 +207,11 @@ object Scanamo {
     * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
     * ...   Scanamo.scanIndex[Bear](client)("bears", "alias-index").toList
     * ... }
-    * List(Valid(Bear(Pooh,honey,Some(Winnie))))
+    * List(Right(Bear(Pooh,honey,Some(Winnie))))
     * }}}
     */
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)
-  : Stream[ValidatedNel[DynamoReadError, T]] =
+  : Stream[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   /**
@@ -228,27 +228,27 @@ object Scanamo {
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
     * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
-    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     * }}}
     * or with some syntactic sugar
     * {{{
     * >>> import com.gu.scanamo.syntax._
     * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig").toList
-    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     * }}}
     * It also supports various conditions on the range key
     * {{{
     * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3).toList
-    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
+    * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)))
     *
     * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1).toList
-    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
     * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2).toList
-    * List(Valid(Animal(Pig,1)), Valid(Animal(Pig,2)))
+    * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)))
     *
     * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
-    * List(Valid(Animal(Pig,2)), Valid(Animal(Pig,3)))
+    * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
     * >>> case class Transport(mode: String, line: String)
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
@@ -258,11 +258,11 @@ object Scanamo {
     * ...     Transport("Underground", "Central")))
     * ...   Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
     * ... }
-    * List(Valid(Transport(Underground,Central)), Valid(Transport(Underground,Circle)))
+    * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
     */
   def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
-    : Stream[ValidatedNel[DynamoReadError, T]] =
+    : Stream[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
   /**
@@ -281,10 +281,10 @@ object Scanamo {
     * ...     Transport("Underground", "Central", "Red")))
     * ...   Scanamo.queryIndex[Transport](client)("transport", "colour-index")('colour -> "Maroon").toList
     * ... }
-    * List(Valid(Transport(Underground,Metropolitan,Maroon)))
+    * List(Right(Transport(Underground,Metropolitan,Maroon)))
     * }}}
     */
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
-  : Stream[ValidatedNel[DynamoReadError, T]] =
+  : Stream[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }
