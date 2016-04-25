@@ -2,7 +2,10 @@ package com.gu.scanamo
 
 import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.{PutItemResult, BatchWriteItemResult, DeleteItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
+import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 
 /**
   * Provides a simplified interface for reading and writing case classes to DynamoDB
@@ -61,6 +64,7 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
+    * >>> import com.gu.scanamo.query._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
     * ...   Scanamo.get[Farmer](client)("farmers")(UniqueKey(KeyEquals('name, "Maggot")))
@@ -102,6 +106,7 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
+    * >>> import com.gu.scanamo.query._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   Scanamo.putAll(client)("farmers")(List(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
@@ -226,6 +231,7 @@ object Scanamo {
     * >>> val tableResult = LocalDynamoDB.createTable(client)("animals")('species -> S, 'number -> N)
     *
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
+    * >>> import com.gu.scanamo.query._
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
     * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)), Right(Animal(Pig,3)))

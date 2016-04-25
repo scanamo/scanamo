@@ -2,7 +2,10 @@ package com.gu.scanamo
 
 import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{PutItemResult, BatchWriteItemResult, DeleteItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
+import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 
 import scala.concurrent.{ExecutionContext, Future}
 

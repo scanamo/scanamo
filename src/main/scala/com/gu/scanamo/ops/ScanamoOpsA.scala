@@ -1,10 +1,10 @@
-package com.gu.scanamo
+package com.gu.scanamo.ops
 
 import cats.{Id, ~>}
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
 import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
@@ -14,7 +14,7 @@ final case class Put(req: PutItemRequest) extends ScanamoOpsA[PutItemResult]
 final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
 final case class Delete(req: DeleteItemRequest) extends ScanamoOpsA[DeleteItemResult]
 final case class Scan(req: ScanRequest) extends ScanamoOpsA[ScanResult]
-final case class QueryOp(req: QueryRequest) extends ScanamoOpsA[QueryResult]
+final case class Query(req: QueryRequest) extends ScanamoOpsA[QueryResult]
 final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
 final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGetItemResult]
 
@@ -25,7 +25,7 @@ object ScanamoOps {
   def get(req: GetItemRequest): ScanamoOps[GetItemResult] = liftF[ScanamoOpsA, GetItemResult](Get(req))
   def delete(req: DeleteItemRequest): ScanamoOps[DeleteItemResult] = liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
   def scan(req: ScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
-  def query(req: QueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](QueryOp(req))
+  def query(req: QueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](Query(req))
   def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResult] =
     liftF[ScanamoOpsA, BatchWriteItemResult](BatchWrite(req))
   def batchGet(req: BatchGetItemRequest): ScanamoOps[BatchGetItemResult] =
@@ -44,7 +44,7 @@ object ScanamoInterpreters {
         client.deleteItem(req)
       case Scan(req) =>
         client.scan(req)
-      case QueryOp(req) =>
+      case Query(req) =>
         client.query(req)
       case BatchWrite(req) =>
         client.batchWriteItem(req)
@@ -73,7 +73,7 @@ object ScanamoInterpreters {
         futureOf(client.deleteItemAsync, req)
       case Scan(req) =>
         futureOf(client.scanAsync, req)
-      case QueryOp(req) =>
+      case Query(req) =>
         futureOf(client.queryAsync, req)
       // Overloading means we need explicit parameter types here
       case BatchWrite(req) =>
