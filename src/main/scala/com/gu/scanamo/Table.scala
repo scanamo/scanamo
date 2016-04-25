@@ -3,7 +3,7 @@ package com.gu.scanamo
 import cats.data.Xor
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query.Query
+import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 
 /**
   * Represents a DynamoDB table that operations can be performed against
@@ -55,9 +55,15 @@ case class Table[V: DynamoFormat](name: String) {
     * }}}
     */
   def index(indexName: String) = Index[V](name, indexName)
+
+  def put(v: V) = ScanamoFree.put(name)(v)
+  def putAll(vs: List[V]) = ScanamoFree.putAll(name)(vs)
+  def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
+  def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
+  def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 }
 
-case class Index[V: DynamoFormat](tableName: String, indexName: String)
+private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String)
 
 /* typeclass */trait Scannable[T[_], V] {
   def scan(t: T[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]]
