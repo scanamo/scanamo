@@ -4,7 +4,7 @@ import com.gu.scanamo.query._
 
 package object scanamo {
 
-  object syntax {
+  object syntax extends Scannable.ToScannableOps with Queryable.ToQueryableOps {
     implicit class SymbolKeyCondition(s: Symbol) {
       def <[V: DynamoFormat](v: V) = KeyIs(s, LT, v)
       def >[V: DynamoFormat](v: V) = KeyIs(s, GT, v)
@@ -35,5 +35,13 @@ package object scanamo {
       Query(KeyEquals(pair._1, pair._2))
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
+
+    implicit class TableOps[V: DynamoFormat](table: Table[V]) {
+      def put(v: V) = ScanamoFree.put(table.name)(v)
+      def putAll(vs: List[V]) = ScanamoFree.putAll(table.name)(vs)
+      def get(key: UniqueKey[_]) = ScanamoFree.get[V](table.name)(key)
+      def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](table.name)(keys)
+      def delete(key: UniqueKey[_]) = ScanamoFree.delete(table.name)(key)
+    }
   }
 }
