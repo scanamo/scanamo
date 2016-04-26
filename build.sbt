@@ -9,7 +9,6 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats" % "0.4.1",
 
   "com.github.mpilquist" %% "simulacrum" % "0.7.0",
-  "org.typelevel" %% "discipline" % "0.4",
 
   // Use Joda for custom conversion example
   "org.joda" % "joda-convert" % "1.8.1" % Provided,
