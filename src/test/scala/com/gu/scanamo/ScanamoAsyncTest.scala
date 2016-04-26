@@ -113,16 +113,16 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig").futureValue.toList should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number < 3).futureValue.toList should equal(
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" AND 'number < 3).futureValue.toList should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number > 1).futureValue.toList should equal(
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" AND 'number > 1).futureValue.toList should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number <= 2).futureValue.toList should equal(
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" AND 'number <= 2).futureValue.toList should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number >= 2).futureValue.toList should equal(
+      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" AND 'number >= 2).futureValue.toList should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
     }
@@ -138,7 +138,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
 
-      ScanamoAsync.query[Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
+      ScanamoAsync.query[Transport](client)("asyncTransport")('mode -> "Underground" AND ('line beginsWith "C")).futureValue.toList should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
     }
   }

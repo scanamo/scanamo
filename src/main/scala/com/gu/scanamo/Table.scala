@@ -22,7 +22,7 @@ import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
   * ...       Transport("Underground", "Circle"),
   * ...       Transport("Underground", "Metropolitan"),
   * ...       Transport("Underground", "Central")))
-  * ...     results <- transport.query('mode -> "Underground" and ('line beginsWith "C"))
+  * ...     results <- transport.query('mode -> "Underground" AND ('line beginsWith "C"))
   * ...   } yield results.toList
   * ...   Scanamo.exec(client)(operations)
   * ... }
