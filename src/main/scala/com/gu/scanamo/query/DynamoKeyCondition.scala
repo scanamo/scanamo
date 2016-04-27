@@ -7,21 +7,24 @@ case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
     AndEqualsCondition(this, equalsKeyCondition)
 }
 
-case class HashKeyEquals[V: DynamoFormat](key: Symbol, v: V, order: Order) {
-  def AND[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
-    AndQueryCondition(this, rangeKeyCondition, Ascending)
-
-  def descending = copy(order = Descending)
-}
-
 case class AndEqualsCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
   hashEquality: H, rangeEquality: R
 )
 
+
+case class HashKeyCondition[V: DynamoFormat](key: Symbol, v: V) {
+  def AND[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
+    AndQueryCondition(this, rangeKeyCondition)
+
+  def descending = Descending(this)
+}
+
+case class Descending[T: QueryableKeyCondition](queryCondition: T)
+
 case class AndQueryCondition[H: DynamoFormat, R: DynamoFormat](
-  hashCondition: HashKeyEquals[H], rangeCondition: RangeKeyCondition[R], order: Order
+  hashCondition: HashKeyCondition[H], rangeCondition: RangeKeyCondition[R]
 ) {
-  def descending = this.copy(order = Descending)
+  def descending = Descending(this)
 }
 
 sealed abstract class RangeKeyCondition[V](implicit f: DynamoFormat[V]) extends Product with Serializable {
@@ -43,8 +46,3 @@ final case class KeyIs[V: DynamoFormat](key: Symbol, operator: DynamoOperator, v
 final case class KeyBeginsWith[V: DynamoFormat](key: Symbol, v: V) extends RangeKeyCondition[V] {
   override def keyConditionExpression(s: String): String = s"begins_with(#$s, :${key.name})"
 }
-
-sealed abstract trait Order extends Product with Serializable
-final case object Ascending extends Order
-final case object Descending extends Order
-

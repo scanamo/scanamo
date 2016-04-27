@@ -233,7 +233,7 @@ object Scanamo {
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> import com.gu.scanamo.query._
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
-    * >>> Scanamo.query[Animal](client)("animals")(Query(HashKeyEquals('species, "Pig", Ascending))).toList
+    * >>> Scanamo.query[Animal](client)("animals")(Query(HashKeyCondition('species, "Pig"))).toList
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     * }}}
     * or with some syntactic sugar

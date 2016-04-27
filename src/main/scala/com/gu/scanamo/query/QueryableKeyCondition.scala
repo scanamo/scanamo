@@ -11,16 +11,13 @@ import scala.collection.convert.decorateAsJava._
 }
 
 object QueryableKeyCondition {
-  implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[HashKeyEquals[V]] {
-    override def apply(t: HashKeyEquals[V])(req: QueryRequest): QueryRequest =
+  implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[HashKeyCondition[V]] {
+    override def apply(t: HashKeyCondition[V])(req: QueryRequest): QueryRequest =
       req.withKeyConditionExpression(s"#K = :${t.key.name}")
         .withExpressionAttributeNames(Map("#K" -> t.key.name).asJava)
         .withExpressionAttributeValues(Map(s":${t.key.name}" -> DynamoFormat[V].write(t.v)).asJava)
-        .withScanIndexForward(t.order match  {
-          case Ascending => true
-          case Descending => false
-        })
   }
+
   implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat] =
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
       override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest =
@@ -35,11 +32,12 @@ object QueryableKeyCondition {
               s":${t.rangeCondition.key.name}" -> DynamoFormat[R].write(t.rangeCondition.v)
             ).asJava
           )
-          .withScanIndexForward(t.order match  {
-            case Ascending => true
-            case Descending => false
-          })
     }
+
+  implicit def descendingQueryCondition[T](implicit condition: QueryableKeyCondition[T]) = new QueryableKeyCondition[Descending[T]] {
+    override def apply(t: Descending[T])(req: QueryRequest): QueryRequest =
+      condition.apply(t.queryCondition)(req).withScanIndexForward(false)
+  }
 }
 
 case class Query[T](t: T)(implicit qkc: QueryableKeyCondition[T]) {
