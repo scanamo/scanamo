@@ -103,11 +103,13 @@ scala> def temptWithGum(child: LuckyWinner): LuckyWinner = child match {
      | }
 scala> val luckyWinners = Table[LuckyWinner]("winners")
 scala> val operations = for {
-     |      _           <- luckyWinners.putAll(
-     |                       List(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
-     |      winners     <- luckyWinners.scan()
-     |      _           <- luckyWinners.putAll(winners.flatMap(_.toOption).map(temptWithGum).toList)
-     |      results     <- luckyWinners.getAll('name -> List("Charlie", "Violet"))
+     |      _               <- luckyWinners.putAll(
+     |                           List(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
+     |      winners         <- luckyWinners.scan()
+     |      winnerList      =  winners.flatMap(_.toOption).toList
+     |      temptedWinners  =  winnerList.map(temptWithGum)
+     |      _               <- luckyWinners.putAll(temptedWinners)
+     |      results         <- luckyWinners.getAll('name -> List("Charlie", "Violet"))
      | } yield results
      
 scala> Scanamo.exec(client)(operations).toList
