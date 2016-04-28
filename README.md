@@ -94,19 +94,26 @@ scala> import com.gu.scanamo.syntax._
 
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val farmersTableResult = LocalDynamoDB.createTable(client)("free")('name -> S)
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("winners")('name -> S)
 
-scala> case class Free(name: String, number: Int)
+scala> case class LuckyWinner(name: String, shape: String)
+scala> def temptWithGum(child: LuckyWinner): LuckyWinner = child match {
+     |   case LuckyWinner("Violet", _) => LuckyWinner("Violet", "blueberry")
+     |   case winner => winner
+     | }
+scala> val luckyWinners = Table[LuckyWinner]("winners")
 scala> val operations = for {
-     |      _           <- ScanamoFree.putAll("free")(List(Free("Monad", 1), Free("Applicative", 2), Free("Love", 3)))
-     |      maybeMonad  <- ScanamoFree.get[Free]("free")('name -> "Monad")
-     |      monad       = maybeMonad.flatMap(_.toOption).getOrElse(Free("oops", 9))
-     |      _           <- ScanamoFree.put("free")(monad.copy(number = monad.number * 10))
-     |      results     <- ScanamoFree.getAll[Free]("free")('name -> List("Monad", "Applicative"))
+     |      _               <- luckyWinners.putAll(
+     |                           List(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
+     |      winners         <- luckyWinners.scan()
+     |      winnerList      =  winners.flatMap(_.toOption).toList
+     |      temptedWinners  =  winnerList.map(temptWithGum)
+     |      _               <- luckyWinners.putAll(temptedWinners)
+     |      results         <- luckyWinners.getAll('name -> List("Charlie", "Violet"))
      | } yield results
      
 scala> Scanamo.exec(client)(operations).toList
-res1: List[cats.data.Xor[error.DynamoReadError, Free]] = List(Right(Free(Monad,10)), Right(Free(Applicative,2)))
+res1: List[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = List(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
 ```
 
 For more details see the [API docs](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)

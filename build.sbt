@@ -26,6 +26,8 @@ scalacOptions := Seq(
   "-feature",
   "-unchecked",
   "-language:implicitConversions",
+  "-language:higherKinds",
+  "-language:existentials",
   "-Xfatal-warnings",
   "-Xlint",
   "-Yinline-warnings",
