@@ -233,7 +233,7 @@ object Scanamo {
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> import com.gu.scanamo.query._
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
-    * >>> Scanamo.query[Animal](client)("animals")(Query(HashKeyCondition('species, "Pig"))).toList
+    * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     * }}}
     * or with some syntactic sugar
@@ -244,16 +244,16 @@ object Scanamo {
     * }}}
     * It also supports various conditions on the range key
     * {{{
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" AND 'number < 3).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3).toList
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" AND 'number > 1).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1).toList
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" AND 'number <= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2).toList
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" AND 'number >= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
     * >>> case class Transport(mode: String, line: String)
@@ -262,7 +262,7 @@ object Scanamo {
     * ...     Transport("Underground", "Circle"),
     * ...     Transport("Underground", "Metropolitan"),
     * ...     Transport("Underground", "Central")))
-    * ...   Scanamo.query[Transport](client)("transport")('mode -> "Underground" AND ('line beginsWith "C")).toList
+    * ...   Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
     * ... }
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
@@ -271,7 +271,7 @@ object Scanamo {
     * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig").descending).toList
     * List(Right(Animal(Pig,3)), Right(Animal(Pig,2)), Right(Animal(Pig,1)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig" AND 'number < 3).descending).toList
+    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig" and 'number < 3).descending).toList
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,1)))
     * }}}
     */

@@ -11,8 +11,8 @@ import scala.collection.convert.decorateAsJava._
 }
 
 object QueryableKeyCondition {
-  implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[HashKeyCondition[V]] {
-    override def apply(t: HashKeyCondition[V])(req: QueryRequest): QueryRequest =
+  implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[KeyEquals[V]] {
+    override def apply(t: KeyEquals[V])(req: QueryRequest): QueryRequest =
       req.withKeyConditionExpression(s"#K = :${t.key.name}")
         .withExpressionAttributeNames(Map("#K" -> t.key.name).asJava)
         .withExpressionAttributeValues(Map(s":${t.key.name}" -> DynamoFormat[V].write(t.v)).asJava)

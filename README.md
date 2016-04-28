@@ -54,7 +54,7 @@ scala> val lines = Scanamo.putAll(client)("transports")(List(
      |       Transport("Underground", "Central")
      | ))
      
-scala> Scanamo.query[Transport](client)("transports")('mode -> "Underground" AND ('line beginsWith "C")).toList
+scala> Scanamo.query[Transport](client)("transports")('mode -> "Underground" and ('line beginsWith "C")).toList
 res1: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
 ```
 

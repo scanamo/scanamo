@@ -5,24 +5,20 @@ import com.gu.scanamo.DynamoFormat
 case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
   def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]) =
     AndEqualsCondition(this, equalsKeyCondition)
+  def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
+    AndQueryCondition(this, rangeKeyCondition)
+
+  def descending = Descending(this)
 }
 
 case class AndEqualsCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
   hashEquality: H, rangeEquality: R
 )
 
-
-case class HashKeyCondition[V: DynamoFormat](key: Symbol, v: V) {
-  def AND[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
-    AndQueryCondition(this, rangeKeyCondition)
-
-  def descending = Descending(this)
-}
-
 case class Descending[T: QueryableKeyCondition](queryCondition: T)
 
 case class AndQueryCondition[H: DynamoFormat, R: DynamoFormat](
-  hashCondition: HashKeyCondition[H], rangeCondition: RangeKeyCondition[R]
+  hashCondition: KeyEquals[H], rangeCondition: RangeKeyCondition[R]
 ) {
   def descending = Descending(this)
 }
