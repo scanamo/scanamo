@@ -45,13 +45,13 @@
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">syntax</span>
+        <span class="name">syntax</span><span class="result"> extends <a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a> with <a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a></span>
       </span>
       </h4>
       
           <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a>, <a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -69,7 +69,7 @@
                 <span class="filtertype">Inherited<br />
                 </span>
                 <ol id="linearization">
-                  <li class="in" name="com.gu.scanamo.syntax"><span>syntax</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  <li class="in" name="com.gu.scanamo.syntax"><span>syntax</span></li><li class="in" name="com.gu.scanamo.Queryable.ToQueryableOps"><span>ToQueryableOps</span></li><li class="in" name="com.gu.scanamo.Scannable.ToScannableOps"><span>ToScannableOps</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                 </ol>
               </div><div id="ancestors">
             <span class="filtertype"></span>
@@ -381,8 +381,42 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.gu.scanamo.Queryable.ToQueryableOps#queryableOps" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="queryableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Queryable[T,V]):com.gu.scanamo.Queryable.Ops[T,V]{valself:T[V]}"></a>
+      <a id="queryableOps[T[_],V](T[V])(Queryable[T,V]):Ops[T,V]{valself:T[V]}"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">queryableOps</span><span class="tparams">[<span name="T">T<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="V">V</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.T">T</span>[<span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.V">V</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="s">s: <a href="Queryable.html" class="extype" name="com.gu.scanamo.Queryable">Queryable</a>[<span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.V">V</span>]</span>)</span><span class="result">: <a href="Queryable$$Ops.html" class="extype" name="com.gu.scanamo.Queryable.Ops">Ops</a>[<span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.V">V</span>] { val self: T[V] }</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@queryableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Queryable[T,V]):com.gu.scanamo.Queryable.Ops[T,V]{valself:T[V]}" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a></dd></dl></div>
+    </li><li name="com.gu.scanamo.Scannable.ToScannableOps#scannableOps" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="scannableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Scannable[T,V]):com.gu.scanamo.Scannable.Ops[T,V]{valself:T[V]}"></a>
+      <a id="scannableOps[T[_],V](T[V])(Scannable[T,V]):Ops[T,V]{valself:T[V]}"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scannableOps</span><span class="tparams">[<span name="T">T<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="V">V</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.T">T</span>[<span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.V">V</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="s">s: <a href="Scannable.html" class="extype" name="com.gu.scanamo.Scannable">Scannable</a>[<span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.V">V</span>]</span>)</span><span class="result">: <a href="Scannable$$Ops.html" class="extype" name="com.gu.scanamo.Scannable.Ops">Ops</a>[<span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.V">V</span>] { val self: T[V] }</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@scannableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Scannable[T,V]):com.gu.scanamo.Scannable.Ops[T,V]{valself:T[V]}" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a></dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#symbolListTupleToUniqueKeys" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolListTupleToUniqueKeys[V](pair:(Symbol,List[V]))(implicitevidence$9:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.UniqueKeys[com.gu.scanamo.KeyList[V]]"></a>
+      <a id="symbolListTupleToUniqueKeys[V](pair:(Symbol,List[V]))(implicitevidence$9:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.KeyList[V]]"></a>
       <a id="symbolListTupleToUniqueKeys[V]((Symbol,List[V]))(DynamoFormat[V]):UniqueKeys[KeyList[V]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -390,16 +424,16 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">symbolListTupleToUniqueKeys</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.gu.scanamo.syntax.symbolListTupleToUniqueKeys.V">V</span>])</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolListTupleToUniqueKeys.V">V</span>]</span>)</span><span class="result">: <a href="UniqueKeys.html" class="extype" name="com.gu.scanamo.UniqueKeys">UniqueKeys</a>[<a href="KeyList.html" class="extype" name="com.gu.scanamo.KeyList">KeyList</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolListTupleToUniqueKeys.V">V</span>]]</span>
+        <span class="name">symbolListTupleToUniqueKeys</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.gu.scanamo.syntax.symbolListTupleToUniqueKeys.V">V</span>])</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolListTupleToUniqueKeys.V">V</span>]</span>)</span><span class="result">: <a href="query/UniqueKeys.html" class="extype" name="com.gu.scanamo.query.UniqueKeys">UniqueKeys</a>[<a href="query/KeyList.html" class="extype" name="com.gu.scanamo.query.KeyList">KeyList</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolListTupleToUniqueKeys.V">V</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolListTupleToUniqueKeys[V](pair:(Symbol,List[V]))(implicitevidence$9:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.UniqueKeys[com.gu.scanamo.KeyList[V]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolListTupleToUniqueKeys[V](pair:(Symbol,List[V]))(implicitevidence$9:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.KeyList[V]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.syntax#symbolTupleToKeyCondition" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.KeyEquals[V]"></a>
+      <a id="symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.KeyEquals[V]"></a>
       <a id="symbolTupleToKeyCondition[V]((Symbol,V))(DynamoFormat[V]):KeyEquals[V]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -407,16 +441,16 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">symbolTupleToKeyCondition</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="com.gu.scanamo.syntax.symbolTupleToKeyCondition.V">V</span>)</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToKeyCondition.V">V</span>]</span>)</span><span class="result">: <a href="KeyEquals.html" class="extype" name="com.gu.scanamo.KeyEquals">KeyEquals</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToKeyCondition.V">V</span>]</span>
+        <span class="name">symbolTupleToKeyCondition</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="com.gu.scanamo.syntax.symbolTupleToKeyCondition.V">V</span>)</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToKeyCondition.V">V</span>]</span>)</span><span class="result">: <a href="query/KeyEquals.html" class="extype" name="com.gu.scanamo.query.KeyEquals">KeyEquals</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToKeyCondition.V">V</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.KeyEquals[V]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.KeyEquals[V]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.syntax#symbolTupleToQuery" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$13:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.Query[com.gu.scanamo.KeyEquals[V]]"></a>
+      <a id="symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$12:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.Query[com.gu.scanamo.query.KeyEquals[V]]"></a>
       <a id="symbolTupleToQuery[V]((Symbol,V))(DynamoFormat[V]):Query[KeyEquals[V]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -424,16 +458,16 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">symbolTupleToQuery</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="com.gu.scanamo.syntax.symbolTupleToQuery.V">V</span>)</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToQuery.V">V</span>]</span>)</span><span class="result">: <a href="Query.html" class="extype" name="com.gu.scanamo.Query">Query</a>[<a href="KeyEquals.html" class="extype" name="com.gu.scanamo.KeyEquals">KeyEquals</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToQuery.V">V</span>]]</span>
+        <span class="name">symbolTupleToQuery</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="com.gu.scanamo.syntax.symbolTupleToQuery.V">V</span>)</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToQuery.V">V</span>]</span>)</span><span class="result">: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[<a href="query/KeyEquals.html" class="extype" name="com.gu.scanamo.query.KeyEquals">KeyEquals</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToQuery.V">V</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$13:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.Query[com.gu.scanamo.KeyEquals[V]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$12:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.Query[com.gu.scanamo.query.KeyEquals[V]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.syntax#symbolTupleToUniqueKey" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.UniqueKey[com.gu.scanamo.KeyEquals[V]]"></a>
+      <a id="symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKey[com.gu.scanamo.query.KeyEquals[V]]"></a>
       <a id="symbolTupleToUniqueKey[V]((Symbol,V))(DynamoFormat[V]):UniqueKey[KeyEquals[V]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -441,10 +475,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">symbolTupleToUniqueKey</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="com.gu.scanamo.syntax.symbolTupleToUniqueKey.V">V</span>)</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToUniqueKey.V">V</span>]</span>)</span><span class="result">: <a href="UniqueKey.html" class="extype" name="com.gu.scanamo.UniqueKey">UniqueKey</a>[<a href="KeyEquals.html" class="extype" name="com.gu.scanamo.KeyEquals">KeyEquals</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToUniqueKey.V">V</span>]]</span>
+        <span class="name">symbolTupleToUniqueKey</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="pair">pair: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="com.gu.scanamo.syntax.symbolTupleToUniqueKey.V">V</span>)</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToUniqueKey.V">V</span>]</span>)</span><span class="result">: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[<a href="query/KeyEquals.html" class="extype" name="com.gu.scanamo.query.KeyEquals">KeyEquals</a>[<span class="extype" name="com.gu.scanamo.syntax.symbolTupleToUniqueKey.V">V</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.UniqueKey[com.gu.scanamo.KeyEquals[V]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKey[com.gu.scanamo.query.KeyEquals[V]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -467,7 +501,7 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#toMultipleKeyList" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,List[(H,R)]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[H],implicitevidence$11:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.UniqueKeys[com.gu.scanamo.MultipleKeyList[H,R]]"></a>
+      <a id="toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,List[(H,R)]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[H],implicitevidence$11:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.MultipleKeyList[H,R]]"></a>
       <a id="toMultipleKeyList[H,R]((HashAndRangeKeyNames,List[(H,R)]))(DynamoFormat[H],DynamoFormat[R]):UniqueKeys[MultipleKeyList[H,R]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -475,16 +509,16 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toMultipleKeyList</span><span class="tparams">[<span name="H">H</span>, <span name="R">R</span>]</span><span class="params">(<span name="pair">pair: (<a href="package$$syntax$$HashAndRangeKeyNames.html" class="extype" name="com.gu.scanamo.syntax.HashAndRangeKeyNames">HashAndRangeKeyNames</a>, <span class="extype" name="scala.List">List</span>[(<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.H">H</span>, <span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.R">R</span>)])</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.H">H</span>]</span>, <span name="arg1">arg1: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.R">R</span>]</span>)</span><span class="result">: <a href="UniqueKeys.html" class="extype" name="com.gu.scanamo.UniqueKeys">UniqueKeys</a>[<a href="MultipleKeyList.html" class="extype" name="com.gu.scanamo.MultipleKeyList">MultipleKeyList</a>[<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.H">H</span>, <span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.R">R</span>]]</span>
+        <span class="name">toMultipleKeyList</span><span class="tparams">[<span name="H">H</span>, <span name="R">R</span>]</span><span class="params">(<span name="pair">pair: (<a href="package$$syntax$$HashAndRangeKeyNames.html" class="extype" name="com.gu.scanamo.syntax.HashAndRangeKeyNames">HashAndRangeKeyNames</a>, <span class="extype" name="scala.List">List</span>[(<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.H">H</span>, <span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.R">R</span>)])</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.H">H</span>]</span>, <span name="arg1">arg1: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.R">R</span>]</span>)</span><span class="result">: <a href="query/UniqueKeys.html" class="extype" name="com.gu.scanamo.query.UniqueKeys">UniqueKeys</a>[<a href="query/MultipleKeyList.html" class="extype" name="com.gu.scanamo.query.MultipleKeyList">MultipleKeyList</a>[<span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.H">H</span>, <span class="extype" name="com.gu.scanamo.syntax.toMultipleKeyList.R">R</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,List[(H,R)]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[H],implicitevidence$11:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.UniqueKeys[com.gu.scanamo.MultipleKeyList[H,R]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,List[(H,R)]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[H],implicitevidence$11:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.MultipleKeyList[H,R]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.syntax#toQuery" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toQuery[T](t:T)(implicitevidence$14:com.gu.scanamo.QueryableKeyCondition[T]):com.gu.scanamo.Query[T]"></a>
+      <a id="toQuery[T](t:T)(implicitevidence$13:com.gu.scanamo.query.QueryableKeyCondition[T]):com.gu.scanamo.query.Query[T]"></a>
       <a id="toQuery[T](T)(QueryableKeyCondition[T]):Query[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -492,10 +526,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toQuery</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.syntax.toQuery.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="QueryableKeyCondition.html" class="extype" name="com.gu.scanamo.QueryableKeyCondition">QueryableKeyCondition</a>[<span class="extype" name="com.gu.scanamo.syntax.toQuery.T">T</span>]</span>)</span><span class="result">: <a href="Query.html" class="extype" name="com.gu.scanamo.Query">Query</a>[<span class="extype" name="com.gu.scanamo.syntax.toQuery.T">T</span>]</span>
+        <span class="name">toQuery</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.syntax.toQuery.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/QueryableKeyCondition.html" class="extype" name="com.gu.scanamo.query.QueryableKeyCondition">QueryableKeyCondition</a>[<span class="extype" name="com.gu.scanamo.syntax.toQuery.T">T</span>]</span>)</span><span class="result">: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[<span class="extype" name="com.gu.scanamo.syntax.toQuery.T">T</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@toQuery[T](t:T)(implicitevidence$14:com.gu.scanamo.QueryableKeyCondition[T]):com.gu.scanamo.Query[T]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@toQuery[T](t:T)(implicitevidence$13:com.gu.scanamo.query.QueryableKeyCondition[T]):com.gu.scanamo.query.Query[T]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -518,7 +552,7 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#toUniqueKey" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toUniqueKey[T](t:T)(implicitevidence$8:com.gu.scanamo.UniqueKeyCondition[T]):com.gu.scanamo.UniqueKey[T]"></a>
+      <a id="toUniqueKey[T](t:T)(implicitevidence$8:com.gu.scanamo.query.UniqueKeyCondition[T]):com.gu.scanamo.query.UniqueKey[T]"></a>
       <a id="toUniqueKey[T](T)(UniqueKeyCondition[T]):UniqueKey[T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -526,27 +560,10 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">toUniqueKey</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.syntax.toUniqueKey.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="UniqueKeyCondition.html" class="extype" name="com.gu.scanamo.UniqueKeyCondition">UniqueKeyCondition</a>[<span class="extype" name="com.gu.scanamo.syntax.toUniqueKey.T">T</span>]</span>)</span><span class="result">: <a href="UniqueKey.html" class="extype" name="com.gu.scanamo.UniqueKey">UniqueKey</a>[<span class="extype" name="com.gu.scanamo.syntax.toUniqueKey.T">T</span>]</span>
+        <span class="name">toUniqueKey</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.syntax.toUniqueKey.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/UniqueKeyCondition.html" class="extype" name="com.gu.scanamo.query.UniqueKeyCondition">UniqueKeyCondition</a>[<span class="extype" name="com.gu.scanamo.syntax.toUniqueKey.T">T</span>]</span>)</span><span class="result">: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[<span class="extype" name="com.gu.scanamo.syntax.toUniqueKey.T">T</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@toUniqueKey[T](t:T)(implicitevidence$8:com.gu.scanamo.UniqueKeyCondition[T]):com.gu.scanamo.UniqueKey[T]" title="Permalink" target="_top">
-        <img src="../../../lib/permalink.png" alt="Permalink" />
-      </a>
-    </span>
-      
-    </li><li name="com.gu.scanamo.syntax#toUniqueKeys" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toUniqueKeys[T](t:T)(implicitevidence$12:com.gu.scanamo.UniqueKeyConditions[T]):com.gu.scanamo.UniqueKeys[T]"></a>
-      <a id="toUniqueKeys[T](T)(UniqueKeyConditions[T]):UniqueKeys[T]"></a>
-      <h4 class="signature">
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">toUniqueKeys</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.syntax.toUniqueKeys.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="UniqueKeyConditions.html" class="extype" name="com.gu.scanamo.UniqueKeyConditions">UniqueKeyConditions</a>[<span class="extype" name="com.gu.scanamo.syntax.toUniqueKeys.T">T</span>]</span>)</span><span class="result">: <a href="UniqueKeys.html" class="extype" name="com.gu.scanamo.UniqueKeys">UniqueKeys</a>[<span class="extype" name="com.gu.scanamo.syntax.toUniqueKeys.T">T</span>]</span>
-      </span>
-      </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@toUniqueKeys[T](t:T)(implicitevidence$12:com.gu.scanamo.UniqueKeyConditions[T]):com.gu.scanamo.UniqueKeys[T]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.package$$syntax$@toUniqueKey[T](t:T)(implicitevidence$8:com.gu.scanamo.query.UniqueKeyCondition[T]):com.gu.scanamo.query.UniqueKey[T]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -629,7 +646,11 @@
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.gu.scanamo.Queryable.ToQueryableOps">
+              <h3>Inherited from <a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a></h3>
+            </div><div class="parent" name="com.gu.scanamo.Scannable.ToScannableOps">
+              <h3>Inherited from <a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
