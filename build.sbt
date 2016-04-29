@@ -6,7 +6,7 @@ scalaVersion := "2.11.8"
 libraryDependencies ++= Seq(
 	"com.amazonaws" % "aws-java-sdk-dynamodb" % "1.10.69",
   "com.chuusai" %% "shapeless" % "2.3.0",
-  "org.typelevel" %% "cats" % "0.4.1",
+  "org.typelevel" %% "cats" % "0.5.0",
 
   "com.github.mpilquist" %% "simulacrum" % "0.7.0",
 
