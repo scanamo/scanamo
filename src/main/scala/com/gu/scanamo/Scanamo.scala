@@ -266,6 +266,14 @@ object Scanamo {
     * ... }
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
+    * To have results returned in descending range key order, append `descending` to your query:
+    * {{{
+    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig").descending).toList
+    * List(Right(Animal(Pig,3)), Right(Animal(Pig,2)), Right(Animal(Pig,1)))
+    *
+    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig" and 'number < 3).descending).toList
+    * List(Right(Animal(Pig,2)), Right(Animal(Pig,1)))
+    * }}}
     */
   def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
     : Stream[Xor[DynamoReadError, T]] =

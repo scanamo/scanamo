@@ -269,6 +269,8 @@ object DynamoFormat extends DerivedDynamoFormat {
 }
 
 trait DerivedDynamoFormat {
+  type ValidatedPropertiesError[T] = Validated[InvalidPropertiesError, T]
+
   trait ConstructedDynamoFormat[T] {
     def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
     def write(t: T): AttributeValue
@@ -278,7 +280,7 @@ trait DerivedDynamoFormat {
   implicit val hnil: ConstructedDynamoFormat[HNil] =
     new ConstructedDynamoFormat[HNil] {
       def read(av: AttributeValue) = Validated.valid(HNil)
-      def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty.asJava)
+      def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty[String, AttributeValue].asJava)
     }
 
   implicit def hcons[K <: Symbol, V, T <: HList](implicit
@@ -300,7 +302,7 @@ trait DerivedDynamoFormat {
         val head: Validated[InvalidPropertiesError, FieldType[K, V]] = withPropertyError(validatedValue).map(field[K](_))
         val tail = tailFormat.value.read(av)
 
-        head.map2(tail)(_ :: _)
+        cats.Apply[ValidatedPropertiesError].map2(head, tail)(_ :: _)
       }
       def write(t: FieldType[K, V] :: T): AttributeValue = {
         val tailValue = tailFormat.value.write(t.tail)

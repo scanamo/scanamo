@@ -17,6 +17,7 @@ object QueryableKeyCondition {
         .withExpressionAttributeNames(Map("#K" -> t.key.name).asJava)
         .withExpressionAttributeValues(Map(s":${t.key.name}" -> DynamoFormat[V].write(t.v)).asJava)
   }
+
   implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat] =
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
       override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest =
@@ -32,6 +33,11 @@ object QueryableKeyCondition {
             ).asJava
           )
     }
+
+  implicit def descendingQueryCondition[T](implicit condition: QueryableKeyCondition[T]) = new QueryableKeyCondition[Descending[T]] {
+    override def apply(t: Descending[T])(req: QueryRequest): QueryRequest =
+      condition.apply(t.queryCondition)(req).withScanIndexForward(false)
+  }
 }
 
 case class Query[T](t: T)(implicit qkc: QueryableKeyCondition[T]) {
