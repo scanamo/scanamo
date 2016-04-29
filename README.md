@@ -19,7 +19,9 @@ libraryDependencies ++= Seq(
 Usage
 -----
 
-You can simply `put` case classes to and `get` them back from DynamoDB:
+If used the Java SDK to access Dynamo, the most familiar way to use Scanamo 
+is via the [Scanamo](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
+object:
 
 ```scala
 scala> import com.gu.scanamo._
@@ -37,6 +39,39 @@ scala> Scanamo.get[Farmer](client)("farmer")('name -> "McDonald")
 res1: Option[cats.data.Xor[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
+Scanamo also provides a [Table](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Table) 
+abstraction:
+
+```scala
+scala> import com.gu.scanamo._
+scala> import com.gu.scanamo.syntax._
+
+scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("winners")('name -> S)
+
+scala> case class LuckyWinner(name: String, shape: String)
+scala> def temptWithGum(child: LuckyWinner): LuckyWinner = child match {
+     |   case LuckyWinner("Violet", _) => LuckyWinner("Violet", "blueberry")
+     |   case winner => winner
+     | }
+scala> val luckyWinners = Table[LuckyWinner]("winners")
+scala> val operations = for {
+     |      _               <- luckyWinners.putAll(
+     |                           List(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
+     |      winners         <- luckyWinners.scan()
+     |      winnerList      =  winners.flatMap(_.toOption).toList
+     |      temptedWinners  =  winnerList.map(temptWithGum)
+     |      _               <- luckyWinners.putAll(temptedWinners)
+     |      results         <- luckyWinners.getAll('name -> List("Charlie", "Violet"))
+     | } yield results
+     
+scala> Scanamo.exec(client)(operations).toList
+res1: List[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = List(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
+```
+
+Note that no operations are actually executed against DynamoDB until `exec` is called. 
+
 It's also possible to make more complex queries:
 
 ```scala
@@ -47,14 +82,17 @@ scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 scala> val transportTableResult = LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
 scala> case class Transport(mode: String, line: String)
-
-scala> val lines = Scanamo.putAll(client)("transports")(List(
-     |       Transport("Underground", "Circle"),
-     |       Transport("Underground", "Metropolitan"),
-     |       Transport("Underground", "Central")
-     | ))
+scala> val transportTable = Table[Transport]("transports")
+scala> val operations = for {
+     |   _ <- transportTable.putAll(List(
+     |          Transport("Underground", "Circle"),
+     |          Transport("Underground", "Metropolitan"),
+     |          Transport("Underground", "Central")
+     |     ))
+     |   tubesStartingWithC <- transportTable.query('mode -> "Underground" and ('line beginsWith "C"))
+     | } yield tubesStartingWithC.toList
      
-scala> Scanamo.query[Transport](client)("transports")('mode -> "Underground" and ('line beginsWith "C")).toList
+scala> Scanamo.exec(client)(operations)
 res1: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
 ```
 
@@ -73,48 +111,19 @@ scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farm")('name 
 
 scala> case class Farm(animals: List[String])
 scala> case class Farmer(name: String, age: Long, farm: Farm)
-
-scala> val bunce = for {
-     |   _ <- ScanamoAsync.putAll(client)("farm")(List(
-     |       Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
-     |     ))
-     |   farmer <- ScanamoAsync.get[Farmer](client)("farm")('name -> "Bunce")
-     | } yield farmer
+scala> val farmTable = Table[Farmer]("farm")
+scala> val ops = for {
+     |   _ <- farmTable.putAll(List(
+     |          Farmer("Boggis", 43L, Farm(List("chicken"))), 
+     |          Farmer("Bunce", 52L, Farm(List("goose"))), 
+     |          Farmer("Bean", 55L, Farm(List("turkey")))
+     |        ))
+     |   bunce <- farmTable.get('name -> "Bunce")
+     | } yield bunce
      
-scala> concurrent.Await.result(bunce, 5.seconds)
+scala> concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
 res1: Option[cats.data.Xor[error.DynamoReadError, Farmer]] = Some(Right(Farmer(Bunce,52,Farm(List(goose)))))
 ```
-
-If you want to take a more pure functional approach and push the IO to the edge of your program, you can make 
-use of the underlying [Free](http://typelevel.org/cats/tut/freemonad.html) structure:
-
-```scala
-scala> import com.gu.scanamo._
-scala> import com.gu.scanamo.syntax._
-
-scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val farmersTableResult = LocalDynamoDB.createTable(client)("winners")('name -> S)
-
-scala> case class LuckyWinner(name: String, shape: String)
-scala> def temptWithGum(child: LuckyWinner): LuckyWinner = child match {
-     |   case LuckyWinner("Violet", _) => LuckyWinner("Violet", "blueberry")
-     |   case winner => winner
-     | }
-scala> val luckyWinners = Table[LuckyWinner]("winners")
-scala> val operations = for {
-     |      _           <- luckyWinners.putAll(
-     |                       List(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
-     |      winners     <- luckyWinners.scan()
-     |      _           <- luckyWinners.putAll(winners.flatMap(_.toOption).map(temptWithGum).toList)
-     |      results     <- luckyWinners.getAll('name -> List("Charlie", "Violet"))
-     | } yield results
-     
-scala> Scanamo.exec(client)(operations).toList
-res1: List[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = List(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
-```
-
-For more details see the [API docs](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
 
 ### Custom Formats
 
@@ -130,16 +139,17 @@ scala> case class Foo(dateTime: DateTime)
 
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val farmersTableResult = LocalDynamoDB.createTable(client)("foo")('dateTime -> S)
+scala> val fooTableResult = LocalDynamoDB.createTable(client)("foo")('dateTime -> S)
  
 scala> implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
      |   DateTime.parse(_).withZone(DateTimeZone.UTC)
      | )(
      |   _.toString
      | )
+scala> val fooTable = Table[Foo]("foo")
 scala> val operations = for {
-     |      _           <- ScanamoFree.put("foo")(Foo(new DateTime(0)))
-     |      results     <- ScanamoFree.scan[Foo]("foo")
+     |      _           <- fooTable.put(Foo(new DateTime(0)))
+     |      results     <- fooTable.scan()
      | } yield results
  
 scala> Scanamo.exec(client)(operations).toList
