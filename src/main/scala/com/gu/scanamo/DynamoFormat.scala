@@ -160,6 +160,13 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val intFormat = xmap(coerceNumber(_.toInt))(_.toString)(numFormat)
+  /**
+    * {{{
+    * prop> (d: Double) =>
+    *     | DynamoFormat[Double].read(DynamoFormat[Double].write(d)) == cats.data.Xor.right(d)
+    * }}}
+    */
+  implicit val doubleFormat = xmap(coerceNumber(_.toDouble))(_.toString)(numFormat)
 
 
   private val javaListFormat = attribute(_.getL, "L")(_.withL)
@@ -175,6 +182,59 @@ object DynamoFormat extends DerivedDynamoFormat {
       _.asScala.toList.traverseU(f.read))(
       _.map(f.write).asJava
     )(javaListFormat)
+
+  private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
+  private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
+  private def setFormat[T](r: String => Xor[DynamoReadError, T])(w: T => String)(df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
+    xmap[Set[T], java.util.List[String]](
+      _.asScala.toList.traverseU(r).map(_.toSet))(
+      _.map(w).toList.asJava
+    )(df)
+
+  /**
+    * {{{
+    * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> (s: Set[Int]) =>
+    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | DynamoFormat[Set[Int]].write(s) == av &&
+    *     |   DynamoFormat[Set[Int]].read(av) == cats.data.Xor.right(s)
+    * }}}
+    */
+  implicit val intSetFormat = setFormat(coerceNumber(_.toInt))(_.toString)(javaNumSetFormat)
+  /**
+    * {{{
+    * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> (s: Set[Long]) =>
+    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | DynamoFormat[Set[Long]].write(s) == av &&
+    *     |   DynamoFormat[Set[Long]].read(av) == cats.data.Xor.right(s)
+    * }}}
+    */
+  implicit val longSetFormat = setFormat(coerceNumber(_.toLong))(_.toString)(javaNumSetFormat)
+  /**
+    * {{{
+    * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> (s: Set[Double]) =>
+    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | DynamoFormat[Set[Double]].write(s) == av &&
+    *     |   DynamoFormat[Set[Double]].read(av) == cats.data.Xor.right(s)
+    * }}}
+    */
+  implicit val doubleSetFormat = setFormat(coerceNumber(_.toDouble))(_.toString)(javaNumSetFormat)
+  /**
+    * {{{
+    * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> (s: Set[String]) =>
+    *     | val av = new AttributeValue().withSS(s.toList: _*)
+    *     | DynamoFormat[Set[String]].write(s) == av &&
+    *     |   DynamoFormat[Set[String]].read(av) == cats.data.Xor.right(s)
+    * }}}
+    */
+  implicit val stringSetFormat =
+    xmap[Set[String], java.util.List[String]](
+      s => Xor.right(s.asScala.toSet))(
+      _.toList.asJava
+    )(javaStringSetFormat)
 
   private val javaMapFormat = attribute(_.getM, "M")(_.withM)
   /**
@@ -254,3 +314,4 @@ trait DerivedDynamoFormat {
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 }
+
