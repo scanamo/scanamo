@@ -11,6 +11,10 @@ case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
   def descending = Descending(this)
 }
 
+case class AttributeEquals[V: DynamoFormat](key: Symbol, v: V) {
+
+}
+
 case class AndEqualsCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
   hashEquality: H, rangeEquality: R
 )

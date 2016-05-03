@@ -1,5 +1,6 @@
 package com.gu.scanamo.ops
 
+import cats.data.Xor
 import cats.{Id, ~>}
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
@@ -11,6 +12,7 @@ import scala.util.{Failure, Success}
 
 sealed trait ScanamoOpsA[A]
 final case class Put(req: PutItemRequest) extends ScanamoOpsA[PutItemResult]
+final case class ConditionalPut(req: PutItemRequest) extends ScanamoOpsA[Xor[ConditionalCheckFailedException, PutItemResult]]
 final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
 final case class Delete(req: DeleteItemRequest) extends ScanamoOpsA[DeleteItemResult]
 final case class Scan(req: ScanRequest) extends ScanamoOpsA[ScanResult]
@@ -22,6 +24,8 @@ object ScanamoOps {
   import cats.free.Free.liftF
 
   def put(req: PutItemRequest): ScanamoOps[PutItemResult] = liftF[ScanamoOpsA, PutItemResult](Put(req))
+  def conditionalPut(req: PutItemRequest): ScanamoOps[Xor[ConditionalCheckFailedException, PutItemResult]] =
+    liftF[ScanamoOpsA, Xor[ConditionalCheckFailedException, PutItemResult]](ConditionalPut(req))
   def get(req: GetItemRequest): ScanamoOps[GetItemResult] = liftF[ScanamoOpsA, GetItemResult](Get(req))
   def delete(req: DeleteItemRequest): ScanamoOps[DeleteItemResult] = liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
   def scan(req: ScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
@@ -38,6 +42,10 @@ object ScanamoInterpreters {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
       case Put(req) =>
         client.putItem(req)
+      case ConditionalPut(req) =>
+        Xor.catchOnly[ConditionalCheckFailedException] {
+          client.putItem(req)
+        }
       case Get(req) =>
         client.getItem(req)
       case Delete(req) =>
@@ -67,6 +75,10 @@ object ScanamoInterpreters {
     override def apply[A](op: ScanamoOpsA[A]): Future[A] = op match {
       case Put(req) =>
         futureOf(client.putItemAsync, req)
+      case ConditionalPut(req) =>
+        futureOf(client.putItemAsync, req).map(Xor.right[ConditionalCheckFailedException, PutItemResult]).recover {
+          case e: ConditionalCheckFailedException => Xor.left(e)
+        }
       case Get(req) =>
         futureOf(client.getItemAsync, req)
       case Delete(req) =>
