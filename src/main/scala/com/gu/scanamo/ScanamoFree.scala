@@ -13,8 +13,8 @@ object ScanamoFree {
   import cats.std.list._
   import cats.syntax.traverse._
 
-  def given[T: PutConditionState](condition: T): Condition[T] =
-    Condition(condition)
+  def given[T: PutConditionState](tableName: String)(condition: ConditionExpression[T]): Condition[T] =
+    Condition(tableName, condition.t)
 
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
     ScanamoOps.put(putRequest(tableName)(item))

@@ -301,28 +301,4 @@ object Scanamo {
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
   : Stream[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
-
-  /**
-    * Performs the chained operation if the condition is met
-    *
-    * {{{
-    *  >>> case class Farm(animals: List[String])
-    * >>> case class Farmer(name: String, age: Long, farm: Farm)
-    *
-    * >>> import com.gu.scanamo.syntax._
-    * >>> import com.gu.scanamo.query._
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> val client = LocalDynamoDB.client()
-    *
-    * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
-    * ...   Scanamo.put(client)("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-    * ...   Scanamo.exec(client)(Scanamo.given(AttributeEquals('age, 156L)).put("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "chicken")))))
-    * ...   Scanamo.exec(client)(Scanamo.given(AttributeEquals('age, 156L)).put("farmers")(Farmer("McDonald", 156L, Farm(List("sheep", "chicken")))))
-    * ...   Scanamo.exec(client)(Scanamo.given(AttributeEquals('age, 15L)).put("farmers")(Farmer("McDonald", 156L, Farm(List("gnu", "chicken")))))
-    * ...   Scanamo.get[Farmer](client)("farmers")('name -> "McDonald")
-    * ... }
-    * Some(Right(Farmer(McDonald,156,Farm(List(sheep, chicken)))))
-    * }}}
-    */
-  def given[T: PutConditionState](condition: T): Condition[T] = ScanamoFree.given(condition)
 }

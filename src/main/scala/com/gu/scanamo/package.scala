@@ -23,6 +23,9 @@ package object scanamo {
     implicit def symbolTupleToKeyCondition[V: DynamoFormat](pair: (Symbol, V)) =
       KeyEquals(pair._1, pair._2)
 
+    implicit def symbolTupleToConditionExpression[V: DynamoFormat](pair: (Symbol, V)) =
+      ConditionExpression(KeyEquals(pair._1, pair._2))
+
     implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
 
     implicit def symbolListTupleToUniqueKeys[V: DynamoFormat](pair: (Symbol, List[V])) =
@@ -35,5 +38,7 @@ package object scanamo {
       Query(KeyEquals(pair._1, pair._2))
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
+
+    def attributeExists(symbol: Symbol) = ConditionExpression(AttributeExists(symbol))
   }
 }

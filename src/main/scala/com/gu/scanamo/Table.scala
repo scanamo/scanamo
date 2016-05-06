@@ -3,7 +3,7 @@ package com.gu.scanamo
 import cats.data.Xor
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
+import com.gu.scanamo.query._
 
 /**
   * Represents a DynamoDB table that operations can be performed against
@@ -61,6 +61,47 @@ case class Table[V: DynamoFormat](name: String) {
   def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
+
+  /**
+    * Performs the chained operation if the condition is met
+    *
+    * {{{
+    * >>> case class Farm(animals: List[String])
+    * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    *
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.query._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> val farmersTable = Table[Farmer]("nursery-farmers")
+    * >>> LocalDynamoDB.withTable(client)("nursery-farmers")('name -> S) {
+    * ...   val farmerOps = for {
+    * ...     _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+    * ...     _ <- farmersTable.given('age -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
+    * ...     _ <- farmersTable.given('age -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
+    * ...     farmerWithNewStock <- farmersTable.get('name -> "McDonald")
+    * ...   } yield farmerWithNewStock
+    * ...   Scanamo.exec(client)(farmerOps)
+    * ... }
+    * Some(Right(Farmer(McDonald,156,Farm(List(sheep, chicken)))))
+    *
+    * >>> case class Thing(a: String, maybe: Option[Int])
+    * >>> val thingTable = Table[Thing]("things")
+    * >>> LocalDynamoDB.withTable(client)("things")('a -> S) {
+    * ...   val ops = for {
+    * ...     _ <- thingTable.put(Thing("a", None))
+    * ...     _ <- thingTable.put(Thing("b", Some(1)))
+    * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("a", Some(2)))
+    * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("b", Some(3)))
+    * ...     things <- thingTable.scan()
+    * ...   } yield things
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Thing(b,Some(3))), Right(Thing(a,None)))
+    * }}}
+    */
+  def given[T: PutConditionState](condition: ConditionExpression[T]) = ScanamoFree.given(name)(condition)
 }
 
 private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String)

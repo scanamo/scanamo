@@ -11,10 +11,6 @@ case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
   def descending = Descending(this)
 }
 
-case class AttributeEquals[V: DynamoFormat](key: Symbol, v: V) {
-
-}
-
 case class AndEqualsCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
   hashEquality: H, rangeEquality: R
 )
@@ -46,3 +42,5 @@ final case class KeyIs[V: DynamoFormat](key: Symbol, operator: DynamoOperator, v
 final case class KeyBeginsWith[V: DynamoFormat](key: Symbol, v: V) extends RangeKeyCondition[V] {
   override def keyConditionExpression(s: String): String = s"begins_with(#$s, :${key.name})"
 }
+
+final case class AttributeExists(key: Symbol)
