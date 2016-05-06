@@ -90,15 +90,16 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val thingTable = Table[Thing]("things")
     * >>> LocalDynamoDB.withTable(client)("things")('a -> S) {
     * ...   val ops = for {
-    * ...     _ <- thingTable.put(Thing("a", None))
-    * ...     _ <- thingTable.put(Thing("b", Some(1)))
+    * ...     _ <- thingTable.putAll(List(Thing("a", None), Thing("b", Some(1)), Thing("c", None)))
     * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("a", Some(2)))
     * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("b", Some(3)))
+    * ...     _ <- thingTable.given(Not(attributeExists('maybe))).put(Thing("c", Some(42)))
+    * ...     _ <- thingTable.given(Not(attributeExists('maybe))).put(Thing("b", Some(42)))
     * ...     things <- thingTable.scan()
     * ...   } yield things
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
-    * List(Right(Thing(b,Some(3))), Right(Thing(a,None)))
+    * List(Right(Thing(b,Some(3))), Right(Thing(c,Some(42))), Right(Thing(a,None)))
     * }}}
     */
   def given[T: PutConditionState](condition: ConditionExpression[T]) = ScanamoFree.given(name)(condition)

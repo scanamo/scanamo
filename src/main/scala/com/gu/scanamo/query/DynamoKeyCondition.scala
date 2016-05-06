@@ -44,3 +44,4 @@ final case class KeyBeginsWith[V: DynamoFormat](key: Symbol, v: V) extends Range
 }
 
 final case class AttributeExists(key: Symbol)
+final case class Not[T: PutConditionState](condition: T)

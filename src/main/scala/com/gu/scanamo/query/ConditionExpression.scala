@@ -31,6 +31,13 @@ object PutConditionState {
       req.withConditionExpression(s"attribute_exists(#attr)")
         .withExpressionAttributeNames(Map("#attr" -> t.key.name).asJava)
   }
+
+  implicit def notCondition[T](implicit pcs: PutConditionState[T]) = new PutConditionState[Not[T]] {
+    override def apply(not: Not[T])(req: PutItemRequest): PutItemRequest = {
+      val requestToNegate = pcs(not.condition)(req)
+      req.withConditionExpression(s"NOT(${requestToNegate.getConditionExpression})")
+    }
+  }
 }
 
 case class ConditionExpression[T](t: T)(implicit pc: PutConditionState[T]) {

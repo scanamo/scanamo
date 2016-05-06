@@ -39,6 +39,10 @@ package object scanamo {
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
 
-    def attributeExists(symbol: Symbol) = ConditionExpression(AttributeExists(symbol))
+    implicit def toConditionExpression[T: PutConditionState](t: T) = ConditionExpression(t)
+
+    def attributeExists(symbol: Symbol) = AttributeExists(symbol)
+
+    def not[T: PutConditionState](t: T) = Not(t)
   }
 }
