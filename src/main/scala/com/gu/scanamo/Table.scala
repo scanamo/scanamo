@@ -102,7 +102,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Thing(b,Some(3))), Right(Thing(c,Some(42))), Right(Thing(a,None)))
     * }}}
     */
-  def given[T: PutConditionState](condition: ConditionExpression[T]) = ScanamoFree.given(name)(condition)
+  def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)
 }
 
 private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String)
