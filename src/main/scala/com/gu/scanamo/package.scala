@@ -39,5 +39,9 @@ package object scanamo {
     def attributeExists(symbol: Symbol) = AttributeExists(symbol)
 
     def not[T: ConditionExpression](t: T) = Not(t)
+
+    implicit class AndConditionExpression[X: ConditionExpression](x: X) {
+      def and[Y: ConditionExpression](y: Y) = AndCondition(x, y)
+    }
   }
 }

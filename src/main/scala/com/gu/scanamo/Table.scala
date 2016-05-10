@@ -100,6 +100,19 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
     * List(Right(Thing(b,Some(3))), Right(Thing(c,Some(42))), Right(Thing(a,None)))
+    *
+    * >>> case class Compound(a: String, maybe: Option[Int])
+    * >>> val compoundTable = Table[Compound]("compounds")
+    * >>> LocalDynamoDB.withTable(client)("compounds")('a -> S) {
+    * ...   val ops = for {
+    * ...     _ <- compoundTable.putAll(List(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
+    * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "alpha").put(Compound("alpha", Some(2)))
+    * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "beta").put(Compound("beta", Some(3)))
+    * ...     compounds <- compoundTable.scan()
+    * ...   } yield compounds
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Compound(beta,Some(3))), Right(Compound(alpha,None)), Right(Compound(gamma,None)))
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)

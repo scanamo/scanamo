@@ -2,6 +2,7 @@ package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
+import com.gu.scanamo.request.ScanamoPutRequest
 
 import scala.collection.convert.decorateAll._
 
@@ -14,12 +15,12 @@ private object ScanamoRequest {
     *
     * prop> (m: Map[String, Int], tableName: String) =>
     *     |   val putRequest = ScanamoRequest.putRequest(tableName)(m)
-    *     |   putRequest.getTableName == tableName &&
-    *     |   putRequest.getItem == m.mapValues(i => new AttributeValue().withN(i.toString)).asJava
+    *     |   putRequest.tableName == tableName &&
+    *     |   putRequest.item == m.mapValues(i => new AttributeValue().withN(i.toString)).asJava
     * }}}
     */
-  def putRequest[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): PutItemRequest =
-    new PutItemRequest().withTableName(tableName).withItem(f.write(item).getM)
+  def putRequest[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoPutRequest =
+    ScanamoPutRequest(tableName, f.write(item).getM, None)
 
   def batchPutRequest[T](tableName: String)(items: List[T])(implicit f: DynamoFormat[T]): BatchWriteItemRequest =
     new BatchWriteItemRequest().withRequestItems(Map(tableName -> items.map(i =>
