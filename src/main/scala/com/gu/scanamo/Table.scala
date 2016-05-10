@@ -114,6 +114,20 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
     * List(Right(Compound(beta,Some(3))), Right(Compound(alpha,None)), Right(Compound(gamma,None)))
+    *
+    * >>> case class Letter(roman: String, greek: String)
+    * >>> val lettersTable = Table[Letter]("letters")
+    * >>> LocalDynamoDB.withTable(client)("letters")('roman -> S) {
+    * ...   val ops = for {
+    * ...     _ <- lettersTable.putAll(List(Letter("a", "alpha"), Letter("b", "beta"), Letter("c", "gammon")))
+    * ...     _ <- lettersTable.given('greek beginsWith "ale").put(Letter("a", "aleph"))
+    * ...     _ <- lettersTable.given('greek beginsWith "gam").put(Letter("c", "gamma"))
+    * ...     letters <- lettersTable.scan()
+    * ...   } yield letters
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Letter(b,beta)), Right(Letter(c,gamma)), Right(Letter(a,alpha)))
+    *
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)

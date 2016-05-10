@@ -42,6 +42,17 @@ object ConditionExpression {
     }
   }
 
+  implicit def beginsWithCondition[V: DynamoFormat] = new ConditionExpression[BeginsWith[V]] {
+    override def apply(b: BeginsWith[V])(req: ScanamoPutRequest): ScanamoPutRequest =
+      req.copy(condition = Some(
+        RequestCondition(
+          s"begins_with(#a, :${b.key.name})",
+          Map("#a" -> b.key.name),
+          Some(Map(s":${b.key.name}" -> DynamoFormat[V].write(b.v)))
+        )
+      ))
+  }
+
   implicit def andCondition[X, Y](implicit lce: ConditionExpression[X], rce: ConditionExpression[Y]) =
     new ConditionExpression[AndCondition[X, Y]] {
       private def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {

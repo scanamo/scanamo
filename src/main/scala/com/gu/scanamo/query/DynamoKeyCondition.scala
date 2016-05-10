@@ -39,7 +39,7 @@ final case class KeyIs[V: DynamoFormat](key: Symbol, operator: DynamoOperator, v
   override def keyConditionExpression(s: String): String = s"#$s ${operator.op} :${key.name}"
 }
 
-final case class KeyBeginsWith[V: DynamoFormat](key: Symbol, v: V) extends RangeKeyCondition[V] {
+final case class BeginsWith[V: DynamoFormat](key: Symbol, v: V) extends RangeKeyCondition[V] {
   override def keyConditionExpression(s: String): String = s"begins_with(#$s, :${key.name})"
 }
 
