@@ -8,7 +8,7 @@ import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.request.{RequestCondition, ScanamoPutRequest}
 import simulacrum.typeclass
 
-case class Condition[T](tableName: String, t: T)(implicit state: ConditionExpression[T]) {
+case class ConditionalOperation[T](tableName: String, t: T)(implicit state: ConditionExpression[T]) {
   def put[V: DynamoFormat](item: V): ScanamoOps[Xor[ConditionalCheckFailedException, PutItemResult]] =
     ScanamoOps.conditionalPut(state.apply(t)(putRequest(tableName)(item)))
 }
@@ -96,3 +96,7 @@ object ConditionExpression {
 }
 
 case class AndCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: R)
+
+case class Condition[T: ConditionExpression](t: T) {
+  def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
+}
