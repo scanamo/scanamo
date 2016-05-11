@@ -140,6 +140,21 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
     * List(Right(Choice(2,crumble)), Right(Choice(1,victoria sponge)), Right(Choice(3,custard)))
+    *
+    * >>> import cats.implicits._
+    * >>> case class Turnip(size: Int, description: Option[String])
+    * >>> val turnipsTable = Table[Turnip]("turnips")
+    * >>> LocalDynamoDB.withTable(client)("turnips")('size -> N) {
+    * ...   val ops = for {
+    * ...     _ <- turnipsTable.putAll(List(Turnip(1, None), Turnip(1000, None)))
+    * ...     initialTurnips <- turnipsTable.scan()
+    * ...     _ <- initialTurnips.flatMap(_.toOption).traverse(t =>
+    * ...       turnipsTable.given('size > 500).put(t.copy(description = Some("Big turnip in the country."))))
+    * ...     turnips <- turnipsTable.scan()
+    * ...   } yield turnips
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Turnip(1,None)), Right(Turnip(1000,Some(Big turnip in the country.))))
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)

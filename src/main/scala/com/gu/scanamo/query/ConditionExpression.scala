@@ -53,6 +53,18 @@ object ConditionExpression {
       ))
   }
 
+  implicit def keyIsCondition[V: DynamoFormat] = new ConditionExpression[KeyIs[V]] {
+    override def apply(k: KeyIs[V])(req: ScanamoPutRequest): ScanamoPutRequest = {
+      req.copy(condition = Some(
+        RequestCondition(
+          s"#a ${k.operator.op} :${k.key.name}",
+          Map("#a" -> k.key.name),
+          Some(Map(s":${k.key.name}" -> DynamoFormat[V].write(k.v)))
+        )
+      ))
+    }
+  }
+
   implicit def andCondition[L, R](implicit lce: ConditionExpression[L], rce: ConditionExpression[R]) =
     new ConditionExpression[AndCondition[L, R]] {
       override def apply(and: AndCondition[L, R])(req: ScanamoPutRequest): ScanamoPutRequest = {
