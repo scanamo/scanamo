@@ -53,61 +53,77 @@ object ConditionExpression {
       ))
   }
 
-  implicit def andCondition[X, Y](implicit lce: ConditionExpression[X], rce: ConditionExpression[Y]) =
-    new ConditionExpression[AndCondition[X, Y]] {
-      private def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {
-        case (k, v) => (newKey(k, prefix, magicChar), v)
-      }
-      private def newKey(oldKey: String, prefix: String, magicChar: Char) =
-        s"$magicChar$prefix${oldKey.stripPrefix(magicChar.toString)}"
+  implicit def andCondition[L, R](implicit lce: ConditionExpression[L], rce: ConditionExpression[R]) =
+    new ConditionExpression[AndCondition[L, R]] {
+      override def apply(and: AndCondition[L, R])(req: ScanamoPutRequest): ScanamoPutRequest = {
 
-      private def prefixKeysIn(string: String, keys: Iterable[String], prefix: String, magicChar: Char) =
-        keys.foldLeft(string)((result, key) => result.replaceAllLiterally(key, newKey(key, prefix, magicChar)))
-
-      val lPrefix = "and_l_"
-      val rPrefix = "and_r_"
-
-      override def apply(and: AndCondition[X, Y])(req: ScanamoPutRequest): ScanamoPutRequest = {
-
-        val condition = for {
-          lCondition <- lce(and.l)(req).condition
-          rCondition <- rce(and.r)(req).condition
-        } yield {
-          val mergedExpressionAttributeNames =
-            prefixKeys(lCondition.attributeNames, lPrefix, '#') ++
-            prefixKeys(rCondition.attributeNames, rPrefix, '#')
-
-          val lValues = lCondition.attributeValues.map(prefixKeys(_, lPrefix, ':'))
-          val rValues = rCondition.attributeValues.map(prefixKeys(_, rPrefix, ':'))
-
-          val mergedExpressionAttributeValues = lValues match {
-            case Some(m) => Some(m ++ rValues.getOrElse(Map.empty))
-            case _ => rValues
-          }
-
-          val lConditionExpression =
-            prefixKeysIn(
-              prefixKeysIn(lCondition.expression, lCondition.attributeNames.keys, lPrefix, '#'),
-              lCondition.attributeValues.toList.flatMap(_.keys), lPrefix, ':'
-            )
-          val rConditionExpression =
-            prefixKeysIn(
-              prefixKeysIn(rCondition.expression, rCondition.attributeNames.keys, rPrefix, '#'),
-              rCondition.attributeValues.toList.flatMap(_.keys), rPrefix, ':'
-            )
-          RequestCondition(
-            s"($lConditionExpression AND $rConditionExpression)",
-            mergedExpressionAttributeNames,
-            mergedExpressionAttributeValues)
-        }
-
+        val condition = combineConditions(req, and.l, and.r, "AND")
         req.copy(condition = condition)
       }
     }
+
+  implicit def orCondition[L, R](implicit lce: ConditionExpression[L], rce: ConditionExpression[R]) =
+    new ConditionExpression[OrCondition[L, R]] {
+      override def apply(and: OrCondition[L, R])(req: ScanamoPutRequest): ScanamoPutRequest = {
+
+        val condition = combineConditions(req, and.l, and.r, "OR")
+        req.copy(condition = condition)
+      }
+    }
+
+  private def combineConditions[L, R](req: ScanamoPutRequest, l: L, r: R, combininingOperator: String)(
+    implicit lce: ConditionExpression[L], rce: ConditionExpression[R]): Option[RequestCondition] = {
+    def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {
+      case (k, v) => (newKey(k, prefix, magicChar), v)
+    }
+    def newKey(oldKey: String, prefix: String, magicChar: Char) =
+      s"$magicChar$prefix${oldKey.stripPrefix(magicChar.toString)}"
+
+    def prefixKeysIn(string: String, keys: Iterable[String], prefix: String, magicChar: Char) =
+      keys.foldLeft(string)((result, key) => result.replaceAllLiterally(key, newKey(key, prefix, magicChar)))
+
+    val lPrefix = s"${combininingOperator.toLowerCase}_l_"
+    val rPrefix = s"${combininingOperator.toLowerCase}_r_"
+
+    for {
+      lCondition <- lce(l)(req).condition
+      rCondition <- rce(r)(req).condition
+    } yield {
+      val mergedExpressionAttributeNames =
+        prefixKeys(lCondition.attributeNames, lPrefix, '#') ++
+          prefixKeys(rCondition.attributeNames, rPrefix, '#')
+
+      val lValues = lCondition.attributeValues.map(prefixKeys(_, lPrefix, ':'))
+      val rValues = rCondition.attributeValues.map(prefixKeys(_, rPrefix, ':'))
+
+      val mergedExpressionAttributeValues = lValues match {
+        case Some(m) => Some(m ++ rValues.getOrElse(Map.empty))
+        case _ => rValues
+      }
+
+      val lConditionExpression =
+        prefixKeysIn(
+          prefixKeysIn(lCondition.expression, lCondition.attributeNames.keys, lPrefix, '#'),
+          lCondition.attributeValues.toList.flatMap(_.keys), lPrefix, ':'
+        )
+      val rConditionExpression =
+        prefixKeysIn(
+          prefixKeysIn(rCondition.expression, rCondition.attributeNames.keys, rPrefix, '#'),
+          rCondition.attributeValues.toList.flatMap(_.keys), rPrefix, ':'
+        )
+      RequestCondition(
+        s"($lConditionExpression $combininingOperator $rConditionExpression)",
+        mergedExpressionAttributeNames,
+        mergedExpressionAttributeValues)
+    }
+  }
 }
 
 case class AndCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: R)
 
+case class OrCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: R)
+
 case class Condition[T: ConditionExpression](t: T) {
   def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
+  def or[Y: ConditionExpression](other: Y) = OrCondition(t, other)
 }

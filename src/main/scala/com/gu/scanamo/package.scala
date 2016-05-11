@@ -43,5 +43,9 @@ package object scanamo {
     implicit class AndConditionExpression[X: ConditionExpression](x: X) {
       def and[Y: ConditionExpression](y: Y) = AndCondition(x, y)
     }
+
+    implicit class OrConditionExpression[X: ConditionExpression](x: X) {
+      def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
+    }
   }
 }

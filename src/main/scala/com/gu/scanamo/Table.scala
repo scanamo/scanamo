@@ -128,6 +128,18 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Letter(b,beta)), Right(Letter(c,gamma)), Right(Letter(a,alpha)))
     *
+    * >>> case class Choice(number: Int, description: String)
+    * >>> val choicesTable = Table[Choice]("choices")
+    * >>> LocalDynamoDB.withTable(client)("choices")('number -> N) {
+    * ...   val ops = for {
+    * ...     _ <- choicesTable.putAll(List(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
+    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(1, "victoria sponge"))
+    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(2, "victoria sponge"))
+    * ...     choices <- choicesTable.scan()
+    * ...   } yield choices
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Choice(2,crumble)), Right(Choice(1,victoria sponge)), Right(Choice(3,custard)))
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)
