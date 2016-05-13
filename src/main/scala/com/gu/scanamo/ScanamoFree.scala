@@ -5,13 +5,16 @@ import cats.data.Xor
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
+import com.gu.scanamo.query._
 
 object ScanamoFree {
 
   import ScanamoRequest._
   import cats.std.list._
   import cats.syntax.traverse._
+
+  def given[T: ConditionExpression](tableName: String)(condition: T): ConditionalOperation[T] =
+    ConditionalOperation(tableName, condition)
 
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
     ScanamoOps.put(putRequest(tableName)(item))

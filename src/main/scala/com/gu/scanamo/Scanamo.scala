@@ -5,7 +5,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
-import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
+import com.gu.scanamo.query._
 
 /**
   * Provides a simplified interface for reading and writing case classes to DynamoDB

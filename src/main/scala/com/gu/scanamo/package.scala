@@ -10,7 +10,7 @@ package object scanamo {
       def >[V: DynamoFormat](v: V) = KeyIs(s, GT, v)
       def <=[V: DynamoFormat](v: V) = KeyIs(s, LTE, v)
       def >=[V: DynamoFormat](v: V) = KeyIs(s, GTE, v)
-      def beginsWith[V: DynamoFormat](v: V) = KeyBeginsWith(s, v)
+      def beginsWith[V: DynamoFormat](v: V) = BeginsWith(s, v)
 
       def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
     }
@@ -35,5 +35,17 @@ package object scanamo {
       Query(KeyEquals(pair._1, pair._2))
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
+
+    def attributeExists(symbol: Symbol) = AttributeExists(symbol)
+
+    def not[T: ConditionExpression](t: T) = Not(t)
+
+    implicit class AndConditionExpression[X: ConditionExpression](x: X) {
+      def and[Y: ConditionExpression](y: Y) = AndCondition(x, y)
+    }
+
+    implicit class OrConditionExpression[X: ConditionExpression](x: X) {
+      def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
+    }
   }
 }
