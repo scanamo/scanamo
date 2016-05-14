@@ -42,7 +42,8 @@ object LocalDynamoDB {
   ): T = {
     client.createTable(
       new CreateTableRequest().withTableName(tableName)
-          .withAttributeDefinitions(attributeDefinitions(primaryIndexAttributes ++ secondaryIndexAttributes))
+          .withAttributeDefinitions(attributeDefinitions(
+            primaryIndexAttributes.toList ++ (secondaryIndexAttributes.toList diff primaryIndexAttributes.toList)))
           .withKeySchema(keySchema(primaryIndexAttributes))
           .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
           .withGlobalSecondaryIndexes(new GlobalSecondaryIndex()

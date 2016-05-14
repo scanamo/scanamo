@@ -45,13 +45,13 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val operations = for {
     * ...     _ <- transport.putAll(List(
     * ...       Transport("Underground", "Circle", "Yellow"),
-    * ...       Transport("Underground", "Metropolitan", "Maroon"),
+    * ...       Transport("Underground", "Metropolitan", "Magenta"),
     * ...       Transport("Underground", "Central", "Red")))
-    * ...     maroonLine <- transport.index("colour-index").query('colour -> "Maroon")
-    * ...   } yield maroonLine.toList
+    * ...     MagentaLine <- transport.index("colour-index").query('colour -> "Magenta")
+    * ...   } yield MagentaLine.toList
     * ...   Scanamo.exec(client)(operations)
     * ... }
-    * List(Right(Transport(Underground,Metropolitan,Maroon)))
+    * List(Right(Transport(Underground,Metropolitan,Magenta)))
     * }}}
     */
   def index(indexName: String) = Index[V](name, indexName)
@@ -217,6 +217,32 @@ case class Table[V: DynamoFormat](name: String) {
 private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
+    * {{{
+    * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> val transport = Table[Transport]("transport")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * ...   'mode -> S, 'line -> S)('mode ->S, 'colour -> S
+    * ... ) {
+    * ...   val operations = for {
+    * ...     _ <- transport.putAll(List(
+    * ...       Transport("Underground", "Circle", "Yellow"),
+    * ...       Transport("Underground", "Metropolitan", "Magenta"),
+    * ...       Transport("Underground", "Central", "Red"),
+    * ...       Transport("Underground", "Picadilly", "Blue"),
+    * ...       Transport("Underground", "Northern", "Black")))
+    * ...     somethingBeginningWithBl <- transport.index("colour-index").limit(1).query(
+    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")).descending
+    * ...     )
+    * ...   } yield somethingBeginningWithBl.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Transport(Underground,Picadilly,Blue)))
+    * }}}
     */
   def limit(n: Int) = IndexLimit(this, n)
 }

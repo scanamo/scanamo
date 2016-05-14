@@ -291,11 +291,11 @@ object Scanamo {
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
     * ...   Scanamo.putAll(client)("transport")(List(
     * ...     Transport("Underground", "Circle", "Yellow"),
-    * ...     Transport("Underground", "Metropolitan", "Maroon"),
+    * ...     Transport("Underground", "Metropolitan", "Magenta"),
     * ...     Transport("Underground", "Central", "Red")))
-    * ...   Scanamo.queryIndex[Transport](client)("transport", "colour-index")('colour -> "Maroon").toList
+    * ...   Scanamo.queryIndex[Transport](client)("transport", "colour-index")('colour -> "Magenta").toList
     * ... }
-    * List(Right(Transport(Underground,Metropolitan,Maroon)))
+    * List(Right(Transport(Underground,Metropolitan,Magenta)))
     * }}}
     */
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
