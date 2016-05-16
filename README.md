@@ -39,6 +39,8 @@ scala> Scanamo.get[Farmer](client)("farmer")('name -> "McDonald")
 res1: Option[cats.data.Xor[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
+The `Xor` represents the possibility that an item might exist, but not be parseable into the given type, in this case `Farmer`. For more information on `Xor`, see the [Cats documentation](http://typelevel.org/cats/tut/xor.html).
+
 Scanamo also provides a [Table](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Table) 
 abstraction:
 
