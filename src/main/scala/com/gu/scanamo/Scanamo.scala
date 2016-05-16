@@ -48,7 +48,7 @@ object Scanamo {
     * >>> LocalDynamoDB.withTable(client)("rabbits")('name -> S) {
     * ...   Scanamo.putAll(client)("rabbits")((
     * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toList)
-    * ...   Scanamo.scan[Rabbit](client)("rabbits").toList.size
+    * ...   Scanamo.scan[Rabbit](client)("rabbits").size
     * ... }
     * 100
     * }}}
@@ -177,11 +177,13 @@ object Scanamo {
     * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
     * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey"))
     * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
-    * ...   Scanamo.scan[Bear](client)("bears").toList
+    * ...   Scanamo.scan[Bear](client)("bears")
     * ... }
     * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
     * }}}
-    * Pagination is handled internally with `Stream` result retrieving pages as necessary
+    *
+    * By default, the entire table contents are read, even if they're more than Dynamo's
+    * maximum result set size
     * {{{
     * >>> case class Lemming(name: String, stuff: String)
     *
@@ -189,13 +191,13 @@ object Scanamo {
     * ...   Scanamo.putAll(client)("lemmings")(
     * ...     (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toList
     * ...   )
-    * ...   Scanamo.scan[Lemming](client)("lemmings").toList.size
+    * ...   Scanamo.scan[Lemming](client)("lemmings").size
     * ... }
     * 100
     * }}}
     */
   def scan[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)
-    : Stream[Xor[DynamoReadError, T]] =
+    : List[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scan(tableName))
 
   /**
@@ -210,13 +212,13 @@ object Scanamo {
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
     * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
     * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
-    * ...   Scanamo.scanIndex[Bear](client)("bears", "alias-index").toList
+    * ...   Scanamo.scanIndex[Bear](client)("bears", "alias-index")
     * ... }
     * List(Right(Bear(Pooh,honey,Some(Winnie))))
     * }}}
     */
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)
-  : Stream[Xor[DynamoReadError, T]] =
+  : List[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   /**
@@ -233,27 +235,27 @@ object Scanamo {
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
     * >>> import com.gu.scanamo.query._
     * >>> val r2 = for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
-    * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig"))).toList
+    * >>> Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig")))
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     * }}}
     * or with some syntactic sugar
     * {{{
     * >>> import com.gu.scanamo.syntax._
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig").toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig")
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     * }}}
     * It also supports various conditions on the range key
     * {{{
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number < 3)
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number > 1)
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number <= 2)
     * List(Right(Animal(Pig,1)), Right(Animal(Pig,2)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2).toList
+    * >>> Scanamo.query[Animal](client)("animals")('species -> "Pig" and 'number >= 2)
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
     * >>> case class Transport(mode: String, line: String)
@@ -262,21 +264,21 @@ object Scanamo {
     * ...     Transport("Underground", "Circle"),
     * ...     Transport("Underground", "Metropolitan"),
     * ...     Transport("Underground", "Central")))
-    * ...   Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C")).toList
+    * ...   Scanamo.query[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"))
     * ... }
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
     * To have results returned in descending range key order, append `descending` to your query:
     * {{{
-    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig").descending).toList
+    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig").descending)
     * List(Right(Animal(Pig,3)), Right(Animal(Pig,2)), Right(Animal(Pig,1)))
     *
-    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig" and 'number < 3).descending).toList
+    * >>> Scanamo.query[Animal](client)("animals")(('species -> "Pig" and 'number < 3).descending)
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,1)))
     * }}}
     */
   def query[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_])
-    : Stream[Xor[DynamoReadError, T]] =
+    : List[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
   /**
@@ -293,12 +295,12 @@ object Scanamo {
     * ...     Transport("Underground", "Circle", "Yellow"),
     * ...     Transport("Underground", "Metropolitan", "Magenta"),
     * ...     Transport("Underground", "Central", "Red")))
-    * ...   Scanamo.queryIndex[Transport](client)("transport", "colour-index")('colour -> "Magenta").toList
+    * ...   Scanamo.queryIndex[Transport](client)("transport", "colour-index")('colour -> "Magenta")
     * ... }
     * List(Right(Transport(Underground,Metropolitan,Magenta)))
     * }}}
     */
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
-  : Stream[Xor[DynamoReadError, T]] =
+  : List[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }

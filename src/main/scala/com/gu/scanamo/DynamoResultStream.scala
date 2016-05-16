@@ -19,21 +19,21 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
   def withExclusiveStartKey(req: Req, key: EvaluationKey): Req
   def exec(req: Req): ScanamoOps[Res]
 
-  def stream[T: DynamoFormat](req: Req): ScanamoOps[Stream[Xor[DynamoReadError, T]]] = {
+  def stream[T: DynamoFormat](req: Req): ScanamoOps[List[Xor[DynamoReadError, T]]] = {
 
-    def streamMore(lastKey: Option[EvaluationKey], remainingLimit: Option[Int]): ScanamoOps[Stream[Xor[DynamoReadError, T]]] = {
+    def streamMore(lastKey: Option[EvaluationKey], remainingLimit: Option[Int]): ScanamoOps[List[Xor[DynamoReadError, T]]] = {
       for {
         queryResult <- exec(lastKey.foldLeft(req)(withExclusiveStartKey(_, _)))
-        results = items(queryResult).asScala.map(ScanamoFree.read[T]).toStream
+        results = items(queryResult).asScala.map(ScanamoFree.read[T]).toList
         resultsStillToGet = remainingLimit.map(_ - results.length)
-        resultStream <-
+        resultList <-
           Option(lastEvaluatedKey(queryResult)).filterNot(_ => resultsStillToGet.exists(_ <= 0)).foldLeft(
-            Free.pure[ScanamoOpsA, Stream[Xor[DynamoReadError, T]]](results)
+            Free.pure[ScanamoOpsA, List[Xor[DynamoReadError, T]]](results)
           )((rs, k) => for {
             items <- rs
             more <- streamMore(Some(k), resultsStillToGet)
-          } yield items #::: more)
-      } yield resultStream
+          } yield items ::: more)
+      } yield resultList
     }
     streamMore(None, limit(req))
   }

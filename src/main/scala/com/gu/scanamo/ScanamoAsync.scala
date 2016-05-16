@@ -43,18 +43,18 @@ object ScanamoAsync {
     exec(client)(ScanamoFree.delete(tableName)(key))
 
   def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 }

@@ -42,31 +42,29 @@ object ScanamoFree {
     ScanamoOps.delete(deleteRequest(tableName)(key))
 
 
-  def scan[T: DynamoFormat](tableName: String): ScanamoOps[Stream[Xor[DynamoReadError, T]]] =
+  def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName))
 
-  def scanWithLimit[T: DynamoFormat](tableName: String, limit: Int): ScanamoOps[Stream[Xor[DynamoReadError, T]]] =
+  def scanWithLimit[T: DynamoFormat](tableName: String, limit: Int): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withLimit(limit))
 
-  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[Stream[Xor[DynamoReadError, T]]] =
+  def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withIndexName(indexName))
 
-  def scanIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String, limit: Int): ScanamoOps[Stream[Xor[DynamoReadError, T]]] =
+  def scanIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String, limit: Int): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     ScanResultStream.stream[T](new ScanRequest().withTableName(tableName).withIndexName(indexName).withLimit(limit))
 
-  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, T]]] =
+  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query))
 
-  def queryWithLimit[T: DynamoFormat](tableName: String)(query: Query[_], limit: Int): ScanamoOps[Stream[Xor[DynamoReadError, T]]] =
+  def queryWithLimit[T: DynamoFormat](tableName: String)(query: Query[_], limit: Int): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query).withLimit(limit))
 
-  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, T]]] =
+  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query).withIndexName(indexName))
 
-  def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_], limit: Int): ScanamoOps[Stream[Xor[DynamoReadError, T]]] = {
-    println(queryRequest(tableName)(query).withIndexName(indexName).withLimit(limit))
+  def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_], limit: Int): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query).withIndexName(indexName).withLimit(limit))
-  }
 
   /**
     * {{{

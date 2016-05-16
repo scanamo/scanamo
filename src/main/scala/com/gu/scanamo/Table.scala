@@ -251,7 +251,7 @@ private[scanamo] case class TableLimit[V: DynamoFormat](table: Table[V], limit: 
 private[scanamo] case class IndexLimit[V: DynamoFormat](index: Index[V], limit: Int)
 
 /* typeclass */trait Scannable[T[_], V] {
-  def scan(t: T[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]]
+  def scan(t: T[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]]
 }
 
 object Scannable {
@@ -271,26 +271,26 @@ object Scannable {
   }
 
   implicit def tableScannable[V: DynamoFormat] = new Scannable[Table, V] {
-    override def scan(t: Table[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def scan(t: Table[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.scan[V](t.name)
   }
   implicit def indexScannable[V: DynamoFormat] = new Scannable[Index, V] {
-    override def scan(i: Index[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def scan(i: Index[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.scanIndex[V](i.tableName, i.indexName)
   }
 
   implicit def limitedTableScannable[V: DynamoFormat] = new Scannable[TableLimit, V] {
-    override def scan(t: TableLimit[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def scan(t: TableLimit[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.scanWithLimit[V](t.table.name, t.limit)
   }
   implicit def limitedIndexScannable[V: DynamoFormat] = new Scannable[IndexLimit, V] {
-    override def scan(i: IndexLimit[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def scan(i: IndexLimit[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.scanIndexWithLimit[V](i.index.tableName, i.index.indexName, i.limit)
   }
 }
 
 /* typeclass */ trait Queryable[T[_], V] {
-  def query(t: T[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]]
+  def query(t: T[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]]
 }
 
 object Queryable {
@@ -310,19 +310,19 @@ object Queryable {
   }
 
   implicit def tableQueryable[V: DynamoFormat] = new Queryable[Table, V] {
-    override def query(t: Table[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def query(t: Table[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.query[V](t.name)(query)
   }
   implicit def indexQueryable[V: DynamoFormat] = new Queryable[Index, V] {
-    override def query(i: Index[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def query(i: Index[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.queryIndex[V](i.tableName, i.indexName)(query)
   }
   implicit def limitedTableQueryable[V: DynamoFormat] = new Queryable[TableLimit, V] {
-    override def query(t: TableLimit[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def query(t: TableLimit[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.queryWithLimit[V](t.table.name)(query, t.limit)
   }
   implicit def limitedIndexQueryable[V: DynamoFormat] = new Queryable[IndexLimit, V] {
-    override def query(i: IndexLimit[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def query(i: IndexLimit[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.queryIndexWithLimit[V](i.index.tableName, i.index.indexName)(query, i.limit)
   }
 }
