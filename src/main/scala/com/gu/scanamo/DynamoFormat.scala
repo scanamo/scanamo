@@ -3,6 +3,7 @@ package com.gu.scanamo
 import cats.NotNull
 import cats.data._
 import cats.std.list._
+import cats.std.vector._
 import cats.std.map._
 import cats.syntax.traverse._
 import cats.syntax.apply._
@@ -169,7 +170,7 @@ object DynamoFormat extends DerivedDynamoFormat {
   implicit val doubleFormat = xmap(coerceNumber(_.toDouble))(_.toString)(numFormat)
 
 
-  private val javaListFormat = attribute(_.getL, "L")(_.withL)
+  val javaListFormat = attribute(_.getL, "L")(_.withL)
   /**
     * {{{
     * prop> (l: List[String]) =>
@@ -182,6 +183,20 @@ object DynamoFormat extends DerivedDynamoFormat {
       _.asScala.toList.traverseU(f.read))(
       _.map(f.write).asJava
     )(javaListFormat)
+
+  /**
+    * {{{
+    * prop> (l: Vector[String]) =>
+    *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(l)) ==
+    *     |   cats.data.Xor.right(l)
+    * }}}
+    */
+  implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
+    xmap[Vector[T], java.util.List[AttributeValue]](
+      _.asScala.toVector.traverseU(f.read))(
+      _.map(f.write).asJava
+    )(javaListFormat)
+
 
   private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
   private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
