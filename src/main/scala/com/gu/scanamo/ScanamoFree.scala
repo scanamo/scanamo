@@ -9,7 +9,7 @@ import com.gu.scanamo.query._
 
 object ScanamoFree {
 
-  import ScanamoRequest._
+  import Requests._
   import cats.std.list._
   import cats.syntax.traverse._
 

@@ -86,35 +86,6 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * Some(Right(Farmer(McDonald,156,Farm(List(sheep, chicken)))))
     *
-    * >>> case class Thing(a: String, maybe: Option[Int])
-    * >>> val thingTable = Table[Thing]("things")
-    * >>> LocalDynamoDB.withTable(client)("things")('a -> S) {
-    * ...   val ops = for {
-    * ...     _ <- thingTable.putAll(List(Thing("a", None), Thing("b", Some(1)), Thing("c", None)))
-    * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("a", Some(2)))
-    * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("b", Some(3)))
-    * ...     _ <- thingTable.given(Not(attributeExists('maybe))).put(Thing("c", Some(42)))
-    * ...     _ <- thingTable.given(Not(attributeExists('maybe))).put(Thing("b", Some(42)))
-    * ...     things <- thingTable.scan()
-    * ...   } yield things
-    * ...   Scanamo.exec(client)(ops).toList
-    * ... }
-    * List(Right(Thing(b,Some(3))), Right(Thing(c,Some(42))), Right(Thing(a,None)))
-    *
-    * >>> case class Compound(a: String, maybe: Option[Int])
-    * >>> val compoundTable = Table[Compound]("compounds")
-    * >>> LocalDynamoDB.withTable(client)("compounds")('a -> S) {
-    * ...   val ops = for {
-    * ...     _ <- compoundTable.putAll(List(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
-    * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "alpha").put(Compound("alpha", Some(2)))
-    * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "beta").put(Compound("beta", Some(3)))
-    * ...     _ <- compoundTable.given(Condition('a -> "gamma") and attributeExists('maybe)).put(Compound("gamma", Some(42)))
-    * ...     compounds <- compoundTable.scan()
-    * ...   } yield compounds
-    * ...   Scanamo.exec(client)(ops).toList
-    * ... }
-    * List(Right(Compound(beta,Some(3))), Right(Compound(alpha,None)), Right(Compound(gamma,None)))
-    *
     * >>> case class Letter(roman: String, greek: String)
     * >>> val lettersTable = Table[Letter]("letters")
     * >>> LocalDynamoDB.withTable(client)("letters")('roman -> S) {
@@ -127,19 +98,6 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
     * List(Right(Letter(b,beta)), Right(Letter(c,gamma)), Right(Letter(a,alpha)))
-    *
-    * >>> case class Choice(number: Int, description: String)
-    * >>> val choicesTable = Table[Choice]("choices")
-    * >>> LocalDynamoDB.withTable(client)("choices")('number -> N) {
-    * ...   val ops = for {
-    * ...     _ <- choicesTable.putAll(List(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
-    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(1, "victoria sponge"))
-    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(2, "victoria sponge"))
-    * ...     choices <- choicesTable.scan()
-    * ...   } yield choices
-    * ...   Scanamo.exec(client)(ops).toList
-    * ... }
-    * List(Right(Choice(2,crumble)), Right(Choice(1,victoria sponge)), Right(Choice(3,custard)))
     *
     * >>> import cats.implicits._
     * >>> case class Turnip(size: Int, description: Option[String])
@@ -155,6 +113,77 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
     * List(Right(Turnip(1,None)), Right(Turnip(1000,Some(Big turnip in the country.))))
+    * }}}
+    *
+    * Conditions can also make use of negation via `not`:
+    *
+    * {{{
+    * >>> case class Thing(a: String, maybe: Option[Int])
+    * >>> val thingTable = Table[Thing]("things")
+    * >>> LocalDynamoDB.withTable(client)("things")('a -> S) {
+    * ...   val ops = for {
+    * ...     _ <- thingTable.putAll(List(Thing("a", None), Thing("b", Some(1)), Thing("c", None)))
+    * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("a", Some(2)))
+    * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("b", Some(3)))
+    * ...     _ <- thingTable.given(Not(attributeExists('maybe))).put(Thing("c", Some(42)))
+    * ...     _ <- thingTable.given(Not(attributeExists('maybe))).put(Thing("b", Some(42)))
+    * ...     things <- thingTable.scan()
+    * ...   } yield things
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Thing(b,Some(3))), Right(Thing(c,Some(42))), Right(Thing(a,None)))
+    * }}}
+    *
+    * be combined with `and`
+    *
+    * {{{
+    * >>> case class Compound(a: String, maybe: Option[Int])
+    * >>> val compoundTable = Table[Compound]("compounds")
+    * >>> LocalDynamoDB.withTable(client)("compounds")('a -> S) {
+    * ...   val ops = for {
+    * ...     _ <- compoundTable.putAll(List(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
+    * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "alpha").put(Compound("alpha", Some(2)))
+    * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "beta").put(Compound("beta", Some(3)))
+    * ...     _ <- compoundTable.given(Condition('a -> "gamma") and attributeExists('maybe)).put(Compound("gamma", Some(42)))
+    * ...     compounds <- compoundTable.scan()
+    * ...   } yield compounds
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Compound(beta,Some(3))), Right(Compound(alpha,None)), Right(Compound(gamma,None)))
+    * }}}
+    *
+    * or with `or`
+    *
+    * {{{
+    * >>> case class Choice(number: Int, description: String)
+    * >>> val choicesTable = Table[Choice]("choices")
+    * >>> LocalDynamoDB.withTable(client)("choices")('number -> N) {
+    * ...   val ops = for {
+    * ...     _ <- choicesTable.putAll(List(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
+    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(1, "victoria sponge"))
+    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(2, "victoria sponge"))
+    * ...     choices <- choicesTable.scan()
+    * ...   } yield choices
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Choice(2,crumble)), Right(Choice(1,victoria sponge)), Right(Choice(3,custard)))
+    * }}}
+    *
+    * The same forms of condition can be applied to deletions
+    *
+    * {{{
+    * >>> case class Gremlin(number: Int, wet: Boolean)
+    * >>> val gremlinsTable = Table[Gremlin]("gremlins")
+    * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
+    * ...   val ops = for {
+    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false), Gremlin(2, true)))
+    * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 1)
+    * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
+    * ...     remainingGremlins <- gremlinsTable.scan()
+    * ...   } yield remainingGremlins
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Gremlin(1,false)))
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)

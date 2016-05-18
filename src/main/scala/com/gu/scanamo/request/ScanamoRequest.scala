@@ -8,6 +8,12 @@ case class ScanamoPutRequest(
   condition: Option[RequestCondition]
 )
 
+case class ScanamoDeleteRequest(
+  tableName: String,
+  key: java.util.Map[String, AttributeValue],
+  condition: Option[RequestCondition]
+)
+
 case class RequestCondition(
   expression: String,
   attributeNames: Map[String, String],
