@@ -201,7 +201,28 @@ object Scanamo {
     exec(client)(ScanamoFree.scan(tableName))
 
   /**
-    * Returns a stream of all items present in the index
+    * Scan a table, but limiting the number of rows evaluated by Dynamo to `limit`
+    *
+    * {{{
+    * >>> case class Bear(name: String, favouriteFood: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
+    * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey"))
+    * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
+    * ...   Scanamo.scanWithLimit[Bear](client)("bears", 1)
+    * ... }
+    * List(Right(Bear(Pooh,honey)))
+    * }}}
+    */
+  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, limit: Int)
+    : List[Xor[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
+
+  /**
+    * Returns all items present in the index
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
@@ -220,6 +241,28 @@ object Scanamo {
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)
   : List[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
+
+  /**
+    * Scans items present in the index, limiting the number of rows evaluated by Dynamo to `limit`
+    *
+    * {{{
+    * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
+    * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
+    * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
+    * ...   Scanamo.put(client)("bears")(Bear("Graham", "quinoa", Some("Guardianista")))
+    * ...   Scanamo.scanIndexWithLimit[Bear](client)("bears", "alias-index", 1)
+    * ... }
+    * List(Right(Bear(Graham,quinoa,Some(Guardianista))))
+    * }}}
+    */
+  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String, limit: Int)
+  : List[Xor[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
   /**
     * Perform a query against a table
@@ -282,6 +325,29 @@ object Scanamo {
     exec(client)(ScanamoFree.query(tableName)(query))
 
   /**
+    * Perform a query against a table returning up to `limit` items
+    *
+    * {{{
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> case class Transport(mode: String, line: String)
+    * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
+    * ...   Scanamo.putAll(client)("transport")(List(
+    * ...     Transport("Underground", "Circle"),
+    * ...     Transport("Underground", "Metropolitan"),
+    * ...     Transport("Underground", "Central")))
+    * ...   Scanamo.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+    * ... }
+    * List(Right(Transport(Underground,Central)))
+    * }}}
+    */
+  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_], limit: Int)
+  : List[Xor[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
+
+  /**
     * Query a table using a secondary index
     *
     * {{{
@@ -303,4 +369,32 @@ object Scanamo {
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_])
   : List[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
+
+  /**
+    * Query a table using a secondary index
+    *
+    * {{{
+    * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    * ... ) {
+    * ...   Scanamo.putAll(client)("transport")(List(
+    * ...     Transport("Underground", "Circle", "Yellow"),
+    * ...     Transport("Underground", "Metropolitan", "Magenta"),
+    * ...     Transport("Underground", "Central", "Red"),
+    * ...     Transport("Underground", "Picadilly", "Blue"),
+    * ...     Transport("Underground", "Northern", "Black")))
+    * ...   Scanamo.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
+    * ...     ('mode -> "Underground" and ('colour beginsWith "Bl")), 1)
+    * ... }
+    * List(Right(Transport(Underground,Northern,Black)))
+    * }}}
+    */
+  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_], limit: Int)
+  : List[Xor[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 }

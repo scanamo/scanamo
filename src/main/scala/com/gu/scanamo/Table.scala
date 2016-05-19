@@ -226,7 +226,7 @@ private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName:
     * >>> import com.gu.scanamo.syntax._
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
-    * ...   'mode -> S, 'line -> S)('mode ->S, 'colour -> S
+    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
     * ... ) {
     * ...   val operations = for {
     * ...     _ <- transport.putAll(List(
