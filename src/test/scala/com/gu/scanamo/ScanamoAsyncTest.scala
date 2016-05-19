@@ -193,4 +193,42 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
     }
   }
+
+  it("conditionally put asynchronously") {
+    case class Farm(animals: List[String])
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    import com.gu.scanamo.syntax._
+
+    val farmersTable = Table[Farmer]("nursery-farmers")
+
+    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+      val farmerOps = for {
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        _ <- farmersTable.given('age -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
+        _ <- farmersTable.given('age -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
+        farmerWithNewStock <- farmersTable.get('name -> "McDonald")
+      } yield farmerWithNewStock
+      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"))))))
+    }
+  }
+
+  it("conditionally delete asynchronously") {
+    case class Gremlin(number: Int, wet: Boolean)
+
+    import com.gu.scanamo.syntax._
+
+    val gremlinsTable = Table[Gremlin]("gremlins")
+
+    LocalDynamoDB.usingTable(client)("gremlins")('number -> N) {
+      val ops = for {
+        _ <- gremlinsTable.putAll(List(Gremlin(1, false), Gremlin(2, true)))
+        _ <- gremlinsTable.given('wet -> true).delete('number -> 1)
+        _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
+        remainingGremlins <- gremlinsTable.scan()
+      } yield remainingGremlins
+      ScanamoAsync.exec(client)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
+    }
+  }
 }
