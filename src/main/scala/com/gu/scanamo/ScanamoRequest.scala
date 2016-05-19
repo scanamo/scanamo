@@ -2,11 +2,11 @@ package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
-import com.gu.scanamo.request.ScanamoPutRequest
+import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest}
 
 import scala.collection.convert.decorateAll._
 
-private object ScanamoRequest {
+private object Requests {
 
   /**
     * {{{
@@ -14,7 +14,7 @@ private object ScanamoRequest {
     * prop> import com.amazonaws.services.dynamodbv2.model._
     *
     * prop> (m: Map[String, Int], tableName: String) =>
-    *     |   val putRequest = ScanamoRequest.putRequest(tableName)(m)
+    *     |   val putRequest = Requests.putRequest(tableName)(m)
     *     |   putRequest.tableName == tableName &&
     *     |   putRequest.item == m.mapValues(i => new AttributeValue().withN(i.toString)).asJava
     * }}}
@@ -34,7 +34,7 @@ private object ScanamoRequest {
     * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val getRequest = ScanamoRequest.getRequest(tableName)(Symbol(keyName) -> keyValue)
+    *     |   val getRequest = Requests.getRequest(tableName)(Symbol(keyName) -> keyValue)
     *     |   getRequest.getTableName == tableName &&
     *     |   getRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
@@ -54,13 +54,13 @@ private object ScanamoRequest {
     * prop> import com.gu.scanamo.syntax._
     *
     * prop> (keyName: String, keyValue: Long, tableName: String) =>
-    *     |   val deleteRequest = ScanamoRequest.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
-    *     |   deleteRequest.getTableName == tableName &&
-    *     |   deleteRequest.getKey == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
+    *     |   val deleteRequest = Requests.deleteRequest(tableName)(Symbol(keyName) -> keyValue)
+    *     |   deleteRequest.tableName == tableName &&
+    *     |   deleteRequest.key == Map(keyName -> new AttributeValue().withN(keyValue.toString)).asJava
     * }}}
     */
-  def deleteRequest[T](tableName: String)(key: UniqueKey[_]): DeleteItemRequest =
-    new DeleteItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava)
+  def deleteRequest[T](tableName: String)(key: UniqueKey[_]): ScanamoDeleteRequest =
+    ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap.asJava, None)
 
   def queryRequest[T](tableName: String)(query: Query[_]): QueryRequest = {
     query(new QueryRequest().withTableName(tableName))

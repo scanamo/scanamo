@@ -6,16 +6,17 @@ import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.model._
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
-import com.gu.scanamo.request.ScanamoPutRequest
+import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
 
-sealed trait ScanamoOpsA[A]
+sealed trait ScanamoOpsA[A] extends Product with Serializable
 final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResult]
 final case class ConditionalPut(req: ScanamoPutRequest) extends ScanamoOpsA[Xor[ConditionalCheckFailedException, PutItemResult]]
 final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
-final case class Delete(req: DeleteItemRequest) extends ScanamoOpsA[DeleteItemResult]
+final case class Delete(req: ScanamoDeleteRequest) extends ScanamoOpsA[DeleteItemResult]
+final case class ConditionalDelete(req: ScanamoDeleteRequest) extends ScanamoOpsA[Xor[ConditionalCheckFailedException, DeleteItemResult]]
 final case class Scan(req: ScanRequest) extends ScanamoOpsA[ScanResult]
 final case class Query(req: QueryRequest) extends ScanamoOpsA[QueryResult]
 final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
@@ -28,7 +29,9 @@ object ScanamoOps {
   def conditionalPut(req: ScanamoPutRequest): ScanamoOps[Xor[ConditionalCheckFailedException, PutItemResult]] =
     liftF[ScanamoOpsA, Xor[ConditionalCheckFailedException, PutItemResult]](ConditionalPut(req))
   def get(req: GetItemRequest): ScanamoOps[GetItemResult] = liftF[ScanamoOpsA, GetItemResult](Get(req))
-  def delete(req: DeleteItemRequest): ScanamoOps[DeleteItemResult] = liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
+  def delete(req: ScanamoDeleteRequest): ScanamoOps[DeleteItemResult] = liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
+  def conditionalDelete(req: ScanamoDeleteRequest): ScanamoOps[Xor[ConditionalCheckFailedException, DeleteItemResult]] =
+    liftF[ScanamoOpsA, Xor[ConditionalCheckFailedException, DeleteItemResult]](ConditionalDelete(req))
   def scan(req: ScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
   def query(req: QueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](Query(req))
   def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResult] =
@@ -49,6 +52,15 @@ object ScanamoInterpreters {
       )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
     )
 
+  def javaDeleteRequest(req: ScanamoDeleteRequest): DeleteItemRequest =
+    req.condition.foldLeft(
+      new DeleteItemRequest().withTableName(req.tableName).withKey(req.key)
+    )((r, c) =>
+      c.attributeValues.foldLeft(
+        r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
+      )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
+    )
+
   def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
       case Put(req) =>
@@ -60,7 +72,11 @@ object ScanamoInterpreters {
       case Get(req) =>
         client.getItem(req)
       case Delete(req) =>
-        client.deleteItem(req)
+        client.deleteItem(javaDeleteRequest(req))
+      case ConditionalDelete(req) =>
+        Xor.catchOnly[ConditionalCheckFailedException] {
+          client.deleteItem(javaDeleteRequest(req))
+        }
       case Scan(req) =>
         client.scan(req)
       case Query(req) =>
@@ -93,7 +109,11 @@ object ScanamoInterpreters {
       case Get(req) =>
         futureOf(client.getItemAsync, req)
       case Delete(req) =>
-        futureOf(client.deleteItemAsync, req)
+        futureOf(client.deleteItemAsync, javaDeleteRequest(req))
+      case ConditionalDelete(req) =>
+        futureOf(client.deleteItemAsync, javaDeleteRequest(req)).map(Xor.right[ConditionalCheckFailedException, DeleteItemResult]).recover {
+          case e: ConditionalCheckFailedException => Xor.left(e)
+        }
       case Scan(req) =>
         futureOf(client.scanAsync, req)
       case Query(req) =>
