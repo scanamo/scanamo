@@ -43,6 +43,10 @@ The `Xor` represents the possibility that an item might exist, but not be parsea
 type, in this case `Farmer`. For more information on `Xor`, see the 
 [Cats documentation](http://typelevel.org/cats/tut/xor.html).
 
+Like all the examples in this README and the Scaladoc, this creates a table, so that it 
+can be checked using [sbt-doctest](https://github.com/tkawachi/sbt-doctest), but the same 
+operations can happily run against pre-existing tables.
+
 ### Table
 
 Scanamo provides a [Table](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Table) 
@@ -102,6 +106,36 @@ scala> val operations = for {
      
 scala> Scanamo.exec(client)(operations)
 res1: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
+```
+
+### Using Indexes
+
+You can also scan and query indexes with Scanamo. In the following example, there is a
+table called `transport` with a hash key of `mode` and range key of `line` and a 
+[global secondary index](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html) 
+called `colour-index` with only a hash key on the `colour` attribute:
+
+```scala
+scala> import com.gu.scanamo._
+scala> import com.gu.scanamo.syntax._
+
+scala> case class Transport(mode: String, line: String, colour: String)
+scala> val transport = Table[Transport]("transport")
+scala> val colourIndex = transport.index("colour-index")
+
+scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
+     |   val operations = for {
+     |     _ <- transport.putAll(List(
+     |       Transport("Underground", "Circle", "Yellow"),
+     |       Transport("Underground", "Metropolitan", "Maroon"),
+     |       Transport("Underground", "Central", "Red")))
+     |     maroonLine <- colourIndex.query('colour -> "Maroon")
+     |   } yield maroonLine.toList
+     |   Scanamo.exec(client)(operations)
+     | }
+res0: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Metropolitan,Maroon)))
 ```
 
 ### Non-blocking calls
