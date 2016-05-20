@@ -24,8 +24,12 @@ object LocalDynamoDB {
         thunk: => T
   ): T = {
     createTable(client)(tableName)(attributeDefinitions: _*)
-    val res = thunk
-    client.deleteTable(tableName)
+    val res = try {
+      thunk
+    } finally {
+      client.deleteTable(tableName)
+      ()
+    }
     res
   }
 
@@ -52,8 +56,12 @@ object LocalDynamoDB {
             .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
           )
     )
-    val res = thunk
-    client.deleteTable(tableName)
+    val res = try {
+      thunk
+    } finally {
+      client.deleteTable(tableName)
+      ()
+    }
     res
   }
 
