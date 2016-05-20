@@ -4,7 +4,7 @@ New features:
 
  * support for conditional `put` and `delete` operations via the `given` method on `Table`
  * support for limiting the number of items evaluated by `query` and `scan` operations
- * a default `DyanmoFormat` instance for `Vector`
+ * a default `DynamoFormat` instance for `Vector`
  
 Breaking changes:
 
