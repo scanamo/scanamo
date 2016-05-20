@@ -55,6 +55,8 @@ doctestDecodeHtmlEntities := true
 doctestWithDependencies := false
 doctestTestFramework := DoctestTestFramework.ScalaTest
 
+parallelExecution in Test := false
+
 homepage := Some(url("https://github.com/guardian/scanamo"))
 licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 publishMavenStyle := true

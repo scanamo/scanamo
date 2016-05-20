@@ -99,6 +99,29 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     }
   }
 
+  it("scans with a limit asynchronously") {
+    case class Bear(name: String, favouriteFood: String)
+
+    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
+      val results = ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1)
+      results.futureValue should equal(List(Right(Bear("Pooh","honey"))))
+    }
+  }
+
+  it ("scanIndexWithLimit") {
+    case class Bear(name: String, favouriteFood: String, alias: Option[String])
+
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
+      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
+      results.futureValue should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
+    }
+  }
+
   it("should query asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncAnimals")('species -> S, 'number -> N) {
 
@@ -140,6 +163,42 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       ScanamoAsync.query[Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
+    }
+  }
+
+  it ("queries with a limit asynchronously") {
+    import com.gu.scanamo.syntax._
+
+    case class Transport(mode: String, line: String)
+
+    LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
+      Scanamo.putAll(client)("transport")(List(
+        Transport("Underground", "Circle"),
+        Transport("Underground", "Metropolitan"),
+        Transport("Underground", "Central")))
+      val results = ScanamoAsync.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      results.futureValue should equal(List(Right(Transport("Underground","Central"))))
+    }
+  }
+
+  it ("queries an index with a limit asynchronously") {
+    case class Transport(mode: String, line: String, colour: String)
+
+    import com.gu.scanamo.syntax._
+
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+      'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    ) {
+      Scanamo.putAll(client)("transport")(List(
+        Transport("Underground", "Circle", "Yellow"),
+        Transport("Underground", "Metropolitan", "Magenta"),
+        Transport("Underground", "Central", "Red"),
+        Transport("Underground", "Picadilly", "Blue"),
+        Transport("Underground", "Northern", "Black")))
+      val results = ScanamoAsync.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
+        ('mode -> "Underground" and ('colour beginsWith "Bl")), 1)
+
+      results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
     }
   }
   

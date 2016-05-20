@@ -45,13 +45,13 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val operations = for {
     * ...     _ <- transport.putAll(List(
     * ...       Transport("Underground", "Circle", "Yellow"),
-    * ...       Transport("Underground", "Metropolitan", "Maroon"),
+    * ...       Transport("Underground", "Metropolitan", "Magenta"),
     * ...       Transport("Underground", "Central", "Red")))
-    * ...     maroonLine <- transport.index("colour-index").query('colour -> "Maroon")
-    * ...   } yield maroonLine.toList
+    * ...     MagentaLine <- transport.index("colour-index").query('colour -> "Magenta")
+    * ...   } yield MagentaLine.toList
     * ...   Scanamo.exec(client)(operations)
     * ... }
-    * List(Right(Transport(Underground,Metropolitan,Maroon)))
+    * List(Right(Transport(Underground,Metropolitan,Magenta)))
     * }}}
     */
   def index(indexName: String) = Index[V](name, indexName)
@@ -63,7 +63,32 @@ case class Table[V: DynamoFormat](name: String) {
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 
   /**
-    * Performs the chained operation if the condition is met
+    * Query or scan a table, limiting the number of items evaluated by Dynamo
+    * {{{
+    * >>> case class Transport(mode: String, line: String)
+    * >>> val transport = Table[Transport]("transport")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- transport.putAll(List(
+    * ...       Transport("Underground", "Circle"),
+    * ...       Transport("Underground", "Metropolitan"),
+    * ...       Transport("Underground", "Central")))
+    * ...     results <- transport.limit(1).query('mode -> "Underground" and ('line beginsWith "C"))
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Transport(Underground,Central)))
+    * }}}
+    */
+  def limit(n: Int) = TableLimit(this, n)
+
+  /**
+    * Performs the chained operation, `put` if the condition is met
     *
     * {{{
     * >>> case class Farm(animals: List[String])
@@ -189,10 +214,44 @@ case class Table[V: DynamoFormat](name: String) {
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)
 }
 
-private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String)
+private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
+  /**
+    * Query or scan an index, limiting the number of items evaluated by Dynamo
+    * {{{
+    * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> val transport = Table[Transport]("transport")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    * ... ) {
+    * ...   val operations = for {
+    * ...     _ <- transport.putAll(List(
+    * ...       Transport("Underground", "Circle", "Yellow"),
+    * ...       Transport("Underground", "Metropolitan", "Magenta"),
+    * ...       Transport("Underground", "Central", "Red"),
+    * ...       Transport("Underground", "Picadilly", "Blue"),
+    * ...       Transport("Underground", "Northern", "Black")))
+    * ...     somethingBeginningWithBl <- transport.index("colour-index").limit(1).query(
+    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")).descending
+    * ...     )
+    * ...   } yield somethingBeginningWithBl.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Transport(Underground,Picadilly,Blue)))
+    * }}}
+    */
+  def limit(n: Int) = IndexLimit(this, n)
+}
+
+private[scanamo] case class TableLimit[V: DynamoFormat](table: Table[V], limit: Int)
+private[scanamo] case class IndexLimit[V: DynamoFormat](index: Index[V], limit: Int)
 
 /* typeclass */trait Scannable[T[_], V] {
-  def scan(t: T[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]]
+  def scan(t: T[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]]
 }
 
 object Scannable {
@@ -212,17 +271,26 @@ object Scannable {
   }
 
   implicit def tableScannable[V: DynamoFormat] = new Scannable[Table, V] {
-    override def scan(t: Table[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def scan(t: Table[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.scan[V](t.name)
   }
   implicit def indexScannable[V: DynamoFormat] = new Scannable[Index, V] {
-    override def scan(i: Index[V])(): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def scan(i: Index[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.scanIndex[V](i.tableName, i.indexName)
+  }
+
+  implicit def limitedTableScannable[V: DynamoFormat] = new Scannable[TableLimit, V] {
+    override def scan(t: TableLimit[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
+      ScanamoFree.scanWithLimit[V](t.table.name, t.limit)
+  }
+  implicit def limitedIndexScannable[V: DynamoFormat] = new Scannable[IndexLimit, V] {
+    override def scan(i: IndexLimit[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]] =
+      ScanamoFree.scanIndexWithLimit[V](i.index.tableName, i.index.indexName, i.limit)
   }
 }
 
 /* typeclass */ trait Queryable[T[_], V] {
-  def query(t: T[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]]
+  def query(t: T[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]]
 }
 
 object Queryable {
@@ -242,11 +310,19 @@ object Queryable {
   }
 
   implicit def tableQueryable[V: DynamoFormat] = new Queryable[Table, V] {
-    override def query(t: Table[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def query(t: Table[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.query[V](t.name)(query)
   }
   implicit def indexQueryable[V: DynamoFormat] = new Queryable[Index, V] {
-    override def query(i: Index[V])(query: Query[_]): ScanamoOps[Stream[Xor[DynamoReadError, V]]] =
+    override def query(i: Index[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
       ScanamoFree.queryIndex[V](i.tableName, i.indexName)(query)
+  }
+  implicit def limitedTableQueryable[V: DynamoFormat] = new Queryable[TableLimit, V] {
+    override def query(t: TableLimit[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
+      ScanamoFree.queryWithLimit[V](t.table.name)(query, t.limit)
+  }
+  implicit def limitedIndexQueryable[V: DynamoFormat] = new Queryable[IndexLimit, V] {
+    override def query(i: IndexLimit[V])(query: Query[_]): ScanamoOps[List[Xor[DynamoReadError, V]]] =
+      ScanamoFree.queryIndexWithLimit[V](i.index.tableName, i.index.indexName)(query, i.limit)
   }
 }

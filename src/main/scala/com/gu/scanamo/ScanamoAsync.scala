@@ -43,18 +43,34 @@ object ScanamoAsync {
     exec(client)(ScanamoFree.delete(tableName)(key))
 
   def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
+  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int)
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
+
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
+  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int)
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
+
   def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
+  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int)
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
+
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[Stream[Xor[DynamoReadError, T]]] =
+    (implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
+
+  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(
+    query: Query[_], limit: Int)(implicit ec: ExecutionContext): Future[List[Xor[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 }

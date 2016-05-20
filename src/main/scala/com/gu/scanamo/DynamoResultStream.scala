@@ -11,27 +11,31 @@ import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
 import collection.convert.decorateAsScala._
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
+  type EvaluationKey = java.util.Map[String, AttributeValue]
+
+  def limit(req: Req): Option[Int]
   def items(res: Res): java.util.List[java.util.Map[String, AttributeValue]]
-  def lastEvaluatedKey(res: Res): java.util.Map[String, AttributeValue]
-  def withExclusiveStartKey(req: Req, key: java.util.Map[String, AttributeValue]): Req
+  def lastEvaluatedKey(res: Res): EvaluationKey
+  def withExclusiveStartKey(req: Req, key: EvaluationKey): Req
   def exec(req: Req): ScanamoOps[Res]
 
-  def stream[T: DynamoFormat](req: Req): ScanamoOps[Stream[Xor[DynamoReadError, T]]] = {
+  def stream[T: DynamoFormat](req: Req): ScanamoOps[List[Xor[DynamoReadError, T]]] = {
 
-    def streamMore(lastKey: Option[java.util.Map[String, AttributeValue]]): ScanamoOps[Stream[Xor[DynamoReadError, T]]] = {
+    def streamMore(lastKey: Option[EvaluationKey], remainingLimit: Option[Int]): ScanamoOps[List[Xor[DynamoReadError, T]]] = {
       for {
         queryResult <- exec(lastKey.foldLeft(req)(withExclusiveStartKey(_, _)))
-        results = items(queryResult).asScala.map(ScanamoFree.read[T]).toStream
-        resultStream <-
-          Option(lastEvaluatedKey(queryResult)).foldLeft(
-            Free.pure[ScanamoOpsA, Stream[Xor[DynamoReadError, T]]](results)
+        results = items(queryResult).asScala.map(ScanamoFree.read[T]).toList
+        resultsStillToGet = remainingLimit.map(_ - results.length)
+        resultList <-
+          Option(lastEvaluatedKey(queryResult)).filterNot(_ => resultsStillToGet.exists(_ <= 0)).foldLeft(
+            Free.pure[ScanamoOpsA, List[Xor[DynamoReadError, T]]](results)
           )((rs, k) => for {
             items <- rs
-            more <- streamMore(Some(k))
-          } yield items #::: more)
-      } yield resultStream
+            more <- streamMore(Some(k), resultsStillToGet)
+          } yield items ::: more)
+      } yield resultList
     }
-    streamMore(None)
+    streamMore(None, limit(req))
   }
 }
 
@@ -43,6 +47,8 @@ private[scanamo] object DynamoResultStream {
       req.withExclusiveStartKey(key)
 
     override def exec(req: ScanRequest): ScanamoOps[ScanResult] = ScanamoOps.scan(req)
+
+    override def limit(req: ScanRequest): Option[Int] = Option(req.getLimit).map(_.intValue)
   }
 
   object QueryResultStream extends DynamoResultStream[QueryRequest, QueryResult] {
@@ -52,5 +58,7 @@ private[scanamo] object DynamoResultStream {
       req.withExclusiveStartKey(key)
 
     override def exec(req: QueryRequest): ScanamoOps[QueryResult] = ScanamoOps.query(req)
+
+    override def limit(req: QueryRequest): Option[Int] = Option(req.getLimit).map(_.intValue)
   }
 }
