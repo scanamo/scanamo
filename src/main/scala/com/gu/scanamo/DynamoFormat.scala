@@ -21,9 +21,9 @@ import scala.reflect.ClassTag
   * DynamoDB's `AttributeValue`
   *
   * {{{
-  * >>> val mapF = DynamoFormat[Map[String, List[Int]]]
-  * >>> mapF.read(mapF.write(Map("foo" -> List(1, 2, 3), "bar" -> List(3, 2, 1))))
-  * Right(Map(foo -> List(1, 2, 3), bar -> List(3, 2, 1)))
+  * >>> val listOptionFormat = DynamoFormat[List[Option[Int]]]
+  * >>> listOptionFormat.read(listOptionFormat.write(List(Some(1), None, Some(3))))
+  * Right(List(Some(1), None, Some(3)))
   * }}}
   *
   * Also supports automatic derivation for case classes
