@@ -1,3 +1,17 @@
+## Version 0.5.0
+
+New features:
+
+ * support for conditional `put` and `delete` operations via the `given` method on `Table`
+ * support for limiting the number of items evaluated by `query` and `scan` operations
+ * a default `DynamoFormat` instance for `Vector`
+ 
+Breaking changes:
+
+ * `query` and `scan` operations now return a `List`, not a `Stream`, as they were being 
+ eagerly evaluated
+
+
 ## Version 0.4.0
 
 > 2016 April 29

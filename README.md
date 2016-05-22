@@ -19,7 +19,7 @@ libraryDependencies ++= Seq(
 Usage
 -----
 
-If used the Java SDK to access Dynamo, the most familiar way to use Scanamo 
+If you've used the Java SDK to access Dynamo, the most familiar way to use Scanamo 
 is via the [Scanamo](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
 object:
 
@@ -39,10 +39,18 @@ scala> Scanamo.get[Farmer](client)("farmer")('name -> "McDonald")
 res1: Option[cats.data.Xor[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
-The `Xor` represents the possibility that an item might exist, but not be parseable into the given type, in this case `Farmer`. For more information on `Xor`, see the [Cats documentation](http://typelevel.org/cats/tut/xor.html).
+The `Xor` represents the possibility that an item might exist, but not be parseable into the given 
+type, in this case `Farmer`. For more information on `Xor`, see the 
+[Cats documentation](http://typelevel.org/cats/tut/xor.html).
 
-Scanamo also provides a [Table](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Table) 
-abstraction:
+Like all the examples in this README and the Scaladoc, this creates a table, so that it 
+can be checked using [sbt-doctest](https://github.com/tkawachi/sbt-doctest), but the same 
+operations can happily run against pre-existing tables.
+
+### Table
+
+Scanamo provides a [Table](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Table) 
+abstraction to reduce noise when defining multiple operations against the same table:
 
 ```scala
 scala> import com.gu.scanamo._
@@ -74,6 +82,8 @@ res1: List[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = List(Right(Lucky
 
 Note that no operations are actually executed against DynamoDB until `exec` is called. 
 
+### Querying
+
 It's also possible to make more complex queries:
 
 ```scala
@@ -98,6 +108,38 @@ scala> Scanamo.exec(client)(operations)
 res1: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
 ```
 
+### Using Indexes
+
+You can also scan and query indexes with Scanamo. In the following example, there is a
+table called `transport` with a hash key of `mode` and range key of `line` and a 
+[global secondary index](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html) 
+called `colour-index` with only a hash key on the `colour` attribute:
+
+```scala
+scala> import com.gu.scanamo._
+scala> import com.gu.scanamo.syntax._
+
+scala> case class Transport(mode: String, line: String, colour: String)
+scala> val transport = Table[Transport]("transport")
+scala> val colourIndex = transport.index("colour-index")
+
+scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
+     |   val operations = for {
+     |     _ <- transport.putAll(List(
+     |       Transport("Underground", "Circle", "Yellow"),
+     |       Transport("Underground", "Metropolitan", "Maroon"),
+     |       Transport("Underground", "Central", "Red")))
+     |     maroonLine <- colourIndex.query('colour -> "Maroon")
+     |   } yield maroonLine.toList
+     |   Scanamo.exec(client)(operations)
+     | }
+res0: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Metropolitan,Maroon)))
+```
+
+### Non-blocking calls
+ 
 Scanamo also supports asynchronous calls to Dynamo:
 
 ```scala
@@ -129,7 +171,11 @@ res1: Option[cats.data.Xor[error.DynamoReadError, Farmer]] = Some(Right(Farmer(B
 
 ### Custom Formats
 
-To define a serialisation format for types which Scanamo doesn't already provide:
+Scanamo uses the `DynamoFormat` type class to define how to read and write 
+different types to DynamoDB. Scanamo provides such formats for many common 
+types, but it's also possible to define a serialisation format for types 
+which Scanamo doesn't provide. For example to store Joda `DateTime` objects
+as ISO `String`s in Dynamo:
   
 ```scala
 scala> import org.joda.time._
