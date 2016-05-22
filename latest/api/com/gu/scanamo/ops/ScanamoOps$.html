@@ -219,19 +219,53 @@
     </span>)</span>
               
         </dd></dl></div>
-    </li><li name="com.gu.scanamo.ops.ScanamoOps#delete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="delete(req:com.amazonaws.services.dynamodbv2.model.DeleteItemRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.DeleteItemResult]"></a>
-      <a id="delete(DeleteItemRequest):ScanamoOps[DeleteItemResult]"></a>
+    </li><li name="com.gu.scanamo.ops.ScanamoOps#conditionalDelete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="conditionalDelete(req:com.gu.scanamo.request.ScanamoDeleteRequest):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]"></a>
+      <a id="conditionalDelete(ScanamoDeleteRequest):ScanamoOps[Xor[ConditionalCheckFailedException,DeleteItemResult]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">delete</span><span class="params">(<span name="req">req: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemRequest">DeleteItemRequest</span></span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemResult">DeleteItemResult</span>]</span>
+        <span class="name">conditionalDelete</span><span class="params">(<span name="req">req: <a href="../request/ScanamoDeleteRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoDeleteRequest">ScanamoDeleteRequest</a></span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="cats.data.Xor">Xor</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemResult">DeleteItemResult</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.ops.ScanamoOps$@delete(req:com.amazonaws.services.dynamodbv2.model.DeleteItemRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.DeleteItemResult]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.ops.ScanamoOps$@conditionalDelete(req:com.gu.scanamo.request.ScanamoDeleteRequest):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ops.ScanamoOps#conditionalPut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="conditionalPut(req:com.gu.scanamo.request.ScanamoPutRequest):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]"></a>
+      <a id="conditionalPut(ScanamoPutRequest):ScanamoOps[Xor[ConditionalCheckFailedException,PutItemResult]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">conditionalPut</span><span class="params">(<span name="req">req: <a href="../request/ScanamoPutRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoPutRequest">ScanamoPutRequest</a></span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="cats.data.Xor">Xor</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.gu.scanamo.ops.ScanamoOps$@conditionalPut(req:com.gu.scanamo.request.ScanamoPutRequest):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ops.ScanamoOps#delete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="delete(req:com.gu.scanamo.request.ScanamoDeleteRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.DeleteItemResult]"></a>
+      <a id="delete(ScanamoDeleteRequest):ScanamoOps[DeleteItemResult]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">delete</span><span class="params">(<span name="req">req: <a href="../request/ScanamoDeleteRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoDeleteRequest">ScanamoDeleteRequest</a></span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemResult">DeleteItemResult</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.gu.scanamo.ops.ScanamoOps$@delete(req:com.gu.scanamo.request.ScanamoDeleteRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.DeleteItemResult]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -413,18 +447,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.ops.ScanamoOps#put" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="put(req:com.amazonaws.services.dynamodbv2.model.PutItemRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.PutItemResult]"></a>
-      <a id="put(PutItemRequest):ScanamoOps[PutItemResult]"></a>
+      <a id="put(req:com.gu.scanamo.request.ScanamoPutRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.PutItemResult]"></a>
+      <a id="put(ScanamoPutRequest):ScanamoOps[PutItemResult]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">put</span><span class="params">(<span name="req">req: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemRequest">PutItemRequest</span></span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span>]</span>
+        <span class="name">put</span><span class="params">(<span name="req">req: <a href="../request/ScanamoPutRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoPutRequest">ScanamoPutRequest</a></span>)</span><span class="result">: <a href="package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.ops.ScanamoOps$@put(req:com.amazonaws.services.dynamodbv2.model.PutItemRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.PutItemResult]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.ops.ScanamoOps$@put(req:com.gu.scanamo.request.ScanamoPutRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.PutItemResult]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

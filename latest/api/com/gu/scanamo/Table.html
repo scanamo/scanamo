@@ -330,6 +330,116 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.Table#given" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]"></a>
+      <a id="given[T](T)(ConditionExpression[T]):ConditionalOperation[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">given</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="condition">condition: <span class="extype" name="com.gu.scanamo.Table.given.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.Table.given.T">T</span>]</span>)</span><span class="result">: <a href="query/ConditionalOperation.html" class="extype" name="com.gu.scanamo.query.ConditionalOperation">ConditionalOperation</a>[<span class="extype" name="com.gu.scanamo.Table.given.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.Table@given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Performs the chained operation, <code>put</code> if the condition is met</p><div class="fullcomment"><div class="comment cmt"><p>Performs the chained operation, <code>put</code> if the condition is met</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
+
+&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
+&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.query._
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+
+&gt;&gt;&gt; <span class="kw">val</span> farmersTable = Table[Farmer](<span class="lit">"nursery-farmers"</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"nursery-farmers"</span>)('name -&gt; S) {
+...   <span class="kw">val</span> farmerOps = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> farmersTable.put(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>))))
+...     _ <span class="kw">&lt;-</span> farmersTable.given('age -&gt; <span class="num">156</span>L).put(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"chicken"</span>))))
+...     _ <span class="kw">&lt;-</span> farmersTable.given('age -&gt; <span class="num">15</span>L).put(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"gnu"</span>, <span class="lit">"chicken"</span>))))
+...     farmerWithNewStock <span class="kw">&lt;-</span> farmersTable.get('name -&gt; <span class="lit">"McDonald"</span>)
+...   } <span class="kw">yield</span> farmerWithNewStock
+...   Scanamo.exec(client)(farmerOps)
+... }
+<span class="std">Some</span>(Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, chicken)))))
+
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Letter(roman: <span class="std">String</span>, greek: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">val</span> lettersTable = Table[Letter](<span class="lit">"letters"</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"letters"</span>)('roman -&gt; S) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> lettersTable.putAll(<span class="std">List</span>(Letter(<span class="lit">"a"</span>, <span class="lit">"alpha"</span>), Letter(<span class="lit">"b"</span>, <span class="lit">"beta"</span>), Letter(<span class="lit">"c"</span>, <span class="lit">"gammon"</span>)))
+...     _ <span class="kw">&lt;-</span> lettersTable.given('greek beginsWith <span class="lit">"ale"</span>).put(Letter(<span class="lit">"a"</span>, <span class="lit">"aleph"</span>))
+...     _ <span class="kw">&lt;-</span> lettersTable.given('greek beginsWith <span class="lit">"gam"</span>).put(Letter(<span class="lit">"c"</span>, <span class="lit">"gamma"</span>))
+...     letters <span class="kw">&lt;-</span> lettersTable.scan()
+...   } <span class="kw">yield</span> letters
+...   Scanamo.exec(client)(ops).toList
+... }
+<span class="std">List</span>(Right(Letter(b,beta)), Right(Letter(c,gamma)), Right(Letter(a,alpha)))
+
+&gt;&gt;&gt; <span class="kw">import</span> cats.implicits._
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Turnip(size: <span class="std">Int</span>, description: <span class="std">Option</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">val</span> turnipsTable = Table[Turnip](<span class="lit">"turnips"</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"turnips"</span>)('size -&gt; N) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> turnipsTable.putAll(<span class="std">List</span>(Turnip(<span class="num">1</span>, <span class="std">None</span>), Turnip(<span class="num">1000</span>, <span class="std">None</span>)))
+...     initialTurnips <span class="kw">&lt;-</span> turnipsTable.scan()
+...     _ <span class="kw">&lt;-</span> initialTurnips.flatMap(_.toOption).traverse(t <span class="kw">=&gt;</span>
+...       turnipsTable.given('size &gt; <span class="num">500</span>).put(t.copy(description = <span class="std">Some</span>(<span class="lit">"Big turnip in the country."</span>))))
+...     turnips <span class="kw">&lt;-</span> turnipsTable.scan()
+...   } <span class="kw">yield</span> turnips
+...   Scanamo.exec(client)(ops).toList
+... }
+<span class="std">List</span>(Right(Turnip(<span class="num">1</span>,<span class="std">None</span>)), Right(Turnip(<span class="num">1000</span>,<span class="std">Some</span>(Big turnip in the country.))))</pre><p>Conditions can also make use of negation via <code>not</code>:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Thing(a: <span class="std">String</span>, maybe: <span class="std">Option</span>[<span class="std">Int</span>])
+&gt;&gt;&gt; <span class="kw">val</span> thingTable = Table[Thing](<span class="lit">"things"</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"things"</span>)('a -&gt; S) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> thingTable.putAll(<span class="std">List</span>(Thing(<span class="lit">"a"</span>, <span class="std">None</span>), Thing(<span class="lit">"b"</span>, <span class="std">Some</span>(<span class="num">1</span>)), Thing(<span class="lit">"c"</span>, <span class="std">None</span>)))
+...     _ <span class="kw">&lt;-</span> thingTable.given(attributeExists('maybe)).put(Thing(<span class="lit">"a"</span>, <span class="std">Some</span>(<span class="num">2</span>)))
+...     _ <span class="kw">&lt;-</span> thingTable.given(attributeExists('maybe)).put(Thing(<span class="lit">"b"</span>, <span class="std">Some</span>(<span class="num">3</span>)))
+...     _ <span class="kw">&lt;-</span> thingTable.given(Not(attributeExists('maybe))).put(Thing(<span class="lit">"c"</span>, <span class="std">Some</span>(<span class="num">42</span>)))
+...     _ <span class="kw">&lt;-</span> thingTable.given(Not(attributeExists('maybe))).put(Thing(<span class="lit">"b"</span>, <span class="std">Some</span>(<span class="num">42</span>)))
+...     things <span class="kw">&lt;-</span> thingTable.scan()
+...   } <span class="kw">yield</span> things
+...   Scanamo.exec(client)(ops).toList
+... }
+<span class="std">List</span>(Right(Thing(b,<span class="std">Some</span>(<span class="num">3</span>))), Right(Thing(c,<span class="std">Some</span>(<span class="num">42</span>))), Right(Thing(a,<span class="std">None</span>)))</pre><p>be combined with <code>and</code></p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Compound(a: <span class="std">String</span>, maybe: <span class="std">Option</span>[<span class="std">Int</span>])
+&gt;&gt;&gt; <span class="kw">val</span> compoundTable = Table[Compound](<span class="lit">"compounds"</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"compounds"</span>)('a -&gt; S) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> compoundTable.putAll(<span class="std">List</span>(Compound(<span class="lit">"alpha"</span>, <span class="std">None</span>), Compound(<span class="lit">"beta"</span>, <span class="std">Some</span>(<span class="num">1</span>)), Compound(<span class="lit">"gamma"</span>, <span class="std">None</span>)))
+...     _ <span class="kw">&lt;-</span> compoundTable.given(attributeExists('maybe) and 'a -&gt; <span class="lit">"alpha"</span>).put(Compound(<span class="lit">"alpha"</span>, <span class="std">Some</span>(<span class="num">2</span>)))
+...     _ <span class="kw">&lt;-</span> compoundTable.given(attributeExists('maybe) and 'a -&gt; <span class="lit">"beta"</span>).put(Compound(<span class="lit">"beta"</span>, <span class="std">Some</span>(<span class="num">3</span>)))
+...     _ <span class="kw">&lt;-</span> compoundTable.given(Condition('a -&gt; <span class="lit">"gamma"</span>) and attributeExists('maybe)).put(Compound(<span class="lit">"gamma"</span>, <span class="std">Some</span>(<span class="num">42</span>)))
+...     compounds <span class="kw">&lt;-</span> compoundTable.scan()
+...   } <span class="kw">yield</span> compounds
+...   Scanamo.exec(client)(ops).toList
+... }
+<span class="std">List</span>(Right(Compound(beta,<span class="std">Some</span>(<span class="num">3</span>))), Right(Compound(alpha,<span class="std">None</span>)), Right(Compound(gamma,<span class="std">None</span>)))</pre><p>or with <code>or</code></p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Choice(number: <span class="std">Int</span>, description: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">val</span> choicesTable = Table[Choice](<span class="lit">"choices"</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"choices"</span>)('number -&gt; N) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> choicesTable.putAll(<span class="std">List</span>(Choice(<span class="num">1</span>, <span class="lit">"cake"</span>), Choice(<span class="num">2</span>, <span class="lit">"crumble"</span>), Choice(<span class="num">3</span>, <span class="lit">"custard"</span>)))
+...     _ <span class="kw">&lt;-</span> choicesTable.given(Condition('description -&gt; <span class="lit">"cake"</span>) or 'description -&gt; <span class="lit">"death"</span>).put(Choice(<span class="num">1</span>, <span class="lit">"victoria sponge"</span>))
+...     _ <span class="kw">&lt;-</span> choicesTable.given(Condition('description -&gt; <span class="lit">"cake"</span>) or 'description -&gt; <span class="lit">"death"</span>).put(Choice(<span class="num">2</span>, <span class="lit">"victoria sponge"</span>))
+...     choices <span class="kw">&lt;-</span> choicesTable.scan()
+...   } <span class="kw">yield</span> choices
+...   Scanamo.exec(client)(ops).toList
+... }
+<span class="std">List</span>(Right(Choice(<span class="num">2</span>,crumble)), Right(Choice(<span class="num">1</span>,victoria sponge)), Right(Choice(<span class="num">3</span>,custard)))</pre><p>The same forms of condition can be applied to deletions</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Gremlin(number: <span class="std">Int</span>, wet: <span class="std">Boolean</span>)
+&gt;&gt;&gt; <span class="kw">val</span> gremlinsTable = Table[Gremlin](<span class="lit">"gremlins"</span>)
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"gremlins"</span>)('number -&gt; N) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> gremlinsTable.putAll(<span class="std">List</span>(Gremlin(<span class="num">1</span>, <span class="kw">false</span>), Gremlin(<span class="num">2</span>, <span class="kw">true</span>)))
+...     _ <span class="kw">&lt;-</span> gremlinsTable.given('wet -&gt; <span class="kw">true</span>).delete('number -&gt; <span class="num">1</span>)
+...     _ <span class="kw">&lt;-</span> gremlinsTable.given('wet -&gt; <span class="kw">true</span>).delete('number -&gt; <span class="num">2</span>)
+...     remainingGremlins <span class="kw">&lt;-</span> gremlinsTable.scan()
+...   } <span class="kw">yield</span> remainingGremlins
+...   Scanamo.exec(client)(ops).toList
+... }
+<span class="std">List</span>(Right(Gremlin(<span class="num">1</span>,<span class="kw">false</span>)))</pre></div></div>
     </li><li name="com.gu.scanamo.Table#index" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="index(indexName:String):com.gu.scanamo.Index[V]"></a>
       <a id="index(String):Index[V]"></a>
@@ -357,13 +467,13 @@
 ...   <span class="kw">val</span> operations = <span class="kw">for</span> {
 ...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">List</span>(
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>, <span class="lit">"Yellow"</span>),
-...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>, <span class="lit">"Maroon"</span>),
+...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>, <span class="lit">"Magenta"</span>),
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>, <span class="lit">"Red"</span>)))
-...     maroonLine <span class="kw">&lt;-</span> transport.index(<span class="lit">"colour-index"</span>).query('colour -&gt; <span class="lit">"Maroon"</span>)
-...   } <span class="kw">yield</span> maroonLine.toList
+...     MagentaLine <span class="kw">&lt;-</span> transport.index(<span class="lit">"colour-index"</span>).query('colour -&gt; <span class="lit">"Magenta"</span>)
+...   } <span class="kw">yield</span> MagentaLine.toList
 ...   Scanamo.exec(client)(operations)
 ... }
-<span class="std">List</span>(Right(Transport(Underground,Metropolitan,Maroon)))</pre></div></div>
+<span class="std">List</span>(Right(Transport(Underground,Metropolitan,Magenta)))</pre></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <a id="isInstanceOf[T0]:Boolean"></a>
@@ -381,6 +491,40 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.Table#limit" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="limit(n:Int):com.gu.scanamo.TableLimit[V]"></a>
+      <a id="limit(Int):TableLimit[V]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">limit</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="com.gu.scanamo.TableLimit">TableLimit</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.Table@limit(n:Int):com.gu.scanamo.TableLimit[V]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Query or scan a table, limiting the number of items evaluated by Dynamo</p><div class="fullcomment"><div class="comment cmt"><p>Query or scan a table, limiting the number of items evaluated by Dynamo</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Transport(mode: <span class="std">String</span>, line: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">val</span> transport = Table[Transport](<span class="lit">"transport"</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"transport"</span>)('mode -&gt; S, 'line -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">List</span>(
+...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>),
+...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>),
+...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>)))
+...     results <span class="kw">&lt;-</span> transport.limit(<span class="num">1</span>).query('mode -&gt; <span class="lit">"Underground"</span> and ('line beginsWith <span class="lit">"C"</span>))
+...   } <span class="kw">yield</span> results.toList
+...   Scanamo.exec(client)(operations)
+... }
+<span class="std">List</span>(Right(Transport(Underground,Central)))</pre></div></div>
     </li><li name="com.gu.scanamo.Table#name" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="name:String"></a>
       <a id="name:String"></a>

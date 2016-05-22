@@ -123,9 +123,9 @@
     </span>
       <p class="shortcomment cmt">Type class for defining serialisation to and from
 DynamoDB's <code>AttributeValue</code></p><div class="fullcomment"><div class="comment cmt"><p>Type class for defining serialisation to and from
-DynamoDB's <code>AttributeValue</code></p><pre>&gt;&gt;&gt; <span class="kw">val</span> mapF = DynamoFormat[<span class="std">Map</span>[<span class="std">String</span>, <span class="std">List</span>[<span class="std">Int</span>]]]
-&gt;&gt;&gt; mapF.read(mapF.write(<span class="std">Map</span>(<span class="lit">"foo"</span> -&gt; <span class="std">List</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>), <span class="lit">"bar"</span> -&gt; <span class="std">List</span>(<span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>))))
-Right(<span class="std">Map</span>(foo -&gt; <span class="std">List</span>(<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>), bar -&gt; <span class="std">List</span>(<span class="num">3</span>, <span class="num">2</span>, <span class="num">1</span>)))</pre><p>Also supports automatic derivation for case classes</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+DynamoDB's <code>AttributeValue</code></p><pre>&gt;&gt;&gt; <span class="kw">val</span> listOptionFormat = DynamoFormat[<span class="std">List</span>[<span class="std">Option</span>[<span class="std">Int</span>]]]
+&gt;&gt;&gt; listOptionFormat.read(listOptionFormat.write(<span class="std">List</span>(<span class="std">Some</span>(<span class="num">1</span>), <span class="std">None</span>, <span class="std">Some</span>(<span class="num">3</span>))))
+Right(<span class="std">List</span>(<span class="std">Some</span>(<span class="num">1</span>), <span class="std">None</span>, <span class="std">Some</span>(<span class="num">3</span>)))</pre><p>Also supports automatic derivation for case classes</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 &gt;&gt;&gt; <span class="kw">val</span> farmerF = DynamoFormat[Farmer]
 &gt;&gt;&gt; farmerF.read(farmerF.write(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>)))))
@@ -368,6 +368,23 @@ java.util.concurrent.ExecutorService to make calls asynchronously
       </span>
       </h4><span class="permalink">
       <a href="../../../index.html#com.gu.scanamo.package@query" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.request" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="request"></a>
+      <a id="request:request"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a href="request/package.html"><span class="name">request</span></a>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.package@request" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

@@ -277,7 +277,7 @@
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoFree#getAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getAll[T](tableName:String)(keys:com.gu.scanamo.query.UniqueKeys[_])(implicitevidence$2:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="getAll[T](tableName:String)(keys:com.gu.scanamo.query.UniqueKeys[_])(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
       <a id="getAll[T](String)(UniqueKeys[_])(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -288,7 +288,7 @@
         <span class="name">getAll</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="keys">keys: <a href="query/UniqueKeys.html" class="extype" name="com.gu.scanamo.query.UniqueKeys">UniqueKeys</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.getAll.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.getAll.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@getAll[T](tableName:String)(keys:com.gu.scanamo.query.UniqueKeys[_])(implicitevidence$2:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@getAll[T](tableName:String)(keys:com.gu.scanamo.query.UniqueKeys[_])(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -310,6 +310,23 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.ScanamoFree#given" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="given[T](tableName:String)(condition:T)(implicitevidence$1:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]"></a>
+      <a id="given[T](String)(T)(ConditionExpression[T]):ConditionalOperation[T]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">given</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="condition">condition: <span class="extype" name="com.gu.scanamo.ScanamoFree.given.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.given.T">T</span>]</span>)</span><span class="result">: <a href="query/ConditionalOperation.html" class="extype" name="com.gu.scanamo.query.ConditionalOperation">ConditionalOperation</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.given.T">T</span>]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@given[T](tableName:String)(condition:T)(implicitevidence$1:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
     </li><li name="scala.AnyRef#hashCode" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <a id="hashCode():Int"></a>
@@ -413,7 +430,7 @@
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoFree#putAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="putAll[T](tableName:String)(items:List[T])(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]"></a>
+      <a id="putAll[T](tableName:String)(items:List[T])(implicitevidence$2:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]"></a>
       <a id="putAll[T](String)(List[T])(DynamoFormat[T]):ScanamoOps[List[BatchWriteItemResult]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -424,41 +441,75 @@
         <span class="name">putAll</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="items">items: <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.gu.scanamo.ScanamoFree.putAll.T">T</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.putAll.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult">BatchWriteItemResult</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@putAll[T](tableName:String)(items:List[T])(implicitevidence$1:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@putAll[T](tableName:String)(items:List[T])(implicitevidence$2:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoFree#query" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="query[T](String)(Query[_])(DynamoFormat[T]):ScanamoOps[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="query[T](String)(Query[_])(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">query</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.query.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.query.T">T</span>]]]</span>
+        <span class="name">query</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.query.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.query.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoFree#queryIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="queryIndex[T](String,String)(Query[_])(DynamoFormat[T]):ScanamoOps[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="queryIndex[T](String,String)(Query[_])(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">queryIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.queryIndex.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.queryIndex.T">T</span>]]]</span>
+        <span class="name">queryIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.queryIndex.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.queryIndex.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoFree#queryIndexWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="queryIndexWithLimit[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="queryIndexWithLimit[T](String,String)(Query[_],Int)(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">queryIndexWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.queryIndexWithLimit.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.queryIndexWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@queryIndexWithLimit[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoFree#queryWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="queryWithLimit[T](tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="queryWithLimit[T](String)(Query[_],Int)(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">queryWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.queryWithLimit.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.queryWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@queryWithLimit[T](tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -487,35 +538,69 @@ prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span
     |     m.mapValues(i <span class="kw">=&gt;</span> <span class="kw">new</span> AttributeValue().withN(i.toString)).asJava
     |   ) == cats.data.Xor.right(m)</pre></div></div>
     </li><li name="com.gu.scanamo.ScanamoFree#scan" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scan[T](tableName:String)(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="scan[T](String)(DynamoFormat[T]):ScanamoOps[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="scan[T](tableName:String)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scan[T](String)(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scan</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.scan.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.scan.T">T</span>]]]</span>
+        <span class="name">scan</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.scan.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.scan.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@scan[T](tableName:String)(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@scan[T](tableName:String)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoFree#scanIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scanIndex[T](tableName:String,indexName:String)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="scanIndex[T](String,String)(DynamoFormat[T]):ScanamoOps[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="scanIndex[T](tableName:String,indexName:String)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scanIndex[T](String,String)(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scanIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.scanIndex.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.scanIndex.T">T</span>]]]</span>
+        <span class="name">scanIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.scanIndex.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.scanIndex.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@scanIndex[T](tableName:String,indexName:String)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@scanIndex[T](tableName:String,indexName:String)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoFree#scanIndexWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scanIndexWithLimit[T](tableName:String,indexName:String,limit:Int)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scanIndexWithLimit[T](String,String,Int)(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scanIndexWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.scanIndexWithLimit.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.scanIndexWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@scanIndexWithLimit[T](tableName:String,indexName:String,limit:Int)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoFree#scanWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scanWithLimit[T](tableName:String,limit:Int)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scanWithLimit[T](String,Int)(DynamoFormat[T]):ScanamoOps[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scanWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.scanWithLimit.T">T</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.scanWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoFree$@scanWithLimit[T](tableName:String,limit:Int)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

@@ -450,69 +450,137 @@ java.util.concurrent.ExecutorService to make calls asynchronously
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoAsync#query" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$7:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="query[T](AmazonDynamoDBAsync)(String)(Query[_])(DynamoFormat[T],ExecutionContext):Future[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$9:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="query[T](AmazonDynamoDBAsync)(String)(Query[_])(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">query</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.query.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.query.T">T</span>]]]</span>
+        <span class="name">query</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.query.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.query.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$7:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$9:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoAsync#queryIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="queryIndex[T](AmazonDynamoDBAsync)(String,String)(Query[_])(DynamoFormat[T],ExecutionContext):Future[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$11:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="queryIndex[T](AmazonDynamoDBAsync)(String,String)(Query[_])(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">queryIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.queryIndex.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.queryIndex.T">T</span>]]]</span>
+        <span class="name">queryIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.queryIndex.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.queryIndex.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$11:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoAsync#queryIndexWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="queryIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$12:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="queryIndexWithLimit[T](AmazonDynamoDBAsync)(String,String)(Query[_],Int)(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">queryIndexWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.queryIndexWithLimit.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.queryIndexWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@queryIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$12:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoAsync#queryWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="queryWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$10:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="queryWithLimit[T](AmazonDynamoDBAsync)(String)(Query[_],Int)(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">queryWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.queryWithLimit.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.queryWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@queryWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$10:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoAsync#scan" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="scan[T](AmazonDynamoDBAsync)(String)(DynamoFormat[T],ExecutionContext):Future[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scan[T](AmazonDynamoDBAsync)(String)(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scan</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.scan.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.scan.T">T</span>]]]</span>
+        <span class="name">scan</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.scan.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.scan.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.ScanamoAsync#scanIndex" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
-      <a id="scanIndex[T](AmazonDynamoDBAsync)(String,String)(DynamoFormat[T],ExecutionContext):Future[Stream[Xor[DynamoReadError,T]]]"></a>
+      <a id="scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scanIndex[T](AmazonDynamoDBAsync)(String,String)(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scanIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.scanIndex.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.Stream">Stream</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.scanIndex.T">T</span>]]]</span>
+        <span class="name">scanIndex</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.scanIndex.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.scanIndex.T">T</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[Stream[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoAsync#scanIndexWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scanIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String,limit:Int)(implicitevidence$8:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scanIndexWithLimit[T](AmazonDynamoDBAsync)(String,String,Int)(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scanIndexWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="indexName">indexName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.scanIndexWithLimit.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.scanIndexWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@scanIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,indexName:String,limit:Int)(implicitevidence$8:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ScanamoAsync#scanWithLimit" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scanWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,limit:Int)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]"></a>
+      <a id="scanWithLimit[T](AmazonDynamoDBAsync)(String,Int)(DynamoFormat[T],ExecutionContext):Future[List[Xor[DynamoReadError,T]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scanWithLimit</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="limit">limit: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoAsync.scanWithLimit.T">T</span>]</span>, <span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="scala.concurrent.Future">Future</span>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoAsync.scanWithLimit.T">T</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.ScanamoAsync$@scanWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync)(tableName:String,limit:Int)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T],implicitec:scala.concurrent.ExecutionContext):scala.concurrent.Future[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
