@@ -2,7 +2,8 @@ package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
-import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest}
+import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
+import com.gu.scanamo.update.UpdateExpression
 
 import scala.collection.convert.decorateAll._
 
@@ -65,4 +66,8 @@ private object Requests {
   def queryRequest[T](tableName: String)(query: Query[_]): QueryRequest = {
     query(new QueryRequest().withTableName(tableName))
   }
+
+  def updateRequest[T](tableName: String)(key: UniqueKey[_])(expression: T)(implicit update: UpdateExpression[T]) =
+    ScanamoUpdateRequest(tableName = tableName, key = key.asAVMap.asJava,
+      update.expression(expression), update.attributeNames(expression), update.attributeValues(expression), None)
 }

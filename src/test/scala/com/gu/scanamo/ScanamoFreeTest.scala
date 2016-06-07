@@ -57,6 +57,7 @@ class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpre
     )
     case BatchWrite(req) => ???
     case BatchGet(req) => ???
+    case UpdateItem(req) => ???
   }
 }
 

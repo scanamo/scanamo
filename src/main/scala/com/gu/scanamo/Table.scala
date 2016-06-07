@@ -4,6 +4,7 @@ import cats.data.Xor
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
+import com.gu.scanamo.update.UpdateExpression
 
 /**
   * Represents a DynamoDB table that operations can be performed against
@@ -61,6 +62,30 @@ case class Table[V: DynamoFormat](name: String) {
   def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
+
+  /**
+    * {{{
+    * >>> case class Forecast(location: String, weather: String)
+    * >>> val forecast = Table[Forecast]("forecast")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTable(client)("forecast")('location -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- forecast.put(Forecast("London", "Rain"))
+    * ...     _ <- forecast.update('location -> "London")(
+    * ...       update.SetExpression('weather, "Sun"))
+    * ...     results <- forecast.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Forecast(London,Sun)))
+    * }}}
+    */
+  def update[T: UpdateExpression](key: UniqueKey[_])(expression: T) =
+    ScanamoFree.update(name)(key)(expression)
 
   /**
     * Query or scan a table, limiting the number of items evaluated by Dynamo
