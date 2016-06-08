@@ -75,8 +75,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   import com.gu.scanamo.syntax._
     * ...   val operations = for {
     * ...     _ <- forecast.put(Forecast("London", "Rain"))
-    * ...     _ <- forecast.update('location -> "London")(
-    * ...       update.SetExpression('weather, "Sun"))
+    * ...     _ <- forecast.update('location -> "London", set('weather -> "Sun"))
     * ...     results <- forecast.scan()
     * ...   } yield results.toList
     * ...   Scanamo.exec(client)(operations)
@@ -84,7 +83,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Forecast(London,Sun)))
     * }}}
     */
-  def update[T: UpdateExpression](key: UniqueKey[_])(expression: T) =
+  def update[T: UpdateExpression](key: UniqueKey[_], expression: T) =
     ScanamoFree.update(name)(key)(expression)
 
   /**

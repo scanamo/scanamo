@@ -1,6 +1,7 @@
 package com.gu
 
 import com.gu.scanamo.query._
+import com.gu.scanamo.update.SetExpression
 
 package object scanamo {
 
@@ -47,5 +48,8 @@ package object scanamo {
     implicit class OrConditionExpression[X: ConditionExpression](x: X) {
       def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
     }
+
+    def set[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      SetExpression(fieldValue._1, fieldValue._2)
   }
 }
