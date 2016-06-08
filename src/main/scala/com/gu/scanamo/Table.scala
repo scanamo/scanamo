@@ -87,7 +87,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Forecast(London,Sun)))
     * }}}
     *
-    * List attributes can also be appended to:
+    * List attributes can also be appended or prepended to:
     *
     * {{{
     * >>> case class Character(name: String, actors: List[String])
@@ -98,11 +98,12 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val operations = for {
     * ...     _ <- characters.put(Character("The Doctor", List("Ecclestone", "Tennant", "Smith")))
     * ...     _ <- characters.update('name -> "The Doctor", append('actors -> "Capaldi"))
+    * ...     _ <- characters.update('name -> "The Doctor", prepend('actors -> "McCoy"))
     * ...     results <- characters.scan()
     * ...   } yield results.toList
     * ...   Scanamo.exec(client)(operations)
     * ... }
-    * List(Right(Character(The Doctor,List(Ecclestone, Tennant, Smith, Capaldi))))
+    * List(Right(Character(The Doctor,List(McCoy, Ecclestone, Tennant, Smith, Capaldi))))
     * }}}
     */
   def update[T: UpdateExpression](key: UniqueKey[_], expression: T) =
