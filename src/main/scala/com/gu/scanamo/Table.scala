@@ -221,18 +221,33 @@ case class Table[V: DynamoFormat](name: String) {
     * The same forms of condition can be applied to deletions
     *
     * {{{
-    * >>> case class Gremlin(number: Int, wet: Boolean)
+    * >>> case class Gremlin(number: Int, wet: Boolean, friendly: Boolean)
     * >>> val gremlinsTable = Table[Gremlin]("gremlins")
     * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
     * ...   val ops = for {
-    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false), Gremlin(2, true)))
+    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false, true), Gremlin(2, true, false)))
     * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 1)
     * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
     * ...     remainingGremlins <- gremlinsTable.scan()
     * ...   } yield remainingGremlins
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
-    * List(Right(Gremlin(1,false)))
+    * List(Right(Gremlin(1,false,true)))
+    * }}}
+    *
+    * and updates
+    *
+    * {{{
+    * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
+    * ...   val ops = for {
+    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false, true), Gremlin(2, true, true)))
+    * ...     _ <- gremlinsTable.given('wet -> true).update('number -> 1, set('friendly -> false))
+    * ...     _ <- gremlinsTable.given('wet -> true).update('number -> 2, set('friendly -> false))
+    * ...     remainingGremlins <- gremlinsTable.scan()
+    * ...   } yield remainingGremlins
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Gremlin(2,true,false)), Right(Gremlin(1,false,true)))
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)

@@ -5,7 +5,8 @@ import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.DynamoFormat
 import com.gu.scanamo.Requests._
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.request.RequestCondition
+import com.gu.scanamo.request.{RequestCondition, ScanamoUpdateRequest}
+import com.gu.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 
 case class ConditionalOperation[T](tableName: String, t: T)(implicit state: ConditionExpression[T]) {
@@ -20,6 +21,13 @@ case class ConditionalOperation[T](tableName: String, t: T)(implicit state: Cond
     ScanamoOps.conditionalDelete(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
+
+  def update[U: UpdateExpression](key: UniqueKey[_], update: U):
+  ScanamoOps[Xor[ConditionalCheckFailedException, UpdateItemResult]] = {
+    val unconditionalRequest = updateRequest(tableName)(key)(update)
+    ScanamoOps.conditionalUpdate(unconditionalRequest.copy(
+      condition = Some(state.apply(t)(unconditionalRequest.condition))))
+  }
 }
 
 @typeclass trait ConditionExpression[T] {
@@ -30,15 +38,15 @@ object ConditionExpression {
   implicit def symbolValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, V)] {
     override def apply(pair: (Symbol, V))(condition: Option[RequestCondition]): RequestCondition =
       RequestCondition(
-        s"#a = :${pair._1.name}",
-        Map("#a" -> pair._1.name),
+        s"#conditionA = :${pair._1.name}",
+        Map("#conditionA" -> pair._1.name),
         Some(Map(s":${pair._1.name}" -> DynamoFormat[V].write(pair._2)))
       )
   }
 
   implicit def attributeExistsCondition = new ConditionExpression[AttributeExists] {
     override def apply(t: AttributeExists)(condition: Option[RequestCondition]): RequestCondition =
-      RequestCondition("attribute_exists(#attr)", Map("#attr" -> t.key.name), None)
+      RequestCondition("attribute_exists(#conditionAttr)", Map("#conditionAttr" -> t.key.name), None)
   }
 
   implicit def notCondition[T](implicit pcs: ConditionExpression[T]) = new ConditionExpression[Not[T]] {
@@ -51,8 +59,8 @@ object ConditionExpression {
   implicit def beginsWithCondition[V: DynamoFormat] = new ConditionExpression[BeginsWith[V]] {
     override def apply(b: BeginsWith[V])(condition: Option[RequestCondition]): RequestCondition =
       RequestCondition(
-        s"begins_with(#a, :${b.key.name})",
-        Map("#a" -> b.key.name),
+        s"begins_with(#conditionA, :${b.key.name})",
+        Map("#conditionA" -> b.key.name),
         Some(Map(s":${b.key.name}" -> DynamoFormat[V].write(b.v)))
       )
   }
@@ -60,8 +68,8 @@ object ConditionExpression {
   implicit def keyIsCondition[V: DynamoFormat] = new ConditionExpression[KeyIs[V]] {
     override def apply(k: KeyIs[V])(condition: Option[RequestCondition]): RequestCondition =
       RequestCondition(
-        s"#a ${k.operator.op} :${k.key.name}",
-        Map("#a" -> k.key.name),
+        s"#conditionA ${k.operator.op} :${k.key.name}",
+        Map("#conditionA" -> k.key.name),
         Some(Map(s":${k.key.name}" -> DynamoFormat[V].write(k.v)))
       )
   }
