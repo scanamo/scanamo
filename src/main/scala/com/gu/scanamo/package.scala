@@ -1,7 +1,7 @@
 package com.gu
 
 import com.gu.scanamo.query._
-import com.gu.scanamo.update.SetExpression
+import com.gu.scanamo.update.{AppendExpression, SetExpression}
 
 package object scanamo {
 
@@ -51,5 +51,8 @@ package object scanamo {
 
     def set[V: DynamoFormat](fieldValue: (Symbol, V)) =
       SetExpression(fieldValue._1, fieldValue._2)
+
+    def append[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      AppendExpression(fieldValue._1, fieldValue._2)
   }
 }

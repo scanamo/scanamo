@@ -23,3 +23,17 @@ object SetExpression {
         Map(":updateA" -> format.write(t.value))
     }
 }
+
+case class AppendExpression[V: DynamoFormat](field: Symbol, value: V)
+
+object AppendExpression {
+  implicit def appendUpdateExpression[V](implicit format: DynamoFormat[V]) =
+    new UpdateExpression[AppendExpression[V]] {
+      override def expression(t: AppendExpression[V]): String =
+        "SET #updateA = list_append(#updateA, :updateA)"
+      override def attributeNames(t: AppendExpression[V]): Map[String, String] =
+        Map("#updateA" -> t.field.name)
+      override def attributeValues(t: AppendExpression[V]): Map[String, AttributeValue] =
+        Map(":updateA" -> DynamoFormat.listFormat[V].write(List(t.value)))
+    }
+}

@@ -64,6 +64,10 @@ case class Table[V: DynamoFormat](name: String) {
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 
   /**
+    * Update an attribute that is not part of the key
+    *
+    * To set an attribute:
+    *
     * {{{
     * >>> case class Forecast(location: String, weather: String)
     * >>> val forecast = Table[Forecast]("forecast")
@@ -81,6 +85,24 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(operations)
     * ... }
     * List(Right(Forecast(London,Sun)))
+    * }}}
+    *
+    * List attributes can also be appended to:
+    *
+    * {{{
+    * >>> case class Character(name: String, actors: List[String])
+    * >>> val characters = Table[Character]("characters")
+    *
+    * >>> LocalDynamoDB.withTable(client)("characters")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- characters.put(Character("The Doctor", List("Ecclestone", "Tennant", "Smith")))
+    * ...     _ <- characters.update('name -> "The Doctor", append('actors -> "Capaldi"))
+    * ...     results <- characters.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Character(The Doctor,List(Ecclestone, Tennant, Smith, Capaldi))))
     * }}}
     */
   def update[T: UpdateExpression](key: UniqueKey[_], expression: T) =
