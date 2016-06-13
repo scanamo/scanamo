@@ -105,6 +105,24 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Character(The Doctor,List(McCoy, Ecclestone, Tennant, Smith, Capaldi))))
     * }}}
+    *
+    * Multiple operations can also be performed in one call:
+    * {{{
+    * >>> case class Foo(name: String, bar: Int, l: List[String])
+    * >>> val foos = Table[Foo]("foos")
+    *
+    * >>> LocalDynamoDB.withTable(client)("foos")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- foos.put(Foo("x", 0, List("First")))
+    * ...     _ <- foos.update('name -> "x",
+    * ...       append('l -> "Second") and set('bar -> 1))
+    * ...     results <- foos.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Foo(x,1,List(First, Second))))
+    * }}}
     */
   def update[T: UpdateExpression](key: UniqueKey[_], expression: T) =
     ScanamoFree.update(name)(key)(expression)

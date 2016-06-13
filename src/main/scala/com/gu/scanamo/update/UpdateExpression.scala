@@ -51,3 +51,45 @@ object PrependExpression {
         Map(":update" -> DynamoFormat.listFormat[V].write(List(t.value)))
     }
 }
+
+case class AndUpdate[L: UpdateExpression, R: UpdateExpression](l: L, r: R)
+
+object AndUpdate {
+  implicit def andUpdateExpression[L, R](implicit lUpdate: UpdateExpression[L], rUpdate: UpdateExpression[R]) =
+    new UpdateExpression[AndUpdate[L, R]] {
+
+      def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {
+        case (k, v) => (newKey(k, prefix, magicChar), v)
+      }
+      def newKey(oldKey: String, prefix: String, magicChar: Char) =
+        s"$magicChar$prefix${oldKey.stripPrefix(magicChar.toString)}"
+
+      override def expression(t: AndUpdate[L, R]): String = {
+        def prefixKeysIn(string: String, keys: Iterable[String], prefix: String, magicChar: Char) =
+          keys.foldLeft(string)((result, key) => result.replaceAllLiterally(key, newKey(key, prefix, magicChar)))
+
+        val lPrefixedNamePlaceholders = prefixKeysIn(
+          lUpdate.expression(t.l).replace("SET ", ""),
+          lUpdate.attributeNames(t.l).keys, "l_", '#')
+
+        val rPrefixedNamePlaceholders = prefixKeysIn(
+          rUpdate.expression(t.r).replace("SET ", ""),
+          rUpdate.attributeNames(t.r).keys, "r_", '#')
+
+        val lPrefixedValuePlaceholders =
+          prefixKeysIn(lPrefixedNamePlaceholders, lUpdate.attributeValues(t.l).keys, "l_", ':')
+        val rPrefixedValuePlaceholders =
+          prefixKeysIn(rPrefixedNamePlaceholders, rUpdate.attributeValues(t.r).keys, "r_", ':')
+
+        s"SET $lPrefixedValuePlaceholders, $rPrefixedValuePlaceholders"
+      }
+
+      override def attributeNames(t: AndUpdate[L, R]): Map[String, String] = {
+        prefixKeys(lUpdate.attributeNames(t.l), "l_", '#') ++ prefixKeys(rUpdate.attributeNames(t.r), "r_", '#')
+      }
+
+      override def attributeValues(t: AndUpdate[L, R]): Map[String, AttributeValue] = {
+        prefixKeys(lUpdate.attributeValues(t.l), "l_", ':') ++ prefixKeys(rUpdate.attributeValues(t.r), "r_", ':')
+      }
+    }
+}

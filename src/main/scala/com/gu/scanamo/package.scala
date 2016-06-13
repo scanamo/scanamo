@@ -1,7 +1,7 @@
 package com.gu
 
 import com.gu.scanamo.query._
-import com.gu.scanamo.update.{AppendExpression, PrependExpression, SetExpression}
+import com.gu.scanamo.update._
 
 package object scanamo {
 
@@ -55,5 +55,9 @@ package object scanamo {
       AppendExpression(fieldValue._1, fieldValue._2)
     def prepend[V: DynamoFormat](fieldValue: (Symbol, V)) =
       PrependExpression(fieldValue._1, fieldValue._2)
+
+    implicit class AndUpdateExpression[X: UpdateExpression](x: X) {
+      def and[Y: UpdateExpression](y: Y) = AndUpdate(x, y)
+    }
   }
 }
