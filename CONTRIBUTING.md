@@ -14,7 +14,7 @@ Building and testing Scanamo
 ----------------------------
 
 Scanamo uses a standard [SBT](https://www.scala-sbt.org/) build. If you
-have SBT installed you can just run the `test` command fromt the SBT prompt
+have SBT installed you can just run the `test` command from the SBT prompt
 to compile Scanamo and run its tests.
 
 Most, though not all of Scanamo's tests are from examples in the scaladoc, 
