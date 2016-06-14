@@ -289,7 +289,6 @@ trait DerivedDynamoFormat {
   trait ConstructedDynamoFormat[T] {
     def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
     def write(t: T): AttributeValue
-    def default: Option[T] = None
   }
 
   implicit val hnil: ConstructedDynamoFormat[HNil] =

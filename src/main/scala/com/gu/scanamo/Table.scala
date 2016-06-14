@@ -123,6 +123,24 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Foo(x,1,List(First, Second))))
     * }}}
+    *
+    * It's also possible to peform `ADD` updates
+    * {{{
+    * >>> case class Bar(name: String, counter: Long, set: Set[String])
+    * >>> val bars = Table[Bar]("bars")
+    *
+    * >>> LocalDynamoDB.withTable(client)("bars")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- bars.put(Bar("x", 1L, Set("First")))
+    * ...     _ <- bars.update('name -> "x",
+    * ...       add('counter -> 10L) and add('set -> Set("Second")))
+    * ...     results <- bars.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Bar(x,11,Set(First, Second))))
+    * }}}
     */
   def update[T: UpdateExpression](key: UniqueKey[_], expression: T) =
     ScanamoFree.update(name)(key)(expression)
