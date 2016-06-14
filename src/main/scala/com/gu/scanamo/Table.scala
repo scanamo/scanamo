@@ -64,7 +64,7 @@ case class Table[V: DynamoFormat](name: String) {
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 
   /**
-    * Update an attribute that is not part of the key
+    * Updates an attribute that is not part of the key
     *
     * To set an attribute:
     *
