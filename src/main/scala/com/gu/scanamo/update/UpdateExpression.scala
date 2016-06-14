@@ -16,6 +16,7 @@ import simulacrum.typeclass
 sealed trait UpdateType { val op: String }
 final object SET extends UpdateType { override val op = "SET" }
 final object ADD extends UpdateType { override val op = "ADD" }
+final object DELETE extends UpdateType { override val op = "DELETE" }
 
 case class SetExpression[V: DynamoFormat](field: Symbol, value: V)
 
@@ -69,6 +70,20 @@ object AddExpression {
       override def attributeNames(t: AddExpression[V]): Map[String, String] =
         Map("#update" -> t.field.name)
       override def attributeValues(t: AddExpression[V]): Map[String, AttributeValue] =
+        Map(":update" -> format.write(t.value))
+    }
+}
+
+case class DeleteExpression[V: DynamoFormat](field: Symbol, value: V)
+
+object DeleteExpression {
+  implicit def deleteUpdateExpression[V](implicit format: DynamoFormat[V]) =
+    new UpdateExpression[DeleteExpression[V]] {
+      override def typeExpressions(t: DeleteExpression[V]): Map[UpdateType, String] =
+        Map(DELETE -> "#update :update")
+      override def attributeNames(t: DeleteExpression[V]): Map[String, String] =
+        Map("#update" -> t.field.name)
+      override def attributeValues(t: DeleteExpression[V]): Map[String, AttributeValue] =
         Map(":update" -> format.write(t.value))
     }
 }

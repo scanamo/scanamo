@@ -57,6 +57,8 @@ package object scanamo {
       PrependExpression(fieldValue._1, fieldValue._2)
     def add[V: DynamoFormat](fieldValue: (Symbol, V)) =
       AddExpression(fieldValue._1, fieldValue._2)
+    def delete[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      DeleteExpression(fieldValue._1, fieldValue._2)
 
     implicit class AndUpdateExpression[X: UpdateExpression](x: X) {
       def and[Y: UpdateExpression](y: Y) = AndUpdate(x, y)
