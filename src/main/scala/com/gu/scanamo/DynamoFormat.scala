@@ -41,10 +41,10 @@ import scala.reflect.ClassTag
   * >>> case class Developer(name: String, age: String, problems: Int)
   * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
   * >>> invalid
-  * Left(InvalidPropertiesError(OneAnd(PropertyReadError(age,NoPropertyOfType(N)),List(PropertyReadError(farm,MissingProperty)))))
+  * Left(InvalidPropertiesError(OneAnd(PropertyReadError(age,NoPropertyOfType(N,{S: none of your business,})),List(PropertyReadError(farm,MissingProperty)))))
   *
   * >>> invalid.leftMap(cats.Show[error.DynamoReadError].show)
-  * Left('age': not of type: 'N', 'farm': missing)
+  * Left('age': not of type: 'N' was '{S: none of your business,}', 'farm': missing)
   * }}}
   *
   * Optional properties are defaulted to None
@@ -69,7 +69,7 @@ object DynamoFormat extends DerivedDynamoFormat {
   ): DynamoFormat[T] = {
     new DynamoFormat[T] {
       override def read(av: AttributeValue): Xor[DynamoReadError, T] =
-        Xor.fromOption(Option(decode(av)), NoPropertyOfType(propertyType))
+        Xor.fromOption(Option(decode(av)), NoPropertyOfType(propertyType, av))
       override def write(t: T): AttributeValue =
         encode(new AttributeValue())(t)
     }
@@ -280,6 +280,18 @@ object DynamoFormat extends DerivedDynamoFormat {
 
     def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(null)
     override val default = Some(None)
+  }
+
+  /**
+    * This ensures that if, for instance, you specify an update with Some(5) rather
+    * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
+    */
+  implicit def someFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Some[T]] {
+    def read(av: AttributeValue): Xor[DynamoReadError, Some[T]] = {
+      Option(av).map(f.read(_).map(Some(_))).getOrElse(Xor.left[DynamoReadError, Some[T]](MissingProperty))
+    }
+
+    def write(t: Some[T]): AttributeValue = f.write(t.get)
   }
 }
 

@@ -90,6 +90,27 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       forecasts.futureValue should equal(List(Right(Forecast("London", "Sun"))))
     }
   }
+
+  it("should update asynchornously if a condition holds") {
+    LocalDynamoDB.usingTable(client)("forecast")('location -> S) {
+
+      case class Forecast(location: String, weather: String, equipment: Option[String])
+
+      val forecasts = Table[Forecast]("forecast")
+
+      import com.gu.scanamo.syntax._
+
+      val ops = for {
+        _ <- forecasts.putAll(List(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
+        _ <- forecasts.given('weather -> "Rain").update('location -> "London", set('equipment -> Some("umbrella")))
+        _ <- forecasts.given('weather -> "Rain").update('location -> "Birmingham", set('equipment -> Some("umbrella")))
+        results <- forecasts.scan()
+      } yield results
+
+      ScanamoAsync.exec(client)(ops).futureValue should equal(
+        List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None))))
+    }
+  }
   
   it("should scan asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
