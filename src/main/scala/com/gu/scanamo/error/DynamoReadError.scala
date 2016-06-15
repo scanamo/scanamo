@@ -3,9 +3,10 @@ package com.gu.scanamo.error
 import cats.{Semigroup, Show}
 import cats.data.NonEmptyList
 import cats.std.list._
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
 sealed abstract class DynamoReadError
-final case class NoPropertyOfType(propertyType: String) extends DynamoReadError
+final case class NoPropertyOfType(propertyType: String, actual: AttributeValue) extends DynamoReadError
 final case class TypeCoercionError(t: Throwable) extends DynamoReadError
 final case object MissingProperty extends DynamoReadError
 
@@ -26,7 +27,7 @@ object DynamoReadError {
 
   def describe(d: DynamoReadError): String =  d match {
     case InvalidPropertiesError(problems) => problems.unwrap.map(p => s"'${p.name}': ${describe(p.problem)}").mkString(", ")
-    case NoPropertyOfType(propertyType) => s"not of type: '$propertyType'"
+    case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
     case TypeCoercionError(e) => s"could not be converted to desired type: $e"
     case MissingProperty => "missing"
   }

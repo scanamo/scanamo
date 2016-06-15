@@ -1,6 +1,7 @@
 package com.gu
 
 import com.gu.scanamo.query._
+import com.gu.scanamo.update._
 
 package object scanamo {
 
@@ -46,6 +47,21 @@ package object scanamo {
 
     implicit class OrConditionExpression[X: ConditionExpression](x: X) {
       def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
+    }
+
+    def set[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      SetExpression(fieldValue._1, fieldValue._2)
+    def append[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      AppendExpression(fieldValue._1, fieldValue._2)
+    def prepend[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      PrependExpression(fieldValue._1, fieldValue._2)
+    def add[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      AddExpression(fieldValue._1, fieldValue._2)
+    def delete[V: DynamoFormat](fieldValue: (Symbol, V)) =
+      DeleteExpression(fieldValue._1, fieldValue._2)
+
+    implicit class AndUpdateExpression[X: UpdateExpression](x: X) {
+      def and[Y: UpdateExpression](y: Y) = AndUpdate(x, y)
     }
   }
 }

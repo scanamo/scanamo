@@ -14,6 +14,15 @@ case class ScanamoDeleteRequest(
   condition: Option[RequestCondition]
 )
 
+case class ScanamoUpdateRequest(
+  tableName: String,
+  key: java.util.Map[String, AttributeValue],
+  updateExpression: String,
+  attributeNames: Map[String, String],
+  attributeValues: Map[String, AttributeValue],
+  condition: Option[RequestCondition]
+)
+
 case class RequestCondition(
   expression: String,
   attributeNames: Map[String, String],

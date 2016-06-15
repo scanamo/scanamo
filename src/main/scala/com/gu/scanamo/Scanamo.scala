@@ -2,10 +2,11 @@ package com.gu.scanamo
 
 import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult, UpdateItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query._
+import com.gu.scanamo.update.UpdateExpression
 
 /**
   * Provides a simplified interface for reading and writing case classes to DynamoDB
@@ -163,6 +164,28 @@ object Scanamo {
     */
   def delete(client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_]): DeleteItemResult =
     exec(client)(ScanamoFree.delete(tableName)(key))
+
+  /**
+    * Updates an attribute that is not part of the key
+    *
+    * {{{
+    * >>> case class Forecast(location: String, weather: String)
+    * >>> val forecast = Table[Forecast]("forecast")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTable(client)("forecast")('location -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   Scanamo.put(client)("forecast")(Forecast("London", "Rain"))
+    * ...   Scanamo.update(client)("forecast")('location -> "London", set('weather -> "Sun"))
+    * ...   Scanamo.scan[Forecast](client)("forecast").toList
+    * ... }
+    * List(Right(Forecast(London,Sun)))
+    * }}}
+    */
+  def update[T: UpdateExpression](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_], expression: T): UpdateItemResult =
+    exec(client)(ScanamoFree.update(tableName)(key)(expression))
 
   /**
     * Lazily scans a table

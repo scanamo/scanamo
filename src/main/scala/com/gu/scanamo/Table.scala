@@ -4,6 +4,7 @@ import cats.data.Xor
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
+import com.gu.scanamo.update.UpdateExpression
 
 /**
   * Represents a DynamoDB table that operations can be performed against
@@ -61,6 +62,89 @@ case class Table[V: DynamoFormat](name: String) {
   def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
+
+  /**
+    * Updates an attribute that is not part of the key
+    *
+    * To set an attribute:
+    *
+    * {{{
+    * >>> case class Forecast(location: String, weather: String)
+    * >>> val forecast = Table[Forecast]("forecast")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTable(client)("forecast")('location -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- forecast.put(Forecast("London", "Rain"))
+    * ...     _ <- forecast.update('location -> "London", set('weather -> "Sun"))
+    * ...     results <- forecast.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Forecast(London,Sun)))
+    * }}}
+    *
+    * List attributes can also be appended or prepended to:
+    *
+    * {{{
+    * >>> case class Character(name: String, actors: List[String])
+    * >>> val characters = Table[Character]("characters")
+    *
+    * >>> LocalDynamoDB.withTable(client)("characters")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- characters.put(Character("The Doctor", List("Ecclestone", "Tennant", "Smith")))
+    * ...     _ <- characters.update('name -> "The Doctor", append('actors -> "Capaldi"))
+    * ...     _ <- characters.update('name -> "The Doctor", prepend('actors -> "McCoy"))
+    * ...     results <- characters.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Character(The Doctor,List(McCoy, Ecclestone, Tennant, Smith, Capaldi))))
+    * }}}
+    *
+    * Multiple operations can also be performed in one call:
+    * {{{
+    * >>> case class Foo(name: String, bar: Int, l: List[String])
+    * >>> val foos = Table[Foo]("foos")
+    *
+    * >>> LocalDynamoDB.withTable(client)("foos")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- foos.put(Foo("x", 0, List("First")))
+    * ...     _ <- foos.update('name -> "x",
+    * ...       append('l -> "Second") and set('bar -> 1))
+    * ...     results <- foos.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Foo(x,1,List(First, Second))))
+    * }}}
+    *
+    * It's also possible to perform `ADD` and `DELETE` updates
+    * {{{
+    * >>> case class Bar(name: String, counter: Long, set: Set[String])
+    * >>> val bars = Table[Bar]("bars")
+    *
+    * >>> LocalDynamoDB.withTable(client)("bars")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- bars.put(Bar("x", 1L, Set("First")))
+    * ...     _ <- bars.update('name -> "x",
+    * ...       add('counter -> 10L) and add('set -> Set("Second")))
+    * ...     _ <- bars.update('name -> "x", delete('set -> Set("First")))
+    * ...     results <- bars.scan()
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Bar(x,11,Set(Second))))
+    * }}}
+    */
+  def update[T: UpdateExpression](key: UniqueKey[_], expression: T) =
+    ScanamoFree.update(name)(key)(expression)
 
   /**
     * Query or scan a table, limiting the number of items evaluated by Dynamo
@@ -197,18 +281,33 @@ case class Table[V: DynamoFormat](name: String) {
     * The same forms of condition can be applied to deletions
     *
     * {{{
-    * >>> case class Gremlin(number: Int, wet: Boolean)
+    * >>> case class Gremlin(number: Int, wet: Boolean, friendly: Boolean)
     * >>> val gremlinsTable = Table[Gremlin]("gremlins")
     * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
     * ...   val ops = for {
-    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false), Gremlin(2, true)))
+    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false, true), Gremlin(2, true, false)))
     * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 1)
     * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
     * ...     remainingGremlins <- gremlinsTable.scan()
     * ...   } yield remainingGremlins
     * ...   Scanamo.exec(client)(ops).toList
     * ... }
-    * List(Right(Gremlin(1,false)))
+    * List(Right(Gremlin(1,false,true)))
+    * }}}
+    *
+    * and updates
+    *
+    * {{{
+    * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
+    * ...   val ops = for {
+    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false, true), Gremlin(2, true, true)))
+    * ...     _ <- gremlinsTable.given('wet -> true).update('number -> 1, set('friendly -> false))
+    * ...     _ <- gremlinsTable.given('wet -> true).update('number -> 2, set('friendly -> false))
+    * ...     remainingGremlins <- gremlinsTable.scan()
+    * ...   } yield remainingGremlins
+    * ...   Scanamo.exec(client)(ops).toList
+    * ... }
+    * List(Right(Gremlin(2,true,false)), Right(Gremlin(1,false,true)))
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)

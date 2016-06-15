@@ -6,6 +6,8 @@ import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
+import com.gu.scanamo.request.ScanamoUpdateRequest
+import com.gu.scanamo.update.UpdateExpression
 
 object ScanamoFree {
 
@@ -65,6 +67,9 @@ object ScanamoFree {
 
   def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_], limit: Int): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     QueryResultStream.stream[T](queryRequest(tableName)(query).withIndexName(indexName).withLimit(limit))
+
+  def update[T: UpdateExpression](tableName: String)(key: UniqueKey[_])(updateExpression: T) =
+    ScanamoOps.update(updateRequest(tableName)(key)(updateExpression))
 
   /**
     * {{{

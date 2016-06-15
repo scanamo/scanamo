@@ -6,7 +6,7 @@ import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.model._
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
-import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest}
+import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
@@ -21,8 +21,11 @@ final case class Scan(req: ScanRequest) extends ScanamoOpsA[ScanResult]
 final case class Query(req: QueryRequest) extends ScanamoOpsA[QueryResult]
 final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
 final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGetItemResult]
+final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateItemResult]
+final case class ConditionalUpdate(req: ScanamoUpdateRequest) extends ScanamoOpsA[Xor[ConditionalCheckFailedException, UpdateItemResult]]
 
 object ScanamoOps {
+
   import cats.free.Free.liftF
 
   def put(req: ScanamoPutRequest): ScanamoOps[PutItemResult] = liftF[ScanamoOpsA, PutItemResult](Put(req))
@@ -38,6 +41,10 @@ object ScanamoOps {
     liftF[ScanamoOpsA, BatchWriteItemResult](BatchWrite(req))
   def batchGet(req: BatchGetItemRequest): ScanamoOps[BatchGetItemResult] =
     liftF[ScanamoOpsA, BatchGetItemResult](BatchGet(req))
+  def update(req: ScanamoUpdateRequest): ScanamoOps[UpdateItemResult] =
+    liftF[ScanamoOpsA, UpdateItemResult](Update(req))
+  def conditionalUpdate(req: ScanamoUpdateRequest): ScanamoOps[Xor[ConditionalCheckFailedException, UpdateItemResult]] =
+    liftF[ScanamoOpsA, Xor[ConditionalCheckFailedException, UpdateItemResult]](ConditionalUpdate(req))
 }
 
 object ScanamoInterpreters {
@@ -59,6 +66,20 @@ object ScanamoInterpreters {
       c.attributeValues.foldLeft(
         r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
       )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
+    )
+
+  def javaUpdateRequest(req: ScanamoUpdateRequest): UpdateItemRequest =
+    req.condition.foldLeft(
+      new UpdateItemRequest().withTableName(req.tableName).withKey(req.key)
+        .withUpdateExpression(req.updateExpression)
+        .withExpressionAttributeNames(req.attributeNames.asJava)
+        .withExpressionAttributeValues(req.attributeValues.asJava)
+    )((r, c) =>
+      c.attributeValues.foldLeft(
+        r.withConditionExpression(c.expression).withExpressionAttributeNames(
+          (c.attributeNames ++ req.attributeNames).asJava)
+      )((cond, values) => cond.withExpressionAttributeValues(
+        (values ++ req.attributeValues).asJava))
     )
 
   def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
@@ -85,6 +106,12 @@ object ScanamoInterpreters {
         client.batchWriteItem(req)
       case BatchGet(req) =>
         client.batchGetItem(req)
+      case Update(req) =>
+        client.updateItem(javaUpdateRequest(req))
+      case ConditionalUpdate(req) =>
+        Xor.catchOnly[ConditionalCheckFailedException] {
+          client.updateItem(javaUpdateRequest(req))
+        }
     }
   }
 
@@ -123,6 +150,12 @@ object ScanamoInterpreters {
         futureOf(client.batchWriteItemAsync(_: BatchWriteItemRequest, _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]), req)
       case BatchGet(req) =>
         futureOf(client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]), req)
+      case Update(req) =>
+        futureOf(client.updateItemAsync, javaUpdateRequest(req))
+      case ConditionalUpdate(req) =>
+        futureOf(client.updateItemAsync, javaUpdateRequest(req)).map(Xor.right[ConditionalCheckFailedException, UpdateItemResult]).recover {
+          case e: ConditionalCheckFailedException => Xor.left(e)
+        }
     }
   }
 }
