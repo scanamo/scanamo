@@ -31,6 +31,13 @@ import com.gu.scanamo.update.UpdateExpression
   * }}}
   */
 case class Table[V: DynamoFormat](name: String) {
+
+  def put(v: V) = ScanamoFree.put(name)(v)
+  def putAll(vs: List[V]) = ScanamoFree.putAll(name)(vs)
+  def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
+  def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
+  def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
+
   /**
     * A secondary index on the table which can be scanned, or queried against
     *
@@ -56,12 +63,6 @@ case class Table[V: DynamoFormat](name: String) {
     * }}}
     */
   def index(indexName: String) = Index[V](name, indexName)
-
-  def put(v: V) = ScanamoFree.put(name)(v)
-  def putAll(vs: List[V]) = ScanamoFree.putAll(name)(vs)
-  def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
-  def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
-  def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 
   /**
     * Updates an attribute that is not part of the key
