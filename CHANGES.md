@@ -3,7 +3,6 @@
 New feature:
 
  * support for `update` operations
- * cross-published for Scala 2.10.x
 
 ## Version 0.5.0
 
