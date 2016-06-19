@@ -3,7 +3,7 @@ organization := "com.gu"
 
 scalaVersion := "2.11.8"
 
-crossScalaVersions := Seq("2.10.6")
+crossScalaVersions := Seq(scalaVersion.value, "2.10.6")
 
 libraryDependencies ++= Seq(
 	"com.amazonaws" % "aws-java-sdk-dynamodb" % "1.10.69",
