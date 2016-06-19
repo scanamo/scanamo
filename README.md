@@ -19,6 +19,15 @@ libraryDependencies ++= Seq(
 Usage
 -----
 
+ - [Putting and Getting](#putting-and-getting)
+ - [Querying](#querying)
+ - [Updating](#updating)
+ - [Using Indexes](#using-indexes)
+ - [Non-blocking requests](#non-blocking-requests)
+ - [Custom formats](#custom-formats)
+
+### Putting and Getting
+
 If you've used the Java SDK to access Dynamo, the most familiar way to use Scanamo 
 is via the [Scanamo](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
 object:
@@ -80,7 +89,7 @@ scala> Scanamo.exec(client)(operations).toList
 res1: List[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = List(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
 ```
 
-Note that no operations are actually executed against DynamoDB until `exec` is called. 
+Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
 
 ### Querying
 
@@ -107,6 +116,30 @@ scala> val operations = for {
 scala> Scanamo.exec(client)(operations)
 res1: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
 ```
+
+### Updating
+
+If you want to update some of the fields of a row, which don't form part of the key, 
+ without replacing it entirely, you can use the `update` operation:
+ 
+```scala
+scala> import com.gu.scanamo._
+scala> import com.gu.scanamo.syntax._
+ 
+scala> val client = LocalDynamoDB.client()
+scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> val teamTableResult = LocalDynamoDB.createTable(client)("teams")('name -> S)
+scala> case class Team(name: String, goals: Int, scorers: List[String])
+scala> val teamTable = Table[Team]("teams")
+scala> val operations = for {
+     |   _ <- teamTable.put(Team("Watford", 1, List("Blissett")))
+     |   _ <- teamTable.update('name -> "Watford", set('goals -> 2) and append('scorers -> "Barnes"))
+     |   watford <- teamTable.get('name -> "Watford")
+     | } yield watford
+     
+scala> Scanamo.exec(client)(operations)
+res1: Option[cats.data.Xor[error.DynamoReadError, Team]] = Some(Right(Team(Watford,2,List(Blissett, Barnes))))
+``` 
 
 ### Using Indexes
 
@@ -138,7 +171,7 @@ scala> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-in
 res0: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Metropolitan,Maroon)))
 ```
 
-### Non-blocking calls
+### Non-blocking requests
  
 Scanamo also supports asynchronous calls to Dynamo:
 
