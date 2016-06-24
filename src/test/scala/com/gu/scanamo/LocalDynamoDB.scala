@@ -8,7 +8,7 @@ import scala.collection.convert.decorateAsJava._
 object LocalDynamoDB {
   def client() = {
     val c = new AmazonDynamoDBAsyncClient(new com.amazonaws.auth.BasicAWSCredentials("key", "secret"))
-    c.setEndpoint("http://localhost:8000")
+    c.setEndpoint("http://localhost:8042")
     c
   }
   def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) = {

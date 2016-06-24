@@ -40,6 +40,7 @@ scalacOptions := Seq(
 )
 
 dynamoDBLocalDownloadDir := file(".dynamodb-local")
+dynamoDBLocalPort := 8042
 startDynamoDBLocal <<= startDynamoDBLocal.dependsOn(compile in Test)
 test in Test <<= (test in Test).dependsOn(startDynamoDBLocal)
 testOptions in Test <+= dynamoDBLocalTestCleanup
