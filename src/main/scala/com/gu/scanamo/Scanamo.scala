@@ -48,13 +48,13 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> LocalDynamoDB.withTable(client)("rabbits")('name -> S) {
     * ...   Scanamo.putAll(client)("rabbits")((
-    * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toList)
+    * ...   for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))).toSet)
     * ...   Scanamo.scan[Rabbit](client)("rabbits").size
     * ... }
     * 100
     * }}}
     */
-  def putAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(items: List[T]): List[BatchWriteItemResult] =
+  def putAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(items: Set[T]): List[BatchWriteItemResult] =
     exec(client)(ScanamoFree.putAll(tableName)(items))
 
   /**
@@ -109,7 +109,7 @@ object Scanamo {
     *
     * >>> import com.gu.scanamo.query._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
-    * ...   Scanamo.putAll(client)("farmers")(List(
+    * ...   Scanamo.putAll(client)("farmers")(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ...   ))
     * ...   Scanamo.getAll[Farmer](client)("farmers")(UniqueKeys(KeyList('name, List("Boggis", "Bean"))))
@@ -120,7 +120,7 @@ object Scanamo {
     * {{{
     * >>> import com.gu.scanamo.syntax._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
-    * ...   Scanamo.putAll(client)("farmers")(List(
+    * ...   Scanamo.putAll(client)("farmers")(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ...   ))
     * ...   Scanamo.getAll[Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
@@ -132,7 +132,7 @@ object Scanamo {
     * >>> case class Doctor(actor: String, regeneration: Int)
     * >>> LocalDynamoDB.withTable(client)("doctors")('actor -> S, 'regeneration -> N) {
     * ...   Scanamo.putAll(client)("doctors")(
-    * ...     List(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+    * ...     Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
     * ...   Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11))
     * ... }
     * List(Right(Doctor(McCoy,9)), Right(Doctor(Ecclestone,11)))
@@ -212,7 +212,7 @@ object Scanamo {
     *
     * >>> LocalDynamoDB.withTable(client)("lemmings")('name -> S) {
     * ...   Scanamo.putAll(client)("lemmings")(
-    * ...     (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toList
+    * ...     (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
     * ...   )
     * ...   Scanamo.scan[Lemming](client)("lemmings").size
     * ... }
@@ -326,7 +326,7 @@ object Scanamo {
     *
     * >>> case class Transport(mode: String, line: String)
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
-    * ...   Scanamo.putAll(client)("transport")(List(
+    * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle"),
     * ...     Transport("Underground", "Metropolitan"),
     * ...     Transport("Underground", "Central")))
@@ -357,7 +357,7 @@ object Scanamo {
     *
     * >>> case class Transport(mode: String, line: String)
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
-    * ...   Scanamo.putAll(client)("transport")(List(
+    * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle"),
     * ...     Transport("Underground", "Metropolitan"),
     * ...     Transport("Underground", "Central")))
@@ -380,7 +380,7 @@ object Scanamo {
     * >>> import com.gu.scanamo.syntax._
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
-    * ...   Scanamo.putAll(client)("transport")(List(
+    * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle", "Yellow"),
     * ...     Transport("Underground", "Metropolitan", "Magenta"),
     * ...     Transport("Underground", "Central", "Red")))
@@ -405,7 +405,7 @@ object Scanamo {
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
     * ... ) {
-    * ...   Scanamo.putAll(client)("transport")(List(
+    * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle", "Yellow"),
     * ...     Transport("Underground", "Metropolitan", "Magenta"),
     * ...     Transport("Underground", "Central", "Red"),

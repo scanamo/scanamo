@@ -27,7 +27,7 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[PutItemResult] =
     exec(client)(ScanamoFree.put(tableName)(item))
 
-  def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: List[T])
+  def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: Set[T])
     (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
     exec(client)(ScanamoFree.putAll(tableName)(items))
 

@@ -21,7 +21,7 @@ object ScanamoFree {
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
     ScanamoOps.put(putRequest(tableName)(item))
 
-  def putAll[T: DynamoFormat](tableName: String)(items: List[T]): ScanamoOps[List[BatchWriteItemResult]] =
+  def putAll[T: DynamoFormat](tableName: String)(items: Set[T]): ScanamoOps[List[BatchWriteItemResult]] =
     items.grouped(25).toList.traverseU(batch =>
       ScanamoOps.batchWrite(batchPutRequest(tableName)(batch)))
 
