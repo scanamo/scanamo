@@ -26,10 +26,10 @@ package object scanamo {
 
     implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
 
-    implicit def symbolListTupleToUniqueKeys[V: DynamoFormat](pair: (Symbol, List[V])) =
+    implicit def symbolListTupleToUniqueKeys[V: DynamoFormat](pair: (Symbol, Set[V])) =
       UniqueKeys(KeyList(pair._1, pair._2))
 
-    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, List[(H, R)])) =
+    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])) =
       UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
 
     implicit def symbolTupleToQuery[V: DynamoFormat](pair: (Symbol, V)) =

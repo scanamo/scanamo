@@ -82,11 +82,11 @@ scala> val operations = for {
      |      winnerList      =  winners.flatMap(_.toOption).toList
      |      temptedWinners  =  winnerList.map(temptWithGum)
      |      _               <- luckyWinners.putAll(temptedWinners.toSet)
-     |      results         <- luckyWinners.getAll('name -> List("Charlie", "Violet"))
+     |      results         <- luckyWinners.getAll('name -> Set("Charlie", "Violet"))
      | } yield results
      
-scala> Scanamo.exec(client)(operations).toList
-res1: List[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = List(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
+scala> Scanamo.exec(client)(operations)
+res1: Set[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = Set(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
 ```
 
 Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 

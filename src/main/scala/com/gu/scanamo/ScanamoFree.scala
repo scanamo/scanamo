@@ -32,12 +32,12 @@ object ScanamoFree {
     } yield
       Option(res.getItem).map(read[T])
 
-  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[List[Xor[DynamoReadError, T]]] = {
+  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Xor[DynamoReadError, T]]] = {
     import collection.convert.decorateAsScala._
     for {
       res <- ScanamoOps.batchGet(batchGetRequest(tableName)(keys))
     } yield
-      keys.sortByKeys(res.getResponses.get(tableName).asScala.toList).map(read[T])
+      res.getResponses.get(tableName).asScala.toSet.map(read[T])
   }
 
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =

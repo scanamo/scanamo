@@ -112,9 +112,9 @@ object Scanamo {
     * ...   Scanamo.putAll(client)("farmers")(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ...   ))
-    * ...   Scanamo.getAll[Farmer](client)("farmers")(UniqueKeys(KeyList('name, List("Boggis", "Bean"))))
+    * ...   Scanamo.getAll[Farmer](client)("farmers")(UniqueKeys(KeyList('name, Set("Boggis", "Bean"))))
     * ... }
-    * List(Right(Farmer(Boggis,43,Farm(List(chicken)))), Right(Farmer(Bean,55,Farm(List(turkey)))))
+    * Set(Right(Farmer(Bean,55,Farm(List(turkey)))), Right(Farmer(Boggis,43,Farm(List(chicken)))))
     * }}}
     * or with some added syntactic sugar:
     * {{{
@@ -123,9 +123,9 @@ object Scanamo {
     * ...   Scanamo.putAll(client)("farmers")(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ...   ))
-    * ...   Scanamo.getAll[Farmer](client)("farmers")('name -> List("Boggis", "Bean"))
+    * ...   Scanamo.getAll[Farmer](client)("farmers")('name -> Set("Boggis", "Bean"))
     * ... }
-    * List(Right(Farmer(Boggis,43,Farm(List(chicken)))), Right(Farmer(Bean,55,Farm(List(turkey)))))
+    * Set(Right(Farmer(Bean,55,Farm(List(turkey)))), Right(Farmer(Boggis,43,Farm(List(chicken)))))
     * }}}
     * You can also retrieve items from a table with both a hash and range key
     * {{{
@@ -133,13 +133,13 @@ object Scanamo {
     * >>> LocalDynamoDB.withTable(client)("doctors")('actor -> S, 'regeneration -> N) {
     * ...   Scanamo.putAll(client)("doctors")(
     * ...     Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
-    * ...   Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11))
+    * ...   Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11))
     * ... }
-    * List(Right(Doctor(McCoy,9)), Right(Doctor(Ecclestone,11)))
+    * Set(Right(Doctor(McCoy,9)), Right(Doctor(Ecclestone,11)))
     * }}}
     */
   def getAll[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_])
-    : List[Xor[DynamoReadError, T]] =
+    : Set[Xor[DynamoReadError, T]] =
     exec(client)(ScanamoFree.getAll(tableName)(keys))
 
 

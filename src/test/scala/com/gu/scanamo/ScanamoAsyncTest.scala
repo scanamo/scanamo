@@ -266,14 +266,14 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       ))
 
       ScanamoAsync.getAll[Farmer](client)("asyncFarmers")(
-        UniqueKeys(KeyList('name, List("Boggis", "Bean")))
+        UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
       ).futureValue should equal(
-        List(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
+        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> List("Boggis", "Bean")).futureValue should equal(
-        List(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
+      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> Set("Boggis", "Bean")).futureValue should equal(
+        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
     LocalDynamoDB.usingTable(client)("asyncDoctors")('actor -> S, 'regeneration -> N) {
@@ -284,9 +284,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       import com.gu.scanamo.syntax._
       ScanamoAsync.getAll[Doctor](client)("asyncDoctors")(
-        ('actor and 'regeneration) -> List("McCoy" -> 9, "Ecclestone" -> 11)
+        ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
       ).futureValue should equal(
-        List(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
+        Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
 
     }
   }
