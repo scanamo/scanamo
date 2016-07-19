@@ -9,7 +9,7 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
 
     case class Large(name: String, number: Int, stuff: String)
     Scanamo.putAll(client)("large-query")(
-      (for { i <- 0 until 100 } yield Large("Harry", i, util.Random.nextString(5000))).toList
+      (for { i <- 0 until 100 } yield Large("Harry", i, util.Random.nextString(5000))).toSet
     )
     Scanamo.put(client)("large-query")(Large("George", 1, "x"))
     import syntax._

@@ -77,16 +77,16 @@ scala> def temptWithGum(child: LuckyWinner): LuckyWinner = child match {
 scala> val luckyWinners = Table[LuckyWinner]("winners")
 scala> val operations = for {
      |      _               <- luckyWinners.putAll(
-     |                           List(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
+     |                           Set(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
      |      winners         <- luckyWinners.scan()
      |      winnerList      =  winners.flatMap(_.toOption).toList
      |      temptedWinners  =  winnerList.map(temptWithGum)
-     |      _               <- luckyWinners.putAll(temptedWinners)
-     |      results         <- luckyWinners.getAll('name -> List("Charlie", "Violet"))
+     |      _               <- luckyWinners.putAll(temptedWinners.toSet)
+     |      results         <- luckyWinners.getAll('name -> Set("Charlie", "Violet"))
      | } yield results
      
-scala> Scanamo.exec(client)(operations).toList
-res1: List[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = List(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
+scala> Scanamo.exec(client)(operations)
+res1: Set[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = Set(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
 ```
 
 Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
@@ -105,7 +105,7 @@ scala> val transportTableResult = LocalDynamoDB.createTable(client)("transports"
 scala> case class Transport(mode: String, line: String)
 scala> val transportTable = Table[Transport]("transports")
 scala> val operations = for {
-     |   _ <- transportTable.putAll(List(
+     |   _ <- transportTable.putAll(Set(
      |          Transport("Underground", "Circle"),
      |          Transport("Underground", "Metropolitan"),
      |          Transport("Underground", "Central")
@@ -160,7 +160,7 @@ scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 scala> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
      |   val operations = for {
-     |     _ <- transport.putAll(List(
+     |     _ <- transport.putAll(Set(
      |       Transport("Underground", "Circle", "Yellow"),
      |       Transport("Underground", "Metropolitan", "Maroon"),
      |       Transport("Underground", "Central", "Red")))
@@ -190,7 +190,7 @@ scala> case class Farm(animals: List[String])
 scala> case class Farmer(name: String, age: Long, farm: Farm)
 scala> val farmTable = Table[Farmer]("farm")
 scala> val ops = for {
-     |   _ <- farmTable.putAll(List(
+     |   _ <- farmTable.putAll(Set(
      |          Farmer("Boggis", 43L, Farm(List("chicken"))), 
      |          Farmer("Bunce", 52L, Farm(List("goose"))), 
      |          Farmer("Bean", 55L, Farm(List("turkey")))

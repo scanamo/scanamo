@@ -19,7 +19,7 @@ import com.gu.scanamo.update.UpdateExpression
   * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
   * ...   import com.gu.scanamo.syntax._
   * ...   val operations = for {
-  * ...     _ <- transport.putAll(List(
+  * ...     _ <- transport.putAll(Set(
   * ...       Transport("Underground", "Circle"),
   * ...       Transport("Underground", "Metropolitan"),
   * ...       Transport("Underground", "Central")))
@@ -33,7 +33,7 @@ import com.gu.scanamo.update.UpdateExpression
 case class Table[V: DynamoFormat](name: String) {
 
   def put(v: V) = ScanamoFree.put(name)(v)
-  def putAll(vs: List[V]) = ScanamoFree.putAll(name)(vs)
+  def putAll(vs: Set[V]) = ScanamoFree.putAll(name)(vs)
   def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
@@ -51,7 +51,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
     * ...   val operations = for {
-    * ...     _ <- transport.putAll(List(
+    * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),
     * ...       Transport("Underground", "Metropolitan", "Magenta"),
     * ...       Transport("Underground", "Central", "Red")))
@@ -159,7 +159,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
     * ...   import com.gu.scanamo.syntax._
     * ...   val operations = for {
-    * ...     _ <- transport.putAll(List(
+    * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle"),
     * ...       Transport("Underground", "Metropolitan"),
     * ...       Transport("Underground", "Central")))
@@ -200,7 +200,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val lettersTable = Table[Letter]("letters")
     * >>> LocalDynamoDB.withTable(client)("letters")('roman -> S) {
     * ...   val ops = for {
-    * ...     _ <- lettersTable.putAll(List(Letter("a", "alpha"), Letter("b", "beta"), Letter("c", "gammon")))
+    * ...     _ <- lettersTable.putAll(Set(Letter("a", "alpha"), Letter("b", "beta"), Letter("c", "gammon")))
     * ...     _ <- lettersTable.given('greek beginsWith "ale").put(Letter("a", "aleph"))
     * ...     _ <- lettersTable.given('greek beginsWith "gam").put(Letter("c", "gamma"))
     * ...     letters <- lettersTable.scan()
@@ -214,7 +214,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val turnipsTable = Table[Turnip]("turnips")
     * >>> LocalDynamoDB.withTable(client)("turnips")('size -> N) {
     * ...   val ops = for {
-    * ...     _ <- turnipsTable.putAll(List(Turnip(1, None), Turnip(1000, None)))
+    * ...     _ <- turnipsTable.putAll(Set(Turnip(1, None), Turnip(1000, None)))
     * ...     initialTurnips <- turnipsTable.scan()
     * ...     _ <- initialTurnips.flatMap(_.toOption).traverse(t =>
     * ...       turnipsTable.given('size > 500).put(t.copy(description = Some("Big turnip in the country."))))
@@ -232,7 +232,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val thingTable = Table[Thing]("things")
     * >>> LocalDynamoDB.withTable(client)("things")('a -> S) {
     * ...   val ops = for {
-    * ...     _ <- thingTable.putAll(List(Thing("a", None), Thing("b", Some(1)), Thing("c", None)))
+    * ...     _ <- thingTable.putAll(Set(Thing("a", None), Thing("b", Some(1)), Thing("c", None)))
     * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("a", Some(2)))
     * ...     _ <- thingTable.given(attributeExists('maybe)).put(Thing("b", Some(3)))
     * ...     _ <- thingTable.given(Not(attributeExists('maybe))).put(Thing("c", Some(42)))
@@ -251,7 +251,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val compoundTable = Table[Compound]("compounds")
     * >>> LocalDynamoDB.withTable(client)("compounds")('a -> S) {
     * ...   val ops = for {
-    * ...     _ <- compoundTable.putAll(List(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
+    * ...     _ <- compoundTable.putAll(Set(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
     * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "alpha").put(Compound("alpha", Some(2)))
     * ...     _ <- compoundTable.given(attributeExists('maybe) and 'a -> "beta").put(Compound("beta", Some(3)))
     * ...     _ <- compoundTable.given(Condition('a -> "gamma") and attributeExists('maybe)).put(Compound("gamma", Some(42)))
@@ -269,7 +269,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val choicesTable = Table[Choice]("choices")
     * >>> LocalDynamoDB.withTable(client)("choices")('number -> N) {
     * ...   val ops = for {
-    * ...     _ <- choicesTable.putAll(List(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
+    * ...     _ <- choicesTable.putAll(Set(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
     * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(1, "victoria sponge"))
     * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(2, "victoria sponge"))
     * ...     choices <- choicesTable.scan()
@@ -286,7 +286,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val gremlinsTable = Table[Gremlin]("gremlins")
     * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
     * ...   val ops = for {
-    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false, true), Gremlin(2, true, false)))
+    * ...     _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, false)))
     * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 1)
     * ...     _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
     * ...     remainingGremlins <- gremlinsTable.scan()
@@ -301,7 +301,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
     * ...   val ops = for {
-    * ...     _ <- gremlinsTable.putAll(List(Gremlin(1, false, true), Gremlin(2, true, true)))
+    * ...     _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, true)))
     * ...     _ <- gremlinsTable.given('wet -> true).update('number -> 1, set('friendly -> false))
     * ...     _ <- gremlinsTable.given('wet -> true).update('number -> 2, set('friendly -> false))
     * ...     remainingGremlins <- gremlinsTable.scan()
@@ -329,7 +329,7 @@ private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName:
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
     * ... ) {
     * ...   val operations = for {
-    * ...     _ <- transport.putAll(List(
+    * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),
     * ...       Transport("Underground", "Metropolitan", "Magenta"),
     * ...       Transport("Underground", "Central", "Red"),
