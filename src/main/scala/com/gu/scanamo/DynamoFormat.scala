@@ -168,6 +168,13 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val doubleFormat = xmap(coerceNumber(_.toDouble))(_.toString)(numFormat)
+  /**
+    * {{{
+    * prop> (s: Short) =>
+    *     | DynamoFormat[Short].read(DynamoFormat[Short].write(s)) == cats.data.Xor.right(s)
+    * }}}
+    */
+  implicit val shortFormat = xmap(coerceNumber(_.toShort))(_.toString)(numFormat)
 
 
   val javaListFormat = attribute(_.getL, "L")(_.withL)
