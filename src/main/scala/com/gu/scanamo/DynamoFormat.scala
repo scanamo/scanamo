@@ -184,6 +184,14 @@ object DynamoFormat extends DerivedDynamoFormat {
       _.map(f.write).asJava
     )(javaListFormat)
 
+  /**
+    * {{{
+    * prop> (sq: Seq[String]) =>
+    *     | DynamoFormat[Seq[String]].read(DynamoFormat[Seq[String]].write(sq)) ==
+    *     |   cats.data.Xor.right(sq)
+    * }}}
+    */
+
   implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
     xmap[Seq[T], List[T]](l => Xor.right(l.toSeq))(_.toList)
 
