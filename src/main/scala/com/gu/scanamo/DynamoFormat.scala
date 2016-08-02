@@ -186,6 +186,18 @@ object DynamoFormat extends DerivedDynamoFormat {
 
   /**
     * {{{
+    * prop> (sq: Seq[String]) =>
+    *     | DynamoFormat[Seq[String]].read(DynamoFormat[Seq[String]].write(sq)) ==
+    *     |   cats.data.Xor.right(sq)
+    * }}}
+    */
+
+  implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
+    xmap[Seq[T], List[T]](l => Xor.right(l.toSeq))(_.toList)
+
+
+  /**
+    * {{{
     * prop> (l: Vector[String]) =>
     *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(l)) ==
     *     |   cats.data.Xor.right(l)
