@@ -11,7 +11,7 @@ import com.gu.scanamo.update.UpdateExpression
 
 object ScanamoFree {
 
-  import cats.std.list._
+  import cats.instances.list._
   import cats.syntax.traverse._
   import collection.convert.decorateAsJava._
 

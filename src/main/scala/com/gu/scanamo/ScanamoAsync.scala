@@ -18,7 +18,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * java.util.concurrent.ExecutorService to make calls asynchronously
   */
 object ScanamoAsync {
-  import cats.std.future._
+  import cats.instances.future._
 
   def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A])(implicit ec: ExecutionContext) =
     op.foldMap(ScanamoInterpreters.future(client)(ec))

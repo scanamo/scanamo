@@ -36,7 +36,7 @@ trait DerivedDynamoFormat {
         val validatedValue = possibleValue.getOrElse(Xor.left[DynamoReadError, V](MissingProperty))
 
         def withPropertyError(x: Xor[DynamoReadError, V]): Validated[InvalidPropertiesError, V] =
-          x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e)))).toValidated
+          x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e), Nil))).toValidated
 
         val head: Validated[InvalidPropertiesError, FieldType[K, V]] = withPropertyError(validatedValue).map(field[K](_))
         val tail = tailFormat.value.read(av)

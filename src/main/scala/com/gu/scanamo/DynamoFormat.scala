@@ -2,9 +2,9 @@ package com.gu.scanamo
 
 import cats.NotNull
 import cats.data._
-import cats.std.list._
-import cats.std.map._
-import cats.std.vector._
+import cats.instances.list._
+import cats.instances.map._
+import cats.instances.vector._
 import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error._
@@ -39,7 +39,7 @@ import java.nio.ByteBuffer
   * >>> case class Developer(name: String, age: String, problems: Int)
   * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
   * >>> invalid
-  * Left(InvalidPropertiesError(OneAnd(PropertyReadError(age,NoPropertyOfType(N,{S: none of your business,})),List(PropertyReadError(farm,MissingProperty)))))
+  * Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(age,NoPropertyOfType(N,{S: none of your business,})), PropertyReadError(farm,MissingProperty))))
   *
   * >>> invalid.leftMap(cats.Show[error.DynamoReadError].show)
   * Left('age': not of type: 'N' was '{S: none of your business,}', 'farm': missing)

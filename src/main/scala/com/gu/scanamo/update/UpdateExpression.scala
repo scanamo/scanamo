@@ -1,7 +1,7 @@
 package com.gu.scanamo.update
 
 import cats.kernel.Semigroup
-import cats.kernel.std.MapMonoid
+import cats.kernel.instances.MapMonoid
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.DynamoFormat
 import simulacrum.typeclass
