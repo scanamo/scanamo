@@ -3,29 +3,29 @@ package com.gu.scanamo.query
 import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.Requests._
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.request.{RequestCondition, ScanamoUpdateRequest}
+import com.gu.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
 import com.gu.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 
 case class ConditionalOperation[T](tableName: String, t: T)(implicit state: ConditionExpression[T]) {
-  def put[V: DynamoFormat](item: V): ScanamoOps[Xor[ConditionalCheckFailedException, PutItemResult]] = {
-    val unconditionalRequest = putRequest(tableName)(item)
+  def put[V](item: V)(implicit f: DynamoFormat[V]): ScanamoOps[Xor[ConditionalCheckFailedException, PutItemResult]] = {
+    val unconditionalRequest = ScanamoPutRequest(tableName, f.write(item), None)
     ScanamoOps.conditionalPut(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
   def delete(key: UniqueKey[_]): ScanamoOps[Xor[ConditionalCheckFailedException, DeleteItemResult]] = {
-    val unconditionalRequest = deleteRequest(tableName)(key)
+    val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None)
     ScanamoOps.conditionalDelete(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
-  def update[U: UpdateExpression](key: UniqueKey[_], update: U):
+  def update[U](key: UniqueKey[_], expression: U)(implicit update: UpdateExpression[U]):
     ScanamoOps[Xor[ConditionalCheckFailedException, UpdateItemResult]] = {
 
-    val unconditionalRequest = updateRequest(tableName)(key)(update)
+    val unconditionalRequest = ScanamoUpdateRequest(
+      tableName, key.asAVMap, update.expression(expression), update.attributeNames(expression), update.attributeValues(expression), None)
     ScanamoOps.conditionalUpdate(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }

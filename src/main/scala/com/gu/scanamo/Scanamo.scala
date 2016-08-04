@@ -15,7 +15,7 @@ import com.gu.scanamo.update.UpdateExpression
   */
 object Scanamo {
 
-  def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]) = op.foldMap(ScanamoInterpreters.id(client))
+  def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]): A = op.foldMap(ScanamoInterpreters.id(client))
 
   /**
     * Puts a single item into a table

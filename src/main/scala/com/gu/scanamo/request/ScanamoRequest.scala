@@ -4,19 +4,19 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
 case class ScanamoPutRequest(
   tableName: String,
-  item: java.util.Map[String, AttributeValue],
+  item: AttributeValue,
   condition: Option[RequestCondition]
 )
 
 case class ScanamoDeleteRequest(
   tableName: String,
-  key: java.util.Map[String, AttributeValue],
+  key: Map[String, AttributeValue],
   condition: Option[RequestCondition]
 )
 
 case class ScanamoUpdateRequest(
   tableName: String,
-  key: java.util.Map[String, AttributeValue],
+  key: Map[String, AttributeValue],
   updateExpression: String,
   attributeNames: Map[String, String],
   attributeValues: Map[String, AttributeValue],
