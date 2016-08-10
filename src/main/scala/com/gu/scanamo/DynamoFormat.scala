@@ -15,6 +15,7 @@ import simulacrum.typeclass
 
 import collection.convert.decorateAll._
 import scala.reflect.ClassTag
+import java.nio.ByteBuffer
 
 /**
   * Type class for defining serialisation to and from
@@ -175,7 +176,30 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val shortFormat = xmap(coerceNumber(_.toShort))(_.toString)(numFormat)
+  /**
+    * {{{
+    * prop> (b: Byte) =>
+    *     | DynamoFormat[Byte].read(DynamoFormat[Byte].write(b)) == cats.data.Xor.right(b)
+    * }}}
+    */
 
+  // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
+  implicit val byteFormat = xmap(coerceNumber(_.toByte))(_.toString)(numFormat)
+
+  // Since AttributeValue includes a ByteBuffer instance, creating byteArray format backed by ByteBuffer
+  private val javaByteBufferFormat = attribute[java.nio.ByteBuffer](_.getB, "B")(_.withB)
+
+  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Xor[DynamoReadError, B] =
+    coerce[ByteBuffer,B, IllegalArgumentException](f)
+
+  /**
+    * {{{
+    * prop> (ab:Array[Byte]) =>
+    *     | DynamoFormat[Array[Byte]].read(DynamoFormat[Array[Byte]].write(ab)) == cats.data.Xor.right(ab)
+    * }}}
+    */
+
+  implicit val byteArrayFormat = xmap(coerceByteBuffer(_.array()))(a => ByteBuffer.wrap(a))(javaByteBufferFormat)
 
   val javaListFormat = attribute(_.getL, "L")(_.withL)
   /**
