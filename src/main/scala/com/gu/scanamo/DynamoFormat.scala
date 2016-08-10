@@ -177,17 +177,16 @@ object DynamoFormat extends DerivedDynamoFormat {
     */
   implicit val shortFormat = xmap(coerceNumber(_.toShort))(_.toString)(numFormat)
 
-  // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[]
-  // Since AttributeValue includes a ByteBuffer instance, creating byte formats backed by ByteBuffer
+  // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
+  implicit val byteFormat = xmap(coerceNumber(_.toByte))(_.toString)(numFormat)
 
+  // Since AttributeValue includes a ByteBuffer instance, creating byteArray format backed by ByteBuffer
   private val javaByteBufferFormat = attribute[java.nio.ByteBuffer](_.getB, "B")(_.withB)
 
   private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Xor[DynamoReadError, B] =
     coerce[ByteBuffer,B, IllegalArgumentException](f)
 
   implicit val byteArrayFormat = xmap(coerceByteBuffer(_.array()))(a => ByteBuffer.wrap(a))(javaByteBufferFormat)
-
-  implicit val byteFormat = xmap(coerceByteBuffer(_.get(0)))(b => ByteBuffer.wrap(Array(b)))(javaByteBufferFormat)
 
   val javaListFormat = attribute(_.getL, "L")(_.withL)
   /**
