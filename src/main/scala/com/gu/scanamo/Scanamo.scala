@@ -188,9 +188,8 @@ object Scanamo {
     exec(client)(ScanamoFree.update(tableName)(key)(expression))
 
   /**
-    * Lazily scans a table
+    * Scans all elements of a table
     *
-    * Does not cache results by default
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
     *

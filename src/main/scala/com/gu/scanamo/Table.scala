@@ -312,6 +312,57 @@ case class Table[V: DynamoFormat](name: String) {
     * }}}
     */
   def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)
+
+  /**
+    * Scans all elements of a table
+    *
+    * {{{
+    * >>> case class Bear(name: String, favouriteFood: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val table = Table[Bear]("bears")
+    *
+    * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
+    * ...   val ops = for {
+    * ...     _ <- table.put(Bear("Pooh", "honey"))
+    * ...     _ <- table.put(Bear("Yogi", "picnic baskets"))
+    * ...     bears <- table.scan()
+    * ...   } yield bears
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
+    * }}}
+    */
+  def scan() = Scannable.tableScannable[V].scan(this)
+
+  /**
+    * Query a table based on the hash key and optionally the range key
+    *
+    * {{{
+    * >>> case class Transport(mode: String, line: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> val table = Table[Transport]("transport")
+    *
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
+    * ...   val ops = for {
+    * ...     _ <- table.putAll(Set(
+    * ...       Transport("Underground", "Circle"),
+    * ...       Transport("Underground", "Metropolitan"),
+    * ...       Transport("Underground", "Central")
+    * ...     ))
+    * ...     linesBeginningWithC <- table.query('mode -> "Underground" and ('line beginsWith "C"))
+    * ...   } yield linesBeginningWithC
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
+    * }}}
+    */
+  def query(query: Query[_]) = Queryable.tableQueryable[V].query(this)(query: Query[_])
 }
 
 private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
@@ -345,10 +396,19 @@ private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName:
     * }}}
     */
   def limit(n: Int) = IndexLimit(this, n)
+
+  def scan() = Scannable.indexScannable[V].scan(this)
+  def query(query: Query[_]) = Queryable.indexQueryable[V].query(this)(query: Query[_])
 }
 
-private[scanamo] case class TableLimit[V: DynamoFormat](table: Table[V], limit: Int)
-private[scanamo] case class IndexLimit[V: DynamoFormat](index: Index[V], limit: Int)
+private[scanamo] case class TableLimit[V: DynamoFormat](table: Table[V], limit: Int) {
+  def scan() = Scannable.limitedTableScannable[V].scan(this)
+  def query(query: Query[_]) = Queryable.limitedTableQueryable[V].query(this)(query: Query[_])
+}
+private[scanamo] case class IndexLimit[V: DynamoFormat](index: Index[V], limit: Int) {
+  def scan() = Scannable.limitedIndexScannable[V].scan(this)
+  def query(query: Query[_]) = Queryable.limitedIndexQueryable[V].query(this)(query: Query[_])
+}
 
 /* typeclass */trait Scannable[T[_], V] {
   def scan(t: T[V])(): ScanamoOps[List[Xor[DynamoReadError, V]]]
