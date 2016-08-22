@@ -5,19 +5,21 @@ scalaVersion := "2.11.8"
 
 crossScalaVersions := Seq(scalaVersion.value, "2.10.6")
 
+resolvers += Resolver.sonatypeRepo("snapshots")
+
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.8",
-  "com.chuusai" %% "shapeless" % "2.3.1",
-  "org.typelevel" %% "cats" % "0.6.0",
+  "com.chuusai" %% "shapeless" % "2.3.2",
+  "org.typelevel" %% "cats-free" % "0.7.0",
 
-  "com.github.mpilquist" %% "simulacrum" % "0.7.0",
+  "com.github.mpilquist" %% "simulacrum" % "0.8.0",
 
   // Use Joda for custom conversion example
   "org.joda" % "joda-convert" % "1.8.1" % Provided,
   "joda-time" % "joda-time" % "2.9.4" % Test,
 
   "org.scalatest" %% "scalatest" % "2.2.6" % Test,
-  "org.scalacheck" %% "scalacheck" % "1.12.4" % Test
+  "org.scalacheck" %% "scalacheck" % "1.12.5" % Test
 )
 // for simulacrum
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
