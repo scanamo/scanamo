@@ -82,6 +82,9 @@ pomExtra := {
 }
 
 import ReleaseTransformations._
+
+releaseCrossBuild := true
+
 releaseProcess := Seq[ReleaseStep](
   checkSnapshotDependencies,
   inquireVersions,
