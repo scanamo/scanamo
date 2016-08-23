@@ -1,3 +1,17 @@
+## Version 0.7.0
+
+ * default `DynamoFormat` instances for `Byte` and `Array[Byte]` (@drocsid)
+ * default `DynamoFormat` instance for `Seq` (@paulmr)
+ * default `DynamoFormat` instance for `Short`
+ * upgrade to Cats 0.7.0 (@travisbrown)
+ * added `scan` and `query` methods explicitly to `Table` and `Index`
+ * publish for Scala 2.10 as well as 2.11
+ 
+Breaking change:
+
+ * Bulk operations(`putAll` and `getAll`) now take a `Set` rather than `List`, which
+ better reflects the underlying behaviour
+
 ## Version 0.6.0
 
 New feature:
