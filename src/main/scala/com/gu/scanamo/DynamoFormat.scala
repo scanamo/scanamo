@@ -52,7 +52,7 @@ import java.nio.ByteBuffer
   * Right(LargelyOptional(None,Some(X)))
   * }}}
   *
-  * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]] or [[DynamoFormat.xmap]]
+  * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.map]]
   */
 @typeclass trait DynamoFormat[T] {
   def read(av: AttributeValue): Xor[DynamoReadError, T]
@@ -71,6 +71,33 @@ object DynamoFormat extends DerivedDynamoFormat {
       override def write(t: T): AttributeValue =
         encode(new AttributeValue())(t)
     }
+  }
+
+  /**
+    * Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
+    * i.e. an `A` can always be converted to a `B` and vice versa.
+    *
+    * If there are some values of `B` that have no corresponding value in `A`,
+    * use [[DynamoFormat.xmap]] or [[DynamoFormat.coercedXmap]].
+    *
+    * {{{
+    * >>> import cats.data.Xor
+    * >>> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    *
+    * >>> case class UserId(value: String)
+    *
+    * >>> implicit val userIdFormat = DynamoFormat.map[UserId, String](
+    * ...   UserId.apply
+    * ... )(
+    * ...   _.value
+    * ... )
+    * >>> DynamoFormat[UserId].read(new AttributeValue().withS("Eric"))
+    * Right(UserId(Eric))
+    * }}}
+    */
+  def map[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+    override def read(item: AttributeValue): Xor[DynamoReadError, A] = f.read(item).map(r)
+    override def write(t: A): AttributeValue = f.write(w(t))
   }
 
   /**
