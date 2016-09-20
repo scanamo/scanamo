@@ -3,12 +3,13 @@ package com.gu.scanamo
 import cats.data.{NonEmptyList, Validated, Xor}
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error.{DynamoReadError, InvalidPropertiesError, MissingProperty, PropertyReadError}
+import macrocompat.bundle
 import shapeless._
 import shapeless.labelled._
 
 import collection.convert.decorateAll._
 
-trait DerivedDynamoFormat {
+trait DerivedDynamoFormat extends NoFormatError {
   type ValidatedPropertiesError[T] = Validated[InvalidPropertiesError, T]
 
   trait ConstructedDynamoFormat[T] {
@@ -54,4 +55,24 @@ trait DerivedDynamoFormat {
       def read(av: AttributeValue): Xor[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toXor
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
+}
+
+trait NoFormatError {
+  import scala.language.experimental.macros
+  implicit def moreHelpfulErrorMessage[T]: DynamoFormat[T] = macro MacroOfLastResort.moreHelpfulErrorMessage[T]
+}
+
+@bundle
+class MacroOfLastResort(val c: scala.reflect.macros.blackbox.Context) {
+
+  import c.universe._
+
+  def moreHelpfulErrorMessage[T: c.WeakTypeTag]: Tree = {
+    val typ = weakTypeOf[T]
+
+    c.echo(c.enclosingPosition, s"could not find implicit value for parameter instance: com.gu.scanamo.DynamoFormat[$typ]")
+    // This is needed to stop the macro, but isn't actually reported to the user, which is why we also need `c.echo`
+    c.abort(c.enclosingPosition, s"could not find implicit value for parameter instance: com.gu.scanamo.DynamoFormat[$typ]")
+  }
+
 }
