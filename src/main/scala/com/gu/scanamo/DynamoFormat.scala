@@ -310,11 +310,14 @@ object DynamoFormat extends DerivedDynamoFormat {
     * prop> (o: Option[Long]) =>
     *     | DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) ==
     *     |   cats.data.Xor.right(o)
+    *
+    * >>> DynamoFormat[Option[Long]].read(new com.amazonaws.services.dynamodbv2.model.AttributeValue().withNULL(true))
+    * Right(None)
     * }}}
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
     def read(av: AttributeValue): Xor[DynamoReadError, Option[T]] = {
-      Option(av).map(f.read(_).map(Some(_)))
+      Option(av).filter(x => !Boolean.unbox(x.isNULL)).map(f.read(_).map(Some(_)))
         .getOrElse(Xor.right(Option.empty[T]))
     }
 
