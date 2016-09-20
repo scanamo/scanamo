@@ -14,9 +14,10 @@ import simulacrum.typeclass
 }
 
 sealed trait UpdateType { val op: String }
-final object SET extends UpdateType { override val op = "SET" }
-final object ADD extends UpdateType { override val op = "ADD" }
-final object DELETE extends UpdateType { override val op = "DELETE" }
+case object SET extends UpdateType { override val op = "SET" }
+case object ADD extends UpdateType { override val op = "ADD" }
+case object DELETE extends UpdateType { override val op = "DELETE" }
+case object REMOVE extends UpdateType { override val op = "REMOVE" }
 
 case class SetExpression[V: DynamoFormat](field: Symbol, value: V)
 
@@ -74,6 +75,12 @@ object AddExpression {
     }
 }
 
+/*
+Note the difference between DELETE and REMOVE:
+ - DELETE is used to delete an element from a set
+ - REMOVE is used to remove an attribute from an item
+ */
+
 case class DeleteExpression[V: DynamoFormat](field: Symbol, value: V)
 
 object DeleteExpression {
@@ -85,6 +92,20 @@ object DeleteExpression {
         Map("#update" -> t.field.name)
       override def attributeValues(t: DeleteExpression[V]): Map[String, AttributeValue] =
         Map(":update" -> format.write(t.value))
+    }
+}
+
+case class RemoveExpression(field: Symbol)
+
+object RemoveExpression {
+  implicit val removeUpdateExpression =
+    new UpdateExpression[RemoveExpression] {
+      override def typeExpressions(t: RemoveExpression): Map[UpdateType, String] =
+        Map(REMOVE -> "#update")
+      override def attributeNames(t: RemoveExpression): Map[String, String] =
+        Map("#update" -> t.field.name)
+      override def attributeValues(t: RemoveExpression): Map[String, AttributeValue] =
+        Map()
     }
 }
 

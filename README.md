@@ -129,16 +129,16 @@ scala> import com.gu.scanamo.syntax._
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 scala> val teamTableResult = LocalDynamoDB.createTable(client)("teams")('name -> S)
-scala> case class Team(name: String, goals: Int, scorers: List[String])
+scala> case class Team(name: String, goals: Int, scorers: List[String], mascot: Option[String])
 scala> val teamTable = Table[Team]("teams")
 scala> val operations = for {
-     |   _ <- teamTable.put(Team("Watford", 1, List("Blissett")))
-     |   _ <- teamTable.update('name -> "Watford", set('goals -> 2) and append('scorers -> "Barnes"))
+     |   _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
+     |   _ <- teamTable.update('name -> "Watford", set('goals -> 2) and append('scorers -> "Barnes") and remove('mascot))
      |   watford <- teamTable.get('name -> "Watford")
      | } yield watford
      
 scala> Scanamo.exec(client)(operations)
-res1: Option[cats.data.Xor[error.DynamoReadError, Team]] = Some(Right(Team(Watford,2,List(Blissett, Barnes))))
+res1: Option[cats.data.Xor[error.DynamoReadError, Team]] = Some(Right(Team(Watford,2,List(Blissett, Barnes),None)))
 ``` 
 
 ### Using Indexes
