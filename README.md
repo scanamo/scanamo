@@ -133,12 +133,11 @@ scala> case class Team(name: String, goals: Int, scorers: List[String], mascot: 
 scala> val teamTable = Table[Team]("teams")
 scala> val operations = for {
      |   _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
-     |   _ <- teamTable.update('name -> "Watford", set('goals -> 2) and append('scorers -> "Barnes") and remove('mascot))
-     |   watford <- teamTable.get('name -> "Watford")
-     | } yield watford
+     |   updated <- teamTable.update('name -> "Watford", set('goals -> 2) and append('scorers -> "Barnes") and remove('mascot))
+     | } yield updated
      
 scala> Scanamo.exec(client)(operations)
-res1: Option[cats.data.Xor[error.DynamoReadError, Team]] = Some(Right(Team(Watford,2,List(Blissett, Barnes),None)))
+res1: cats.data.Xor[error.DynamoReadError, Team] = Right(Team(Watford,2,List(Blissett, Barnes),None))
 ``` 
 
 ### Using Indexes

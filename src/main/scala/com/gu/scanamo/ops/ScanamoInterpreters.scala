@@ -38,6 +38,7 @@ object ScanamoInterpreters {
         .withUpdateExpression(req.updateExpression)
         .withExpressionAttributeNames(req.attributeNames.asJava)
         .withExpressionAttributeValues(req.attributeValues.asJava)
+        .withReturnValues(ReturnValue.ALL_NEW)
     )((r, c) =>
       c.attributeValues.foldLeft(
         r.withConditionExpression(c.expression).withExpressionAttributeNames(
