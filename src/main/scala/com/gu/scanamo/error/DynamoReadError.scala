@@ -3,9 +3,12 @@ package com.gu.scanamo.error
 import cats.{Semigroup, Show}
 import cats.data.NonEmptyList
 import cats.instances.list._
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ConditionalCheckFailedException}
 
-sealed abstract class DynamoReadError
+sealed abstract class ScanamoError
+final case class ConditionNotMet(e: ConditionalCheckFailedException) extends ScanamoError
+
+sealed abstract class DynamoReadError extends ScanamoError
 final case class NoPropertyOfType(propertyType: String, actual: AttributeValue) extends DynamoReadError
 final case class TypeCoercionError(t: Throwable) extends DynamoReadError
 final case object MissingProperty extends DynamoReadError

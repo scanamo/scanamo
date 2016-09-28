@@ -15,9 +15,6 @@ object ScanamoFree {
   import cats.syntax.traverse._
   import collection.convert.decorateAsJava._
 
-  def given[T: ConditionExpression](tableName: String)(condition: T): ConditionalOperation[T] =
-    ConditionalOperation(tableName, condition)
-
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
     ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None))
 
@@ -76,9 +73,14 @@ object ScanamoFree {
   def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_], limit: Int): ScanamoOps[List[Xor[DynamoReadError, T]]] =
     QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName)).withIndexName(indexName).withLimit(limit))
 
-  def update[T](tableName: String)(key: UniqueKey[_])(expression: T)(implicit update: UpdateExpression[T]) =
+  def update[T, U](tableName: String)(key: UniqueKey[_])(expression: U)(
+    implicit update: UpdateExpression[U], format: DynamoFormat[T]
+  ): ScanamoOps[Xor[DynamoReadError, T]] =
     ScanamoOps.update(ScanamoUpdateRequest(
-      tableName, key.asAVMap, update.expression(expression), update.attributeNames(expression), update.attributeValues(expression), None))
+      tableName, key.asAVMap, update.expression(expression), update.attributeNames(expression), update.attributeValues(expression), None)
+    ).map(
+      r => format.read(new AttributeValue().withM(r.getAttributes))
+    )
 
   /**
     * {{{

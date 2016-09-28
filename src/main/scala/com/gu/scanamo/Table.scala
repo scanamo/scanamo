@@ -65,7 +65,7 @@ case class Table[V: DynamoFormat](name: String) {
   def index(indexName: String) = Index[V](name, indexName)
 
   /**
-    * Updates an attribute that is not part of the key
+    * Updates an attribute that is not part of the key and returns the updated row
     *
     * To set an attribute:
     *
@@ -80,12 +80,11 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   import com.gu.scanamo.syntax._
     * ...   val operations = for {
     * ...     _ <- forecast.put(Forecast("London", "Rain"))
-    * ...     _ <- forecast.update('location -> "London", set('weather -> "Sun"))
-    * ...     results <- forecast.scan()
-    * ...   } yield results.toList
+    * ...     updated <- forecast.update('location -> "London", set('weather -> "Sun"))
+    * ...   } yield updated
     * ...   Scanamo.exec(client)(operations)
     * ... }
-    * List(Right(Forecast(London,Sun)))
+    * Right(Forecast(London,Sun))
     * }}}
     *
     * List attributes can also be appended or prepended to:
@@ -116,13 +115,12 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   import com.gu.scanamo.syntax._
     * ...   val operations = for {
     * ...     _ <- foos.put(Foo("x", 0, List("First")))
-    * ...     _ <- foos.update('name -> "x",
+    * ...     updated <- foos.update('name -> "x",
     * ...       append('l -> "Second") and set('bar -> 1))
-    * ...     results <- foos.scan()
-    * ...   } yield results.toList
+    * ...   } yield updated
     * ...   Scanamo.exec(client)(operations)
     * ... }
-    * List(Right(Foo(x,1,List(First, Second))))
+    * Right(Foo(x,1,List(First, Second)))
     * }}}
     *
     * It's also possible to perform `ADD` and `DELETE` updates
@@ -136,16 +134,15 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     _ <- bars.put(Bar("x", 1L, Set("First")))
     * ...     _ <- bars.update('name -> "x",
     * ...       add('counter -> 10L) and add('set -> Set("Second")))
-    * ...     _ <- bars.update('name -> "x", delete('set -> Set("First")))
-    * ...     results <- bars.scan()
-    * ...   } yield results.toList
+    * ...     updatedBar <- bars.update('name -> "x", delete('set -> Set("First")))
+    * ...   } yield updatedBar
     * ...   Scanamo.exec(client)(operations)
     * ... }
-    * List(Right(Bar(x,11,Set(Second))))
+    * Right(Bar(x,11,Set(Second)))
     * }}}
     */
-  def update[T: UpdateExpression](key: UniqueKey[_], expression: T) =
-    ScanamoFree.update(name)(key)(expression)
+  def update[U: UpdateExpression](key: UniqueKey[_], expression: U): ScanamoOps[Xor[DynamoReadError, V]] =
+    ScanamoFree.update[V, U](name)(key)(expression)
 
   /**
     * Query or scan a table, limiting the number of items evaluated by Dynamo
@@ -311,7 +308,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Gremlin(2,true,false)), Right(Gremlin(1,false,true)))
     * }}}
     */
-  def given[T: ConditionExpression](condition: T) = ScanamoFree.given(name)(condition)
+  def given[T: ConditionExpression](condition: T) = ConditionalOperation[V,T](name, condition)
 
   /**
     * Scans all elements of a table
