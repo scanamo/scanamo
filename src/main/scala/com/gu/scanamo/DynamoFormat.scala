@@ -52,7 +52,7 @@ import java.nio.ByteBuffer
   * Right(LargelyOptional(None,Some(X)))
   * }}}
   *
-  * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.map]]
+  * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.iso]]
   */
 @typeclass trait DynamoFormat[T] {
   def read(av: AttributeValue): Xor[DynamoReadError, T]
@@ -86,16 +86,13 @@ object DynamoFormat extends DerivedDynamoFormat {
     *
     * >>> case class UserId(value: String)
     *
-    * >>> implicit val userIdFormat = DynamoFormat.map[UserId, String](
-    * ...   UserId.apply
-    * ... )(
-    * ...   _.value
-    * ... )
+    * >>> implicit val userIdFormat =
+    * ...   DynamoFormat.iso[UserId, String](UserId.apply)(_.value)
     * >>> DynamoFormat[UserId].read(new AttributeValue().withS("Eric"))
     * Right(UserId(Eric))
     * }}}
     */
-  def map[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+  def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     override def read(item: AttributeValue): Xor[DynamoReadError, A] = f.read(item).map(r)
     override def write(t: A): AttributeValue = f.write(w(t))
   }
