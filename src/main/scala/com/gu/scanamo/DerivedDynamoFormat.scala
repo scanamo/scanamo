@@ -1,6 +1,7 @@
 package com.gu.scanamo
 
-import cats.data.{NonEmptyList, Validated, Xor}
+import cats.data.{NonEmptyList, Validated}
+import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error.{DynamoReadError, InvalidPropertiesError, MissingProperty, PropertyReadError}
 import macrocompat.bundle
@@ -32,11 +33,11 @@ trait DerivedDynamoFormat extends NoFormatError {
       def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :: T] = {
         val fieldName = fieldWitness.value.name
 
-        val possibleValue = av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Xor.right))
+        val possibleValue = av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Either.right))
 
-        val validatedValue = possibleValue.getOrElse(Xor.left[DynamoReadError, V](MissingProperty))
+        val validatedValue = possibleValue.getOrElse(Either.left[DynamoReadError, V](MissingProperty))
 
-        def withPropertyError(x: Xor[DynamoReadError, V]): Validated[InvalidPropertiesError, V] =
+        def withPropertyError(x: Either[DynamoReadError, V]): Validated[InvalidPropertiesError, V] =
           x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e), Nil))).toValidated
 
         val head: Validated[InvalidPropertiesError, FieldType[K, V]] = withPropertyError(validatedValue).map(field[K](_))
@@ -52,7 +53,7 @@ trait DerivedDynamoFormat extends NoFormatError {
 
   implicit def generic[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
-      def read(av: AttributeValue): Xor[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toXor
+      def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 }

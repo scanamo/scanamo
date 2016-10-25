@@ -1,6 +1,5 @@
 package com.gu.scanamo.query
 
-import cats.data.Xor
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.DynamoFormat
 import com.gu.scanamo.error.{ConditionNotMet, ScanamoError}
@@ -8,29 +7,30 @@ import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
 import com.gu.scanamo.update.UpdateExpression
 import simulacrum.typeclass
+import cats.syntax.either._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T], format: DynamoFormat[V]) {
-  def put(item: V): ScanamoOps[Xor[ConditionalCheckFailedException, PutItemResult]] = {
+  def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] = {
     val unconditionalRequest = ScanamoPutRequest(tableName, format.write(item), None)
     ScanamoOps.conditionalPut(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
-  def delete(key: UniqueKey[_]): ScanamoOps[Xor[ConditionalCheckFailedException, DeleteItemResult]] = {
+  def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] = {
     val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None)
     ScanamoOps.conditionalDelete(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
   def update[U](key: UniqueKey[_], expression: U)(implicit update: UpdateExpression[U]):
-    ScanamoOps[Xor[ScanamoError, V]] = {
+    ScanamoOps[Either[ScanamoError, V]] = {
 
     val unconditionalRequest = ScanamoUpdateRequest(
       tableName, key.asAVMap, update.expression(expression), update.attributeNames(expression), update.attributeValues(expression), None)
     ScanamoOps.conditionalUpdate(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition)))
-    ).map(xor => xor.leftMap(ConditionNotMet(_)).flatMap(
+    ).map(either => either.leftMap[ScanamoError](ConditionNotMet(_)).flatMap(
       r => format.read(new AttributeValue().withM(r.getAttributes))))
   }
 }
