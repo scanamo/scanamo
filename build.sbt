@@ -11,7 +11,6 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.52",
   "com.chuusai" %% "shapeless" % "2.3.2",
   "org.typelevel" %% "cats-free" % "0.8.1",
-
   "com.github.mpilquist" %% "simulacrum" % "0.10.0",
 
   "org.typelevel" %% "macro-compat" % "1.1.1",
@@ -50,9 +49,8 @@ startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
 test in Test := (test in Test).dependsOn(startDynamoDBLocal).value
 testOptions in Test += dynamoDBLocalTestCleanup.value
 
-site.settings
-site.includeScaladoc()
-import com.typesafe.sbt.SbtSite.SiteKeys.makeSite
+enablePlugins(MicrositesPlugin)
+
 includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml"
 ghpages.settings
 com.typesafe.sbt.SbtGhPages.GhPagesKeys.ghpagesNoJekyll := false
