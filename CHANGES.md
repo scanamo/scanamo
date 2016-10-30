@@ -1,3 +1,21 @@
+## Version 0.8.0
+
+Definitely Breaking changes:
+
+ * Switched from using `Xor` to `Either` (#67)
+
+Possibly breaking changes:
+
+ * Return the new value after an update (#66)
+ * Read Dynamo NULL values as `None` for values mapped to an `Option` (#65)
+
+Innocent changes:
+
+ * Attempt to provide better errors when unable derive a `DynamoFormat` (#64)
+ * Add REMOVE support to the update API (#63 - @cb372)
+ * Add an `iso` method to `DynamoFormat` (#62 - @cb372)
+
+
 ## Version 0.7.0
 
  * default `DynamoFormat` instances for `Byte` and `Array[Byte]` (@drocsid)
