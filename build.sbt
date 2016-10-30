@@ -49,6 +49,9 @@ startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
 test in Test := (test in Test).dependsOn(startDynamoDBLocal).value
 testOptions in Test += dynamoDBLocalTestCleanup.value
 
+tut <<= tut.dependsOn(startDynamoDBLocal)
+testOptions in Test <+= dynamoDBLocalTestCleanup
+
 enablePlugins(MicrositesPlugin)
 
 includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml"
