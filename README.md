@@ -45,12 +45,11 @@ scala> case class Farmer(name: String, age: Long, farm: Farm)
 
 scala> val putResult = Scanamo.put(client)("farmer")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
 scala> Scanamo.get[Farmer](client)("farmer")('name -> "McDonald")
-res1: Option[cats.data.Xor[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
+res1: Option[Either[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
-The `Xor` represents the possibility that an item might exist, but not be parseable into the given 
-type, in this case `Farmer`. For more information on `Xor`, see the 
-[Cats documentation](http://typelevel.org/cats/tut/xor.html).
+The `Either` represents the possibility that an item might exist, but not be parsable into the given
+type, in this case `Farmer`.
 
 Like all the examples in this README and the Scaladoc, this creates a table, so that it 
 can be checked using [sbt-doctest](https://github.com/tkawachi/sbt-doctest), but the same 
@@ -64,6 +63,7 @@ abstraction to reduce noise when defining multiple operations against the same t
 ```scala
 scala> import com.gu.scanamo._
 scala> import com.gu.scanamo.syntax._
+scala> import cats.syntax.either._
 
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -86,7 +86,7 @@ scala> val operations = for {
      | } yield results
      
 scala> Scanamo.exec(client)(operations)
-res1: Set[cats.data.Xor[error.DynamoReadError, LuckyWinner]] = Set(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
+res1: Set[Either[error.DynamoReadError, LuckyWinner]] = Set(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
 ```
 
 Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
@@ -114,7 +114,7 @@ scala> val operations = for {
      | } yield tubesStartingWithC.toList
      
 scala> Scanamo.exec(client)(operations)
-res1: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
+res1: List[Either[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
 ```
 
 ### Updating
@@ -137,8 +137,8 @@ scala> val operations = for {
      | } yield updated
      
 scala> Scanamo.exec(client)(operations)
-res1: cats.data.Xor[error.DynamoReadError, Team] = Right(Team(Watford,2,List(Blissett, Barnes),None))
-``` 
+res1: Either[error.DynamoReadError, Team] = Right(Team(Watford,2,List(Blissett, Barnes),None))
+```
 
 ### Using Indexes
 
@@ -167,7 +167,7 @@ scala> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-in
      |   } yield maroonLine.toList
      |   Scanamo.exec(client)(operations)
      | }
-res0: List[cats.data.Xor[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Metropolitan,Maroon)))
+res0: List[Either[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Metropolitan,Maroon)))
 ```
 
 ### Non-blocking requests
@@ -198,7 +198,7 @@ scala> val ops = for {
      | } yield bunce
      
 scala> concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
-res1: Option[cats.data.Xor[error.DynamoReadError, Farmer]] = Some(Right(Farmer(Bunce,52,Farm(List(goose)))))
+res1: Option[Either[error.DynamoReadError, Farmer]] = Some(Right(Farmer(Bunce,52,Farm(List(goose)))))
 ```
 
 ### Custom Formats
@@ -233,7 +233,7 @@ scala> val operations = for {
      | } yield results
  
 scala> Scanamo.exec(client)(operations).toList
-res1: List[cats.data.Xor[error.DynamoReadError, Foo]] = List(Right(Foo(1970-01-01T00:00:00.000Z)))
+res1: List[Either[error.DynamoReadError, Foo]] = List(Right(Foo(1970-01-01T00:00:00.000Z)))
 ```
 
 

@@ -1,7 +1,7 @@
 package com.gu.scanamo.ops
 
 import cats._
-import cats.data.Xor
+import cats.syntax.either._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
@@ -52,7 +52,7 @@ object ScanamoInterpreters {
       case Put(req) =>
         client.putItem(javaPutRequest(req))
       case ConditionalPut(req) =>
-        Xor.catchOnly[ConditionalCheckFailedException] {
+        Either.catchOnly[ConditionalCheckFailedException] {
           client.putItem(javaPutRequest(req))
         }
       case Get(req) =>
@@ -60,7 +60,7 @@ object ScanamoInterpreters {
       case Delete(req) =>
         client.deleteItem(javaDeleteRequest(req))
       case ConditionalDelete(req) =>
-        Xor.catchOnly[ConditionalCheckFailedException] {
+        Either.catchOnly[ConditionalCheckFailedException] {
           client.deleteItem(javaDeleteRequest(req))
         }
       case Scan(req) =>
@@ -74,7 +74,7 @@ object ScanamoInterpreters {
       case Update(req) =>
         client.updateItem(javaUpdateRequest(req))
       case ConditionalUpdate(req) =>
-        Xor.catchOnly[ConditionalCheckFailedException] {
+        Either.catchOnly[ConditionalCheckFailedException] {
           client.updateItem(javaUpdateRequest(req))
         }
     }
@@ -96,9 +96,9 @@ object ScanamoInterpreters {
         futureOf(client.putItemAsync, javaPutRequest(req))
       case ConditionalPut(req) =>
         futureOf(client.putItemAsync, javaPutRequest(req))
-          .map(Xor.right[ConditionalCheckFailedException, PutItemResult])
+          .map(Either.right[ConditionalCheckFailedException, PutItemResult])
           .recover {
-            case e: ConditionalCheckFailedException => Xor.left(e)
+            case e: ConditionalCheckFailedException => Either.left(e)
           }
       case Get(req) =>
         futureOf(client.getItemAsync, req)
@@ -106,8 +106,8 @@ object ScanamoInterpreters {
         futureOf(client.deleteItemAsync, javaDeleteRequest(req))
       case ConditionalDelete(req) =>
         futureOf(client.deleteItemAsync, javaDeleteRequest(req))
-          .map(Xor.right[ConditionalCheckFailedException, DeleteItemResult])
-          .recover { case e: ConditionalCheckFailedException => Xor.left(e) }
+          .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
+          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
       case Scan(req) =>
         futureOf(client.scanAsync, req)
       case Query(req) =>
@@ -121,9 +121,9 @@ object ScanamoInterpreters {
         futureOf(client.updateItemAsync, javaUpdateRequest(req))
       case ConditionalUpdate(req) =>
         futureOf(client.updateItemAsync, javaUpdateRequest(req))
-          .map(Xor.right[ConditionalCheckFailedException, UpdateItemResult])
+          .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
           .recover {
-            case e: ConditionalCheckFailedException => Xor.left(e)
+            case e: ConditionalCheckFailedException => Either.left(e)
           }
     }
   }

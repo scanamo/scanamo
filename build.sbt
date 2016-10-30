@@ -8,7 +8,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.8",
   "com.chuusai" %% "shapeless" % "2.3.2",
-  "org.typelevel" %% "cats-free" % "0.7.0",
+  "org.typelevel" %% "cats-free" % "0.7.2",
 
   "com.github.mpilquist" %% "simulacrum" % "0.8.0",
 
