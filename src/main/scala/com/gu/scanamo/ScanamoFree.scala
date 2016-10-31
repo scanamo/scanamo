@@ -12,7 +12,7 @@ object ScanamoFree {
 
   import cats.instances.list._
   import cats.syntax.traverse._
-  import collection.convert.decorateAsJava._
+  import collection.JavaConverters._
 
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
     ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None))
@@ -34,7 +34,6 @@ object ScanamoFree {
       Option(res.getItem).map(read[T])
 
   def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
-    import collection.convert.decorateAsScala._
     for {
       res <- ScanamoOps.batchGet(
         new BatchGetItemRequest().withRequestItems(Map(tableName ->
@@ -83,7 +82,7 @@ object ScanamoFree {
 
   /**
     * {{{
-    * prop> import collection.convert.decorateAsJava._
+    * prop> import collection.JavaConverters._
     * prop> import com.amazonaws.services.dynamodbv2.model._
     *
     * prop> (m: Map[String, Int]) =>

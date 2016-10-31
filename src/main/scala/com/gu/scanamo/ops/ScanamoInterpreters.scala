@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
 
 object ScanamoInterpreters {
-  import collection.convert.decorateAsJava._
+  import collection.JavaConverters._
 
   def javaPutRequest(req: ScanamoPutRequest): PutItemRequest =
     req.condition.foldLeft(

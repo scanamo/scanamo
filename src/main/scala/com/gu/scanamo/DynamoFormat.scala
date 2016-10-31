@@ -11,7 +11,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error._
 import simulacrum.typeclass
 
-import scala.collection.convert.decorateAll._
+import collection.JavaConverters._
 import scala.reflect.ClassTag
 import java.nio.ByteBuffer
 

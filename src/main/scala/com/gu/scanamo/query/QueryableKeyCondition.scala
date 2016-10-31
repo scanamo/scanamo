@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.model.QueryRequest
 import com.gu.scanamo.DynamoFormat
 import simulacrum.typeclass
 
-import scala.collection.convert.decorateAsJava._
+import collection.JavaConverters._
 
 @typeclass trait QueryableKeyCondition[T] {
   def apply(t: T)(req: QueryRequest): QueryRequest

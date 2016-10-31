@@ -9,7 +9,7 @@ import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryResult, Sca
 import com.gu.scanamo.ops.{BatchGet, BatchWrite, Query, _}
 import org.scalatest.{FunSuite, Matchers}
 
-import scala.collection.convert.decorateAll._
+import collection.JavaConverters._
 
 class ScanamoFreeTest extends FunSuite with Matchers {
   test("only make one call for a limited result") {

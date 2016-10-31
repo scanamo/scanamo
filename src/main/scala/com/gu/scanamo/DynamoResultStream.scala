@@ -2,13 +2,12 @@ package com.gu.scanamo
 
 import java.util
 
-import cats.data._
 import cats.free.Free
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryRequest, QueryResult, ScanRequest, ScanResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
 
-import collection.convert.decorateAsScala._
+import collection.JavaConverters._
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
   type EvaluationKey = java.util.Map[String, AttributeValue]
