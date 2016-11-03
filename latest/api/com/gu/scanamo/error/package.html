@@ -66,8 +66,25 @@
 
         <div id="types" class="types members">
               <h3>Type Members</h3>
-              <ol><li name="com.gu.scanamo.error.DynamoReadError" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="DynamoReadErrorextendsAnyRef"></a>
+              <ol><li name="com.gu.scanamo.error.ConditionNotMet" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConditionNotMetextendsScanamoErrorwithProductwithSerializable"></a>
+      <a id="ConditionNotMet:ConditionNotMet"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConditionNotMet.html"><span class="name">ConditionNotMet</span></a><span class="params">(<span name="e">e: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span></span>)</span><span class="result"> extends <a href="ScanamoError.html" class="extype" name="com.gu.scanamo.error.ScanamoError">ScanamoError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.gu.scanamo.error.package@ConditionNotMetextendsScanamoErrorwithProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.error.DynamoReadError" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="DynamoReadErrorextendsScanamoError"></a>
       <a id="DynamoReadError:DynamoReadError"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -75,10 +92,10 @@
         <span class="kind">class</span>
       </span>
       <span class="symbol">
-        <a href="DynamoReadError.html"><span class="name">DynamoReadError</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <a href="DynamoReadError.html"><span class="name">DynamoReadError</span></a><span class="result"> extends <a href="ScanamoError.html" class="extype" name="com.gu.scanamo.error.ScanamoError">ScanamoError</a></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.error.package@DynamoReadErrorextendsAnyRef" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.error.package@DynamoReadErrorextendsScanamoError" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -109,7 +126,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="NoPropertyOfType.html"><span class="name">NoPropertyOfType</span></a><span class="params">(<span name="propertyType">propertyType: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="result"> extends <a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="NoPropertyOfType.html"><span class="name">NoPropertyOfType</span></a><span class="params">(<span name="propertyType">propertyType: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="actual">actual: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span></span>)</span><span class="result"> extends <a href="DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a> with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.gu.scanamo.error.package@NoPropertyOfTypeextendsDynamoReadErrorwithProductwithSerializable" title="Permalink" target="_top">
@@ -130,6 +147,23 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.gu.scanamo.error.package@PropertyReadErrorextendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.error.ScanamoError" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="ScanamoErrorextendsAnyRef"></a>
+      <a id="ScanamoError:ScanamoError"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a href="ScanamoError.html"><span class="name">ScanamoError</span></a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.gu.scanamo.error.package@ScanamoErrorextendsAnyRef" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

@@ -123,7 +123,7 @@
     </span>
       
     </li><li name="com.gu.scanamo.ops.ConditionalDelete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ConditionalDeleteextendsScanamoOpsA[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]withProductwithSerializable"></a>
+      <a id="ConditionalDeleteextendsScanamoOpsA[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]withProductwithSerializable"></a>
       <a id="ConditionalDelete:ConditionalDelete"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -131,16 +131,16 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ConditionalDelete.html"><span class="name">ConditionalDelete</span></a><span class="params">(<span name="req">req: <a href="../request/ScanamoDeleteRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoDeleteRequest">ScanamoDeleteRequest</a></span>)</span><span class="result"> extends <a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>[<span class="extype" name="cats.data.Xor">Xor</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemResult">DeleteItemResult</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ConditionalDelete.html"><span class="name">ConditionalDelete</span></a><span class="params">(<span name="req">req: <a href="../request/ScanamoDeleteRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoDeleteRequest">ScanamoDeleteRequest</a></span>)</span><span class="result"> extends <a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemResult">DeleteItemResult</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.ops.package@ConditionalDeleteextendsScanamoOpsA[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]withProductwithSerializable" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.ops.package@ConditionalDeleteextendsScanamoOpsA[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]withProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.ops.ConditionalPut" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="ConditionalPutextendsScanamoOpsA[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]withProductwithSerializable"></a>
+      <a id="ConditionalPutextendsScanamoOpsA[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]withProductwithSerializable"></a>
       <a id="ConditionalPut:ConditionalPut"></a>
       <h4 class="signature">
       <span class="modifier_kind">
@@ -148,10 +148,27 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <a href="ConditionalPut.html"><span class="name">ConditionalPut</span></a><span class="params">(<span name="req">req: <a href="../request/ScanamoPutRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoPutRequest">ScanamoPutRequest</a></span>)</span><span class="result"> extends <a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>[<span class="extype" name="cats.data.Xor">Xor</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <a href="ConditionalPut.html"><span class="name">ConditionalPut</span></a><span class="params">(<span name="req">req: <a href="../request/ScanamoPutRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoPutRequest">ScanamoPutRequest</a></span>)</span><span class="result"> extends <a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.ops.package@ConditionalPutextendsScanamoOpsA[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]withProductwithSerializable" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.ops.package@ConditionalPutextendsScanamoOpsA[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]withProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ops.ConditionalUpdate" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ConditionalUpdateextendsScanamoOpsA[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.UpdateItemResult]]withProductwithSerializable"></a>
+      <a id="ConditionalUpdate:ConditionalUpdate"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="ConditionalUpdate.html"><span class="name">ConditionalUpdate</span></a><span class="params">(<span name="req">req: <a href="../request/ScanamoUpdateRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoUpdateRequest">ScanamoUpdateRequest</a></span>)</span><span class="result"> extends <a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.UpdateItemResult">UpdateItemResult</span>]] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.gu.scanamo.ops.package@ConditionalUpdateextendsScanamoOpsA[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.UpdateItemResult]]withProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -271,6 +288,23 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.gu.scanamo.ops.package@ScanamoOpsA[A]extendsProductwithSerializable" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.ops.Update" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="UpdateextendsScanamoOpsA[com.amazonaws.services.dynamodbv2.model.UpdateItemResult]withProductwithSerializable"></a>
+      <a id="Update:Update"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier">final </span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a href="Update.html"><span class="name">Update</span></a><span class="params">(<span name="req">req: <a href="../request/ScanamoUpdateRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoUpdateRequest">ScanamoUpdateRequest</a></span>)</span><span class="result"> extends <a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.UpdateItemResult">UpdateItemResult</span>] with <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.gu.scanamo.ops.package@UpdateextendsScanamoOpsA[com.amazonaws.services.dynamodbv2.model.UpdateItemResult]withProductwithSerializable" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

@@ -45,7 +45,7 @@
         <span class="kind">case class</span>
       </span>
       <span class="symbol">
-        <span class="name">ConditionalOperation</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="t">t: <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="state">state: <a href="ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+        <span class="name">ConditionalOperation</span><span class="tparams">[<span name="V">V</span>, <span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="t">t: <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="state">state: <a href="ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span>]</span>, <span name="format">format: <a href="../DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.V">V</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       </h4>
       
@@ -89,18 +89,18 @@
         <div id="constructors" class="members">
               <h3>Instance Constructors</h3>
               <ol><li name="com.gu.scanamo.query.ConditionalOperation#&lt;init&gt;" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(tableName:String,t:T)(implicitstate:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]"></a>
-      <a id="&lt;init&gt;:ConditionalOperation[T]"></a>
+      <a id="&lt;init&gt;(tableName:String,t:T)(implicitstate:com.gu.scanamo.query.ConditionExpression[T],implicitformat:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.ConditionalOperation[V,T]"></a>
+      <a id="&lt;init&gt;:ConditionalOperation[V,T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">new</span>
       </span>
       <span class="symbol">
-        <span class="name">ConditionalOperation</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="t">t: <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="state">state: <a href="ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span>]</span>)</span>
+        <span class="name">ConditionalOperation</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="t">t: <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="state">state: <a href="ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.T">T</span>]</span>, <span name="format">format: <a href="../DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.V">V</span>]</span>)</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@&lt;init&gt;(tableName:String,t:T)(implicitstate:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@&lt;init&gt;(tableName:String,t:T)(implicitstate:com.gu.scanamo.query.ConditionExpression[T],implicitformat:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.ConditionalOperation[V,T]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -206,18 +206,18 @@
               
         </dd></dl></div>
     </li><li name="com.gu.scanamo.query.ConditionalOperation#delete" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="delete(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]"></a>
-      <a id="delete(UniqueKey[_]):ScanamoOps[Xor[ConditionalCheckFailedException,DeleteItemResult]]"></a>
+      <a id="delete(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]"></a>
+      <a id="delete(UniqueKey[_]):ScanamoOps[Either[ConditionalCheckFailedException,DeleteItemResult]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">delete</span><span class="params">(<span name="key">key: <a href="UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="result">: <a href="../ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="cats.data.Xor">Xor</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemResult">DeleteItemResult</span>]]</span>
+        <span class="name">delete</span><span class="params">(<span name="key">key: <a href="UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="result">: <a href="../ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemResult">DeleteItemResult</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@delete(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@delete(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.DeleteItemResult]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -348,18 +348,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.query.ConditionalOperation#put" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="put[V](item:V)(implicitevidence$1:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]"></a>
-      <a id="put[V](V)(DynamoFormat[V]):ScanamoOps[Xor[ConditionalCheckFailedException,PutItemResult]]"></a>
+      <a id="put(item:V):com.gu.scanamo.ops.ScanamoOps[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]"></a>
+      <a id="put(V):ScanamoOps[Either[ConditionalCheckFailedException,PutItemResult]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">put</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="item">item: <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.put.V">V</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="../DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.put.V">V</span>]</span>)</span><span class="result">: <a href="../ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="cats.data.Xor">Xor</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span>]]</span>
+        <span class="name">put</span><span class="params">(<span name="item">item: <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.V">V</span></span>)</span><span class="result">: <a href="../ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException">ConditionalCheckFailedException</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemResult">PutItemResult</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@put[V](item:V)(implicitevidence$1:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.ops.ScanamoOps[cats.data.Xor[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]" title="Permalink" target="_top">
+      <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@put(item:V):com.gu.scanamo.ops.ScanamoOps[Either[com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException,com.amazonaws.services.dynamodbv2.model.PutItemResult]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -411,6 +411,23 @@
       </span>
       </h4><span class="permalink">
       <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@tableName:String" title="Permalink" target="_top">
+        <img src="../../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      
+    </li><li name="com.gu.scanamo.query.ConditionalOperation#update" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="update[U](key:com.gu.scanamo.query.UniqueKey[_],expression:U)(implicitupdate:com.gu.scanamo.update.UpdateExpression[U]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.ScanamoError,V]]"></a>
+      <a id="update[U](UniqueKey[_],U)(UpdateExpression[U]):ScanamoOps[Either[ScanamoError,V]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="key">key: <a href="UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>, <span name="expression">expression: <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.update.U">U</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="update">update: <a href="../update/UpdateExpression.html" class="extype" name="com.gu.scanamo.update.UpdateExpression">UpdateExpression</a>[<span class="extype" name="com.gu.scanamo.query.ConditionalOperation.update.U">U</span>]</span>)</span><span class="result">: <a href="../ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Either">Either</span>[<a href="../error/ScanamoError.html" class="extype" name="com.gu.scanamo.error.ScanamoError">ScanamoError</a>, <span class="extype" name="com.gu.scanamo.query.ConditionalOperation.V">V</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../../index.html#com.gu.scanamo.query.ConditionalOperation@update[U](key:com.gu.scanamo.query.UniqueKey[_],expression:U)(implicitupdate:com.gu.scanamo.update.UpdateExpression[U]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.ScanamoError,V]]" title="Permalink" target="_top">
         <img src="../../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>

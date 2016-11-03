@@ -58,7 +58,7 @@
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"transport"</span>)('mode -&gt; S, 'line -&gt; S) {
 ...   <span class="kw">import</span> com.gu.scanamo.syntax._
 ...   <span class="kw">val</span> operations = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">List</span>(
+...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">Set</span>(
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>),
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>),
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>)))
@@ -280,35 +280,35 @@
               
         </dd></dl></div>
     </li><li name="com.gu.scanamo.Table#get" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="get(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[Option[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,V]]]"></a>
-      <a id="get(UniqueKey[_]):ScanamoOps[Option[Xor[DynamoReadError,V]]]"></a>
+      <a id="get(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[Option[Either[com.gu.scanamo.error.DynamoReadError,V]]]"></a>
+      <a id="get(UniqueKey[_]):ScanamoOps[Option[Either[DynamoReadError,V]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">get</span><span class="params">(<span name="key">key: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Option">Option</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Table.V">V</span>]]]</span>
+        <span class="name">get</span><span class="params">(<span name="key">key: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Table.V">V</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Table@get(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[Option[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,V]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Table@get(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[Option[Either[com.gu.scanamo.error.DynamoReadError,V]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
     </li><li name="com.gu.scanamo.Table#getAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="getAll(keys:com.gu.scanamo.query.UniqueKeys[_]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,V]]]"></a>
-      <a id="getAll(UniqueKeys[_]):ScanamoOps[List[Xor[DynamoReadError,V]]]"></a>
+      <a id="getAll(keys:com.gu.scanamo.query.UniqueKeys[_]):com.gu.scanamo.ops.ScanamoOps[Set[Either[com.gu.scanamo.error.DynamoReadError,V]]]"></a>
+      <a id="getAll(UniqueKeys[_]):ScanamoOps[Set[Either[DynamoReadError,V]]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">getAll</span><span class="params">(<span name="keys">keys: <a href="query/UniqueKeys.html" class="extype" name="com.gu.scanamo.query.UniqueKeys">UniqueKeys</a>[_]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Table.V">V</span>]]]</span>
+        <span class="name">getAll</span><span class="params">(<span name="keys">keys: <a href="query/UniqueKeys.html" class="extype" name="com.gu.scanamo.query.UniqueKeys">UniqueKeys</a>[_]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Table.V">V</span>]]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Table@getAll(keys:com.gu.scanamo.query.UniqueKeys[_]):com.gu.scanamo.ops.ScanamoOps[List[cats.data.Xor[com.gu.scanamo.error.DynamoReadError,V]]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Table@getAll(keys:com.gu.scanamo.query.UniqueKeys[_]):com.gu.scanamo.ops.ScanamoOps[Set[Either[com.gu.scanamo.error.DynamoReadError,V]]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -331,18 +331,18 @@
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.gu.scanamo.Table#given" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]"></a>
-      <a id="given[T](T)(ConditionExpression[T]):ConditionalOperation[T]"></a>
+      <a id="given[T](condition:T)(implicitevidence$3:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[V,T]"></a>
+      <a id="given[T](T)(ConditionExpression[T]):ConditionalOperation[V,T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">given</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="condition">condition: <span class="extype" name="com.gu.scanamo.Table.given.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.Table.given.T">T</span>]</span>)</span><span class="result">: <a href="query/ConditionalOperation.html" class="extype" name="com.gu.scanamo.query.ConditionalOperation">ConditionalOperation</a>[<span class="extype" name="com.gu.scanamo.Table.given.T">T</span>]</span>
+        <span class="name">given</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="condition">condition: <span class="extype" name="com.gu.scanamo.Table.given.T">T</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.Table.given.T">T</span>]</span>)</span><span class="result">: <a href="query/ConditionalOperation.html" class="extype" name="com.gu.scanamo.query.ConditionalOperation">ConditionalOperation</a>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>, <span class="extype" name="com.gu.scanamo.Table.given.T">T</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Table@given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[T]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Table@given[T](condition:T)(implicitevidence$3:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[V,T]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
@@ -370,7 +370,7 @@
 &gt;&gt;&gt; <span class="kw">val</span> lettersTable = Table[Letter](<span class="lit">"letters"</span>)
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"letters"</span>)('roman -&gt; S) {
 ...   <span class="kw">val</span> ops = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> lettersTable.putAll(<span class="std">List</span>(Letter(<span class="lit">"a"</span>, <span class="lit">"alpha"</span>), Letter(<span class="lit">"b"</span>, <span class="lit">"beta"</span>), Letter(<span class="lit">"c"</span>, <span class="lit">"gammon"</span>)))
+...     _ <span class="kw">&lt;-</span> lettersTable.putAll(<span class="std">Set</span>(Letter(<span class="lit">"a"</span>, <span class="lit">"alpha"</span>), Letter(<span class="lit">"b"</span>, <span class="lit">"beta"</span>), Letter(<span class="lit">"c"</span>, <span class="lit">"gammon"</span>)))
 ...     _ <span class="kw">&lt;-</span> lettersTable.given('greek beginsWith <span class="lit">"ale"</span>).put(Letter(<span class="lit">"a"</span>, <span class="lit">"aleph"</span>))
 ...     _ <span class="kw">&lt;-</span> lettersTable.given('greek beginsWith <span class="lit">"gam"</span>).put(Letter(<span class="lit">"c"</span>, <span class="lit">"gamma"</span>))
 ...     letters <span class="kw">&lt;-</span> lettersTable.scan()
@@ -384,7 +384,7 @@
 &gt;&gt;&gt; <span class="kw">val</span> turnipsTable = Table[Turnip](<span class="lit">"turnips"</span>)
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"turnips"</span>)('size -&gt; N) {
 ...   <span class="kw">val</span> ops = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> turnipsTable.putAll(<span class="std">List</span>(Turnip(<span class="num">1</span>, <span class="std">None</span>), Turnip(<span class="num">1000</span>, <span class="std">None</span>)))
+...     _ <span class="kw">&lt;-</span> turnipsTable.putAll(<span class="std">Set</span>(Turnip(<span class="num">1</span>, <span class="std">None</span>), Turnip(<span class="num">1000</span>, <span class="std">None</span>)))
 ...     initialTurnips <span class="kw">&lt;-</span> turnipsTable.scan()
 ...     _ <span class="kw">&lt;-</span> initialTurnips.flatMap(_.toOption).traverse(t <span class="kw">=&gt;</span>
 ...       turnipsTable.given('size &gt; <span class="num">500</span>).put(t.copy(description = <span class="std">Some</span>(<span class="lit">"Big turnip in the country."</span>))))
@@ -396,7 +396,7 @@
 &gt;&gt;&gt; <span class="kw">val</span> thingTable = Table[Thing](<span class="lit">"things"</span>)
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"things"</span>)('a -&gt; S) {
 ...   <span class="kw">val</span> ops = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> thingTable.putAll(<span class="std">List</span>(Thing(<span class="lit">"a"</span>, <span class="std">None</span>), Thing(<span class="lit">"b"</span>, <span class="std">Some</span>(<span class="num">1</span>)), Thing(<span class="lit">"c"</span>, <span class="std">None</span>)))
+...     _ <span class="kw">&lt;-</span> thingTable.putAll(<span class="std">Set</span>(Thing(<span class="lit">"a"</span>, <span class="std">None</span>), Thing(<span class="lit">"b"</span>, <span class="std">Some</span>(<span class="num">1</span>)), Thing(<span class="lit">"c"</span>, <span class="std">None</span>)))
 ...     _ <span class="kw">&lt;-</span> thingTable.given(attributeExists('maybe)).put(Thing(<span class="lit">"a"</span>, <span class="std">Some</span>(<span class="num">2</span>)))
 ...     _ <span class="kw">&lt;-</span> thingTable.given(attributeExists('maybe)).put(Thing(<span class="lit">"b"</span>, <span class="std">Some</span>(<span class="num">3</span>)))
 ...     _ <span class="kw">&lt;-</span> thingTable.given(Not(attributeExists('maybe))).put(Thing(<span class="lit">"c"</span>, <span class="std">Some</span>(<span class="num">42</span>)))
@@ -409,7 +409,7 @@
 &gt;&gt;&gt; <span class="kw">val</span> compoundTable = Table[Compound](<span class="lit">"compounds"</span>)
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"compounds"</span>)('a -&gt; S) {
 ...   <span class="kw">val</span> ops = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> compoundTable.putAll(<span class="std">List</span>(Compound(<span class="lit">"alpha"</span>, <span class="std">None</span>), Compound(<span class="lit">"beta"</span>, <span class="std">Some</span>(<span class="num">1</span>)), Compound(<span class="lit">"gamma"</span>, <span class="std">None</span>)))
+...     _ <span class="kw">&lt;-</span> compoundTable.putAll(<span class="std">Set</span>(Compound(<span class="lit">"alpha"</span>, <span class="std">None</span>), Compound(<span class="lit">"beta"</span>, <span class="std">Some</span>(<span class="num">1</span>)), Compound(<span class="lit">"gamma"</span>, <span class="std">None</span>)))
 ...     _ <span class="kw">&lt;-</span> compoundTable.given(attributeExists('maybe) and 'a -&gt; <span class="lit">"alpha"</span>).put(Compound(<span class="lit">"alpha"</span>, <span class="std">Some</span>(<span class="num">2</span>)))
 ...     _ <span class="kw">&lt;-</span> compoundTable.given(attributeExists('maybe) and 'a -&gt; <span class="lit">"beta"</span>).put(Compound(<span class="lit">"beta"</span>, <span class="std">Some</span>(<span class="num">3</span>)))
 ...     _ <span class="kw">&lt;-</span> compoundTable.given(Condition('a -&gt; <span class="lit">"gamma"</span>) and attributeExists('maybe)).put(Compound(<span class="lit">"gamma"</span>, <span class="std">Some</span>(<span class="num">42</span>)))
@@ -421,25 +421,34 @@
 &gt;&gt;&gt; <span class="kw">val</span> choicesTable = Table[Choice](<span class="lit">"choices"</span>)
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"choices"</span>)('number -&gt; N) {
 ...   <span class="kw">val</span> ops = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> choicesTable.putAll(<span class="std">List</span>(Choice(<span class="num">1</span>, <span class="lit">"cake"</span>), Choice(<span class="num">2</span>, <span class="lit">"crumble"</span>), Choice(<span class="num">3</span>, <span class="lit">"custard"</span>)))
+...     _ <span class="kw">&lt;-</span> choicesTable.putAll(<span class="std">Set</span>(Choice(<span class="num">1</span>, <span class="lit">"cake"</span>), Choice(<span class="num">2</span>, <span class="lit">"crumble"</span>), Choice(<span class="num">3</span>, <span class="lit">"custard"</span>)))
 ...     _ <span class="kw">&lt;-</span> choicesTable.given(Condition('description -&gt; <span class="lit">"cake"</span>) or 'description -&gt; <span class="lit">"death"</span>).put(Choice(<span class="num">1</span>, <span class="lit">"victoria sponge"</span>))
 ...     _ <span class="kw">&lt;-</span> choicesTable.given(Condition('description -&gt; <span class="lit">"cake"</span>) or 'description -&gt; <span class="lit">"death"</span>).put(Choice(<span class="num">2</span>, <span class="lit">"victoria sponge"</span>))
 ...     choices <span class="kw">&lt;-</span> choicesTable.scan()
 ...   } <span class="kw">yield</span> choices
 ...   Scanamo.exec(client)(ops).toList
 ... }
-<span class="std">List</span>(Right(Choice(<span class="num">2</span>,crumble)), Right(Choice(<span class="num">1</span>,victoria sponge)), Right(Choice(<span class="num">3</span>,custard)))</pre><p>The same forms of condition can be applied to deletions</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Gremlin(number: <span class="std">Int</span>, wet: <span class="std">Boolean</span>)
+<span class="std">List</span>(Right(Choice(<span class="num">2</span>,crumble)), Right(Choice(<span class="num">1</span>,victoria sponge)), Right(Choice(<span class="num">3</span>,custard)))</pre><p>The same forms of condition can be applied to deletions</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Gremlin(number: <span class="std">Int</span>, wet: <span class="std">Boolean</span>, friendly: <span class="std">Boolean</span>)
 &gt;&gt;&gt; <span class="kw">val</span> gremlinsTable = Table[Gremlin](<span class="lit">"gremlins"</span>)
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"gremlins"</span>)('number -&gt; N) {
 ...   <span class="kw">val</span> ops = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> gremlinsTable.putAll(<span class="std">List</span>(Gremlin(<span class="num">1</span>, <span class="kw">false</span>), Gremlin(<span class="num">2</span>, <span class="kw">true</span>)))
+...     _ <span class="kw">&lt;-</span> gremlinsTable.putAll(<span class="std">Set</span>(Gremlin(<span class="num">1</span>, <span class="kw">false</span>, <span class="kw">true</span>), Gremlin(<span class="num">2</span>, <span class="kw">true</span>, <span class="kw">false</span>)))
 ...     _ <span class="kw">&lt;-</span> gremlinsTable.given('wet -&gt; <span class="kw">true</span>).delete('number -&gt; <span class="num">1</span>)
 ...     _ <span class="kw">&lt;-</span> gremlinsTable.given('wet -&gt; <span class="kw">true</span>).delete('number -&gt; <span class="num">2</span>)
 ...     remainingGremlins <span class="kw">&lt;-</span> gremlinsTable.scan()
 ...   } <span class="kw">yield</span> remainingGremlins
 ...   Scanamo.exec(client)(ops).toList
 ... }
-<span class="std">List</span>(Right(Gremlin(<span class="num">1</span>,<span class="kw">false</span>)))</pre></div></div>
+<span class="std">List</span>(Right(Gremlin(<span class="num">1</span>,<span class="kw">false</span>,<span class="kw">true</span>)))</pre><p>and updates</p><pre>&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"gremlins"</span>)('number -&gt; N) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> gremlinsTable.putAll(<span class="std">Set</span>(Gremlin(<span class="num">1</span>, <span class="kw">false</span>, <span class="kw">true</span>), Gremlin(<span class="num">2</span>, <span class="kw">true</span>, <span class="kw">true</span>)))
+...     _ <span class="kw">&lt;-</span> gremlinsTable.given('wet -&gt; <span class="kw">true</span>).update('number -&gt; <span class="num">1</span>, set('friendly -&gt; <span class="kw">false</span>))
+...     _ <span class="kw">&lt;-</span> gremlinsTable.given('wet -&gt; <span class="kw">true</span>).update('number -&gt; <span class="num">2</span>, set('friendly -&gt; <span class="kw">false</span>))
+...     remainingGremlins <span class="kw">&lt;-</span> gremlinsTable.scan()
+...   } <span class="kw">yield</span> remainingGremlins
+...   Scanamo.exec(client)(ops).toList
+... }
+<span class="std">List</span>(Right(Gremlin(<span class="num">2</span>,<span class="kw">true</span>,<span class="kw">false</span>)), Right(Gremlin(<span class="num">1</span>,<span class="kw">false</span>,<span class="kw">true</span>)))</pre></div></div>
     </li><li name="com.gu.scanamo.Table#index" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="index(indexName:String):com.gu.scanamo.Index[V]"></a>
       <a id="index(String):Index[V]"></a>
@@ -465,7 +474,7 @@
 
 &gt;&gt;&gt; LocalDynamoDB.withTableWithSecondaryIndex(client)(<span class="lit">"transport"</span>, <span class="lit">"colour-index"</span>)('mode -&gt; S, 'line -&gt; S)('colour -&gt; S) {
 ...   <span class="kw">val</span> operations = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">List</span>(
+...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">Set</span>(
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>, <span class="lit">"Yellow"</span>),
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>, <span class="lit">"Magenta"</span>),
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>, <span class="lit">"Red"</span>)))
@@ -516,7 +525,7 @@
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"transport"</span>)('mode -&gt; S, 'line -&gt; S) {
 ...   <span class="kw">import</span> com.gu.scanamo.syntax._
 ...   <span class="kw">val</span> operations = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">List</span>(
+...     _ <span class="kw">&lt;-</span> transport.putAll(<span class="std">Set</span>(
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>),
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>),
 ...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>)))
@@ -611,22 +620,89 @@
     </span>
       
     </li><li name="com.gu.scanamo.Table#putAll" visbl="pub" data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="putAll(vs:List[V]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]"></a>
-      <a id="putAll(List[V]):ScanamoOps[List[BatchWriteItemResult]]"></a>
+      <a id="putAll(vs:Set[V]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]"></a>
+      <a id="putAll(Set[V]):ScanamoOps[List[BatchWriteItemResult]]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">putAll</span><span class="params">(<span name="vs">vs: <span class="extype" name="scala.List">List</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult">BatchWriteItemResult</span>]]</span>
+        <span class="name">putAll</span><span class="params">(<span name="vs">vs: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult">BatchWriteItemResult</span>]]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.Table@putAll(vs:List[V]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.Table@putAll(vs:Set[V]):com.gu.scanamo.ops.ScanamoOps[List[com.amazonaws.services.dynamodbv2.model.BatchWriteItemResult]]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
       
+    </li><li name="com.gu.scanamo.Table#query" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="query(query:com.gu.scanamo.query.Query[_]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,V]]]"></a>
+      <a id="query(Query[_]):ScanamoOps[List[Either[DynamoReadError,V]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">query</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Table.V">V</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.Table@query(query:com.gu.scanamo.query.Query[_]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,V]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Query a table based on the hash key and optionally the range key</p><div class="fullcomment"><div class="comment cmt"><p>Query a table based on the hash key and optionally the range key</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Transport(mode: <span class="std">String</span>, line: <span class="std">String</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">val</span> table = Table[Transport](<span class="lit">"transport"</span>)
+
+&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"transport"</span>)('mode -&gt; S, 'line -&gt; S) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> table.putAll(<span class="std">Set</span>(
+...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Circle"</span>),
+...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Metropolitan"</span>),
+...       Transport(<span class="lit">"Underground"</span>, <span class="lit">"Central"</span>)
+...     ))
+...     linesBeginningWithC <span class="kw">&lt;-</span> table.query('mode -&gt; <span class="lit">"Underground"</span> and ('line beginsWith <span class="lit">"C"</span>))
+...   } <span class="kw">yield</span> linesBeginningWithC
+...   Scanamo.exec(client)(ops)
+... }
+<span class="std">List</span>(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))</pre></div></div>
+    </li><li name="com.gu.scanamo.Table#scan" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="scan():com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,V]]]"></a>
+      <a id="scan():ScanamoOps[List[Either[DynamoReadError,V]]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scan</span><span class="params">()</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Table.V">V</span>]]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.Table@scan():com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,V]]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Scans all elements of a table</p><div class="fullcomment"><div class="comment cmt"><p>Scans all elements of a table</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bear(name: <span class="std">String</span>, favouriteFood: <span class="std">String</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> table = Table[Bear](<span class="lit">"bears"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"bears"</span>)('name -&gt; S) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Pooh"</span>, <span class="lit">"honey"</span>))
+...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Yogi"</span>, <span class="lit">"picnic baskets"</span>))
+...     bears <span class="kw">&lt;-</span> table.scan()
+...   } <span class="kw">yield</span> bears
+...   Scanamo.exec(client)(ops)
+... }
+<span class="std">List</span>(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))</pre></div></div>
     </li><li name="scala.AnyRef#synchronized" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a>
       <a id="synchronized[T0](⇒T0):T0"></a>
@@ -644,6 +720,75 @@
       </a>
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.gu.scanamo.Table#update" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="update[U](key:com.gu.scanamo.query.UniqueKey[_],expression:U)(implicitevidence$2:com.gu.scanamo.update.UpdateExpression[U]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,V]]"></a>
+      <a id="update[U](UniqueKey[_],U)(UpdateExpression[U]):ScanamoOps[Either[DynamoReadError,V]]"></a>
+      <h4 class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">update</span><span class="tparams">[<span name="U">U</span>]</span><span class="params">(<span name="key">key: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>, <span name="expression">expression: <span class="extype" name="com.gu.scanamo.Table.update.U">U</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="update/UpdateExpression.html" class="extype" name="com.gu.scanamo.update.UpdateExpression">UpdateExpression</a>[<span class="extype" name="com.gu.scanamo.Table.update.U">U</span>]</span>)</span><span class="result">: <a href="ops/package.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Table.V">V</span>]]</span>
+      </span>
+      </h4><span class="permalink">
+      <a href="../../../index.html#com.gu.scanamo.Table@update[U](key:com.gu.scanamo.query.UniqueKey[_],expression:U)(implicitevidence$2:com.gu.scanamo.update.UpdateExpression[U]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,V]]" title="Permalink" target="_top">
+        <img src="../../../lib/permalink.png" alt="Permalink" />
+      </a>
+    </span>
+      <p class="shortcomment cmt">Updates an attribute that is not part of the key and returns the updated row</p><div class="fullcomment"><div class="comment cmt"><p>Updates an attribute that is not part of the key and returns the updated row</p><p>To set an attribute:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Forecast(location: <span class="std">String</span>, weather: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">val</span> forecast = Table[Forecast](<span class="lit">"forecast"</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"forecast"</span>)('location -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> forecast.put(Forecast(<span class="lit">"London"</span>, <span class="lit">"Rain"</span>))
+...     updated <span class="kw">&lt;-</span> forecast.update('location -&gt; <span class="lit">"London"</span>, set('weather -&gt; <span class="lit">"Sun"</span>))
+...   } <span class="kw">yield</span> updated
+...   Scanamo.exec(client)(operations)
+... }
+Right(Forecast(London,Sun))</pre><p>List attributes can also be appended or prepended to:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Character(name: <span class="std">String</span>, actors: <span class="std">List</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">val</span> characters = Table[Character](<span class="lit">"characters"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"characters"</span>)('name -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> characters.put(Character(<span class="lit">"The Doctor"</span>, <span class="std">List</span>(<span class="lit">"Ecclestone"</span>, <span class="lit">"Tennant"</span>, <span class="lit">"Smith"</span>)))
+...     _ <span class="kw">&lt;-</span> characters.update('name -&gt; <span class="lit">"The Doctor"</span>, append('actors -&gt; <span class="lit">"Capaldi"</span>))
+...     _ <span class="kw">&lt;-</span> characters.update('name -&gt; <span class="lit">"The Doctor"</span>, prepend('actors -&gt; <span class="lit">"McCoy"</span>))
+...     results <span class="kw">&lt;-</span> characters.scan()
+...   } <span class="kw">yield</span> results.toList
+...   Scanamo.exec(client)(operations)
+... }
+<span class="std">List</span>(Right(Character(The Doctor,<span class="std">List</span>(McCoy, Ecclestone, Tennant, Smith, Capaldi))))</pre><p>Multiple operations can also be performed in one call:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Foo(name: <span class="std">String</span>, bar: <span class="std">Int</span>, l: <span class="std">List</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">val</span> foos = Table[Foo](<span class="lit">"foos"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"foos"</span>)('name -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> foos.put(Foo(<span class="lit">"x"</span>, <span class="num">0</span>, <span class="std">List</span>(<span class="lit">"First"</span>)))
+...     updated <span class="kw">&lt;-</span> foos.update('name -&gt; <span class="lit">"x"</span>,
+...       append('l -&gt; <span class="lit">"Second"</span>) and set('bar -&gt; <span class="num">1</span>))
+...   } <span class="kw">yield</span> updated
+...   Scanamo.exec(client)(operations)
+... }
+Right(Foo(x,<span class="num">1</span>,<span class="std">List</span>(First, Second)))</pre><p>It's also possible to perform <code>ADD</code> and <code>DELETE</code> updates</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bar(name: <span class="std">String</span>, counter: <span class="std">Long</span>, set: <span class="std">Set</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">val</span> bars = Table[Bar](<span class="lit">"bars"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"bars"</span>)('name -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> bars.put(Bar(<span class="lit">"x"</span>, <span class="num">1</span>L, <span class="std">Set</span>(<span class="lit">"First"</span>)))
+...     _ <span class="kw">&lt;-</span> bars.update('name -&gt; <span class="lit">"x"</span>,
+...       add('counter -&gt; <span class="num">10</span>L) and add('set -&gt; <span class="std">Set</span>(<span class="lit">"Second"</span>)))
+...     updatedBar <span class="kw">&lt;-</span> bars.update('name -&gt; <span class="lit">"x"</span>, delete('set -&gt; <span class="std">Set</span>(<span class="lit">"First"</span>)))
+...   } <span class="kw">yield</span> updatedBar
+...   Scanamo.exec(client)(operations)
+... }
+Right(Bar(x,<span class="num">11</span>,<span class="std">Set</span>(Second)))</pre></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <a id="wait():Unit"></a>

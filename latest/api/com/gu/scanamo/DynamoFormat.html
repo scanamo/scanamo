@@ -58,15 +58,17 @@ Right(<span class="std">List</span>(<span class="std">Some</span>(<span class="n
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 &gt;&gt;&gt; <span class="kw">val</span> farmerF = DynamoFormat[Farmer]
 &gt;&gt;&gt; farmerF.read(farmerF.write(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>)))))
-Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow))))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Developer(name: <span class="std">String</span>, age: <span class="std">String</span>, problems: <span class="std">Int</span>)
+Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow))))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">import</span> cats.syntax.either._
+
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Developer(name: <span class="std">String</span>, age: <span class="std">String</span>, problems: <span class="std">Int</span>)
 &gt;&gt;&gt; <span class="kw">val</span> invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer(<span class="lit">"Alice"</span>, <span class="lit">"none of your business"</span>, <span class="num">99</span>)))
 &gt;&gt;&gt; invalid
-Left(InvalidPropertiesError(OneAnd(PropertyReadError(age,NoPropertyOfType(N)),<span class="std">List</span>(PropertyReadError(farm,MissingProperty)))))
+Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(age,NoPropertyOfType(N,{S: none of your business,})), PropertyReadError(farm,MissingProperty))))
 
 &gt;&gt;&gt; invalid.leftMap(cats.Show[error.DynamoReadError].show)
-Left(<span class="lit">'age'</span>: not of <span class="kw">type</span>: <span class="lit">'N'</span>, <span class="lit">'farm'</span>: missing)</pre><p>Optional properties are defaulted to None</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> LargelyOptional(a: <span class="std">Option</span>[<span class="std">String</span>], b: <span class="std">Option</span>[<span class="std">String</span>])
+Left(<span class="lit">'age'</span>: not of <span class="kw">type</span>: <span class="lit">'N'</span> was '{S: none of your business,}<span class="lit">', '</span>farm': missing)</pre><p>Optional properties are defaulted to None</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> LargelyOptional(a: <span class="std">Option</span>[<span class="std">String</span>], b: <span class="std">Option</span>[<span class="std">String</span>])
 &gt;&gt;&gt; DynamoFormat[LargelyOptional].read(DynamoFormat[<span class="std">Map</span>[<span class="std">String</span>, <span class="std">String</span>]].write(<span class="std">Map</span>(<span class="lit">"b"</span> -&gt; <span class="lit">"X"</span>)))
-Right(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span>(X)))</pre><p>Custom formats can often be most easily defined using <a href="DynamoFormat$.html#coercedXmap[A,B,T&gt;:Null&lt;:Throwable](read:B=&gt;A)(write:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#coercedXmap">DynamoFormat.coercedXmap</a> or <a href="DynamoFormat$.html#xmap[A,B](r:B=&gt;cats.data.Xor[com.gu.scanamo.error.DynamoReadError,A])(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#xmap">DynamoFormat.xmap</a>
+Right(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span>(X)))</pre><p>Custom formats can often be most easily defined using <a href="DynamoFormat$.html#coercedXmap[A,B,T&gt;:Null&lt;:Throwable](read:B=&gt;A)(write:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#coercedXmap">DynamoFormat.coercedXmap</a>, <a href="DynamoFormat$.html#xmap[A,B](r:B=&gt;Either[com.gu.scanamo.error.DynamoReadError,A])(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#xmap">DynamoFormat.xmap</a> or <a href="DynamoFormat$.html#iso[A,B](r:B=&gt;A)(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#iso">DynamoFormat.iso</a>
 </p></div><div class="toggleContainer block">
           <span class="toggle">Linear Supertypes</span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Any">Any</span></div>
@@ -128,18 +130,18 @@ Right(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
     </span>
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.gu.scanamo.DynamoFormat#read" visbl="pub" data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="read(av:com.amazonaws.services.dynamodbv2.model.AttributeValue):cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]"></a>
-      <a id="read(AttributeValue):Xor[DynamoReadError,T]"></a>
+      <a id="read(av:com.amazonaws.services.dynamodbv2.model.AttributeValue):Either[com.gu.scanamo.error.DynamoReadError,T]"></a>
+      <a id="read(AttributeValue):Either[DynamoReadError,T]"></a>
       <h4 class="signature">
       <span class="modifier_kind">
         <span class="modifier">abstract </span>
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">read</span><span class="params">(<span name="av">av: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span></span>)</span><span class="result">: <span class="extype" name="cats.data.Xor">Xor</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.DynamoFormat.T">T</span>]</span>
+        <span class="name">read</span><span class="params">(<span name="av">av: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span></span>)</span><span class="result">: <span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.DynamoFormat.T">T</span>]</span>
       </span>
       </h4><span class="permalink">
-      <a href="../../../index.html#com.gu.scanamo.DynamoFormat@read(av:com.amazonaws.services.dynamodbv2.model.AttributeValue):cats.data.Xor[com.gu.scanamo.error.DynamoReadError,T]" title="Permalink" target="_top">
+      <a href="../../../index.html#com.gu.scanamo.DynamoFormat@read(av:com.amazonaws.services.dynamodbv2.model.AttributeValue):Either[com.gu.scanamo.error.DynamoReadError,T]" title="Permalink" target="_top">
         <img src="../../../lib/permalink.png" alt="Permalink" />
       </a>
     </span>
