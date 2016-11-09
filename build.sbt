@@ -1,27 +1,29 @@
 name := "scanamo"
 organization := "com.gu"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.0"
+
+crossScalaVersions := Seq("2.11.8", scalaVersion.value)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.8",
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.52",
   "com.chuusai" %% "shapeless" % "2.3.2",
-  "org.typelevel" %% "cats-free" % "0.7.2",
+  "org.typelevel" %% "cats-free" % "0.8.1",
 
-  "com.github.mpilquist" %% "simulacrum" % "0.8.0",
+  "com.github.mpilquist" %% "simulacrum" % "0.10.0",
 
   "org.typelevel" %% "macro-compat" % "1.1.1",
   "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch),
 
   // Use Joda for custom conversion example
   "org.joda" % "joda-convert" % "1.8.1" % Provided,
-  "joda-time" % "joda-time" % "2.9.4" % Test,
+  "joda-time" % "joda-time" % "2.9.5" % Test,
 
-  "org.scalatest" %% "scalatest" % "2.2.6" % Test,
-  "org.scalacheck" %% "scalacheck" % "1.12.5" % Test
+  "org.scalatest" %% "scalatest" % "3.0.0" % Test,
+  "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
 )
 // for simulacrum
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
@@ -36,7 +38,6 @@ scalacOptions := Seq(
   "-language:existentials",
   "-Xfatal-warnings",
   "-Xlint",
-  "-Yinline-warnings",
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
@@ -45,9 +46,9 @@ scalacOptions := Seq(
 
 dynamoDBLocalDownloadDir := file(".dynamodb-local")
 dynamoDBLocalPort := 8042
-startDynamoDBLocal <<= startDynamoDBLocal.dependsOn(compile in Test)
-test in Test <<= (test in Test).dependsOn(startDynamoDBLocal)
-testOptions in Test <+= dynamoDBLocalTestCleanup
+startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
+test in Test := (test in Test).dependsOn(startDynamoDBLocal).value
+testOptions in Test += dynamoDBLocalTestCleanup.value
 
 site.settings
 site.includeScaladoc()

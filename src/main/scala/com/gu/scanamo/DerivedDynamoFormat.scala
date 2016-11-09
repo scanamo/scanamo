@@ -8,7 +8,7 @@ import macrocompat.bundle
 import shapeless._
 import shapeless.labelled._
 
-import collection.convert.decorateAll._
+import collection.JavaConverters._
 
 trait DerivedDynamoFormat extends NoFormatError {
   type ValidatedPropertiesError[T] = Validated[InvalidPropertiesError, T]
