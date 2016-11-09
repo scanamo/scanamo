@@ -1,4 +1,4 @@
-Scanamo [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11) [![Build Status](https://travis-ci.org/guardian/scanamo.svg?branch=master)](https://travis-ci.org/guardian/scanamo) [![Coverage Status](https://coveralls.io/repos/github/guardian/scanamo/badge.svg?branch=master)](https://coveralls.io/github/guardian/scanamo?branch=master) [![Chat on gitter](https://badges.gitter.im/guardian/scanamo.svg)](https://gitter.im/guardian/scanamo)
+Scanamo [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.12) [![Build Status](https://travis-ci.org/guardian/scanamo.svg?branch=master)](https://travis-ci.org/guardian/scanamo) [![Coverage Status](https://coveralls.io/repos/github/guardian/scanamo/badge.svg?branch=master)](https://coveralls.io/github/guardian/scanamo?branch=master) [![Chat on gitter](https://badges.gitter.im/guardian/scanamo.svg)](https://gitter.im/guardian/scanamo)
 =======
 
 Scanamo is a library to make using [DynamoDB](https://aws.amazon.com/documentation/dynamodb/) with Scala 
@@ -12,9 +12,11 @@ Installation
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.gu" %% "scanamo" % "0.8.0"
+  "com.gu" %% "scanamo" % "0.8.1"
 )
 ```
+
+Scanamo is published for Scala 2.12 and Scala 2.11
 
 Usage
 -----
