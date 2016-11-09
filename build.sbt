@@ -16,7 +16,7 @@ libraryDependencies ++= Seq(
 
   "org.typelevel" %% "macro-compat" % "1.1.1",
   "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch),
 
   // Use Joda for custom conversion example
   "org.joda" % "joda-convert" % "1.8.1" % Provided,
