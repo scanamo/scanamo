@@ -1,16 +1,16 @@
 name := "scanamo"
 organization := "com.gu"
 
-scalaVersion := "2.11.8"
+scalaVersion := "2.12.0"
 
-crossScalaVersions := Seq(scalaVersion.value, "2.12.0-RC2")
+crossScalaVersions := Seq("2.11.8", scalaVersion.value)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.8",
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.52",
   "com.chuusai" %% "shapeless" % "2.3.2",
-  "org.typelevel" %% "cats-free" % "0.8.0",
+  "org.typelevel" %% "cats-free" % "0.8.1",
 
   "com.github.mpilquist" %% "simulacrum" % "0.10.0",
 
@@ -20,10 +20,10 @@ libraryDependencies ++= Seq(
 
   // Use Joda for custom conversion example
   "org.joda" % "joda-convert" % "1.8.1" % Provided,
-  "joda-time" % "joda-time" % "2.9.4" % Test,
+  "joda-time" % "joda-time" % "2.9.5" % Test,
 
   "org.scalatest" %% "scalatest" % "3.0.0" % Test,
-  "org.scalacheck" %% "scalacheck" % "1.13.3" % Test
+  "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
 )
 // for simulacrum
 addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
