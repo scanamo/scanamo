@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query.{UniqueKey, _}
+import com.gu.scanamo.query._
 import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
 import com.gu.scanamo.update.UpdateExpression
 
