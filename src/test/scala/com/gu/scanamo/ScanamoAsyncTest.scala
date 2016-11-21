@@ -73,6 +73,28 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     }
   }
 
+  it("should deleteAll asynchronously") {
+    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+
+      val dataSet = Set(
+        Farmer("Patty", 200L, Farm(List("unicorn"))),
+        Farmer("Ted", 40L, Farm(List("T-Rex"))),
+        Farmer("Jack", 2L, Farm(List("velociraptor")))
+      )
+
+      Scanamo.putAll(client)("asyncFarmers")(dataSet)
+
+      val maybeFarmer = for {
+        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> dataSet.map(_.name))
+      } yield Scanamo.scan[Farmer](client)("asyncFarmers")
+
+      maybeFarmer.futureValue should equal(None)
+    }
+  }
+
   it("should update asynchronously") {
     LocalDynamoDB.usingTable(client)("forecast")('location -> S) {
 
@@ -322,26 +344,6 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false), Gremlin(2, true)))
         _ <- gremlinsTable.given('wet -> true).delete('number -> 1)
         _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
-        remainingGremlins <- gremlinsTable.scan()
-      } yield remainingGremlins
-      ScanamoAsync.exec(client)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
-    }
-  }
-
-  it("bulk delete asynchronously") {
-    case class Gremlin(number: Int, wet: Boolean)
-
-    import com.gu.scanamo.syntax._
-
-    val gremlinsTable = Table[Gremlin]("gremlins")
-
-    val dataSet1 = Set(Gremlin(1, false))
-    val dataSet2 = Set(Gremlin(2, false), Gremlin(3, true), Gremlin(4, true))
-
-    LocalDynamoDB.usingTable(client)("gremlins")('number -> N) {
-      val ops = for {
-        _ <- gremlinsTable.putAll(dataSet1 ++ dataSet2)
-        _ <- gremlinsTable.deleteAll('number -> dataSet2.map(_.number))
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
       ScanamoAsync.exec(client)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
