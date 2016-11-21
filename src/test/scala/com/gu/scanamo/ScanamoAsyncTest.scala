@@ -91,7 +91,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> dataSet.map(_.name))
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
-      maybeFarmer.futureValue should equal(None)
+      maybeFarmer.futureValue should equal(List.empty)
     }
   }
 
