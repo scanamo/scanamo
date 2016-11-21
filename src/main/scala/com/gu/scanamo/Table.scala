@@ -36,6 +36,7 @@ case class Table[V: DynamoFormat](name: String) {
   def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
+  def deleteAll[T:DynamoFormat](items: (Symbol, Set[T])) = ScanamoFree.deleteAll(name)(items)
 
   /**
     * A secondary index on the table which can be scanned, or queried against

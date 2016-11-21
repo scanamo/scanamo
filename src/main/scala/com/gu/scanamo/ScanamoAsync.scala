@@ -42,6 +42,10 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[DeleteItemResult] =
     exec(client)(ScanamoFree.delete(tableName)(key))
 
+  def deleteAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(deleteItems: (Symbol, Set[T]))
+                             (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
+    exec(client)(ScanamoFree.deleteAll(tableName)(deleteItems))
+
   def update[V: DynamoFormat, U: UpdateExpression](client: AmazonDynamoDBAsync)(tableName: String)(
     key: UniqueKey[_], expression: U)(implicit ec: ExecutionContext
   ): Future[Either[DynamoReadError,V]] =

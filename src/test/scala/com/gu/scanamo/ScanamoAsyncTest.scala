@@ -327,4 +327,24 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       ScanamoAsync.exec(client)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
     }
   }
+
+  it("bulk delete asynchronously") {
+    case class Gremlin(number: Int, wet: Boolean)
+
+    import com.gu.scanamo.syntax._
+
+    val gremlinsTable = Table[Gremlin]("gremlins")
+
+    val dataSet1 = Set(Gremlin(1, false))
+    val dataSet2 = Set(Gremlin(2, false), Gremlin(3, true), Gremlin(4, true))
+
+    LocalDynamoDB.usingTable(client)("gremlins")('number -> N) {
+      val ops = for {
+        _ <- gremlinsTable.putAll(dataSet1 ++ dataSet2)
+        _ <- gremlinsTable.deleteAll('number -> dataSet2.map(_.number))
+        remainingGremlins <- gremlinsTable.scan()
+      } yield remainingGremlins
+      ScanamoAsync.exec(client)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
+    }
+  }
 }
