@@ -28,15 +28,14 @@ object ScanamoFree {
       )
     )
 
-  def deleteAll[T](tableName: String)(deleteItems: (Symbol, Set[T]))(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] = {
-    val (key, items) = deleteItems
-    items.grouped(batchSize).toList.traverseU { batch =>
+  def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = {
+    items.asAVMap.grouped(batchSize).toList.traverseU { batch =>
       ScanamoOps.batchWrite(
         new BatchWriteItemRequest().withRequestItems(
           Map(tableName -> batch.toList
             .map(item =>
               new WriteRequest().withDeleteRequest(
-                new DeleteRequest().withKey((Map(key.name -> f.write(item))).asJava)))
+                new DeleteRequest().withKey(item.asJava)))
             .asJava).asJava)
       )
     }

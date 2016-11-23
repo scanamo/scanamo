@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult, UpdateItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query._
@@ -188,7 +188,7 @@ object Scanamo {
     * List()
     * }}}
     */
-  def deleteAll[T:DynamoFormat](client: AmazonDynamoDB)(tableName: String)(items: (Symbol, Set[T])): List[BatchWriteItemResult] =
+  def deleteAll(client: AmazonDynamoDB)(tableName: String)(items: UniqueKeys[_]): List[BatchWriteItemResult] =
     exec(client)(ScanamoFree.deleteAll(tableName)(items))
 
   /**

@@ -4,7 +4,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import com.gu.scanamo.query.{KeyEquals, KeyList, UniqueKey, UniqueKeys}
+import com.gu.scanamo.query._
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
@@ -78,6 +78,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
+
+      import com.gu.scanamo.syntax._
 
       val dataSet = Set(
         Farmer("Patty", 200L, Farm(List("unicorn"))),

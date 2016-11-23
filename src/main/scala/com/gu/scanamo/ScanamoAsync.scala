@@ -1,12 +1,11 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult, UpdateItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 import com.gu.scanamo.update.UpdateExpression
-
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -42,9 +41,9 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[DeleteItemResult] =
     exec(client)(ScanamoFree.delete(tableName)(key))
 
-  def deleteAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(deleteItems: (Symbol, Set[T]))
+  def deleteAll(client: AmazonDynamoDBAsync)(tableName: String)(items: UniqueKeys[_])
                              (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
-    exec(client)(ScanamoFree.deleteAll(tableName)(deleteItems))
+    exec(client)(ScanamoFree.deleteAll(tableName)(items))
 
   def update[V: DynamoFormat, U: UpdateExpression](client: AmazonDynamoDBAsync)(tableName: String)(
     key: UniqueKey[_], expression: U)(implicit ec: ExecutionContext
