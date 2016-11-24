@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult, UpdateItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query._
@@ -163,6 +163,33 @@ object Scanamo {
     */
   def delete(client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_]): DeleteItemResult =
     exec(client)(ScanamoFree.delete(tableName)(key))
+
+  /**
+    * Deletes multiple items from a table by a unique key
+    *
+    * {{{
+    * >>> case class Farm(animals: List[String])
+    * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    *
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> val dataSet = Set(
+    * ...   Farmer("Patty", 200L, Farm(List("unicorn"))),
+    * ...   Farmer("Ted", 40L, Farm(List("T-Rex"))),
+    * ...   Farmer("Jack", 2L, Farm(List("velociraptor"))))
+    *
+    * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
+    * ...   Scanamo.putAll(client)("farmers")(dataSet)
+    * ...   Scanamo.deleteAll(client)("farmers")('name -> dataSet.map(_.name))
+    * ...   Scanamo.scan[Farmer](client)("farmers").toList
+    * ... }
+    * List()
+    * }}}
+    */
+  def deleteAll(client: AmazonDynamoDB)(tableName: String)(items: UniqueKeys[_]): List[BatchWriteItemResult] =
+    exec(client)(ScanamoFree.deleteAll(tableName)(items))
 
   /**
     * Updates an attribute that is not part of the key

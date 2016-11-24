@@ -14,17 +14,32 @@ object ScanamoFree {
   import cats.syntax.traverse._
   import collection.JavaConverters._
 
+  private val batchSize = 25
+
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
     ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.grouped(25).toList.traverseU(batch =>
+    items.grouped(batchSize).toList.traverseU(batch =>
       ScanamoOps.batchWrite(
         new BatchWriteItemRequest().withRequestItems(Map(tableName -> batch.toList.map(i =>
           new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM))
         ).asJava).asJava)
       )
     )
+
+  def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = {
+    items.asAVMap.grouped(batchSize).toList.traverseU { batch =>
+      ScanamoOps.batchWrite(
+        new BatchWriteItemRequest().withRequestItems(
+          Map(tableName -> batch.toList
+            .map(item =>
+              new WriteRequest().withDeleteRequest(
+                new DeleteRequest().withKey(item.asJava)))
+            .asJava).asJava)
+      )
+    }
+  }
 
   def get[T](tableName: String)(key: UniqueKey[_])
     (implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =

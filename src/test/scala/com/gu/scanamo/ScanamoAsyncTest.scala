@@ -4,7 +4,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import com.gu.scanamo.query.{KeyEquals, KeyList, UniqueKey, UniqueKeys}
+import com.gu.scanamo.query._
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
@@ -70,6 +70,30 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McGregor")
 
       maybeFarmer.futureValue should equal(None)
+    }
+  }
+
+  it("should deleteAll asynchronously") {
+    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+
+      import com.gu.scanamo.syntax._
+
+      val dataSet = Set(
+        Farmer("Patty", 200L, Farm(List("unicorn"))),
+        Farmer("Ted", 40L, Farm(List("T-Rex"))),
+        Farmer("Jack", 2L, Farm(List("velociraptor")))
+      )
+
+      Scanamo.putAll(client)("asyncFarmers")(dataSet)
+
+      val maybeFarmer = for {
+        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> dataSet.map(_.name))
+      } yield Scanamo.scan[Farmer](client)("asyncFarmers")
+
+      maybeFarmer.futureValue should equal(List.empty)
     }
   }
 

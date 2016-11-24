@@ -38,6 +38,35 @@ case class Table[V: DynamoFormat](name: String) {
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 
   /**
+    * Deletes multiple items by a unique key
+    *
+    * {{{
+    * >>> case class Farm(animals: List[String])
+    * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> val farm = Table[Farmer]("farmers")
+    *
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> val dataSet = Set(
+    * ...   Farmer("Patty", 200L, Farm(List("unicorn"))),
+    * ...   Farmer("Ted", 40L, Farm(List("T-Rex"))),
+    * ...   Farmer("Jack", 2L, Farm(List("velociraptor"))))
+    * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
+    * ...   val operations = for {
+    * ...     _       <- farm.putAll(dataSet)
+    * ...     _       <- farm.deleteAll('name -> dataSet.map(_.name))
+    * ...     scanned <- farm.scan
+    * ...   } yield scanned.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List()
+    * }}}
+    */
+  def deleteAll(items: UniqueKeys[_]) = ScanamoFree.deleteAll(name)(items)
+
+  /**
     * A secondary index on the table which can be scanned, or queried against
     *
     * {{{
