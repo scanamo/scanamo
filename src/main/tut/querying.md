@@ -1,11 +1,16 @@
+---
+layout: docs
+title: Querying
+---
+
 ### Querying
 
-It's also possible to make more complex queries:
+Scanamo can be used to perform most queries that can be made against DynamoDB
 
-```tut
+```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
- 
+
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val transportTableResult = LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
@@ -19,6 +24,8 @@ val operations = for {
   ))
   tubesStartingWithC <- transportTable.query('mode -> "Underground" and ('line beginsWith "C"))
 } yield tubesStartingWithC.toList
-     
+```
+```tut
 Scanamo.exec(client)(operations)
 ```
+

@@ -49,8 +49,10 @@ startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
 test in Test := (test in Test).dependsOn(startDynamoDBLocal).value
 testOptions in Test += dynamoDBLocalTestCleanup.value
 
-tut <<= tut.dependsOn(startDynamoDBLocal)
-testOptions in Test <+= dynamoDBLocalTestCleanup
+tut := tut.dependsOn(startDynamoDBLocal).value
+
+lazy val buildMicrosite = taskKey[Unit]("make the microsite and cleanup local DynamoDB afterwards")
+buildMicrosite := Def.sequential(makeMicrosite.toTask, stopDynamoDBLocal.toTask).value
 
 enablePlugins(MicrositesPlugin)
 
