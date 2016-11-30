@@ -23,8 +23,6 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       val result = for {
         _ <- ScanamoAsync.put(client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
-
-      result.futureValue should equal(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
     }
   }
 
@@ -52,6 +50,16 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       import com.gu.scanamo.syntax._
       ScanamoAsync.get[Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
         .futureValue should equal(Some(Right(Engine("Thomas", 1))))
+    }
+
+    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+      case class City(name: String, country: String)
+
+      ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US"))
+
+      import com.gu.scanamo.syntax._
+      ScanamoAsync.get[City](client, true)("asyncCities")('name -> "Nashville")
+        .futureValue should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 

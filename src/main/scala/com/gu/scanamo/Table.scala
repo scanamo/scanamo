@@ -33,7 +33,7 @@ case class Table[V: DynamoFormat](name: String) {
 
   def put(v: V) = ScanamoFree.put(name)(v)
   def putAll(vs: Set[V]) = ScanamoFree.putAll(name)(vs)
-  def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
+  def get(key: UniqueKey[_], consistentRead: Boolean = false) = ScanamoFree.get[V](name)(key, consistentRead)
   def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
   def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
 

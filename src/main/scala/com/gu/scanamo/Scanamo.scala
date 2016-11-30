@@ -90,9 +90,9 @@ object Scanamo {
     * Some(Right(Engine(Thomas,1)))
     * }}}
     */
-  def get[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
+  def get[T: DynamoFormat](client: AmazonDynamoDB, consistentRead: Boolean = false)(tableName: String)(key: UniqueKey[_])
     : Option[Either[DynamoReadError, T]] =
-    exec(client)(ScanamoFree.get[T](tableName)(key))
+    exec(client)(ScanamoFree.get[T](tableName)(key, consistentRead))
 
   /**
     * Returns all the items in the table with matching keys

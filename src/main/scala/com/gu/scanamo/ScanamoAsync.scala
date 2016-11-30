@@ -29,9 +29,9 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
     exec(client)(ScanamoFree.putAll(tableName)(items))
 
-  def get[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
+  def get[T: DynamoFormat](client: AmazonDynamoDBAsync, consistentRead: Boolean = false)(tableName: String)(key: UniqueKey[_])
     (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
-    exec(client)(ScanamoFree.get[T](tableName)(key))
+    exec(client)(ScanamoFree.get[T](tableName)(key, consistentRead))
 
   def getAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])
     (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
