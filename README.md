@@ -12,7 +12,7 @@ Installation
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.gu" %% "scanamo" % "0.8.1"
+  "com.gu" %% "scanamo" % "0.8.2"
 )
 ```
 
