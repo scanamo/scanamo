@@ -1,3 +1,11 @@
+## Version 0.8.2
+
+ * Add support for deleteAll (#70 - @randallalexander)
+
+## Version 0.8.1
+
+ * Release for Scala 2.12 in addition to 2.11
+
 ## Version 0.8.0
 
 Definitely Breaking changes:
