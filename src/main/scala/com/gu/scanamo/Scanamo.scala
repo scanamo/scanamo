@@ -90,9 +90,27 @@ object Scanamo {
     * Some(Right(Engine(Thomas,1)))
     * }}}
     */
-  def get[T: DynamoFormat](client: AmazonDynamoDB, consistentRead: Boolean = false)(tableName: String)(key: UniqueKey[_])
+  def get[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
     : Option[Either[DynamoReadError, T]] =
-    exec(client)(ScanamoFree.get[T](tableName)(key, consistentRead))
+    exec(client)(ScanamoFree.get[T](tableName)(key))
+
+  /**
+    * {{{
+    * >>>  LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+    * ...   case class City(name: String, country: String)
+    * ...   val client = LocalDynamoDB.client()
+    * ...   ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US"))
+    *
+    * ...   import com.gu.scanamo.syntax._
+    * ...   Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
+    * ...  }
+    * Some(Right(City("Nashville", "US")))
+    * }}}
+    */
+
+  def getWithConsistency[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
+    : Option[Either[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.getWithConsistency[T](tableName)(key))
 
   /**
     * Returns all the items in the table with matching keys
