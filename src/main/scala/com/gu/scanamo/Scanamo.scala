@@ -96,18 +96,19 @@ object Scanamo {
 
   /**
     * {{{
-    * >>>  LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
-    * ...   case class City(name: String, country: String)
-    * ...   val client = LocalDynamoDB.client()
-    * ...   ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US"))
+    * >>> case class City(name: String, country: String)
+    * >>> val cityTable = Table[City]("asyncCities")
     *
-    * ...   import com.gu.scanamo.syntax._
-    * ...   Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
-    * ...  }
-    * Some(Right(City("Nashville", "US")))
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.client()
+    * >>> LocalDynamoDB.withTable(client)("asyncCities")('name -> S) {
+    * ...  Scanamo.put(client)("asyncCities")(City("Nashville", "US"))
+    * ...  import com.gu.scanamo.syntax._
+    * ...  Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
+    * ... }
+    * Some(Right(City(Nashville,US)))
     * }}}
     */
-
   def getWithConsistency[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_])
     : Option[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.getWithConsistency[T](tableName)(key))

@@ -29,4 +29,22 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
       Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville") should equal(Some(Right(City("Nashville", "US"))))
     }
   }
+
+  it("should get consistent") {
+    case class City(name: String, country: String)
+
+    val cityTable = Table[City]("asyncCities")
+
+    import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
+    val client = LocalDynamoDB.client()
+    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+      import com.gu.scanamo.syntax._
+      val ops = for {
+        _ <- cityTable.put(City("Nashville", "US"))
+        res <- cityTable.consistent.get('name -> "Nashville")
+      } yield res
+      Scanamo.exec(client)(ops) should equal(Some(Right(City("Nashville", "US"))))
+    }
+  }
 }

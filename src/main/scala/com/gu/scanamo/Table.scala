@@ -198,20 +198,22 @@ case class Table[V: DynamoFormat](name: String) {
   def limit(n: Int) = TableLimit(this, n)
 
   /**
-    * Get from a table with a consistent read, ensuring strong consistency over eventual consistency
-    *
     * {{{
-    * >>>LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
-    * ... val cityTable = Table[City]("asyncCities")
-    * ... import com.gu.scanamo.syntax._
-    * ... val ops = for {
-    * ...   _ <- cityTable.put(City("Nashville", "US"))
-    * ...   res <- cityTable.consistent.get('name -> "Nashville")
-    * ... } yield res
-    * ... Scanamo.exec(client)(ops)
+    * >>> case class City(name: String, country: String)
+    * >>> val cityTable = Table[City]("asyncCities")
+    *
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.client()
+    * >>> LocalDynamoDB.withTable(client)("asyncCities")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val ops = for {
+    * ...     putRes <- cityTable.put(City("Nashville", "US"))
+    * ...     res <- cityTable.consistent.get('name -> "Nashville")
+    * ...   } yield res
+    * ...   Scanamo.exec(client)(ops)
     * ... }
-    * Right(City("Nashville", "US"))
-    }}}
+    * Some(Right(City(Nashville,US)))
+    * }}}
     */
   def consistent = TableConsistent(this)
 
@@ -540,23 +542,6 @@ object Queryable {
 object Gettable {
   def apply[T[_], V](implicit s: Gettable[T, V]) = s
 
-  trait Ops[T[_], V] {
-    val instance: Gettable[T, V]
-    def self: T[V]
-    def get(key: UniqueKey[_]) = instance.get(self)(key)
-  }
-
-  trait ToGettableOps {
-    implicit def gettableOps[T[_], V](t: T[V])(implicit s: Gettable[T, V]) = new Ops[T, V] {
-      val instance = s
-      val self = t
-    }
-  }
-
-  implicit def gettable[V: DynamoFormat] = new Gettable[Table, V] {
-    override def get(t: Table[V])(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
-      ScanamoFree.get[V](t.name)(key)
-  }
   implicit def consistentGettable[V: DynamoFormat] = new Gettable[TableConsistent, V] {
     override def get(t: TableConsistent[V])(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
       ScanamoFree.getWithConsistency[V](t.table.name)(key)
