@@ -1,24 +1,24 @@
 options:
   - title: Put and Get
     url: put-get.html
-    menu_section: operations
+
+  - title: Scanning
+    url: scanning.html
 
   - title: Querying
     url: querying.html
-    menu_section: operations
 
   - title: Updating
     url: updating.html
-    menu_section: operations
 
   - title: Using Indexes
     url: using-indexes.html
-    menu_section: home
 
   - title: Asynchronous Requests
     url: asynchronous.html
-    menu_section: home
 
   - title: Custom Formats
     url: custom-formats.html
-    menu_section: home
+
+  - title: Batch Operations
+    url: batch-operations.html

@@ -1,12 +1,13 @@
 ---
 layout: docs
-title: Querying
-position: 4
+title: Scanning
+position: 3
 ---
 
-### Querying
+### Scanning
 
-Scanamo can be used to perform most queries that can be made against DynamoDB
+If you want to go through all elements of a table, or index, Scanamo 
+supports scanning it:
 
 ```tut:silent
 import com.gu.scanamo._
@@ -14,20 +15,22 @@ import com.gu.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
+LocalDynamoDB.createTable(client)("lines")('mode -> S, 'line -> S)
 
 case class Transport(mode: String, line: String)
-val transportTable = Table[Transport]("transports")
+```
+```tut:book
+val transportTable = Table[Transport]("lines")
 val operations = for {
   _ <- transportTable.putAll(Set(
     Transport("Underground", "Circle"),
     Transport("Underground", "Metropolitan"),
-    Transport("Underground", "Central")
+    Transport("Underground", "Central"),
+    Transport("Tram", "Croydon Tramlink")
   ))
-  tubesStartingWithC <- transportTable.query('mode -> "Underground" and ('line beginsWith "C"))
-} yield tubesStartingWithC.toList
-```
-```tut:book
+  allLines <- transportTable.scan()
+} yield allLines.toList
+
 Scanamo.exec(client)(operations)
 ```
 

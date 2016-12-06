@@ -107,10 +107,10 @@ releaseProcess := Seq[ReleaseStep](
 
 micrositeName             := "Scanamo"
 micrositeDescription      := "Scanamo: simpler DynamoDB access for Scala"
-micrositeAuthor           := "Phil Wills"
+micrositeAuthor           := "Scanamo Contributors"
 micrositeGithubOwner      := "guardian"
 micrositeGithubRepo       := "scanamo"
-micrositeBaseUrl          := ""
+micrositeBaseUrl          := "/scanamo"
 micrositeDocumentationUrl := "/scanamo/latest/api"
 micrositeHighlightTheme   := "color-brewer"
 micrositePalette := Map(
