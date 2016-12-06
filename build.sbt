@@ -51,8 +51,7 @@ testOptions in Test += dynamoDBLocalTestCleanup.value
 
 tut := tut.dependsOn(startDynamoDBLocal).value
 
-lazy val buildMicrosite = taskKey[Unit]("make the microsite and cleanup local DynamoDB afterwards")
-buildMicrosite := Def.sequential(makeMicrosite.toTask, stopDynamoDBLocal.toTask).value
+tut <<= (tut, stopDynamoDBLocal){ (tut, stop) => tut.doFinally(stop)}
 
 enablePlugins(MicrositesPlugin)
 
@@ -104,4 +103,23 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
   pushChanges
+)
+
+micrositeName             := "Scanamo"
+micrositeDescription      := "Scanamo: simpler DynamoDB access for Scala"
+micrositeAuthor           := "Phil Wills"
+micrositeGithubOwner      := "guardian"
+micrositeGithubRepo       := "scanamo"
+micrositeBaseUrl          := ""
+micrositeDocumentationUrl := "/scanamo/latest/api"
+micrositeHighlightTheme   := "color-brewer"
+micrositePalette := Map(
+  "brand-primary"     -> "#951c55",
+  "brand-secondary"   -> "#005689",
+  "brand-tertiary"    -> "#00456e",
+  "gray-dark"         -> "#453E46",
+  "gray"              -> "#837F84",
+  "gray-light"        -> "#E3E2E3",
+  "gray-lighter"      -> "#F4F3F4",
+  "white-color"       -> "#FFFFFF"
 )
