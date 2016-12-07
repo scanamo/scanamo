@@ -53,7 +53,7 @@ tut := tut.dependsOn(startDynamoDBLocal).value
 
 tut <<= (tut, stopDynamoDBLocal){ (tut, stop) => tut.doFinally(stop)}
 
-enablePlugins(MicrositesPlugin)
+enablePlugins(MicrositesPlugin, SiteScaladocPlugin)
 
 includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml"
 ghpages.settings
@@ -67,7 +67,7 @@ doctestTestFramework := DoctestTestFramework.ScalaTest
 
 parallelExecution in Test := false
 
-homepage := Some(url("https://github.com/guardian/scanamo"))
+homepage := Some(url("https://guardian.github.io/scanamo/"))
 licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 publishMavenStyle := true
 publishArtifact in Test := false
@@ -110,7 +110,7 @@ micrositeDescription      := "Scanamo: simpler DynamoDB access for Scala"
 micrositeAuthor           := "Scanamo Contributors"
 micrositeGithubOwner      := "guardian"
 micrositeGithubRepo       := "scanamo"
-micrositeBaseUrl          := "/scanamo"
+micrositeBaseUrl          := "scanamo"
 micrositeDocumentationUrl := "/scanamo/latest/api"
 micrositeHighlightTheme   := "color-brewer"
 micrositePalette := Map(
