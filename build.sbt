@@ -11,7 +11,6 @@ libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.52",
   "com.chuusai" %% "shapeless" % "2.3.2",
   "org.typelevel" %% "cats-free" % "0.8.1",
-
   "com.github.mpilquist" %% "simulacrum" % "0.10.0",
 
   "org.typelevel" %% "macro-compat" % "1.1.1",
@@ -50,9 +49,12 @@ startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
 test in Test := (test in Test).dependsOn(startDynamoDBLocal).value
 testOptions in Test += dynamoDBLocalTestCleanup.value
 
-site.settings
-site.includeScaladoc()
-import com.typesafe.sbt.SbtSite.SiteKeys.makeSite
+tut := tut.dependsOn(startDynamoDBLocal).value
+
+tut <<= (tut, stopDynamoDBLocal){ (tut, stop) => tut.doFinally(stop)}
+
+enablePlugins(MicrositesPlugin, SiteScaladocPlugin)
+
 includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml"
 ghpages.settings
 com.typesafe.sbt.SbtGhPages.GhPagesKeys.ghpagesNoJekyll := false
@@ -65,7 +67,7 @@ doctestTestFramework := DoctestTestFramework.ScalaTest
 
 parallelExecution in Test := false
 
-homepage := Some(url("https://github.com/guardian/scanamo"))
+homepage := Some(url("https://guardian.github.io/scanamo/"))
 licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 publishMavenStyle := true
 publishArtifact in Test := false
@@ -101,4 +103,23 @@ releaseProcess := Seq[ReleaseStep](
   commitNextVersion,
   ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
   pushChanges
+)
+
+micrositeName             := "Scanamo"
+micrositeDescription      := "Scanamo: simpler DynamoDB access for Scala"
+micrositeAuthor           := "Scanamo Contributors"
+micrositeGithubOwner      := "guardian"
+micrositeGithubRepo       := "scanamo"
+micrositeBaseUrl          := "scanamo"
+micrositeDocumentationUrl := "/scanamo/latest/api"
+micrositeHighlightTheme   := "color-brewer"
+micrositePalette := Map(
+  "brand-primary"     -> "#951c55",
+  "brand-secondary"   -> "#005689",
+  "brand-tertiary"    -> "#00456e",
+  "gray-dark"         -> "#453E46",
+  "gray"              -> "#837F84",
+  "gray-light"        -> "#E3E2E3",
+  "gray-lighter"      -> "#F4F3F4",
+  "white-color"       -> "#FFFFFF"
 )
