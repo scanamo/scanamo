@@ -42,7 +42,7 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
       import com.gu.scanamo.syntax._
       val ops = for {
         _ <- cityTable.put(City("Nashville", "US"))
-        res <- cityTable.consistent.get('name -> "Nashville")
+        res <- cityTable.consistently.get('name -> "Nashville")
       } yield res
       Scanamo.exec(client)(ops) should equal(Some(Right(City("Nashville", "US"))))
     }
