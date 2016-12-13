@@ -55,6 +55,18 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     }
   }
 
+  it("should get consistently asynchronously") {
+    case class City(name: String, country: String)
+    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+
+      ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US"))
+
+      import com.gu.scanamo.syntax._
+      ScanamoAsync.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
+        .futureValue should equal(Some(Right(City("Nashville", "US"))))
+    }
+  }
+
   it("should delete asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
 

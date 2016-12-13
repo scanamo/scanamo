@@ -48,6 +48,14 @@ object ScanamoFree {
     } yield
       Option(res.getItem).map(read[T])
 
+  def getWithConsistency[T](tableName: String)(key: UniqueKey[_])
+            (implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+    for {
+      res <- ScanamoOps.get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(true))
+    } yield
+      Option(res.getItem).map(read[T])
+
+
   def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
     for {
       res <- ScanamoOps.batchGet(

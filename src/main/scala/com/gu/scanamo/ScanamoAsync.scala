@@ -33,6 +33,10 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.get[T](tableName)(key))
 
+  def getWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
+                          (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.getWithConsistency[T](tableName)(key))
+
   def getAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])
     (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAll[T](tableName)(keys))
