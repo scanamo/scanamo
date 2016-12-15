@@ -230,6 +230,12 @@ DynamoDB's AttributeValue">
                           DynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
+                        <a class="object" href="Gettable$.html" title=""></a>
+                        <a class="trait" href="Gettable.html" title=""></a>
+                        <a href="Gettable.html" title="">
+                          Gettable
+                        </a>
+                      </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="MacroOfLastResort.html" title=""></a>
                         <a href="MacroOfLastResort.html" title="">
@@ -492,6 +498,49 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.gu.scanamo.Table#consistently" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="consistently:com.gu.scanamo.ConsistentlyReadTable[V]"></a><a id="consistently:ConsistentlyReadTable[V]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/Table.html#consistently:com.gu.scanamo.ConsistentlyReadTable[V]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">consistently</span><span class="result">: <span class="extype" name="com.gu.scanamo.ConsistentlyReadTable">ConsistentlyReadTable</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
+read operations against this table.</p><div class="fullcomment"><div class="comment cmt"><p>Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
+read operations against this table. Note that there is no equivalent on
+table indexes as consistent reads from secondary indexes are not
+supported by DynamoDB</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> City(country: <span class="std">String</span>, name: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">val</span> cityTable = Table[City](<span class="lit">"cities"</span>)
+
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">val</span> (get, scan, query) = LocalDynamoDB.withTable(client)(<span class="lit">"cities"</span>)('country -&gt; S, 'name -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     putRes <span class="kw">&lt;-</span> cityTable.putAll(<span class="std">Set</span>(
+...       City(<span class="lit">"US"</span>, <span class="lit">"Nashville"</span>), City(<span class="lit">"IT"</span>, <span class="lit">"Rome"</span>), City(<span class="lit">"IT"</span>, <span class="lit">"Siena"</span>), City(<span class="lit">"TZ"</span>, <span class="lit">"Dar es Salaam"</span>)))
+...     get <span class="kw">&lt;-</span> cityTable.consistently.get('country -&gt; <span class="lit">"US"</span> and 'name -&gt; <span class="lit">"Nashville"</span>)
+...     scan <span class="kw">&lt;-</span> cityTable.consistently.scan()
+...     query <span class="kw">&lt;-</span> cityTable.consistently.query('country -&gt; <span class="lit">"IT"</span>)
+...   } <span class="kw">yield</span> (get, scan, query)
+...   Scanamo.exec(client)(ops)
+... }
+&gt;&gt;&gt; get
+<span class="std">Some</span>(Right(City(US,Nashville)))
+
+&gt;&gt;&gt; scan
+<span class="std">List</span>(Right(City(US,Nashville)), Right(City(IT,Rome)), Right(City(IT,Siena)), Right(City(TZ,Dar es Salaam)))
+
+&gt;&gt;&gt; query
+<span class="std">List</span>(Right(City(IT,Rome)), Right(City(IT,Siena)))</pre></div></div>
     </li><li name="com.gu.scanamo.Table#delete" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="delete(key:com.gu.scanamo.query.UniqueKey[_]):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.DeleteItemResult]"></a><a id="delete(UniqueKey[_]):ScanamoOps[DeleteItemResult]"></a>
       <span class="permalink">

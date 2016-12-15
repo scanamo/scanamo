@@ -230,6 +230,12 @@ DynamoDB's AttributeValue">
                           DynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
+                        <a class="object" href="Gettable$.html" title=""></a>
+                        <a class="trait" href="Gettable.html" title=""></a>
+                        <a href="Gettable.html" title="">
+                          Gettable
+                        </a>
+                      </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="MacroOfLastResort.html" title=""></a>
                         <a href="MacroOfLastResort.html" title="">
@@ -590,6 +596,22 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.ScanamoFree#getWithConsistency" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="getWithConsistency[T](tableName:String)(key:com.gu.scanamo.query.UniqueKey[_])(implicitft:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Option[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="getWithConsistency[T](String)(UniqueKey[_])(DynamoFormat[T]):ScanamoOps[Option[Either[DynamoReadError,T]]]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#getWithConsistency[T](tableName:String)(key:com.gu.scanamo.query.UniqueKey[_])(implicitft:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Option[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getWithConsistency</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="key">key: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ft">ft: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.getWithConsistency.T">T</span>]</span>)</span><span class="result">: <a href="ops/index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.getWithConsistency.T">T</span>]]]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
@@ -703,9 +725,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.ScanamoFree#query" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="query[T](String)(Query[_])(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+      <a id="query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="query[T](String)(Query[_])(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#query[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -718,10 +740,26 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       
-    </li><li name="com.gu.scanamo.ScanamoFree#queryIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="queryIndex[T](String,String)(Query[_])(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+    </li><li name="com.gu.scanamo.ScanamoFree#queryConsistent" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="queryConsistent[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="queryConsistent[T](String)(Query[_])(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#queryConsistent[T](tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">queryConsistent</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="query">query: <a href="query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.queryConsistent.T">T</span>]</span>)</span><span class="result">: <a href="ops/index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.queryConsistent.T">T</span>]]]</span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.ScanamoFree#queryIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="queryIndex[T](String,String)(Query[_])(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#queryIndex[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -735,9 +773,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.ScanamoFree#queryIndexWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="queryIndexWithLimit[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="queryIndexWithLimit[T](String,String)(Query[_],Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+      <a id="queryIndexWithLimit[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="queryIndexWithLimit[T](String,String)(Query[_],Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#queryIndexWithLimit[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#queryIndexWithLimit[T](tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -751,9 +789,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.ScanamoFree#queryWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="queryWithLimit[T](tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="queryWithLimit[T](String)(Query[_],Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+      <a id="queryWithLimit[T](tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="queryWithLimit[T](String)(Query[_],Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#queryWithLimit[T](tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#queryWithLimit[T](tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -804,10 +842,26 @@ prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span
       </span>
       
       
-    </li><li name="com.gu.scanamo.ScanamoFree#scanIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scanIndex[T](tableName:String,indexName:String)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="scanIndex[T](String,String)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+    </li><li name="com.gu.scanamo.ScanamoFree#scanConsistent" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scanConsistent[T](tableName:String)(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="scanConsistent[T](String)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#scanIndex[T](tableName:String,indexName:String)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#scanConsistent[T](tableName:String)(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">scanConsistent</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.scanConsistent.T">T</span>]</span>)</span><span class="result">: <a href="ops/index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.List">List</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.scanConsistent.T">T</span>]]]</span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.ScanamoFree#scanIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="scanIndex[T](tableName:String,indexName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="scanIndex[T](String,String)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#scanIndex[T](tableName:String,indexName:String)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -821,9 +875,9 @@ prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span
       
       
     </li><li name="com.gu.scanamo.ScanamoFree#scanIndexWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scanIndexWithLimit[T](tableName:String,indexName:String,limit:Int)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="scanIndexWithLimit[T](String,String,Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+      <a id="scanIndexWithLimit[T](tableName:String,indexName:String,limit:Int)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="scanIndexWithLimit[T](String,String,Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#scanIndexWithLimit[T](tableName:String,indexName:String,limit:Int)(implicitevidence$5:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#scanIndexWithLimit[T](tableName:String,indexName:String,limit:Int)(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -837,9 +891,9 @@ prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span
       
       
     </li><li name="com.gu.scanamo.ScanamoFree#scanWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scanWithLimit[T](tableName:String,limit:Int)(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="scanWithLimit[T](String,Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
+      <a id="scanWithLimit[T](tableName:String,limit:Int)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]"></a><a id="scanWithLimit[T](String,Int)(DynamoFormat[T]):ScanamoOps[List[Either[DynamoReadError,T]]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#scanWithLimit[T](tableName:String,limit:Int)(implicitevidence$3:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#scanWithLimit[T](tableName:String,limit:Int)(implicitevidence$4:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[List[Either[com.gu.scanamo.error.DynamoReadError,T]]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
