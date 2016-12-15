@@ -95,6 +95,7 @@ releaseProcess := Seq[ReleaseStep](
   inquireVersions,
   runClean,
   runTest,
+  releaseStepTask(tut),
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
@@ -102,7 +103,8 @@ releaseProcess := Seq[ReleaseStep](
   setNextVersion,
   commitNextVersion,
   ReleaseStep(action = Command.process("sonatypeReleaseAll", _)),
-  pushChanges
+  pushChanges,
+  releaseStepTask(publishMicrosite)
 )
 
 micrositeName             := "Scanamo"
