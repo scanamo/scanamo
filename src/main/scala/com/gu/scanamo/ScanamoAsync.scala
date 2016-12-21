@@ -49,10 +49,10 @@ object ScanamoAsync {
                              (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
     exec(client)(ScanamoFree.deleteAll(tableName)(items))
 
-  def update[V: DynamoFormat, U: UpdateExpression](client: AmazonDynamoDBAsync)(tableName: String)(
-    key: UniqueKey[_], expression: U)(implicit ec: ExecutionContext
+  def update[V: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(
+    key: UniqueKey[_], expression: UpdateExpression)(implicit ec: ExecutionContext
   ): Future[Either[DynamoReadError,V]] =
-    exec(client)(ScanamoFree.update[V, U](tableName)(key)(expression))
+    exec(client)(ScanamoFree.update[V](tableName)(key)(expression))
 
   def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
     (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =

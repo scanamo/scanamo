@@ -62,8 +62,8 @@ package object scanamo {
     def remove(field: Symbol) =
       RemoveExpression(field)
 
-    implicit class AndUpdateExpression[X: UpdateExpression](x: X) {
-      def and[Y: UpdateExpression](y: Y) = AndUpdate(x, y)
+    implicit class AndUpdateExpression(x: UpdateExpression) {
+      def and(y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
     }
   }
 }

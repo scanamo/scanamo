@@ -100,11 +100,11 @@ object ScanamoFree {
   def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName)).withIndexName(indexName).withLimit(limit))
 
-  def update[T, U](tableName: String)(key: UniqueKey[_])(expression: U)(
-    implicit update: UpdateExpression[U], format: DynamoFormat[T]
+  def update[T](tableName: String)(key: UniqueKey[_])(update: UpdateExpression)(
+    implicit format: DynamoFormat[T]
   ): ScanamoOps[Either[DynamoReadError, T]] =
     ScanamoOps.update(ScanamoUpdateRequest(
-      tableName, key.asAVMap, update.expression(expression), update.attributeNames(expression), update.attributeValues(expression), None)
+      tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None)
     ).map(
       r => format.read(new AttributeValue().withM(r.getAttributes))
     )

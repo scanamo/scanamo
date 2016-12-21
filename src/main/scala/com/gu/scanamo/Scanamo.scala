@@ -229,8 +229,8 @@ object Scanamo {
     * List(Right(Forecast(London,Sun)))
     * }}}
     */
-  def update[V: DynamoFormat, U: UpdateExpression](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_], expression: U): Either[DynamoReadError, V] =
-    exec(client)(ScanamoFree.update[V, U](tableName)(key)(expression))
+  def update[V: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(key: UniqueKey[_], expression: UpdateExpression): Either[DynamoReadError, V] =
+    exec(client)(ScanamoFree.update[V](tableName)(key)(expression))
 
   /**
     * Scans all elements of a table

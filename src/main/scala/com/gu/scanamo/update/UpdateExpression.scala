@@ -6,11 +6,11 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.DynamoFormat
 import simulacrum.typeclass
 
-@typeclass trait UpdateExpression[T] {
-  def expression(t: T): String = typeExpressions(t).map{ case (t, e) => s"${t.op} $e" }.mkString(" ")
-  def typeExpressions(t: T): Map[UpdateType, String]
-  def attributeNames(t: T): Map[String, String]
-  def attributeValues(t: T): Map[String, AttributeValue]
+sealed trait UpdateExpression extends Product with Serializable {
+  def expression: String = typeExpressions.map{ case (t, e) => s"${t.op} $e" }.mkString(" ")
+  def typeExpressions: Map[UpdateType, String]
+  def attributeNames: Map[String, String]
+  def attributeValues: Map[String, AttributeValue]
 }
 
 sealed trait UpdateType { val op: String }
@@ -19,66 +19,44 @@ case object ADD extends UpdateType { override val op = "ADD" }
 case object DELETE extends UpdateType { override val op = "DELETE" }
 case object REMOVE extends UpdateType { override val op = "REMOVE" }
 
-case class SetExpression[V: DynamoFormat](field: Symbol, value: V)
+case class SetExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+  val format = DynamoFormat[V]
 
-object SetExpression {
-  implicit def setUpdateExpression[V](implicit format: DynamoFormat[V]) =
-    new UpdateExpression[SetExpression[V]] {
-      override def typeExpressions(t: SetExpression[V]): Map[UpdateType, String] =
-        Map(SET -> "#update = :update")
-      override def attributeNames(t: SetExpression[V]): Map[String, String] =
-        Map("#update" -> t.field.name)
-      override def attributeValues(t: SetExpression[V]): Map[String, AttributeValue] =
-        Map(":update" -> format.write(t.value))
-    }
+  override def typeExpressions: Map[UpdateType, String] =
+    Map(SET -> "#update = :update")
+  override def attributeNames: Map[String, String] =
+    Map("#update" -> field.name)
+  override def attributeValues: Map[String, AttributeValue] =
+    Map(":update" -> format.write(value))
 }
 
-case class AppendExpression[V: DynamoFormat](field: Symbol, value: V)
-
-object AppendExpression {
-  implicit def appendUpdateExpression[V](implicit format: DynamoFormat[V]) =
-    new UpdateExpression[AppendExpression[V]] {
-      override def typeExpressions(t: AppendExpression[V]): Map[UpdateType, String] =
-        Map(SET -> "#update = list_append(if_not_exists(#update, :emptyList), :update)")
-      override def attributeNames(t: AppendExpression[V]): Map[String, String] =
-        Map("#update" -> t.field.name)
-      override def attributeValues(t: AppendExpression[V]): Map[String, AttributeValue] =
-        Map(
-          ":update" -> DynamoFormat.listFormat[V].write(List(t.value)),
-          ":emptyList" -> new AttributeValue().withL()
-        )
-    }
+case class AppendExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+  override def typeExpressions: Map[UpdateType, String] =
+    Map(SET -> "#update = list_append(if_not_exists(#update, :emptyList), :update)")
+  override def attributeNames: Map[String, String] =
+    Map("#update" -> field.name)
+  override def attributeValues: Map[String, AttributeValue] =
+    Map(":update" -> DynamoFormat.listFormat[V].write(List(value)),
+        ":emptyList" -> new AttributeValue().withL())
 }
 
-case class PrependExpression[V: DynamoFormat](field: Symbol, value: V)
-
-object PrependExpression {
-  implicit def appendUpdateExpression[V](implicit format: DynamoFormat[V]) =
-    new UpdateExpression[PrependExpression[V]] {
-      override def typeExpressions(t: PrependExpression[V]): Map[UpdateType, String] =
-        Map(SET -> "#update = list_append(:update, if_not_exists(#update, :emptyList))")
-      override def attributeNames(t: PrependExpression[V]): Map[String, String] =
-        Map("#update" -> t.field.name)
-      override def attributeValues(t: PrependExpression[V]): Map[String, AttributeValue] =
-        Map(
-          ":update" -> DynamoFormat.listFormat[V].write(List(t.value)),
-          ":emptyList" -> new AttributeValue().withL()
-        )
-    }
+case class PrependExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+  override def typeExpressions: Map[UpdateType, String] =
+    Map(SET -> "#update = list_append(:update, if_not_exists(#update, :emptyList))")
+  override def attributeNames: Map[String, String] =
+    Map("#update" -> field.name)
+  override def attributeValues: Map[String, AttributeValue] =
+    Map(":update" -> DynamoFormat.listFormat[V].write(List(value)),
+        ":emptyList" -> new AttributeValue().withL())
 }
 
-case class AddExpression[V: DynamoFormat](field: Symbol, value: V)
-
-object AddExpression {
-  implicit def addUpdateExpression[V](implicit format: DynamoFormat[V]) =
-    new UpdateExpression[AddExpression[V]] {
-      override def typeExpressions(t: AddExpression[V]): Map[UpdateType, String] =
-        Map(ADD -> "#update :update")
-      override def attributeNames(t: AddExpression[V]): Map[String, String] =
-        Map("#update" -> t.field.name)
-      override def attributeValues(t: AddExpression[V]): Map[String, AttributeValue] =
-        Map(":update" -> format.write(t.value))
-    }
+case class AddExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+  override def typeExpressions: Map[UpdateType, String] =
+    Map(ADD -> "#update :update")
+  override def attributeNames: Map[String, String] =
+    Map("#update" -> field.name)
+  override def attributeValues: Map[String, AttributeValue] =
+    Map(":update" -> DynamoFormat[V].write(value))
 }
 
 /*
@@ -87,74 +65,57 @@ Note the difference between DELETE and REMOVE:
  - REMOVE is used to remove an attribute from an item
  */
 
-case class DeleteExpression[V: DynamoFormat](field: Symbol, value: V)
-
-object DeleteExpression {
-  implicit def deleteUpdateExpression[V](implicit format: DynamoFormat[V]) =
-    new UpdateExpression[DeleteExpression[V]] {
-      override def typeExpressions(t: DeleteExpression[V]): Map[UpdateType, String] =
-        Map(DELETE -> "#update :update")
-      override def attributeNames(t: DeleteExpression[V]): Map[String, String] =
-        Map("#update" -> t.field.name)
-      override def attributeValues(t: DeleteExpression[V]): Map[String, AttributeValue] =
-        Map(":update" -> format.write(t.value))
-    }
+case class DeleteExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+  override def typeExpressions: Map[UpdateType, String] =
+    Map(DELETE -> "#update :update")
+  override def attributeNames: Map[String, String] =
+    Map("#update" -> field.name)
+  override def attributeValues: Map[String, AttributeValue] =
+    Map(":update" -> DynamoFormat[V].write(value))
 }
 
-case class RemoveExpression(field: Symbol)
-
-object RemoveExpression {
-  implicit val removeUpdateExpression =
-    new UpdateExpression[RemoveExpression] {
-      override def typeExpressions(t: RemoveExpression): Map[UpdateType, String] =
-        Map(REMOVE -> "#update")
-      override def attributeNames(t: RemoveExpression): Map[String, String] =
-        Map("#update" -> t.field.name)
-      override def attributeValues(t: RemoveExpression): Map[String, AttributeValue] =
-        Map()
-    }
+case class RemoveExpression(field: Symbol) extends UpdateExpression {
+  override def typeExpressions: Map[UpdateType, String] =
+    Map(REMOVE -> "#update")
+  override def attributeNames: Map[String, String] =
+    Map("#update" -> field.name)
+  override def attributeValues: Map[String, AttributeValue] =
+    Map()
 }
 
-case class AndUpdate[L: UpdateExpression, R: UpdateExpression](l: L, r: R)
+case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExpression {
 
-object AndUpdate {
-  implicit def andUpdateExpression[L, R](implicit lUpdate: UpdateExpression[L], rUpdate: UpdateExpression[R]) =
-    new UpdateExpression[AndUpdate[L, R]] {
+  def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {
+    case (k, v) => (newKey(k, prefix, magicChar), v)
+  }
+  def newKey(oldKey: String, prefix: String, magicChar: Char) =
+    s"$magicChar$prefix${oldKey.stripPrefix(magicChar.toString)}"
 
-      def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {
-        case (k, v) => (newKey(k, prefix, magicChar), v)
-      }
-      def newKey(oldKey: String, prefix: String, magicChar: Char) =
-        s"$magicChar$prefix${oldKey.stripPrefix(magicChar.toString)}"
+  val expressionMonoid = new MapMonoid[UpdateType, String]()(new Semigroup[String] {
+    override def combine(x: String, y: String): String = s"$x, $y"
+  })
 
-      val expressionMonoid = new MapMonoid[UpdateType, String]()(new Semigroup[String] {
-        override def combine(x: String, y: String): String = s"$x, $y"
-      })
+  override def typeExpressions: Map[UpdateType, String] =  {
+    def prefixKeysIn(string: String, keys: Iterable[String], prefix: String, magicChar: Char) =
+      keys.foldLeft(string)((result, key) => result.replaceAllLiterally(key, newKey(key, prefix, magicChar)))
 
-      override def typeExpressions(t: AndUpdate[L, R]): Map[UpdateType, String] = {
-        def prefixKeysIn(string: String, keys: Iterable[String], prefix: String, magicChar: Char) =
-          keys.foldLeft(string)((result, key) => result.replaceAllLiterally(key, newKey(key, prefix, magicChar)))
+    val lPrefixedNamePlaceholders = l.typeExpressions.mapValues(exp =>
+      prefixKeysIn(exp, l.attributeNames.keys, "l_", '#'))
 
-        val lPrefixedNamePlaceholders = lUpdate.typeExpressions(t.l).mapValues(exp =>
-          prefixKeysIn(exp, lUpdate.attributeNames(t.l).keys, "l_", '#'))
+    val rPrefixedNamePlaceholders = r.typeExpressions.mapValues(exp =>
+      prefixKeysIn(exp, r.attributeNames.keys, "r_", '#'))
 
-        val rPrefixedNamePlaceholders = rUpdate.typeExpressions(t.r).mapValues(exp =>
-          prefixKeysIn(exp, rUpdate.attributeNames(t.r).keys, "r_", '#'))
+    val lPrefixedValuePlaceholders = lPrefixedNamePlaceholders.mapValues(exp =>
+      prefixKeysIn(exp, l.attributeValues.keys, "l_", ':'))
+    val rPrefixedValuePlaceholders = rPrefixedNamePlaceholders.mapValues(exp =>
+      prefixKeysIn(exp, r.attributeValues.keys, "r_", ':'))
 
-        val lPrefixedValuePlaceholders = lPrefixedNamePlaceholders.mapValues(exp =>
-          prefixKeysIn(exp, lUpdate.attributeValues(t.l).keys, "l_", ':'))
-        val rPrefixedValuePlaceholders = rPrefixedNamePlaceholders.mapValues(exp =>
-          prefixKeysIn(exp, rUpdate.attributeValues(t.r).keys, "r_", ':'))
+    expressionMonoid.combine(lPrefixedValuePlaceholders, rPrefixedValuePlaceholders)
+  }
 
-        expressionMonoid.combine(lPrefixedValuePlaceholders, rPrefixedValuePlaceholders)
-      }
+  override def attributeNames: Map[String, String] =
+    prefixKeys(l.attributeNames, "l_", '#') ++ prefixKeys(r.attributeNames, "r_", '#')
 
-      override def attributeNames(t: AndUpdate[L, R]): Map[String, String] = {
-        prefixKeys(lUpdate.attributeNames(t.l), "l_", '#') ++ prefixKeys(rUpdate.attributeNames(t.r), "r_", '#')
-      }
-
-      override def attributeValues(t: AndUpdate[L, R]): Map[String, AttributeValue] = {
-        prefixKeys(lUpdate.attributeValues(t.l), "l_", ':') ++ prefixKeys(rUpdate.attributeValues(t.r), "r_", ':')
-      }
-    }
+  override def attributeValues: Map[String, AttributeValue] =
+    prefixKeys(l.attributeValues, "l_", ':') ++ prefixKeys(r.attributeValues, "r_", ':')
 }
