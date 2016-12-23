@@ -13,6 +13,12 @@ sealed trait UpdateExpression extends Product with Serializable {
   def attributeValues: Map[String, AttributeValue]
 }
 
+object UpdateExpression {
+  implicit object Semigroup extends Semigroup[UpdateExpression] {
+    override def combine(x: UpdateExpression, y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
+  }
+}
+
 sealed trait UpdateType { val op: String }
 case object SET extends UpdateType { override val op = "SET" }
 case object ADD extends UpdateType { override val op = "ADD" }
