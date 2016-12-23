@@ -34,6 +34,7 @@ val ops = for {
   survivors <- lemmingsTable.scan()
 } yield (bLemmings, survivors)
 val (bLemmings, survivors) = Scanamo.exec(client)(ops)
+import cats.syntax.either._
 bLemmings.flatMap(_.toOption)
 survivors.flatMap(_.toOption)
 ```
