@@ -220,10 +220,10 @@ object DynamoFormat extends DerivedDynamoFormat {
     *     | DynamoFormat[Array[Byte]].read(DynamoFormat[Array[Byte]].write(ab)) == Right(ab)
     * }}}
     */
-
   implicit val byteArrayFormat = xmap(coerceByteBuffer(_.array()))(a => ByteBuffer.wrap(a))(javaByteBufferFormat)
 
   val javaListFormat = attribute(_.getL, "L")(_.withL)
+
   /**
     * {{{
     * prop> (l: List[String]) =>
@@ -244,10 +244,8 @@ object DynamoFormat extends DerivedDynamoFormat {
     *     |   Right(sq)
     * }}}
     */
-
   implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
     xmap[Seq[T], List[T]](l => Right(l.toSeq))(_.toList)
-
 
   /**
     * {{{
@@ -262,6 +260,18 @@ object DynamoFormat extends DerivedDynamoFormat {
       _.map(f.write).asJava
     )(javaListFormat)
 
+  /**
+    * {{{
+    * prop> (l: Array[String]) =>
+    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(l)) ==
+    *     |   Right(l)
+    * }}}
+    */
+  implicit def arrayFormat[T:ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
+    xmap[Array[T], java.util.List[AttributeValue]](
+      _.asScala.toList.traverseU(f.read).map(_.toArray))(
+      _.map(f.write).toList.asJava
+    )(javaListFormat)
 
   private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
   private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
@@ -281,6 +291,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val intSetFormat = setFormat(coerceNumber(_.toInt))(_.toString)(javaNumSetFormat)
+
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -291,6 +302,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val longSetFormat = setFormat(coerceNumber(_.toLong))(_.toString)(javaNumSetFormat)
+
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -301,6 +313,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val doubleSetFormat = setFormat(coerceNumber(_.toDouble))(_.toString)(javaNumSetFormat)
+
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -317,6 +330,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     )(javaStringSetFormat)
 
   private val javaMapFormat = attribute(_.getM, "M")(_.withM)
+
   /**
     * {{{
     * prop> (m: Map[String, Int]) =>
