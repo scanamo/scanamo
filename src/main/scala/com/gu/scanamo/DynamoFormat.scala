@@ -162,7 +162,6 @@ object DynamoFormat extends DerivedDynamoFormat {
     Boolean.box
   )(javaBooleanFormat)
 
-
   private val numFormat = attribute(_.getN, "N")(_.withN)
   private def coerceNumber[N](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
@@ -177,6 +176,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val longFormat = xmap(coerceNumber(_.toLong))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (i: Int) =>
@@ -184,6 +184,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val intFormat = xmap(coerceNumber(_.toInt))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (d: Double) =>
@@ -191,6 +192,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val doubleFormat = xmap(coerceNumber(_.toDouble))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (s: Short) =>
@@ -198,13 +200,13 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val shortFormat = xmap(coerceNumber(_.toShort))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (b: Byte) =>
     *     | DynamoFormat[Byte].read(DynamoFormat[Byte].write(b)) == Right(b)
     * }}}
     */
-
   // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
   implicit val byteFormat = xmap(coerceNumber(_.toByte))(_.toString)(numFormat)
 
