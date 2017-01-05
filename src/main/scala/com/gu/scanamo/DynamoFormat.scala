@@ -14,6 +14,7 @@ import simulacrum.typeclass
 import collection.JavaConverters._
 import scala.reflect.ClassTag
 import java.nio.ByteBuffer
+import java.util.UUID
 
 /**
   * Type class for defining serialisation to and from
@@ -220,8 +221,17 @@ object DynamoFormat extends DerivedDynamoFormat {
     *     | DynamoFormat[Array[Byte]].read(DynamoFormat[Array[Byte]].write(ab)) == Right(ab)
     * }}}
     */
-
   implicit val byteArrayFormat = xmap(coerceByteBuffer(_.array()))(a => ByteBuffer.wrap(a))(javaByteBufferFormat)
+
+  /**
+    * {{{
+    * prop> implicit val arbitraryUUID = org.scalacheck.Arbitrary(org.scalacheck.Gen.uuid)
+    * prop> (uuid: java.util.UUID) =>
+    *     | DynamoFormat[java.util.UUID].read(DynamoFormat[java.util.UUID].write(uuid)) ==
+    *     |   Right(uuid)
+    * }}}
+    */
+  implicit val uuidFormat = coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
 
   val javaListFormat = attribute(_.getL, "L")(_.withL)
   /**
