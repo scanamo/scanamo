@@ -134,6 +134,20 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Character(The Doctor,List(McCoy, Ecclestone, Tennant, Smith, Capaldi))))
     * }}}
     *
+    * Appending or prepending creates the list if it does not yet exist:
+    *
+    * {{{
+    * >>> LocalDynamoDB.withTable(client)("characters")('name -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- characters.update('name -> "James Bond", append('actors -> "Craig"))
+    * ...     results <- characters.query('name -> "James Bond")
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Character(James Bond,List(Craig))))
+    * }}}
+    *
     * Multiple operations can also be performed in one call:
     * {{{
     * >>> case class Foo(name: String, bar: Int, l: List[String])
