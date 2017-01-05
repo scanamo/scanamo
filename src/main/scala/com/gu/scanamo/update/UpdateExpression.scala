@@ -39,11 +39,14 @@ object AppendExpression {
   implicit def appendUpdateExpression[V](implicit format: DynamoFormat[V]) =
     new UpdateExpression[AppendExpression[V]] {
       override def typeExpressions(t: AppendExpression[V]): Map[UpdateType, String] =
-        Map(SET -> "#update = list_append(#update, :update)")
+        Map(SET -> "#update = list_append(if_not_exists(#update, :emptyList), :update)")
       override def attributeNames(t: AppendExpression[V]): Map[String, String] =
         Map("#update" -> t.field.name)
       override def attributeValues(t: AppendExpression[V]): Map[String, AttributeValue] =
-        Map(":update" -> DynamoFormat.listFormat[V].write(List(t.value)))
+        Map(
+          ":update" -> DynamoFormat.listFormat[V].write(List(t.value)),
+          ":emptyList" -> new AttributeValue().withL()
+        )
     }
 }
 
@@ -53,11 +56,14 @@ object PrependExpression {
   implicit def appendUpdateExpression[V](implicit format: DynamoFormat[V]) =
     new UpdateExpression[PrependExpression[V]] {
       override def typeExpressions(t: PrependExpression[V]): Map[UpdateType, String] =
-        Map(SET -> "#update = list_append(:update, #update)")
+        Map(SET -> "#update = list_append(:update, if_not_exists(#update, :emptyList))")
       override def attributeNames(t: PrependExpression[V]): Map[String, String] =
         Map("#update" -> t.field.name)
       override def attributeValues(t: PrependExpression[V]): Map[String, AttributeValue] =
-        Map(":update" -> DynamoFormat.listFormat[V].write(List(t.value)))
+        Map(
+          ":update" -> DynamoFormat.listFormat[V].write(List(t.value)),
+          ":emptyList" -> new AttributeValue().withL()
+        )
     }
 }
 
