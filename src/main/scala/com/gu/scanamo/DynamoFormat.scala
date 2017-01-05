@@ -251,9 +251,9 @@ object DynamoFormat extends DerivedDynamoFormat {
 
   /**
     * {{{
-    * prop> (l: Vector[String]) =>
-    *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(l)) ==
-    *     |   Right(l)
+    * prop> (v: Vector[String]) =>
+    *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(v)) ==
+    *     |   Right(v)
     * }}}
     */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
@@ -264,9 +264,9 @@ object DynamoFormat extends DerivedDynamoFormat {
 
   /**
     * {{{
-    * prop> (l: Array[String]) =>
-    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(l)) ==
-    *     |   Right(l)
+    * prop> (a: Array[String]) =>
+    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).deep ==
+    *     |   a.deep
     * }}}
     */
   implicit def arrayFormat[T:ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
