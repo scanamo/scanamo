@@ -162,7 +162,6 @@ object DynamoFormat extends DerivedDynamoFormat {
     Boolean.box
   )(javaBooleanFormat)
 
-
   private val numFormat = attribute(_.getN, "N")(_.withN)
   private def coerceNumber[N](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
@@ -177,6 +176,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val longFormat = xmap(coerceNumber(_.toLong))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (i: Int) =>
@@ -184,6 +184,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val intFormat = xmap(coerceNumber(_.toInt))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (d: Double) =>
@@ -191,6 +192,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val doubleFormat = xmap(coerceNumber(_.toDouble))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (s: Short) =>
@@ -198,13 +200,13 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val shortFormat = xmap(coerceNumber(_.toShort))(_.toString)(numFormat)
+
   /**
     * {{{
     * prop> (b: Byte) =>
     *     | DynamoFormat[Byte].read(DynamoFormat[Byte].write(b)) == Right(b)
     * }}}
     */
-
   // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
   implicit val byteFormat = xmap(coerceNumber(_.toByte))(_.toString)(numFormat)
 
@@ -220,10 +222,10 @@ object DynamoFormat extends DerivedDynamoFormat {
     *     | DynamoFormat[Array[Byte]].read(DynamoFormat[Array[Byte]].write(ab)) == Right(ab)
     * }}}
     */
-
   implicit val byteArrayFormat = xmap(coerceByteBuffer(_.array()))(a => ByteBuffer.wrap(a))(javaByteBufferFormat)
 
   val javaListFormat = attribute(_.getL, "L")(_.withL)
+
   /**
     * {{{
     * prop> (l: List[String]) =>
@@ -244,16 +246,14 @@ object DynamoFormat extends DerivedDynamoFormat {
     *     |   Right(sq)
     * }}}
     */
-
   implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
     xmap[Seq[T], List[T]](l => Right(l.toSeq))(_.toList)
 
-
   /**
     * {{{
-    * prop> (l: Vector[String]) =>
-    *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(l)) ==
-    *     |   Right(l)
+    * prop> (v: Vector[String]) =>
+    *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(v)) ==
+    *     |   Right(v)
     * }}}
     */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
@@ -262,6 +262,18 @@ object DynamoFormat extends DerivedDynamoFormat {
       _.map(f.write).asJava
     )(javaListFormat)
 
+  /**
+    * {{{
+    * prop> (a: Array[String]) =>
+    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).deep ==
+    *     |   a.deep
+    * }}}
+    */
+  implicit def arrayFormat[T:ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
+    xmap[Array[T], java.util.List[AttributeValue]](
+      _.asScala.toList.traverseU(f.read).map(_.toArray))(
+      _.map(f.write).toList.asJava
+    )(javaListFormat)
 
   private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
   private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
@@ -281,6 +293,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val intSetFormat = setFormat(coerceNumber(_.toInt))(_.toString)(javaNumSetFormat)
+
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -291,6 +304,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val longSetFormat = setFormat(coerceNumber(_.toLong))(_.toString)(javaNumSetFormat)
+
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -301,6 +315,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     * }}}
     */
   implicit val doubleSetFormat = setFormat(coerceNumber(_.toDouble))(_.toString)(javaNumSetFormat)
+
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -317,6 +332,7 @@ object DynamoFormat extends DerivedDynamoFormat {
     )(javaStringSetFormat)
 
   private val javaMapFormat = attribute(_.getM, "M")(_.withM)
+
   /**
     * {{{
     * prop> (m: Map[String, Int]) =>
