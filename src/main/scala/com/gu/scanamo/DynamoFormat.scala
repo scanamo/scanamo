@@ -92,7 +92,7 @@ import java.nio.ByteBuffer
   def default: Option[T] = None
 }
 
-object DynamoFormat extends DerivedDynamoFormat {
+object DynamoFormat extends EnumDynamoFormat {
   private def attribute[T](
     decode: AttributeValue => T, propertyType: String)(
     encode: AttributeValue => T => AttributeValue
