@@ -1,10 +1,9 @@
 package com.gu.scanamo
 
 import cats.data.{NonEmptyList, Validated}
-import cats.data.Validated.Invalid
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.gu.scanamo.error.{DynamoReadError, InvalidPropertiesError, MissingProperty, PropertyReadError}
+import com.gu.scanamo.error._
 import macrocompat.bundle
 import shapeless._
 import shapeless.labelled._
@@ -18,9 +17,6 @@ trait DerivedDynamoFormat extends NoFormatError {
     def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
     def write(t: T): AttributeValue
   }
-
-  private def mungeEitherToValidated[A](fieldName: String, x: Either[DynamoReadError, A]): Validated[InvalidPropertiesError, A] =
-    x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e), Nil))).toValidated
 
   implicit val hnil: ConstructedDynamoFormat[HNil] =
     new ConstructedDynamoFormat[HNil] {
@@ -39,9 +35,12 @@ trait DerivedDynamoFormat extends NoFormatError {
 
         val possibleValue = av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Either.right))
 
-        val validatedValue = possibleValue.getOrElse(Either.left[DynamoReadError, V](MissingProperty))
+        val valueOrError = possibleValue.getOrElse(Either.left[DynamoReadError, V](MissingProperty))
 
-        val head: Validated[InvalidPropertiesError, FieldType[K, V]] = mungeEitherToValidated(fieldName, validatedValue).map(field[K](_))
+        def validatedProperty(x: Either[DynamoReadError, V]): Validated[InvalidPropertiesError, V] =
+          x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e), Nil))).toValidated
+
+        val head: Validated[InvalidPropertiesError, FieldType[K, V]] = validatedProperty(valueOrError).map(field[K](_))
         val tail = tailFormat.value.read(av)
 
         cats.Apply[ValidatedPropertiesError].map2(head, tail)(_ :: _)
@@ -52,28 +51,27 @@ trait DerivedDynamoFormat extends NoFormatError {
       }
     }
 
-  // This will never be used because CNil is a type with no values
-  implicit val cnil: ConstructedDynamoFormat[CNil] = new ConstructedDynamoFormat[CNil] {
-    def read(av: AttributeValue): Validated[InvalidPropertiesError, CNil] =
-      Invalid(InvalidPropertiesError(NonEmptyList.of(PropertyReadError("CNil", MissingProperty))))
+  trait CoProductDynamoFormat[T] extends DynamoFormat[T]
 
-    def write(t: CNil): AttributeValue = new AttributeValue()
+  implicit val cnil: CoProductDynamoFormat[CNil] = new CoProductDynamoFormat[CNil] {
+    def read(av: AttributeValue): Either[DynamoReadError, CNil] =
+      Left(TypeCoercionError(new Exception(s"$av was not of the expected type")))
+
+    def write(t: CNil): AttributeValue = sys.error("CNil cannot be written to an AttributeValue")
   }
 
   implicit def coproduct[K <: Symbol, V, T <: Coproduct](implicit
     headFormat: Lazy[DynamoFormat[V]],
-    tailFormat: ConstructedDynamoFormat[T],
+    tailFormat: CoProductDynamoFormat[T],
     fieldWitness: Witness.Aux[K]
-  ): ConstructedDynamoFormat[FieldType[K, V] :+: T] = {
+  ): CoProductDynamoFormat[FieldType[K, V] :+: T] = {
     val fieldName = fieldWitness.value.name
-    new ConstructedDynamoFormat[FieldType[K, V] :+: T] {
-      def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :+: T] = {
+    new CoProductDynamoFormat[FieldType[K, V] :+: T] {
+      def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: T] = {
         av.getM.asScala.get(fieldName) match {
           case Some(nestedAv) =>
             val value = headFormat.value.read(nestedAv)
-            val head = value.map(v => Inl(field[K](v)))
-
-            mungeEitherToValidated(fieldName, head)
+            value.map(v => Inl(field[K](v)))
           case None =>
             tailFormat.read(av).map(v => Inr(v))
         }
@@ -88,9 +86,15 @@ trait DerivedDynamoFormat extends NoFormatError {
     }
   }
 
-  implicit def generic[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
+  implicit def genericProduct[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
+      def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
+    }
+
+  implicit def genericCoProduct[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[CoProductDynamoFormat[R]]): DynamoFormat[T] =
+    new DynamoFormat[T] {
+      def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 }
