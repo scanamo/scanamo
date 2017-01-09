@@ -1,6 +1,7 @@
 package com.gu.scanamo
 
 import cats.data.{NonEmptyList, Validated}
+import cats.data.Validated.Invalid
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error.{DynamoReadError, InvalidPropertiesError, MissingProperty, PropertyReadError}
@@ -17,6 +18,9 @@ trait DerivedDynamoFormat extends NoFormatError {
     def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
     def write(t: T): AttributeValue
   }
+
+  private def mungeEitherToValidated[A](fieldName: String, x: Either[DynamoReadError, A]): Validated[InvalidPropertiesError, A] =
+    x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e), Nil))).toValidated
 
   implicit val hnil: ConstructedDynamoFormat[HNil] =
     new ConstructedDynamoFormat[HNil] {
@@ -37,10 +41,7 @@ trait DerivedDynamoFormat extends NoFormatError {
 
         val validatedValue = possibleValue.getOrElse(Either.left[DynamoReadError, V](MissingProperty))
 
-        def withPropertyError(x: Either[DynamoReadError, V]): Validated[InvalidPropertiesError, V] =
-          x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e), Nil))).toValidated
-
-        val head: Validated[InvalidPropertiesError, FieldType[K, V]] = withPropertyError(validatedValue).map(field[K](_))
+        val head: Validated[InvalidPropertiesError, FieldType[K, V]] = mungeEitherToValidated(fieldName, validatedValue).map(field[K](_))
         val tail = tailFormat.value.read(av)
 
         cats.Apply[ValidatedPropertiesError].map2(head, tail)(_ :: _)
@@ -50,6 +51,42 @@ trait DerivedDynamoFormat extends NoFormatError {
         tailValue.withM((tailValue.getM.asScala + (fieldWitness.value.name -> headFormat.value.write(t.head))).asJava)
       }
     }
+
+  // This will never be used because CNil is a type with no values
+  implicit val cnil: ConstructedDynamoFormat[CNil] = new ConstructedDynamoFormat[CNil] {
+    def read(av: AttributeValue): Validated[InvalidPropertiesError, CNil] =
+      Invalid(InvalidPropertiesError(NonEmptyList.of(PropertyReadError("CNil", MissingProperty))))
+
+    def write(t: CNil): AttributeValue = new AttributeValue()
+  }
+
+  implicit def coproduct[K <: Symbol, V, T <: Coproduct](implicit
+    headFormat: Lazy[DynamoFormat[V]],
+    tailFormat: ConstructedDynamoFormat[T],
+    fieldWitness: Witness.Aux[K]
+  ): ConstructedDynamoFormat[FieldType[K, V] :+: T] = {
+    val fieldName = fieldWitness.value.name
+    new ConstructedDynamoFormat[FieldType[K, V] :+: T] {
+      def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :+: T] = {
+        av.getM.asScala.get(fieldName) match {
+          case Some(nestedAv) =>
+            val value = headFormat.value.read(nestedAv)
+            val head = value.map(v => Inl(field[K](v)))
+
+            mungeEitherToValidated(fieldName, head)
+          case None =>
+            tailFormat.read(av).map(v => Inr(v))
+        }
+      }
+
+      def write(field: FieldType[K, V] :+: T): AttributeValue = field match {
+        case Inl(h) =>
+          new AttributeValue().withM(Map(fieldName -> headFormat.value.write(h)).asJava)
+        case Inr(t) =>
+          tailFormat.write(t)
+      }
+    }
+  }
 
   implicit def generic[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
