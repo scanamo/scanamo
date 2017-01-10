@@ -183,8 +183,8 @@ case class Table[V: DynamoFormat](name: String) {
     * Right(Bar(x,11,Set(Second)))
     * }}}
     */
-  def update[U: UpdateExpression](key: UniqueKey[_], expression: U): ScanamoOps[Either[DynamoReadError, V]] =
-    ScanamoFree.update[V, U](name)(key)(expression)
+  def update(key: UniqueKey[_], expression: UpdateExpression): ScanamoOps[Either[DynamoReadError, V]] =
+    ScanamoFree.update[V](name)(key)(expression)
 
   /**
     * Query or scan a table, limiting the number of items evaluated by Dynamo

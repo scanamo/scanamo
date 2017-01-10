@@ -23,11 +23,11 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
-  def update[U](key: UniqueKey[_], expression: U)(implicit update: UpdateExpression[U]):
+  def update(key: UniqueKey[_], update: UpdateExpression):
     ScanamoOps[Either[ScanamoError, V]] = {
 
     val unconditionalRequest = ScanamoUpdateRequest(
-      tableName, key.asAVMap, update.expression(expression), update.attributeNames(expression), update.attributeValues(expression), None)
+      tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None)
     ScanamoOps.conditionalUpdate(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition)))
     ).map(either => either.leftMap[ScanamoError](ConditionNotMet(_)).flatMap(
