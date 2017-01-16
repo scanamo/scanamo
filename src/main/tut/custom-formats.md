@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Custom Formats
-position:  6
+position:  2
 ---
 
 ### Custom Formats

@@ -1,7 +1,6 @@
 ---
 layout: docs
 title: Scanning
-position: 3
 ---
 
 ### Scanning

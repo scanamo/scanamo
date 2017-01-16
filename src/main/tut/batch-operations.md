@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Batch Operations
-position: 9
+position: 5
 ---
 
 ### Batch Operations

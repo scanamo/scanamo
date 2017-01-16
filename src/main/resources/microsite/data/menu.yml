@@ -1,15 +1,19 @@
 options:
-  - title: Put and Get
-    url: put-get.html
+  - title: Operations
+    url: operations.html
 
-  - title: Scanning
-    url: scanning.html
+    nested_options:
+    - title: Put and Get
+      url: put-get.html
 
-  - title: Querying
-    url: querying.html
+    - title: Scanning
+      url: scanning.html
 
-  - title: Updating
-    url: updating.html
+    - title: Querying
+      url: querying.html
+
+    - title: Updating
+      url: updating.html
 
   - title: Using Indexes
     url: using-indexes.html

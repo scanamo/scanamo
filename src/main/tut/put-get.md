@@ -1,7 +1,6 @@
 ---
 layout: docs
 title: Putting and Getting
-position: 2
 ---
 
 ### Putting and Getting

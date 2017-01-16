@@ -1,7 +1,6 @@
 ---
 layout: docs
 title: Updating
-position: 5
 ---
 
 ### Updating

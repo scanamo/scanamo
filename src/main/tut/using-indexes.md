@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Using Indexes
-position: 7
+position: 3
 ---
 
 ### Using Indexes

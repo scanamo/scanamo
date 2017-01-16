@@ -1,7 +1,6 @@
 ---
 layout: docs
 title: Querying
-position: 4
 ---
 
 ### Querying
