@@ -1,3 +1,21 @@
+## Version 0.9.0
+
+ * Automatic derivation of `DynamoFormat` for sealed traits (#78 - @cb372)
+ * Automatic derivation of `DynamoFormat` for enumerations (#84)
+ * Allow Update operations to be constructed programmatically (#77)
+ * Default `DynamoFormat` for arrays (#79 - @timchan-lumoslabs)
+ * Default `DynamoFormat` for `UUID` (#81)
+ 
+ * Remove compiler messages on failure of `DyanmoFormat` derivation (#85)
+ 
+ * Various library upgrades including cats 0.9.0 (#86)
+ 
+0.9.0 is largely source compatible with 0.8.x (no tests had to change structure)
+
+## Version 0.8.3
+
+ * Add support for consistent get/scan/query operations (#74 - @amherrington13)
+
 ## Version 0.8.2
 
  * Add support for deleteAll (#70 - @randallalexander)
