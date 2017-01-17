@@ -230,22 +230,22 @@ DynamoDB's AttributeValue">
                           DynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="trait" href="EnumDynamoFormat.html" title=""></a>
+                        <a href="EnumDynamoFormat.html" title="">
+                          EnumDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="EnumerationDynamoFormat.html" title=""></a>
+                        <a href="EnumerationDynamoFormat.html" title="">
+                          EnumerationDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Gettable$.html" title=""></a>
                         <a class="trait" href="Gettable.html" title=""></a>
                         <a href="Gettable.html" title="">
                           Gettable
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="class" href="MacroOfLastResort.html" title=""></a>
-                        <a href="MacroOfLastResort.html" title="">
-                          MacroOfLastResort
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="trait" href="NoFormatError.html" title=""></a>
-                        <a href="NoFormatError.html" title="">
-                          NoFormatError
                         </a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Queryable$.html" title=""></a>
@@ -328,7 +328,24 @@ Right(<span class="std">List</span>(<span class="std">Some</span>(<span class="n
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 &gt;&gt;&gt; <span class="kw">val</span> farmerF = DynamoFormat[Farmer]
 &gt;&gt;&gt; farmerF.read(farmerF.write(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>)))))
-Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow))))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">import</span> cats.syntax.either._
+Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow))))</pre><p>and for sealed trait + case object hierarchies</p><pre>&gt;&gt;&gt; <span class="kw">sealed</span> <span class="kw">trait</span> Animal
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">object</span> Aardvark <span class="kw">extends</span> Animal
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">object</span> Zebra <span class="kw">extends</span> Animal
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Pet(name: <span class="std">String</span>, animal: Animal)
+&gt;&gt;&gt; <span class="kw">val</span> petF = DynamoFormat[Pet]
+&gt;&gt;&gt; petF.read(petF.write(Pet(<span class="lit">"Amy"</span>, Aardvark)))
+Right(Pet(Amy,Aardvark))
+
+&gt;&gt;&gt; petF.read(petF.write(Pet(<span class="lit">"Zebediah"</span>, Zebra)))
+Right(Pet(Zebediah,Zebra))</pre><p>as well as more complex sealed trait + case class hierarchies</p><pre>&gt;&gt;&gt; <span class="kw">sealed</span> <span class="kw">trait</span> Monster
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">object</span> Godzilla <span class="kw">extends</span> Monster
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> GiantSquid(tentacles: <span class="std">Int</span>) <span class="kw">extends</span> Monster
+&gt;&gt;&gt; <span class="kw">val</span> monsterF = DynamoFormat[Monster]
+&gt;&gt;&gt; monsterF.read(monsterF.write(Godzilla))
+Right(Godzilla)
+
+&gt;&gt;&gt; monsterF.read(monsterF.write(GiantSquid(<span class="num">12</span>)))
+Right(GiantSquid(<span class="num">12</span>))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">import</span> cats.syntax.either._
 
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Developer(name: <span class="std">String</span>, age: <span class="std">String</span>, problems: <span class="std">Int</span>)
 &gt;&gt;&gt; <span class="kw">val</span> invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer(<span class="lit">"Alice"</span>, <span class="lit">"none of your business"</span>, <span class="num">99</span>)))
@@ -344,7 +361,12 @@ Right(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
             Linear Supertypes
           </span>
           <div class="superTypes hiddenContent"><span class="extype" name="scala.Serializable">Serializable</span>, <span class="extype" name="java.io.Serializable">Serializable</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">
+              Known Subclasses
+            </span>
+            <div class="subClasses hiddenContent"><a href="DerivedDynamoFormat$CoProductDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat.CoProductDynamoFormat">CoProductDynamoFormat</a>, <a href="EnumerationDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumerationDynamoFormat">EnumerationDynamoFormat</a></div>
+          </div></div>
         
 
       <div id="mbrsel">

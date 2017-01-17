@@ -34,6 +34,9 @@ has support for putting, getting and deleting in batches</p>
 <span class="c1">// bLemmings: Set[Either[com.gu.scanamo.error.DynamoReadError,Lemming]] = Set(Right(Lemming(Builder,180)), Right(Lemming(Blocker,42)))
 // survivors: List[Either[com.gu.scanamo.error.DynamoReadError,Lemming]] = List(Right(Lemming(Builder,180)))
 </span>
+<span class="k">import</span> <span class="nn">cats.syntax.either._</span>
+<span class="c1">// import cats.syntax.either._
+</span>
 <span class="n">bLemmings</span><span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">toOption</span><span class="o">)</span>
 <span class="c1">// res4: scala.collection.immutable.Set[Lemming] = Set(Lemming(Builder,180), Lemming(Blocker,42))
 </span>

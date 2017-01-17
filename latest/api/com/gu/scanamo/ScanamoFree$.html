@@ -230,22 +230,22 @@ DynamoDB's AttributeValue">
                           DynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="trait" href="EnumDynamoFormat.html" title=""></a>
+                        <a href="EnumDynamoFormat.html" title="">
+                          EnumDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="EnumerationDynamoFormat.html" title=""></a>
+                        <a href="EnumerationDynamoFormat.html" title="">
+                          EnumerationDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Gettable$.html" title=""></a>
                         <a class="trait" href="Gettable.html" title=""></a>
                         <a href="Gettable.html" title="">
                           Gettable
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="class" href="MacroOfLastResort.html" title=""></a>
-                        <a href="MacroOfLastResort.html" title="">
-                          MacroOfLastResort
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="trait" href="NoFormatError.html" title=""></a>
-                        <a href="NoFormatError.html" title="">
-                          NoFormatError
                         </a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Queryable$.html" title=""></a>
@@ -939,9 +939,9 @@ prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.gu.scanamo.ScanamoFree#update" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="update[T,U](tableName:String)(key:com.gu.scanamo.query.UniqueKey[_])(expression:U)(implicitupdate:com.gu.scanamo.update.UpdateExpression[U],implicitformat:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="update[T,U](String)(UniqueKey[_])(U)(UpdateExpression[U],DynamoFormat[T]):ScanamoOps[Either[DynamoReadError,T]]"></a>
+      <a id="update[T](tableName:String)(key:com.gu.scanamo.query.UniqueKey[_])(update:com.gu.scanamo.update.UpdateExpression)(implicitformat:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="update[T](String)(UniqueKey[_])(UpdateExpression)(DynamoFormat[T]):ScanamoOps[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/ScanamoFree$.html#update[T,U](tableName:String)(key:com.gu.scanamo.query.UniqueKey[_])(expression:U)(implicitupdate:com.gu.scanamo.update.UpdateExpression[U],implicitformat:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/ScanamoFree$.html#update[T](tableName:String)(key:com.gu.scanamo.query.UniqueKey[_])(update:com.gu.scanamo.update.UpdateExpression)(implicitformat:com.gu.scanamo.DynamoFormat[T]):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -950,7 +950,7 @@ prop&gt; (m: <span class="std">Map</span>[<span class="std">String</span>, <span
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">update</span><span class="tparams">[<span name="T">T</span>, <span name="U">U</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="key">key: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="params">(<span name="expression">expression: <span class="extype" name="com.gu.scanamo.ScanamoFree.update.U">U</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="update">update: <a href="update/UpdateExpression.html" class="extype" name="com.gu.scanamo.update.UpdateExpression">UpdateExpression</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.update.U">U</span>]</span>, <span name="format">format: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.update.T">T</span>]</span>)</span><span class="result">: <a href="ops/index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.update.T">T</span>]]</span>
+        <span class="name">update</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="key">key: <a href="query/UniqueKey.html" class="extype" name="com.gu.scanamo.query.UniqueKey">UniqueKey</a>[_]</span>)</span><span class="params">(<span name="update">update: <a href="update/UpdateExpression.html" class="extype" name="com.gu.scanamo.update.UpdateExpression">UpdateExpression</a></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="format">format: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.ScanamoFree.update.T">T</span>]</span>)</span><span class="result">: <a href="ops/index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.ScanamoFree.update.T">T</span>]]</span>
       </span>
       
       

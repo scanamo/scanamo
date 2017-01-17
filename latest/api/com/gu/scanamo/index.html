@@ -228,22 +228,22 @@ DynamoDB's AttributeValue">
                           DynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="trait" href="EnumDynamoFormat.html" title=""></a>
+                        <a href="EnumDynamoFormat.html" title="">
+                          EnumDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="EnumerationDynamoFormat.html" title=""></a>
+                        <a href="EnumerationDynamoFormat.html" title="">
+                          EnumerationDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Gettable$.html" title=""></a>
                         <a class="trait" href="Gettable.html" title=""></a>
                         <a href="Gettable.html" title="">
                           Gettable
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="class" href="MacroOfLastResort.html" title=""></a>
-                        <a href="MacroOfLastResort.html" title="">
-                          MacroOfLastResort
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="trait" href="NoFormatError.html" title=""></a>
-                        <a href="NoFormatError.html" title="">
-                          NoFormatError
                         </a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Queryable$.html" title=""></a>
@@ -370,9 +370,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         <div id="types" class="types members">
               <h3>Type Members</h3>
               <ol><li name="com.gu.scanamo.DerivedDynamoFormat" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="DerivedDynamoFormatextendsNoFormatError"></a><a id="DerivedDynamoFormat:DerivedDynamoFormat"></a>
+      <a id="DerivedDynamoFormatextendsAnyRef"></a><a id="DerivedDynamoFormat:DerivedDynamoFormat"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/index.html#DerivedDynamoFormatextendsNoFormatError" title="Permalink">
+      <a href="../../../com/gu/scanamo/index.html#DerivedDynamoFormatextendsAnyRef" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -383,7 +383,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       <span class="symbol">
         <a title="" href="DerivedDynamoFormat.html">
               <span class="name">DerivedDynamoFormat</span>
-            </a><span class="result"> extends <a href="NoFormatError.html" class="extype" name="com.gu.scanamo.NoFormatError">NoFormatError</a></span>
+            </a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
       
@@ -413,7 +413,24 @@ Right(<span class="std">List</span>(<span class="std">Some</span>(<span class="n
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
 &gt;&gt;&gt; <span class="kw">val</span> farmerF = DynamoFormat[Farmer]
 &gt;&gt;&gt; farmerF.read(farmerF.write(Farmer(<span class="lit">"McDonald"</span>, <span class="num">156</span>L, Farm(<span class="std">List</span>(<span class="lit">"sheep"</span>, <span class="lit">"cow"</span>)))))
-Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow))))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">import</span> cats.syntax.either._
+Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</span>(sheep, cow))))</pre><p>and for sealed trait + case object hierarchies</p><pre>&gt;&gt;&gt; <span class="kw">sealed</span> <span class="kw">trait</span> Animal
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">object</span> Aardvark <span class="kw">extends</span> Animal
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">object</span> Zebra <span class="kw">extends</span> Animal
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Pet(name: <span class="std">String</span>, animal: Animal)
+&gt;&gt;&gt; <span class="kw">val</span> petF = DynamoFormat[Pet]
+&gt;&gt;&gt; petF.read(petF.write(Pet(<span class="lit">"Amy"</span>, Aardvark)))
+Right(Pet(Amy,Aardvark))
+
+&gt;&gt;&gt; petF.read(petF.write(Pet(<span class="lit">"Zebediah"</span>, Zebra)))
+Right(Pet(Zebediah,Zebra))</pre><p>as well as more complex sealed trait + case class hierarchies</p><pre>&gt;&gt;&gt; <span class="kw">sealed</span> <span class="kw">trait</span> Monster
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">object</span> Godzilla <span class="kw">extends</span> Monster
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> GiantSquid(tentacles: <span class="std">Int</span>) <span class="kw">extends</span> Monster
+&gt;&gt;&gt; <span class="kw">val</span> monsterF = DynamoFormat[Monster]
+&gt;&gt;&gt; monsterF.read(monsterF.write(Godzilla))
+Right(Godzilla)
+
+&gt;&gt;&gt; monsterF.read(monsterF.write(GiantSquid(<span class="num">12</span>)))
+Right(GiantSquid(<span class="num">12</span>))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">import</span> cats.syntax.either._
 
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Developer(name: <span class="std">String</span>, age: <span class="std">String</span>, problems: <span class="std">Int</span>)
 &gt;&gt;&gt; <span class="kw">val</span> invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer(<span class="lit">"Alice"</span>, <span class="lit">"none of your business"</span>, <span class="num">99</span>)))
@@ -425,6 +442,52 @@ Left(<span class="lit">'age'</span>: not of <span class="kw">type</span>: <span 
 &gt;&gt;&gt; DynamoFormat[LargelyOptional].read(DynamoFormat[<span class="std">Map</span>[<span class="std">String</span>, <span class="std">String</span>]].write(<span class="std">Map</span>(<span class="lit">"b"</span> -&gt; <span class="lit">"X"</span>)))
 Right(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span>(X)))</pre><p>Custom formats can often be most easily defined using <a href="DynamoFormat$.html#coercedXmap[A,B,T&gt;:Null&lt;:Throwable](read:B=&gt;A)(write:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#coercedXmap">DynamoFormat.coercedXmap</a>, <a href="DynamoFormat$.html#xmap[A,B](r:B=&gt;Either[com.gu.scanamo.error.DynamoReadError,A])(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#xmap">DynamoFormat.xmap</a> or <a href="DynamoFormat$.html#iso[A,B](r:B=&gt;A)(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]" class="extmbr" name="com.gu.scanamo.DynamoFormat#iso">DynamoFormat.iso</a>
 </p></div></div>
+    </li><li name="com.gu.scanamo.EnumDynamoFormat" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="EnumDynamoFormatextendsDerivedDynamoFormat"></a><a id="EnumDynamoFormat:EnumDynamoFormat"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/index.html#EnumDynamoFormatextendsDerivedDynamoFormat" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="EnumDynamoFormat.html">
+              <span class="name">EnumDynamoFormat</span>
+            </a><span class="result"> extends <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></span>
+      </span>
+      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"><p></p><pre>prop&gt; <span class="kw">sealed</span> <span class="kw">trait</span> Animal
+prop&gt; <span class="kw">case</span> <span class="kw">object</span> Aardvark <span class="kw">extends</span> Animal
+prop&gt; <span class="kw">case</span> <span class="kw">object</span> Hippopotamus <span class="kw">extends</span> Animal
+prop&gt; <span class="kw">case</span> <span class="kw">object</span> Zebra <span class="kw">extends</span> Animal
+
+prop&gt; <span class="kw">import</span> org.scalacheck._
+prop&gt; <span class="kw">implicit</span> <span class="kw">val</span> arbitraryAnimal: Arbitrary[Animal] = Arbitrary(Gen.oneOf(<span class="std">List</span>(Aardvark, Hippopotamus, Zebra)))
+
+prop&gt; (a: Animal) <span class="kw">=&gt;</span>
+    | DynamoFormat[Animal].read(DynamoFormat[Animal].write(a)) == Right(a)</pre><pre>&gt;&gt;&gt; DynamoFormat[Animal].write(Zebra).getS
+Zebra</pre></div></div>
+    </li><li name="com.gu.scanamo.EnumerationDynamoFormat" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
+      <a id="EnumerationDynamoFormat[T]extendsDynamoFormat[T]"></a><a id="EnumerationDynamoFormat[T]:EnumerationDynamoFormat[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/index.html#EnumerationDynamoFormat[T]extendsDynamoFormat[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="EnumerationDynamoFormat.html">
+              <span class="name">EnumerationDynamoFormat</span>
+            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.EnumerationDynamoFormat.T">T</span>]</span>
+      </span>
+      
+      
     </li><li name="com.gu.scanamo.Gettable" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Gettable[T[_],V]extendsAnyRef"></a><a id="Gettable[T[_],V]:Gettable[T,V]"></a>
       <span class="permalink">
@@ -440,42 +503,6 @@ Right(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
         <a title="" href="Gettable.html">
               <span class="name">Gettable</span>
             </a><span class="tparams">[<span name="T">T<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="V">V</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      
-      
-    </li><li name="com.gu.scanamo.MacroOfLastResort" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="MacroOfLastResortextendsAnyRef"></a><a id="MacroOfLastResort:MacroOfLastResort"></a>
-      <span class="permalink">
-      <a href="../../../com/gu/scanamo/index.html#MacroOfLastResortextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">class</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="MacroOfLastResort.html">
-              <span class="name">MacroOfLastResort</span>
-            </a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
-      </span>
-      
-      
-    </li><li name="com.gu.scanamo.NoFormatError" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
-      <a id="NoFormatErrorextendsAnyRef"></a><a id="NoFormatError:NoFormatError"></a>
-      <span class="permalink">
-      <a href="../../../com/gu/scanamo/index.html#NoFormatErrorextendsAnyRef" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">trait</span>
-      </span>
-      <span class="symbol">
-        <a title="" href="NoFormatError.html">
-              <span class="name">NoFormatError</span>
-            </a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
       
@@ -572,7 +599,7 @@ Right(LargelyOptional(<span class="std">None</span>,<span class="std">Some</span
       <span class="symbol">
         <a title="" href="DynamoFormat$.html">
               <span class="name">DynamoFormat</span>
-            </a><span class="result"> extends <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+            </a><span class="result"> extends <a href="EnumDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumDynamoFormat">EnumDynamoFormat</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       

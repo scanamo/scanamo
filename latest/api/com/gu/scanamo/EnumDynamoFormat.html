@@ -230,22 +230,22 @@ DynamoDB's AttributeValue">
                           DynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="trait" href="" title=""></a>
+                        <a href="" title="">
+                          EnumDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="EnumerationDynamoFormat.html" title=""></a>
+                        <a href="EnumerationDynamoFormat.html" title="">
+                          EnumerationDynamoFormat
+                        </a>
+                      </li><li class="current-entities indented3">
                         <a class="object" href="Gettable$.html" title=""></a>
                         <a class="trait" href="Gettable.html" title=""></a>
                         <a href="Gettable.html" title="">
                           Gettable
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="class" href="" title=""></a>
-                        <a href="" title="">
-                          MacroOfLastResort
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <span class="separator"></span>
-                        <a class="trait" href="NoFormatError.html" title=""></a>
-                        <a href="NoFormatError.html" title="">
-                          NoFormatError
                         </a>
                       </li><li class="current-entities indented3">
                         <a class="object" href="Queryable$.html" title=""></a>
@@ -296,12 +296,12 @@ concurrent.ExecutionContext and returns a concurrent.Future">
             </div>
           </div>
           <div id="content">
-            <body class="class type">
+            <body class="trait type">
       <div id="definition">
-        <div class="big-circle class">c</div>
+        <div class="big-circle trait">t</div>
         <p id="owner"><a href="../../index.html" class="extype" name="com">com</a>.<a href="../index.html" class="extype" name="com.gu">gu</a>.<a href="index.html" class="extype" name="com.gu.scanamo">scanamo</a></p>
-        <h1>MacroOfLastResort<span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html" title="Permalink">
+        <h1>EnumDynamoFormat<span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span></h1>
@@ -311,20 +311,35 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       <h4 id="signature" class="signature">
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">class</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">MacroOfLastResort</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+        <span class="name">EnumDynamoFormat</span><span class="result"> extends <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></span>
       </span>
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p></p><pre>prop&gt; <span class="kw">sealed</span> <span class="kw">trait</span> Animal
+prop&gt; <span class="kw">case</span> <span class="kw">object</span> Aardvark <span class="kw">extends</span> Animal
+prop&gt; <span class="kw">case</span> <span class="kw">object</span> Hippopotamus <span class="kw">extends</span> Animal
+prop&gt; <span class="kw">case</span> <span class="kw">object</span> Zebra <span class="kw">extends</span> Animal
+
+prop&gt; <span class="kw">import</span> org.scalacheck._
+prop&gt; <span class="kw">implicit</span> <span class="kw">val</span> arbitraryAnimal: Arbitrary[Animal] = Arbitrary(Gen.oneOf(<span class="std">List</span>(Aardvark, Hippopotamus, Zebra)))
+
+prop&gt; (a: Animal) <span class="kw">=&gt;</span>
+    | DynamoFormat[Animal].read(DynamoFormat[Animal].write(a)) == Right(a)</pre><pre>&gt;&gt;&gt; DynamoFormat[Animal].write(Zebra).getS
+Zebra</pre></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
-        </div></div>
+          <div class="superTypes hiddenContent"><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+        </div><div class="toggleContainer block">
+            <span class="toggle">
+              Known Subclasses
+            </span>
+            <div class="subClasses hiddenContent"><a href="DynamoFormat$.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a></div>
+          </div></div>
         
 
       <div id="mbrsel">
@@ -349,7 +364,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.gu.scanamo.MacroOfLastResort"><span>MacroOfLastResort</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.gu.scanamo.EnumDynamoFormat"><span>EnumDynamoFormat</span></li><li class="in" name="com.gu.scanamo.DerivedDynamoFormat"><span>DerivedDynamoFormat</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -367,28 +382,64 @@ concurrent.ExecutionContext and returns a concurrent.Future">
 
       <div id="template">
         <div id="allMembers">
-        <div id="constructors" class="members">
-              <h3>Instance Constructors</h3>
-              <ol><li name="com.gu.scanamo.MacroOfLastResort#&lt;init&gt;" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="&lt;init&gt;(c:scala.reflect.macros.blackbox.Context):com.gu.scanamo.MacroOfLastResort"></a><a id="&lt;init&gt;:MacroOfLastResort"></a>
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="com.gu.scanamo.DerivedDynamoFormat.CoProductDynamoFormat" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="CoProductDynamoFormat[T]extendsDynamoFormat[T]"></a><a id="CoProductDynamoFormat[T]:CoProductDynamoFormat[T]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#&lt;init&gt;(c:scala.reflect.macros.blackbox.Context):com.gu.scanamo.MacroOfLastResort" title="Permalink">
+      <a href="../../../com/gu/scanamo/DerivedDynamoFormat.html#CoProductDynamoFormat[T]extendsDynamoFormat[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
       <span class="modifier_kind">
         <span class="modifier"></span>
-        <span class="kind">new</span>
+        <span class="kind">trait</span>
       </span>
       <span class="symbol">
-        <span class="name">MacroOfLastResort</span><span class="params">(<span name="c">c: <span class="extype" name="scala.reflect.macros.blackbox.Context">Context</span></span>)</span>
+        <a title="" href="DerivedDynamoFormat$CoProductDynamoFormat.html">
+              <span class="name">CoProductDynamoFormat</span>
+            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.CoProductDynamoFormat.T">T</span>]</span>
       </span>
       
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat.ConstructedDynamoFormat" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="ConstructedDynamoFormat[T]extendsAnyRef"></a><a id="ConstructedDynamoFormat[T]:ConstructedDynamoFormat[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/DerivedDynamoFormat.html#ConstructedDynamoFormat[T]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">trait</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="DerivedDynamoFormat$ConstructedDynamoFormat.html">
+              <span class="name">ConstructedDynamoFormat</span>
+            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
       
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat.ValidatedPropertiesError" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ValidatedPropertiesError[T]=cats.data.Validated[com.gu.scanamo.error.InvalidPropertiesError,T]"></a><a id="ValidatedPropertiesError[T]:ValidatedPropertiesError[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#ValidatedPropertiesError[T]=cats.data.Validated[com.gu.scanamo.error.InvalidPropertiesError,T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ValidatedPropertiesError</span><span class="tparams">[<span name="T">T</span>]</span><span class="result alias"> = <span class="extype" name="cats.data.Validated">Validated</span>[<a href="error/InvalidPropertiesError.html" class="extype" name="com.gu.scanamo.error.InvalidPropertiesError">InvalidPropertiesError</a>, <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.ValidatedPropertiesError.T">T</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
     </li></ol>
             </div>
-
-        
 
         
 
@@ -398,7 +449,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
                 <li name="scala.AnyRef#!=" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="!=(x$1:Any):Boolean"></a><a id="!=(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#!=(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#!=(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -414,7 +465,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef###" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="##():Int"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html###():Int" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html###():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -430,7 +481,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#==" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="==(x$1:Any):Boolean"></a><a id="==(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#==(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#==(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -446,7 +497,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.Any#asInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="asInstanceOf[T0]:T0"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#asInstanceOf[T0]:T0" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#asInstanceOf[T0]:T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -459,26 +510,10 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.gu.scanamo.MacroOfLastResort#c" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="c:scala.reflect.macros.blackbox.Context"></a><a id="c:Context"></a>
-      <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#c:scala.reflect.macros.blackbox.Context" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">val</span>
-      </span>
-      <span class="symbol">
-        <span class="name">c</span><span class="result">: <span class="extype" name="scala.reflect.macros.blackbox.Context">Context</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#clone" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="clone():Object"></a><a id="clone():AnyRef"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#clone():Object" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#clone():Object" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -497,10 +532,90 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat#cnil" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cnil:DerivedDynamoFormat.this.CoProductDynamoFormat[shapeless.CNil]"></a><a id="cnil:CoProductDynamoFormat[CNil]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#cnil:DerivedDynamoFormat.this.CoProductDynamoFormat[shapeless.CNil]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cnil</span><span class="result">: <a href="#CoProductDynamoFormat[T]extendsDynamoFormat[T]" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.CoProductDynamoFormat">CoProductDynamoFormat</a>[<span class="extype" name="shapeless.CNil">CNil</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat#coproduct" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="coproduct[K&lt;:Symbol,V,T&lt;:shapeless.Coproduct](implicitheadFormat:shapeless.Lazy[com.gu.scanamo.DynamoFormat[V]],implicittailFormat:DerivedDynamoFormat.this.CoProductDynamoFormat[T],implicitfieldWitness:shapeless.Witness.Aux[K]):DerivedDynamoFormat.this.CoProductDynamoFormat[shapeless.:+:[shapeless.labelled.FieldType[K,V],T]]"></a><a id="coproduct[K&lt;:Symbol,V,T&lt;:Coproduct](Lazy[DynamoFormat[V]],CoProductDynamoFormat[T],Aux[K]):CoProductDynamoFormat[:+:[FieldType[K,V],T]]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#coproduct[K&lt;:Symbol,V,T&lt;:shapeless.Coproduct](implicitheadFormat:shapeless.Lazy[com.gu.scanamo.DynamoFormat[V]],implicittailFormat:DerivedDynamoFormat.this.CoProductDynamoFormat[T],implicitfieldWitness:shapeless.Witness.Aux[K]):DerivedDynamoFormat.this.CoProductDynamoFormat[shapeless.:+:[shapeless.labelled.FieldType[K,V],T]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">coproduct</span><span class="tparams">[<span name="K">K &lt;: <span class="extype" name="scala.Symbol">Symbol</span></span>, <span name="V">V</span>, <span name="T">T &lt;: <span class="extype" name="shapeless.Coproduct">Coproduct</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="headFormat">headFormat: <span class="extype" name="shapeless.Lazy">Lazy</span>[<a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.coproduct.V">V</span>]]</span>, <span name="tailFormat">tailFormat: <a href="#CoProductDynamoFormat[T]extendsDynamoFormat[T]" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.CoProductDynamoFormat">CoProductDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.coproduct.T">T</span>]</span>, <span name="fieldWitness">fieldWitness: <span class="extype" name="shapeless.Witness.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.coproduct.K">K</span>]</span>)</span><span class="result">: <a href="#CoProductDynamoFormat[T]extendsDynamoFormat[T]" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.CoProductDynamoFormat">CoProductDynamoFormat</a>[<span class="extype" name="shapeless.:+:">:+:</span>[<span class="extype" name="shapeless.labelled.FieldType">FieldType</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.coproduct.K">K</span>, <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.coproduct.V">V</span>], <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.coproduct.T">T</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
+    </li><li name="com.gu.scanamo.EnumDynamoFormat#enumDynamoFormatCCons" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="enumDynamoFormatCCons[K&lt;:Symbol,V,R&lt;:shapeless.Coproduct](implicitfieldWitness:shapeless.Witness.Aux[K],implicitemptyGeneric:shapeless.LabelledGeneric.Aux[V,shapeless.HNil],implicitalternativeFormat:com.gu.scanamo.EnumerationDynamoFormat[R]):com.gu.scanamo.EnumerationDynamoFormat[shapeless.:+:[shapeless.labelled.FieldType[K,V],R]]"></a><a id="enumDynamoFormatCCons[K&lt;:Symbol,V,R&lt;:Coproduct](Aux[K],Aux[V,HNil],EnumerationDynamoFormat[R]):EnumerationDynamoFormat[:+:[FieldType[K,V],R]]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#enumDynamoFormatCCons[K&lt;:Symbol,V,R&lt;:shapeless.Coproduct](implicitfieldWitness:shapeless.Witness.Aux[K],implicitemptyGeneric:shapeless.LabelledGeneric.Aux[V,shapeless.HNil],implicitalternativeFormat:com.gu.scanamo.EnumerationDynamoFormat[R]):com.gu.scanamo.EnumerationDynamoFormat[shapeless.:+:[shapeless.labelled.FieldType[K,V],R]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enumDynamoFormatCCons</span><span class="tparams">[<span name="K">K &lt;: <span class="extype" name="scala.Symbol">Symbol</span></span>, <span name="V">V</span>, <span name="R">R &lt;: <span class="extype" name="shapeless.Coproduct">Coproduct</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="fieldWitness">fieldWitness: <span class="extype" name="shapeless.Witness.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumDynamoFormatCCons.K">K</span>]</span>, <span name="emptyGeneric">emptyGeneric: <span class="extype" name="shapeless.LabelledGeneric.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumDynamoFormatCCons.V">V</span>, <span class="extype" name="shapeless.HNil">HNil</span>]</span>, <span name="alternativeFormat">alternativeFormat: <a href="EnumerationDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumerationDynamoFormat">EnumerationDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumDynamoFormatCCons.R">R</span>]</span>)</span><span class="result">: <a href="EnumerationDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumerationDynamoFormat">EnumerationDynamoFormat</a>[<span class="extype" name="shapeless.:+:">:+:</span>[<span class="extype" name="shapeless.labelled.FieldType">FieldType</span>[<span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumDynamoFormatCCons.K">K</span>, <span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumDynamoFormatCCons.V">V</span>], <span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumDynamoFormatCCons.R">R</span>]]</span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.EnumDynamoFormat#enumDynamoFormatCNil" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="enumDynamoFormatCNil:com.gu.scanamo.EnumerationDynamoFormat[shapeless.CNil]"></a><a id="enumDynamoFormatCNil:EnumerationDynamoFormat[CNil]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#enumDynamoFormatCNil:com.gu.scanamo.EnumerationDynamoFormat[shapeless.CNil]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enumDynamoFormatCNil</span><span class="result">: <a href="EnumerationDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumerationDynamoFormat">EnumerationDynamoFormat</a>[<span class="extype" name="shapeless.CNil">CNil</span>]</span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.EnumDynamoFormat#enumFormat" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="enumFormat[A,Repr&lt;:shapeless.Coproduct](implicitgen:shapeless.LabelledGeneric.Aux[A,Repr],implicitgenericFormat:com.gu.scanamo.EnumerationDynamoFormat[Repr]):com.gu.scanamo.EnumerationDynamoFormat[A]"></a><a id="enumFormat[A,Repr&lt;:Coproduct](Aux[A,Repr],EnumerationDynamoFormat[Repr]):EnumerationDynamoFormat[A]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#enumFormat[A,Repr&lt;:shapeless.Coproduct](implicitgen:shapeless.LabelledGeneric.Aux[A,Repr],implicitgenericFormat:com.gu.scanamo.EnumerationDynamoFormat[Repr]):com.gu.scanamo.EnumerationDynamoFormat[A]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">enumFormat</span><span class="tparams">[<span name="A">A</span>, <span name="Repr">Repr &lt;: <span class="extype" name="shapeless.Coproduct">Coproduct</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="gen">gen: <span class="extype" name="shapeless.LabelledGeneric.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumFormat.A">A</span>, <span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumFormat.Repr">Repr</span>]</span>, <span name="genericFormat">genericFormat: <a href="EnumerationDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumerationDynamoFormat">EnumerationDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumFormat.Repr">Repr</span>]</span>)</span><span class="result">: <a href="EnumerationDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumerationDynamoFormat">EnumerationDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.EnumDynamoFormat.enumFormat.A">A</span>]</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#eq" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="eq(x$1:AnyRef):Boolean"></a><a id="eq(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#eq(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#eq(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -516,7 +631,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#equals" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="equals(x$1:Any):Boolean"></a><a id="equals(Any):Boolean"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#equals(x$1:Any):Boolean" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#equals(x$1:Any):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -532,7 +647,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#finalize():Unit" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#finalize():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -551,10 +666,42 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </span>)</span>
               
         </dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat#genericCoProduct" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="genericCoProduct[T,R](implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.CoProductDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]"></a><a id="genericCoProduct[T,R](Aux[T,R],Lazy[CoProductDynamoFormat[R]]):DynamoFormat[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#genericCoProduct[T,R](implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.CoProductDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">genericCoProduct</span><span class="tparams">[<span name="T">T</span>, <span name="R">R</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="gen">gen: <span class="extype" name="shapeless.LabelledGeneric.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericCoProduct.T">T</span>, <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericCoProduct.R">R</span>]</span>, <span name="formatR">formatR: <span class="extype" name="shapeless.Lazy">Lazy</span>[<a href="#CoProductDynamoFormat[T]extendsDynamoFormat[T]" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.CoProductDynamoFormat">CoProductDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericCoProduct.R">R</span>]]</span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericCoProduct.T">T</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat#genericProduct" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="genericProduct[T,R](implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]"></a><a id="genericProduct[T,R](Aux[T,R],Lazy[ConstructedDynamoFormat[R]]):DynamoFormat[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#genericProduct[T,R](implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">genericProduct</span><span class="tparams">[<span name="T">T</span>, <span name="R">R</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="gen">gen: <span class="extype" name="shapeless.LabelledGeneric.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.T">T</span>, <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.R">R</span>]</span>, <span name="formatR">formatR: <span class="extype" name="shapeless.Lazy">Lazy</span>[<a href="#ConstructedDynamoFormat[T]extendsAnyRef" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.ConstructedDynamoFormat">ConstructedDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.R">R</span>]]</span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.T">T</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#getClass():Class[_]" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#getClass():Class[_]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -570,7 +717,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#hashCode" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="hashCode():Int"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#hashCode():Int" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#hashCode():Int" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -583,10 +730,42 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat#hcons" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hcons[K&lt;:Symbol,V,T&lt;:shapeless.HList](implicitheadFormat:shapeless.Lazy[com.gu.scanamo.DynamoFormat[V]],implicittailFormat:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[T]],implicitfieldWitness:shapeless.Witness.Aux[K]):DerivedDynamoFormat.this.ConstructedDynamoFormat[shapeless.::[shapeless.labelled.FieldType[K,V],T]]"></a><a id="hcons[K&lt;:Symbol,V,T&lt;:HList](Lazy[DynamoFormat[V]],Lazy[ConstructedDynamoFormat[T]],Aux[K]):ConstructedDynamoFormat[::[FieldType[K,V],T]]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#hcons[K&lt;:Symbol,V,T&lt;:shapeless.HList](implicitheadFormat:shapeless.Lazy[com.gu.scanamo.DynamoFormat[V]],implicittailFormat:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[T]],implicitfieldWitness:shapeless.Witness.Aux[K]):DerivedDynamoFormat.this.ConstructedDynamoFormat[shapeless.::[shapeless.labelled.FieldType[K,V],T]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hcons</span><span class="tparams">[<span name="K">K &lt;: <span class="extype" name="scala.Symbol">Symbol</span></span>, <span name="V">V</span>, <span name="T">T &lt;: <span class="extype" name="shapeless.HList">HList</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="headFormat">headFormat: <span class="extype" name="shapeless.Lazy">Lazy</span>[<a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.hcons.V">V</span>]]</span>, <span name="tailFormat">tailFormat: <span class="extype" name="shapeless.Lazy">Lazy</span>[<a href="#ConstructedDynamoFormat[T]extendsAnyRef" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.ConstructedDynamoFormat">ConstructedDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.hcons.T">T</span>]]</span>, <span name="fieldWitness">fieldWitness: <span class="extype" name="shapeless.Witness.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.hcons.K">K</span>]</span>)</span><span class="result">: <a href="#ConstructedDynamoFormat[T]extendsAnyRef" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.ConstructedDynamoFormat">ConstructedDynamoFormat</a>[<span class="extype" name="shapeless.::">::</span>[<span class="extype" name="shapeless.labelled.FieldType">FieldType</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.hcons.K">K</span>, <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.hcons.V">V</span>], <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.hcons.T">T</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat#hnil" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="hnil:DerivedDynamoFormat.this.ConstructedDynamoFormat[shapeless.HNil]"></a><a id="hnil:ConstructedDynamoFormat[HNil]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#hnil:DerivedDynamoFormat.this.ConstructedDynamoFormat[shapeless.HNil]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">val</span>
+      </span>
+      <span class="symbol">
+        <span class="name">hnil</span><span class="result">: <a href="#ConstructedDynamoFormat[T]extendsAnyRef" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.ConstructedDynamoFormat">ConstructedDynamoFormat</a>[<span class="extype" name="shapeless.HNil">HNil</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#isInstanceOf[T0]:Boolean" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#isInstanceOf[T0]:Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -599,26 +778,10 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.gu.scanamo.MacroOfLastResort#moreHelpfulErrorMessage" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="moreHelpfulErrorMessage[T](implicitevidence$1:MacroOfLastResort.this.c.WeakTypeTag[T]):MacroOfLastResort.this.c.universe.Tree"></a><a id="moreHelpfulErrorMessage[T](scala.reflect.macros.blackbox.Context.WeakTypeTag[T]):scala.reflect.macros.Universe.Tree"></a>
-      <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#moreHelpfulErrorMessage[T](implicitevidence$1:MacroOfLastResort.this.c.WeakTypeTag[T]):MacroOfLastResort.this.c.universe.Tree" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">moreHelpfulErrorMessage</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <span class="extype" name="scala.reflect.macros.Aliases.WeakTypeTag">scala.reflect.macros.blackbox.Context.WeakTypeTag</span>[<span class="extype" name="com.gu.scanamo.MacroOfLastResort.moreHelpfulErrorMessage.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.reflect.api.Trees.Tree">scala.reflect.macros.Universe.Tree</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#ne(x$1:AnyRef):Boolean" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#ne(x$1:AnyRef):Boolean" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -634,7 +797,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#notify" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notify():Unit"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#notify():Unit" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#notify():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -650,7 +813,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#notifyAll" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="notifyAll():Unit"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#notifyAll():Unit" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#notifyAll():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -666,7 +829,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#synchronized" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="synchronized[T0](x$1:=&gt;T0):T0"></a><a id="synchronized[T0](⇒T0):T0"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#synchronized[T0](x$1:=&gt;T0):T0" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -682,7 +845,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#toString" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="toString():String"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#toString():String" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#toString():String" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -698,7 +861,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#wait():Unit" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#wait():Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -720,7 +883,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long,x$2:Int):Unit"></a><a id="wait(Long,Int):Unit"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#wait(x$1:Long,x$2:Int):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -742,7 +905,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait(x$1:Long):Unit"></a><a id="wait(Long):Unit"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/MacroOfLastResort.html#wait(x$1:Long):Unit" title="Permalink">
+      <a href="../../../com/gu/scanamo/EnumDynamoFormat.html#wait(x$1:Long):Unit" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -771,7 +934,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="scala.AnyRef">
+        <div class="parent" name="com.gu.scanamo.DerivedDynamoFormat">
+              <h3>Inherited from <a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></h3>
+            </div><div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
