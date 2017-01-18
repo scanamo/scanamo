@@ -182,6 +182,25 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * Right(Bar(x,11,Set(Second)))
     * }}}
+    *
+    * Updates may occur on nested attributes
+    * {{{
+    * >>> case class Inner(session: String)
+    * >>> case class Middle(name: String, counter: Long, inner: Inner)
+    * >>> case class Outer(id: java.util.UUID, middle: Middle)
+    * >>> val outers = Table[Outer]("outers")
+    *
+    * >>> LocalDynamoDB.withTable(client)("outers")('id -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val id = java.util.UUID.fromString("a8345373-9a93-43be-9bcd-e3682c9197f4")
+    * ...   val operations = for {
+    * ...     _ <- outers.put(Outer(id, Middle("x", 1L, Inner("alpha"))))
+    * ...     updatedOuter <- outers.update('id -> id, set('middle \ 'inner \ 'session -> "beta"))
+    * ...   } yield updatedOuter
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * Right(Outer(a8345373-9a93-43be-9bcd-e3682c9197f4,Middle(x,1,Inner(beta))))
+    * }}}
     */
   def update(key: UniqueKey[_], expression: UpdateExpression): ScanamoOps[Either[DynamoReadError, V]] =
     ScanamoFree.update[V](name)(key)(expression)

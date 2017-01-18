@@ -1,10 +1,10 @@
 package com.gu.scanamo.update
 
+import cats.data.NonEmptyVector
 import cats.kernel.Semigroup
 import cats.kernel.instances.MapMonoid
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.DynamoFormat
-import simulacrum.typeclass
 
 sealed trait UpdateExpression extends Product with Serializable {
   def expression: String = typeExpressions.map{ case (t, e) => s"${t.op} $e" }.mkString(" ")
@@ -25,42 +25,38 @@ case object ADD extends UpdateType { override val op = "ADD" }
 case object DELETE extends UpdateType { override val op = "DELETE" }
 case object REMOVE extends UpdateType { override val op = "REMOVE" }
 
-case class SetExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+case class SetExpression[V: DynamoFormat](field: Field, value: V) extends UpdateExpression {
   val format = DynamoFormat[V]
 
   override def typeExpressions: Map[UpdateType, String] =
-    Map(SET -> "#update = :update")
-  override def attributeNames: Map[String, String] =
-    Map("#update" -> field.name)
+    Map(SET -> s"${field.placeholder} = :update")
+  override def attributeNames: Map[String, String] = field.attributeNames
   override def attributeValues: Map[String, AttributeValue] =
     Map(":update" -> format.write(value))
 }
 
-case class AppendExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+case class AppendExpression[V: DynamoFormat](field: Field, value: V) extends UpdateExpression {
   override def typeExpressions: Map[UpdateType, String] =
-    Map(SET -> "#update = list_append(if_not_exists(#update, :emptyList), :update)")
-  override def attributeNames: Map[String, String] =
-    Map("#update" -> field.name)
+    Map(SET -> s"${field.placeholder} = list_append(if_not_exists(${field.placeholder}, :emptyList), :update)")
+  override def attributeNames: Map[String, String] = field.attributeNames
   override def attributeValues: Map[String, AttributeValue] =
     Map(":update" -> DynamoFormat.listFormat[V].write(List(value)),
         ":emptyList" -> new AttributeValue().withL())
 }
 
-case class PrependExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+case class PrependExpression[V: DynamoFormat](field: Field, value: V) extends UpdateExpression {
   override def typeExpressions: Map[UpdateType, String] =
-    Map(SET -> "#update = list_append(:update, if_not_exists(#update, :emptyList))")
-  override def attributeNames: Map[String, String] =
-    Map("#update" -> field.name)
+    Map(SET -> s"${field.placeholder} = list_append(:update, if_not_exists(${field.placeholder}, :emptyList))")
+  override def attributeNames: Map[String, String] = field.attributeNames
   override def attributeValues: Map[String, AttributeValue] =
     Map(":update" -> DynamoFormat.listFormat[V].write(List(value)),
         ":emptyList" -> new AttributeValue().withL())
 }
 
-case class AddExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+case class AddExpression[V: DynamoFormat](field: Field, value: V) extends UpdateExpression {
   override def typeExpressions: Map[UpdateType, String] =
-    Map(ADD -> "#update :update")
-  override def attributeNames: Map[String, String] =
-    Map("#update" -> field.name)
+    Map(ADD -> s"${field.placeholder} :update")
+  override def attributeNames: Map[String, String] = field.attributeNames
   override def attributeValues: Map[String, AttributeValue] =
     Map(":update" -> DynamoFormat[V].write(value))
 }
@@ -71,20 +67,18 @@ Note the difference between DELETE and REMOVE:
  - REMOVE is used to remove an attribute from an item
  */
 
-case class DeleteExpression[V: DynamoFormat](field: Symbol, value: V) extends UpdateExpression {
+case class DeleteExpression[V: DynamoFormat](field: Field, value: V) extends UpdateExpression {
   override def typeExpressions: Map[UpdateType, String] =
-    Map(DELETE -> "#update :update")
-  override def attributeNames: Map[String, String] =
-    Map("#update" -> field.name)
+    Map(DELETE -> s"${field.placeholder} :update")
+  override def attributeNames: Map[String, String] = field.attributeNames
   override def attributeValues: Map[String, AttributeValue] =
     Map(":update" -> DynamoFormat[V].write(value))
 }
 
-case class RemoveExpression(field: Symbol) extends UpdateExpression {
+case class RemoveExpression(field: Field) extends UpdateExpression {
   override def typeExpressions: Map[UpdateType, String] =
-    Map(REMOVE -> "#update")
-  override def attributeNames: Map[String, String] =
-    Map("#update" -> field.name)
+    Map(REMOVE -> field.placeholder)
+  override def attributeNames: Map[String, String] = field.attributeNames
   override def attributeValues: Map[String, AttributeValue] =
     Map()
 }
@@ -124,4 +118,15 @@ case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExp
 
   override def attributeValues: Map[String, AttributeValue] =
     prefixKeys(l.attributeValues, "l_", ':') ++ prefixKeys(r.attributeValues, "r_", ':')
+}
+
+case class Field(traversal: NonEmptyVector[Symbol]) {
+  val placeholder: String = {
+    val suffix = traversal.map(s => s"update${s.name}").reduceLeft((l,r) => s"$l.#$r")
+    s"#$suffix"
+  }
+  val name: String = traversal.map(_.name).reduceLeft((l, r) => s"$l.$r")
+  val attributeNames: Map[String, String] = traversal.map(s => s"#update${s.name}" -> s.name).toVector.toMap
+
+  def \ (inner: Symbol): Field = Field(traversal.append(inner))
 }
