@@ -21,8 +21,8 @@ options:
   - title: Asynchronous Requests
     url: asynchronous.html
 
-  - title: Custom Formats
-    url: custom-formats.html
+  - title: DynamoFormat
+    url: dynamo-format.html
 
   - title: Batch Operations
     url: batch-operations.html
