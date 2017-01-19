@@ -1,6 +1,5 @@
 package com.gu
 
-import cats.data.NonEmptyVector
 import com.gu.scanamo.query._
 import com.gu.scanamo.update._
 
@@ -63,8 +62,8 @@ package object scanamo {
     def remove(field: Field): UpdateExpression =
       RemoveExpression(field)
 
-    implicit def symbolField(s: Symbol): Field = Field(NonEmptyVector.of(s))
-    implicit def symbolFieldValue[T](sv: (Symbol, T)): (Field, T) = Field(NonEmptyVector.of(sv._1)) -> sv._2
+    implicit def symbolField(s: Symbol): Field = Field.of(s)
+    implicit def symbolFieldValue[T](sv: (Symbol, T)): (Field, T) = Field.of(sv._1) -> sv._2
 
     implicit class AndUpdateExpression(x: UpdateExpression) {
       def and(y: UpdateExpression): UpdateExpression = AndUpdate(x, y)

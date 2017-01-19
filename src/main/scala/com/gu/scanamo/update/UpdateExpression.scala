@@ -1,6 +1,5 @@
 package com.gu.scanamo.update
 
-import cats.data.NonEmptyVector
 import cats.kernel.Semigroup
 import cats.kernel.instances.MapMonoid
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
@@ -120,13 +119,11 @@ case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExp
     prefixKeys(l.attributeValues, "l_", ':') ++ prefixKeys(r.attributeValues, "r_", ':')
 }
 
-case class Field(traversal: NonEmptyVector[Symbol]) {
-  val placeholder: String = {
-    val suffix = traversal.map(s => s"update${s.name}").reduceLeft((l,r) => s"$l.#$r")
-    s"#$suffix"
-  }
-  val name: String = traversal.map(_.name).reduceLeft((l, r) => s"$l.$r")
-  val attributeNames: Map[String, String] = traversal.map(s => s"#update${s.name}" -> s.name).toVector.toMap
+case class Field(placeholder: String, attributeNames: Map[String, String]) {
+  def \ (s: Symbol): Field = Field(s"$placeholder.#update${s.name}", attributeNames + (s"#update${s.name}" -> s.name))
+  def apply(index: Int): Field = Field(s"$placeholder[$index]", attributeNames)
+}
 
-  def \ (inner: Symbol): Field = Field(traversal.append(inner))
+object Field {
+  def of(s: Symbol): Field = Field(s"#update${s.name}", Map(s"#update${s.name}" -> s.name))
 }
