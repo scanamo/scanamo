@@ -1131,7 +1131,23 @@ Right(Foo(x,<span class="num">1</span>,<span class="std">List</span>(First, Seco
 ...   } <span class="kw">yield</span> updatedBar
 ...   Scanamo.exec(client)(operations)
 ... }
-Right(Bar(x,<span class="num">11</span>,<span class="std">Set</span>(Second)))</pre></div></div>
+Right(Bar(x,<span class="num">11</span>,<span class="std">Set</span>(Second)))</pre><p>Updates may occur on nested attributes</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Inner(session: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Middle(name: <span class="std">String</span>, counter: <span class="std">Long</span>, inner: Inner, list: <span class="std">List</span>[<span class="std">Int</span>])
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Outer(id: java.util.UUID, middle: Middle)
+&gt;&gt;&gt; <span class="kw">val</span> outers = Table[Outer](<span class="lit">"outers"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"outers"</span>)('id -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> id = java.util.UUID.fromString(<span class="lit">"a8345373-9a93-43be-9bcd-e3682c9197f4"</span>)
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> outers.put(Outer(id, Middle(<span class="lit">"x"</span>, <span class="num">1</span>L, Inner(<span class="lit">"alpha"</span>), <span class="std">List</span>(<span class="num">1</span>, <span class="num">2</span>))))
+...     updatedOuter <span class="kw">&lt;-</span> outers.update('id -&gt; id,
+...       set('middle \ 'inner \ 'session -&gt; <span class="lit">"beta"</span>) and add(('middle \ 'list)(<span class="num">1</span>) -&gt;  <span class="num">1</span>)
+...     )
+...   } <span class="kw">yield</span> updatedOuter
+...   Scanamo.exec(client)(operations)
+... }
+Right(Outer(a8345373-<span class="num">9</span>a93-<span class="num">43</span>be-<span class="num">9</span>bcd-e3682c9197f4,Middle(x,<span class="num">1</span>,Inner(beta),<span class="std">List</span>(<span class="num">1</span>, <span class="num">3</span>))))</pre></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">
