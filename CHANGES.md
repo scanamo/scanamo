@@ -1,3 +1,7 @@
+## Version 0.9.1
+
+ * Allow update of nested properties (#89)
+
 ## Version 0.9.0
 
  * Automatic derivation of `DynamoFormat` for sealed traits (#78 - @cb372)
@@ -10,7 +14,8 @@
  
  * Various library upgrades including cats 0.9.0 (#86)
  
-0.9.0 is largely source compatible with 0.8.x (no tests had to change structure)
+0.9.0 is largely source compatible with 0.8.x (no tests had to change structure),
+but the encoding of `UpdateExpression` means it is no longer open for extension
 
 ## Version 0.8.3
 
