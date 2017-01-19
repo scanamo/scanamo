@@ -49,18 +49,21 @@ package object scanamo {
       def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
     }
 
-    def set[V: DynamoFormat](fieldValue: (Symbol, V)): UpdateExpression =
+    def set[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
       SetExpression(fieldValue._1, fieldValue._2)
-    def append[V: DynamoFormat](fieldValue: (Symbol, V)): UpdateExpression =
+    def append[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
       AppendExpression(fieldValue._1, fieldValue._2)
-    def prepend[V: DynamoFormat](fieldValue: (Symbol, V)): UpdateExpression =
+    def prepend[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
       PrependExpression(fieldValue._1, fieldValue._2)
-    def add[V: DynamoFormat](fieldValue: (Symbol, V)): UpdateExpression =
+    def add[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
       AddExpression(fieldValue._1, fieldValue._2)
-    def delete[V: DynamoFormat](fieldValue: (Symbol, V)): UpdateExpression =
+    def delete[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
       DeleteExpression(fieldValue._1, fieldValue._2)
-    def remove(field: Symbol): UpdateExpression =
+    def remove(field: Field): UpdateExpression =
       RemoveExpression(field)
+
+    implicit def symbolField(s: Symbol): Field = Field.of(s)
+    implicit def symbolFieldValue[T](sv: (Symbol, T)): (Field, T) = Field.of(sv._1) -> sv._2
 
     implicit class AndUpdateExpression(x: UpdateExpression) {
       def and(y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
