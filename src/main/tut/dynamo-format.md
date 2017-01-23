@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: DynamoFormat
-position:  2
+position:  4
 ---
 
 ### DynamoFormat

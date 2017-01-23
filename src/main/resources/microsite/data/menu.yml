@@ -4,25 +4,29 @@ options:
 
     nested_options:
     - title: Put and Get
-      url: put-get.html
+      url: operations.html#put-and-get
 
-    - title: Scanning
-      url: scanning.html
+    - title: Update
+      url: operations.html#update
 
-    - title: Querying
-      url: querying.html
+    - title: Scan
+      url: operations.html#scan
 
-    - title: Updating
-      url: updating.html
+    - title: Query
+      url: operations.html#query
+
+  - title: Batch Operations
+    url: batch-operations.html
 
   - title: Using Indexes
     url: using-indexes.html
 
-  - title: Asynchronous Requests
-    url: asynchronous.html
-
   - title: DynamoFormat
     url: dynamo-format.html
 
-  - title: Batch Operations
-    url: batch-operations.html
+    nested_options:
+    - title: Custom Formats
+      url: dynamo-format.html#custom-formats
+
+  - title: Asynchronous Requests
+    url: asynchronous.html

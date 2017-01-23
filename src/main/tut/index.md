@@ -45,4 +45,10 @@ Scanamo.exec(client)(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"
 Scanamo.exec(client)(table.get('name -> "McDonald"))
 ```
 
+Scanamo supports most other DynamoDB [operations](operations.html), beyond
+the basic `Put` and `Get`.
+
+The translation between Dynamo items and Scala types is handled by a type class
+called [DynamoFormat](dynamo-format.html).
+
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
