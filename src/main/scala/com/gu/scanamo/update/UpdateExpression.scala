@@ -31,10 +31,6 @@ private[update] sealed trait LeafUpdateExpression {
   val constantValue: Option[(String, AttributeValue)]
   def expression: String
   def prefixKeys(prefix: String): LeafUpdateExpression
-
-  def prefixMapKeys[T](map: Map[String, T], prefix: String) = map.map {
-    case (k, v) => (s"$prefix$k", v)
-  }
 }
 
 object UpdateExpression {
