@@ -50,17 +50,17 @@ package object scanamo {
     }
 
     def set[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
-      SetExpression(fieldValue._1, fieldValue._2)
+      UpdateExpression.set(fieldValue)
     def append[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
-      AppendExpression(fieldValue._1, fieldValue._2)
+      UpdateExpression.append(fieldValue)
     def prepend[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
-      PrependExpression(fieldValue._1, fieldValue._2)
+      UpdateExpression.prepend(fieldValue)
     def add[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
-      AddExpression(fieldValue._1, fieldValue._2)
+      UpdateExpression.add(fieldValue)
     def delete[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
-      DeleteExpression(fieldValue._1, fieldValue._2)
+      UpdateExpression.delete(fieldValue)
     def remove(field: Field): UpdateExpression =
-      RemoveExpression(field)
+      UpdateExpression.remove(field)
 
     implicit def symbolField(s: Symbol): Field = Field.of(s)
     implicit def symbolFieldValue[T](sv: (Symbol, T)): (Field, T) = Field.of(sv._1) -> sv._2

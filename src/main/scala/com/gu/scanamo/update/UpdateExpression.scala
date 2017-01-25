@@ -24,7 +24,7 @@ sealed trait UpdateExpression extends Product with Serializable {
   def unprefixedAttributeValues: Map[String, AttributeValue]
 }
 
-sealed trait LeafUpdateExpression {
+private[update] sealed trait LeafUpdateExpression {
   val updateType: UpdateType
   val attributeNames: Map[String, String]
   val attributeValue: Option[(String, AttributeValue)]
@@ -38,18 +38,31 @@ sealed trait LeafUpdateExpression {
 }
 
 object UpdateExpression {
+  def set[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    SetExpression(fieldValue._1, fieldValue._2)
+  def append[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    AppendExpression(fieldValue._1, fieldValue._2)
+  def prepend[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    PrependExpression(fieldValue._1, fieldValue._2)
+  def add[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    AddExpression(fieldValue._1, fieldValue._2)
+  def delete[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    DeleteExpression(fieldValue._1, fieldValue._2)
+  def remove(field: Field): UpdateExpression =
+    RemoveExpression(field)
+
   implicit object Semigroup extends Semigroup[UpdateExpression] {
     override def combine(x: UpdateExpression, y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
   }
 }
 
-sealed trait UpdateType { val op: String }
-case object SET extends UpdateType { override val op = "SET" }
-case object ADD extends UpdateType { override val op = "ADD" }
-case object DELETE extends UpdateType { override val op = "DELETE" }
-case object REMOVE extends UpdateType { override val op = "REMOVE" }
+private[update] sealed trait UpdateType { val op: String }
+private[update] case object SET extends UpdateType { override val op = "SET" }
+private[update] case object ADD extends UpdateType { override val op = "ADD" }
+private[update] case object DELETE extends UpdateType { override val op = "DELETE" }
+private[update] case object REMOVE extends UpdateType { override val op = "REMOVE" }
 
-case class SimpleUpdateExpression(leaf: LeafUpdateExpression) extends UpdateExpression {
+private[update] case class SimpleUpdateExpression(leaf: LeafUpdateExpression) extends UpdateExpression {
   override def typeExpressions: Map[UpdateType, NonEmptyVector[LeafUpdateExpression]] =
     Map(leaf.updateType -> NonEmptyVector.of(leaf))
   override def unprefixedAttributeNames: Map[String, String] =
@@ -59,7 +72,7 @@ case class SimpleUpdateExpression(leaf: LeafUpdateExpression) extends UpdateExpr
   override val constantValue: Option[(String, AttributeValue)] = leaf.constantValue
 }
 
-case class LeafSetExpression (
+private[update] case class LeafSetExpression (
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
@@ -89,7 +102,7 @@ object SetExpression {
   }
 }
 
-case class LeafAppendExpression (
+private[update] case class LeafAppendExpression (
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
@@ -120,7 +133,7 @@ object AppendExpression {
   }
 }
 
-case class LeafPrependExpression (
+private[update] case class LeafPrependExpression (
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
@@ -151,7 +164,7 @@ object PrependExpression {
   }
 }
 
-case class LeafAddExpression (
+private[update]case class LeafAddExpression (
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
@@ -186,7 +199,7 @@ Note the difference between DELETE and REMOVE:
  - DELETE is used to delete an element from a set
  - REMOVE is used to remove an attribute from an item
  */
-case class LeafDeleteExpression (
+private[update] case class LeafDeleteExpression (
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
@@ -216,7 +229,7 @@ object DeleteExpression {
   }
 }
 
-case class LeafRemoveExpression (
+private[update] case class LeafRemoveExpression (
   namePlaceholder: String,
   attributeNames: Map[String, String]
 ) extends LeafUpdateExpression {
