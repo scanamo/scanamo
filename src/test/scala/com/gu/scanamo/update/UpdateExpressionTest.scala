@@ -14,7 +14,9 @@ class UpdateExpressionTest extends org.scalatest.FunSpec
     for {
       s <- arbitrary[Symbol]
       i <- arbitrary[Int]
-      u <- Gen.oneOf(List(set(s -> i), add(s -> i), remove(s)))
+      si <- arbitrary[Set[Int]]
+      l <- arbitrary[List[String]]
+      u <- Gen.oneOf(List(set(s -> i), add(s -> i), remove(s), delete(s -> si), append(s -> l), prepend(s -> l)))
     } yield u
 
   def genNode(level: Int): Gen[UpdateExpression] = for {
@@ -29,10 +31,19 @@ class UpdateExpressionTest extends org.scalatest.FunSpec
   implicit lazy val update: Arbitrary[UpdateExpression] = Arbitrary(genTree(0))
 
 
-  it("should have all attribute keys in the expression") {
+  it("should have all value placeholders in the expression") {
     check {
       (ue: UpdateExpression) =>
         ue.attributeValues.keys.forall(s => {
+          ue.expression.contains(s)
+        })
+    }
+  }
+
+  it("should have all name placeholders in the expression") {
+    check {
+      (ue: UpdateExpression) =>
+        ue.attributeNames.keys.forall(s => {
           ue.expression.contains(s)
         })
     }
