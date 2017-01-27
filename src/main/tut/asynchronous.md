@@ -4,7 +4,7 @@ title: Asynchronous Requests
 position: 5
 ---
 
-### Non-blocking requests
+## Non-blocking requests
  
 Whilst for simplicity most examples in these documents are based on synchronous
 requests to DynamoDB, Scanamo supports making the requests asynchronously with

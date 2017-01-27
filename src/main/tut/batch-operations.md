@@ -4,7 +4,7 @@ title: Batch Operations
 position: 2
 ---
 
-### Batch Operations
+## Batch Operations
  
 Many operations against Dynamo can be performed in batches. Scanamo
 has support for putting, getting and deleting in batches

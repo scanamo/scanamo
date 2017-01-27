@@ -6,6 +6,9 @@ options:
     - title: Put and Get
       url: operations.html#put-and-get
 
+    - title: Delete
+      url: operations.html#delete
+
     - title: Update
       url: operations.html#update
 

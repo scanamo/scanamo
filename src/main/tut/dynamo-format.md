@@ -4,13 +4,13 @@ title: DynamoFormat
 position:  4
 ---
 
-### DynamoFormat
+## DynamoFormat
 
-Scanamo uses the [DynamoFormat](latest/api/com/gu/scanamo/DynamoFormat.html) 
+Scanamo uses the [`DynamoFormat`](latest/api/com/gu/scanamo/DynamoFormat.html) 
 type class to define how to read and write different types to DynamoDB.
 
 Many common types have a `DynamoFormat` provided by Scanamo. For a full list see
-of those supported, you can look at the [companion object](latest/api/com/gu/scanamo/DynamoFormat$.html)
+of those supported, you can look at the [companion object](latest/api/com/gu/scanamo/DynamoFormat$.html).
 
 Scanamo also supports automatically deriving formats for case classes and 
 sealed trait families where all the contained types have a defined or derivable

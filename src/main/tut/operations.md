@@ -4,20 +4,20 @@ title: Operations
 position: 1
 ---
 
-### Operations
+## Operations
 
 Scanamo supports all the DynamoDB operations that interact with individual items in DynamoDB tables:
 
  * [Put](#put-and-get) for adding a new item, or replacing an existing one
  * [Get](#put-and-get) for retrieving an item by a fully specified key
- * Delete for removing an item
+ * [Delete](#delete) for removing an item
  * [Update](#update) for updating some portion of the fields of an item, whilst leaving the rest 
  as is
  * [Scan](#scan) for retrieving all elements of a table
  * [Query](#query) for retrieving all elements with a given hash-key and a range key that matches
  some criteria
  
-## Put and Get
+### Put and Get
 
 Often when using DynamoDB, the primary use case is simply putting objects into 
 Dynamo and subsequently retrieving them:
@@ -46,10 +46,36 @@ Scanamo.exec(client)(operations)
 
 Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
 
+### Delete
+
+To remove an item in it's entirety, we can use delete:
+
+```tut:silent
+import com.gu.scanamo._
+import com.gu.scanamo.syntax._
+
+val client = LocalDynamoDB.client()
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+LocalDynamoDB.createTable(client)("villains")('name -> S)
+
+case class Villain(name: String, catchphrase: String)
+```
+```tut:book
+val villains = Table[Villain]("villains")
+val operations = for {
+  _ <- villains.put(Villain("Dalek", "EXTERMINATE!"))
+  _ <- villains.put(Villain("Cyberman", "DELETE"))
+  _ <- villains.delete('name -> "Cyberman")
+  survivors <- villains.scan()
+} yield survivors
+     
+Scanamo.exec(client)(operations)
+```
+
 ### Update
 
-If you want to update some of the fields of a row, which don't form part of the key,
- without replacing it entirely, you can use the `update` operation:
+If you want to change some of the fields of an item, that don't form part of it's key,
+ without replacing the item entirely, you can use the `update` operation:
 
 ```tut:silent
 import com.gu.scanamo._
@@ -70,7 +96,7 @@ val operations = for {
 Scanamo.exec(client)(operations)
 ```
 
-You can also conditionally update different elements of the document:
+Which fields are updated can be based on incoming data:
 
 ```tut:silent
 import cats.data.NonEmptyList
@@ -110,6 +136,9 @@ Scanamo.exec(client)(
 )
 
 ```
+
+Further examples, showcasing different types of update can be found in the 
+[scaladoc for the `update` method on `Table`](/scanamo/latest/api/com/gu/scanamo/Table.html#update(key:com.gu.scanamo.query.UniqueKey[_],expression:com.gu.scanamo.update.UpdateExpression):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,V]]) 
 
 ### Scan
 

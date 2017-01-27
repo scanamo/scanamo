@@ -1,0 +1,40 @@
+body {
+    font-family: Georgia, sans-serif;
+    line-height: 1.5;
+    color: #333;
+}
+
+p {
+    margin: 0.25rem 0 0.5rem 0;
+}
+
+pre {
+    margin: 0;
+    border: none;
+}
+
+#content a {
+    color: #951c55;
+    border-bottom: 0.0625rem solid #dcdcdc;
+}
+#content a:hover {
+    border-bottom: 0.0625rem solid #6e99b3;
+    text-decoration: none;
+}
+
+#content code {
+    background-color: transparent;
+    padding: 0;
+}
+
+#page-content-wrapper section {
+    margin: 1px 0 0 0;
+}
+
+#page-content-wrapper section pre .hljs {
+    padding: 5px 25px;
+}
+
+#page-content-wrapper .nav a {
+    padding: 30px 15px;
+}
