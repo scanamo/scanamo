@@ -1,4 +1,4 @@
-addSbtPlugin("com.localytics" % "sbt-dynamodb" % "1.4.1")
+addSbtPlugin("com.localytics" % "sbt-dynamodb" % "1.5.3")
 
 addSbtPlugin("com.github.tkawachi" % "sbt-doctest" % "0.4.1")
 
