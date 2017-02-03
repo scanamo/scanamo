@@ -17,6 +17,9 @@ Scanamo supports all the DynamoDB operations that interact with individual items
  * [Query](#query) for retrieving all elements with a given hash-key and a range key that matches
  some criteria
  
+Scanamo also supports [batched operations](batch-operations.html) and queries against 
+[secondary indexes](using-indexes.html).
+ 
 ### Put and Get
 
 Often when using DynamoDB, the primary use case is simply putting objects into 

@@ -13,6 +13,10 @@ pre {
     border: none;
 }
 
+#content p {
+    padding-left: 0.25rem;
+}
+
 #content a {
     color: #951c55;
     border-bottom: 0.0625rem solid #dcdcdc;
@@ -27,12 +31,12 @@ pre {
     padding: 0;
 }
 
-#page-content-wrapper section {
-    margin: 1px 0 0 0;
+#content code.hljs, #page-content-wrapper section pre .hljs {
+    padding: 0.5rem 1rem;
 }
 
-#page-content-wrapper section pre .hljs {
-    padding: 5px 25px;
+#page-content-wrapper section {
+    margin: 1px 0 0 0;
 }
 
 #page-content-wrapper .nav a {
