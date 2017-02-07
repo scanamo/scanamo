@@ -1,10 +1,10 @@
 ---
 layout: docs
 title: Using Indexes
-position: 7
+position: 3
 ---
 
-### Using Indexes
+## Using Indexes
 
 Scanamo supports scanning and querying [global secondary indexes](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html). 
 In the following example, we create and use a table called `transport` with a hash key 
