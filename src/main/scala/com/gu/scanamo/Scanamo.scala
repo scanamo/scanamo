@@ -34,7 +34,7 @@ object Scanamo {
     * Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
-  def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): PutItemResult =
+  def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): T =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   /**

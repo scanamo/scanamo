@@ -22,7 +22,7 @@ object ScanamoAsync {
     op.foldMap(ScanamoInterpreters.future(client)(ec))
 
   def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)
-    (implicit ec: ExecutionContext): Future[PutItemResult] =
+    (implicit ec: ExecutionContext): Future[T] =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: Set[T])

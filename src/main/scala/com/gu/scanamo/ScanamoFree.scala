@@ -16,8 +16,11 @@ object ScanamoFree {
 
   private val batchSize = 25
 
-  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
-    ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None))
+  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[T] = {
+    ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None)).map(
+      _ => item
+    )
+  }
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
     items.grouped(batchSize).toList.traverseU(batch =>
