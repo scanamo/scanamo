@@ -21,8 +21,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       import com.gu.scanamo.syntax._
 
       val result = for {
-        item <- ScanamoAsync.put(client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-      } yield item
+        _ <- ScanamoAsync.put(client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+      } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
 
       result.futureValue should equal(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))
     }
