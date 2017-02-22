@@ -146,7 +146,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None))))
     }
   }
-  
+
   it("should scan asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
 
@@ -274,7 +274,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
     }
   }
-  
+
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
 
