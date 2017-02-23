@@ -13,10 +13,16 @@ package object scanamo {
       def >=[V: DynamoFormat](v: V) = KeyIs(s, GTE, v)
       def beginsWith[V: DynamoFormat](v: V) = BeginsWith(s, v)
 
-      def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
+      def and(other: Symbol) = HashAndRangeKeyNames(s, other)
+      def andFilter(other: Symbol) = {
+        println("and filter")
+        RangeFilterNames(s, other)
+      }
+
     }
 
     case class HashAndRangeKeyNames(hash: Symbol, range: Symbol)
+    case class RangeFilterNames(range: Symbol, filter: Symbol)
 
     implicit def symbolTupleToUniqueKey[V: DynamoFormat](pair: (Symbol, V)) =
       UniqueKey(KeyEquals(pair._1, pair._2))
@@ -31,6 +37,9 @@ package object scanamo {
 
     implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])) =
       UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
+
+    implicit def toMultipleKeyList2[R: DynamoFormat, F: DynamoFormat](pair: (RangeFilterNames, Set[(R, F)])) =
+      UniqueKeys(MultipleKeyList(pair._1.range -> pair._1.filter, pair._2))
 
     implicit def symbolTupleToQuery[V: DynamoFormat](pair: (Symbol, V)) =
       Query(KeyEquals(pair._1, pair._2))

@@ -8,6 +8,9 @@ case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
   def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
     AndQueryCondition(this, rangeKeyCondition)
 
+  def and[R: DynamoFormat, F: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R], fieldCondition: RangeKeyCondition[F]) =
+    AndFilterCondition(this, rangeKeyCondition, fieldCondition)
+
   def descending = Descending(this)
 }
 
@@ -19,6 +22,12 @@ case class Descending[T: QueryableKeyCondition](queryCondition: T)
 
 case class AndQueryCondition[H: DynamoFormat, R: DynamoFormat](
   hashCondition: KeyEquals[H], rangeCondition: RangeKeyCondition[R]
+) {
+  def descending = Descending(this)
+}
+
+case class AndFilterCondition[H: DynamoFormat, R: DynamoFormat, F: DynamoFormat](
+  hashCondition: KeyEquals[H], rangeCondition: RangeKeyCondition[R], fieldCondition: RangeKeyCondition[F]
 ) {
   def descending = Descending(this)
 }

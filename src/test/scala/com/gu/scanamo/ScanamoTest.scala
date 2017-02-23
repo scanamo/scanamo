@@ -47,4 +47,21 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
       Scanamo.exec(client)(ops) should equal(Some(Right(City("Nashville", "US"))))
     }
   }
+
+  it("should allow filtering one field") {
+    val client = LocalDynamoDB.client()
+    LocalDynamoDB.createTable(client)("large-query")('name -> S, 'number -> N)
+
+    case class Large(name: String, number: Int, stuff: Int)
+
+    val input = for{ i <- 0 until 100} yield {
+      Large("Harry", i, i%2)
+    }
+    input.toSet
+    Scanamo.putAll(client)("large-query")(input.toSet)
+    import syntax._
+    Scanamo.query[Large](client)("large-query")('name -> "Harry and ('number >= 1) andFilter('stuff >= 1)").toList.size should be (50)
+
+    val deleteResult = client.deleteTable("large-query")
+  }
 }
