@@ -21,6 +21,9 @@ options:
   - title: Batch Operations
     url: batch-operations.html
 
+  - title: Conditional Operations
+    url: conditional-operations.html
+
   - title: Using Indexes
     url: using-indexes.html
 
