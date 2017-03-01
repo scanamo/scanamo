@@ -8,7 +8,7 @@ crossScalaVersions := Seq("2.11.8", scalaVersion.value)
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.78",
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.98",
   "com.chuusai" %% "shapeless" % "2.3.2",
   "org.typelevel" %% "cats-free" % "0.9.0",
   "com.github.mpilquist" %% "simulacrum" % "0.10.0",
