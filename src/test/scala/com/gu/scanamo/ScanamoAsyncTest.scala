@@ -59,11 +59,12 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     case class City(name: String, country: String)
     LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
 
-      ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US"))
-
       import com.gu.scanamo.syntax._
-      ScanamoAsync.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
-        .futureValue should equal(Some(Right(City("Nashville", "US"))))
+      ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US")).andThen {
+        case _ =>
+          ScanamoAsync.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
+            .futureValue should equal(Some(Right(City("Nashville", "US"))))
+      }
     }
   }
 
