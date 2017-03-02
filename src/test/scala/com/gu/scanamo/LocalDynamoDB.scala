@@ -1,16 +1,19 @@
 package com.gu.scanamo
 
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.dynamodbv2._
 import com.amazonaws.services.dynamodbv2.model._
 
 import collection.JavaConverters._
 
 object LocalDynamoDB {
-  def client() = {
-    val c = new AmazonDynamoDBAsyncClient(new com.amazonaws.auth.BasicAWSCredentials("key", "secret"))
-    c.setEndpoint("http://localhost:8042")
-    c
-  }
+  def client(): AmazonDynamoDBAsync =
+    AmazonDynamoDBAsyncClient.asyncBuilder()
+      .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials")))
+      .withEndpointConfiguration(new EndpointConfiguration("http://localhost:8042", ""))
+      .build()
+
   def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) = {
     client.createTable(
       attributeDefinitions(attributes),
