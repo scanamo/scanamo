@@ -1,3 +1,7 @@
+## Version 0.9.2
+
+ * Fix bug when many updates and'd together (#90)
+
 ## Version 0.9.1
 
  * Allow update of nested properties (#89)
