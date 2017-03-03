@@ -1,0 +1,59 @@
+<html><head><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><title>Scanamo</title><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="description" content="Scanamo: simpler DynamoDB access for Scala" /><meta name="author" content="Scanamo Contributors" /><meta name="og:image" content="/scanamo/img/poster.png" /><meta name="og:title" content="Scanamo" /><meta name="og:site_name" content="Scanamo" /><meta name="og:url" content="https://guardian.github.io/scanamo/" /><meta name="og:type" content="website" /><meta name="og:description" content="Scanamo: simpler DynamoDB access for Scala" /><meta name="twitter:image" content="/scanamo/img/poster.png" /><meta name="twitter:card" content="summary_large_image" /><meta name="twitter:site" content="" /><link rel="icon" type="image/png" href="/scanamo/img/favicon.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/scanamo/highlight/styles/color-brewer.css" /><link rel="stylesheet" href="/scanamo/css/style.css" /><link rel="stylesheet" href="/scanamo/css/palette.css" /><link rel="stylesheet" href="/scanamo/css/scanamo.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/scanamo/" class="brand"><div class="brand-wrapper" style="background:url('/scanamo/img/sidebar_brand.png') no-repeat"><span>Scanamo</span></div></a></li> <li><a href="/scanamo/operations.html" class="">Operations</a> <ul class="sub_section"> <li><a href="/scanamo/operations.html#put-and-get" class="">Put and Get</a></li> <li><a href="/scanamo/operations.html#delete" class="">Delete</a></li> <li><a href="/scanamo/operations.html#update" class="">Update</a></li> <li><a href="/scanamo/operations.html#scan" class="">Scan</a></li> <li><a href="/scanamo/operations.html#query" class="">Query</a></li></ul></li> <li><a href="/scanamo/batch-operations.html" class="">Batch Operations</a></li> <li><a href="/scanamo/conditional-operations.html" class="">Conditional Operations</a></li> <li><a href="/scanamo/using-indexes.html" class="">Using Indexes</a></li> <li><a href="/scanamo/dynamo-format.html" class=" active ">DynamoFormat</a> <ul class="sub_section"> <li><a href="/scanamo/dynamo-format.html#custom-formats" class="">Custom Formats</a></li></ul></li> <li><a href="/scanamo/asynchronous.html" class="">Asynchronous Requests</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li class="hidden-xs"><a href="https://github.com/guardian/scanamo"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li class="hidden-xs"><a href="https://github.com/guardian/scanamo"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Scanamo Scanamo: simpler DynamoDB access for Scala');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Scanamo Scanamo: simpler DynamoDB access for Scala');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="guardian" data-github-repo="scanamo"><div class="content-wrapper"><section><h2 id="dynamoformat">DynamoFormat</h2>
+
+<p>Scanamo uses the <a href="latest/api/com/gu/scanamo/DynamoFormat.html"><code class="highlighter-rouge">DynamoFormat</code></a> 
+type class to define how to read and write different types to DynamoDB.</p>
+
+<p>Many common types have a <code class="highlighter-rouge">DynamoFormat</code> provided by Scanamo. For a full list see
+of those supported, you can look at the <a href="latest/api/com/gu/scanamo/DynamoFormat$.html">companion object</a>.</p>
+
+<p>Scanamo also supports automatically deriving formats for case classes and 
+sealed trait families where all the contained types have a defined or derivable
+<code class="highlighter-rouge">DynamoFormat</code>.</p>
+
+<h3 id="custom-formats">Custom Formats</h3>
+
+<p>It’s also possible to define a serialisation format for types which Scanamo 
+doesn’t already support and can’t derive. Normally this involves using the 
+<a href="latest/api/com/gu/scanamo/DynamoFormat$.html#xmap[A,B](r:B=&gt;Either[com.gu.scanamo.error.DynamoReadError,A])(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]">xmap</a> 
+or <a href="latest/api/com/gu/scanamo/DynamoFormat$.html#coercedXmap[A,B,T&gt;:Null&lt;:Throwable](read:B=&gt;A)(write:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):com.gu.scanamo.DynamoFormat[A]">coercedXmap</a>
+to translate between the type and one Scanamo does already know about.</p>
+
+<p>For example, to store Joda <code class="highlighter-rouge">DateTime</code> objects as ISO <code class="highlighter-rouge">String</code>s in Dynamo:</p>
+
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.joda.time._</span>
+
+<span class="k">import</span> <span class="nn">com.gu.scanamo._</span>
+<span class="k">import</span> <span class="nn">com.gu.scanamo.syntax._</span>
+
+<span class="k">case</span> <span class="k">class</span> <span class="nc">Foo</span><span class="o">(</span><span class="n">dateTime</span><span class="k">:</span> <span class="kt">DateTime</span><span class="o">)</span>
+
+<span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">LocalDynamoDB</span><span class="o">.</span><span class="n">client</span><span class="o">()</span>
+<span class="k">import</span> <span class="nn">com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._</span>
+<span class="nc">LocalDynamoDB</span><span class="o">.</span><span class="n">createTable</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="s">"foo"</span><span class="o">)(</span><span class="ss">'dateTime </span><span class="o">-&gt;</span> <span class="n">S</span><span class="o">)</span>
+</code></pre>
+</div>
+<div class="highlighter-rouge"><pre class="highlight"><code><span class="k">implicit</span> <span class="k">val</span> <span class="n">jodaStringFormat</span> <span class="k">=</span> <span class="nc">DynamoFormat</span><span class="o">.</span><span class="n">coercedXmap</span><span class="o">[</span><span class="kt">DateTime</span>, <span class="kt">String</span>, <span class="kt">IllegalArgumentException</span><span class="o">](</span>
+  <span class="nc">DateTime</span><span class="o">.</span><span class="n">parse</span><span class="o">(</span><span class="k">_</span><span class="o">).</span><span class="n">withZone</span><span class="o">(</span><span class="nc">DateTimeZone</span><span class="o">.</span><span class="nc">UTC</span><span class="o">)</span>
+<span class="o">)(</span>
+  <span class="k">_</span><span class="o">.</span><span class="n">toString</span>
+<span class="o">)</span>
+<span class="c1">// jodaStringFormat: com.gu.scanamo.DynamoFormat[org.joda.time.DateTime] = com.gu.scanamo.DynamoFormat$$anon$3@fab3d75
+</span>
+<span class="k">val</span> <span class="n">fooTable</span> <span class="k">=</span> <span class="nc">Table</span><span class="o">[</span><span class="kt">Foo</span><span class="o">](</span><span class="s">"foo"</span><span class="o">)</span>
+<span class="c1">// fooTable: com.gu.scanamo.Table[Foo] = Table(foo)
+</span>
+<span class="k">val</span> <span class="n">operations</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
+  <span class="k">_</span>           <span class="k">&lt;-</span> <span class="n">fooTable</span><span class="o">.</span><span class="n">put</span><span class="o">(</span><span class="nc">Foo</span><span class="o">(</span><span class="k">new</span> <span class="nc">DateTime</span><span class="o">(</span><span class="mi">0</span><span class="o">)))</span>
+  <span class="n">results</span>     <span class="k">&lt;-</span> <span class="n">fooTable</span><span class="o">.</span><span class="n">scan</span><span class="o">()</span>
+<span class="o">}</span> <span class="k">yield</span> <span class="n">results</span>
+<span class="c1">// operations: cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,List[Either[com.gu.scanamo.error.DynamoReadError,Foo]]] = Free(...)
+</span>
+<span class="nc">Scanamo</span><span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="n">operations</span><span class="o">).</span><span class="n">toList</span>
+<span class="c1">// res4: List[Either[com.gu.scanamo.error.DynamoReadError,Foo]] = List(Right(Foo(1970-01-01T00:00:00.000Z)))
+</span></code></pre>
+</div>
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/scanamo/highlight/highlight.pack.js"></script><script>hljs.configure({
+languages:['scala','java','bash']
+});
+hljs.initHighlighting();
+             </script><script src="/scanamo/js/main.js"></script></body></html>
