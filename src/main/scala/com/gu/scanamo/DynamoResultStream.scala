@@ -6,6 +6,7 @@ import cats.free.Free
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryRequest, QueryResult, ScanRequest, ScanResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
+import com.gu.scanamo.request.ScanamoScanRequest
 
 import collection.JavaConverters._
 
@@ -39,15 +40,15 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
 }
 
 private[scanamo] object DynamoResultStream {
-  object ScanResultStream extends DynamoResultStream[ScanRequest, ScanResult] {
+  object ScanResultStream extends DynamoResultStream[ScanamoScanRequest, ScanResult] {
     override def items(res: ScanResult): util.List[util.Map[String, AttributeValue]] = res.getItems
     override def lastEvaluatedKey(res: ScanResult): util.Map[String, AttributeValue] = res.getLastEvaluatedKey
-    override def withExclusiveStartKey(req: ScanRequest, key: util.Map[String, AttributeValue]): ScanRequest =
-      req.withExclusiveStartKey(key)
+    override def withExclusiveStartKey(req: ScanamoScanRequest, key: util.Map[String, AttributeValue]): ScanamoScanRequest =
+      req.copy(options = req.options.copy(exclusiveStartKey = Some(key.asScala.toMap)))
 
-    override def exec(req: ScanRequest): ScanamoOps[ScanResult] = ScanamoOps.scan(req)
+    override def exec(req: ScanamoScanRequest): ScanamoOps[ScanResult] = ScanamoOps.scan(req)
 
-    override def limit(req: ScanRequest): Option[Int] = Option(req.getLimit).map(_.intValue)
+    override def limit(req: ScanamoScanRequest): Option[Int] = req.options.limit
   }
 
   object QueryResultStream extends DynamoResultStream[QueryRequest, QueryResult] {

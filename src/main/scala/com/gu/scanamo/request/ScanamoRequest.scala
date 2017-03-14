@@ -23,6 +23,21 @@ case class ScanamoUpdateRequest(
   condition: Option[RequestCondition]
 )
 
+case class ScanamoScanRequest(
+  tableName: String,
+  index: Option[String],
+  options: ScanamoQueryOptions
+)
+
+case class ScanamoQueryOptions(
+  consistent: Boolean,
+  limit: Option[Int],
+  exclusiveStartKey: Option[Map[String, AttributeValue]]
+)
+object ScanamoQueryOptions {
+  val default = ScanamoQueryOptions(false, None, None)
+}
+
 case class RequestCondition(
   expression: String,
   attributeNames: Map[String, String],
