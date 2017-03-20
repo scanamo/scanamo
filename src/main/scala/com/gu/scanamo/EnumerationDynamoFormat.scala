@@ -2,8 +2,11 @@ package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error.{DynamoReadError, TypeCoercionError}
+import macrocompat.bundle
 import shapeless.labelled.{FieldType, field}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
+
+import scala.reflect.macros.blackbox
 
 abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
 
@@ -58,4 +61,11 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
       override def write(t: A): AttributeValue = genericFormat.write(gen.to(t))
     }
 
+  import scala.language.experimental.macros
+  implicit def symbolFormat: DynamoFormat[Symbol] = macro FailingDerivationMacro.fail
+}
+
+@bundle
+private[scanamo] class FailingDerivationMacro(c: blackbox.Context) {
+  def fail = c.abort(c.enclosingPosition, "No DynamoFormat available")
 }

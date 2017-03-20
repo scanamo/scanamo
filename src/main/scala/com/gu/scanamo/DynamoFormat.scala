@@ -16,6 +16,10 @@ import scala.reflect.ClassTag
 import java.nio.ByteBuffer
 import java.util.UUID
 
+import macrocompat.bundle
+
+import scala.reflect.macros.blackbox
+
 /**
   * Type class for defining serialisation to and from
   * DynamoDB's `AttributeValue`
