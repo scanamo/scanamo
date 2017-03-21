@@ -31,7 +31,7 @@ Usage
 ### Putting and Getting
 
 If you've used the Java SDK to access Dynamo, the most familiar way to use Scanamo 
-is via the [Scanamo](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Scanamo$)
+is via the [Scanamo](http://guardian.github.io/scanamo/latest/api/com/gu/scanamo/Scanamo$.html)
 object:
 
 ```scala
@@ -59,7 +59,7 @@ operations can happily run against pre-existing tables.
 
 ### Table
 
-Scanamo provides a [Table](http://guardian.github.io/scanamo/latest/api/#com.gu.scanamo.Table) 
+Scanamo provides a [Table](http://guardian.github.io/scanamo/latest/api/com/gu/scanamo/Table.html) 
 abstraction to reduce noise when defining multiple operations against the same table:
 
 ```scala
