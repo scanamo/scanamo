@@ -11,6 +11,7 @@ import collection.JavaConverters._
 
 trait DerivedDynamoFormat {
   type ValidatedPropertiesError[T] = Validated[InvalidPropertiesError, T]
+  type NotSymbol[T] = |¬|[Symbol]#λ[T]
 
   trait ConstructedDynamoFormat[T] {
     def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
@@ -85,7 +86,7 @@ trait DerivedDynamoFormat {
     }
   }
 
-  implicit def genericProduct[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
+  implicit def genericProduct[T: NotSymbol, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))

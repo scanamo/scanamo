@@ -1,24 +1,21 @@
 package com.gu.scanamo
 
+import java.nio.ByteBuffer
+import java.util.UUID
+
 import cats.NotNull
+import cats.instances.either._
 import cats.instances.list._
 import cats.instances.map._
 import cats.instances.vector._
-import cats.instances.either._
-import cats.syntax.traverse._
 import cats.syntax.either._
+import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error._
 import simulacrum.typeclass
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 import scala.reflect.ClassTag
-import java.nio.ByteBuffer
-import java.util.UUID
-
-import macrocompat.bundle
-
-import scala.reflect.macros.blackbox
 
 /**
   * Type class for defining serialisation to and from
