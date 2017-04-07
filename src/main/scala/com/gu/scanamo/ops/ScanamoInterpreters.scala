@@ -6,7 +6,7 @@ import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
 import com.amazonaws.services.dynamodbv2.model.{UpdateItemResult, _}
-import com.gu.scanamo.request.{ScanamoDeleteRequest, ScanamoPutRequest, ScanamoScanRequest, ScanamoUpdateRequest}
+import com.gu.scanamo.request._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
@@ -32,7 +32,7 @@ object ScanamoInterpreters {
       case Scan(req) =>
         client.scan(JavaRequests.scan(req))
       case Query(req) =>
-        client.query(req)
+        client.query(JavaRequests.query(req))
       case BatchWrite(req) =>
         client.batchWriteItem(req)
       case BatchGet(req) =>
@@ -77,7 +77,7 @@ object ScanamoInterpreters {
       case Scan(req) =>
         futureOf(client.scanAsync, JavaRequests.scan(req))
       case Query(req) =>
-        futureOf(client.queryAsync, req)
+        futureOf(client.queryAsync, JavaRequests.query(req))
       // Overloading means we need explicit parameter types here
       case BatchWrite(req) =>
         futureOf(client.batchWriteItemAsync(_: BatchWriteItemRequest, _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]), req)
@@ -100,11 +100,34 @@ private[ops] object JavaRequests {
 
   def scan(req: ScanamoScanRequest): ScanRequest =
     req.index.foldLeft(
-      req.options.exclusiveStartKey.foldLeft(
-        req.options.limit.foldLeft(
-          new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)
-        )(_.withLimit(_))
-      )((r, key) => r.withExclusiveStartKey(key.asJava))
+      req.options.filter.foldLeft(
+        req.options.exclusiveStartKey.foldLeft(
+          req.options.limit.foldLeft(
+            new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)
+          )(_.withLimit(_))
+        )((r, key) => r.withExclusiveStartKey(key.asJava))
+      )((r, f) => {
+        val requestCondition = f.apply(None)
+        r.withFilterExpression(requestCondition.expression)
+          .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
+          .withExpressionAttributeValues(requestCondition.attributeValues.getOrElse(Map.empty).asJava)
+      })
+    )(_.withIndexName(_))
+
+  def query(req: ScanamoQueryRequest): QueryRequest =
+    req.index.foldLeft(
+      req.options.filter.foldLeft(
+        req.options.exclusiveStartKey.foldLeft(
+          req.options.limit.foldLeft(
+            req.query(new QueryRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent))
+          )(_.withLimit(_))
+        )((r, key) => r.withExclusiveStartKey(key.asJava))
+      )((r, f) => {
+        val requestCondition = f.apply(None)
+        r.withFilterExpression(requestCondition.expression)
+          .withExpressionAttributeNames((r.getExpressionAttributeNames.asScala ++ requestCondition.attributeNames).asJava)
+          .withExpressionAttributeValues((r.getExpressionAttributeValues.asScala ++ requestCondition.attributeValues.getOrElse(Map.empty)).asJava)
+      })
     )(_.withIndexName(_))
 
   def put(req: ScanamoPutRequest): PutItemRequest =

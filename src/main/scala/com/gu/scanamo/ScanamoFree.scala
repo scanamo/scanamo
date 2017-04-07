@@ -86,19 +86,19 @@ object ScanamoFree {
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, Some(indexName), ScanamoQueryOptions.default.copy(limit = Some(limit))))
 
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName)))
+    QueryResultStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
 
   def queryConsistent[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName).withConsistentRead(true)))
+    QueryResultStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default.copy(consistent = true)))
 
   def queryWithLimit[T: DynamoFormat](tableName: String)(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName)).withLimit(limit))
+    QueryResultStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default.copy(limit = Some(limit))))
 
   def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName)).withIndexName(indexName))
+    QueryResultStream.stream[T](ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default))
 
   def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream.stream[T](query(new QueryRequest().withTableName(tableName)).withIndexName(indexName).withLimit(limit))
+    QueryResultStream.stream[T](ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default.copy(limit = Some(limit))))
 
   def update[T](tableName: String)(key: UniqueKey[_])(update: UpdateExpression)(
     implicit format: DynamoFormat[T]

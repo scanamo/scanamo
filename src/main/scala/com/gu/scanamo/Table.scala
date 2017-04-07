@@ -1,8 +1,10 @@
 package com.gu.scanamo
 
+import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
+import com.gu.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import com.gu.scanamo.update.UpdateExpression
 
 /**
@@ -246,7 +248,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Underground,Central)))
     * }}}
     */
-  def limit(n: Int) = TableLimit(this, n)
+  def limit(n: Int) = TableWithOptions[V](name, ScanamoQueryOptions.default).limit(n)
 
   /**
     * Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
@@ -474,6 +476,60 @@ case class Table[V: DynamoFormat](name: String) {
     * }}}
     */
   def query(query: Query[_]) = Queryable.tableQueryable[V].query(this)(query: Query[_])
+
+  /**
+    * Filter the results of a Scan or Query
+    *
+    * {{{
+    * >>> case class Bear(name: String, favouriteFood: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val table = Table[Bear]("bears")
+    *
+    * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
+    * ...   val ops = for {
+    * ...     _ <- table.put(Bear("Pooh", "honey"))
+    * ...     _ <- table.put(Bear("Yogi", "picnic baskets"))
+    * ...     bears <- table.filter('favouriteFood -> "honey").scan()
+    * ...   } yield bears
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Bear(Pooh,honey)))
+    *
+    * >>> case class Station(line: String, name: String, zone: Int)
+    *
+    * >>> val stationTable = Table[Station]("Station")
+    *
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withTable(client)("Station")('line -> S, 'name -> S) {
+    * ...   val ops = for {
+    * ...     _ <- stationTable.putAll(Set(
+    * ...       Station("Metropolitan", "Chalfont & Latimer", 8),
+    * ...       Station("Metropolitan", "Chorleywood", 7),
+    * ...       Station("Metropolitan", "Rickmansworth", 7),
+    * ...       Station("Metropolitan", "Croxley", 7),
+    * ...       Station("Jubilee", "Canons Park", 5)
+    * ...     ))
+    * ...     filteredStations <- stationTable.filter('zone < 8).query('line -> "Metropolitan" and ('name beginsWith "C"))
+    * ...   } yield filteredStations
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Station(Metropolitan,Chorleywood,7)), Right(Station(Metropolitan,Croxley,7)))
+    * }}}
+    */
+  def filter[C: ConditionExpression](condition: C) =
+    TableWithOptions(name, ScanamoQueryOptions.default).filter(Condition(condition))
+}
+
+private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
+  def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+  def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
+  def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
+  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
+  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
 }
 
 private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
