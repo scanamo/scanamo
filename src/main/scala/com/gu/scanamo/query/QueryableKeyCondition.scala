@@ -38,6 +38,22 @@ object QueryableKeyCondition {
     override def apply(t: Descending[T])(req: QueryRequest): QueryRequest =
       condition.apply(t.queryCondition)(req).withScanIndexForward(false)
   }
+
+  implicit def hashAndFilterCondition[H: DynamoFormat, R: DynamoFormat, F: DynamoFormat] =
+    new QueryableKeyCondition[AndFilterCondition[H, R, F]] {
+      override def apply(t: AndFilterCondition[H, R, F])(req: QueryRequest): QueryRequest = {
+        req
+          .withKeyConditionExpression(
+              s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}"
+            )
+         .addExpressionAttributeNamesEntry("#K", t.hashCondition.key.name)
+         .addExpressionAttributeNamesEntry("#R", t.rangeCondition.key.name)
+         .addExpressionAttributeValuesEntry(s":${t.hashCondition.key.name}", DynamoFormat[H].write(t.hashCondition.v))
+         .addExpressionAttributeValuesEntry(s":${t.rangeCondition.key.name}", DynamoFormat[R].write(t.rangeCondition.v))
+         .addExpressionAttributeValuesEntry(s":${t.fieldCondition.key.name}", DynamoFormat[F].write(t.fieldCondition.v))
+         .withFilterExpression(s"${t.fieldCondition.keyConditionExpression("F")}")
+      }
+    }
 }
 
 case class Query[T](t: T)(implicit qkc: QueryableKeyCondition[T]) {
