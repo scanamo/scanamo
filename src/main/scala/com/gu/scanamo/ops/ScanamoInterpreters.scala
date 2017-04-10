@@ -1,6 +1,7 @@
 package com.gu.scanamo.ops
 
 import cats._
+import cats.data.NonEmptyList
 import cats.syntax.either._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
@@ -98,37 +99,43 @@ object ScanamoInterpreters {
 private[ops] object JavaRequests {
   import collection.JavaConverters._
 
-  def scan(req: ScanamoScanRequest): ScanRequest =
-    req.index.foldLeft(
-      req.options.filter.foldLeft(
-        req.options.exclusiveStartKey.foldLeft(
-          req.options.limit.foldLeft(
-            new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)
-          )(_.withLimit(_))
-        )((r, key) => r.withExclusiveStartKey(key.asJava))
-      )((r, f) => {
+  def scan(req: ScanamoScanRequest): ScanRequest = {
+    def queryRefinement[T](o: ScanamoScanRequest => Option[T])(rt: (ScanRequest,T) => ScanRequest): ScanRequest => ScanRequest =
+    { qr => o(req).foldLeft(qr)(rt) }
+
+    NonEmptyList.of(
+      queryRefinement(_.index)(_.withIndexName(_)),
+      queryRefinement(_.options.limit)(_.withLimit(_)),
+      queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.asJava)),
+      queryRefinement(_.options.filter)((r, f) => {
         val requestCondition = f.apply(None)
         r.withFilterExpression(requestCondition.expression)
           .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
           .withExpressionAttributeValues(requestCondition.attributeValues.getOrElse(Map.empty).asJava)
       })
-    )(_.withIndexName(_))
+    ).reduceLeft(_.compose(_))(
+      new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)
+    )
+  }
 
-  def query(req: ScanamoQueryRequest): QueryRequest =
-    req.index.foldLeft(
-      req.options.filter.foldLeft(
-        req.options.exclusiveStartKey.foldLeft(
-          req.options.limit.foldLeft(
-            req.query(new QueryRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent))
-          )(_.withLimit(_))
-        )((r, key) => r.withExclusiveStartKey(key.asJava))
-      )((r, f) => {
+  def query(req: ScanamoQueryRequest): QueryRequest = {
+    def queryRefinement[T](o: ScanamoQueryRequest => Option[T])(rt: (QueryRequest,T) => QueryRequest): QueryRequest => QueryRequest =
+      { qr => o(req).foldLeft(qr)(rt) }
+
+    NonEmptyList.of(
+      queryRefinement(_.index)(_.withIndexName(_)),
+      queryRefinement(_.options.limit)(_.withLimit(_)),
+      queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.asJava)),
+      queryRefinement(_.options.filter)((r, f) => {
         val requestCondition = f.apply(None)
         r.withFilterExpression(requestCondition.expression)
           .withExpressionAttributeNames((r.getExpressionAttributeNames.asScala ++ requestCondition.attributeNames).asJava)
           .withExpressionAttributeValues((r.getExpressionAttributeValues.asScala ++ requestCondition.attributeValues.getOrElse(Map.empty)).asJava)
       })
-    )(_.withIndexName(_))
+    ).reduceLeft(_.compose(_))(
+      req.query(new QueryRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent))
+    )
+  }
 
   def put(req: ScanamoPutRequest): PutItemRequest =
     req.condition.foldLeft(

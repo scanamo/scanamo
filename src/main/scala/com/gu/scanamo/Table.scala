@@ -1,5 +1,6 @@
 package com.gu.scanamo
 
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
@@ -33,11 +34,11 @@ import com.gu.scanamo.update.UpdateExpression
   */
 case class Table[V: DynamoFormat](name: String) {
 
-  def put(v: V) = ScanamoFree.put(name)(v)
-  def putAll(vs: Set[V]) = ScanamoFree.putAll(name)(vs)
-  def get(key: UniqueKey[_]) = ScanamoFree.get[V](name)(key)
-  def getAll(keys: UniqueKeys[_]) = ScanamoFree.getAll[V](name)(keys)
-  def delete(key: UniqueKey[_]) = ScanamoFree.delete(name)(key)
+  def put(v: V): ScanamoOps[PutItemResult] = ScanamoFree.put(name)(v)
+  def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.putAll(name)(vs)
+  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.get[V](name)(key)
+  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] = ScanamoFree.getAll[V](name)(keys)
+  def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] = ScanamoFree.delete(name)(key)
 
   /**
     * Deletes multiple items by a unique key
@@ -66,7 +67,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List()
     * }}}
     */
-  def deleteAll(items: UniqueKeys[_]) = ScanamoFree.deleteAll(name)(items)
+  def deleteAll(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.deleteAll(name)(items)
 
   /**
     * A secondary index on the table which can be scanned, or queried against
@@ -283,7 +284,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(City(IT,Rome)), Right(City(IT,Siena)))
     * }}}
     */
-  def consistently = ConsistentlyReadTable(this)
+  def consistently = ConsistentlyReadTable(name)
 
   /**
     * Performs the chained operation, `put` if the condition is met
@@ -447,7 +448,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
     * }}}
     */
-  def scan() = Scannable.tableScannable[V].scan(this)
+  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
   /**
     * Query a table based on the hash key and optionally the range key
@@ -475,7 +476,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
     */
-  def query(query: Query[_]) = Queryable.tableQueryable[V].query(this)(query: Query[_])
+  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
   /**
     * Filter the results of a Scan or Query
@@ -524,12 +525,29 @@ case class Table[V: DynamoFormat](name: String) {
     TableWithOptions(name, ScanamoQueryOptions.default).filter(Condition(condition))
 }
 
+private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {
+  def limit(n: Int): TableWithOptions[V] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.limit(n)
+  def filter[T](c: Condition[T]): TableWithOptions[V] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
+
+  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
+    ScanamoFree.getWithConsistency[V](tableName)(key)
+  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    ScanamoFree.scanConsistent[V](tableName)
+  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    ScanamoFree.queryConsistent[V](tableName)(query)
+}
+
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
-  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
-  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
+
+  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
+  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
 }
 
 private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
@@ -562,121 +580,19 @@ private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName:
     * List(Right(Transport(Underground,Picadilly,Blue)))
     * }}}
     */
-  def limit(n: Int) = IndexLimit(this, n)
+  def limit(n: Int) =
+    IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).limit(n)
 
-  def scan() = Scannable.indexScannable[V].scan(this)
-  def query(query: Query[_]) = Queryable.indexQueryable[V].query(this)(query: Query[_])
+  def filter[C: ConditionExpression](condition: C) =
+    IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).filter(Condition(condition))
+
+  def scan() = IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).scan()
+  def query(query: Query[_]) = IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).query(query)
 }
 
-private[scanamo] case class TableLimit[V: DynamoFormat](table: Table[V], limit: Int) {
-  def scan() = Scannable.limitedTableScannable[V].scan(this)
-  def query(query: Query[_]) = Queryable.limitedTableQueryable[V].query(this)(query: Query[_])
-}
-private[scanamo] case class IndexLimit[V: DynamoFormat](index: Index[V], limit: Int) {
-  def scan() = Scannable.limitedIndexScannable[V].scan(this)
-  def query(query: Query[_]) = Queryable.limitedIndexQueryable[V].query(this)(query: Query[_])
-}
-private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](table: Table[V]) {
-  def get(key: UniqueKey[_]) = Gettable.consistentGettable[V].get(this)(key: UniqueKey[_])
-  def scan() = Scannable.consistentTableScannable[V].scan(this)
-  def query(query: Query[_]) = Queryable.consistentTableQueryable[V].query(this)(query: Query[_])
-}
-
-/* typeclass */trait Scannable[T[_], V] {
-  def scan(t: T[V])(): ScanamoOps[List[Either[DynamoReadError, V]]]
-}
-
-object Scannable {
-  def apply[T[_], V](implicit s: Scannable[T, V]) = s
-
-  trait Ops[T[_], V] {
-    val instance: Scannable[T, V]
-    def self: T[V]
-    def scan() = instance.scan(self)()
-  }
-
-  trait ToScannableOps {
-    implicit def scannableOps[T[_], V](t: T[V])(implicit s: Scannable[T, V]) = new Ops[T, V] {
-      val instance = s
-      val self = t
-    }
-  }
-
-  implicit def tableScannable[V: DynamoFormat] = new Scannable[Table, V] {
-    override def scan(t: Table[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.scan[V](t.name)
-  }
-  implicit def indexScannable[V: DynamoFormat] = new Scannable[Index, V] {
-    override def scan(i: Index[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.scanIndex[V](i.tableName, i.indexName)
-  }
-
-  implicit def limitedTableScannable[V: DynamoFormat] = new Scannable[TableLimit, V] {
-    override def scan(t: TableLimit[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.scanWithLimit[V](t.table.name, t.limit)
-  }
-  implicit def limitedIndexScannable[V: DynamoFormat] = new Scannable[IndexLimit, V] {
-    override def scan(i: IndexLimit[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.scanIndexWithLimit[V](i.index.tableName, i.index.indexName, i.limit)
-  }
-
-  implicit def consistentTableScannable[V: DynamoFormat]() = new Scannable[ConsistentlyReadTable, V] {
-    override def scan(t: ConsistentlyReadTable[V])(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.scanConsistent[V](t.table.name)
-  }
-}
-
-/* typeclass */ trait Queryable[T[_], V] {
-  def query(t: T[V])(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
-}
-
-object Queryable {
-  def apply[T[_], V](implicit s: Queryable[T, V]) = s
-
-  trait Ops[T[_], V] {
-    val instance: Queryable[T, V]
-    def self: T[V]
-    def query(query: Query[_]) = instance.query(self)(query)
-  }
-
-  trait ToQueryableOps {
-    implicit def queryableOps[T[_], V](t: T[V])(implicit s: Queryable[T, V]) = new Ops[T, V] {
-      val instance = s
-      val self = t
-    }
-  }
-
-  implicit def tableQueryable[V: DynamoFormat] = new Queryable[Table, V] {
-    override def query(t: Table[V])(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.query[V](t.name)(query)
-  }
-  implicit def indexQueryable[V: DynamoFormat] = new Queryable[Index, V] {
-    override def query(i: Index[V])(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.queryIndex[V](i.tableName, i.indexName)(query)
-  }
-  implicit def limitedTableQueryable[V: DynamoFormat] = new Queryable[TableLimit, V] {
-    override def query(t: TableLimit[V])(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.queryWithLimit[V](t.table.name)(query, t.limit)
-  }
-  implicit def limitedIndexQueryable[V: DynamoFormat] = new Queryable[IndexLimit, V] {
-    override def query(i: IndexLimit[V])(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.queryIndexWithLimit[V](i.index.tableName, i.index.indexName)(query, i.limit)
-  }
-  implicit def consistentTableQueryable[V: DynamoFormat] = new Queryable[ConsistentlyReadTable, V] {
-    override def query(t: ConsistentlyReadTable[V])(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-      ScanamoFree.queryConsistent[V](t.table.name)(query)
-  }
-}
-
-/* typeclass */ trait Gettable[T[_], V]{
-  def get(t: T[V])(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]]
-}
-
-object Gettable {
-  def apply[T[_], V](implicit s: Gettable[T, V]) = s
-
-  implicit def consistentGettable[V: DynamoFormat] = new Gettable[ConsistentlyReadTable, V] {
-    override def get(t: ConsistentlyReadTable[V])(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
-      ScanamoFree.getWithConsistency[V](t.table.name)(key)
-  }
+private[scanamo] case class IndexWithOptions[V: DynamoFormat](tableName: String, indexName: Option[String], queryOptions: ScanamoQueryOptions) {
+  def limit(n: Int): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+  def filter[T](c: Condition[T]): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
+  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, indexName, queryOptions))
+  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, indexName, query, queryOptions))
 }

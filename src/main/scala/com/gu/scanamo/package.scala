@@ -5,7 +5,7 @@ import com.gu.scanamo.update._
 
 package object scanamo {
 
-  object syntax extends Scannable.ToScannableOps with Queryable.ToQueryableOps {
+  object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
       def <[V: DynamoFormat](v: V) = KeyIs(s, LT, v)
       def >[V: DynamoFormat](v: V) = KeyIs(s, GT, v)
