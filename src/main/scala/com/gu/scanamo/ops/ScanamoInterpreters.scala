@@ -32,20 +32,22 @@ object ScanamoInterpreters {
       )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
     )
 
-  def javaUpdateRequest(req: ScanamoUpdateRequest): UpdateItemRequest =
-    req.condition.foldLeft(
-      new UpdateItemRequest().withTableName(req.tableName).withKey(req.key.asJava)
-        .withUpdateExpression(req.updateExpression)
-        .withExpressionAttributeNames(req.attributeNames.asJava)
-        .withExpressionAttributeValues(req.attributeValues.asJava)
-        .withReturnValues(ReturnValue.ALL_NEW)
-    )((r, c) =>
-      c.attributeValues.foldLeft(
+  def javaUpdateRequest(req: ScanamoUpdateRequest): UpdateItemRequest = {
+    val reqWithoutValues =
+      req.condition.foldLeft(
+        new UpdateItemRequest().withTableName(req.tableName).withKey(req.key.asJava)
+          .withUpdateExpression(req.updateExpression)
+          .withExpressionAttributeNames(req.attributeNames.asJava)
+          .withReturnValues(ReturnValue.ALL_NEW)
+      )((r, c) =>
         r.withConditionExpression(c.expression).withExpressionAttributeNames(
           (c.attributeNames ++ req.attributeNames).asJava)
-      )((cond, values) => cond.withExpressionAttributeValues(
-        (values ++ req.attributeValues).asJava))
-    )
+      )
+
+    val attributeValues = req.condition.flatMap(_.attributeValues).foldLeft(req.attributeValues)(_ ++ _)
+    if (attributeValues.isEmpty) reqWithoutValues
+    else reqWithoutValues.withExpressionAttributeValues(attributeValues.asJava)
+  }
 
   def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {

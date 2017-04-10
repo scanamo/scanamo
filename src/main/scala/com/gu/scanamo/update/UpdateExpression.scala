@@ -36,6 +36,10 @@ private[update] sealed trait LeafUpdateExpression {
 object UpdateExpression {
   def set[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
     SetExpression(fieldValue._1, fieldValue._2)
+  def setFromAttribute(fields: (Field, Field)): UpdateExpression = {
+    val (to, from) = fields
+    SetExpression.fromAttribute(from, to)
+  }
   def append[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
     AppendExpression(fieldValue._1, fieldValue._2)
   def prepend[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
@@ -96,6 +100,17 @@ object SetExpression {
       format.write(value)
     ))
   }
+  def fromAttribute(from: Field, to: Field): UpdateExpression =
+    SimpleUpdateExpression(new LeafUpdateExpression {
+      override def expression: String = s"#${to.placeholder} = #${from.placeholder}"
+
+      override def prefixKeys(prefix: String): LeafUpdateExpression = this
+
+      override val constantValue: Option[(String, AttributeValue)] = None
+      override val attributeNames: Map[String, String] = to.attributeNames ++ from.attributeNames
+      override val updateType: UpdateType = SET
+      override val attributeValue: Option[(String, AttributeValue)] = None
+    })
 }
 
 private[update] case class LeafAppendExpression (

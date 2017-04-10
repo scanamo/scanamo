@@ -57,5 +57,4 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
       override def read(av: AttributeValue): Either[DynamoReadError, A] = genericFormat.read(av).right.map(gen.from)
       override def write(t: A): AttributeValue = genericFormat.write(gen.to(t))
     }
-
 }
