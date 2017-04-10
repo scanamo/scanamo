@@ -45,3 +45,4 @@ final case class BeginsWith[V: DynamoFormat](key: Symbol, v: V) extends RangeKey
 
 final case class AttributeExists(key: Symbol)
 final case class Not[T: ConditionExpression](condition: T)
+
