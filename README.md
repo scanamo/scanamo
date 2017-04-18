@@ -1,6 +1,8 @@
 Scanamo [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.12) [![Build Status](https://travis-ci.org/guardian/scanamo.svg?branch=master)](https://travis-ci.org/guardian/scanamo) [![Coverage Status](https://coveralls.io/repos/github/guardian/scanamo/badge.svg?branch=master)](https://coveralls.io/github/guardian/scanamo?branch=master) [![Chat on gitter](https://badges.gitter.im/guardian/scanamo.svg)](https://gitter.im/guardian/scanamo)
 =======
 
+[![Join the chat at https://gitter.im/guardian/scanamo](https://badges.gitter.im/guardian/scanamo.svg)](https://gitter.im/guardian/scanamo?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 Scanamo is a library to make using [DynamoDB](https://aws.amazon.com/documentation/dynamodb/) with Scala 
 simpler and less error-prone.
 
