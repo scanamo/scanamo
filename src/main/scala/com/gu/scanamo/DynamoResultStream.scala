@@ -6,6 +6,7 @@ import cats.free.Free
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryRequest, QueryResult, ScanRequest, ScanResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
+import com.gu.scanamo.request.{ScanamoQueryRequest, ScanamoScanRequest}
 
 import collection.JavaConverters._
 
@@ -39,25 +40,25 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
 }
 
 private[scanamo] object DynamoResultStream {
-  object ScanResultStream extends DynamoResultStream[ScanRequest, ScanResult] {
+  object ScanResultStream extends DynamoResultStream[ScanamoScanRequest, ScanResult] {
     override def items(res: ScanResult): util.List[util.Map[String, AttributeValue]] = res.getItems
     override def lastEvaluatedKey(res: ScanResult): util.Map[String, AttributeValue] = res.getLastEvaluatedKey
-    override def withExclusiveStartKey(req: ScanRequest, key: util.Map[String, AttributeValue]): ScanRequest =
-      req.withExclusiveStartKey(key)
+    override def withExclusiveStartKey(req: ScanamoScanRequest, key: util.Map[String, AttributeValue]): ScanamoScanRequest =
+      req.copy(options = req.options.copy(exclusiveStartKey = Some(key.asScala.toMap)))
 
-    override def exec(req: ScanRequest): ScanamoOps[ScanResult] = ScanamoOps.scan(req)
+    override def exec(req: ScanamoScanRequest): ScanamoOps[ScanResult] = ScanamoOps.scan(req)
 
-    override def limit(req: ScanRequest): Option[Int] = Option(req.getLimit).map(_.intValue)
+    override def limit(req: ScanamoScanRequest): Option[Int] = req.options.limit
   }
 
-  object QueryResultStream extends DynamoResultStream[QueryRequest, QueryResult] {
+  object QueryResultStream extends DynamoResultStream[ScanamoQueryRequest, QueryResult] {
     override def items(res: QueryResult): util.List[util.Map[String, AttributeValue]] = res.getItems
     override def lastEvaluatedKey(res: QueryResult): util.Map[String, AttributeValue] = res.getLastEvaluatedKey
-    override def withExclusiveStartKey(req: QueryRequest, key: util.Map[String, AttributeValue]): QueryRequest =
-      req.withExclusiveStartKey(key)
+    override def withExclusiveStartKey(req: ScanamoQueryRequest, key: util.Map[String, AttributeValue]): ScanamoQueryRequest =
+      req.copy(options = req.options.copy(exclusiveStartKey = Some(key.asScala.toMap)))
 
-    override def exec(req: QueryRequest): ScanamoOps[QueryResult] = ScanamoOps.query(req)
+    override def exec(req: ScanamoQueryRequest): ScanamoOps[QueryResult] = ScanamoOps.query(req)
 
-    override def limit(req: QueryRequest): Option[Int] = Option(req.getLimit).map(_.intValue)
+    override def limit(req: ScanamoQueryRequest): Option[Int] = req.options.limit
   }
 }

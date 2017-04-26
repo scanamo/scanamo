@@ -43,7 +43,7 @@ class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpre
     case Scan(req) => State(counter =>
       if (counter < 42)
         counter + 1 -> new ScanResult().withLastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1)).asJava)
-          .withItems(List.fill(Option(req.getLimit).map(_.toInt).getOrElse(50))(
+          .withItems(List.fill(req.options.limit.getOrElse(50))(
             new util.HashMap[String, AttributeValue]()): _*)
       else
         counter -> new ScanResult().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
@@ -51,7 +51,7 @@ class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpre
     case Query(req) => State(counter =>
       if (counter < 42)
         counter + 1 -> new QueryResult().withLastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1)).asJava)
-            .withItems(List.fill(req.getLimit)(new util.HashMap[String, AttributeValue]()): _*)
+            .withItems(List.fill(req.options.limit.getOrElse(0))(new util.HashMap[String, AttributeValue]()): _*)
       else
         counter -> new QueryResult().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
     )
