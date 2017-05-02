@@ -20,18 +20,20 @@ object QueryableKeyCondition {
 
   implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat] =
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
-      override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest =
+      override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest = {
         req
           .withKeyConditionExpression(
             s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}"
           )
           .withExpressionAttributeNames(Map("#K" -> t.hashCondition.key.name, "#R" -> t.rangeCondition.key.name).asJava)
           .withExpressionAttributeValues(
-            Map(
-              s":${t.hashCondition.key.name}" -> DynamoFormat[H].write(t.hashCondition.v),
-              s":${t.rangeCondition.key.name}" -> DynamoFormat[R].write(t.rangeCondition.v)
+            (
+              t.rangeCondition.attributes.map {attrib =>
+                s":${attrib._1}" -> DynamoFormat[R].write(attrib._2)
+              } + (s":${t.hashCondition.key.name}" -> DynamoFormat[H].write(t.hashCondition.v))
             ).asJava
           )
+      }
     }
 
   implicit def descendingQueryCondition[T](implicit condition: QueryableKeyCondition[T]) = new QueryableKeyCondition[Descending[T]] {

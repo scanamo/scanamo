@@ -12,7 +12,7 @@ package object scanamo {
       def <=[V: DynamoFormat](v: V) = KeyIs(s, LTE, v)
       def >=[V: DynamoFormat](v: V) = KeyIs(s, GTE, v)
       def beginsWith[V: DynamoFormat](v: V) = BeginsWith(s, v)
-
+      def between[V: DynamoFormat](bounds: (V, V)) = Between(s, bounds)
       def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
     }
 
