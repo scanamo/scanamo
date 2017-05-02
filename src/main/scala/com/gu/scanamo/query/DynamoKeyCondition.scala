@@ -1,6 +1,7 @@
 package com.gu.scanamo.query
 
 import com.gu.scanamo.DynamoFormat
+import com.gu.scanamo.syntax.Bounds
 
 case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
   def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]) =
@@ -45,11 +46,11 @@ final case class BeginsWith[V: DynamoFormat](key: Symbol, v: V) extends RangeKey
   override def attributes = Map(key.name -> v)
 }
 
-final case class Between[V: DynamoFormat](key: Symbol, bounds: (V, V)) extends RangeKeyCondition[V] {
+final case class Between[V: DynamoFormat](key: Symbol, bounds: Bounds[V]) extends RangeKeyCondition[V] {
   override def keyConditionExpression(s: String): String = s"#$s BETWEEN :lower AND :upper"
   override def attributes = Map(
-    "lower" -> bounds._1,
-    "upper" -> bounds._2
+    "lower" -> bounds.lowerBound.v,
+    "upper" -> bounds.upperBound.v
   )
 }
 

@@ -12,7 +12,7 @@ package object scanamo {
       def <=[V: DynamoFormat](v: V) = KeyIs(s, LTE, v)
       def >=[V: DynamoFormat](v: V) = KeyIs(s, GTE, v)
       def beginsWith[V: DynamoFormat](v: V) = BeginsWith(s, v)
-      def between[V: DynamoFormat](bounds: (V, V)) = Between(s, bounds)
+      def between[V: DynamoFormat](bounds: Bounds[V]) = Between(s, bounds)
       def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
     }
 
@@ -36,6 +36,12 @@ package object scanamo {
       Query(KeyEquals(pair._1, pair._2))
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
+
+    case class Bounds[V: DynamoFormat](lowerBound: Bound[V], upperBound: Bound[V])
+
+    implicit class Bound[V: DynamoFormat](val v: V) {
+      def and(upperBound: V) = Bounds(Bound(v), Bound(upperBound))
+    }
 
     def attributeExists(symbol: Symbol) = AttributeExists(symbol)
 

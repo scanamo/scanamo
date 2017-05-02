@@ -299,7 +299,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       Scanamo.putAll(client)("stations")(stations)
       val results1 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
-        'mode -> "Underground" and ('zone between ((2, 4))))
+        'mode -> "Underground" and ('zone between (2 and 4)))
 
       results1.futureValue should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
 
@@ -308,7 +308,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       Scanamo.putAll(client)("stations")(Set(LiverpoolStreet))
       val results2 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
-        'mode -> "Underground" and ('zone between ((2, 4))))
+        'mode -> "Underground" and ('zone between (2 and 4)))
       results2.futureValue should equal(List.empty)
 
       val maybeStations2 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)("stations")
@@ -316,7 +316,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       Scanamo.putAll(client)("stations")(Set(CamdenTown))
       val results3 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
-        'mode -> "Underground" and ('zone between ((1, 1))))
+        'mode -> "Underground" and ('zone between (1 and 1)))
       results3.futureValue should equal(List.empty)
     }
   }
@@ -405,8 +405,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
         _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
-        _ <- farmersTable.given('age between ((56, 57))).put(Farmer("Butch", 57, Farm(List("chicken"))))
-        _ <- farmersTable.given('age between ((58, 59))).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        _ <- farmersTable.given('age between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get('name -> "Butch")
       } yield farmerButch
       ScanamoAsync.exec(client)(farmerOps).futureValue should equal(

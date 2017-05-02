@@ -76,8 +76,8 @@ object ConditionExpression {
         s"#condition BETWEEN :lower and :upper",
         Map("#condition" -> b.key.name),
         Some(Map(
-          ":lower" -> DynamoFormat[V].write(b.bounds._1),
-          ":upper" -> DynamoFormat[V].write(b.bounds._2)
+          ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
+          ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
         ))
       )
   }
