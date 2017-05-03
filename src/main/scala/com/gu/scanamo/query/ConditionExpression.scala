@@ -70,6 +70,18 @@ object ConditionExpression {
       )
   }
 
+  implicit def betweenCondition[V: DynamoFormat] = new ConditionExpression[Between[V]] {
+    override def apply(b: Between[V])(condition: Option[RequestCondition]): RequestCondition =
+      RequestCondition(
+        s"#condition BETWEEN :lower and :upper",
+        Map("#condition" -> b.key.name),
+        Some(Map(
+          ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
+          ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
+        ))
+      )
+  }
+
   implicit def keyIsCondition[V: DynamoFormat] = new ConditionExpression[KeyIs[V]] {
     override def apply(k: KeyIs[V])(condition: Option[RequestCondition]): RequestCondition =
       RequestCondition(

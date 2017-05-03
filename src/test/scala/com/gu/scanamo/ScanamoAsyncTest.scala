@@ -1,5 +1,6 @@
 package com.gu.scanamo
 
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
@@ -270,9 +271,53 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Transport("Underground", "Picadilly", "Blue"),
         Transport("Underground", "Northern", "Black")))
       val results = ScanamoAsync.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
-        ('mode -> "Underground" and ('colour beginsWith "Bl")), 1)
+        'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
 
       results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
+    }
+  }
+
+  it ("queries an index asynchronously with 'between' sort-key condition") {
+    case class Station(mode: String, name: String, zone: Int)
+
+    import com.gu.scanamo.syntax._
+
+    def deletaAllStations(client: AmazonDynamoDBAsync, stations: Set[Station]) = {
+      ScanamoAsync.delete(client)("stations")('mode -> "Underground")
+      ScanamoAsync.deleteAll(client)("stations")(
+        UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
+      )
+    }
+    val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
+    val CamdenTown = Station("Underground", "Camden Town", 2)
+    val GoldersGreen = Station("Underground", "Golders Green", 3)
+    val Hainault = Station("Underground", "Hainault", 4)
+
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("stations", "zone-index")(
+      'mode -> S, 'name -> S)('mode -> S, 'zone -> N
+    ) {
+      val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
+      Scanamo.putAll(client)("stations")(stations)
+      val results1 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+        'mode -> "Underground" and ('zone between (2 and 4)))
+
+      results1.futureValue should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
+
+      val maybeStations1 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)("stations")
+      maybeStations1.futureValue should equal(List.empty)
+
+      Scanamo.putAll(client)("stations")(Set(LiverpoolStreet))
+      val results2 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+        'mode -> "Underground" and ('zone between (2 and 4)))
+      results2.futureValue should equal(List.empty)
+
+      val maybeStations2 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)("stations")
+      maybeStations2.futureValue should equal(List.empty)
+
+      Scanamo.putAll(client)("stations")(Set(CamdenTown))
+      val results3 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+        'mode -> "Underground" and ('zone between (1 and 1)))
+      results3.futureValue should equal(List.empty)
     }
   }
   
@@ -344,6 +389,29 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       } yield farmerWithNewStock
       ScanamoAsync.exec(client)(farmerOps).futureValue should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"))))))
+    }
+  }
+
+  it("conditionally put asynchronously with 'between' condition") {
+    case class Farm(animals: List[String])
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    import com.gu.scanamo.syntax._
+
+    val farmersTable = Table[Farmer]("nursery-farmers")
+
+    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+      val farmerOps = for {
+        _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
+        _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
+        _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
+        _ <- farmersTable.given('age between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        farmerButch <- farmersTable.get('name -> "Butch")
+      } yield farmerButch
+      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(
+        Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
+      )
     }
   }
 
