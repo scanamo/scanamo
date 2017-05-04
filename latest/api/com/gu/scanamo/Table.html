@@ -242,18 +242,6 @@ DynamoDB's AttributeValue">
                           EnumerationDynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Gettable$.html" title=""></a>
-                        <a class="trait" href="Gettable.html" title=""></a>
-                        <a href="Gettable.html" title="">
-                          Gettable
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <a class="object" href="Queryable$.html" title=""></a>
-                        <a class="trait" href="Queryable.html" title=""></a>
-                        <a href="Queryable.html" title="">
-                          Queryable
-                        </a>
-                      </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB"></a>
                         <a href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB">
@@ -272,12 +260,6 @@ concurrent.ExecutionContext and returns a concurrent.Future">
                         <a class="object" href="ScanamoFree$.html" title=""></a>
                         <a href="ScanamoFree$.html" title="">
                           ScanamoFree
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <a class="object" href="Scannable$.html" title=""></a>
-                        <a class="trait" href="Scannable.html" title=""></a>
-                        <a href="Scannable.html" title="">
-                          Scannable
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -609,6 +591,58 @@ supported by DynamoDB</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span cl
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
+    </li><li name="com.gu.scanamo.Table#filter" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="filter[C](condition:C)(implicitevidence$3:com.gu.scanamo.query.ConditionExpression[C]):com.gu.scanamo.TableWithOptions[V]"></a><a id="filter[C](C)(ConditionExpression[C]):TableWithOptions[V]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/Table.html#filter[C](condition:C)(implicitevidence$3:com.gu.scanamo.query.ConditionExpression[C]):com.gu.scanamo.TableWithOptions[V]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">filter</span><span class="tparams">[<span name="C">C</span>]</span><span class="params">(<span name="condition">condition: <span class="extype" name="com.gu.scanamo.Table.filter.C">C</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.Table.filter.C">C</span>]</span>)</span><span class="result">: <span class="extype" name="com.gu.scanamo.TableWithOptions">TableWithOptions</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>
+      </span>
+      
+      <p class="shortcomment cmt">Filter the results of a Scan or Query</p><div class="fullcomment"><div class="comment cmt"><p>Filter the results of a Scan or Query</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bear(name: <span class="std">String</span>, favouriteFood: <span class="std">String</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> table = Table[Bear](<span class="lit">"bears"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"bears"</span>)('name -&gt; S) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Pooh"</span>, <span class="lit">"honey"</span>))
+...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Yogi"</span>, <span class="lit">"picnic baskets"</span>))
+...     bears <span class="kw">&lt;-</span> table.filter('favouriteFood -&gt; <span class="lit">"honey"</span>).scan()
+...   } <span class="kw">yield</span> bears
+...   Scanamo.exec(client)(ops)
+... }
+<span class="std">List</span>(Right(Bear(Pooh,honey)))
+
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Station(line: <span class="std">String</span>, name: <span class="std">String</span>, zone: <span class="std">Int</span>)
+
+&gt;&gt;&gt; <span class="kw">val</span> stationTable = Table[Station](<span class="lit">"Station"</span>)
+
+&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"Station"</span>)('line -&gt; S, 'name -&gt; S) {
+...   <span class="kw">val</span> ops = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> stationTable.putAll(<span class="std">Set</span>(
+...       Station(<span class="lit">"Metropolitan"</span>, <span class="lit">"Chalfont & Latimer"</span>, <span class="num">8</span>),
+...       Station(<span class="lit">"Metropolitan"</span>, <span class="lit">"Chorleywood"</span>, <span class="num">7</span>),
+...       Station(<span class="lit">"Metropolitan"</span>, <span class="lit">"Rickmansworth"</span>, <span class="num">7</span>),
+...       Station(<span class="lit">"Metropolitan"</span>, <span class="lit">"Croxley"</span>, <span class="num">7</span>),
+...       Station(<span class="lit">"Jubilee"</span>, <span class="lit">"Canons Park"</span>, <span class="num">5</span>)
+...     ))
+...     filteredStations <span class="kw">&lt;-</span> stationTable.filter('zone &lt; <span class="num">8</span>).query('line -&gt; <span class="lit">"Metropolitan"</span> and ('name beginsWith <span class="lit">"C"</span>))
+...   } <span class="kw">yield</span> filteredStations
+...   Scanamo.exec(client)(ops)
+... }
+<span class="std">List</span>(Right(Station(Metropolitan,Chorleywood,<span class="num">7</span>)), Right(Station(Metropolitan,Croxley,<span class="num">7</span>)))</pre></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -847,9 +881,9 @@ supported by DynamoDB</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span cl
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
     </li><li name="com.gu.scanamo.Table#limit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="limit(n:Int):com.gu.scanamo.TableLimit[V]"></a><a id="limit(Int):TableLimit[V]"></a>
+      <a id="limit(n:Int):com.gu.scanamo.TableWithOptions[V]"></a><a id="limit(Int):TableWithOptions[V]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Table.html#limit(n:Int):com.gu.scanamo.TableLimit[V]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Table.html#limit(n:Int):com.gu.scanamo.TableWithOptions[V]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -858,7 +892,7 @@ supported by DynamoDB</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span cl
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">limit</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="com.gu.scanamo.TableLimit">TableLimit</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>
+        <span class="name">limit</span><span class="params">(<span name="n">n: <span class="extype" name="scala.Int">Int</span></span>)</span><span class="result">: <span class="extype" name="com.gu.scanamo.TableWithOptions">TableWithOptions</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>
       </span>
       
       <p class="shortcomment cmt">Query or scan a table, limiting the number of items evaluated by Dynamo</p><div class="fullcomment"><div class="comment cmt"><p>Query or scan a table, limiting the number of items evaluated by Dynamo</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Transport(mode: <span class="std">String</span>, line: <span class="std">String</span>)
@@ -1147,7 +1181,18 @@ Right(Bar(x,<span class="num">11</span>,<span class="std">Set</span>(Second)))</
 ...   } <span class="kw">yield</span> updatedOuter
 ...   Scanamo.exec(client)(operations)
 ... }
-Right(Outer(a8345373-<span class="num">9</span>a93-<span class="num">43</span>be-<span class="num">9</span>bcd-e3682c9197f4,Middle(x,<span class="num">1</span>,Inner(beta),<span class="std">List</span>(<span class="num">1</span>, <span class="num">3</span>))))</pre></div></div>
+Right(Outer(a8345373-<span class="num">9</span>a93-<span class="num">43</span>be-<span class="num">9</span>bcd-e3682c9197f4,Middle(x,<span class="num">1</span>,Inner(beta),<span class="std">List</span>(<span class="num">1</span>, <span class="num">3</span>))))</pre><p>It's possible to update one field to the value of another</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Thing(id: <span class="std">String</span>, mandatory: <span class="std">Int</span>, optional: <span class="std">Option</span>[<span class="std">Int</span>])
+&gt;&gt;&gt; <span class="kw">val</span> things = Table[Thing](<span class="lit">"things"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"things"</span>)('id -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> things.put(Thing(<span class="lit">"a1"</span>, <span class="num">3</span>, <span class="std">None</span>))
+...     updated <span class="kw">&lt;-</span> things.update('id -&gt; <span class="lit">"a1"</span>, set('optional -&gt; 'mandatory))
+...   } <span class="kw">yield</span> updated
+...   Scanamo.exec(client)(operations)
+... }
+Right(Thing(a1,<span class="num">3</span>,<span class="std">Some</span>(<span class="num">3</span>)))</pre></div></div>
     </li><li name="scala.AnyRef#wait" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="wait():Unit"></a>
       <span class="permalink">

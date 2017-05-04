@@ -205,8 +205,14 @@
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="ScanamoInterpreters$.html" title=""></a>
-                        <a href="ScanamoInterpreters$.html" title="">
+                        <a class="object" href="ScanamoInterpreters$.html" title="Interpreters to take the operations defined with Scanamo and execute them
+by transforming them from a [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html)
+grammar using a [FunctionK](http://typelevel.org/cats/datatypes/functionk.html)
+"></a>
+                        <a href="ScanamoInterpreters$.html" title="Interpreters to take the operations defined with Scanamo and execute them
+by transforming them from a [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html)
+grammar using a [FunctionK](http://typelevel.org/cats/datatypes/functionk.html)
+">
                           ScanamoInterpreters
                         </a>
                       </li><li class="current-entities indented4">
@@ -677,9 +683,9 @@
       
       
     </li><li name="com.gu.scanamo.ops.ScanamoOps#query" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="query(req:com.amazonaws.services.dynamodbv2.model.QueryRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.QueryResult]"></a><a id="query(QueryRequest):ScanamoOps[QueryResult]"></a>
+      <a id="query(req:com.gu.scanamo.request.ScanamoQueryRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.QueryResult]"></a><a id="query(ScanamoQueryRequest):ScanamoOps[QueryResult]"></a>
       <span class="permalink">
-      <a href="../../../../com/gu/scanamo/ops/ScanamoOps$.html#query(req:com.amazonaws.services.dynamodbv2.model.QueryRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.QueryResult]" title="Permalink">
+      <a href="../../../../com/gu/scanamo/ops/ScanamoOps$.html#query(req:com.gu.scanamo.request.ScanamoQueryRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.QueryResult]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -688,14 +694,14 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">query</span><span class="params">(<span name="req">req: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.QueryRequest">QueryRequest</span></span>)</span><span class="result">: <a href="index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.QueryResult">QueryResult</span>]</span>
+        <span class="name">query</span><span class="params">(<span name="req">req: <a href="../request/ScanamoQueryRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoQueryRequest">ScanamoQueryRequest</a></span>)</span><span class="result">: <a href="index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.QueryResult">QueryResult</span>]</span>
       </span>
       
       
     </li><li name="com.gu.scanamo.ops.ScanamoOps#scan" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="scan(req:com.amazonaws.services.dynamodbv2.model.ScanRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.ScanResult]"></a><a id="scan(ScanRequest):ScanamoOps[ScanResult]"></a>
+      <a id="scan(req:com.gu.scanamo.request.ScanamoScanRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.ScanResult]"></a><a id="scan(ScanamoScanRequest):ScanamoOps[ScanResult]"></a>
       <span class="permalink">
-      <a href="../../../../com/gu/scanamo/ops/ScanamoOps$.html#scan(req:com.amazonaws.services.dynamodbv2.model.ScanRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.ScanResult]" title="Permalink">
+      <a href="../../../../com/gu/scanamo/ops/ScanamoOps$.html#scan(req:com.gu.scanamo.request.ScanamoScanRequest):com.gu.scanamo.ops.ScanamoOps[com.amazonaws.services.dynamodbv2.model.ScanResult]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -704,7 +710,7 @@
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">scan</span><span class="params">(<span name="req">req: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.ScanRequest">ScanRequest</span></span>)</span><span class="result">: <a href="index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ScanResult">ScanResult</span>]</span>
+        <span class="name">scan</span><span class="params">(<span name="req">req: <a href="../request/ScanamoScanRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoScanRequest">ScanamoScanRequest</a></span>)</span><span class="result">: <a href="index.html#ScanamoOps[A]=cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,A]" class="extmbr" name="com.gu.scanamo.ops.ScanamoOps">ScanamoOps</a>[<span class="extype" name="com.amazonaws.services.dynamodbv2.model.ScanResult">ScanResult</span>]</span>
       </span>
       
       

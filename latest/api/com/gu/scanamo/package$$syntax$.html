@@ -224,18 +224,6 @@ DynamoDB's AttributeValue">
                           EnumerationDynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Gettable$.html" title=""></a>
-                        <a class="trait" href="Gettable.html" title=""></a>
-                        <a href="Gettable.html" title="">
-                          Gettable
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <a class="object" href="Queryable$.html" title=""></a>
-                        <a class="trait" href="Queryable.html" title=""></a>
-                        <a href="Queryable.html" title="">
-                          Queryable
-                        </a>
-                      </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB"></a>
                         <a href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB">
@@ -254,12 +242,6 @@ concurrent.ExecutionContext and returns a concurrent.Future">
                         <a class="object" href="ScanamoFree$.html" title=""></a>
                         <a href="ScanamoFree$.html" title="">
                           ScanamoFree
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <a class="object" href="Scannable$.html" title=""></a>
-                        <a class="trait" href="Scannable.html" title=""></a>
-                        <a href="Scannable.html" title="">
-                          Scannable
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -314,7 +296,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         <span class="kind">object</span>
       </span>
       <span class="symbol">
-        <span class="name">syntax</span><span class="result"> extends <a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a> with <a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a></span>
+        <span class="name">syntax</span>
       </span>
       </h4>
 
@@ -323,7 +305,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a>, <a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a>, <span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
         </div></div>
         
 
@@ -349,7 +331,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
                   <span class="filtertype">Inherited<br />
                   </span>
                   <ol id="linearization">
-                    <li class="in" name="com.gu.scanamo.syntax"><span>syntax</span></li><li class="in" name="com.gu.scanamo.Queryable.ToQueryableOps"><span>ToQueryableOps</span></li><li class="in" name="com.gu.scanamo.Scannable.ToScannableOps"><span>ToScannableOps</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                    <li class="in" name="com.gu.scanamo.syntax"><span>syntax</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
                   </ol>
                 </div><div class="ancestors">
               <span class="filtertype"></span>
@@ -404,6 +386,42 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         <a title="" href="package$$syntax$$AndUpdateExpression.html">
               <span class="name">AndUpdateExpression</span>
             </a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.syntax.Bound" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Bound[V]extendsAnyRef"></a><a id="Bound[V]:Bound[V]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#Bound[V]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="package$$syntax$$Bound.html">
+              <span class="name">Bound</span>
+            </a><span class="tparams">[<span name="V">V</span>]</span><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.syntax.Bounds" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="Bounds[V]extendsProductwithSerializable"></a><a id="Bounds[V]:Bounds[V]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#Bounds[V]extendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="package$$syntax$$Bounds.html">
+              <span class="name">Bounds</span>
+            </a><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="lowerBound">lowerBound: <a href="package$$syntax$$Bound.html" class="extype" name="com.gu.scanamo.syntax.Bound">Bound</a>[<span class="extype" name="com.gu.scanamo.syntax.Bounds.V">V</span>]</span>, <span name="upperBound">upperBound: <a href="package$$syntax$$Bound.html" class="extype" name="com.gu.scanamo.syntax.Bound">Bound</a>[<span class="extype" name="com.gu.scanamo.syntax.Bounds.V">V</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$15">evidence$15: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.Bounds.V">V</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
       </span>
       
       
@@ -518,9 +536,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#add" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="add[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$22:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="add[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
+      <a id="add[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$25:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="add[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#add[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$22:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#add[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$25:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -534,9 +552,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.syntax#append" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="append[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$20:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="append[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
+      <a id="append[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$23:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="append[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#append[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$20:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#append[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$23:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -604,9 +622,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
               
         </dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#delete" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="delete[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$23:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="delete[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
+      <a id="delete[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$26:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="delete[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#delete[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$23:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#delete[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$26:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -651,6 +669,22 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
+    </li><li name="com.gu.scanamo.syntax#fieldField" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="fieldField(ss:(Symbol,Symbol)):(com.gu.scanamo.update.Field,com.gu.scanamo.update.Field)"></a><a id="fieldField((Symbol,Symbol)):(Field,Field)"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#fieldField(ss:(Symbol,Symbol)):(com.gu.scanamo.update.Field,com.gu.scanamo.update.Field)" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">fieldField</span><span class="params">(<span name="ss">ss: (<span class="extype" name="scala.Symbol">Symbol</span>, <span class="extype" name="scala.Symbol">Symbol</span>)</span>)</span><span class="result">: (<a href="update/Field.html" class="extype" name="com.gu.scanamo.update.Field">Field</a>, <a href="update/Field.html" class="extype" name="com.gu.scanamo.update.Field">Field</a>)</span>
+      </span>
+      
+      
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
@@ -738,9 +772,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#not" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="not[T](t:T)(implicitevidence$14:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.Not[T]"></a><a id="not[T](T)(ConditionExpression[T]):Not[T]"></a>
+      <a id="not[T](t:T)(implicitevidence$17:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.Not[T]"></a><a id="not[T](T)(ConditionExpression[T]):Not[T]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#not[T](t:T)(implicitevidence$14:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.Not[T]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#not[T](t:T)(implicitevidence$17:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.Not[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -786,9 +820,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#prepend" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="prepend[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$21:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="prepend[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
+      <a id="prepend[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$24:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="prepend[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#prepend[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$21:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#prepend[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$24:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -801,22 +835,6 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       
-    </li><li name="com.gu.scanamo.Queryable.ToQueryableOps#queryableOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="queryableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Queryable[T,V]):com.gu.scanamo.Queryable.Ops[T,V]{valself:T[V]}"></a><a id="queryableOps[T[_],V](T[V])(Queryable[T,V]):Ops[T,V]{valself:T[V]}"></a>
-      <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#queryableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Queryable[T,V]):com.gu.scanamo.Queryable.Ops[T,V]{valself:T[V]}" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">queryableOps</span><span class="tparams">[<span name="T">T<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="V">V</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.T">T</span>[<span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.V">V</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="s">s: <a href="Queryable.html" class="extype" name="com.gu.scanamo.Queryable">Queryable</a>[<span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.V">V</span>]</span>)</span><span class="result">: <a href="Queryable$$Ops.html" class="extype" name="com.gu.scanamo.Queryable.Ops">Ops</a>[<span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps.queryableOps.V">V</span>] { val self: T[V] }</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a></dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#remove" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="remove(field:com.gu.scanamo.update.Field):com.gu.scanamo.update.UpdateExpression"></a><a id="remove(Field):UpdateExpression"></a>
       <span class="permalink">
@@ -833,26 +851,10 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       
-    </li><li name="com.gu.scanamo.Scannable.ToScannableOps#scannableOps" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scannableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Scannable[T,V]):com.gu.scanamo.Scannable.Ops[T,V]{valself:T[V]}"></a><a id="scannableOps[T[_],V](T[V])(Scannable[T,V]):Ops[T,V]{valself:T[V]}"></a>
-      <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#scannableOps[T[_],V](t:T[V])(implicits:com.gu.scanamo.Scannable[T,V]):com.gu.scanamo.Scannable.Ops[T,V]{valself:T[V]}" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier">implicit </span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">scannableOps</span><span class="tparams">[<span name="T">T<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="V">V</span>]</span><span class="params">(<span name="t">t: <span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.T">T</span>[<span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.V">V</span>]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="s">s: <a href="Scannable.html" class="extype" name="com.gu.scanamo.Scannable">Scannable</a>[<span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.V">V</span>]</span>)</span><span class="result">: <a href="Scannable$$Ops.html" class="extype" name="com.gu.scanamo.Scannable.Ops">Ops</a>[<span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.T">T</span>, <span class="extype" name="com.gu.scanamo.Scannable.ToScannableOps.scannableOps.V">V</span>] { val self: T[V] }</span>
-      </span>
-      
-      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a></dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#set" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="set[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$19:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="set[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
+      <a id="set[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$22:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression"></a><a id="set[V]((Field,V))(DynamoFormat[V]):UpdateExpression"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#set[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$19:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#set[V](fieldValue:(com.gu.scanamo.update.Field,V))(implicitevidence$22:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.update.UpdateExpression" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -862,6 +864,22 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       <span class="symbol">
         <span class="name">set</span><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="fieldValue">fieldValue: (<a href="update/Field.html" class="extype" name="com.gu.scanamo.update.Field">Field</a>, <span class="extype" name="com.gu.scanamo.syntax.set.V">V</span>)</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.syntax.set.V">V</span>]</span>)</span><span class="result">: <a href="update/UpdateExpression.html" class="extype" name="com.gu.scanamo.update.UpdateExpression">UpdateExpression</a></span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.syntax#set" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="set(fields:(com.gu.scanamo.update.Field,com.gu.scanamo.update.Field)):com.gu.scanamo.update.UpdateExpression"></a><a id="set((Field,Field)):UpdateExpression"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#set(fields:(com.gu.scanamo.update.Field,com.gu.scanamo.update.Field)):com.gu.scanamo.update.UpdateExpression" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">set</span><span class="params">(<span name="fields">fields: (<a href="update/Field.html" class="extype" name="com.gu.scanamo.update.Field">Field</a>, <a href="update/Field.html" class="extype" name="com.gu.scanamo.update.Field">Field</a>)</span>)</span><span class="result">: <a href="update/UpdateExpression.html" class="extype" name="com.gu.scanamo.update.UpdateExpression">UpdateExpression</a></span>
       </span>
       
       
@@ -898,9 +916,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.syntax#symbolListTupleToUniqueKeys" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolListTupleToUniqueKeys[V](pair:(Symbol,Set[V]))(implicitevidence$9:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.KeyList[V]]"></a><a id="symbolListTupleToUniqueKeys[V]((Symbol,Set[V]))(DynamoFormat[V]):UniqueKeys[KeyList[V]]"></a>
+      <a id="symbolListTupleToUniqueKeys[V](pair:(Symbol,Set[V]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.KeyList[V]]"></a><a id="symbolListTupleToUniqueKeys[V]((Symbol,Set[V]))(DynamoFormat[V]):UniqueKeys[KeyList[V]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolListTupleToUniqueKeys[V](pair:(Symbol,Set[V]))(implicitevidence$9:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.KeyList[V]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolListTupleToUniqueKeys[V](pair:(Symbol,Set[V]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.KeyList[V]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -914,9 +932,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.syntax#symbolTupleToKeyCondition" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.KeyEquals[V]"></a><a id="symbolTupleToKeyCondition[V]((Symbol,V))(DynamoFormat[V]):KeyEquals[V]"></a>
+      <a id="symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$8:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.KeyEquals[V]"></a><a id="symbolTupleToKeyCondition[V]((Symbol,V))(DynamoFormat[V]):KeyEquals[V]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.KeyEquals[V]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolTupleToKeyCondition[V](pair:(Symbol,V))(implicitevidence$8:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.KeyEquals[V]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -930,9 +948,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.syntax#symbolTupleToQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$12:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.Query[com.gu.scanamo.query.KeyEquals[V]]"></a><a id="symbolTupleToQuery[V]((Symbol,V))(DynamoFormat[V]):Query[KeyEquals[V]]"></a>
+      <a id="symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$13:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.Query[com.gu.scanamo.query.KeyEquals[V]]"></a><a id="symbolTupleToQuery[V]((Symbol,V))(DynamoFormat[V]):Query[KeyEquals[V]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$12:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.Query[com.gu.scanamo.query.KeyEquals[V]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolTupleToQuery[V](pair:(Symbol,V))(implicitevidence$13:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.Query[com.gu.scanamo.query.KeyEquals[V]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -946,9 +964,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.syntax#symbolTupleToUniqueKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKey[com.gu.scanamo.query.KeyEquals[V]]"></a><a id="symbolTupleToUniqueKey[V]((Symbol,V))(DynamoFormat[V]):UniqueKey[KeyEquals[V]]"></a>
+      <a id="symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKey[com.gu.scanamo.query.KeyEquals[V]]"></a><a id="symbolTupleToUniqueKey[V]((Symbol,V))(DynamoFormat[V]):UniqueKey[KeyEquals[V]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKey[com.gu.scanamo.query.KeyEquals[V]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#symbolTupleToUniqueKey[V](pair:(Symbol,V))(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):com.gu.scanamo.query.UniqueKey[com.gu.scanamo.query.KeyEquals[V]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -978,9 +996,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef</dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#toMultipleKeyList" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,Set[(H,R)]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[H],implicitevidence$11:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.MultipleKeyList[H,R]]"></a><a id="toMultipleKeyList[H,R]((HashAndRangeKeyNames,Set[(H,R)]))(DynamoFormat[H],DynamoFormat[R]):UniqueKeys[MultipleKeyList[H,R]]"></a>
+      <a id="toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,Set[(H,R)]))(implicitevidence$11:com.gu.scanamo.DynamoFormat[H],implicitevidence$12:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.MultipleKeyList[H,R]]"></a><a id="toMultipleKeyList[H,R]((HashAndRangeKeyNames,Set[(H,R)]))(DynamoFormat[H],DynamoFormat[R]):UniqueKeys[MultipleKeyList[H,R]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,Set[(H,R)]))(implicitevidence$10:com.gu.scanamo.DynamoFormat[H],implicitevidence$11:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.MultipleKeyList[H,R]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#toMultipleKeyList[H,R](pair:(com.gu.scanamo.syntax.HashAndRangeKeyNames,Set[(H,R)]))(implicitevidence$11:com.gu.scanamo.DynamoFormat[H],implicitevidence$12:com.gu.scanamo.DynamoFormat[R]):com.gu.scanamo.query.UniqueKeys[com.gu.scanamo.query.MultipleKeyList[H,R]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -994,9 +1012,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       
     </li><li name="com.gu.scanamo.syntax#toQuery" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toQuery[T](t:T)(implicitevidence$13:com.gu.scanamo.query.QueryableKeyCondition[T]):com.gu.scanamo.query.Query[T]"></a><a id="toQuery[T](T)(QueryableKeyCondition[T]):Query[T]"></a>
+      <a id="toQuery[T](t:T)(implicitevidence$14:com.gu.scanamo.query.QueryableKeyCondition[T]):com.gu.scanamo.query.Query[T]"></a><a id="toQuery[T](T)(QueryableKeyCondition[T]):Query[T]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#toQuery[T](t:T)(implicitevidence$13:com.gu.scanamo.query.QueryableKeyCondition[T]):com.gu.scanamo.query.Query[T]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#toQuery[T](t:T)(implicitevidence$14:com.gu.scanamo.query.QueryableKeyCondition[T]):com.gu.scanamo.query.Query[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1026,9 +1044,9 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.gu.scanamo.syntax#toUniqueKey" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="toUniqueKey[T](t:T)(implicitevidence$8:com.gu.scanamo.query.UniqueKeyCondition[T]):com.gu.scanamo.query.UniqueKey[T]"></a><a id="toUniqueKey[T](T)(UniqueKeyCondition[T]):UniqueKey[T]"></a>
+      <a id="toUniqueKey[T](t:T)(implicitevidence$9:com.gu.scanamo.query.UniqueKeyCondition[T]):com.gu.scanamo.query.UniqueKey[T]"></a><a id="toUniqueKey[T](T)(UniqueKeyCondition[T]):UniqueKey[T]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/package$$syntax$.html#toUniqueKey[T](t:T)(implicitevidence$8:com.gu.scanamo.query.UniqueKeyCondition[T]):com.gu.scanamo.query.UniqueKey[T]" title="Permalink">
+      <a href="../../../com/gu/scanamo/package$$syntax$.html#toUniqueKey[T](t:T)(implicitevidence$9:com.gu.scanamo.query.UniqueKeyCondition[T]):com.gu.scanamo.query.UniqueKey[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1117,11 +1135,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         </div>
 
         <div id="inheritedMembers">
-        <div class="parent" name="com.gu.scanamo.Queryable.ToQueryableOps">
-              <h3>Inherited from <a href="Queryable$$ToQueryableOps.html" class="extype" name="com.gu.scanamo.Queryable.ToQueryableOps">ToQueryableOps</a></h3>
-            </div><div class="parent" name="com.gu.scanamo.Scannable.ToScannableOps">
-              <h3>Inherited from <a href="Scannable$$ToScannableOps.html" class="extype" name="com.gu.scanamo.Scannable.ToScannableOps">ToScannableOps</a></h3>
-            </div><div class="parent" name="scala.AnyRef">
+        <div class="parent" name="scala.AnyRef">
               <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
             </div><div class="parent" name="scala.Any">
               <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>

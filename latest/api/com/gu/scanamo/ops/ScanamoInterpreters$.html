@@ -205,8 +205,14 @@
                         </a>
                       </li><li class="current-entities indented4">
                         <span class="separator"></span>
-                        <a class="object" href="" title=""></a>
-                        <a href="" title="">
+                        <a class="object" href="" title="Interpreters to take the operations defined with Scanamo and execute them
+by transforming them from a [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html)
+grammar using a [FunctionK](http://typelevel.org/cats/datatypes/functionk.html)
+"></a>
+                        <a href="" title="Interpreters to take the operations defined with Scanamo and execute them
+by transforming them from a [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html)
+grammar using a [FunctionK](http://typelevel.org/cats/datatypes/functionk.html)
+">
                           ScanamoInterpreters
                         </a>
                       </li><li class="current-entities indented4">
@@ -255,7 +261,10 @@
       </h4>
 
       
-          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <div id="comment" class="fullcommenttop"><div class="comment cmt"><p>Interpreters to take the operations defined with Scanamo and execute them
+by transforming them from a [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html)
+grammar using a [FunctionK](http://typelevel.org/cats/datatypes/functionk.html)
+</p></div><div class="toggleContainer block">
           <span class="toggle">
             Linear Supertypes
           </span>
@@ -467,7 +476,9 @@
         <span class="name">future</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync">AmazonDynamoDBAsync</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="ec">ec: <span class="extype" name="scala.concurrent.ExecutionContext">ExecutionContext</span></span>)</span><span class="result">: <span class="extype" name="cats.~&gt;">~&gt;</span>[<a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>, <span class="extype" name="scala.concurrent.Future">Future</span>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Interpret Scanamo operations into a <code>Future</code> using the AmazonDynamoDBAsync client
+which doesn't block, using it's own thread pool for I/O requests internally
+</p>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -500,7 +511,7 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
-    </li><li name="com.gu.scanamo.ops.ScanamoInterpreters#id" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+    </li><li name="com.gu.scanamo.ops.ScanamoInterpreters#id" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="id(client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB):cats.~&gt;[com.gu.scanamo.ops.ScanamoOpsA,cats.Id]"></a><a id="id(AmazonDynamoDB):~&gt;[ScanamoOpsA,Id]"></a>
       <span class="permalink">
       <a href="../../../../com/gu/scanamo/ops/ScanamoInterpreters$.html#id(client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB):cats.~&gt;[com.gu.scanamo.ops.ScanamoOpsA,cats.Id]" title="Permalink">
@@ -515,7 +526,12 @@
         <span class="name">id</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="result">: <span class="extype" name="cats.~&gt;">~&gt;</span>[<a href="ScanamoOpsA.html" class="extype" name="com.gu.scanamo.ops.ScanamoOpsA">ScanamoOpsA</a>, <span class="extype" name="cats.Id">Id</span>]</span>
       </span>
       
-      
+      <p class="shortcomment cmt">Interpret Scanamo operations using blocking requests to DynamoDB with any
+transport errors or semantic errors within DynamoDB thrown as exceptions.</p><div class="fullcomment"><div class="comment cmt"><p>Interpret Scanamo operations using blocking requests to DynamoDB with any
+transport errors or semantic errors within DynamoDB thrown as exceptions.</p><p>We need to interpret into a type with a type parameter, so cheat by using
+the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
+a type alias for the type itself (<code>type Id[A] = A</code>).
+</p></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
@@ -532,54 +548,6 @@
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>Any</dd></dl></div>
-    </li><li name="com.gu.scanamo.ops.ScanamoInterpreters#javaDeleteRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="javaDeleteRequest(req:com.gu.scanamo.request.ScanamoDeleteRequest):com.amazonaws.services.dynamodbv2.model.DeleteItemRequest"></a><a id="javaDeleteRequest(ScanamoDeleteRequest):DeleteItemRequest"></a>
-      <span class="permalink">
-      <a href="../../../../com/gu/scanamo/ops/ScanamoInterpreters$.html#javaDeleteRequest(req:com.gu.scanamo.request.ScanamoDeleteRequest):com.amazonaws.services.dynamodbv2.model.DeleteItemRequest" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">javaDeleteRequest</span><span class="params">(<span name="req">req: <a href="../request/ScanamoDeleteRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoDeleteRequest">ScanamoDeleteRequest</a></span>)</span><span class="result">: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.DeleteItemRequest">DeleteItemRequest</span></span>
-      </span>
-      
-      
-    </li><li name="com.gu.scanamo.ops.ScanamoInterpreters#javaPutRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="javaPutRequest(req:com.gu.scanamo.request.ScanamoPutRequest):com.amazonaws.services.dynamodbv2.model.PutItemRequest"></a><a id="javaPutRequest(ScanamoPutRequest):PutItemRequest"></a>
-      <span class="permalink">
-      <a href="../../../../com/gu/scanamo/ops/ScanamoInterpreters$.html#javaPutRequest(req:com.gu.scanamo.request.ScanamoPutRequest):com.amazonaws.services.dynamodbv2.model.PutItemRequest" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">javaPutRequest</span><span class="params">(<span name="req">req: <a href="../request/ScanamoPutRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoPutRequest">ScanamoPutRequest</a></span>)</span><span class="result">: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.PutItemRequest">PutItemRequest</span></span>
-      </span>
-      
-      
-    </li><li name="com.gu.scanamo.ops.ScanamoInterpreters#javaUpdateRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
-      <a id="javaUpdateRequest(req:com.gu.scanamo.request.ScanamoUpdateRequest):com.amazonaws.services.dynamodbv2.model.UpdateItemRequest"></a><a id="javaUpdateRequest(ScanamoUpdateRequest):UpdateItemRequest"></a>
-      <span class="permalink">
-      <a href="../../../../com/gu/scanamo/ops/ScanamoInterpreters$.html#javaUpdateRequest(req:com.gu.scanamo.request.ScanamoUpdateRequest):com.amazonaws.services.dynamodbv2.model.UpdateItemRequest" title="Permalink">
-        <i class="material-icons"></i>
-      </a>
-    </span>
-      <span class="modifier_kind">
-        <span class="modifier"></span>
-        <span class="kind">def</span>
-      </span>
-      <span class="symbol">
-        <span class="name">javaUpdateRequest</span><span class="params">(<span name="req">req: <a href="../request/ScanamoUpdateRequest.html" class="extype" name="com.gu.scanamo.request.ScanamoUpdateRequest">ScanamoUpdateRequest</a></span>)</span><span class="result">: <span class="extype" name="com.amazonaws.services.dynamodbv2.model.UpdateItemRequest">UpdateItemRequest</span></span>
-      </span>
-      
-      
     </li><li name="scala.AnyRef#ne" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ne(x$1:AnyRef):Boolean"></a><a id="ne(AnyRef):Boolean"></a>
       <span class="permalink">

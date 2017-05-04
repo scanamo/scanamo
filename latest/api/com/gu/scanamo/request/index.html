@@ -214,6 +214,24 @@
                           ScanamoPutRequest
                         </a>
                       </li><li class="current-entities indented4">
+                        <a class="object" href="ScanamoQueryOptions$.html" title=""></a>
+                        <a class="class" href="ScanamoQueryOptions.html" title=""></a>
+                        <a href="ScanamoQueryOptions.html" title="">
+                          ScanamoQueryOptions
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ScanamoQueryRequest.html" title=""></a>
+                        <a href="ScanamoQueryRequest.html" title="">
+                          ScanamoQueryRequest
+                        </a>
+                      </li><li class="current-entities indented4">
+                        <span class="separator"></span>
+                        <a class="class" href="ScanamoScanRequest.html" title=""></a>
+                        <a href="ScanamoScanRequest.html" title="">
+                          ScanamoScanRequest
+                        </a>
+                      </li><li class="current-entities indented4">
                         <span class="separator"></span>
                         <a class="class" href="ScanamoUpdateRequest.html" title=""></a>
                         <a href="ScanamoUpdateRequest.html" title="">
@@ -268,7 +286,31 @@
           <div id="comment" class="fullcommenttop"></div>
         
 
-      
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              
+            </ol>
+          </div>
+          
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
 
       <div id="template">
         <div id="allMembers">
@@ -330,6 +372,60 @@
       </span>
       
       
+    </li><li name="com.gu.scanamo.request.ScanamoQueryOptions" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ScanamoQueryOptionsextendsProductwithSerializable"></a><a id="ScanamoQueryOptions:ScanamoQueryOptions"></a>
+      <span class="permalink">
+      <a href="../../../../com/gu/scanamo/request/index.html#ScanamoQueryOptionsextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ScanamoQueryOptions.html">
+              <span class="name">ScanamoQueryOptions</span>
+            </a><span class="params">(<span name="consistent">consistent: <span class="extype" name="scala.Boolean">Boolean</span></span>, <span name="limit">limit: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Int">Int</span>]</span>, <span name="exclusiveStartKey">exclusiveStartKey: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.Map">Map</span>[<span class="extype" name="scala.Predef.String">String</span>, <span class="extype" name="com.amazonaws.services.dynamodbv2.model.AttributeValue">AttributeValue</span>]]</span>, <span name="filter">filter: <span class="extype" name="scala.Option">Option</span>[<a href="../query/Condition.html" class="extype" name="com.gu.scanamo.query.Condition">Condition</a>[_]]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.request.ScanamoQueryRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ScanamoQueryRequestextendsProductwithSerializable"></a><a id="ScanamoQueryRequest:ScanamoQueryRequest"></a>
+      <span class="permalink">
+      <a href="../../../../com/gu/scanamo/request/index.html#ScanamoQueryRequestextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ScanamoQueryRequest.html">
+              <span class="name">ScanamoQueryRequest</span>
+            </a><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="index">index: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="query">query: <a href="../query/Query.html" class="extype" name="com.gu.scanamo.query.Query">Query</a>[_]</span>, <span name="options">options: <a href="ScanamoQueryOptions.html" class="extype" name="com.gu.scanamo.request.ScanamoQueryOptions">ScanamoQueryOptions</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li><li name="com.gu.scanamo.request.ScanamoScanRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ScanamoScanRequestextendsProductwithSerializable"></a><a id="ScanamoScanRequest:ScanamoScanRequest"></a>
+      <span class="permalink">
+      <a href="../../../../com/gu/scanamo/request/index.html#ScanamoScanRequestextendsProductwithSerializable" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">case class</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ScanamoScanRequest.html">
+              <span class="name">ScanamoScanRequest</span>
+            </a><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>, <span name="index">index: <span class="extype" name="scala.Option">Option</span>[<span class="extype" name="scala.Predef.String">String</span>]</span>, <span name="options">options: <a href="ScanamoQueryOptions.html" class="extype" name="com.gu.scanamo.request.ScanamoQueryOptions">ScanamoQueryOptions</a></span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
     </li><li name="com.gu.scanamo.request.ScanamoUpdateRequest" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
       <a id="ScanamoUpdateRequestextendsProductwithSerializable"></a><a id="ScanamoUpdateRequest:ScanamoUpdateRequest"></a>
       <span class="permalink">
@@ -353,7 +449,30 @@
 
         
 
-        
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="com.gu.scanamo.request.ScanamoQueryOptions" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ScanamoQueryOptions"></a><a id="ScanamoQueryOptions:ScanamoQueryOptions"></a>
+      <span class="permalink">
+      <a href="../../../../com/gu/scanamo/request/index.html#ScanamoQueryOptions" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="ScanamoQueryOptions$.html">
+              <span class="name">ScanamoQueryOptions</span>
+            </a><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+      </span>
+      
+      
+    </li>
+              </ol>
+            </div>
 
         
 

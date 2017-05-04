@@ -242,18 +242,6 @@ DynamoDB's AttributeValue">
                           EnumerationDynamoFormat
                         </a>
                       </li><li class="current-entities indented3">
-                        <a class="object" href="Gettable$.html" title=""></a>
-                        <a class="trait" href="Gettable.html" title=""></a>
-                        <a href="Gettable.html" title="">
-                          Gettable
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <a class="object" href="Queryable$.html" title=""></a>
-                        <a class="trait" href="Queryable.html" title=""></a>
-                        <a href="Queryable.html" title="">
-                          Queryable
-                        </a>
-                      </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="object" href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB"></a>
                         <a href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB">
@@ -272,12 +260,6 @@ concurrent.ExecutionContext and returns a concurrent.Future">
                         <a class="object" href="ScanamoFree$.html" title=""></a>
                         <a href="ScanamoFree$.html" title="">
                           ScanamoFree
-                        </a>
-                      </li><li class="current-entities indented3">
-                        <a class="object" href="Scannable$.html" title=""></a>
-                        <a class="trait" href="Scannable.html" title=""></a>
-                        <a href="Scannable.html" title="">
-                          Scannable
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -427,6 +409,22 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       
+    </li><li name="com.gu.scanamo.DerivedDynamoFormat.NotSymbol" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="NotSymbol[T]=shapeless.&lt;:!&lt;[T,Symbol]"></a><a id="NotSymbol[T]:NotSymbol[T]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/DynamoFormat$.html#NotSymbol[T]=shapeless.&lt;:!&lt;[T,Symbol]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">type</span>
+      </span>
+      <span class="symbol">
+        <span class="name">NotSymbol</span><span class="tparams">[<span name="T">T</span>]</span><span class="result alias"> = <span class="extype" name="shapeless.&lt;:!&lt;">&lt;:!&lt;</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.NotSymbol.T">T</span>, <span class="extype" name="scala.Symbol">Symbol</span>]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
     </li><li name="com.gu.scanamo.DynamoFormat.Ops" visbl="pub" class="indented0 " data-isabs="true" fullComment="no" group="Ungrouped">
       <a id="Ops[T]extendsAnyRef"></a><a id="Ops[T]:Ops[T]"></a>
       <span class="permalink">
@@ -879,9 +877,9 @@ prop&gt; (s: <span class="std">Set</span>[<span class="std">Double</span>]) <spa
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
     </li><li name="com.gu.scanamo.DerivedDynamoFormat#genericProduct" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="genericProduct[T,R](implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]"></a><a id="genericProduct[T,R](Aux[T,R],Lazy[ConstructedDynamoFormat[R]]):DynamoFormat[T]"></a>
+      <a id="genericProduct[T,R](implicitevidence$1:DerivedDynamoFormat.this.NotSymbol[T],implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]"></a><a id="genericProduct[T,R](NotSymbol[T],Aux[T,R],Lazy[ConstructedDynamoFormat[R]]):DynamoFormat[T]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/DynamoFormat$.html#genericProduct[T,R](implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]" title="Permalink">
+      <a href="../../../com/gu/scanamo/DynamoFormat$.html#genericProduct[T,R](implicitevidence$1:DerivedDynamoFormat.this.NotSymbol[T],implicitgen:shapeless.LabelledGeneric.Aux[T,R],implicitformatR:shapeless.Lazy[DerivedDynamoFormat.this.ConstructedDynamoFormat[R]]):com.gu.scanamo.DynamoFormat[T]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -890,7 +888,7 @@ prop&gt; (s: <span class="std">Set</span>[<span class="std">Double</span>]) <spa
         <span class="kind">def</span>
       </span>
       <span class="symbol">
-        <span class="name">genericProduct</span><span class="tparams">[<span name="T">T</span>, <span name="R">R</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="gen">gen: <span class="extype" name="shapeless.LabelledGeneric.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.T">T</span>, <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.R">R</span>]</span>, <span name="formatR">formatR: <span class="extype" name="shapeless.Lazy">Lazy</span>[<a href="#ConstructedDynamoFormat[T]extendsAnyRef" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.ConstructedDynamoFormat">ConstructedDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.R">R</span>]]</span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.T">T</span>]</span>
+        <span class="name">genericProduct</span><span class="tparams">[<span name="T">T</span>, <span name="R">R</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="#NotSymbol[T]=shapeless.&lt;:!&lt;[T,Symbol]" class="extmbr" name="com.gu.scanamo.DynamoFormat.NotSymbol">NotSymbol</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.T">T</span>]</span>, <span name="gen">gen: <span class="extype" name="shapeless.LabelledGeneric.Aux">Aux</span>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.T">T</span>, <span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.R">R</span>]</span>, <span name="formatR">formatR: <span class="extype" name="shapeless.Lazy">Lazy</span>[<a href="#ConstructedDynamoFormat[T]extendsAnyRef" class="extmbr" name="com.gu.scanamo.DerivedDynamoFormat.ConstructedDynamoFormat">ConstructedDynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.R">R</span>]]</span>)</span><span class="result">: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.DerivedDynamoFormat.genericProduct.T">T</span>]</span>
       </span>
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="DerivedDynamoFormat.html" class="extype" name="com.gu.scanamo.DerivedDynamoFormat">DerivedDynamoFormat</a></dd></dl></div>
