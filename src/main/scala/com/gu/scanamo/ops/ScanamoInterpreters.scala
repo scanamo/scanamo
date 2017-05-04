@@ -12,8 +12,21 @@ import com.gu.scanamo.request._
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
 
+/**
+  * Interpreters to take the operations defined with Scanamo and execute them
+  * by transforming them from a [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html)
+  * grammar using a [FunctionK](http://typelevel.org/cats/datatypes/functionk.html)
+  */
 object ScanamoInterpreters {
 
+  /**
+    * Interpret Scanamo operations using blocking requests to DynamoDB with any
+    * transport errors or semantic errors within DynamoDB thrown as exceptions.
+    *
+    * We need to interpret into a type with a type parameter, so cheat by using
+    * the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
+    * a type alias for the type itself (`type Id[A] = A`).
+    */
   def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
       case Put(req) =>
@@ -47,6 +60,10 @@ object ScanamoInterpreters {
     }
   }
 
+  /**
+    * Interpret Scanamo operations into a `Future` using the AmazonDynamoDBAsync client
+    * which doesn't block, using it's own thread pool for I/O requests internally
+    */
   def future(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) = new (ScanamoOpsA ~> Future) {
     private def futureOf[X <: AmazonWebServiceRequest, T](call: (X,AsyncHandler[X, T]) => java.util.concurrent.Future[T], req: X): Future[T] = {
       val p = Promise[T]()
