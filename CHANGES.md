@@ -1,3 +1,9 @@
+## Version 0.9.3
+
+ * Support for filtering queries and scans (#102) 
+ * Added support for 'between' queries (#106 - @todor-kolev)
+ * Allow one attribute to be updated to the value of another (#101)
+
 ## Version 0.9.2
 
  * Fix bug when many updates and'd together (#90)
