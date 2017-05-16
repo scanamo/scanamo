@@ -18,21 +18,8 @@ libraryDependencies ++= Seq(
 
 Scanamo is published for Scala 2.12 and Scala 2.11
 
-Usage
------
-
- - [Putting and Getting](#putting-and-getting)
- - [Querying](#querying)
- - [Updating](#updating)
- - [Using Indexes](#using-indexes)
- - [Non-blocking requests](#non-blocking-requests)
- - [Custom formats](#custom-formats)
-
-### Putting and Getting
-
-If you've used the Java SDK to access Dynamo, the most familiar way to use Scanamo 
-is via the [Scanamo](http://guardian.github.io/scanamo/latest/api/com/gu/scanamo/Scanamo$.html)
-object:
+Basic Usage
+-----------
 
 ```scala
 scala> import com.gu.scanamo._
@@ -44,200 +31,20 @@ scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")('nam
 
 scala> case class Farm(animals: List[String])
 scala> case class Farmer(name: String, age: Long, farm: Farm)
+scala> val table = Table[Farmer]("farmer")
 
-scala> val putResult = Scanamo.put(client)("farmer")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-scala> Scanamo.get[Farmer](client)("farmer")('name -> "McDonald")
+scala> val ops = for {
+     |   _ <- table.putAll(Set(
+     |       Farmer("McDonald", 156L, Farm(List("sheep", "cow"))),
+     |       Farmer("Boggis", 43L, Farm(List("chicken")))
+     |     ))
+     |   mcdonald <- table.get('name -> "McDonald")
+     | } yield mcdonald
+scala> Scanamo.exec(client)(ops)
 res1: Option[Either[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
-The `Either` represents the possibility that an item might exist, but not be parsable into the given
-type, in this case `Farmer`.
-
-Like all the examples in this README and the Scaladoc, this creates a table, so that it 
-can be checked using [sbt-doctest](https://github.com/tkawachi/sbt-doctest), but the same 
-operations can happily run against pre-existing tables.
-
-### Table
-
-Scanamo provides a [Table](http://guardian.github.io/scanamo/latest/api/com/gu/scanamo/Table.html) 
-abstraction to reduce noise when defining multiple operations against the same table:
-
-```scala
-scala> import com.gu.scanamo._
-scala> import com.gu.scanamo.syntax._
-scala> import cats.syntax.either._
-
-scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val winnersTableResult = LocalDynamoDB.createTable(client)("winners")('name -> S)
-
-scala> case class LuckyWinner(name: String, shape: String)
-scala> def temptWithGum(child: LuckyWinner): LuckyWinner = child match {
-     |   case LuckyWinner("Violet", _) => LuckyWinner("Violet", "blueberry")
-     |   case winner => winner
-     | }
-scala> val luckyWinners = Table[LuckyWinner]("winners")
-scala> val operations = for {
-     |      _               <- luckyWinners.putAll(
-     |                           Set(LuckyWinner("Violet", "human"), LuckyWinner("Augustus", "human"), LuckyWinner("Charlie", "human")))
-     |      winners         <- luckyWinners.scan()
-     |      winnerList      =  winners.flatMap(_.toOption).toList
-     |      temptedWinners  =  winnerList.map(temptWithGum)
-     |      _               <- luckyWinners.putAll(temptedWinners.toSet)
-     |      results         <- luckyWinners.getAll('name -> Set("Charlie", "Violet"))
-     | } yield results
-     
-scala> Scanamo.exec(client)(operations)
-res1: Set[Either[error.DynamoReadError, LuckyWinner]] = Set(Right(LuckyWinner(Charlie,human)), Right(LuckyWinner(Violet,blueberry)))
-```
-
-Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
-
-### Querying
-
-It's also possible to make more complex queries:
-
-```scala
-scala> import com.gu.scanamo._
-scala> import com.gu.scanamo.syntax._
- 
-scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val transportTableResult = LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
-scala> case class Transport(mode: String, line: String)
-scala> val transportTable = Table[Transport]("transports")
-scala> val operations = for {
-     |   _ <- transportTable.putAll(Set(
-     |          Transport("Underground", "Circle"),
-     |          Transport("Underground", "Metropolitan"),
-     |          Transport("Underground", "Central")
-     |     ))
-     |   tubesStartingWithC <- transportTable.query('mode -> "Underground" and ('line beginsWith "C"))
-     | } yield tubesStartingWithC.toList
-     
-scala> Scanamo.exec(client)(operations)
-res1: List[Either[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
-```
-
-### Updating
-
-If you want to update some of the fields of a row, which don't form part of the key, 
- without replacing it entirely, you can use the `update` operation:
- 
-```scala
-scala> import com.gu.scanamo._
-scala> import com.gu.scanamo.syntax._
- 
-scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val teamTableResult = LocalDynamoDB.createTable(client)("teams")('name -> S)
-scala> case class Team(name: String, goals: Int, scorers: List[String], mascot: Option[String])
-scala> val teamTable = Table[Team]("teams")
-scala> val operations = for {
-     |   _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
-     |   updated <- teamTable.update('name -> "Watford", set('goals -> 2) and append('scorers -> "Barnes") and remove('mascot))
-     | } yield updated
-     
-scala> Scanamo.exec(client)(operations)
-res1: Either[error.DynamoReadError, Team] = Right(Team(Watford,2,List(Blissett, Barnes),None))
-```
-
-### Using Indexes
-
-You can also scan and query indexes with Scanamo. In the following example, there is a
-table called `transport` with a hash key of `mode` and range key of `line` and a 
-[global secondary index](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html) 
-called `colour-index` with only a hash key on the `colour` attribute:
-
-```scala
-scala> import com.gu.scanamo._
-scala> import com.gu.scanamo.syntax._
-
-scala> case class Transport(mode: String, line: String, colour: String)
-scala> val transport = Table[Transport]("transport")
-scala> val colourIndex = transport.index("colour-index")
-
-scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
-     |   val operations = for {
-     |     _ <- transport.putAll(Set(
-     |       Transport("Underground", "Circle", "Yellow"),
-     |       Transport("Underground", "Metropolitan", "Maroon"),
-     |       Transport("Underground", "Central", "Red")))
-     |     maroonLine <- colourIndex.query('colour -> "Maroon")
-     |   } yield maroonLine.toList
-     |   Scanamo.exec(client)(operations)
-     | }
-res0: List[Either[error.DynamoReadError, Transport]] = List(Right(Transport(Underground,Metropolitan,Maroon)))
-```
-
-### Non-blocking requests
- 
-Scanamo also supports asynchronous calls to Dynamo:
-
-```scala
-scala> import com.gu.scanamo._
-scala> import com.gu.scanamo.syntax._
-
-scala> import scala.concurrent.duration._
-scala> import scala.concurrent.ExecutionContext.Implicits.global
- 
-scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farm")('name -> S)
-
-scala> case class Farm(animals: List[String])
-scala> case class Farmer(name: String, age: Long, farm: Farm)
-scala> val farmTable = Table[Farmer]("farm")
-scala> val ops = for {
-     |   _ <- farmTable.putAll(Set(
-     |          Farmer("Boggis", 43L, Farm(List("chicken"))), 
-     |          Farmer("Bunce", 52L, Farm(List("goose"))), 
-     |          Farmer("Bean", 55L, Farm(List("turkey")))
-     |        ))
-     |   bunce <- farmTable.get('name -> "Bunce")
-     | } yield bunce
-     
-scala> concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
-res1: Option[Either[error.DynamoReadError, Farmer]] = Some(Right(Farmer(Bunce,52,Farm(List(goose)))))
-```
-
-### Custom Formats
-
-Scanamo uses the `DynamoFormat` type class to define how to read and write 
-different types to DynamoDB. Scanamo provides such formats for many common 
-types, but it's also possible to define a serialisation format for types 
-which Scanamo doesn't provide. For example to store Joda `DateTime` objects
-as ISO `String`s in Dynamo:
-  
-```scala
-scala> import org.joda.time._
-
-scala> import com.gu.scanamo._
-scala> import com.gu.scanamo.syntax._
-
-scala> case class Foo(dateTime: DateTime)
-
-scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val fooTableResult = LocalDynamoDB.createTable(client)("foo")('dateTime -> S)
- 
-scala> implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
-     |   DateTime.parse(_).withZone(DateTimeZone.UTC)
-     | )(
-     |   _.toString
-     | )
-scala> val fooTable = Table[Foo]("foo")
-scala> val operations = for {
-     |      _           <- fooTable.put(Foo(new DateTime(0)))
-     |      results     <- fooTable.scan()
-     | } yield results
- 
-scala> Scanamo.exec(client)(operations).toList
-res1: List[Either[error.DynamoReadError, Foo]] = List(Right(Foo(1970-01-01T00:00:00.000Z)))
-```
-
+For more details, please see the [Scanamo site](https://guardian.github.io/scanamo).
 
 License
 -------
