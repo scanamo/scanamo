@@ -54,6 +54,11 @@ object ConditionExpression {
       RequestCondition("attribute_exists(#conditionttr)", Map("#conditionttr" -> t.key.name), None)
   }
 
+  implicit def attributeNotExistsCondition = new ConditionExpression[AttributeNotExists] {
+    override def apply(t: AttributeNotExists)(condition: Option[RequestCondition]): RequestCondition =
+      RequestCondition("attribute_not_exists(#conditionttr)", Map("#conditionttr" -> t.key.name), None)
+  }
+
   implicit def notCondition[T](implicit pcs: ConditionExpression[T]) = new ConditionExpression[Not[T]] {
     override def apply(not: Not[T])(condition: Option[RequestCondition]): RequestCondition = {
       val conditionToNegate = pcs(not.condition)(condition)
