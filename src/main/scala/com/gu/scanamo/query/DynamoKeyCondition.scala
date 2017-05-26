@@ -55,4 +55,5 @@ final case class Between[V: DynamoFormat](key: Symbol, bounds: Bounds[V]) extend
 }
 
 final case class AttributeExists(key: Symbol)
+final case class AttributeNotExists(key: Symbol)
 final case class Not[T: ConditionExpression](condition: T)

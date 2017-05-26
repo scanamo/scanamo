@@ -320,6 +320,23 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       results3.futureValue should equal(List.empty)
     }
   }
+
+  it("queries for items that are missing an attribute") {
+      case class Farmer(firstName: String, surname: String, age: Option[Int])
+
+      import com.gu.scanamo.syntax._
+
+      val farmersTable = Table[Farmer]("nursery-farmers")
+
+      LocalDynamoDB.usingTable(client)("nursery-farmers")('firstName -> S, 'surname -> S) {
+        val farmerOps = for {
+          _ <- farmersTable.put(Farmer("Fred", "Perry", None))
+          _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
+          farmerWithNoAge <- farmersTable.filter(attributeNotExists('age)).query('firstName -> "Fred")
+        } yield farmerWithNoAge
+        ScanamoAsync.exec(client)(farmerOps).futureValue should equal(List(Right(Farmer("Fred", "Perry", None))))
+      }
+  }
   
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
