@@ -34,11 +34,11 @@ object Scanamo {
     * Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
-  def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): PutItemResult =
+  def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): T =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   /**
-    * Gets a single item from a table by a unique key
+    * Puts a set of items into a table
     *
     * {{{
     * >>> case class Rabbit(name: String)
@@ -57,6 +57,8 @@ object Scanamo {
     exec(client)(ScanamoFree.putAll(tableName)(items))
 
   /**
+    * Gets a single item from a table by a unique key
+    *
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
