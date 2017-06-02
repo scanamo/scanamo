@@ -55,16 +55,14 @@ object ScanamoFree {
     } yield
       Option(res.getItem).map(read[T])
 
-
   def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
-    for {
-      res <- ScanamoOps.batchGet(
+    keys.asAVMap.grouped(batchSize).toList.traverseU { batch =>
+      ScanamoOps.batchGet(
         new BatchGetItemRequest().withRequestItems(Map(tableName ->
-          new KeysAndAttributes().withKeys(keys.asAVMap.map(_.asJava).asJava)
+          new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)
         ).asJava)
       )
-    } yield
-      res.getResponses.get(tableName).asScala.toSet.map(read[T])
+    }.map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
   }
 
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
