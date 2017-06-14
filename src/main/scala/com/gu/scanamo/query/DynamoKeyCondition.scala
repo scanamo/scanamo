@@ -46,6 +46,11 @@ final case class BeginsWith[V: DynamoFormat](key: Symbol, v: V) extends RangeKey
   override def attributes = Map(key.name -> v)
 }
 
+final case class Equals[V: DynamoFormat](key: Symbol, v: V) extends RangeKeyCondition[V] {
+  override def keyConditionExpression(s: String): String = s"#$s = :${key.name}"
+  override def attributes = Map(key.name -> v)
+}
+
 final case class Between[V: DynamoFormat](key: Symbol, bounds: Bounds[V]) extends RangeKeyCondition[V] {
   override def keyConditionExpression(s: String): String = s"#$s BETWEEN :lower AND :upper"
   override def attributes = Map(
