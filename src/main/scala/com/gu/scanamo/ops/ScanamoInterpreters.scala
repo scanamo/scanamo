@@ -126,9 +126,11 @@ private[ops] object JavaRequests {
       queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.asJava)),
       queryRefinement(_.options.filter)((r, f) => {
         val requestCondition = f.apply(None)
-        r.withFilterExpression(requestCondition.expression)
+        val filteredRequest = r.withFilterExpression(requestCondition.expression)
           .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
-          .withExpressionAttributeValues(requestCondition.attributeValues.getOrElse(Map.empty).asJava)
+        requestCondition.attributeValues.fold(filteredRequest)(avs =>
+          filteredRequest.withExpressionAttributeValues(avs.asJava)
+        )
       })
     ).reduceLeft(_.compose(_))(
       new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)

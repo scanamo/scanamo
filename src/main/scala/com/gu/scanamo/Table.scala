@@ -482,27 +482,29 @@ case class Table[V: DynamoFormat](name: String) {
     * Filter the results of a Scan or Query
     *
     * {{{
-    * >>> case class Bear(name: String, favouriteFood: String)
+    * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val table = Table[Bear]("bears")
     *
+    * >>> import com.gu.scanamo.syntax._
+    *
     * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
     * ...   val ops = for {
-    * ...     _ <- table.put(Bear("Pooh", "honey"))
-    * ...     _ <- table.put(Bear("Yogi", "picnic baskets"))
-    * ...     bears <- table.filter('favouriteFood -> "honey").scan()
-    * ...   } yield bears
+    * ...     _ <- table.put(Bear("Pooh", "honey", None))
+    * ...     _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
+    * ...     honeyBears <- table.filter('favouriteFood -> "honey").scan()
+    * ...     competitiveBears <- table.filter(attributeExists('antagonist)).scan()
+    * ...   } yield (honeyBears, competitiveBears)
     * ...   Scanamo.exec(client)(ops)
     * ... }
-    * List(Right(Bear(Pooh,honey)))
+    * (List(Right(Bear(Pooh,honey,None))),List(Right(Bear(Yogi,picnic baskets,Some(Ranger Smith)))))
     *
     * >>> case class Station(line: String, name: String, zone: Int)
     *
     * >>> val stationTable = Table[Station]("Station")
     *
-    * >>> import com.gu.scanamo.syntax._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withTable(client)("Station")('line -> S, 'name -> S) {
