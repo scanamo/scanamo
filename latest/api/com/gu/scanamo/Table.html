@@ -606,27 +606,29 @@ supported by DynamoDB</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span cl
         <span class="name">filter</span><span class="tparams">[<span name="C">C</span>]</span><span class="params">(<span name="condition">condition: <span class="extype" name="com.gu.scanamo.Table.filter.C">C</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="query/ConditionExpression.html" class="extype" name="com.gu.scanamo.query.ConditionExpression">ConditionExpression</a>[<span class="extype" name="com.gu.scanamo.Table.filter.C">C</span>]</span>)</span><span class="result">: <span class="extype" name="com.gu.scanamo.TableWithOptions">TableWithOptions</span>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>
       </span>
       
-      <p class="shortcomment cmt">Filter the results of a Scan or Query</p><div class="fullcomment"><div class="comment cmt"><p>Filter the results of a Scan or Query</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bear(name: <span class="std">String</span>, favouriteFood: <span class="std">String</span>)
+      <p class="shortcomment cmt">Filter the results of a Scan or Query</p><div class="fullcomment"><div class="comment cmt"><p>Filter the results of a Scan or Query</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Bear(name: <span class="std">String</span>, favouriteFood: <span class="std">String</span>, antagonist: <span class="std">Option</span>[<span class="std">String</span>])
 
 &gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 &gt;&gt;&gt; <span class="kw">val</span> table = Table[Bear](<span class="lit">"bears"</span>)
 
+&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
+
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"bears"</span>)('name -&gt; S) {
 ...   <span class="kw">val</span> ops = <span class="kw">for</span> {
-...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Pooh"</span>, <span class="lit">"honey"</span>))
-...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Yogi"</span>, <span class="lit">"picnic baskets"</span>))
-...     bears <span class="kw">&lt;-</span> table.filter('favouriteFood -&gt; <span class="lit">"honey"</span>).scan()
-...   } <span class="kw">yield</span> bears
+...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Pooh"</span>, <span class="lit">"honey"</span>, <span class="std">None</span>))
+...     _ <span class="kw">&lt;-</span> table.put(Bear(<span class="lit">"Yogi"</span>, <span class="lit">"picnic baskets"</span>, <span class="std">Some</span>(<span class="lit">"Ranger Smith"</span>)))
+...     honeyBears <span class="kw">&lt;-</span> table.filter('favouriteFood -&gt; <span class="lit">"honey"</span>).scan()
+...     competitiveBears <span class="kw">&lt;-</span> table.filter(attributeExists('antagonist)).scan()
+...   } <span class="kw">yield</span> (honeyBears, competitiveBears)
 ...   Scanamo.exec(client)(ops)
 ... }
-<span class="std">List</span>(Right(Bear(Pooh,honey)))
+(<span class="std">List</span>(Right(Bear(Pooh,honey,<span class="std">None</span>))),<span class="std">List</span>(Right(Bear(Yogi,picnic baskets,<span class="std">Some</span>(Ranger Smith)))))
 
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Station(line: <span class="std">String</span>, name: <span class="std">String</span>, zone: <span class="std">Int</span>)
 
 &gt;&gt;&gt; <span class="kw">val</span> stationTable = Table[Station](<span class="lit">"Station"</span>)
 
-&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.syntax._
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"Station"</span>)('line -&gt; S, 'name -&gt; S) {
@@ -863,7 +865,22 @@ supported by DynamoDB</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span cl
 ...   } <span class="kw">yield</span> MagentaLine.toList
 ...   Scanamo.exec(client)(operations)
 ... }
-<span class="std">List</span>(Right(Transport(Underground,Metropolitan,Magenta)))</pre></div></div>
+<span class="std">List</span>(Right(Transport(Underground,Metropolitan,Magenta)))</pre><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> GithubProject(organisation: <span class="std">String</span>, repository: <span class="std">String</span>, language: <span class="std">String</span>, license: <span class="std">String</span>)
+&gt;&gt;&gt; <span class="kw">val</span> githubProjects = Table[GithubProject](<span class="lit">"github-projects"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTableWithSecondaryIndex(client)(<span class="lit">"github-projects"</span>, <span class="lit">"language-license"</span>)('organisation -&gt; S, 'repository -&gt; S)('language -&gt; S, 'license -&gt; S) {
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> githubProjects.putAll(<span class="std">Set</span>(
+...       GithubProject(<span class="lit">"typelevel"</span>, <span class="lit">"cats"</span>, <span class="lit">"Scala"</span>, <span class="lit">"MIT"</span>),
+...       GithubProject(<span class="lit">"localytics"</span>, <span class="lit">"sbt-dynamodb"</span>, <span class="lit">"Scala"</span>, <span class="lit">"MIT"</span>),
+...       GithubProject(<span class="lit">"tpolecat"</span>, <span class="lit">"tut"</span>, <span class="lit">"Scala"</span>, <span class="lit">"MIT"</span>),
+...       GithubProject(<span class="lit">"guardian"</span>, <span class="lit">"scanamo"</span>, <span class="lit">"Scala"</span>, <span class="lit">"Apache 2"</span>)
+...     ))
+...     scalaMIT <span class="kw">&lt;-</span> githubProjects.index(<span class="lit">"language-license"</span>).query('language -&gt; <span class="lit">"Scala"</span> and ('license -&gt; <span class="lit">"MIT"</span>))
+...   } <span class="kw">yield</span> scalaMIT.toList
+...   Scanamo.exec(client)(operations)
+... }
+<span class="std">List</span>(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))</pre></div></div>
     </li><li name="scala.Any#isInstanceOf" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="isInstanceOf[T0]:Boolean"></a>
       <span class="permalink">
