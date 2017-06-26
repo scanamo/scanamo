@@ -36,6 +36,25 @@ object QueryableKeyCondition {
       }
     }
 
+  implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition] =
+    new QueryableKeyCondition[AndEqualsCondition[H, R]] {
+      override def apply(t: AndEqualsCondition[H, R])(req: QueryRequest): QueryRequest = {
+        val m = UniqueKeyCondition[AndEqualsCondition[H,R]].asAVMap(t)
+        val charWithKey = m.keySet.toList.zipWithIndex.map {
+          case (k, v) =>  (s"#${('A'.toInt + v).toChar}", k)
+        }
+
+        req
+          .withKeyConditionExpression(
+            charWithKey.map { case (char, key) => s"$char = :$key"}.mkString(" AND ")
+          )
+          .withExpressionAttributeNames(charWithKey.toMap.asJava)
+          .withExpressionAttributeValues(
+            (m.map { case (k, v) => s":$k" -> v }).asJava
+          )
+      }
+    }
+
   implicit def descendingQueryCondition[T](implicit condition: QueryableKeyCondition[T]) = new QueryableKeyCondition[Descending[T]] {
     override def apply(t: Descending[T])(req: QueryRequest): QueryRequest =
       condition.apply(t.queryCondition)(req).withScanIndexForward(false)

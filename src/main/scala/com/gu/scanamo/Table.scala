@@ -92,6 +92,25 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Transport(Underground,Metropolitan,Magenta)))
     * }}}
+    *
+    * {{{
+    * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
+    * >>> val githubProjects = Table[GithubProject]("github-projects")
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("github-projects", "language-license")('organisation -> S, 'repository -> S)('language -> S, 'license -> S) {
+    * ...   val operations = for {
+    * ...     _ <- githubProjects.putAll(Set(
+    * ...       GithubProject("typelevel", "cats", "Scala", "MIT"),
+    * ...       GithubProject("localytics", "sbt-dynamodb", "Scala", "MIT"),
+    * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
+    * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
+    * ...     ))
+    * ...     scalaMIT <- githubProjects.index("language-license").query('language -> "Scala" and ('license -> "MIT"))
+    * ...   } yield scalaMIT.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
+    * }}}
     */
   def index(indexName: String) = Index[V](name, indexName)
 
