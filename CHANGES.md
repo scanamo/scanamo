@@ -1,3 +1,13 @@
+## Version 0.9.5
+
+ * Automatically manage batching of `getAll` (#116 - @todor-kolev)
+ * Support filtering by attribute existence on scans (#119)
+ * Allow querying on an exact hash and range key (#122)
+
+## Version 0.9.4
+
+ * Add "attribute_not_exists" condition expression (#110 - @todor-kolev)
+
 ## Version 0.9.3
 
  * Support for filtering queries and scans (#102) 
