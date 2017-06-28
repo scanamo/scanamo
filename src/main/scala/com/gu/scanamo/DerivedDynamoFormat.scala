@@ -24,16 +24,17 @@ trait DerivedDynamoFormat {
       def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty[String, AttributeValue].asJava)
     }
 
-  implicit def hcons[K <: Symbol, V, T <: HList](implicit
-    headFormat: Lazy[DynamoFormat[V]],
-    tailFormat: Lazy[ConstructedDynamoFormat[T]],
-    fieldWitness: Witness.Aux[K]
-  ): ConstructedDynamoFormat[FieldType[K, V] :: T] =
+  implicit def hcons[K <: Symbol, V, T <: HList](
+      implicit
+      headFormat: Lazy[DynamoFormat[V]],
+      tailFormat: Lazy[ConstructedDynamoFormat[T]],
+      fieldWitness: Witness.Aux[K]): ConstructedDynamoFormat[FieldType[K, V] :: T] =
     new ConstructedDynamoFormat[FieldType[K, V] :: T] {
       def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :: T] = {
         val fieldName = fieldWitness.value.name
 
-        val possibleValue = av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Either.right))
+        val possibleValue =
+          av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Either.right))
 
         val valueOrError = possibleValue.getOrElse(Either.left[DynamoReadError, V](MissingProperty))
 
@@ -60,11 +61,11 @@ trait DerivedDynamoFormat {
     def write(t: CNil): AttributeValue = sys.error("CNil cannot be written to an AttributeValue")
   }
 
-  implicit def coproduct[K <: Symbol, V, T <: Coproduct](implicit
-    headFormat: Lazy[DynamoFormat[V]],
-    tailFormat: CoProductDynamoFormat[T],
-    fieldWitness: Witness.Aux[K]
-  ): CoProductDynamoFormat[FieldType[K, V] :+: T] = {
+  implicit def coproduct[K <: Symbol, V, T <: Coproduct](
+      implicit
+      headFormat: Lazy[DynamoFormat[V]],
+      tailFormat: CoProductDynamoFormat[T],
+      fieldWitness: Witness.Aux[K]): CoProductDynamoFormat[FieldType[K, V] :+: T] = {
     val fieldName = fieldWitness.value.name
     new CoProductDynamoFormat[FieldType[K, V] :+: T] {
       def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: T] = {
@@ -86,13 +87,17 @@ trait DerivedDynamoFormat {
     }
   }
 
-  implicit def genericProduct[T: NotSymbol, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
+  implicit def genericProduct[T: NotSymbol, R](
+      implicit gen: LabelledGeneric.Aux[T, R],
+      formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 
-  implicit def genericCoProduct[T, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[CoProductDynamoFormat[R]]): DynamoFormat[T] =
+  implicit def genericCoProduct[T, R](
+      implicit gen: LabelledGeneric.Aux[T, R],
+      formatR: Lazy[CoProductDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))

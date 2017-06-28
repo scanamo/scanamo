@@ -444,7 +444,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Gremlin(2,true,false)), Right(Gremlin(1,false,true)))
     * }}}
     */
-  def given[T: ConditionExpression](condition: T) = ConditionalOperation[V,T](name, condition)
+  def given[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
   /**
     * Scans all elements of a table
@@ -572,6 +572,7 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
 }
 
 private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
+
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
     * {{{
@@ -611,9 +612,13 @@ private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName:
   def query(query: Query[_]) = IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).query(query)
 }
 
-private[scanamo] case class IndexWithOptions[V: DynamoFormat](tableName: String, indexName: Option[String], queryOptions: ScanamoQueryOptions) {
+private[scanamo] case class IndexWithOptions[V: DynamoFormat](
+    tableName: String,
+    indexName: Option[String],
+    queryOptions: ScanamoQueryOptions) {
   def limit(n: Int): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def filter[T](c: Condition[T]): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, indexName, queryOptions))
-  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, indexName, query, queryOptions))
+  def query(query: Query[_]) =
+    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, indexName, query, queryOptions))
 }

@@ -7,9 +7,13 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.DynamoFormat
 
 sealed trait UpdateExpression extends Product with Serializable {
-  def expression: String = typeExpressions.map{ case (t, e) =>
-    s"${t.op} ${e.map(_.expression).toVector.mkString(", ")}"
-  }.mkString(" ")
+  def expression: String =
+    typeExpressions
+      .map {
+        case (t, e) =>
+          s"${t.op} ${e.map(_.expression).toVector.mkString(", ")}"
+      }
+      .mkString(" ")
   def typeExpressions: Map[UpdateType, NonEmptyVector[LeafUpdateExpression]]
   def attributeNames: Map[String, String] =
     unprefixedAttributeNames.map {
@@ -72,11 +76,11 @@ private[update] case class SimpleUpdateExpression(leaf: LeafUpdateExpression) ex
   override val constantValue: Option[(String, AttributeValue)] = leaf.constantValue
 }
 
-private[update] case class LeafSetExpression (
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
+private[update] case class LeafSetExpression(
+    namePlaceholder: String,
+    attributeNames: Map[String, String],
+    valuePlaceholder: String,
+    av: AttributeValue
 ) extends LeafUpdateExpression {
   override val updateType = SET
   override val constantValue = None
@@ -93,12 +97,13 @@ private[update] case class LeafSetExpression (
 
 object SetExpression {
   def apply[V](field: Field, value: V)(implicit format: DynamoFormat[V]): UpdateExpression = {
-    SimpleUpdateExpression(LeafSetExpression(
-      field.placeholder,
-      field.attributeNames,
-      "update",
-      format.write(value)
-    ))
+    SimpleUpdateExpression(
+      LeafSetExpression(
+        field.placeholder,
+        field.attributeNames,
+        "update",
+        format.write(value)
+      ))
   }
   def fromAttribute(from: Field, to: Field): UpdateExpression =
     SimpleUpdateExpression(new LeafUpdateExpression {
@@ -113,11 +118,11 @@ object SetExpression {
     })
 }
 
-private[update] case class LeafAppendExpression (
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
+private[update] case class LeafAppendExpression(
+    namePlaceholder: String,
+    attributeNames: Map[String, String],
+    valuePlaceholder: String,
+    av: AttributeValue
 ) extends LeafUpdateExpression {
   override val updateType = SET
   override val constantValue = Some("emptyList" -> new AttributeValue().withL())
@@ -135,20 +140,21 @@ private[update] case class LeafAppendExpression (
 
 object AppendExpression {
   def apply[V](field: Field, value: V)(implicit format: DynamoFormat[V]): UpdateExpression = {
-    SimpleUpdateExpression(LeafAppendExpression(
-      field.placeholder,
-      field.attributeNames,
-      "update",
-      DynamoFormat.listFormat[V].write(List(value))
-    ))
+    SimpleUpdateExpression(
+      LeafAppendExpression(
+        field.placeholder,
+        field.attributeNames,
+        "update",
+        DynamoFormat.listFormat[V].write(List(value))
+      ))
   }
 }
 
-private[update] case class LeafPrependExpression (
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
+private[update] case class LeafPrependExpression(
+    namePlaceholder: String,
+    attributeNames: Map[String, String],
+    valuePlaceholder: String,
+    av: AttributeValue
 ) extends LeafUpdateExpression {
   override val updateType = SET
   override val constantValue = Some("emptyList" -> new AttributeValue().withL())
@@ -166,20 +172,21 @@ private[update] case class LeafPrependExpression (
 
 object PrependExpression {
   def apply[V](field: Field, value: V)(implicit format: DynamoFormat[V]): UpdateExpression = {
-    SimpleUpdateExpression(LeafPrependExpression(
-      field.placeholder,
-      field.attributeNames,
-      "update",
-      DynamoFormat.listFormat[V].write(List(value))
-    ))
+    SimpleUpdateExpression(
+      LeafPrependExpression(
+        field.placeholder,
+        field.attributeNames,
+        "update",
+        DynamoFormat.listFormat[V].write(List(value))
+      ))
   }
 }
 
-private[update]case class LeafAddExpression (
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
+private[update] case class LeafAddExpression(
+    namePlaceholder: String,
+    attributeNames: Map[String, String],
+    valuePlaceholder: String,
+    av: AttributeValue
 ) extends LeafUpdateExpression {
   override val updateType = ADD
   override val constantValue = None
@@ -196,12 +203,13 @@ private[update]case class LeafAddExpression (
 
 object AddExpression {
   def apply[V](field: Field, value: V)(implicit format: DynamoFormat[V]): UpdateExpression = {
-    SimpleUpdateExpression(LeafAddExpression(
-      field.placeholder,
-      field.attributeNames,
-      "update",
-      format.write(value)
-    ))
+    SimpleUpdateExpression(
+      LeafAddExpression(
+        field.placeholder,
+        field.attributeNames,
+        "update",
+        format.write(value)
+      ))
   }
 }
 
@@ -210,11 +218,11 @@ Note the difference between DELETE and REMOVE:
  - DELETE is used to delete an element from a set
  - REMOVE is used to remove an attribute from an item
  */
-private[update] case class LeafDeleteExpression (
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
+private[update] case class LeafDeleteExpression(
+    namePlaceholder: String,
+    attributeNames: Map[String, String],
+    valuePlaceholder: String,
+    av: AttributeValue
 ) extends LeafUpdateExpression {
   override val updateType = DELETE
   override val constantValue = None
@@ -231,18 +239,19 @@ private[update] case class LeafDeleteExpression (
 
 object DeleteExpression {
   def apply[V](field: Field, value: V)(implicit format: DynamoFormat[V]): UpdateExpression = {
-    SimpleUpdateExpression(LeafDeleteExpression(
-      field.placeholder,
-      field.attributeNames,
-      "update",
-      format.write(value)
-    ))
+    SimpleUpdateExpression(
+      LeafDeleteExpression(
+        field.placeholder,
+        field.attributeNames,
+        "update",
+        format.write(value)
+      ))
   }
 }
 
-private[update] case class LeafRemoveExpression (
-  namePlaceholder: String,
-  attributeNames: Map[String, String]
+private[update] case class LeafRemoveExpression(
+    namePlaceholder: String,
+    attributeNames: Map[String, String]
 ) extends LeafUpdateExpression {
   override val updateType = REMOVE
   override val constantValue = None
@@ -257,10 +266,11 @@ private[update] case class LeafRemoveExpression (
 
 object RemoveExpression {
   def apply(field: Field): UpdateExpression = {
-    SimpleUpdateExpression(LeafRemoveExpression(
-      field.placeholder,
-      field.attributeNames
-    ))
+    SimpleUpdateExpression(
+      LeafRemoveExpression(
+        field.placeholder,
+        field.attributeNames
+      ))
   }
 }
 
@@ -272,7 +282,7 @@ case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExp
 
   private val semigroup = Semigroup[Map[UpdateType, NonEmptyVector[LeafUpdateExpression]]]
 
-  override def typeExpressions: Map[UpdateType, NonEmptyVector[LeafUpdateExpression]] =  {
+  override def typeExpressions: Map[UpdateType, NonEmptyVector[LeafUpdateExpression]] = {
     val leftUpdates = l.typeExpressions.mapValues(_.map(_.prefixKeys("l_")))
     val rightUpdates = r.typeExpressions.mapValues(_.map(_.prefixKeys("r_")))
 
@@ -289,7 +299,7 @@ case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExp
 }
 
 case class Field(placeholder: String, attributeNames: Map[String, String]) {
-  def \ (s: Symbol): Field = Field(s"$placeholder.#update${s.name}", attributeNames + (s"update${s.name}" -> s.name))
+  def \(s: Symbol): Field = Field(s"$placeholder.#update${s.name}", attributeNames + (s"update${s.name}" -> s.name))
   def apply(index: Int): Field = Field(s"$placeholder[$index]", attributeNames)
 }
 

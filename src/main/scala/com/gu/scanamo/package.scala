@@ -13,7 +13,7 @@ package object scanamo {
       def >=[V: DynamoFormat](v: V) = KeyIs(s, GTE, v)
       def beginsWith[V: DynamoFormat](v: V) = BeginsWith(s, v)
       def between[V: DynamoFormat](bounds: Bounds[V]) = Between(s, bounds)
-      def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
+      def and(other: Symbol) = HashAndRangeKeyNames(s, other)
     }
 
     case class HashAndRangeKeyNames(hash: Symbol, range: Symbol)

@@ -67,6 +67,8 @@ doctestTestFramework := DoctestTestFramework.ScalaTest
 
 parallelExecution in Test := false
 
+scalafmtVersion := "1.0.0-RC4"
+
 homepage := Some(url("https://guardian.github.io/scanamo/"))
 licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html"))
 publishMavenStyle := true

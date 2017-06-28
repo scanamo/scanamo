@@ -15,10 +15,11 @@ object UniqueKeyCondition {
     override def asAVMap(t: KeyEquals[V]): Map[String, AttributeValue] =
       Map(t.key.name -> DynamoFormat[V].write(t.v))
   }
-  implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition] = new UniqueKeyCondition[AndEqualsCondition[H, R]] {
-    override def asAVMap(t: AndEqualsCondition[H, R]): Map[String, AttributeValue] =
-      UniqueKeyCondition[H].asAVMap(t.hashEquality) ++ UniqueKeyCondition[R].asAVMap(t.rangeEquality)
-  }
+  implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition] =
+    new UniqueKeyCondition[AndEqualsCondition[H, R]] {
+      override def asAVMap(t: AndEqualsCondition[H, R]): Map[String, AttributeValue] =
+        UniqueKeyCondition[H].asAVMap(t.hashEquality) ++ UniqueKeyCondition[R].asAVMap(t.rangeEquality)
+    }
 }
 
 case class UniqueKey[T: UniqueKeyCondition](t: T) {
@@ -38,8 +39,9 @@ object UniqueKeyConditions {
     new UniqueKeyConditions[MultipleKeyList[H, R]] {
       override def asAVMap(mkl: MultipleKeyList[H, R]): Set[Map[String, AttributeValue]] = {
         val (hashKey, rangeKey) = mkl.keys
-        mkl.values.map { case (h, r) =>
-          Map(hashKey.name -> DynamoFormat[H].write(h), rangeKey.name -> DynamoFormat[R].write(r))
+        mkl.values.map {
+          case (h, r) =>
+            Map(hashKey.name -> DynamoFormat[H].write(h), rangeKey.name -> DynamoFormat[R].write(r))
         }
       }
     }
