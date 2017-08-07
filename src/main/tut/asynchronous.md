@@ -1,7 +1,7 @@
 ---
 layout: docs
 title: Asynchronous Requests
-position: 6
+position: 7
 ---
 
 ## Non-blocking requests
