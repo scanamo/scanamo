@@ -24,6 +24,9 @@ options:
   - title: Conditional Operations
     url: conditional-operations.html
 
+  - title: Filters
+    url: filters.html
+
   - title: Using Indexes
     url: using-indexes.html
 
