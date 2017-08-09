@@ -13,10 +13,6 @@ libraryDependencies ++= Seq(
   "org.typelevel" %% "cats-free" % "0.9.0",
   "com.github.mpilquist" %% "simulacrum" % "0.10.0",
 
-  "org.typelevel" %% "macro-compat" % "1.1.1",
-  "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
-  compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch),
-
   // Use Joda for custom conversion example
   "org.joda" % "joda-convert" % "1.8.1" % Provided,
   "joda-time" % "joda-time" % "2.9.7" % Test,
