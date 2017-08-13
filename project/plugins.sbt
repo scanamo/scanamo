@@ -13,5 +13,3 @@ addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.1")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.0")
 addSbtPlugin("org.scoverage" % "sbt-coveralls" % "1.1.0")
-
-addSbtPlugin("org.lyranthe.sbt" % "partial-unification" % "1.1.0")
