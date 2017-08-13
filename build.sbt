@@ -3,7 +3,7 @@ organization := "com.gu"
 
 scalaVersion := "2.12.1"
 
-crossScalaVersions := Seq("2.11.8", scalaVersion.value)
+crossScalaVersions := Seq("2.11.11", scalaVersion.value)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
