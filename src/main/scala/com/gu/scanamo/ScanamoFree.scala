@@ -20,7 +20,7 @@ object ScanamoFree {
     ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.grouped(batchSize).toList.traverseU(batch =>
+    items.grouped(batchSize).toList.traverse(batch =>
       ScanamoOps.batchWrite(
         new BatchWriteItemRequest().withRequestItems(Map(tableName -> batch.toList.map(i =>
           new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM))
@@ -29,7 +29,7 @@ object ScanamoFree {
     )
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = {
-    items.asAVMap.grouped(batchSize).toList.traverseU { batch =>
+    items.asAVMap.grouped(batchSize).toList.traverse { batch =>
       ScanamoOps.batchWrite(
         new BatchWriteItemRequest().withRequestItems(
           Map(tableName -> batch.toList
@@ -56,7 +56,7 @@ object ScanamoFree {
       Option(res.getItem).map(read[T])
 
   def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
-    keys.asAVMap.grouped(batchSize).toList.traverseU { batch =>
+    keys.asAVMap.grouped(batchSize).toList.traverse { batch =>
       ScanamoOps.batchGet(
         new BatchGetItemRequest().withRequestItems(Map(tableName ->
           new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)
