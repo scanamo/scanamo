@@ -10,7 +10,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 libraryDependencies ++= Seq(
   "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.154",
   "com.chuusai" %% "shapeless" % "2.3.2",
-  "org.typelevel" %% "cats-free" % "0.9.0",
+  "org.typelevel" %% "cats-free" % "1.0.0-MF",
   "com.github.mpilquist" %% "simulacrum" % "0.10.0",
 
   "org.typelevel" %% "macro-compat" % "1.1.1",
@@ -40,7 +40,8 @@ scalacOptions := Seq(
   "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard"
+  "-Ywarn-value-discard",
+  "-Ypartial-unification"
 )
 
 dynamoDBLocalDownloadDir := file(".dynamodb-local")
