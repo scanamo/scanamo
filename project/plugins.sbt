@@ -1,6 +1,6 @@
-addSbtPlugin("com.localytics" % "sbt-dynamodb" % "1.5.3")
+addSbtPlugin("com.localytics" % "sbt-dynamodb" % "1.5.5")
 
-addSbtPlugin("com.github.tkawachi" % "sbt-doctest" % "0.4.1")
+addSbtPlugin("com.github.tkawachi" % "sbt-doctest" % "0.7.0")
 
 resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages" % "0.5.4")

@@ -1,21 +1,21 @@
 name := "scanamo"
 organization := "com.gu"
 
-scalaVersion := "2.12.1"
+scalaVersion := "2.12.3"
 
 crossScalaVersions := Seq("2.11.11", scalaVersion.value)
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 
 libraryDependencies ++= Seq(
-  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.154",
+  "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
   "com.chuusai" %% "shapeless" % "2.3.2",
   "org.typelevel" %% "cats-free" % "1.0.0-MF",
-  "com.github.mpilquist" %% "simulacrum" % "0.10.0",
+  "com.github.mpilquist" %% "simulacrum" % "0.11.0",
 
   // Use Joda for custom conversion example
-  "org.joda" % "joda-convert" % "1.8.1" % Provided,
-  "joda-time" % "joda-time" % "2.9.7" % Test,
+  "org.joda" % "joda-convert" % "1.8.3" % Provided,
+  "joda-time" % "joda-time" % "2.9.9" % Test,
 
   "org.scalatest" %% "scalatest" % "3.0.1" % Test,
   "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
@@ -40,6 +40,11 @@ scalacOptions := Seq(
   "-Ypartial-unification"
 )
 
+// sbt-doctest leaves some unused values
+// see https://github.com/scala/bug/issues/10270
+scalacOptions in Test := scalacOptions.value
+  .filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+
 dynamoDBLocalDownloadDir := file(".dynamodb-local")
 dynamoDBLocalPort := 8042
 startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
@@ -59,7 +64,6 @@ git.remoteRepo := "git@github.com:guardian/scanamo.git"
 
 doctestMarkdownEnabled := true
 doctestDecodeHtmlEntities := true
-doctestWithDependencies := false
 doctestTestFramework := DoctestTestFramework.ScalaTest
 
 parallelExecution in Test := false

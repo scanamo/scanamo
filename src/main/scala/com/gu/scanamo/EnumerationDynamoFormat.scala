@@ -44,7 +44,7 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
       else alternativeFormat.read(av).right.map(Inr(_))
 
     override def write(t: FieldType[K, V] :+: R): AttributeValue = t match {
-      case Inl(l) => new AttributeValue().withS(fieldWitness.value.name)
+      case Inl(_) => new AttributeValue().withS(fieldWitness.value.name)
       case Inr(r) => alternativeFormat.write(r)
     }
   }
