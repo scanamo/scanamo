@@ -15,7 +15,7 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
     import syntax._
     Scanamo.query[Large](client)("large-query")('name -> "Harry").toList.size should be (100)
 
-    val deleteResult = client.deleteTable("large-query")
+    client.deleteTable("large-query")
   }
 
   it("should get consistently") {

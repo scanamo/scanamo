@@ -97,7 +97,6 @@ object Scanamo {
   /**
     * {{{
     * >>> case class City(name: String, country: String)
-    * >>> val cityTable = Table[City]("asyncCities")
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
@@ -215,7 +214,6 @@ object Scanamo {
     *
     * {{{
     * >>> case class Forecast(location: String, weather: String)
-    * >>> val forecast = Table[Forecast]("forecast")
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._

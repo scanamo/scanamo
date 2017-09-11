@@ -24,7 +24,7 @@ case class AndQueryCondition[H: DynamoFormat, R: DynamoFormat](
   def descending = Descending(this)
 }
 
-sealed abstract class RangeKeyCondition[V](implicit f: DynamoFormat[V]) extends Product with Serializable {
+sealed abstract class RangeKeyCondition[V: DynamoFormat] extends Product with Serializable {
   val key: Symbol
   def attributes: Map[String, V]
   def keyConditionExpression(s: String): String
