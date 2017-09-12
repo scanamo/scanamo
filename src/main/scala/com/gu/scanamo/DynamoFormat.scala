@@ -52,20 +52,6 @@ import scala.reflect.ClassTag
   * Right(Pet(Zebediah,Zebra))
   * }}}
   *
-  * as well as more complex sealed trait + case class hierarchies
-  *
-  * {{{
-  * >>> sealed trait Monster
-  * >>> case object Godzilla extends Monster
-  * >>> case class GiantSquid(tentacles: Int) extends Monster
-  * >>> val monsterF = DynamoFormat[Monster]
-  * >>> monsterF.read(monsterF.write(Godzilla))
-  * Right(Godzilla)
-  *
-  * >>> monsterF.read(monsterF.write(GiantSquid(12)))
-  * Right(GiantSquid(12))
-  * }}}
-  *
   * Problems reading a value are detailed
   * {{{
   * >>> import cats.syntax.either._
