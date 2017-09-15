@@ -18,8 +18,11 @@ trait DerivedDynamoFormat {
     def write(t: T): AttributeValue
   }
 
-  implicit val hnil: ConstructedDynamoFormat[HNil] =
-    new ConstructedDynamoFormat[HNil] {
+  trait InvalidConstructedDynamoFormat[T] extends ConstructedDynamoFormat[T]
+  trait ValidConstructedDynamoFormat[T] extends ConstructedDynamoFormat[T]
+
+  implicit val hnil: InvalidConstructedDynamoFormat[HNil] =
+    new InvalidConstructedDynamoFormat[HNil] {
       def read(av: AttributeValue) = Validated.valid(HNil)
       def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty[String, AttributeValue].asJava)
     }
@@ -28,8 +31,8 @@ trait DerivedDynamoFormat {
     headFormat: Lazy[DynamoFormat[V]],
     tailFormat: Lazy[ConstructedDynamoFormat[T]],
     fieldWitness: Witness.Aux[K]
-  ): ConstructedDynamoFormat[FieldType[K, V] :: T] =
-    new ConstructedDynamoFormat[FieldType[K, V] :: T] {
+  ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
+    new ValidConstructedDynamoFormat[FieldType[K, V] :: T] {
       def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :: T] = {
         val fieldName = fieldWitness.value.name
 
@@ -86,7 +89,7 @@ trait DerivedDynamoFormat {
     }
   }
 
-  implicit def genericProduct[T: NotSymbol, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ConstructedDynamoFormat[R]]): DynamoFormat[T] =
+  implicit def genericProduct[T: NotSymbol, R](implicit gen: LabelledGeneric.Aux[T, R], formatR: Lazy[ValidConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
