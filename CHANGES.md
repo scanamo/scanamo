@@ -1,3 +1,8 @@
+## Version 1.0.0-M1
+
+ * Update Cats to `1.0.0-MF` (#134 - @rstradling)
+ * Don't allow an empty map to be derived as a DynamoFormat (#140)
+
 ## Version 0.9.5
 
  * Automatically manage batching of `getAll` (#116 - @todor-kolev)
