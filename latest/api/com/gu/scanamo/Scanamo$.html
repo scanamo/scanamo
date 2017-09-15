@@ -438,7 +438,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         <span class="name">clone</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.AnyRef">AnyRef</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
       <span class="defval" name="classOf[java.lang.CloneNotSupportedException]">...</span>
@@ -569,7 +569,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         <span class="name">finalize</span><span class="params">()</span><span class="result">: <span class="extype" name="scala.Unit">Unit</span></span>
       </span>
       
-      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java$lang.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
+      <div class="fullcomment"><dl class="attributes block"> <dt>Attributes</dt><dd>protected[<a href="../../../java/lang/index.html" class="extype" name="java.lang">java.lang</a>] </dd><dt>Definition Classes</dt><dd>AnyRef</dd><dt>Annotations</dt><dd>
                 <span class="name">@throws</span><span class="args">(<span>
       
       <span class="symbol">classOf[java.lang.Throwable]</span>
@@ -687,7 +687,6 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       </span>
       
       <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"><p></p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> City(name: <span class="std">String</span>, country: <span class="std">String</span>)
-&gt;&gt;&gt; <span class="kw">val</span> cityTable = Table[City](<span class="lit">"asyncCities"</span>)
 
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 &gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
@@ -1132,7 +1131,6 @@ maximum result set size</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span 
       </span>
       
       <p class="shortcomment cmt">Updates an attribute that is not part of the key</p><div class="fullcomment"><div class="comment cmt"><p>Updates an attribute that is not part of the key</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Forecast(location: <span class="std">String</span>, weather: <span class="std">String</span>)
-&gt;&gt;&gt; <span class="kw">val</span> forecast = Table[Forecast](<span class="lit">"forecast"</span>)
 
 &gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
 &gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._

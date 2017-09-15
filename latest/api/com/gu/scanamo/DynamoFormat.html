@@ -319,15 +319,7 @@ Right(Farmer(McDonald,<span class="num">156</span>,Farm(<span class="std">List</
 Right(Pet(Amy,Aardvark))
 
 &gt;&gt;&gt; petF.read(petF.write(Pet(<span class="lit">"Zebediah"</span>, Zebra)))
-Right(Pet(Zebediah,Zebra))</pre><p>as well as more complex sealed trait + case class hierarchies</p><pre>&gt;&gt;&gt; <span class="kw">sealed</span> <span class="kw">trait</span> Monster
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">object</span> Godzilla <span class="kw">extends</span> Monster
-&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> GiantSquid(tentacles: <span class="std">Int</span>) <span class="kw">extends</span> Monster
-&gt;&gt;&gt; <span class="kw">val</span> monsterF = DynamoFormat[Monster]
-&gt;&gt;&gt; monsterF.read(monsterF.write(Godzilla))
-Right(Godzilla)
-
-&gt;&gt;&gt; monsterF.read(monsterF.write(GiantSquid(<span class="num">12</span>)))
-Right(GiantSquid(<span class="num">12</span>))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">import</span> cats.syntax.either._
+Right(Pet(Zebediah,Zebra))</pre><p>Problems reading a value are detailed</p><pre>&gt;&gt;&gt; <span class="kw">import</span> cats.syntax.either._
 
 &gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Developer(name: <span class="std">String</span>, age: <span class="std">String</span>, problems: <span class="std">Int</span>)
 &gt;&gt;&gt; <span class="kw">val</span> invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer(<span class="lit">"Alice"</span>, <span class="lit">"none of your business"</span>, <span class="num">99</span>)))
