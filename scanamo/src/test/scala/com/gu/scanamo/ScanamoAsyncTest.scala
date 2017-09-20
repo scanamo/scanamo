@@ -34,7 +34,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      Scanamo.put(client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
+      val table = Table[Farmer]("asyncFarmers")
+      Scanamo.exec(client)(table.put(Farmer("Maggot", 75L, Farm(List("dog")))))
 
       ScanamoAsync.get[Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
         .futureValue should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
