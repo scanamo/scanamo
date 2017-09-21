@@ -112,7 +112,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
     */
-  def index(indexName: String) = Index[V](name, indexName)
+  def index(indexName: String): Index[V] = IndexWithOptions[V](name, indexName, ScanamoQueryOptions.default)
 
   /**
     * Updates an attribute that is not part of the key and returns the updated row
@@ -571,7 +571,9 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
 }
 
-private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
+sealed abstract class Index[V] {
+  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
+  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
     * {{{
@@ -601,19 +603,15 @@ private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName:
     * List(Right(Transport(Underground,Picadilly,Blue)))
     * }}}
     */
-  def limit(n: Int) =
-    IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).limit(n)
-
-  def filter[C: ConditionExpression](condition: C) =
-    IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).filter(Condition(condition))
-
-  def scan() = IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).scan()
-  def query(query: Query[_]) = IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).query(query)
+  def limit(n: Int): Index[V]
+  def filter[C: ConditionExpression](condition: C): Index[V]
 }
 
-private[scanamo] case class IndexWithOptions[V: DynamoFormat](tableName: String, indexName: Option[String], queryOptions: ScanamoQueryOptions) {
+private[scanamo] case class IndexWithOptions[V: DynamoFormat](tableName: String, indexName: String, queryOptions: ScanamoQueryOptions) extends Index[V] {
   def limit(n: Int): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+  def filter[C: ConditionExpression](condition: C) =
+    IndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
-  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, indexName, queryOptions))
-  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, indexName, query, queryOptions))
+  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions))
+  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
 }
