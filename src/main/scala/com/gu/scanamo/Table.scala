@@ -572,10 +572,68 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
 }
 
 sealed abstract class Index[V] {
+
+  /**
+    * Scan a secondary index
+    *
+    *
+    * This will only return items with a value present in the secondary index
+    *
+    * {{{
+    * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val table = Table[Bear]("bears")
+    *
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "antagonist")('name -> S)('antagonist -> S) {
+    * ...   val ops = for {
+    * ...     _ <- table.put(Bear("Pooh", "honey", None))
+    * ...     _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
+    * ...     _ <- table.put(Bear("Paddington", "marmalade sandwiches", Some("Mr Curry")))
+    * ...     antagonisticBears <- table.index("antagonist").scan()
+    * ...   } yield antagonisticBears
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Bear(Paddington,marmalade sandwiches,Some(Mr Curry))), Right(Bear(Yogi,picnic baskets,Some(Ranger Smith))))
+    * }}}
+    */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  /**
+    * Run a query against keys in a secondary index
+    *
+    * {{{
+    * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
+    * >>> val githubProjects = Table[GithubProject]("github-projects")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("github-projects", "language-license")('organisation -> S, 'repository -> S)('language -> S, 'license -> S) {
+    * ...   val operations = for {
+    * ...     _ <- githubProjects.putAll(Set(
+    * ...       GithubProject("typelevel", "cats", "Scala", "MIT"),
+    * ...       GithubProject("localytics", "sbt-dynamodb", "Scala", "MIT"),
+    * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
+    * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
+    * ...     ))
+    * ...     scalaMIT <- githubProjects.index("language-license").query('language -> "Scala" and ('license -> "MIT"))
+    * ...   } yield scalaMIT.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
+    * }}}
+  */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
+
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
+    *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
     * >>> val transport = Table[Transport]("transport")
