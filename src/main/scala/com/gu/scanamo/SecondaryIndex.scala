@@ -11,7 +11,7 @@ import com.gu.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, Scanamo
   *
   * Can be constructed via the [[com.gu.scanamo.Table#index index]] method on [[com.gu.scanamo.Table Table]]
   */
-sealed abstract class Index[V] {
+sealed abstract class SecondaryIndex[V] {
 
   /**
     * Scan a secondary index
@@ -101,7 +101,7 @@ sealed abstract class Index[V] {
     * List(Right(Transport(Underground,Picadilly,Blue)))
     * }}}
     */
-  def limit(n: Int): Index[V]
+  def limit(n: Int): SecondaryIndex[V]
 
   /**
     * Filter the results of `scan` or `query` within DynamoDB
@@ -134,14 +134,14 @@ sealed abstract class Index[V] {
     * List(Right(Transport(Underground,Central,Red)), Right(Transport(Underground,Circle,Yellow)))
     * }}}
     */
-  def filter[C: ConditionExpression](condition: C): Index[V]
+  def filter[C: ConditionExpression](condition: C): SecondaryIndex[V]
 }
 
-private[scanamo] case class IndexWithOptions[V: DynamoFormat](tableName: String, indexName: String, queryOptions: ScanamoQueryOptions) extends Index[V] {
-  def limit(n: Int): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](tableName: String, indexName: String, queryOptions: ScanamoQueryOptions) extends SecondaryIndex[V] {
+  def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def filter[C: ConditionExpression](condition: C) =
-    IndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
-  def filter[T](c: Condition[T]): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
+    SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
+  def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions))
   def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
 }

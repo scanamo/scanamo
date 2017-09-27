@@ -112,7 +112,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
     */
-  def index(indexName: String): Index[V] = IndexWithOptions[V](name, indexName, ScanamoQueryOptions.default)
+  def index(indexName: String): SecondaryIndex[V] = SecondaryIndexWithOptions[V](name, indexName, ScanamoQueryOptions.default)
 
   /**
     * Updates an attribute that is not part of the key and returns the updated row
