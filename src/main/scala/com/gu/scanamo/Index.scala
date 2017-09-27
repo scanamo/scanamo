@@ -6,6 +6,11 @@ import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query.{Condition, ConditionExpression, Query}
 import com.gu.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 
+/**
+  * Represents a secondary index on a DynamoDB table.
+  *
+  * Can be constructed via the [[com.gu.scanamo.Table#index index]] method on [[com.gu.scanamo.Table Table]]
+  */
 sealed abstract class Index[V] {
 
   /**
@@ -97,6 +102,38 @@ sealed abstract class Index[V] {
     * }}}
     */
   def limit(n: Int): Index[V]
+
+  /**
+    * Filter the results of `scan` or `query` within DynamoDB
+    *
+    * Note that rows filtered out still count towards your consumed capacity
+    * {{{
+    * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> val transport = Table[Transport]("transport")
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.syntax._
+    *
+    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    * ... ) {
+    * ...   val operations = for {
+    * ...     _ <- transport.putAll(Set(
+    * ...       Transport("Underground", "Circle", "Yellow"),
+    * ...       Transport("Underground", "Metropolitan", "Magenta"),
+    * ...       Transport("Underground", "Central", "Red"),
+    * ...       Transport("Underground", "Picadilly", "Blue"),
+    * ...       Transport("Underground", "Northern", "Black")))
+    * ...     somethingBeginningWithC <- transport.index("colour-index")
+    * ...                                   .filter('line beginsWith ("C"))
+    * ...                                   .query('mode -> "Underground")
+    * ...   } yield somethingBeginningWithC.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Transport(Underground,Central,Red)), Right(Transport(Underground,Circle,Yellow)))
+    * }}}
+    */
   def filter[C: ConditionExpression](condition: C): Index[V]
 }
 
