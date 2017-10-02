@@ -43,10 +43,11 @@ scalacOptions := Seq(
 // sbt-doctest leaves some unused values
 // see https://github.com/scala/bug/issues/10270
 scalacOptions in Test := {
+  val mainScalacOptions = scalacOptions.value
   if (CrossVersion.partialVersion(scalaVersion.value) == Some((2,12)))
-    scalacOptions.value.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+    mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
   else
-    scalacOptions.value
+    mainScalacOptions
 }
 scalacOptions in (Compile, console) := (scalacOptions in Test).value
 
@@ -56,15 +57,12 @@ startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
 test in Test := (test in Test).dependsOn(startDynamoDBLocal).value
 testOptions in Test += dynamoDBLocalTestCleanup.value
 
-tut := tut.dependsOn(startDynamoDBLocal).value
+tut := tut.dependsOn(startDynamoDBLocal).doFinally(stopDynamoDBLocal.taskValue).value
 
-tut <<= (tut, stopDynamoDBLocal){ (tut, stop) => tut.doFinally(stop)}
-
-enablePlugins(MicrositesPlugin, SiteScaladocPlugin)
+enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin)
 
 includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml"
-ghpages.settings
-com.typesafe.sbt.SbtGhPages.GhPagesKeys.ghpagesNoJekyll := false
+ghpagesNoJekyll := false
 git.remoteRepo := "git@github.com:guardian/scanamo.git"
 
 doctestMarkdownEnabled := true
@@ -105,10 +103,10 @@ releaseProcess := Seq[ReleaseStep](
   setReleaseVersion,
   commitReleaseVersion,
   tagRelease,
-  ReleaseStep(action = Command.process("publishSigned", _), enableCrossBuild = true),
+  ReleaseStep(action = state => "publishSigned" :: state, enableCrossBuild = true),
   setNextVersion,
   commitNextVersion,
-  ReleaseStep(action = Command.process("sonatypeReleaseAll", _), enableCrossBuild = true),
+  ReleaseStep(action = state => "sonatypeReleaseAll" :: state, enableCrossBuild = true),
   pushChanges,
   releaseStepTask(publishMicrosite)
 )
