@@ -112,7 +112,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
     */
-  def index(indexName: String) = Index[V](name, indexName)
+  def index(indexName: String): SecondaryIndex[V] = SecondaryIndexWithOptions[V](name, indexName, ScanamoQueryOptions.default)
 
   /**
     * Updates an attribute that is not part of the key and returns the updated row
@@ -569,51 +569,4 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
-}
-
-private[scanamo] case class Index[V: DynamoFormat](tableName: String, indexName: String) {
-  /**
-    * Query or scan an index, limiting the number of items evaluated by Dynamo
-    * {{{
-    * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> val transport = Table[Transport]("transport")
-    *
-    * >>> val client = LocalDynamoDB.client()
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> import com.gu.scanamo.syntax._
-    *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
-    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
-    * ... ) {
-    * ...   val operations = for {
-    * ...     _ <- transport.putAll(Set(
-    * ...       Transport("Underground", "Circle", "Yellow"),
-    * ...       Transport("Underground", "Metropolitan", "Magenta"),
-    * ...       Transport("Underground", "Central", "Red"),
-    * ...       Transport("Underground", "Picadilly", "Blue"),
-    * ...       Transport("Underground", "Northern", "Black")))
-    * ...     somethingBeginningWithBl <- transport.index("colour-index").limit(1).query(
-    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")).descending
-    * ...     )
-    * ...   } yield somethingBeginningWithBl.toList
-    * ...   Scanamo.exec(client)(operations)
-    * ... }
-    * List(Right(Transport(Underground,Picadilly,Blue)))
-    * }}}
-    */
-  def limit(n: Int) =
-    IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).limit(n)
-
-  def filter[C: ConditionExpression](condition: C) =
-    IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).filter(Condition(condition))
-
-  def scan() = IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).scan()
-  def query(query: Query[_]) = IndexWithOptions(tableName, Some(indexName), ScanamoQueryOptions.default).query(query)
-}
-
-private[scanamo] case class IndexWithOptions[V: DynamoFormat](tableName: String, indexName: Option[String], queryOptions: ScanamoQueryOptions) {
-  def limit(n: Int): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
-  def filter[T](c: Condition[T]): IndexWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
-  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, indexName, queryOptions))
-  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, indexName, query, queryOptions))
 }
