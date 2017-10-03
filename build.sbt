@@ -48,6 +48,7 @@ scalacOptions in Test := {
   else
     scalacOptions.value
 }
+scalacOptions in (Compile, console) := (scalacOptions in Test).value
 
 dynamoDBLocalDownloadDir := file(".dynamodb-local")
 dynamoDBLocalPort := 8042
