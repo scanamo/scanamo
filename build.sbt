@@ -57,7 +57,8 @@ startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value
 test in Test := (test in Test).dependsOn(startDynamoDBLocal).value
 testOptions in Test += dynamoDBLocalTestCleanup.value
 
-tut := tut.dependsOn(startDynamoDBLocal).doFinally(stopDynamoDBLocal.taskValue).value
+tut := tut.dependsOn(startDynamoDBLocal).value
+stopDynamoDBLocal := stopDynamoDBLocal.triggeredBy(tut).value
 
 enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin)
 
