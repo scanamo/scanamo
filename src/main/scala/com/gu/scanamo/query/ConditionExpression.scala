@@ -11,23 +11,23 @@ import cats.syntax.either._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T], format: DynamoFormat[V]) {
-  def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] = {
-    val unconditionalRequest = ScanamoPutRequest(tableName, format.write(item), None)
+  def put(item: V, returnValue: Option[ReturnValue] = None): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] = {
+    val unconditionalRequest = ScanamoPutRequest(tableName, format.write(item), None, returnValue)
     ScanamoOps.conditionalPut(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
-  def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] = {
-    val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None)
+  def delete(key: UniqueKey[_], returnValue: Option[ReturnValue] = None): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] = {
+    val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None, returnValue)
     ScanamoOps.conditionalDelete(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
-  def update(key: UniqueKey[_], update: UpdateExpression):
+  def update(key: UniqueKey[_], update: UpdateExpression, returnValue: Option[ReturnValue] = None):
     ScanamoOps[Either[ScanamoError, V]] = {
 
     val unconditionalRequest = ScanamoUpdateRequest(
-      tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None)
+      tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None, returnValue)
     ScanamoOps.conditionalUpdate(unconditionalRequest.copy(
       condition = Some(state.apply(t)(unconditionalRequest.condition)))
     ).map(either => either.leftMap[ScanamoError](ConditionNotMet(_)).flatMap(

@@ -1,13 +1,14 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ReturnValue}
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{EitherValues, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 
-class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
+class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures with EitherValues {
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
 
@@ -26,6 +27,29 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
 
       result.futureValue should equal(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
+    }
+  }
+
+  it("should put asynchronously and return values correctly") {
+    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+
+      val originalItem = Farmer("McDonald", 156L, Farm(List("sheep", "cow")))
+      val updatedItem = Farmer("McDonald", 100L, Farm(List("sheep", "pig")))
+
+      val resultF = for {
+        _ <- ScanamoAsync.put(client)("asyncFarmers")(originalItem)
+        result <- ScanamoAsync.put(client)("asyncFarmers")(
+          updatedItem,
+          Some(ReturnValue.ALL_OLD)
+        )
+      } yield result
+
+      // Parse the returned result
+      val format = implicitly[DynamoFormat[Farmer]]
+      val parsedResult = format.read(new AttributeValue().withM(resultF.futureValue.getAttributes))
+      parsedResult.right.value should equal(originalItem)
     }
   }
 

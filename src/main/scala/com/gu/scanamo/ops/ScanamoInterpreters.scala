@@ -158,7 +158,10 @@ private[ops] object JavaRequests {
 
   def put(req: ScanamoPutRequest): PutItemRequest =
     req.condition.foldLeft(
-      new PutItemRequest().withTableName(req.tableName).withItem(req.item.getM)
+      new PutItemRequest()
+        .withTableName(req.tableName)
+        .withItem(req.item.getM)
+        .withReturnValues(req.returnValue.getOrElse(ReturnValue.NONE))
     )((r, c) =>
       c.attributeValues.foldLeft(
         r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
@@ -167,7 +170,10 @@ private[ops] object JavaRequests {
 
   def delete(req: ScanamoDeleteRequest): DeleteItemRequest =
     req.condition.foldLeft(
-      new DeleteItemRequest().withTableName(req.tableName).withKey(req.key.asJava)
+      new DeleteItemRequest()
+        .withTableName(req.tableName)
+        .withKey(req.key.asJava)
+        .withReturnValues(req.returnValue.getOrElse(ReturnValue.NONE))
     )((r, c) =>
       c.attributeValues.foldLeft(
         r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
@@ -179,7 +185,7 @@ private[ops] object JavaRequests {
       new UpdateItemRequest().withTableName(req.tableName).withKey(req.key.asJava)
         .withUpdateExpression(req.updateExpression)
         .withExpressionAttributeNames(req.attributeNames.asJava)
-        .withReturnValues(ReturnValue.ALL_NEW)
+        .withReturnValues(req.returnValue.getOrElse(ReturnValue.ALL_NEW))
     )((r, c) =>
       c.attributeValues.foldLeft(
         r.withConditionExpression(c.expression).withExpressionAttributeNames(

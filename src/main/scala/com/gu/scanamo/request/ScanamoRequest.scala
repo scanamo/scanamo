@@ -1,18 +1,20 @@
 package com.gu.scanamo.request
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ReturnValue}
 import com.gu.scanamo.query.{Condition, Query}
 
 case class ScanamoPutRequest(
   tableName: String,
   item: AttributeValue,
-  condition: Option[RequestCondition]
+  condition: Option[RequestCondition],
+  returnValue: Option[ReturnValue]
 )
 
 case class ScanamoDeleteRequest(
   tableName: String,
   key: Map[String, AttributeValue],
-  condition: Option[RequestCondition]
+  condition: Option[RequestCondition],
+  returnValue: Option[ReturnValue]
 )
 
 case class ScanamoUpdateRequest(
@@ -21,7 +23,8 @@ case class ScanamoUpdateRequest(
   updateExpression: String,
   attributeNames: Map[String, String],
   attributeValues: Map[String, AttributeValue],
-  condition: Option[RequestCondition]
+  condition: Option[RequestCondition],
+  returnValue: Option[ReturnValue]
 )
 
 case class ScanamoScanRequest(

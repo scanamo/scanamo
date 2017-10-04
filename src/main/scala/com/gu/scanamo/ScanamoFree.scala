@@ -16,8 +16,8 @@ object ScanamoFree {
 
   private val batchSize = 25
 
-  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
-    ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None))
+  def put[T](tableName: String)(item: T, returnValue: Option[ReturnValue] = None)(implicit f: DynamoFormat[T]): ScanamoOps[PutItemResult] =
+    ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None, returnValue))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
     items.grouped(batchSize).toList.traverse(batch =>
@@ -65,8 +65,8 @@ object ScanamoFree {
     }.map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
   }
 
-  def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
-    ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.asAVMap, None))
+  def delete(tableName: String)(key: UniqueKey[_], returnValue: Option[ReturnValue] = None): ScanamoOps[DeleteItemResult] =
+    ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.asAVMap, None, returnValue))
 
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default))
@@ -98,11 +98,11 @@ object ScanamoFree {
   def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream.stream[T](ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default.copy(limit = Some(limit))))
 
-  def update[T](tableName: String)(key: UniqueKey[_])(update: UpdateExpression)(
+  def update[T](tableName: String)(key: UniqueKey[_], returnValue: Option[ReturnValue] = None)(update: UpdateExpression)(
     implicit format: DynamoFormat[T]
   ): ScanamoOps[Either[DynamoReadError, T]] =
     ScanamoOps.update(ScanamoUpdateRequest(
-      tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None)
+      tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None, returnValue)
     ).map(
       r => format.read(new AttributeValue().withM(r.getAttributes))
     )

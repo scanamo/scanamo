@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult, ReturnValue}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
@@ -21,9 +21,9 @@ object ScanamoAsync {
   def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A])(implicit ec: ExecutionContext) =
     op.foldMap(ScanamoInterpreters.future(client)(ec))
 
-  def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)
+  def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T, returnValue: Option[ReturnValue] = None)
     (implicit ec: ExecutionContext): Future[PutItemResult] =
-    exec(client)(ScanamoFree.put(tableName)(item))
+    exec(client)(ScanamoFree.put(tableName)(item, returnValue))
 
   def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: Set[T])
     (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
@@ -41,18 +41,18 @@ object ScanamoAsync {
     (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAll[T](tableName)(keys))
 
-  def delete[T](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
+  def delete[T](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_], returnValue: Option[ReturnValue] = None)
     (implicit ec: ExecutionContext): Future[DeleteItemResult] =
-    exec(client)(ScanamoFree.delete(tableName)(key))
+    exec(client)(ScanamoFree.delete(tableName)(key, returnValue))
 
   def deleteAll(client: AmazonDynamoDBAsync)(tableName: String)(items: UniqueKeys[_])
                              (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
     exec(client)(ScanamoFree.deleteAll(tableName)(items))
 
   def update[V: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(
-    key: UniqueKey[_], expression: UpdateExpression)(implicit ec: ExecutionContext
-  ): Future[Either[DynamoReadError,V]] =
-    exec(client)(ScanamoFree.update[V](tableName)(key)(expression))
+    key: UniqueKey[_], expression: UpdateExpression, returnValue: Option[ReturnValue] = None)
+    (implicit ec: ExecutionContext): Future[Either[DynamoReadError,V]] =
+    exec(client)(ScanamoFree.update[V](tableName)(key, returnValue)(expression))
 
   def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
     (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
