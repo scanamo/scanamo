@@ -19,6 +19,9 @@ val commonSettings =  Seq(
     "-Ypartial-unification"
   ),
 
+  // for simulacrum
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
@@ -35,7 +38,12 @@ val commonSettings =  Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(scanamo, docs)
+  .aggregate(scanamo)
+  .settings(
+    commonSettings,
+    siteSubdirName in ScalaUnidoc := "latest/api"
+  )
+  .enablePlugins(ScalaUnidocPlugin)
 
 addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
@@ -62,8 +70,6 @@ lazy val scanamo = (project in file("scanamo"))
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
     ),
-    // for simulacrum
-    addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
 
     startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value,
     test in Test := (test in Test).dependsOn(startDynamoDBLocal).value,
@@ -86,7 +92,10 @@ lazy val docs = (project in file("docs"))
 
     includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
-    git.remoteRepo := "git@github.com:guardian/scanamo.git"
+    git.remoteRepo := "git@github.com:guardian/scanamo.git",
+
+    makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile in root).value,
+    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc) in root, siteSubdirName in ScalaUnidoc in root)
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin)
   .dependsOn(scanamo % "compile->test")
