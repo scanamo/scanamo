@@ -2,6 +2,7 @@ scalaVersion in ThisBuild := "2.12.3"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
 val commonSettings =  Seq(
+  organization := "com.gu",
   scalacOptions := Seq(
     "-deprecation",
     "-encoding", "UTF-8",
@@ -32,13 +33,21 @@ val commonSettings =  Seq(
       mainScalacOptions
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
+)
 
+val dynamoTestSettings = Seq(
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
-  dynamoDBLocalPort := 8042
+  dynamoDBLocalPort := 8042,
+
+  startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value,
+  test in Test := (test in Test).dependsOn(startDynamoDBLocal).value,
+  testOptions in Test += dynamoDBLocalTestCleanup.value,
+
+  parallelExecution in Test := false
 )
 
 lazy val root = (project in file("."))
-  .aggregate(scanamo)
+  .aggregate(formats, scanamo, alpakka)
   .settings(
     commonSettings,
     siteSubdirName in ScalaUnidoc := "latest/api"
@@ -49,13 +58,39 @@ addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-lazy val scanamo = (project in file("scanamo"))
+lazy val formats = (project in file("formats"))
   .settings(
     commonSettings,
     publishingSettings,
 
-    name := "scanamo",
-    organization := "com.gu",
+    name := "scanamo-formats",
+  )
+  .settings(
+
+    libraryDependencies ++= Seq(
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
+      "com.chuusai" %% "shapeless" % "2.3.2",
+      "com.github.mpilquist" %% "simulacrum" % "0.11.0",
+      "org.typelevel" %% "cats-core" % "1.0.0-MF",
+
+      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+    ),
+
+    doctestMarkdownEnabled := true,
+    doctestDecodeHtmlEntities := true,
+    doctestTestFramework := DoctestTestFramework.ScalaTest
+  )
+
+lazy val scanamo = (project in file("scanamo"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+    dynamoTestSettings,
+
+    name := "scanamo"
+  )
+  .settings(
 
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
@@ -69,24 +104,47 @@ lazy val scanamo = (project in file("scanamo"))
 
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+    )
+  )
+  .dependsOn(formats)
+
+lazy val alpakka = (project in file("alpakka"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+    dynamoTestSettings,
+
+    name := "scanamo-alpakka",
+  )
+  .settings(
+
+    libraryDependencies ++= Seq(
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
+      "org.typelevel" %% "cats-free" % "1.0.0-MF",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.11",
+
+      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
     ),
 
-    startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value,
-    test in Test := (test in Test).dependsOn(startDynamoDBLocal).value,
-    testOptions in Test += dynamoDBLocalTestCleanup.value,
-
-    doctestMarkdownEnabled := true,
-    doctestDecodeHtmlEntities := true,
-    doctestTestFramework := DoctestTestFramework.ScalaTest,
-
-    parallelExecution in Test := false
+    fork in Test := true,
+    envVars in Test := Map(
+      "AWS_ACCESS_KEY_ID" -> "dummy",
+      "AWS_SECRET_KEY" -> "credentials"
+    ),
+    dynamoDBLocalDownloadDir := file(".alpakka-dynamodb-local"),
+    dynamoDBLocalPort := 8052,
   )
+  .dependsOn(formats, scanamo)
 
 lazy val docs = (project in file("docs"))
   .settings(
     commonSettings,
     micrositeSettings,
 
+    dynamoDBLocalDownloadDir := file(".dynamodb-local"),
+    dynamoDBLocalPort := 8042,
+    
     tut := tut.dependsOn(startDynamoDBLocal).value,
     stopDynamoDBLocal := stopDynamoDBLocal.triggeredBy(tut).value,
 
