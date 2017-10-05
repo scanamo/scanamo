@@ -5,7 +5,7 @@ import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.dynamodbv2._
 import com.amazonaws.services.dynamodbv2.model._
 
-import collection.JavaConverters._
+import scala.collection.JavaConverters._
 
 object LocalDynamoDB {
   def client(): AmazonDynamoDBAsync =
