@@ -139,7 +139,7 @@ private[ops] object JavaRequests {
 
   def query(req: ScanamoQueryRequest): QueryRequest = {
     def queryRefinement[T](o: ScanamoQueryRequest => Option[T])(rt: (QueryRequest,T) => QueryRequest): QueryRequest => QueryRequest =
-      { qr => o(req).foldLeft(qr)(rt) }
+    { qr => o(req).foldLeft(qr)(rt) }
 
     NonEmptyList.of(
       queryRefinement(_.index)(_.withIndexName(_)),

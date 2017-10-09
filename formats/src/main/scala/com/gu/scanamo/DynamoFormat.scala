@@ -82,9 +82,9 @@ import scala.reflect.ClassTag
 
 object DynamoFormat extends EnumDynamoFormat {
   private def attribute[T](
-    decode: AttributeValue => T, propertyType: String)(
-    encode: AttributeValue => T => AttributeValue
-  ): DynamoFormat[T] = {
+                            decode: AttributeValue => T, propertyType: String)(
+                            encode: AttributeValue => T => AttributeValue
+                          ): DynamoFormat[T] = {
     new DynamoFormat[T] {
       override def read(av: AttributeValue): Either[DynamoReadError, T] =
         Either.fromOption(Option(decode(av)), NoPropertyOfType(propertyType, av))

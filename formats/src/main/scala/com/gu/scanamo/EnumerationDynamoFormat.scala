@@ -35,10 +35,10 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
   }
 
   implicit def enumDynamoFormatCCons[K <: Symbol, V, R <: Coproduct](implicit
-    fieldWitness: Witness.Aux[K],
-    emptyGeneric: LabelledGeneric.Aux[V, HNil],
-    alternativeFormat: EnumerationDynamoFormat[R]
-  ): EnumerationDynamoFormat[FieldType[K, V] :+: R] = new EnumerationDynamoFormat[FieldType[K, V] :+: R] {
+                                                                     fieldWitness: Witness.Aux[K],
+                                                                     emptyGeneric: LabelledGeneric.Aux[V, HNil],
+                                                                     alternativeFormat: EnumerationDynamoFormat[R]
+                                                                    ): EnumerationDynamoFormat[FieldType[K, V] :+: R] = new EnumerationDynamoFormat[FieldType[K, V] :+: R] {
     override def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: R] =
       if (av.getS == fieldWitness.value.name) Right(Inl(field[K](emptyGeneric.from(HNil))))
       else alternativeFormat.read(av).right.map(Inr(_))
@@ -50,9 +50,9 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
   }
 
   implicit def enumFormat[A, Repr <: Coproduct](implicit
-    gen: LabelledGeneric.Aux[A, Repr],
-    genericFormat: EnumerationDynamoFormat[Repr]
-  ): EnumerationDynamoFormat[A] =
+                                                gen: LabelledGeneric.Aux[A, Repr],
+                                                genericFormat: EnumerationDynamoFormat[Repr]
+                                               ): EnumerationDynamoFormat[A] =
     new EnumerationDynamoFormat[A] {
       override def read(av: AttributeValue): Either[DynamoReadError, A] = genericFormat.read(av).right.map(gen.from)
       override def write(t: A): AttributeValue = genericFormat.write(gen.to(t))

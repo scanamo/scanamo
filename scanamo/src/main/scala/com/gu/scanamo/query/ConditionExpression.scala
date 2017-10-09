@@ -24,7 +24,7 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
   }
 
   def update(key: UniqueKey[_], update: UpdateExpression):
-    ScanamoOps[Either[ScanamoError, V]] = {
+  ScanamoOps[Either[ScanamoError, V]] = {
 
     val unconditionalRequest = ScanamoUpdateRequest(
       tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None)
@@ -126,8 +126,8 @@ object ConditionExpression {
     val rCondition = rce(r)(condition)
 
     val mergedExpressionAttributeNames =
-        prefixKeys(lCondition.attributeNames, lPrefix, '#') ++
-          prefixKeys(rCondition.attributeNames, rPrefix, '#')
+      prefixKeys(lCondition.attributeNames, lPrefix, '#') ++
+        prefixKeys(rCondition.attributeNames, rPrefix, '#')
 
     val lValues = lCondition.attributeValues.map(prefixKeys(_, lPrefix, ':'))
     val rValues = rCondition.attributeValues.map(prefixKeys(_, rPrefix, ':'))
