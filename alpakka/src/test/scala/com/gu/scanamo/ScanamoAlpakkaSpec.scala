@@ -82,10 +82,10 @@ class ScanamoAlpakkaSpec
 
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
-    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+    LocalDynamoDB.usingTable(client)("asyncAlpakkaCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.put(alpakkaClient)("asyncCities")(City("Nashville", "US")).andThen {
+      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).andThen {
         case _ =>
           ScanamoAlpakka.getWithConsistency[City](alpakkaClient)("asyncCities")('name -> "Nashville")
             .futureValue should equal(Some(Right(City("Nashville", "US"))))

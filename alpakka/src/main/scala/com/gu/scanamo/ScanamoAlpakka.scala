@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
@@ -23,7 +23,7 @@ object ScanamoAlpakka {
     op.foldMap(AlpakkaInterpreter.future(client)(ec))
 
   def put[T: DynamoFormat](client: DynamoClient)(tableName: String)(item: T)
-                          (implicit ec: ExecutionContext): Future[PutItemResult] =
+                          (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   def putAll[T: DynamoFormat](client: DynamoClient)(tableName: String)(items: Set[T])

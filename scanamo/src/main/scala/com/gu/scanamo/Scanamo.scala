@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query._
@@ -17,7 +17,10 @@ object Scanamo {
   def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]): A = op.foldMap(ScanamoInterpreters.id(client))
 
   /**
-    * Puts a single item into a table
+    * Puts a single item into a table and returns the previous stored item if overwritten by the new one.
+    *
+    * In case there wasn't any previously stored item, [None] will be returned.
+    * If the stored item has a different schema than type [T] then an appropriate [DynamoReadError] will be returned.
     *
     * {{{
     * >>> case class Farm(animals: List[String])
@@ -34,7 +37,7 @@ object Scanamo {
     * Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
     * }}}
     */
-  def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): PutItemResult =
+  def put[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(item: T): Option[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   /**

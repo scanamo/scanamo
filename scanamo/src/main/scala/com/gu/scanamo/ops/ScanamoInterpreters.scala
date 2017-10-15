@@ -158,7 +158,10 @@ private[ops] object JavaRequests {
 
   def put(req: ScanamoPutRequest): PutItemRequest =
     req.condition.foldLeft(
-      new PutItemRequest().withTableName(req.tableName).withItem(req.item.getM)
+      new PutItemRequest()
+        .withTableName(req.tableName)
+        .withItem(req.item.getM)
+        .withReturnValues(ReturnValue.ALL_OLD)
     )((r, c) =>
       c.attributeValues.foldLeft(
         r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
