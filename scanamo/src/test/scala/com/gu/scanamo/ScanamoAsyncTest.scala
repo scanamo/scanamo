@@ -403,6 +403,36 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     }
   }
 
+  it("should return old item after put asynchronously") {
+    case class Farm(animals: List[String])
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    val farmersTable = Table[Farmer]("nursery-farmers")
+
+    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+      val farmerOps = for {
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
+      } yield result
+      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(
+        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))))
+    }
+  }
+
+  it("should return None when putting a new item asynchronously") {
+    case class Farm(animals: List[String])
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    val farmersTable = Table[Farmer]("nursery-farmers")
+
+    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+      val farmerOps = for {
+        result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+      } yield result
+      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(None)
+    }
+  }
+
   it("conditionally put asynchronously") {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)

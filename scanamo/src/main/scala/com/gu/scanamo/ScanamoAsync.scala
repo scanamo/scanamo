@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, PutItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
@@ -22,7 +22,7 @@ object ScanamoAsync {
     op.foldMap(ScanamoInterpreters.future(client)(ec))
 
   def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)
-    (implicit ec: ExecutionContext): Future[PutItemResult] =
+    (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: Set[T])
