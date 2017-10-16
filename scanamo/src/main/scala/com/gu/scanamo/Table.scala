@@ -403,8 +403,8 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withTable(client)("choices")('number -> N) {
     * ...   val ops = for {
     * ...     _ <- choicesTable.putAll(Set(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
-    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(1, "victoria sponge"))
-    * ...     _ <- choicesTable.given(Condition('description -> "cake") or 'description -> "death").put(Choice(2, "victoria sponge"))
+    * ...     _ <- choicesTable.given(Condition('description -> "cake") or Condition('description -> "death")).put(Choice(1, "victoria sponge"))
+    * ...     _ <- choicesTable.given(Condition('description -> "cake") or Condition('description -> "death")).put(Choice(2, "victoria sponge"))
     * ...     choices <- choicesTable.scan()
     * ...   } yield choices
     * ...   Scanamo.exec(client)(ops).toList

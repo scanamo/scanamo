@@ -163,3 +163,11 @@ case class Condition[T: ConditionExpression](t: T) {
   def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
   def or[Y: ConditionExpression](other: Y) = OrCondition(t, other)
 }
+
+object Condition {
+  implicit def conditionExpression[T]: ConditionExpression[Condition[T]] =
+    new ConditionExpression[Condition[T]] {
+      override def apply(condition: Condition[T])(possibleCondition: Option[RequestCondition]): RequestCondition =
+        condition(possibleCondition)
+    }
+}
