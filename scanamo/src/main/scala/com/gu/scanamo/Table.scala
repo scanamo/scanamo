@@ -309,7 +309,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Performs the chained operation, `put` if the condition is met
     *
     * {{{
-    * >>> case class Farm(animals: List[String])
+    * >>> case class Farm(animals: List[String], hectares: Int)
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> import com.gu.scanamo.syntax._
@@ -320,14 +320,14 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val farmersTable = Table[Farmer]("nursery-farmers")
     * >>> LocalDynamoDB.withTable(client)("nursery-farmers")('name -> S) {
     * ...   val farmerOps = for {
-    * ...     _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-    * ...     _ <- farmersTable.given('age -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
-    * ...     _ <- farmersTable.given('age -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
+    * ...     _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
+    * ...     _ <- farmersTable.given('age -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
+    * ...     _ <- farmersTable.given('age -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
     * ...     farmerWithNewStock <- farmersTable.get('name -> "McDonald")
     * ...   } yield farmerWithNewStock
     * ...   Scanamo.exec(client)(farmerOps)
     * ... }
-    * Some(Right(Farmer(McDonald,156,Farm(List(sheep, chicken)))))
+    * Some(Right(Farmer(McDonald,156,Farm(List(sheep, chicken),30))))
     *
     * >>> case class Letter(roman: String, greek: String)
     * >>> val lettersTable = Table[Letter]("letters")
@@ -443,6 +443,20 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Gremlin(2,true,false)), Right(Gremlin(1,false,true)))
     * }}}
+    *
+    * Conditions can also be placed on nested attributes
+    *
+    * >>> val smallscaleFarmersTable = Table[Farmer]("smallscale-farmers")
+    * >>> LocalDynamoDB.withTable(client)("smallscale-farmers")('name -> S) {
+    * ...   val farmerOps = for {
+    * ...     _ <- smallscaleFarmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
+    * ...     _ <- smallscaleFarmersTable.given('farm \ 'hectares < 40L).put(Farmer("McDonald", 156L, Farm(List("gerbil", "hamster"), 20)))
+    * ...     _ <- smallscaleFarmersTable.given('farm \ 'hectares > 40L).put(Farmer("McDonald", 156L, Farm(List("elephant"), 50)))
+    * ...     farmerWithNewStock <- smallscaleFarmersTable.get('name -> "McDonald")
+    * ...   } yield farmerWithNewStock
+    * ...   Scanamo.exec(client)(farmerOps)
+    * ... }
+    * Some(Right(Farmer(McDonald,156,Farm(List(gerbil, hamster),20))))
     */
   def given[T: ConditionExpression](condition: T) = ConditionalOperation[V,T](name, condition)
 

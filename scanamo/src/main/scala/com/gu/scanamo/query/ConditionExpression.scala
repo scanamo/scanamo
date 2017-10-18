@@ -5,7 +5,7 @@ import com.gu.scanamo.DynamoFormat
 import com.gu.scanamo.error.{ConditionNotMet, ScanamoError}
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
-import com.gu.scanamo.update.UpdateExpression
+import com.gu.scanamo.update.{AttributeName, UpdateExpression}
 import simulacrum.typeclass
 import cats.syntax.either._
 
@@ -41,22 +41,27 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
 
 object ConditionExpression {
   implicit def symbolValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, V)] {
-    override def apply(pair: (Symbol, V))(condition: Option[RequestCondition]): RequestCondition =
+    val prefix = "equalsCondition"
+    override def apply(pair: (Symbol, V))(condition: Option[RequestCondition]): RequestCondition = {
+      val attributeName = AttributeName.of(pair._1)
       RequestCondition(
-        s"#condition = :${pair._1.name}",
-        Map("#condition" -> pair._1.name),
-        Some(Map(s":${pair._1.name}" -> DynamoFormat[V].write(pair._2)))
+        s"#${attributeName.placeholder(prefix)} = :conditionAttributeValue",
+        attributeName.attributeNames(s"#$prefix"),
+        Some(Map(":conditionAttributeValue" -> DynamoFormat[V].write(pair._2)))
       )
+    }
   }
 
   implicit def attributeExistsCondition = new ConditionExpression[AttributeExists] {
+    val prefix = "attributeExists"
     override def apply(t: AttributeExists)(condition: Option[RequestCondition]): RequestCondition =
-      RequestCondition("attribute_exists(#conditionttr)", Map("#conditionttr" -> t.key.name), None)
+      RequestCondition(s"attribute_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
   }
 
   implicit def attributeNotExistsCondition = new ConditionExpression[AttributeNotExists] {
+    val prefix = "attributeNotExists"
     override def apply(t: AttributeNotExists)(condition: Option[RequestCondition]): RequestCondition =
-      RequestCondition("attribute_not_exists(#conditionttr)", Map("#conditionttr" -> t.key.name), None)
+      RequestCondition(s"attribute_not_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
   }
 
   implicit def notCondition[T](implicit pcs: ConditionExpression[T]) = new ConditionExpression[Not[T]] {
@@ -67,19 +72,21 @@ object ConditionExpression {
   }
 
   implicit def beginsWithCondition[V: DynamoFormat] = new ConditionExpression[BeginsWith[V]] {
+    val prefix = "beginsWith"
     override def apply(b: BeginsWith[V])(condition: Option[RequestCondition]): RequestCondition =
       RequestCondition(
-        s"begins_with(#condition, :${b.key.name})",
-        Map("#condition" -> b.key.name),
-        Some(Map(s":${b.key.name}" -> DynamoFormat[V].write(b.v)))
+        s"begins_with(#${b.key.placeholder(prefix)}, :conditionAttributeValue)",
+        b.key.attributeNames(s"#$prefix"),
+        Some(Map(":conditionAttributeValue" -> DynamoFormat[V].write(b.v)))
       )
   }
 
   implicit def betweenCondition[V: DynamoFormat] = new ConditionExpression[Between[V]] {
+    val prefix = "between"
     override def apply(b: Between[V])(condition: Option[RequestCondition]): RequestCondition =
       RequestCondition(
-        s"#condition BETWEEN :lower and :upper",
-        Map("#condition" -> b.key.name),
+        s"#${b.key.placeholder(prefix)} BETWEEN :lower and :upper",
+        b.key.attributeNames(s"#$prefix"),
         Some(Map(
           ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
           ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
@@ -88,11 +95,12 @@ object ConditionExpression {
   }
 
   implicit def keyIsCondition[V: DynamoFormat] = new ConditionExpression[KeyIs[V]] {
+    val prefix = "keyIs"
     override def apply(k: KeyIs[V])(condition: Option[RequestCondition]): RequestCondition =
       RequestCondition(
-        s"#condition ${k.operator.op} :${k.key.name}",
-        Map("#condition" -> k.key.name),
-        Some(Map(s":${k.key.name}" -> DynamoFormat[V].write(k.v)))
+        s"#${k.key.placeholder(prefix)} ${k.operator.op} :conditionAttributeValue",
+        k.key.attributeNames(s"#$prefix"),
+        Some(Map(":conditionAttributeValue" -> DynamoFormat[V].write(k.v)))
       )
   }
 
