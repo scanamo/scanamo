@@ -212,6 +212,14 @@ object DynamoFormat extends EnumDynamoFormat {
 
   /**
     * {{{
+    * prop> (d: BigDecimal) =>
+    *     | DynamoFormat[BigDecimal].read(DynamoFormat[BigDecimal].write(d)) == Right(d)
+    * }}}
+    */
+  implicit val bigDecimalFormat = xmap(coerceNumber(BigDecimal(_)))(_.toString)(numFormat)
+
+  /**
+    * {{{
     * prop> (s: Short) =>
     *     | DynamoFormat[Short].read(DynamoFormat[Short].write(s)) == Right(s)
     * }}}
@@ -342,6 +350,17 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val doubleSetFormat = setFormat(coerceNumber(_.toDouble))(_.toString)(javaNumSetFormat)
+
+  /**
+    * {{{
+    * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> (s: Set[BigDecimal]) =>
+    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
+    *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
+    * }}}
+    */
+  implicit val BigDecimalSetFormat = setFormat(coerceNumber(BigDecimal(_)))(_.toString)(javaNumSetFormat)
 
   /**
     * {{{
