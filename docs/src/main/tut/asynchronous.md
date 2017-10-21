@@ -97,3 +97,9 @@ val ops = for {
 
 system.terminate()
 ```
+
+In order to use the Alpakka interpreter, you need to import the `scanamo-alpakka` library dependency
+```sbt
+val scanamoV = "<latest scanamo version>"
+libraryDependencies += "com.gu" %% "scanamo-alpakka" % scanamoV
+```
