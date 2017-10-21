@@ -25,7 +25,9 @@ object QueryableKeyCondition {
           .withKeyConditionExpression(
             s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}"
           )
-          .withExpressionAttributeNames(Map("#K" -> t.hashCondition.key.name, "#R" -> t.rangeCondition.key.name).asJava)
+          .withExpressionAttributeNames(
+            (Map("#K" -> t.hashCondition.key.name) ++ t.rangeCondition.key.attributeNames("#R")).asJava
+          )
           .withExpressionAttributeValues(
             (
               t.rangeCondition.attributes.map {attrib =>
