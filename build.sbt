@@ -156,7 +156,7 @@ lazy val docs = (project in file("docs"))
     addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc) in root, siteSubdirName in ScalaUnidoc in root)
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin)
-  .dependsOn(scanamo % "compile->test")
+  .dependsOn(scanamo % "compile->test", alpakka % "compile")
 
 
 import ReleaseTransformations._
