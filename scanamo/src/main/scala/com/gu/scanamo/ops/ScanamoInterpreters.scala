@@ -14,8 +14,8 @@ import scala.util.{Failure, Success}
 
 /**
   * Interpreters to take the operations defined with Scanamo and execute them
-  * by transforming them from a [Free Monad](http://typelevel.org/cats/datatypes/freemonad.html)
-  * grammar using a [FunctionK](http://typelevel.org/cats/datatypes/functionk.html)
+  * by transforming them from a [[https://typelevel.org/cats/datatypes/freemonad.html Free Monad]]
+  * grammar using a [[https://typelevel.org/cats/datatypes/functionk.html FunctionK]]
   */
 object ScanamoInterpreters {
 

@@ -10,11 +10,9 @@ import com.gu.scanamo.update.UpdateExpression
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
-  * Provides the same interface as [[com.gu.scanamo.Scanamo]], except that it requires an alpakka client
-  * and an implicit concurrent.ExecutionContext and returns a concurrent.Future
-  *
-  * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
-  * java.util.concurrent.ExecutorService to make calls asynchronously
+  * Provides the same interface as [[com.gu.scanamo.Scanamo]], except that it requires an
+  * [[https://github.com/akka/alpakka Alpakka]] client
+  * and an implicit [[scala.concurrent.ExecutionContext]] and returns a [[scala.concurrent.Future]]
   */
 object ScanamoAlpakka {
   import cats.instances.future._
