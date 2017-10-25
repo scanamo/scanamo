@@ -52,6 +52,7 @@ lazy val root = (project in file("."))
   .aggregate(formats, scanamo, alpakka)
   .settings(
     commonSettings,
+    publishingSettings,
     siteSubdirName in ScalaUnidoc := "latest/api",
 
     publishArtifact := false,
