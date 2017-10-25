@@ -195,16 +195,16 @@ val publishingSettings = Seq(
     inquireVersions,
     runClean,
     runTest,
-    ReleaseStep(releaseStepCommand("tut"), enableCrossBuild = true),
+    releaseStepCommand("+tut"),
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
-    ReleaseStep(action = state => "publishSigned" :: state, enableCrossBuild = true),
+    releaseStepCommand("+publishSigned"),
     setNextVersion,
     commitNextVersion,
-    ReleaseStep(action = state => "sonatypeReleaseAll" :: state, enableCrossBuild = true),
+    releaseStepCommand("+sonatypeReleaseAll"),
     pushChanges,
-    releaseStepTask(publishMicrosite)
+    releaseStepCommand("publishMicrosite")
   )
 )
 
