@@ -195,16 +195,16 @@ val publishingSettings = Seq(
     inquireVersions,
     runClean,
     runTest,
-    releaseStepCommand("+tut"),
+    releaseStepCommandAndRemaining("+tut"),
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
-    releaseStepCommand("+publishSigned"),
+    releaseStepCommandAndRemaining("+publishSigned"),
     setNextVersion,
     commitNextVersion,
-    releaseStepCommand("+sonatypeReleaseAll"),
+    releaseStepCommandAndRemaining("+sonatypeReleaseAll"),
     pushChanges,
-    releaseStepCommand("publishMicrosite")
+    releaseStepCommandAndRemaining("publishMicrosite"),
   )
 )
 
