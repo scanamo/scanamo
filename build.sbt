@@ -53,11 +53,8 @@ lazy val root = (project in file("."))
   .settings(
     commonSettings,
     publishingSettings,
-    siteSubdirName in ScalaUnidoc := "latest/api",
-
-    publishArtifact := false,
+    noPublishSettings,
   )
-  .enablePlugins(ScalaUnidocPlugin)
 
 addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
@@ -149,6 +146,7 @@ lazy val docs = (project in file("docs"))
   .settings(
     commonSettings,
     micrositeSettings,
+    noPublishSettings,
 
     dynamoDBLocalDownloadDir := file(".dynamodb-local"),
     dynamoDBLocalPort := 8042,
@@ -160,12 +158,11 @@ lazy val docs = (project in file("docs"))
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:guardian/scanamo.git",
 
-    makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile in root).value,
-    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc) in root, siteSubdirName in ScalaUnidoc in root),
-
-    publishArtifact := false,
+    makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
+    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
+    siteSubdirName in ScalaUnidoc := "latest/api",
   )
-  .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin)
+  .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
   .disablePlugins(ReleasePlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile")
 
@@ -209,6 +206,12 @@ val publishingSettings = Seq(
     pushChanges,
     releaseStepTask(publishMicrosite)
   )
+)
+
+lazy val noPublishSettings = Seq(
+  publish := {},
+  publishLocal := {},
+  publishArtifact := false
 )
 
 val micrositeSettings = Seq(
