@@ -165,6 +165,7 @@ lazy val docs = (project in file("docs"))
     publishArtifact := false,
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin)
+  .disablePlugins(ReleasePlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile")
 
 
