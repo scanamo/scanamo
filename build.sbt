@@ -52,7 +52,9 @@ lazy val root = (project in file("."))
   .aggregate(formats, scanamo, alpakka)
   .settings(
     commonSettings,
-    siteSubdirName in ScalaUnidoc := "latest/api"
+    siteSubdirName in ScalaUnidoc := "latest/api",
+
+    publishArtifact := false,
   )
   .enablePlugins(ScalaUnidocPlugin)
 
@@ -158,7 +160,9 @@ lazy val docs = (project in file("docs"))
     git.remoteRepo := "git@github.com:guardian/scanamo.git",
 
     makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile in root).value,
-    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc) in root, siteSubdirName in ScalaUnidoc in root)
+    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc) in root, siteSubdirName in ScalaUnidoc in root),
+
+    publishArtifact := false,
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile")
