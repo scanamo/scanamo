@@ -198,7 +198,7 @@ val publishingSettings = Seq(
     inquireVersions,
     runClean,
     runTest,
-    ReleaseStep(releaseStepTask(tut), enableCrossBuild = true),
+    ReleaseStep(releaseStepCommand("tut"), enableCrossBuild = true),
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
