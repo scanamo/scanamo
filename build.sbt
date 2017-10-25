@@ -33,6 +33,8 @@ val commonSettings =  Seq(
       mainScalacOptions
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
+  autoAPIMappings := true,
+  apiURL := Some(url("https://guardian.github.io/scanamo/latest/api/")),
 )
 
 val dynamoTestSettings = Seq(
@@ -134,6 +136,9 @@ lazy val alpakka = (project in file("alpakka"))
     ),
     dynamoDBLocalDownloadDir := file(".alpakka-dynamodb-local"),
     dynamoDBLocalPort := 8052,
+
+    // unidoc can work out links to other project, but scalac can't
+    scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
   .dependsOn(formats, scanamo)
 
