@@ -195,7 +195,7 @@ val publishingSettings = Seq(
     inquireVersions,
     runClean,
     runTest,
-    releaseStepCommandAndRemaining("+tut"),
+    releaseStepCommandAndRemaining("+docs/tut"),
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
