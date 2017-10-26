@@ -1,3 +1,11 @@
+## Version 1.0.0-M2
+
+ * Add support for [Alpakka](http://developer.lightbend.com/docs/alpakka/current/dynamodb.html) as a client (#151 - @btlines), plus docs (#158 - @calvinlfer)
+ * Return overwritten item from `Put` (#153 - @amirkarimi)
+ * BigDecimal support (#161 - @hunzinker)
+ * Support conditions on nested attribute names (#156)
+ * Rename `Index` to `SecondaryIndex` (#144)
+
 ## Version 1.0.0-M1
 
  * Update Cats to `1.0.0-MF` (#134 - @rstradling)

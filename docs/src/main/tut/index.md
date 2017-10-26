@@ -19,7 +19,7 @@ Scanamo is published for Scala 2.11 and 2.12 to Maven Central, so just add the f
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.gu" %% "scanamo" % "1.0.0-M1"
+  "com.gu" %% "scanamo" % "1.0.0-M2"
 )
 ```
 
