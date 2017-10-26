@@ -247,6 +247,18 @@ DynamoDB's AttributeValue">
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="object" href="ScanamoAlpakka$.html" title="Provides the same interface as com.gu.scanamo.Scanamo, except that it requires an
+Alpakka client
+and an implicit scala.concurrent.ExecutionContext and returns a scala.concurrent.Future
+"></a>
+                        <a href="ScanamoAlpakka$.html" title="Provides the same interface as com.gu.scanamo.Scanamo, except that it requires an
+Alpakka client
+and an implicit scala.concurrent.ExecutionContext and returns a scala.concurrent.Future
+">
+                          ScanamoAlpakka
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="object" href="ScanamoAsync$.html" title="Provides the same interface as com.gu.scanamo.Scanamo, except that it requires an implicit
 concurrent.ExecutionContext and returns a concurrent.Future"></a>
                         <a href="ScanamoAsync$.html" title="Provides the same interface as com.gu.scanamo.Scanamo, except that it requires an implicit
@@ -258,6 +270,12 @@ concurrent.ExecutionContext and returns a concurrent.Future">
                         <a class="object" href="ScanamoFree$.html" title=""></a>
                         <a href="ScanamoFree$.html" title="">
                           ScanamoFree
+                        </a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="class" href="SecondaryIndex.html" title="Represents a secondary index on a DynamoDB table."></a>
+                        <a href="SecondaryIndex.html" title="Represents a secondary index on a DynamoDB table.">
+                          SecondaryIndex
                         </a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
@@ -303,7 +321,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
           <span class="toggle">
             Linear Supertypes
           </span>
-          <div class="superTypes hiddenContent"><span class="extype" name="scala.AnyRef">AnyRef</span>, <span class="extype" name="scala.Any">Any</span></div>
+          <div class="superTypes hiddenContent"><a href="http://www.scala-lang.org/api/2.12.3/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.3/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></div>
         </div></div>
         
 
@@ -365,7 +383,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
       <span class="symbol">
         <a title="" href="DerivedDynamoFormat.html">
               <span class="name">DerivedDynamoFormat</span>
-            </a><span class="result"> extends <span class="extype" name="scala.AnyRef">AnyRef</span></span>
+            </a><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.3/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
       </span>
       
       
@@ -384,7 +402,7 @@ concurrent.ExecutionContext and returns a concurrent.Future">
         <a title="Type class for defining serialisation to and from
 DynamoDB's AttributeValue" href="DynamoFormat.html">
               <span class="name">DynamoFormat</span>
-            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <span class="extype" name="scala.Serializable">Serializable</span></span>
+            </a><span class="tparams">[<span name="T">T</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.3/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Type class for defining serialisation to and from
@@ -462,6 +480,25 @@ Zebra</pre></div></div>
       </span>
       
       
+    </li><li name="com.gu.scanamo.SecondaryIndex" visbl="pub" class="indented0 " data-isabs="true" fullComment="yes" group="Ungrouped">
+      <a id="SecondaryIndex[V]extendsAnyRef"></a><a id="SecondaryIndex[V]:SecondaryIndex[V]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/index.html#SecondaryIndex[V]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">sealed abstract </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <a title="Represents a secondary index on a DynamoDB table." href="SecondaryIndex.html">
+              <span class="name">SecondaryIndex</span>
+            </a><span class="tparams">[<span name="V">V</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.3/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></span>
+      </span>
+      
+      <p class="shortcomment cmt">Represents a secondary index on a DynamoDB table.</p><div class="fullcomment"><div class="comment cmt"><p>Represents a secondary index on a DynamoDB table.</p><p>Can be constructed via the <a href="Table.html#index(indexName:String):com.gu.scanamo.SecondaryIndex[V]" class="extmbr" name="com.gu.scanamo.Table#index">index</a> method on <a href="Table.html" class="extype" name="com.gu.scanamo.Table">Table</a>
+</p></div></div>
     </li><li name="com.gu.scanamo.Table" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="Table[V]extendsProductwithSerializable"></a><a id="Table[V]:Table[V]"></a>
       <span class="permalink">
@@ -476,7 +513,7 @@ Zebra</pre></div></div>
       <span class="symbol">
         <a title="Represents a DynamoDB table that operations can be performed against" href="Table.html">
               <span class="name">Table</span>
-            </a><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$1">evidence$1: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>)</span><span class="result"> extends <span class="extype" name="scala.Product">Product</span> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+            </a><span class="tparams">[<span name="V">V</span>]</span><span class="params">(<span name="name">name: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span class="implicit">implicit </span><span name="evidence$1">evidence$1: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Table.V">V</span>]</span>)</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.3/scala/Product.html#scala.Product" class="extype" name="scala.Product">Product</a> with <a href="http://www.scala-lang.org/api/2.12.3/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       <p class="shortcomment cmt">Represents a DynamoDB table that operations can be performed against</p><div class="fullcomment"><div class="comment cmt"><p>Represents a DynamoDB table that operations can be performed against</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Transport(mode: <span class="std">String</span>, line: <span class="std">String</span>)
@@ -519,7 +556,7 @@ Zebra</pre></div></div>
       <span class="symbol">
         <a title="" href="DynamoFormat$.html">
               <span class="name">DynamoFormat</span>
-            </a><span class="result"> extends <a href="EnumDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumDynamoFormat">EnumDynamoFormat</a> with <span class="extype" name="scala.Serializable">Serializable</span></span>
+            </a><span class="result"> extends <a href="EnumDynamoFormat.html" class="extype" name="com.gu.scanamo.EnumDynamoFormat">EnumDynamoFormat</a> with <a href="http://www.scala-lang.org/api/2.12.3/scala/Serializable.html#scala.Serializable" class="extype" name="scala.Serializable">Serializable</a></span>
       </span>
       
       
@@ -542,6 +579,30 @@ Zebra</pre></div></div>
       
       <p class="shortcomment cmt">Provides a simplified interface for reading and writing case classes to DynamoDB</p><div class="fullcomment"><div class="comment cmt"><p>Provides a simplified interface for reading and writing case classes to DynamoDB</p><p>To avoid blocking, use <a href="ScanamoAsync$.html" class="extype" name="com.gu.scanamo.ScanamoAsync">com.gu.scanamo.ScanamoAsync</a>
 </p></div></div>
+    </li><li name="com.gu.scanamo.ScanamoAlpakka" visbl="pub" class="indented0 " data-isabs="false" fullComment="no" group="Ungrouped">
+      <a id="ScanamoAlpakka"></a><a id="ScanamoAlpakka:ScanamoAlpakka"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/index.html#ScanamoAlpakka" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">object</span>
+      </span>
+      <span class="symbol">
+        <a title="Provides the same interface as com.gu.scanamo.Scanamo, except that it requires an
+Alpakka client
+and an implicit scala.concurrent.ExecutionContext and returns a scala.concurrent.Future
+" href="ScanamoAlpakka$.html">
+              <span class="name">ScanamoAlpakka</span>
+            </a>
+      </span>
+      
+      <p class="shortcomment cmt">Provides the same interface as <a href="Scanamo$.html" class="extype" name="com.gu.scanamo.Scanamo">com.gu.scanamo.Scanamo</a>, except that it requires an
+<a href="https://github.com/akka/alpakka" target="_blank">Alpakka</a> client
+and an implicit <a href="http://www.scala-lang.org/api/2.12.3/scala/concurrent/ExecutionContext.html" class="extype" name="scala.concurrent.ExecutionContext">scala.concurrent.ExecutionContext</a> and returns a <a href="http://www.scala-lang.org/api/2.12.3/scala/concurrent/Future.html" class="extype" name="scala.concurrent.Future">scala.concurrent.Future</a>
+</p>
     </li><li name="com.gu.scanamo.ScanamoAsync" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="ScanamoAsync"></a><a id="ScanamoAsync:ScanamoAsync"></a>
       <span class="permalink">
@@ -612,9 +673,9 @@ java.util.concurrent.ExecutorService to make calls asynchronously
 
         <div id="inheritedMembers">
         <div class="parent" name="scala.AnyRef">
-              <h3>Inherited from <span class="extype" name="scala.AnyRef">AnyRef</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.3/scala/collection/immutable/List.html#scala.AnyRef" class="extype" name="scala.collection.immutable.List">AnyRef</a></h3>
             </div><div class="parent" name="scala.Any">
-              <h3>Inherited from <span class="extype" name="scala.Any">Any</span></h3>
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.3/scala/collection/immutable/List.html#scala.Any" class="extype" name="scala.collection.immutable.List">Any</a></h3>
             </div>
         
         </div>

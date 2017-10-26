@@ -42,3 +42,7 @@ pre {
 #page-content-wrapper .nav a {
     padding: 30px 15px;
 }
+
+.jumbotron {
+    background-image: none;
+}
