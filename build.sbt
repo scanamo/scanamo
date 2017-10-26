@@ -188,6 +188,13 @@ val publishingSettings = Seq(
     </developers>
   },
 
+  publishTo := Some(
+    if (isSnapshot.value)
+      Opts.resolver.sonatypeSnapshots
+    else
+      Opts.resolver.sonatypeStaging
+  ),
+
   releaseCrossBuild := true,
 
   releaseProcess := Seq[ReleaseStep](
