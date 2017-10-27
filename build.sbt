@@ -34,7 +34,7 @@ val commonSettings =  Seq(
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
-  apiURL := Some(url("https://guardian.github.io/scanamo/latest/api/")),
+  apiURL := Some(url("https://scanamo.github.io/scanamo/latest/api/")),
 )
 
 val dynamoTestSettings = Seq(
@@ -156,7 +156,7 @@ lazy val docs = (project in file("docs"))
 
     includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
-    git.remoteRepo := "git@github.com:guardian/scanamo.git",
+    git.remoteRepo := "git@github.com:scanamo/scanamo.git",
 
     makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
     addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
@@ -169,13 +169,13 @@ lazy val docs = (project in file("docs"))
 
 import ReleaseTransformations._
 val publishingSettings = Seq(
-  homepage := Some(url("https://guardian.github.io/scanamo/")),
+  homepage := Some(url("http://www.scanamo.org/")),
   licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
   publishMavenStyle := true,
   publishArtifact in Test := false,
   scmInfo := Some(ScmInfo(
-    url("https://github.com/guardian/scanamo"),
-    "scm:git:git@github.com:guardian/scanamo.git"
+    url("https://github.com/scanamo/scanamo"),
+    "scm:git:git@github.com:scanamo/scanamo.git"
   )),
 
   pomExtra := {
@@ -225,7 +225,7 @@ val micrositeSettings = Seq(
   micrositeName             := "Scanamo",
   micrositeDescription      := "Scanamo: simpler DynamoDB access for Scala",
   micrositeAuthor           := "Scanamo Contributors",
-  micrositeGithubOwner      := "guardian",
+  micrositeGithubOwner      := "scanamo",
   micrositeGithubRepo       := "scanamo",
   micrositeBaseUrl          := "scanamo",
   micrositeDocumentationUrl := "/scanamo/latest/api",
