@@ -34,7 +34,7 @@ val commonSettings =  Seq(
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
-  apiURL := Some(url("https://scanamo.github.io/scanamo/latest/api/")),
+  apiURL := Some(url("http://www.scanamo.org/latest/api/")),
 )
 
 val dynamoTestSettings = Seq(
@@ -227,8 +227,8 @@ val micrositeSettings = Seq(
   micrositeAuthor           := "Scanamo Contributors",
   micrositeGithubOwner      := "scanamo",
   micrositeGithubRepo       := "scanamo",
-  micrositeBaseUrl          := "scanamo",
-  micrositeDocumentationUrl := "/scanamo/latest/api",
+  micrositeBaseUrl          := "",
+  micrositeDocumentationUrl := "/latest/api",
   micrositeHighlightTheme   := "color-brewer",
   micrositePalette := Map(
     "brand-primary"     -> "#951c55",
