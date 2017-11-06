@@ -41,9 +41,15 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
 
 object ConditionExpression {
   implicit def symbolValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, V)] {
-    val prefix = "equalsCondition"
     override def apply(pair: (Symbol, V))(condition: Option[RequestCondition]): RequestCondition = {
-      val attributeName = AttributeName.of(pair._1)
+      attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))(condition)
+    }
+  }
+
+  implicit def attributeValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(AttributeName, V)] {
+    val prefix = "equalsCondition"
+    override def apply(pair: (AttributeName, V))(condition: Option[RequestCondition]): RequestCondition = {
+      val attributeName = pair._1
       RequestCondition(
         s"#${attributeName.placeholder(prefix)} = :conditionAttributeValue",
         attributeName.attributeNames(s"#$prefix"),
