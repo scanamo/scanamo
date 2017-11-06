@@ -446,17 +446,20 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * Conditions can also be placed on nested attributes
     *
+    * {{{
     * >>> val smallscaleFarmersTable = Table[Farmer]("smallscale-farmers")
     * >>> LocalDynamoDB.withTable(client)("smallscale-farmers")('name -> S) {
     * ...   val farmerOps = for {
     * ...     _ <- smallscaleFarmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
     * ...     _ <- smallscaleFarmersTable.given('farm \ 'hectares < 40L).put(Farmer("McDonald", 156L, Farm(List("gerbil", "hamster"), 20)))
     * ...     _ <- smallscaleFarmersTable.given('farm \ 'hectares > 40L).put(Farmer("McDonald", 156L, Farm(List("elephant"), 50)))
+    * ...     _ <- smallscaleFarmersTable.given('farm \ 'hectares -> 20L).update('name -> "McDonald", append('farm \ 'animals -> "squirrel"))
     * ...     farmerWithNewStock <- smallscaleFarmersTable.get('name -> "McDonald")
     * ...   } yield farmerWithNewStock
     * ...   Scanamo.exec(client)(farmerOps)
     * ... }
-    * Some(Right(Farmer(McDonald,156,Farm(List(gerbil, hamster),20))))
+    * Some(Right(Farmer(McDonald,156,Farm(List(gerbil, hamster, squirrel),20))))
+    * }}}
     */
   def given[T: ConditionExpression](condition: T) = ConditionalOperation[V,T](name, condition)
 
