@@ -6,7 +6,8 @@ import java.util.UUID
 import cats.NotNull
 import cats.instances.either._
 import cats.instances.list._
-import cats.instances.map._
+import cats.instances.sortedMap._
+import cats.instances.string._
 import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
@@ -15,6 +16,7 @@ import com.gu.scanamo.error._
 import simulacrum.typeclass
 
 import scala.collection.JavaConverters._
+import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
 
 /**
@@ -383,7 +385,8 @@ object DynamoFormat extends EnumDynamoFormat {
     */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
     xmap[Map[String, V], java.util.Map[String, AttributeValue]](
-      _.asScala.toMap.traverse(f.read))(
+      m => (SortedMap[String, AttributeValue]() ++ m.asScala).traverse(f.read)
+    )(
       _.mapValues(f.write).asJava
     )(javaMapFormat)
 
