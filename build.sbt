@@ -73,7 +73,7 @@ lazy val formats = (project in file("formats"))
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
-      "org.typelevel" %% "cats-core" % "1.0.0-MF",
+      "org.typelevel" %% "cats-core" % "1.0.0-RC1",
 
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
@@ -97,7 +97,7 @@ lazy val scanamo = (project in file("scanamo"))
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
       "com.chuusai" %% "shapeless" % "2.3.2",
-      "org.typelevel" %% "cats-free" % "1.0.0-MF",
+      "org.typelevel" %% "cats-free" % "1.0.0-RC1",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
 
       // Use Joda for custom conversion example
@@ -122,7 +122,7 @@ lazy val alpakka = (project in file("alpakka"))
 
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
-      "org.typelevel" %% "cats-free" % "1.0.0-MF",
+      "org.typelevel" %% "cats-free" % "1.0.0-RC1",
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.11",
 
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
