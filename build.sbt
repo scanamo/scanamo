@@ -21,7 +21,7 @@ val commonSettings =  Seq(
   ),
 
   // for simulacrum
-  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+  addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
 
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
@@ -70,7 +70,7 @@ lazy val formats = (project in file("formats"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % "1.0.0-RC1",
@@ -95,7 +95,7 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "org.typelevel" %% "cats-free" % "1.0.0-RC1",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
@@ -121,9 +121,9 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.190",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
       "org.typelevel" %% "cats-free" % "1.0.0-RC1",
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.11",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.14",
 
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
