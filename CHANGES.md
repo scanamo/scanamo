@@ -1,3 +1,9 @@
+## Version 1.0.0-M3
+
+ * Update Cats to `1.0.0-RC1` (#166)
+ * Equals condition support for nested attributes (#165 - @ivashin)
+ * Update aws-java-sdk-dynamodb and alpakka (#167)
+
 ## Version 1.0.0-M2
 
  * Add support for [Alpakka](http://developer.lightbend.com/docs/alpakka/current/dynamodb.html) as a client (#151 - @btlines), plus docs (#158 - @calvinlfer)
