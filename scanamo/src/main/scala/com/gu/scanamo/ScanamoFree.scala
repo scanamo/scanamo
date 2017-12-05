@@ -10,6 +10,7 @@ import com.gu.scanamo.update.UpdateExpression
 
 object ScanamoFree {
 
+  import cats.free.Free.pure
   import cats.instances.list._
   import cats.syntax.traverse._
   import collection.JavaConverters._
@@ -29,13 +30,32 @@ object ScanamoFree {
       }
     }
 
+  private def putAllRequest[T](tableName: String, batch: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[BatchWriteItemResult] =
+    ScanamoOps.batchWrite(
+      new BatchWriteItemRequest().withRequestItems(Map(tableName -> batch.toList.map(i =>
+        new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM))
+      ).asJava).asJava)
+    )
+  
+  private def retryRequest(result: BatchWriteItemResult): ScanamoOps[Option[BatchWriteItemResult]] = {
+    val unprocessedItems = result.getUnprocessedItems()
+    if (unprocessedItems.isEmpty)
+      pure(None)
+    else
+      for {
+        r <- ScanamoOps.batchWriteRetry(
+          new BatchWriteItemRequest().withRequestItems(unprocessedItems)
+        )
+        u <- retryRequest(r)
+      } yield u.orElse(Some(r))
+  }
+
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.grouped(batchSize).toList.traverse(batch =>
-      ScanamoOps.batchWrite(
-        new BatchWriteItemRequest().withRequestItems(Map(tableName -> batch.toList.map(i =>
-          new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM))
-        ).asJava).asJava)
-      )
+    items.grouped(batchSize).toList.flatTraverse(batch =>
+      for {
+        r <- putAllRequest(tableName, batch)
+        u <- retryRequest(r)
+      } yield r :: u.toList
     )
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = {

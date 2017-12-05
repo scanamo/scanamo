@@ -22,6 +22,7 @@ object AlpakkaInterpreter {
           case Query(req) => client.single(JavaRequests.query(req))
           case Update(req) => client.single(JavaRequests.update(req))
           case BatchWrite(req) => client.single(req)
+          case BatchWriteRetry(req) => client.single(req)
           case BatchGet(req) => client.single(req)
           case ConditionalDelete(req) =>
             client.single(JavaRequests.delete(req))
