@@ -1,6 +1,6 @@
 language: scala
 scala:
-- 2.11.7
+- 2.12.3
 jdk:
 - oraclejdk8
 sudo: false
@@ -19,4 +19,4 @@ install:
   - gem install sass
   - gem install jekyll -v 3.2.1
 script: "sbt clean coverage test makeMicrosite"
-after_success: "sbt coverageReport coveralls"
+#after_success: "sbt coverageReport coveralls"

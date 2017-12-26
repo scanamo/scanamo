@@ -12,7 +12,7 @@ Installation
 
 ```scala
 libraryDependencies ++= Seq(
-  "com.gu" %% "scanamo" % "0.9.5"
+  "com.gu" %% "scanamo" % "1.0.0-M3"
 )
 ```
 
@@ -44,7 +44,7 @@ scala> Scanamo.exec(client)(ops)
 res1: Option[Either[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
 ```
 
-For more details, please see the [Scanamo site](https://guardian.github.io/scanamo).
+For more details, please see the [Scanamo site](http://www.scanamo.org).
 
 License
 -------
