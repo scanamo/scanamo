@@ -1,6 +1,8 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
+val catsVersion = "1.0.0"
+
 val commonSettings =  Seq(
   organization := "com.gu",
   scalacOptions := Seq(
@@ -73,7 +75,7 @@ lazy val formats = (project in file("formats"))
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
-      "org.typelevel" %% "cats-core" % "1.0.0-RC1",
+      "org.typelevel" %% "cats-core" % catsVersion,
 
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
@@ -97,7 +99,7 @@ lazy val scanamo = (project in file("scanamo"))
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
       "com.chuusai" %% "shapeless" % "2.3.2",
-      "org.typelevel" %% "cats-free" % "1.0.0-RC1",
+      "org.typelevel" %% "cats-free" % catsVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
 
       // Use Joda for custom conversion example
@@ -122,7 +124,7 @@ lazy val alpakka = (project in file("alpakka"))
 
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
-      "org.typelevel" %% "cats-free" % "1.0.0-RC1",
+      "org.typelevel" %% "cats-free" % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.14",
 
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
@@ -150,7 +152,7 @@ lazy val docs = (project in file("docs"))
 
     dynamoDBLocalDownloadDir := file(".dynamodb-local"),
     dynamoDBLocalPort := 8042,
-    
+
     tut := tut.dependsOn(startDynamoDBLocal).value,
     stopDynamoDBLocal := stopDynamoDBLocal.triggeredBy(tut).value,
 
