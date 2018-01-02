@@ -1,7 +1,7 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
-val catsVersion = "1.0.0"
+val catsVersion = "1.0.1"
 
 val commonSettings =  Seq(
   organization := "com.gu",
