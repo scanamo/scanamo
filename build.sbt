@@ -72,13 +72,13 @@ lazy val formats = (project in file("formats"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
-      "com.chuusai" %% "shapeless" % "2.3.2",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      "com.chuusai" %% "shapeless" % "2.3.3",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % catsVersion,
 
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
 
     doctestMarkdownEnabled := true,
@@ -97,8 +97,8 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
-      "com.chuusai" %% "shapeless" % "2.3.2",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      "com.chuusai" %% "shapeless" % "2.3.3",
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
 
@@ -106,8 +106,8 @@ lazy val scanamo = (project in file("scanamo"))
       "org.joda" % "joda-convert" % "1.8.3" % Provided,
       "joda-time" % "joda-time" % "2.9.9" % Test,
 
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     )
   )
   .dependsOn(formats)
@@ -123,12 +123,12 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
       "org.typelevel" %% "cats-free" % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.14",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.15.1",
 
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
 
     fork in Test := true,
