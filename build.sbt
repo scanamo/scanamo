@@ -86,6 +86,20 @@ lazy val formats = (project in file("formats"))
     doctestTestFramework := DoctestTestFramework.ScalaTest
   )
 
+lazy val refined = (project in file("refined"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+    name := "scanamo-refined"
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      "eu.timepit" %% "refined" % "0.8.6",
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test
+    )
+  )
+  .dependsOn(formats)
+
 lazy val scanamo = (project in file("scanamo"))
   .settings(
     commonSettings,
@@ -166,7 +180,7 @@ lazy val docs = (project in file("docs"))
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
   .disablePlugins(ReleasePlugin)
-  .dependsOn(scanamo % "compile->test", alpakka % "compile")
+  .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 
 import ReleaseTransformations._

@@ -52,3 +52,44 @@ val operations = for {
  
 Scanamo.exec(client)(operations).toList
 ```
+
+### Formats for Refined Types
+
+Scanamo supports Scala refined types via the `scanamo-refined` module, helping you to define custom formats
+for types built using the predicates provided by the [refined](https://github.com/fthomas/refined) project.
+Refined types give an extra layer of type safety to our programs making the compilation fail when we try to
+assign wrong values to them.
+
+To use them in your project you will need to include the dependency in your project:
+
+```
+libraryDependencies += "com.gu.scanamo" %% "scanamo-refined" % "x.y.z"
+```
+
+And then import the support for refined types and define your model:
+
+```tut:silent
+import com.gu.scanamo.refined._
+import eu.timepit.refined._
+import eu.timepit.refined.api.Refined
+import eu.timepit.refined.auto._
+import eu.timepit.refined.numeric._
+
+type PosInt = Int Refined Positive
+
+case class Customer(age: PosInt)
+
+LocalDynamoDB.createTable(client)("Customer")('age -> N)
+```
+
+You just now use it like if the type `PosInt` was natively supported by `scanamo`:
+
+```tut:book
+val customerTable = Table[Customer]("Customer")
+val operations = for {
+  _       <- customerTable.put(Customer(67))
+  results <- customerTable.scan()
+} yield results
+
+Scanamo.exec(client)(operations).toList
+```
