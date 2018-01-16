@@ -162,6 +162,27 @@ object Scanamo {
     : Set[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.getAll(tableName)(keys))
 
+  /**
+    * {{{
+    * >>> case class Farm(animals: List[String])
+    * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    *
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> import com.gu.scanamo.query._
+    * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
+    * ...   Scanamo.putAll(client)("farmers")(Set(
+    * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
+    * ...   ))
+    * ...   Scanamo.getAllWithConsistency[Farmer](client)("farmers")(UniqueKeys(KeyList('name, Set("Boggis", "Bean"))))
+    * ... }
+    * Set(Right(Farmer(Bean,55,Farm(List(turkey)))), Right(Farmer(Boggis,43,Farm(List(chicken)))))
+    * }}}
+    */
+  def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_])
+  : Set[Either[DynamoReadError, T]] =
+    exec(client)(ScanamoFree.getAllWithConsistency(tableName)(keys))
 
   /**
     * Deletes a single item from a table by a unique key

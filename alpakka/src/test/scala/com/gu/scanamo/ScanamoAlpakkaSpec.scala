@@ -427,6 +427,20 @@ class ScanamoAlpakkaSpec
     }
   }
 
+  it("should get multiple items consistently asynchronously (automatically handling batching)") {
+    LocalDynamoDB.usingTable(client)("asyncFarms")('id -> N) {
+
+      case class Farm(id: Int, name: String)
+      val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
+
+      Scanamo.putAll(client)("asyncFarms")(farms)
+
+      ScanamoAsync.getAllWithConsistency[Farm](client)("asyncFarms")(
+        UniqueKeys(KeyList('id, farms.map(_.id)))
+      ).futureValue should equal(farms.map(Right(_)))
+    }
+  }
+
   it("conditionally put asynchronously") {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
