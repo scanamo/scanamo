@@ -152,7 +152,7 @@ class ScanamoAlpakkaSpec
     }
   }
 
-  it("should update asynchornously if a condition holds") {
+  it("should update asynchronously if a condition holds") {
     LocalDynamoDB.usingTable(client)("forecast")('location -> S) {
 
       case class Forecast(location: String, weather: String, equipment: Option[String])
