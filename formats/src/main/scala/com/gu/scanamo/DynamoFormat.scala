@@ -404,7 +404,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * >>> DynamoFormat[Option[Long]].read(new com.amazonaws.services.dynamodbv2.model.AttributeValue().withNULL(true))
     * Right(None)
     *
-    * >>> DynamoFormat[Option[Long]].write(None) == new com.amazonaws.services.dynamodbv2.model.AttributeValue().withNULL(true)
+    * >>> DynamoFormat[Option[Long]].write(None).isNULL()
     * true
     * }}}
     */
