@@ -59,6 +59,10 @@ package object scanamo {
       UpdateExpression.append(fieldValue)
     def prepend[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.prepend(fieldValue)
+    def appendAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+      UpdateExpression.appendAll(fieldValue)
+    def prependAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+      UpdateExpression.prependAll(fieldValue)
     def add[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.add(fieldValue)
     def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
