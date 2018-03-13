@@ -40,6 +40,10 @@ object ScanamoAlpakka {
                              (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAll[T](tableName)(keys))
 
+  def getAllWithConsistency[T: DynamoFormat](client: DynamoClient)(tableName: String)(keys: UniqueKeys[_])
+                             (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.getAllWithConsistency[T](tableName)(keys))
+
   def delete[T](client: DynamoClient)(tableName: String)(key: UniqueKey[_])
                (implicit ec: ExecutionContext): Future[DeleteItemResult] =
     exec(client)(ScanamoFree.delete(tableName)(key))

@@ -571,6 +571,8 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
     ScanamoFree.getWithConsistency[V](tableName)(key)
+  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
+    ScanamoFree.getAllWithConsistency[V](tableName)(keys)
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanConsistent[V](tableName)
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
