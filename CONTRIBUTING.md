@@ -30,3 +30,10 @@ documentation changes:
  * run `makeMicrosite` from the root of SBT
  * run `jekyll serve --incremental --baseurl /` from `docs/target/site`
  * Load http://127.0.0.1:4000/
+
+Releasing
+---------
+
+`release cross` from the SBT prompt should publish an artifact to Maven 
+Central for both Scala 2.11 and Scala 2.12. It will also attempt to update
+the documentation website at http://www.scanamo.org/ with the latest scaladoc.
