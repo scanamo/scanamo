@@ -1147,7 +1147,20 @@ Right(Forecast(London,Sun))</pre><p>List attributes can also be appended or prep
 ...   } <span class="kw">yield</span> results.toList
 ...   Scanamo.exec(client)(operations)
 ... }
-<span class="std">List</span>(Right(Character(James Bond,<span class="std">List</span>(Craig))))</pre><p>Multiple operations can also be performed in one call:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Foo(name: <span class="std">String</span>, bar: <span class="std">Int</span>, l: <span class="std">List</span>[<span class="std">String</span>])
+<span class="std">List</span>(Right(Character(James Bond,<span class="std">List</span>(Craig))))</pre><p>To concatenate a list to the front or end of an existing list, use appendAll/prependAll:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Fruit(kind: <span class="std">String</span>, sources: <span class="std">List</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">val</span> fruits = Table[Fruit](<span class="lit">"fruits"</span>)
+
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"fruits"</span>)('kind -&gt; S) {
+...   <span class="kw">import</span> com.gu.scanamo.syntax._
+...   <span class="kw">val</span> operations = <span class="kw">for</span> {
+...     _ <span class="kw">&lt;-</span> fruits.put(Fruit(<span class="lit">"watermelon"</span>, <span class="std">List</span>(<span class="lit">"USA"</span>)))
+...     _ <span class="kw">&lt;-</span> fruits.update('kind -&gt; <span class="lit">"watermelon"</span>, appendAll('sources -&gt; <span class="std">List</span>(<span class="lit">"China"</span>, <span class="lit">"Turkey"</span>)))
+...     _ <span class="kw">&lt;-</span> fruits.update('kind -&gt; <span class="lit">"watermelon"</span>, prependAll('sources -&gt; <span class="std">List</span>(<span class="lit">"Brazil"</span>)))
+...     results <span class="kw">&lt;-</span> fruits.query('kind -&gt; <span class="lit">"watermelon"</span>)
+...   } <span class="kw">yield</span> results.toList
+...   Scanamo.exec(client)(operations)
+... }
+<span class="std">List</span>(Right(Fruit(watermelon,<span class="std">List</span>(Brazil, USA, China, Turkey))))</pre><p>Multiple operations can also be performed in one call:</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Foo(name: <span class="std">String</span>, bar: <span class="std">Int</span>, l: <span class="std">List</span>[<span class="std">String</span>])
 &gt;&gt;&gt; <span class="kw">val</span> foos = Table[Foo](<span class="lit">"foos"</span>)
 
 &gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"foos"</span>)('name -&gt; S) {

@@ -625,6 +625,35 @@
 ...   Scanamo.getAll[Doctor](client)(<span class="lit">"doctors"</span>)(('actor and 'regeneration) -&gt; <span class="std">Set</span>(<span class="lit">"McCoy"</span> -&gt; <span class="num">9</span>, <span class="lit">"Ecclestone"</span> -&gt; <span class="num">11</span>))
 ... }
 <span class="std">Set</span>(Right(Doctor(McCoy,<span class="num">9</span>)), Right(Doctor(Ecclestone,<span class="num">11</span>)))</pre></div></div>
+    </li><li name="com.gu.scanamo.Scanamo#getAllWithConsistency" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="getAllWithConsistency[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keys:com.gu.scanamo.query.UniqueKeys[_])(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):Set[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="getAllWithConsistency[T](AmazonDynamoDB)(String)(UniqueKeys[_])(DynamoFormat[T]):Set[Either[DynamoReadError,T]]"></a>
+      <span class="permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#getAllWithConsistency[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(keys:com.gu.scanamo.query.UniqueKeys[_])(implicitevidence$6:com.gu.scanamo.DynamoFormat[T]):Set[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">getAllWithConsistency</span><span class="tparams">[<span name="T">T</span>]</span><span class="params">(<span name="client">client: <span class="extype" name="com.amazonaws.services.dynamodbv2.AmazonDynamoDB">AmazonDynamoDB</span></span>)</span><span class="params">(<span name="tableName">tableName: <span class="extype" name="scala.Predef.String">String</span></span>)</span><span class="params">(<span name="keys">keys: <a href="query/UniqueKeys.html" class="extype" name="com.gu.scanamo.query.UniqueKeys">UniqueKeys</a>[_]</span>)</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="DynamoFormat.html" class="extype" name="com.gu.scanamo.DynamoFormat">DynamoFormat</a>[<span class="extype" name="com.gu.scanamo.Scanamo.getAllWithConsistency.T">T</span>]</span>)</span><span class="result">: <span class="extype" name="scala.Predef.Set">Set</span>[<span class="extype" name="scala.Either">Either</span>[<a href="error/DynamoReadError.html" class="extype" name="com.gu.scanamo.error.DynamoReadError">DynamoReadError</a>, <span class="extype" name="com.gu.scanamo.Scanamo.getAllWithConsistency.T">T</span>]]</span>
+      </span>
+      
+      <p class="shortcomment cmt"></p><div class="fullcomment"><div class="comment cmt"><p></p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farm(animals: <span class="std">List</span>[<span class="std">String</span>])
+&gt;&gt;&gt; <span class="kw">case</span> <span class="kw">class</span> Farmer(name: <span class="std">String</span>, age: <span class="std">Long</span>, farm: Farm)
+
+&gt;&gt;&gt; <span class="kw">import</span> com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+&gt;&gt;&gt; <span class="kw">val</span> client = LocalDynamoDB.client()
+
+&gt;&gt;&gt; <span class="kw">import</span> com.gu.scanamo.query._
+&gt;&gt;&gt; LocalDynamoDB.withTable(client)(<span class="lit">"farmers"</span>)('name -&gt; S) {
+...   Scanamo.putAll(client)(<span class="lit">"farmers"</span>)(<span class="std">Set</span>(
+...     Farmer(<span class="lit">"Boggis"</span>, <span class="num">43</span>L, Farm(<span class="std">List</span>(<span class="lit">"chicken"</span>))), Farmer(<span class="lit">"Bunce"</span>, <span class="num">52</span>L, Farm(<span class="std">List</span>(<span class="lit">"goose"</span>))), Farmer(<span class="lit">"Bean"</span>, <span class="num">55</span>L, Farm(<span class="std">List</span>(<span class="lit">"turkey"</span>)))
+...   ))
+...   Scanamo.getAllWithConsistency[Farmer](client)(<span class="lit">"farmers"</span>)(UniqueKeys(KeyList('name, <span class="std">Set</span>(<span class="lit">"Boggis"</span>, <span class="lit">"Bean"</span>))))
+... }
+<span class="std">Set</span>(Right(Farmer(Bean,<span class="num">55</span>,Farm(<span class="std">List</span>(turkey)))), Right(Farmer(Boggis,<span class="num">43</span>,Farm(<span class="std">List</span>(chicken)))))</pre></div></div>
     </li><li name="scala.AnyRef#getClass" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="getClass():Class[_]"></a>
       <span class="permalink">
@@ -812,9 +841,9 @@ If the stored item has a different schema than type [T] then an appropriate [Dyn
 ... }
 <span class="num">100</span></pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#query" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="query[T](AmazonDynamoDB)(String)(Query[_])(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$12:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="query[T](AmazonDynamoDB)(String)(Query[_])(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#query[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$12:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -864,9 +893,9 @@ If the stored item has a different schema than type [T] then an appropriate [Dyn
 &gt;&gt;&gt; Scanamo.query[Animal](client)(<span class="lit">"animals"</span>)(('species -&gt; <span class="lit">"Pig"</span> and 'number &lt; <span class="num">3</span>).descending)
 <span class="std">List</span>(Right(Animal(Pig,<span class="num">2</span>)), Right(Animal(Pig,<span class="num">1</span>)))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#queryIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$13:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="queryIndex[T](AmazonDynamoDB)(String,String)(Query[_])(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$14:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="queryIndex[T](AmazonDynamoDB)(String,String)(Query[_])(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$13:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#queryIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_])(implicitevidence$14:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -892,9 +921,9 @@ If the stored item has a different schema than type [T] then an appropriate [Dyn
 ... }
 <span class="std">List</span>(Right(Transport(Underground,Metropolitan,Magenta)))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#queryIndexWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="queryIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$14:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="queryIndexWithLimit[T](AmazonDynamoDB)(String,String)(Query[_],Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="queryIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$15:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="queryIndexWithLimit[T](AmazonDynamoDB)(String,String)(Query[_],Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#queryIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$14:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#queryIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$15:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -925,9 +954,9 @@ If the stored item has a different schema than type [T] then an appropriate [Dyn
 ... }
 <span class="std">List</span>(Right(Transport(Underground,Northern,Black)))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#queryWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="queryWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$12:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="queryWithLimit[T](AmazonDynamoDB)(String)(Query[_],Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="queryWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$13:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="queryWithLimit[T](AmazonDynamoDB)(String)(Query[_],Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#queryWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$12:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#queryWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(query:com.gu.scanamo.query.Query[_],limit:Int)(implicitevidence$13:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -953,9 +982,9 @@ If the stored item has a different schema than type [T] then an appropriate [Dyn
 ... }
 <span class="std">List</span>(Right(Transport(Underground,Central)))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#scan" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scan[T](AmazonDynamoDB)(String)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scan[T](AmazonDynamoDB)(String)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitevidence$7:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#scan[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -988,9 +1017,9 @@ maximum result set size</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span 
 ... }
 <span class="num">100</span></pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#scanIndex" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scanIndex[T](AmazonDynamoDB)(String,String)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scanIndex[T](AmazonDynamoDB)(String,String)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#scanIndex[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String)(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1014,9 +1043,9 @@ maximum result set size</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span 
 ... }
 <span class="std">List</span>(Right(Bear(Pooh,honey,<span class="std">Some</span>(Winnie))))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#scanIndexWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scanIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String,limit:Int)(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scanIndexWithLimit[T](AmazonDynamoDB)(String,String,Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="scanIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String,limit:Int)(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scanIndexWithLimit[T](AmazonDynamoDB)(String,String,Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#scanIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String,limit:Int)(implicitevidence$10:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#scanIndexWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,indexName:String,limit:Int)(implicitevidence$11:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1041,9 +1070,9 @@ maximum result set size</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span 
 ... }
 <span class="std">List</span>(Right(Bear(Graham,quinoa,<span class="std">Some</span>(Guardianista))))</pre></div></div>
     </li><li name="com.gu.scanamo.Scanamo#scanWithLimit" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="scanWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,limit:Int)(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scanWithLimit[T](AmazonDynamoDB)(String,Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
+      <a id="scanWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]"></a><a id="scanWithLimit[T](AmazonDynamoDB)(String,Int)(DynamoFormat[T]):List[Either[DynamoReadError,T]]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#scanWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,limit:Int)(implicitevidence$8:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#scanWithLimit[T](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String,limit:Int)(implicitevidence$9:com.gu.scanamo.DynamoFormat[T]):List[Either[com.gu.scanamo.error.DynamoReadError,T]]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
@@ -1099,9 +1128,9 @@ maximum result set size</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span 
       
       <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>AnyRef → Any</dd></dl></div>
     </li><li name="com.gu.scanamo.Scanamo#update" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
-      <a id="update[V](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.query.UniqueKey[_],expression:com.gu.scanamo.update.UpdateExpression)(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):Either[com.gu.scanamo.error.DynamoReadError,V]"></a><a id="update[V](AmazonDynamoDB)(String)(UniqueKey[_],UpdateExpression)(DynamoFormat[V]):Either[DynamoReadError,V]"></a>
+      <a id="update[V](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.query.UniqueKey[_],expression:com.gu.scanamo.update.UpdateExpression)(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):Either[com.gu.scanamo.error.DynamoReadError,V]"></a><a id="update[V](AmazonDynamoDB)(String)(UniqueKey[_],UpdateExpression)(DynamoFormat[V]):Either[DynamoReadError,V]"></a>
       <span class="permalink">
-      <a href="../../../com/gu/scanamo/Scanamo$.html#update[V](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.query.UniqueKey[_],expression:com.gu.scanamo.update.UpdateExpression)(implicitevidence$6:com.gu.scanamo.DynamoFormat[V]):Either[com.gu.scanamo.error.DynamoReadError,V]" title="Permalink">
+      <a href="../../../com/gu/scanamo/Scanamo$.html#update[V](client:com.amazonaws.services.dynamodbv2.AmazonDynamoDB)(tableName:String)(key:com.gu.scanamo.query.UniqueKey[_],expression:com.gu.scanamo.update.UpdateExpression)(implicitevidence$7:com.gu.scanamo.DynamoFormat[V]):Either[com.gu.scanamo.error.DynamoReadError,V]" title="Permalink">
         <i class="material-icons"></i>
       </a>
     </span>
