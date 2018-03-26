@@ -12,6 +12,7 @@ final case class ConditionalDelete(req: ScanamoDeleteRequest) extends ScanamoOps
 final case class Scan(req: ScanamoScanRequest) extends ScanamoOpsA[ScanResult]
 final case class Query(req: ScanamoQueryRequest) extends ScanamoOpsA[QueryResult]
 final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
+final case class BatchWriteRetry(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
 final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGetItemResult]
 final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateItemResult]
 final case class ConditionalUpdate(req: ScanamoUpdateRequest) extends ScanamoOpsA[Either[ConditionalCheckFailedException, UpdateItemResult]]
@@ -31,6 +32,8 @@ object ScanamoOps {
   def query(req: ScanamoQueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](Query(req))
   def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResult] =
     liftF[ScanamoOpsA, BatchWriteItemResult](BatchWrite(req))
+  def batchWriteRetry(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResult] =
+    liftF[ScanamoOpsA, BatchWriteItemResult](BatchWriteRetry(req))
   def batchGet(req: BatchGetItemRequest): ScanamoOps[BatchGetItemResult] =
     liftF[ScanamoOpsA, BatchGetItemResult](BatchGet(req))
   def update(req: ScanamoUpdateRequest): ScanamoOps[UpdateItemResult] =
