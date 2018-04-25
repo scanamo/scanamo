@@ -9,7 +9,7 @@ import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 import com.gu.scanamo.update.UpdateExpression
 
 /**
-  * Provides the same interface as [[com.gu.scanamo.Scanamo]], but requires a generic [[cats.effect.Effect]] type
+  * Provides the same interface as [[com.gu.scanamo.Scanamo]], but requires a generic type
   * as a handler for asynchronous [[AmazonDynamoDBAsync]] calls.
   *
   * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
