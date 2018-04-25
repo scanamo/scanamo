@@ -1,8 +1,9 @@
-package com.gu.scanamo
+package com.gu.scanamo.async
 
 import cats.effect.Effect
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
+import com.gu.scanamo.{DynamoFormat, ScanamoFree}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
@@ -11,7 +12,7 @@ import com.gu.scanamo.update.UpdateExpression
 /**
   * Uses a generic Cats Effect type as a handler for asynchronous Dynamo calls.
   */
-object ScanamoAsync {
+trait EffectAsync {
 
   def exec[F[_]: Effect, A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A]): F[A] =
     op.foldMap(ScanamoInterpreters.effect(client))
@@ -84,4 +85,3 @@ object ScanamoAsync {
     query: Query[_], limit: Int): F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 }
-

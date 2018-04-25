@@ -1,7 +1,8 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
-val catsVersion = "1.0.1"
+val catsVersion = "1.1.0"
+val catsEffectVersion = "0.10"
 
 val commonSettings =  Seq(
   organization := "com.gu",
@@ -113,7 +114,9 @@ lazy val scanamo = (project in file("scanamo"))
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
       "com.chuusai" %% "shapeless" % "2.3.3",
+      "org.typelevel" %% "cats-core" % catsVersion,
       "org.typelevel" %% "cats-free" % catsVersion,
+      "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
 
       // Use Joda for custom conversion example
