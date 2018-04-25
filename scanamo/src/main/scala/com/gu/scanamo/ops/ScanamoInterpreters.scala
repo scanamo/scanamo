@@ -140,7 +140,7 @@ object ScanamoInterpreters {
             _.fold(
               _ match {
                 case e: ConditionalCheckFailedException => F.delay(e.asLeft[PutItemResult])
-                case t => F.raiseError(t)
+                case t => F.raiseError(t) // raise error as opposed to swallowing
               },
               a => F.delay(a.asRight[ConditionalCheckFailedException])
             )
@@ -156,7 +156,7 @@ object ScanamoInterpreters {
             _.fold(
               _ match {
                 case e: ConditionalCheckFailedException => F.delay(e.asLeft[DeleteItemResult])
-                case t => F.raiseError(t)
+                case t => F.raiseError(t) // raise error as opposed to swallowing
               },
               a => F.delay(a.asRight[ConditionalCheckFailedException])
            )
@@ -179,7 +179,7 @@ object ScanamoInterpreters {
             _.fold(
               _ match {
                 case e: ConditionalCheckFailedException => F.delay(e.asLeft[UpdateItemResult])
-                case t => F.raiseError(t)
+                case t => F.raiseError(t) // raise error as opposed to swallowing
               },
               a => F.delay(a.asRight[ConditionalCheckFailedException])
             )
