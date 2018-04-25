@@ -1,12 +1,13 @@
 package com.gu.scanamo.ops
 
 import cats._
+import cats.implicits._
 import cats.data.NonEmptyList
-import cats.syntax.either._
+import cats.effect.Effect
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
 import com.amazonaws.services.dynamodbv2.model.{UpdateItemResult, _}
+import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
 import com.gu.scanamo.request._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
@@ -27,7 +28,7 @@ object ScanamoInterpreters {
     * the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
     * a type alias for the type itself (`type Id[A] = A`).
     */
-  def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
+  def id(client: AmazonDynamoDB): ScanamoOpsA ~> Id = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
       case Put(req) =>
         client.putItem(JavaRequests.put(req))
@@ -64,7 +65,7 @@ object ScanamoInterpreters {
     * Interpret Scanamo operations into a `Future` using the AmazonDynamoDBAsync client
     * which doesn't block, using it's own thread pool for I/O requests internally
     */
-  def future(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) = new (ScanamoOpsA ~> Future) {
+  def future(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext): ScanamoOpsA ~> Future = new (ScanamoOpsA ~> Future) {
     private def futureOf[X <: AmazonWebServiceRequest, T](call: (X,AsyncHandler[X, T]) => java.util.concurrent.Future[T], req: X): Future[T] = {
       val p = Promise[T]()
       val h = new AsyncHandler[X, T] {
@@ -80,9 +81,9 @@ object ScanamoInterpreters {
         futureOf(client.putItemAsync, JavaRequests.put(req))
       case ConditionalPut(req) =>
         futureOf(client.putItemAsync, JavaRequests.put(req))
-          .map(Either.right[ConditionalCheckFailedException, PutItemResult])
+          .map(_.asRight[ConditionalCheckFailedException])
           .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
+            case e: ConditionalCheckFailedException => e.asLeft[PutItemResult]
           }
       case Get(req) =>
         futureOf(client.getItemAsync, req)
@@ -90,8 +91,8 @@ object ScanamoInterpreters {
         futureOf(client.deleteItemAsync, JavaRequests.delete(req))
       case ConditionalDelete(req) =>
         futureOf(client.deleteItemAsync, JavaRequests.delete(req))
-          .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
-          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+          .map(_.asRight[ConditionalCheckFailedException])
+          .recover { case e: ConditionalCheckFailedException => e.asLeft[DeleteItemResult] }
       case Scan(req) =>
         futureOf(client.scanAsync, JavaRequests.scan(req))
       case Query(req) =>
@@ -105,10 +106,86 @@ object ScanamoInterpreters {
         futureOf(client.updateItemAsync, JavaRequests.update(req))
       case ConditionalUpdate(req) =>
         futureOf(client.updateItemAsync, JavaRequests.update(req))
-          .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
+          .map(_.asRight[ConditionalCheckFailedException])
           .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
+            case e: ConditionalCheckFailedException => e.asLeft[UpdateItemResult]
           }
+    }
+  }
+
+  /**
+    * Interpret Scanamo operations into a `cats.effect.IO` using the AmazonDynamoDBAsync client
+    * which doesn't block.
+    *
+    * @param client
+    * @return
+    */
+  def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Effect[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
+    private def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B], req: A): F[B] =
+      F.async { cb =>
+        val handler = new AsyncHandler[A, B] {
+          def onError(exception: Exception): Unit =
+            cb(Left(exception))
+          def onSuccess(request: A, result: B): Unit =
+            cb(Right(result))
+        }
+        val _ = f(req, handler)
+      }
+
+    override def apply[A](fa: ScanamoOpsA[A]): F[A] = fa match {
+      case Put(req) =>
+        eff(client.putItemAsync, JavaRequests.put(req))
+      case ConditionalPut(req) =>
+        eff(client.putItemAsync, JavaRequests.put(req))
+          .attempt
+          .flatMap(
+            _.fold(
+              _ match {
+                case e: ConditionalCheckFailedException => F.delay(e.asLeft[PutItemResult])
+                case t => F.raiseError(t)
+              },
+              a => F.delay(a.asRight[ConditionalCheckFailedException])
+            )
+          )
+      case Get(req) =>
+        eff(client.getItemAsync, req)
+      case Delete(req) =>
+        eff(client.deleteItemAsync, JavaRequests.delete(req))
+      case ConditionalDelete(req) =>
+        eff(client.deleteItemAsync, JavaRequests.delete(req))
+          .attempt
+          .flatMap(
+            _.fold(
+              _ match {
+                case e: ConditionalCheckFailedException => F.delay(e.asLeft[DeleteItemResult])
+                case t => F.raiseError(t)
+              },
+              a => F.delay(a.asRight[ConditionalCheckFailedException])
+           )
+          )
+      case Scan(req) =>
+        eff(client.scanAsync, JavaRequests.scan(req))
+      case Query(req) =>
+        eff(client.queryAsync, JavaRequests.query(req))
+      // Overloading means we need explicit parameter types here
+      case BatchWrite(req) =>
+        eff(client.batchWriteItemAsync(_: BatchWriteItemRequest, _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]), req)
+      case BatchGet(req) =>
+        eff(client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]), req)
+      case Update(req) =>
+        eff(client.updateItemAsync, JavaRequests.update(req))
+      case ConditionalUpdate(req) =>
+        eff(client.updateItemAsync, JavaRequests.update(req))
+          .attempt
+          .flatMap(
+            _.fold(
+              _ match {
+                case e: ConditionalCheckFailedException => F.delay(e.asLeft[UpdateItemResult])
+                case t => F.raiseError(t)
+              },
+              a => F.delay(a.asRight[ConditionalCheckFailedException])
+            )
+          )
     }
   }
 }
