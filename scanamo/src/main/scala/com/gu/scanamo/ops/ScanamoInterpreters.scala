@@ -117,8 +117,6 @@ object ScanamoInterpreters {
     * Interpret Scanamo operations into a `cats.effect.IO` using the AmazonDynamoDBAsync client
     * which doesn't block.
     *
-    * @param client
-    * @return
     */
   def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Effect[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
     private def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B], req: A): F[B] =

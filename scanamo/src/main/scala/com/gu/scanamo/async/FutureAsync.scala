@@ -11,11 +11,7 @@ import com.gu.scanamo.update.UpdateExpression
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
-  * Provides the same interface as [[com.gu.scanamo.Scanamo]], except that it requires an implicit
-  * concurrent.ExecutionContext and returns a concurrent.Future
-  *
-  * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
-  * java.util.concurrent.ExecutorService to make calls asynchronously
+  * Uses a Future type as a handler for asynchronous Dynamo calls.
   */
 @deprecated("Future API use is discouraged. Please use EffectAsync instead.", "2019-01-01")
 object FutureAsync {

@@ -10,13 +10,8 @@ import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 import com.gu.scanamo.update.UpdateExpression
 
 /**
-  * Provides the same interface as [[com.gu.scanamo.Scanamo]], but requires a generic Effect type
-  * as a handler for asynchronous [[AmazonDynamoDBAsync]] calls.
-  *
-  * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
-  * java.util.concurrent.ExecutorService to make calls asynchronously
+  * Uses a generic Cats Effect type as a handler for asynchronous Dynamo calls.
   */
-
 trait EffectAsync {
 
   def exec[F[_]: Effect, A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A]): F[A] =
