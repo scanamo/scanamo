@@ -7,6 +7,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
 
 class ScanamoAsyncTest extends FunSpec with Matchers {
@@ -61,7 +62,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers {
     LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      val _ = ScanamoAsync.put[IO, City](client)("asyncCities")(City("Nashville", "US"))
+      val _ = ScanamoAsync.put[IO, City](client)("asyncCities")(City("Nashville", "US")).unsafeRunSync()
       ScanamoAsync.getWithConsistency[IO, City](client)("asyncCities")('name -> "Nashville")
         .unsafeRunSync() should equal(Some(Right(City("Nashville", "US"))))
     }
@@ -310,7 +311,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers {
       results2.unsafeRunSync() should equal(List.empty)
 
       val maybeStations2 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)("stations")
-      maybeStations2 should equal(List.empty)
+      maybeStations2.unsafeRunSync() should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(CamdenTown))
       val results3 = ScanamoAsync.queryIndex[IO, Station](client)("stations", "zone-index")(
@@ -327,7 +328,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers {
     val farmersTable = Table[Farmer]("nursery-farmers")
 
     LocalDynamoDB.usingTable(client)("nursery-farmers")('firstName -> S, 'surname -> S) {
-      val farmerOps = for {
+      val farmerOps: ScanamoOps[List[Either[DynamoReadError, Farmer]]] = for {
         _ <- farmersTable.put(Farmer("Fred", "Perry", None))
         _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
         farmerWithNoAge <- farmersTable.filter(attributeNotExists('age)).query('firstName -> "Fred")
