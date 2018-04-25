@@ -1,44 +1,18 @@
 package com.gu.scanamo
 
-import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
-import akka.stream.alpakka.dynamodb.impl.DynamoSettings
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import com.gu.scanamo.async.FutureAsync
-import com.gu.scanamo.query._
+import cats.effect.IO
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
+import org.scalatest.{FunSpec, Matchers}
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.query._
 
-@deprecated("Future API use is discouraged. Please use EffectAsync instead.", "2019-01-01") // see SI-7934 for info on this workaround
-class ScanamoAlpakkaSpec
-  extends FunSpecLike
-  with BeforeAndAfterAll
-  with Matchers
-  with ScalaFutures {
-
-  implicit val system = ActorSystem("scanamo-alpakka")
-
-  override protected def afterAll(): Unit = {
-    system.terminate()
-    super.afterAll()
-  }
-
-  implicit val materializer = ActorMaterializer.create(system)
-  implicit val executor = system.dispatcher
-  implicit val defaultPatience =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
+class ScanamoAsyncTest extends FunSpec with Matchers {
 
   val client = LocalDynamoDB.client()
-  val alpakkaClient = DynamoClient(
-    DynamoSettings(
-      region = "",
-      host = "localhost",
-      port = 8052,
-      parallelism = 2
-    )
-  )
+  import scala.concurrent.ExecutionContext.Implicits.global
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
@@ -48,10 +22,10 @@ class ScanamoAlpakkaSpec
       import com.gu.scanamo.syntax._
 
       val result = for {
-        _ <- ScanamoAlpakka.put(alpakkaClient)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        _ <- ScanamoAsync.put[IO, Farmer](client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
 
-      result.futureValue should equal(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
+      result.unsafeRunSync() should equal(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
     }
   }
 
@@ -60,15 +34,15 @@ class ScanamoAlpakkaSpec
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      Scanamo.put(client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
+      Scanamo.put[Farmer](client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
 
-      ScanamoAlpakka.get[Farmer](alpakkaClient)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
-        .futureValue should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
+      ScanamoAsync.get[IO, Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
+        .unsafeRunSync() should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAlpakka.get[Farmer](alpakkaClient)("asyncFarmers")('name -> "Maggot")
-        .futureValue should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
+      ScanamoAsync.get[IO, Farmer](client)("asyncFarmers")('name -> "Maggot")
+        .unsafeRunSync() should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
     }
 
     LocalDynamoDB.usingTable(client)("asyncEngines")('name -> S, 'number -> N) {
@@ -77,21 +51,19 @@ class ScanamoAlpakkaSpec
       Scanamo.put(client)("asyncEngines")(Engine("Thomas", 1))
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.get[Engine](alpakkaClient)("asyncEngines")('name -> "Thomas" and 'number -> 1)
-        .futureValue should equal(Some(Right(Engine("Thomas", 1))))
+      ScanamoAsync.get[IO, Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
+        .unsafeRunSync() should equal(Some(Right(Engine("Thomas", 1))))
     }
   }
 
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
-    LocalDynamoDB.usingTable(client)("asyncAlpakkaCities")('name -> S) {
+    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).andThen {
-        case _ =>
-          ScanamoAlpakka.getWithConsistency[City](alpakkaClient)("asyncCities")('name -> "Nashville")
-            .futureValue should equal(Some(Right(City("Nashville", "US"))))
-      }
+      val _ = ScanamoAsync.put[IO, City](client)("asyncCities")(City("Nashville", "US"))
+      ScanamoAsync.getWithConsistency[IO, City](client)("asyncCities")('name -> "Nashville")
+        .unsafeRunSync() should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
@@ -106,10 +78,10 @@ class ScanamoAlpakkaSpec
       import com.gu.scanamo.syntax._
 
       val maybeFarmer = for {
-        _ <- ScanamoAlpakka.delete(alpakkaClient)("asyncFarmers")('name -> "McGregor")
+        _ <- ScanamoAsync.delete[IO, Farmer](client)("asyncFarmers")('name -> "McGregor")
       } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McGregor")
 
-      maybeFarmer.futureValue should equal(None)
+      maybeFarmer.unsafeRunSync() should equal(None)
     }
   }
 
@@ -130,10 +102,10 @@ class ScanamoAlpakkaSpec
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAlpakka.deleteAll(alpakkaClient)("asyncFarmers")('name -> dataSet.map(_.name))
+        _ <- ScanamoAsync.deleteAll[IO](client)("asyncFarmers")('name -> dataSet.map(_.name))
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
-      maybeFarmer.futureValue should equal(List.empty)
+      maybeFarmer.unsafeRunSync() should equal(List.empty)
     }
   }
 
@@ -147,10 +119,10 @@ class ScanamoAlpakkaSpec
       import com.gu.scanamo.syntax._
 
       val forecasts = for {
-        _ <- ScanamoAlpakka.update(alpakkaClient)("forecast")('location -> "London", set('weather -> "Sun"))
+        _ <- ScanamoAsync.update[IO, Forecast](client)("forecast")('location -> "London", set('weather -> "Sun"))
       } yield Scanamo.scan[Forecast](client)("forecast")
 
-      forecasts.futureValue should equal(List(Right(Forecast("London", "Sun"))))
+      forecasts.unsafeRunSync() should equal(List(Right(Forecast("London", "Sun"))))
     }
   }
 
@@ -170,7 +142,7 @@ class ScanamoAlpakkaSpec
         results <- forecasts.scan()
       } yield results
 
-      ScanamoAlpakka.exec(alpakkaClient)(ops).futureValue should equal(
+      ScanamoAsync.exec[IO, List[Either[DynamoReadError, Forecast]]](client)(ops).unsafeRunSync() should equal(
         List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None))))
     }
   }
@@ -183,7 +155,7 @@ class ScanamoAlpakkaSpec
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
 
-      ScanamoAlpakka.scan[Bear](alpakkaClient)("asyncBears").futureValue.toList should equal(
+      ScanamoAsync.scan[IO, Bear](client)("asyncBears").unsafeRunSync() should equal(
         List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets")))
       )
     }
@@ -196,7 +168,7 @@ class ScanamoAlpakkaSpec
         (for {_ <- 0 until 100} yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
       )
 
-      ScanamoAlpakka.scan[Lemming](alpakkaClient)("asyncLemmings").futureValue.toList.size should equal(100)
+      ScanamoAsync.scan[IO, Lemming](client)("asyncLemmings").unsafeRunSync().size should equal(100)
     }
   }
 
@@ -206,8 +178,8 @@ class ScanamoAlpakkaSpec
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1)
-      results.futureValue should equal(List(Right(Bear("Pooh","honey"))))
+      val results = ScanamoAsync.scanWithLimit[IO, Bear](client)("asyncBears", 1)
+      results.unsafeRunSync() should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
 
@@ -218,8 +190,8 @@ class ScanamoAlpakkaSpec
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1)
-      results.futureValue should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
+      val results = ScanamoAsync.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1)
+      results.unsafeRunSync() should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
     }
   }
 
@@ -234,19 +206,19 @@ class ScanamoAlpakkaSpec
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig").futureValue.toList should equal(
+      ScanamoAsync.query[IO, Animal](client)("asyncAnimals")('species -> "Pig").unsafeRunSync() should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number < 3).futureValue.toList should equal(
+      ScanamoAsync.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number < 3).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number > 1).futureValue.toList should equal(
+      ScanamoAsync.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number > 1).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number <= 2).futureValue.toList should equal(
+      ScanamoAsync.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number <= 2).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number >= 2).futureValue.toList should equal(
+      ScanamoAsync.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number >= 2).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
     }
@@ -262,7 +234,7 @@ class ScanamoAlpakkaSpec
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
 
-      ScanamoAlpakka.query[Transport](alpakkaClient)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
+      ScanamoAsync.query[IO, Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).unsafeRunSync() should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
     }
   }
@@ -277,8 +249,8 @@ class ScanamoAlpakkaSpec
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
-      results.futureValue should equal(List(Right(Transport("Underground","Central"))))
+      val results = ScanamoAsync.queryWithLimit[IO, Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      results.unsafeRunSync() should equal(List(Right(Transport("Underground","Central"))))
     }
   }
 
@@ -296,10 +268,10 @@ class ScanamoAlpakkaSpec
         Transport("Underground", "Central", "Red"),
         Transport("Underground", "Picadilly", "Blue"),
         Transport("Underground", "Northern", "Black")))
-      val results = ScanamoAlpakka.queryIndexWithLimit[Transport](alpakkaClient)("transport", "colour-index")(
+      val results = ScanamoAsync.queryIndexWithLimit[IO, Transport](client)("transport", "colour-index")(
         'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
 
-      results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
+      results.unsafeRunSync() should equal(List(Right(Transport("Underground","Northern","Black"))))
     }
   }
 
@@ -308,9 +280,9 @@ class ScanamoAlpakkaSpec
 
     import com.gu.scanamo.syntax._
 
-    def deletaAllStations(client: DynamoClient, stations: Set[Station]) = {
-      ScanamoAlpakka.delete(client)("stations")('mode -> "Underground")
-      ScanamoAlpakka.deleteAll(client)("stations")(
+    def deletaAllStations(client: AmazonDynamoDBAsync, stations: Set[Station]) = {
+      ScanamoAsync.delete[IO, Station](client)("stations")('mode -> "Underground")
+      ScanamoAsync.deleteAll[IO](client)("stations")(
         UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
       )
     }
@@ -324,26 +296,26 @@ class ScanamoAlpakkaSpec
     ) {
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       Scanamo.putAll(client)("stations")(stations)
-      val results1 = ScanamoAlpakka.queryIndex[Station](alpakkaClient)("stations", "zone-index")(
+      val results1 = ScanamoAsync.queryIndex[IO, Station](client)("stations", "zone-index")(
         'mode -> "Underground" and ('zone between (2 and 4)))
 
-      results1.futureValue should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
+      results1.unsafeRunSync() should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
 
-      val maybeStations1 = for {_ <- deletaAllStations(alpakkaClient, stations)} yield Scanamo.scan[Station](client)("stations")
-      maybeStations1.futureValue should equal(List.empty)
+      val maybeStations1 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)("stations")
+      maybeStations1 should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(LiverpoolStreet))
-      val results2 = ScanamoAlpakka.queryIndex[Station](alpakkaClient)("stations", "zone-index")(
+      val results2 = ScanamoAsync.queryIndex[IO, Station](client)("stations", "zone-index")(
         'mode -> "Underground" and ('zone between (2 and 4)))
-      results2.futureValue should equal(List.empty)
+      results2.unsafeRunSync() should equal(List.empty)
 
-      val maybeStations2 = for {_ <- deletaAllStations(alpakkaClient, stations)} yield Scanamo.scan[Station](client)("stations")
-      maybeStations2.futureValue should equal(List.empty)
+      val maybeStations2 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)("stations")
+      maybeStations2 should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(CamdenTown))
-      val results3 = ScanamoAlpakka.queryIndex[Station](alpakkaClient)("stations", "zone-index")(
+      val results3 = ScanamoAsync.queryIndex[IO, Station](client)("stations", "zone-index")(
         'mode -> "Underground" and ('zone between (1 and 1)))
-      results3.futureValue should equal(List.empty)
+      results3.unsafeRunSync() should equal(List.empty)
     }
   }
 
@@ -360,7 +332,7 @@ class ScanamoAlpakkaSpec
         _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
         farmerWithNoAge <- farmersTable.filter(attributeNotExists('age)).query('firstName -> "Fred")
       } yield farmerWithNoAge
-      ScanamoAlpakka.exec(alpakkaClient)(farmerOps).futureValue should equal(List(Right(Farmer("Fred", "Perry", None))))
+      ScanamoAsync.exec[IO, List[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(List(Right(Farmer("Fred", "Perry", None))))
     }
   }
 
@@ -369,12 +341,12 @@ class ScanamoAlpakkaSpec
 
     LocalDynamoDB.usingTable(client)("asyncRabbits")('name -> S) {
       val result = for {
-        _ <- ScanamoAlpakka.putAll(alpakkaClient)("asyncRabbits")((
+        _ <- ScanamoAsync.putAll[IO, Rabbit](client)("asyncRabbits")((
           for {_ <- 0 until 100} yield Rabbit(util.Random.nextString(500))
           ).toSet)
       } yield Scanamo.scan[Rabbit](client)("asyncRabbits")
 
-      result.futureValue.toList.size should equal(100)
+      result.unsafeRunSync().size should equal(100)
     }
     ()
   }
@@ -389,14 +361,14 @@ class ScanamoAlpakkaSpec
         Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
       ))
 
-      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")(
+      ScanamoAsync.getAll[IO, Farmer](client)("asyncFarmers")(
         UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
-      ).futureValue should equal(
+      ).unsafeRunSync() should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")('name -> Set("Boggis", "Bean")).futureValue should equal(
+      ScanamoAsync.getAll[IO, Farmer](client)("asyncFarmers")('name -> Set("Boggis", "Bean")).unsafeRunSync() should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
@@ -407,9 +379,9 @@ class ScanamoAlpakkaSpec
         Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.getAll[Doctor](alpakkaClient)("asyncDoctors")(
+      ScanamoAsync.getAll[IO, Doctor](client)("asyncDoctors")(
         ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
-      ).futureValue should equal(
+      ).unsafeRunSync() should equal(
         Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
 
     }
@@ -423,9 +395,9 @@ class ScanamoAlpakkaSpec
 
       Scanamo.putAll(client)("asyncFarms")(farms)
 
-      ScanamoAlpakka.getAll[Farm](alpakkaClient)("asyncFarms")(
+      ScanamoAsync.getAll[IO, Farm](client)("asyncFarms")(
         UniqueKeys(KeyList('id, farms.map(_.id)))
-      ).futureValue should equal(farms.map(Right(_)))
+      ).unsafeRunSync() should equal(farms.map(Right(_)))
     }
   }
 
@@ -437,9 +409,39 @@ class ScanamoAlpakkaSpec
 
       Scanamo.putAll(client)("asyncFarms")(farms)
 
-      FutureAsync.getAllWithConsistency[Farm](client)("asyncFarms")(
+      ScanamoAsync.getAllWithConsistency[IO, Farm](client)("asyncFarms")(
         UniqueKeys(KeyList('id, farms.map(_.id)))
-      ).futureValue should equal(farms.map(Right(_)))
+      ).unsafeRunSync() should equal(farms.map(Right(_)))
+    }
+  }
+
+  it("should return old item after put asynchronously") {
+    case class Farm(animals: List[String])
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    val farmersTable = Table[Farmer]("nursery-farmers")
+
+    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+      val farmerOps = for {
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
+      } yield result
+      ScanamoAsync.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(
+        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))))
+    }
+  }
+
+  it("should return None when putting a new item asynchronously") {
+    case class Farm(animals: List[String])
+    case class Farmer(name: String, age: Long, farm: Farm)
+
+    val farmersTable = Table[Farmer]("nursery-farmers")
+
+    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+      val farmerOps = for {
+        result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+      } yield result
+      ScanamoAsync.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(None)
     }
   }
 
@@ -458,7 +460,7 @@ class ScanamoAlpakkaSpec
         _ <- farmersTable.given('age -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
       } yield farmerWithNewStock
-      ScanamoAlpakka.exec(alpakkaClient)(farmerOps).futureValue should equal(
+      ScanamoAsync.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"))))))
     }
   }
@@ -480,7 +482,7 @@ class ScanamoAlpakkaSpec
         _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get('name -> "Butch")
       } yield farmerButch
-      ScanamoAlpakka.exec(alpakkaClient)(farmerOps).futureValue should equal(
+      ScanamoAsync.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(
         Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
       )
     }
@@ -500,8 +502,7 @@ class ScanamoAlpakkaSpec
         _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
-      ScanamoAlpakka.exec(alpakkaClient)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
+      ScanamoAsync.exec[IO, List[Either[DynamoReadError, Gremlin]]](client)(ops).unsafeRunSync() should equal(List(Right(Gremlin(1,false))))
     }
   }
-
 }

@@ -17,7 +17,8 @@ import scala.concurrent.{ExecutionContext, Future}
   * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
   * java.util.concurrent.ExecutorService to make calls asynchronously
   */
-trait FutureAsync {
+@deprecated("Future API use is discouraged. Please use EffectAsync instead.", "2019-01-01")
+object FutureAsync {
   import cats.instances.future._
 
   def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A])(implicit ec: ExecutionContext) =
@@ -93,4 +94,3 @@ trait FutureAsync {
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 }
 
-object FutureAsync extends FutureAsync

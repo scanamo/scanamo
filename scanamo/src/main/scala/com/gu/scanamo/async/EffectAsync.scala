@@ -90,5 +90,3 @@ trait EffectAsync {
     query: Query[_], limit: Int): F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 }
-
-object EffectAsync extends EffectAsync

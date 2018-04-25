@@ -5,9 +5,11 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import com.gu.scanamo.async.FutureAsync
 import com.gu.scanamo.query._
 
-class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
+@deprecated("Future API use is discouraged. Please use EffectAsync instead.", "2019-01-01") // see SI-7934 for info on this workaround
+class FutureAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
 
@@ -22,7 +24,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       import com.gu.scanamo.syntax._
 
       val result = for {
-        _ <- ScanamoAsync.put(client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        _ <- FutureAsync.put(client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
 
       result.futureValue should equal(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
@@ -36,12 +38,12 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       Scanamo.put(client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
 
-      ScanamoAsync.get[Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
+      FutureAsync.get[Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
         .futureValue should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAsync.get[Farmer](client)("asyncFarmers")('name -> "Maggot")
+      FutureAsync.get[Farmer](client)("asyncFarmers")('name -> "Maggot")
         .futureValue should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
     }
 
@@ -51,7 +53,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncEngines")(Engine("Thomas", 1))
 
       import com.gu.scanamo.syntax._
-      ScanamoAsync.get[Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
+      FutureAsync.get[Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
         .futureValue should equal(Some(Right(Engine("Thomas", 1))))
     }
   }
@@ -61,9 +63,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US")).andThen {
+      FutureAsync.put(client)("asyncCities")(City("Nashville", "US")).andThen {
         case _ =>
-          ScanamoAsync.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
+          FutureAsync.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
             .futureValue should equal(Some(Right(City("Nashville", "US"))))
       }
     }
@@ -80,7 +82,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       import com.gu.scanamo.syntax._
 
       val maybeFarmer = for {
-        _ <- ScanamoAsync.delete(client)("asyncFarmers")('name -> "McGregor")
+        _ <- FutureAsync.delete(client)("asyncFarmers")('name -> "McGregor")
       } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McGregor")
 
       maybeFarmer.futureValue should equal(None)
@@ -104,7 +106,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> dataSet.map(_.name))
+        _ <- FutureAsync.deleteAll(client)("asyncFarmers")('name -> dataSet.map(_.name))
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
       maybeFarmer.futureValue should equal(List.empty)
@@ -121,7 +123,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       import com.gu.scanamo.syntax._
 
       val forecasts = for {
-        _ <- ScanamoAsync.update(client)("forecast")('location -> "London", set('weather -> "Sun"))
+        _ <- FutureAsync.update(client)("forecast")('location -> "London", set('weather -> "Sun"))
       } yield Scanamo.scan[Forecast](client)("forecast")
 
       forecasts.futureValue should equal(List(Right(Forecast("London", "Sun"))))
@@ -144,11 +146,11 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         results <- forecasts.scan()
       } yield results
 
-      ScanamoAsync.exec(client)(ops).futureValue should equal(
+      FutureAsync.exec(client)(ops).futureValue should equal(
         List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None))))
     }
   }
-  
+
   it("should scan asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
 
@@ -157,7 +159,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
 
-      ScanamoAsync.scan[Bear](client)("asyncBears").futureValue.toList should equal(
+      FutureAsync.scan[Bear](client)("asyncBears").futureValue.toList should equal(
         List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets")))
       )
     }
@@ -170,7 +172,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         (for {_ <- 0 until 100} yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
       )
 
-      ScanamoAsync.scan[Lemming](client)("asyncLemmings").futureValue.toList.size should equal(100)
+      FutureAsync.scan[Lemming](client)("asyncLemmings").futureValue.toList.size should equal(100)
     }
   }
 
@@ -180,7 +182,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1)
+      val results = FutureAsync.scanWithLimit[Bear](client)("asyncBears", 1)
       results.futureValue should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
@@ -192,7 +194,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
+      val results = FutureAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
       results.futureValue should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
     }
   }
@@ -208,19 +210,19 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig").futureValue.toList should equal(
+      FutureAsync.query[Animal](client)("asyncAnimals")('species -> "Pig").futureValue.toList should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number < 3).futureValue.toList should equal(
+      FutureAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number < 3).futureValue.toList should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number > 1).futureValue.toList should equal(
+      FutureAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number > 1).futureValue.toList should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number <= 2).futureValue.toList should equal(
+      FutureAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number <= 2).futureValue.toList should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number >= 2).futureValue.toList should equal(
+      FutureAsync.query[Animal](client)("asyncAnimals")('species -> "Pig" and 'number >= 2).futureValue.toList should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
     }
@@ -236,7 +238,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
 
-      ScanamoAsync.query[Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
+      FutureAsync.query[Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
     }
   }
@@ -251,7 +253,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoAsync.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      val results = FutureAsync.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
       results.futureValue should equal(List(Right(Transport("Underground","Central"))))
     }
   }
@@ -270,7 +272,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Transport("Underground", "Central", "Red"),
         Transport("Underground", "Picadilly", "Blue"),
         Transport("Underground", "Northern", "Black")))
-      val results = ScanamoAsync.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
+      val results = FutureAsync.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
         'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
 
       results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
@@ -283,8 +285,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     import com.gu.scanamo.syntax._
 
     def deletaAllStations(client: AmazonDynamoDBAsync, stations: Set[Station]) = {
-      ScanamoAsync.delete(client)("stations")('mode -> "Underground")
-      ScanamoAsync.deleteAll(client)("stations")(
+      FutureAsync.delete(client)("stations")('mode -> "Underground")
+      FutureAsync.deleteAll(client)("stations")(
         UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
       )
     }
@@ -298,7 +300,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     ) {
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       Scanamo.putAll(client)("stations")(stations)
-      val results1 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+      val results1 = FutureAsync.queryIndex[Station](client)("stations", "zone-index")(
         'mode -> "Underground" and ('zone between (2 and 4)))
 
       results1.futureValue should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
@@ -307,7 +309,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       maybeStations1.futureValue should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(LiverpoolStreet))
-      val results2 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+      val results2 = FutureAsync.queryIndex[Station](client)("stations", "zone-index")(
         'mode -> "Underground" and ('zone between (2 and 4)))
       results2.futureValue should equal(List.empty)
 
@@ -315,7 +317,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       maybeStations2.futureValue should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(CamdenTown))
-      val results3 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+      val results3 = FutureAsync.queryIndex[Station](client)("stations", "zone-index")(
         'mode -> "Underground" and ('zone between (1 and 1)))
       results3.futureValue should equal(List.empty)
     }
@@ -334,16 +336,16 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
           _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
           farmerWithNoAge <- farmersTable.filter(attributeNotExists('age)).query('firstName -> "Fred")
         } yield farmerWithNoAge
-        ScanamoAsync.exec(client)(farmerOps).futureValue should equal(List(Right(Farmer("Fred", "Perry", None))))
+        FutureAsync.exec(client)(farmerOps).futureValue should equal(List(Right(Farmer("Fred", "Perry", None))))
       }
   }
-  
+
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
 
     LocalDynamoDB.usingTable(client)("asyncRabbits")('name -> S) {
       val result = for {
-        _ <- ScanamoAsync.putAll(client)("asyncRabbits")((
+        _ <- FutureAsync.putAll(client)("asyncRabbits")((
           for {_ <- 0 until 100} yield Rabbit(util.Random.nextString(500))
           ).toSet)
       } yield Scanamo.scan[Rabbit](client)("asyncRabbits")
@@ -363,14 +365,14 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
       ))
 
-      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")(
+      FutureAsync.getAll[Farmer](client)("asyncFarmers")(
         UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
       ).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> Set("Boggis", "Bean")).futureValue should equal(
+      FutureAsync.getAll[Farmer](client)("asyncFarmers")('name -> Set("Boggis", "Bean")).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
@@ -381,7 +383,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
       import com.gu.scanamo.syntax._
-      ScanamoAsync.getAll[Doctor](client)("asyncDoctors")(
+      FutureAsync.getAll[Doctor](client)("asyncDoctors")(
         ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
       ).futureValue should equal(
         Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
@@ -397,7 +399,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       Scanamo.putAll(client)("asyncFarms")(farms)
 
-      ScanamoAsync.getAll[Farm](client)("asyncFarms")(
+      FutureAsync.getAll[Farm](client)("asyncFarms")(
         UniqueKeys(KeyList('id, farms.map(_.id)))
       ).futureValue should equal(farms.map(Right(_)))
     }
@@ -411,7 +413,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       Scanamo.putAll(client)("asyncFarms")(farms)
 
-      ScanamoAsync.getAllWithConsistency[Farm](client)("asyncFarms")(
+      FutureAsync.getAllWithConsistency[Farm](client)("asyncFarms")(
         UniqueKeys(KeyList('id, farms.map(_.id)))
       ).futureValue should equal(farms.map(Right(_)))
     }
@@ -428,7 +430,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
         result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
-      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(
+      FutureAsync.exec(client)(farmerOps).futureValue should equal(
         Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))))
     }
   }
@@ -443,7 +445,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       val farmerOps = for {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
-      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(None)
+      FutureAsync.exec(client)(farmerOps).futureValue should equal(None)
     }
   }
 
@@ -462,7 +464,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         _ <- farmersTable.given('age -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
       } yield farmerWithNewStock
-      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(
+      FutureAsync.exec(client)(farmerOps).futureValue should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"))))))
     }
   }
@@ -484,7 +486,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get('name -> "Butch")
       } yield farmerButch
-      ScanamoAsync.exec(client)(farmerOps).futureValue should equal(
+      FutureAsync.exec(client)(farmerOps).futureValue should equal(
         Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
       )
     }
@@ -504,7 +506,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
-      ScanamoAsync.exec(client)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
+      FutureAsync.exec(client)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
     }
   }
 }
