@@ -303,7 +303,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers {
       results1.unsafeRunSync() should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
 
       val maybeStations1 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)("stations")
-      maybeStations1 should equal(List.empty)
+      maybeStations1.unsafeRunSync() should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(LiverpoolStreet))
       val results2 = ScanamoAsync.queryIndex[IO, Station](client)("stations", "zone-index")(
