@@ -73,7 +73,7 @@ lazy val formats = (project in file("formats"))
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
       "com.chuusai" %% "shapeless" % "2.3.2",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
-      "org.typelevel" %% "cats-core" % "1.0.0-RC1",
+      "org.typelevel" %% "cats-core" % "1.1.0",
 
       "org.scalatest" %% "scalatest" % "3.0.1" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
