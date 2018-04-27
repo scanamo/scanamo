@@ -152,7 +152,7 @@ class ScanamoAlpakkaSpec
     }
   }
 
-  it("should update asynchornously if a condition holds") {
+  it("should update asynchronously if a condition holds") {
     LocalDynamoDB.usingTable(client)("forecast")('location -> S) {
 
       case class Forecast(location: String, weather: String, equipment: Option[String])
@@ -422,6 +422,20 @@ class ScanamoAlpakkaSpec
       Scanamo.putAll(client)("asyncFarms")(farms)
 
       ScanamoAlpakka.getAll[Farm](alpakkaClient)("asyncFarms")(
+        UniqueKeys(KeyList('id, farms.map(_.id)))
+      ).futureValue should equal(farms.map(Right(_)))
+    }
+  }
+
+  it("should get multiple items consistently asynchronously (automatically handling batching)") {
+    LocalDynamoDB.usingTable(client)("asyncFarms")('id -> N) {
+
+      case class Farm(id: Int, name: String)
+      val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
+
+      Scanamo.putAll(client)("asyncFarms")(farms)
+
+      ScanamoAsync.getAllWithConsistency[Farm](client)("asyncFarms")(
         UniqueKeys(KeyList('id, farms.map(_.id)))
       ).futureValue should equal(farms.map(Right(_)))
     }

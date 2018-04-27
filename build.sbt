@@ -1,6 +1,8 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
+val catsVersion = "1.1.0"
+
 val commonSettings =  Seq(
   organization := "com.gu",
   scalacOptions := Seq(
@@ -49,7 +51,7 @@ val dynamoTestSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, alpakka)
+  .aggregate(formats, scanamo, alpakka, refined)
   .settings(
     commonSettings,
     publishingSettings,
@@ -70,19 +72,32 @@ lazy val formats = (project in file("formats"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
-      "com.chuusai" %% "shapeless" % "2.3.2",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      "com.chuusai" %% "shapeless" % "2.3.3",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
-      "org.typelevel" %% "cats-core" % "1.1.0",
-
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+      "org.typelevel" %% "cats-core" % catsVersion,
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
 
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,
     doctestTestFramework := DoctestTestFramework.ScalaTest
   )
+
+lazy val refined = (project in file("refined"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+    name := "scanamo-refined"
+  )
+  .settings(
+    libraryDependencies ++= Seq(
+      "eu.timepit" %% "refined" % "0.8.6",
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test
+    )
+  )
+  .dependsOn(formats)
 
 lazy val scanamo = (project in file("scanamo"))
   .settings(
@@ -95,17 +110,17 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
-      "com.chuusai" %% "shapeless" % "2.3.2",
-      "org.typelevel" %% "cats-free" % "1.0.0-RC1",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      "com.chuusai" %% "shapeless" % "2.3.3",
+      "org.typelevel" %% "cats-free" % catsVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
 
       // Use Joda for custom conversion example
       "org.joda" % "joda-convert" % "1.8.3" % Provided,
       "joda-time" % "joda-time" % "2.9.9" % Test,
 
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     )
   )
   .dependsOn(formats)
@@ -121,12 +136,12 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.225",
-      "org.typelevel" %% "cats-free" % "1.0.0-RC1",
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.14",
+      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      "org.typelevel" %% "cats-free" % catsVersion,
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.15.1",
 
-      "org.scalatest" %% "scalatest" % "3.0.1" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.4" % Test
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
 
     fork in Test := true,
@@ -150,7 +165,7 @@ lazy val docs = (project in file("docs"))
 
     dynamoDBLocalDownloadDir := file(".dynamodb-local"),
     dynamoDBLocalPort := 8042,
-    
+
     tut := tut.dependsOn(startDynamoDBLocal).value,
     stopDynamoDBLocal := stopDynamoDBLocal.triggeredBy(tut).value,
 
@@ -164,7 +179,7 @@ lazy val docs = (project in file("docs"))
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
   .disablePlugins(ReleasePlugin)
-  .dependsOn(scanamo % "compile->test", alpakka % "compile")
+  .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 
 import ReleaseTransformations._
