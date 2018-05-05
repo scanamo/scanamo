@@ -1,7 +1,7 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
-val catsVersion = "1.0.1"
+val catsVersion = "1.1.0"
 
 val commonSettings =  Seq(
   organization := "com.gu",
@@ -76,7 +76,6 @@ lazy val formats = (project in file("formats"))
       "com.chuusai" %% "shapeless" % "2.3.3",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % catsVersion,
-
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
