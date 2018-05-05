@@ -33,8 +33,8 @@ val ops = for {
   bunce <- farmTable.get('name -> "Bunce")
 } yield bunce
 ```
-```tut:book
-//concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
+```scala
+concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
 ```
 
 Note that `AmazonDynamoDBAsyncClient` uses a thread pool internally.
