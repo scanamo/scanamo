@@ -81,3 +81,4 @@ object LocalDynamoDB {
 
   private val arbitraryThroughputThatIsIgnoredByDynamoDBLocal = new ProvisionedThroughput(1L, 1L)
 }
+
