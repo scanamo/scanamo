@@ -30,6 +30,8 @@ val commonSettings =  Seq(
 
   // for simulacrum
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
+
 
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
@@ -163,7 +165,6 @@ lazy val scalaz = (project in file("scalaz"))
     commonSettings,
     publishingSettings,
     dynamoTestSettings,
-    addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
     libraryDependencies ++= List(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
       "org.typelevel" %% "cats-free" % catsVersion,
@@ -178,7 +179,7 @@ lazy val scalaz = (project in file("scalaz"))
       "AWS_ACCESS_KEY_ID" -> "dummy",
       "AWS_SECRET_KEY" -> "credentials"
     ),
-    dynamoDBLocalDownloadDir := file(".cats-effect-dynamodb-local"),
+    dynamoDBLocalDownloadDir := file(".scalaz-ioeffect-dynamodb-local"),
     dynamoDBLocalPort := 8042,
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
