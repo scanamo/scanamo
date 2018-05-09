@@ -6,14 +6,12 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
-import scalaz.ioeffect
 import scalaz.ioeffect.RTS
 
 
 class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
 
   val client = LocalDynamoDB.client()
-  import scala.concurrent.ExecutionContext.Implicits.global
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
