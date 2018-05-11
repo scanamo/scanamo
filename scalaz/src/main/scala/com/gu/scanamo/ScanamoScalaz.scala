@@ -11,11 +11,9 @@ import scalaz.ioeffect.IO
 import shims._
 
 object ScanamoScalaz {
-
-
+  
   def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A]): IO[ConditionalCheckFailedException, A] =
     op.asScalaz.foldMap(ScalazInterpreter.io(client))
-
 
   def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)
   : IO[ConditionalCheckFailedException, Option[Either[DynamoReadError, T]]] =
