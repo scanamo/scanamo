@@ -1,18 +1,17 @@
 package com.gu.scanamo.ops
 
+import java.util.concurrent.{Future => JFuture}
+
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model._
-import scalaz.ioeffect.IO
-import scalaz.ioeffect.ExitResult
+import scalaz.ioeffect.{ExitResult, IO}
 import scalaz.~>
 
-import java.util.concurrent.{Future => JFuture}
-
 object ScalazInterpreter {
-  def io(client: AmazonDynamoDBAsync) = new (ScanamoOpsA ~> IO[Throwable, ?]) {
-    private def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => JFuture[B], req: A): IO[Throwable, B] =
+  def io(client: AmazonDynamoDBAsync) = new (ScanamoOpsA ~> IO[ConditionalCheckFailedException, ?]) {
+    private[this] def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => JFuture[B], req: A): IO[Exception, B] =
       IO.async { cb =>
         val handler = new AsyncHandler[A, B] {
           def onError(exception: Exception): Unit =
@@ -24,42 +23,50 @@ object ScalazInterpreter {
         val _ = f(req, handler)
       }
 
-    // Welcome to Scala's GADT support :D
-    override def apply[A](fa: ScanamoOpsA[A]): IO[Throwable, A] = fa match {
-      case Put(req) =>
-        eff[PutItemRequest, PutItemResult](client.putItemAsync, JavaRequests.put(req)).asInstanceOf[IO[Throwable, A]]
-      case ConditionalPut(req) =>
-        eff[PutItemRequest, PutItemResult](client.putItemAsync, JavaRequests.put(req)).asInstanceOf[IO[Throwable, A]]
-      case Get(req) =>
-        eff[GetItemRequest, GetItemResult](client.getItemAsync, req).asInstanceOf[IO[Throwable, A]]
-      case Delete(req) =>
-        eff[DeleteItemRequest, DeleteItemResult](client.deleteItemAsync, JavaRequests.delete(req)).asInstanceOf[IO[Throwable, A]]
-      case ConditionalDelete(req) =>
-        eff[DeleteItemRequest, DeleteItemResult](client.deleteItemAsync, JavaRequests.delete(req)).asInstanceOf[IO[Throwable, A]]
-      case Scan(req) =>
-        eff[ScanRequest, ScanResult](client.scanAsync, JavaRequests.scan(req)).asInstanceOf[IO[Throwable, A]]
-      case Query(req) =>
-        eff[QueryRequest, QueryResult](client.queryAsync, JavaRequests.query(req)).asInstanceOf[IO[Throwable, A]]
-      // Overloading means we need explicit parameter types here
-      case BatchWrite(req) =>
-        eff[BatchWriteItemRequest, BatchWriteItemResult](
-          client.batchWriteItemAsync(
-            _: BatchWriteItemRequest,
-            _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
-          req
-        ).asInstanceOf[IO[Throwable, A]]
-      case BatchGet(req) =>
-        eff[BatchGetItemRequest, BatchGetItemResult](
-          client.batchGetItemAsync(
-            _: BatchGetItemRequest,
-            _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-          req
-        ).asInstanceOf[IO[Throwable, A]]
-      case Update(req) =>
-        eff[UpdateItemRequest, UpdateItemResult](client.updateItemAsync, JavaRequests.update(req)).asInstanceOf[IO[Throwable, A]]
-      case ConditionalUpdate(req) =>
-        eff[UpdateItemRequest, UpdateItemResult](client.updateItemAsync, JavaRequests.update(req)).asInstanceOf[IO[Throwable, A]]
+    // Refactor this with Leibniz when Scala solves the GADT problem
+    private[this] def unifyA[A0, A](io: IO[Exception, A0]): IO[ConditionalCheckFailedException, A] =
+      io.catchAll[ConditionalCheckFailedException] {
+        case e: ConditionalCheckFailedException => IO.fail(e)
+        case t => IO.interrupt(t)
+      }.asInstanceOf[IO[ConditionalCheckFailedException, A]]
 
+    override def apply[A](fa: ScanamoOpsA[A]): IO[ConditionalCheckFailedException, A] = {
+      fa match {
+        case Put(req) =>
+          unifyA(eff(client.putItemAsync, JavaRequests.put(req)))
+        case ConditionalPut(req) =>
+          unifyA(eff(client.putItemAsync, JavaRequests.put(req)))
+        case Get(req) =>
+          unifyA(eff(client.getItemAsync, req))
+        case Delete(req) =>
+          unifyA(eff(client.deleteItemAsync, JavaRequests.delete(req)))
+        case ConditionalDelete(req) =>
+          unifyA(eff(client.deleteItemAsync, JavaRequests.delete(req)))
+        case Scan(req) =>
+          unifyA(eff(client.scanAsync, JavaRequests.scan(req)))
+        case Query(req) =>
+          unifyA(eff[QueryRequest, QueryResult](client.queryAsync, JavaRequests.query(req)))
+        // Overloading means we need explicit parameter types here
+        case BatchWrite(req) =>
+          unifyA(eff(
+            client.batchWriteItemAsync(
+              _: BatchWriteItemRequest,
+              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+            req
+          ))
+        case BatchGet(req) =>
+          unifyA(eff(
+            client.batchGetItemAsync(
+              _: BatchGetItemRequest,
+              _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+            req
+          ))
+        case Update(req) =>
+          unifyA(eff(client.updateItemAsync, JavaRequests.update(req)))
+        case ConditionalUpdate(req) =>
+          unifyA(eff[UpdateItemRequest, UpdateItemResult](client.updateItemAsync, JavaRequests.update(req)))
+
+      }
     }
   }
 }
