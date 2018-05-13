@@ -31,6 +31,7 @@ object DynamoReadError {
   def describe(d: DynamoReadError): String =  d match {
     case InvalidPropertiesError(problems) => problems.toList.map(p => s"'${p.name}': ${describe(p.problem)}").mkString(", ")
     case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
+    case NoSubtypeOfType(typeName, actual) => s"empty sealed trait 'stypeName' for '$actual'"
     case TypeCoercionError(e) => s"could not be converted to desired type: $e"
     case MissingProperty => "missing"
   }
