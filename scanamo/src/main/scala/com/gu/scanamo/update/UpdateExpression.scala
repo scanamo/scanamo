@@ -45,6 +45,10 @@ object UpdateExpression {
     AppendExpression(fieldValue._1, fieldValue._2)
   def prepend[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     PrependExpression(fieldValue._1, fieldValue._2)
+  def appendAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+    AppendAllExpression(fieldValue._1, fieldValue._2)
+  def prependAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+    PrependAllExpression(fieldValue._1, fieldValue._2)
   def add[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     AddExpression(fieldValue._1, fieldValue._2)
   def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
@@ -175,6 +179,30 @@ object PrependExpression {
       field.attributeNames(prefix),
       "update",
       DynamoFormat.listFormat[V].write(List(value))
+    ))
+  }
+}
+
+object AppendAllExpression {
+  private val prefix = "updateAppendAll"
+  def apply[V](field: AttributeName, value: List[V])(implicit format: DynamoFormat[V]): UpdateExpression =  {
+    SimpleUpdateExpression(LeafAppendExpression(
+      field.placeholder(prefix),
+      field.attributeNames(prefix),
+      "update",
+      DynamoFormat.listFormat[V].write(value)
+    ))
+  }
+}
+
+object PrependAllExpression {
+  private val prefix = "updatePrependAll"
+  def apply[V](field: AttributeName, value: List[V])(implicit format: DynamoFormat[V]): UpdateExpression = {
+    SimpleUpdateExpression(LeafPrependExpression(
+      field.placeholder(prefix),
+      field.attributeNames(prefix),
+      "update",
+      DynamoFormat.listFormat[V].write(value)
     ))
   }
 }

@@ -44,4 +44,4 @@ LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
 }
 ```
 
-More examples can be found in the [Table ScalaDoc](/scanamo/latest/api/com/gu/scanamo/Table.html#given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[V,T]).
+More examples can be found in the [Table ScalaDoc](/latest/api/com/gu/scanamo/Table.html#given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[V,T]).

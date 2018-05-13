@@ -75,6 +75,16 @@ object ScanamoFree {
     }.map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
   }
 
+  def getAllWithConsistency[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
+    keys.asAVMap.grouped(batchSize).toList.traverse { batch =>
+      ScanamoOps.batchGet(
+        new BatchGetItemRequest().withRequestItems(Map(tableName ->
+          new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(true)
+        ).asJava)
+      )
+    }.map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
+  }
+
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.asAVMap, None))
 

@@ -173,6 +173,25 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Character(James Bond,List(Craig))))
     * }}}
     *
+    * To concatenate a list to the front or end of an existing list, use appendAll/prependAll:
+    *
+    * {{{
+    * >>> case class Fruit(kind: String, sources: List[String])
+    * >>> val fruits = Table[Fruit]("fruits")
+    *
+    * >>> LocalDynamoDB.withTable(client)("fruits")('kind -> S) {
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val operations = for {
+    * ...     _ <- fruits.put(Fruit("watermelon", List("USA")))
+    * ...     _ <- fruits.update('kind -> "watermelon", appendAll('sources -> List("China", "Turkey")))
+    * ...     _ <- fruits.update('kind -> "watermelon", prependAll('sources -> List("Brazil")))
+    * ...     results <- fruits.query('kind -> "watermelon")
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Fruit(watermelon,List(Brazil, USA, China, Turkey))))
+    * }}}
+    *
     * Multiple operations can also be performed in one call:
     * {{{
     * >>> case class Foo(name: String, bar: Int, l: List[String])
@@ -574,6 +593,8 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
     ScanamoFree.getWithConsistency[V](tableName)(key)
+  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
+    ScanamoFree.getAllWithConsistency[V](tableName)(keys)
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanConsistent[V](tableName)
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
