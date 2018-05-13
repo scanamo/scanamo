@@ -166,6 +166,8 @@ lazy val docs = (project in file("docs"))
     dynamoDBLocalDownloadDir := file(".dynamodb-local"),
     dynamoDBLocalPort := 8042,
 
+    libraryDependencies += "org.typelevel" %% "cats-core" % catsVersion,
+
     tut := tut.dependsOn(startDynamoDBLocal).value,
     stopDynamoDBLocal := stopDynamoDBLocal.triggeredBy(tut).value,
 
