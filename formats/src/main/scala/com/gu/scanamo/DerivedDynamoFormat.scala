@@ -37,10 +37,15 @@ trait DerivedDynamoFormat {
       }.toMap.asJava)
   }
 
-  def dispatch[T](sealedTrait: SealedTrait[DynamoFormat, T]): DynamoFormat[T] =
+  def dispatch[T](st: SealedTrait[DynamoFormat, T]): DynamoFormat[T] =
     new DynamoFormat[T] {
-      def read(av: AttributeValue): Either[DynamoReadError, T] = ???
-      def write(t: T): AttributeValue = ???
+      def read(av: AttributeValue): Either[DynamoReadError, T] = 
+        st.subtypes.foldRight(Left(NoSubtypeOfType(st.typeName.full, av)): Either[DynamoReadError, T]) { case (sub, r) =>
+          r.recoverWith { case _: DynamoReadError => sub.typeclass.read(av) }
+        }
+
+      def write(t: T): AttributeValue =
+        st.dispatch(t) { sub => sub.typeclass.write(sub.cast(t)) }
     }
   
   implicit def gen[T]: DynamoFormat[T] = macro Magnolia.gen[T]
