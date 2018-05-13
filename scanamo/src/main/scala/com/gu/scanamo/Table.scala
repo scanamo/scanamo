@@ -58,7 +58,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Farmer("Patty", 200L, Farm(List("unicorn"))),
     * ...   Farmer("Ted", 40L, Farm(List("T-Rex"))),
     * ...   Farmer("Jack", 2L, Farm(List("velociraptor"))))
-    * >>> val keySet = NonEmptySet.of("Patty", "Ted", "Farmer")
+    * >>> val keySet = NonEmptySet.of("Patty", "Ted", "Jack")
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   val operations = for {
     * ...     _       <- farm.putAll(dataSet)
