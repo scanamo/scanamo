@@ -11,7 +11,6 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
 import cats.data.NonEmptySet
 import cats.kernel.instances.all._
-import scala.collection.immutable.SortedSet
 
 class ScanamoAlpakkaSpec
   extends FunSpecLike
@@ -40,9 +39,6 @@ class ScanamoAlpakkaSpec
       parallelism = 2
     )
   )
-
-  def nes[A: Ordering](s: Set[A]): NonEmptySet[A] =
-    NonEmptySet.fromSetUnsafe(SortedSet(s.toSeq: _*))
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
@@ -130,11 +126,12 @@ class ScanamoAlpakkaSpec
         Farmer("Ted", 40L, Farm(List("T-Rex"))),
         Farmer("Jack", 2L, Farm(List("velociraptor")))
       )
+      val keySet = NonEmptySet.of("Patty", "Ted", "Jack")
 
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAlpakka.deleteAll(alpakkaClient)("asyncFarmers")('name -> nes(dataSet.map(_.name)))
+        _ <- ScanamoAlpakka.deleteAll(alpakkaClient)("asyncFarmers")('name -> keySet)
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
       maybeFarmer.futureValue should equal(List.empty)

@@ -8,7 +8,6 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 import cats.data.NonEmptySet
 import cats.kernel.instances.all._
-import scala.collection.immutable.SortedSet
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
@@ -16,9 +15,6 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
   val client = LocalDynamoDB.client()
   import scala.concurrent.ExecutionContext.Implicits.global
-
-  def nes[A: Ordering](s: Set[A]): NonEmptySet[A] =
-    NonEmptySet.fromSetUnsafe(SortedSet(s.toSeq: _*))
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
@@ -106,11 +102,12 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Farmer("Ted", 40L, Farm(List("T-Rex"))),
         Farmer("Jack", 2L, Farm(List("velociraptor")))
       )
+      val keySet = NonEmptySet.of("Patty", "Ted", "Jack")
 
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> nes(dataSet.map(_.name)))
+        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> keySet)
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
       maybeFarmer.futureValue should equal(List.empty)
