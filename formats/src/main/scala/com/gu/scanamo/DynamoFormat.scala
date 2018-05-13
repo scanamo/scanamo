@@ -82,7 +82,7 @@ import scala.reflect.ClassTag
   def default: Option[T] = None
 }
 
-object DynamoFormat extends EnumDynamoFormat {
+object DynamoFormat extends DerivedDynamoFormat {
   private def attribute[T](
                             decode: AttributeValue => T, propertyType: String)(
                             encode: AttributeValue => T => AttributeValue
