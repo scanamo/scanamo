@@ -73,7 +73,7 @@ lazy val formats = (project in file("formats"))
 
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
-      "com.chuusai" %% "shapeless" % "2.3.3",
+      "com.propensive" %% "magnolia" % "0.7.1",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
@@ -111,7 +111,7 @@ lazy val scanamo = (project in file("scanamo"))
 
     libraryDependencies ++= Seq(
       "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
-      "com.chuusai" %% "shapeless" % "2.3.3",
+      "com.propensive" %% "magnolia" % "0.7.1",
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
 
