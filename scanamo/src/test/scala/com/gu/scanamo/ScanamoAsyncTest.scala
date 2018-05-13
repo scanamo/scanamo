@@ -6,6 +6,9 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
+import cats.data.NonEmptySet
+import cats.kernel.instances.all._
+import scala.collection.immutable.SortedSet
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
@@ -13,6 +16,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
   val client = LocalDynamoDB.client()
   import scala.concurrent.ExecutionContext.Implicits.global
+
+  def nes[A: Ordering](s: Set[A]): NonEmptySet[A] =
+    NonEmptySet.fromSetUnsafe(SortedSet(s.toSeq: _*))
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
@@ -104,7 +110,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> dataSet.map(_.name))
+        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> nes(dataSet.map(_.name)))
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
       maybeFarmer.futureValue should equal(List.empty)
@@ -370,7 +376,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> Set("Boggis", "Bean")).futureValue should equal(
+      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> NonEmptySet.of("Boggis", "Bean")).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
@@ -382,7 +388,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       import com.gu.scanamo.syntax._
       ScanamoAsync.getAll[Doctor](client)("asyncDoctors")(
-        ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
+        ('actor and 'regeneration) -> NonEmptySet.of("McCoy" -> 9, "Ecclestone" -> 11)
       ).futureValue should equal(
         Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
 

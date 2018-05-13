@@ -9,6 +9,9 @@ import com.gu.scanamo.query._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
+import cats.data.NonEmptySet
+import cats.kernel.instances.all._
+import scala.collection.immutable.SortedSet
 
 class ScanamoAlpakkaSpec
   extends FunSpecLike
@@ -37,6 +40,9 @@ class ScanamoAlpakkaSpec
       parallelism = 2
     )
   )
+
+  def nes[A: Ordering](s: Set[A]): NonEmptySet[A] =
+    NonEmptySet.fromSetUnsafe(SortedSet(s.toSeq: _*))
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
@@ -128,7 +134,7 @@ class ScanamoAlpakkaSpec
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAlpakka.deleteAll(alpakkaClient)("asyncFarmers")('name -> dataSet.map(_.name))
+        _ <- ScanamoAlpakka.deleteAll(alpakkaClient)("asyncFarmers")('name -> nes(dataSet.map(_.name)))
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
       maybeFarmer.futureValue should equal(List.empty)
@@ -394,7 +400,7 @@ class ScanamoAlpakkaSpec
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")('name -> Set("Boggis", "Bean")).futureValue should equal(
+      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")('name -> NonEmptySet.of("Boggis", "Bean")).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
@@ -406,7 +412,7 @@ class ScanamoAlpakkaSpec
 
       import com.gu.scanamo.syntax._
       ScanamoAlpakka.getAll[Doctor](alpakkaClient)("asyncDoctors")(
-        ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
+        ('actor and 'regeneration) -> NonEmptySet.of("McCoy" -> 9, "Ecclestone" -> 11)
       ).futureValue should equal(
         Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
 
