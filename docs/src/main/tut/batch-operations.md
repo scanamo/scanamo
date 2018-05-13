@@ -12,7 +12,7 @@ has support for putting, getting and deleting in batches
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
-import cats.data.NonEmptyList
+import cats.data.NonEmptySet
 import cats.kernel.instances.string._
 
 import scala.concurrent.duration._
