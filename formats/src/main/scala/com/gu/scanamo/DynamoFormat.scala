@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
   * DynamoDB's `AttributeValue`
   *
   * {{{
-  * >>> val listOptionFormat: DynamoFormat[List[Option[Int]]] = DerivedDynamoFormat.derive
+  * >>> val listOptionFormat = DynamoFormat[List[Option[Int]]]
   * >>> listOptionFormat.read(listOptionFormat.write(List(Some(1), None, Some(3))))
   * Right(List(Some(1), None, Some(3)))
   * }}}
@@ -47,7 +47,7 @@ import scala.reflect.ClassTag
   * >>> case object Aardvark extends Animal
   * >>> case object Zebra extends Animal
   * >>> case class Pet(name: String, animal: Animal)
-  * >>> val animalF: DynamoFormat[Animal] = DerivedDynamoFormat.derive
+  * >>> implicit val animalF: DynamoFormat[Animal] = DerivedEnumerationDynamoFormat.deriveEnum
   * >>> val petF: DynamoFormat[Pet] = DerivedDynamoFormat.derive
   * >>> petF.read(petF.write(Pet("Amy", Aardvark)))
   * Right(Pet(Amy,Aardvark))
@@ -62,7 +62,7 @@ import scala.reflect.ClassTag
   *
   * >>> case class Developer(name: String, age: String, problems: Int)
   * >>> val formatDev = DerivedDynamoFormat.derive[Developer]
-  * >>> val invalid = formatDev.read(formatDev.write(Developer("Alice", "none of your business", 99)))
+  * >>> val invalid = farmerF.read(formatDev.write(Developer("Alice", "none of your business", 99)))
   * >>> invalid
   * Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(age,NoPropertyOfType(N,{S: none of your business,})), PropertyReadError(farm,MissingProperty))))
   *
