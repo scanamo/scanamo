@@ -17,13 +17,14 @@ abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
   *
   * prop> import org.scalacheck._
   * prop> implicit val arbitraryAnimal: Arbitrary[Animal] = Arbitrary(Gen.oneOf(List(Aardvark, Hippopotamus, Zebra)))
+  * prop> val formatAnimal = DerivedEnumerationDynamoFormat.deriveEnum[Animal]
   *
   * prop> (a: Animal) =>
-  *     | DynamoFormat[Animal].read(DynamoFormat[Animal].write(a)) == Right(a)
+  *     | formatAnimal.read(formatAnimal.write(a)) == Right(a)
   * }}}
   *
   * {{{
-  * >>> DynamoFormat[Animal].write(Zebra).getS
+  * >>> formatAnimal.write(Zebra).getS
   * Zebra
   * }}}
   */

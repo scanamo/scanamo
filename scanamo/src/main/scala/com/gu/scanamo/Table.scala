@@ -13,6 +13,7 @@ import com.gu.scanamo.update.UpdateExpression
   *
   * {{{
   * >>> case class Transport(mode: String, line: String)
+  * >>> implicit val formatTransport: DynamoFormat[Transport] = DerivedDynamoFormat.derive
   * >>> val transport = Table[Transport]("transport")
   *
   * >>> val client = LocalDynamoDB.client()
@@ -46,6 +47,8 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+    * >>> implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
     * >>> val farm = Table[Farmer]("farmers")
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -74,6 +77,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
     * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
@@ -95,6 +99,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
+    * >>> implicit val formatGP: DynamoFormat[GithubProject] = DerivedDynamoFormat.derive
     * >>> val githubProjects = Table[GithubProject]("github-projects")
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("github-projects", "language-license")('organisation -> S, 'repository -> S)('language -> S, 'license -> S) {
@@ -121,6 +126,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Forecast(location: String, weather: String)
+    * >>> implicit val formatForecast: DynamoFormat[Forecast] = DerivedDynamoFormat.derive
     * >>> val forecast = Table[Forecast]("forecast")
     *
     * >>> val client = LocalDynamoDB.client()
@@ -141,6 +147,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Character(name: String, actors: List[String])
+    * >>> implicit val formatCharacter: DynamoFormat[Character] = DerivedDynamoFormat.derive
     * >>> val characters = Table[Character]("characters")
     *
     * >>> LocalDynamoDB.withTable(client)("characters")('name -> S) {
@@ -174,6 +181,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Fruit(kind: String, sources: List[String])
+    * >>> implicit val formatFruit: DynamoFormat[Fruit] = DerivedDynamoFormat.derive
     * >>> val fruits = Table[Fruit]("fruits")
     *
     * >>> LocalDynamoDB.withTable(client)("fruits")('kind -> S) {
@@ -192,6 +200,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Multiple operations can also be performed in one call:
     * {{{
     * >>> case class Foo(name: String, bar: Int, l: List[String])
+    * >>> implicit val formatFoo: DynamoFormat[Foo] = DerivedDynamoFormat.derive
     * >>> val foos = Table[Foo]("foos")
     *
     * >>> LocalDynamoDB.withTable(client)("foos")('name -> S) {
@@ -209,6 +218,7 @@ case class Table[V: DynamoFormat](name: String) {
     * It's also possible to perform `ADD` and `DELETE` updates
     * {{{
     * >>> case class Bar(name: String, counter: Long, set: Set[String])
+    * >>> implicit val formatBar: DynamoFormat[Bar] = DerivedDynamoFormat.derive
     * >>> val bars = Table[Bar]("bars")
     *
     * >>> LocalDynamoDB.withTable(client)("bars")('name -> S) {
@@ -229,6 +239,9 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Inner(session: String)
     * >>> case class Middle(name: String, counter: Long, inner: Inner, list: List[Int])
     * >>> case class Outer(id: java.util.UUID, middle: Middle)
+    * >>> implicit val formatI: DynamoFormat[Inner] = DerivedDynamoFormat.derive
+    * >>> implicit val formatM: DynamoFormat[Middle] = DerivedDynamoFormat.derive
+    * >>> implicit val formatO: DynamoFormat[Outer] = DerivedDynamoFormat.derive
     * >>> val outers = Table[Outer]("outers")
     *
     * >>> LocalDynamoDB.withTable(client)("outers")('id -> S) {
@@ -248,6 +261,7 @@ case class Table[V: DynamoFormat](name: String) {
     * It's possible to update one field to the value of another
     * {{{
     * >>> case class Thing(id: String, mandatory: Int, optional: Option[Int])
+    * >>> implicit val formatThing: DynamoFormat[Thing] = DerivedDynamoFormat.derive
     * >>> val things = Table[Thing]("things")
     *
     * >>> LocalDynamoDB.withTable(client)("things")('id -> S) {
@@ -268,6 +282,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Query or scan a table, limiting the number of items evaluated by Dynamo
     * {{{
     * >>> case class Transport(mode: String, line: String)
+    * >>> implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
     * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
@@ -297,6 +312,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class City(country: String, name: String)
+    * >>> implicit val formatCity: DynamoFormat[City] = DerivedDynamoFormat.derive
     * >>> val cityTable = Table[City]("cities")
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -330,6 +346,8 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Farm(animals: List[String], hectares: Int)
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+    * >>> implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
     *
     * >>> import com.gu.scanamo.syntax._
     * >>> import com.gu.scanamo.query._
@@ -349,6 +367,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Some(Right(Farmer(McDonald,156,Farm(List(sheep, chicken),30))))
     *
     * >>> case class Letter(roman: String, greek: String)
+    * >>> implicit val formatLetter: DynamoFormat[Letter] = DerivedDynamoFormat.derive
     * >>> val lettersTable = Table[Letter]("letters")
     * >>> LocalDynamoDB.withTable(client)("letters")('roman -> S) {
     * ...   val ops = for {
@@ -363,6 +382,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> import cats.implicits._
     * >>> case class Turnip(size: Int, description: Option[String])
+    * >>> implicit val formatTurnip: DynamoFormat[Turnip] = DerivedDynamoFormat.derive
     * >>> val turnipsTable = Table[Turnip]("turnips")
     * >>> LocalDynamoDB.withTable(client)("turnips")('size -> N) {
     * ...   val ops = for {
@@ -381,6 +401,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Thing(a: String, maybe: Option[Int])
+    * >>> implicit val formatThing: DynamoFormat[Thing] = DerivedDynamoFormat.derive
     * >>> val thingTable = Table[Thing]("things")
     * >>> LocalDynamoDB.withTable(client)("things")('a -> S) {
     * ...   val ops = for {
@@ -400,6 +421,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Compound(a: String, maybe: Option[Int])
+    * >>> implicit val formatCompound: DynamoFormat[Compound] = DerivedDynamoFormat.derive
     * >>> val compoundTable = Table[Compound]("compounds")
     * >>> LocalDynamoDB.withTable(client)("compounds")('a -> S) {
     * ...   val ops = for {
@@ -418,6 +440,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Choice(number: Int, description: String)
+    * >>> implicit val formatChoice: DynamoFormat[Choice] = DerivedDynamoFormat.derive
     * >>> val choicesTable = Table[Choice]("choices")
     * >>> LocalDynamoDB.withTable(client)("choices")('number -> N) {
     * ...   val ops = for {
@@ -435,6 +458,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Gremlin(number: Int, wet: Boolean, friendly: Boolean)
+    * >>> implicit val format: DynamoFormat[Gremlin] = DerivedDynamoFormat.derive
     * >>> val gremlinsTable = Table[Gremlin]("gremlins")
     * >>> LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
     * ...   val ops = for {
@@ -487,6 +511,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
+    * >>> implicit val formatBear: DynamoFormat[Bear] = DerivedDynamoFormat.derive
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -510,6 +535,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Transport(mode: String, line: String)
+    * >>> implicit val formatTransport: DynamoFormat[Transport] = DerivedDynamoFormat.derive
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> val table = Table[Transport]("transport")
@@ -541,6 +567,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> implicit val formatBear: DynamoFormat[Bear] = DerivedDynamoFormat.derive
     * >>> val table = Table[Bear]("bears")
     *
     * >>> import com.gu.scanamo.syntax._
@@ -557,6 +584,7 @@ case class Table[V: DynamoFormat](name: String) {
     * (List(Right(Bear(Pooh,honey,None))),List(Right(Bear(Yogi,picnic baskets,Some(Ranger Smith)))))
     *
     * >>> case class Station(line: String, name: String, zone: Int)
+    * >>> implicit val formatStation: DynamoFormat[Station] = DerivedDynamoFormat.derive
     *
     * >>> val stationTable = Table[Station]("Station")
     *

@@ -24,7 +24,7 @@ import scala.reflect.ClassTag
   * DynamoDB's `AttributeValue`
   *
   * {{{
-  * >>> val listOptionFormat = DynamoFormat[List[Option[Int]]]
+  * >>> val listOptionFormat: DynamoFormat[List[Option[Int]]] = DerivedDynamoFormat.derive
   * >>> listOptionFormat.read(listOptionFormat.write(List(Some(1), None, Some(3))))
   * Right(List(Some(1), None, Some(3)))
   * }}}
@@ -34,7 +34,8 @@ import scala.reflect.ClassTag
   * {{{
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
-  * >>> val farmerF = DynamoFormat[Farmer]
+  * >>> val farmF: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+  * >>> val farmerF: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
   * >>> farmerF.read(farmerF.write(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
   * Right(Farmer(McDonald,156,Farm(List(sheep, cow))))
   * }}}
@@ -46,7 +47,8 @@ import scala.reflect.ClassTag
   * >>> case object Aardvark extends Animal
   * >>> case object Zebra extends Animal
   * >>> case class Pet(name: String, animal: Animal)
-  * >>> val petF = DynamoFormat[Pet]
+  * >>> val animalF: DynamoFormat[Animal] = DerivedDynamoFormat.derive
+  * >>> val petF: DynamoFormat[Pet] = DerivedDynamoFormat.derive
   * >>> petF.read(petF.write(Pet("Amy", Aardvark)))
   * Right(Pet(Amy,Aardvark))
   *
@@ -59,7 +61,8 @@ import scala.reflect.ClassTag
   * >>> import cats.syntax.either._
   *
   * >>> case class Developer(name: String, age: String, problems: Int)
-  * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
+  * >>> val formatDev = DerivedDynamoFormat.derive[Developer]
+  * >>> val invalid = formatDev.read(formatDev.write(Developer("Alice", "none of your business", 99)))
   * >>> invalid
   * Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(age,NoPropertyOfType(N,{S: none of your business,})), PropertyReadError(farm,MissingProperty))))
   *
@@ -70,7 +73,7 @@ import scala.reflect.ClassTag
   * Optional properties are defaulted to None
   * {{{
   * >>> case class LargelyOptional(a: Option[String], b: Option[String])
-  * >>> DynamoFormat[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
+  * >>> DerivedDynamoFormat.derive[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
   * Right(LargelyOptional(None,Some(X)))
   * }}}
   *

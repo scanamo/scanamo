@@ -19,6 +19,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
+      implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+      implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
+
       import com.gu.scanamo.syntax._
 
       val result = for {
@@ -34,6 +37,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
+      implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+      implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
+
       Scanamo.put(client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
 
       ScanamoAsync.get[Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
@@ -48,6 +54,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncEngines")('name -> S, 'number -> N) {
       case class Engine(name: String, number: Int)
 
+      implicit val format: DynamoFormat[Engine] = DerivedDynamoFormat.derive
+
       Scanamo.put(client)("asyncEngines")(Engine("Thomas", 1))
 
       import com.gu.scanamo.syntax._
@@ -58,6 +66,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
+
+    implicit val format: DynamoFormat[City] = DerivedDynamoFormat.derive
+
     LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
@@ -74,6 +85,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
+
+      implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+      implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 
       Scanamo.put(client)("asyncFarmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
 
@@ -92,6 +106,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
+
+      implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+      implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 
       import com.gu.scanamo.syntax._
 
@@ -116,6 +133,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       case class Forecast(location: String, weather: String)
 
+      implicit val format: DynamoFormat[Forecast] = DerivedDynamoFormat.derive
+
       Scanamo.put(client)("forecast")(Forecast("London", "Rain"))
 
       import com.gu.scanamo.syntax._
@@ -132,6 +151,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("forecast")('location -> S) {
 
       case class Forecast(location: String, weather: String, equipment: Option[String])
+
+      implicit val format: DynamoFormat[Forecast] = DerivedDynamoFormat.derive
 
       val forecasts = Table[Forecast]("forecast")
 
@@ -154,6 +175,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       case class Bear(name: String, favouriteFood: String)
 
+      implicit val format: DynamoFormat[Bear] = DerivedDynamoFormat.derive
+
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
 
@@ -166,6 +189,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       case class Lemming(name: String, stuff: String)
 
+      implicit val format: DynamoFormat[Lemming] = DerivedDynamoFormat.derive
+
       Scanamo.putAll(client)("asyncLemmings")(
         (for {_ <- 0 until 100} yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
       )
@@ -177,6 +202,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   it("scans with a limit asynchronously") {
     case class Bear(name: String, favouriteFood: String)
 
+    implicit val format: DynamoFormat[Bear] = DerivedDynamoFormat.derive
+
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
@@ -187,6 +214,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
   it ("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
+
+    implicit val format: DynamoFormat[Bear] = DerivedDynamoFormat.derive
 
     LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
@@ -201,6 +230,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncAnimals")('species -> S, 'number -> N) {
 
       case class Animal(species: String, number: Int)
+
+      implicit val format: DynamoFormat[Animal] = DerivedDynamoFormat.derive
 
       Scanamo.put(client)("asyncAnimals")(Animal("Wolf", 1))
 
@@ -229,6 +260,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       case class Transport(mode: String, line: String)
 
+      implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
+
       import com.gu.scanamo.syntax._
 
       Scanamo.putAll(client)("asyncTransport")(Set(
@@ -246,6 +279,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
     case class Transport(mode: String, line: String)
 
+    implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
+
     LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
       Scanamo.putAll(client)("transport")(Set(
         Transport("Underground", "Circle"),
@@ -258,6 +293,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
   it ("queries an index with a limit asynchronously") {
     case class Transport(mode: String, line: String, colour: String)
+
+    implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
 
     import com.gu.scanamo.syntax._
 
@@ -279,6 +316,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
   it ("queries an index asynchronously with 'between' sort-key condition") {
     case class Station(mode: String, name: String, zone: Int)
+
+    implicit val format: DynamoFormat[Station] = DerivedDynamoFormat.derive
 
     import com.gu.scanamo.syntax._
 
@@ -324,6 +363,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   it("queries for items that are missing an attribute") {
       case class Farmer(firstName: String, surname: String, age: Option[Int])
 
+      implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
+
       import com.gu.scanamo.syntax._
 
       val farmersTable = Table[Farmer]("nursery-farmers")
@@ -340,6 +381,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
+
+    implicit val format: DynamoFormat[Rabbit] = DerivedDynamoFormat.derive
 
     LocalDynamoDB.usingTable(client)("asyncRabbits")('name -> S) {
       val result = for {
@@ -359,6 +402,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       case class Farm(animals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
+      implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+      implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
+
       Scanamo.putAll(client)("asyncFarmers")(Set(
         Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
       ))
@@ -377,6 +423,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncDoctors")('actor -> S, 'regeneration -> N) {
       case class Doctor(actor: String, regeneration: Int)
 
+      implicit val format: DynamoFormat[Doctor] = DerivedDynamoFormat.derive
+
       Scanamo.putAll(client)("asyncDoctors")(
         Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
@@ -393,6 +441,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncFarms")('id -> N) {
 
       case class Farm(id: Int, name: String)
+      implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
 
       Scanamo.putAll(client)("asyncFarms")(farms)
@@ -407,6 +456,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncFarms")('id -> N) {
 
       case class Farm(id: Int, name: String)
+      implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
 
       Scanamo.putAll(client)("asyncFarms")(farms)
@@ -420,6 +470,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   it("should return old item after put asynchronously") {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
+
+    implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+    implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 
     val farmersTable = Table[Farmer]("nursery-farmers")
 
@@ -437,6 +490,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
+    implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+    implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
+
     val farmersTable = Table[Farmer]("nursery-farmers")
 
     LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
@@ -450,6 +506,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   it("conditionally put asynchronously") {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
+
+    implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+    implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 
     import com.gu.scanamo.syntax._
 
@@ -470,6 +529,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   it("conditionally put asynchronously with 'between' condition") {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
+
+    implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+    implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 
     import com.gu.scanamo.syntax._
 
@@ -492,6 +554,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
   it("conditionally delete asynchronously") {
     case class Gremlin(number: Int, wet: Boolean)
+
+    implicit val format: DynamoFormat[Gremlin] = DerivedDynamoFormat.derive
 
     import com.gu.scanamo.syntax._
 

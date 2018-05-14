@@ -25,6 +25,8 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
+    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.gu.scanamo.syntax._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -45,6 +47,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Rabbit(name: String)
+    * >>> implicit val formatRabbit = DerivedDynamoFormat.derive[Rabbit]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -63,6 +66,8 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
+    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
@@ -86,6 +91,7 @@ object Scanamo {
     * Can also be used with tables that have both a hash and a range key:
     * {{{
     * >>> case class Engine(name: String, number: Int)
+    * >>> implicit val formatEngine = DerivedDynamoFormat.derive[Engine]
     * >>> LocalDynamoDB.withTable(client)("engines")('name -> S, 'number -> N) {
     * ...   Scanamo.put(client)("engines")(Engine("Thomas", 1))
     * ...   Scanamo.get[Engine](client)("engines")('name -> "Thomas" and 'number -> 1)
@@ -100,6 +106,7 @@ object Scanamo {
   /**
     * {{{
     * >>> case class City(name: String, country: String)
+    * >>> implicit val format = DerivedDynamoFormat.derive[City]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
@@ -123,6 +130,8 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
+    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
@@ -150,6 +159,7 @@ object Scanamo {
     * You can also retrieve items from a table with both a hash and range key
     * {{{
     * >>> case class Doctor(actor: String, regeneration: Int)
+    * >>> implicit val formatDoctor = DerivedDynamoFormat.derive[Doctor]
     * >>> LocalDynamoDB.withTable(client)("doctors")('actor -> S, 'regeneration -> N) {
     * ...   Scanamo.putAll(client)("doctors")(
     * ...     Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
@@ -166,6 +176,8 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
+    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
@@ -190,6 +202,8 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
+    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
@@ -212,6 +226,8 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
+    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
+    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
@@ -238,6 +254,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Forecast(location: String, weather: String)
+    * >>> implicit val format = DerivedDynamoFormat.derive[Forecast]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -259,6 +276,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
+    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -275,6 +293,7 @@ object Scanamo {
     * maximum result set size
     * {{{
     * >>> case class Lemming(name: String, stuff: String)
+    * >>> implicit val formatL = DerivedDynamoFormat.derive[Lemming]
     *
     * >>> LocalDynamoDB.withTable(client)("lemmings")('name -> S) {
     * ...   Scanamo.putAll(client)("lemmings")(
@@ -294,6 +313,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
+    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -315,6 +335,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
+    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -336,6 +357,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
+    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -359,6 +381,7 @@ object Scanamo {
     * This can be as simple as looking up by a hash key where a range key also exists
     * {{{
     * >>> case class Animal(species: String, number: Int)
+    * >>> implicit val format = DerivedDynamoFormat.derive[Animal]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -391,6 +414,7 @@ object Scanamo {
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
     * >>> case class Transport(mode: String, line: String)
+    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
     * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle"),
@@ -422,6 +446,7 @@ object Scanamo {
     * >>> import com.gu.scanamo.syntax._
     *
     * >>> case class Transport(mode: String, line: String)
+    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
     * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle"),
@@ -441,6 +466,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
@@ -464,6 +490,7 @@ object Scanamo {
     *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
+    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._

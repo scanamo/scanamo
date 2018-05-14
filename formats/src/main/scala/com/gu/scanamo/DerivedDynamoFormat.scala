@@ -12,7 +12,7 @@ import scala.language.experimental.macros
 
 import collection.JavaConverters._
 
-trait DerivedDynamoFormat {
+object DerivedDynamoFormat {
   type Typeclass[A] = DynamoFormat[A]
   type Valid[A] = ValidatedNel[PropertyReadError, A]
 
