@@ -27,8 +27,19 @@ abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
   * Zebra
   * }}}
   */
-trait DerivedEnumerationDynamoFormat {
-  def dispatch[T](st: SealedTrait[EnumerationDynamoFormat, T]): EnumerationDynamoFormat[T] =
+object DerivedEnumerationDynamoFormat {
+  type Typeclass[A] = EnumerationDynamoFormat[A]
+
+  def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] =
+    new EnumerationDynamoFormat[T] {
+      def read(av: AttributeValue): Either[DynamoReadError, T] =
+        Right(cc.rawConstruct(Nil))
+
+      def write(t: T): AttributeValue =
+        new AttributeValue().withS(cc.typeName.short)
+    }
+
+  def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] =
     new EnumerationDynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = 
         Either.fromOption(
@@ -43,5 +54,5 @@ trait DerivedEnumerationDynamoFormat {
         st.dispatch(t) { sub => sub.typeclass.write(sub.cast(t)) }
     }
   
-  def deriveEnum[T]: EnumerationDynamoFormat[T] = macro Magnolia.gen[T]
+  def deriveEnum[T]: Typeclass[T] = macro Magnolia.gen[T]
 }
