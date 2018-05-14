@@ -13,10 +13,10 @@ import scala.language.experimental.macros
 import collection.JavaConverters._
 
 trait DerivedDynamoFormat {
-
+  type Typeclass[A] = DynamoFormat[A]
   type Valid[A] = ValidatedNel[PropertyReadError, A]
 
-  def combine[T](cc: CaseClass[DynamoFormat, T]): DynamoFormat[T] = {
+  def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField[A](m: Map[String, AttributeValue])(p: Param[DynamoFormat, A]): Valid[p.PType] =
       Either.fromOption(m.get(p.label), PropertyReadError(p.label, MissingProperty))
         .flatMap(v => p.typeclass.read(v).leftMap(PropertyReadError(p.label, _)))
@@ -39,7 +39,7 @@ trait DerivedDynamoFormat {
     }
   }
 
-  def dispatch[T](st: SealedTrait[DynamoFormat, T]): DynamoFormat[T] =
+  def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = 
         st.subtypes.foldRight(Left(NoSubtypeOfType(st.typeName.full, av)): Either[DynamoReadError, T]) { case (sub, r) =>
@@ -50,5 +50,5 @@ trait DerivedDynamoFormat {
         st.dispatch(t) { sub => sub.typeclass.write(sub.cast(t)) }
     }
   
-  def derive[T]: DynamoFormat[T] = macro Magnolia.gen[T]
+  def derive[T]: Typeclass[T] = macro Magnolia.gen[T]
 }
