@@ -48,5 +48,5 @@ trait DerivedDynamoFormat {
         st.dispatch(t) { sub => sub.typeclass.write(sub.cast(t)) }
     }
   
-  implicit def gen[T]: DynamoFormat[T] = macro Magnolia.gen[T]
+  def derive[T]: DynamoFormat[T] = macro Magnolia.gen[T]
 }
