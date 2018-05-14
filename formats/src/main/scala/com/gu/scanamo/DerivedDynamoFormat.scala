@@ -16,11 +16,11 @@ object DerivedDynamoFormat {
   type Typeclass[A] = DynamoFormat[A]
   type Valid[A] = ValidatedNel[PropertyReadError, A]
 
+  val nullAv = new AttributeValue().withNULL(true)
+
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField[A](m: Map[String, AttributeValue])(p: Param[DynamoFormat, A]): Valid[p.PType] =
-      Either.fromOption(m.get(p.label), PropertyReadError(p.label, MissingProperty))
-        .flatMap(v => p.typeclass.read(v).leftMap(PropertyReadError(p.label, _)))
-        .toValidatedNel
+      p.typeclass.read(m.get(p.label).getOrElse(nullAv)).leftMap(PropertyReadError(p.label, _)).toValidatedNel
 
     def decode(av: AttributeValue): Valid[Seq[Any]] =
       Option(av.getM).map(_.asScala.toMap) match {
