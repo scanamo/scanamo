@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import cats.data.ValidatedNel
+import cats.data.{ValidatedNel, Validated}
 import cats.instances.list._
 import cats.syntax.either._
 import cats.syntax.traverse._
@@ -14,18 +14,22 @@ import collection.JavaConverters._
 
 object DerivedDynamoFormat {
   type Typeclass[A] = DynamoFormat[A]
-  type Valid[A] = ValidatedNel[PropertyReadError, A]
+  type Valid[A] = ValidatedNel[DynamoReadError, A]
 
   val nullAv = new AttributeValue().withNULL(true)
 
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField[A](m: Map[String, AttributeValue])(p: Param[DynamoFormat, A]): Valid[p.PType] =
-      p.typeclass.read(m.get(p.label).getOrElse(nullAv)).leftMap(PropertyReadError(p.label, _)).toValidatedNel
+      m.get(p.label)
+        .map { av => p.typeclass.read(av).leftMap(PropertyReadError(p.label, _)) }
+        .orElse(p.typeclass.default.map(Right(_)))
+        .map(Validated.fromEither(_).toValidatedNel)
+        .getOrElse(PropertyReadError(p.label, MissingProperty).invalidNel)
 
     def decode(av: AttributeValue): Valid[Seq[Any]] =
       Option(av.getM).map(_.asScala.toMap) match {
         case Some(m) => cc.parameters.toList.traverse(decodeField(m)(_))
-        case None => PropertyReadError(cc.typeName.full, NoPropertyOfType("M", av)).invalidNel
+        case None => NoPropertyOfType("M", av).invalidNel
       }
 
     new DynamoFormat[T] {
@@ -42,7 +46,7 @@ object DerivedDynamoFormat {
   def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = 
-        st.subtypes.foldRight(Left(NoSubtypeOfType(st.typeName.full, av)): Either[DynamoReadError, T]) { case (sub, r) =>
+        st.subtypes.foldRight(Left(NoSubtypeOfType(st.typeName.short)): Either[DynamoReadError, T]) { case (sub, r) =>
           r.recoverWith { case _: DynamoReadError => sub.typeclass.read(av) }
         }
 
