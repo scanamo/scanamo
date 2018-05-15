@@ -44,6 +44,7 @@ implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, Illeg
 )(
   _.toString
 )
+implicit val format: DynamoFormat[Foo] = DerivedDynamoFormat.derive
 val fooTable = Table[Foo]("foo")
 val operations = for {
   _           <- fooTable.put(Foo(new DateTime(0)))
@@ -78,7 +79,7 @@ import eu.timepit.refined.numeric._
 type PosInt = Int Refined Positive
 
 case class Customer(age: PosInt)
-
+implicit val formatC: DynamoFormat[Customer] = DerivedDynamoFormat.derive
 LocalDynamoDB.createTable(client)("Customer")('age -> N)
 ```
 

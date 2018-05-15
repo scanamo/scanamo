@@ -35,6 +35,8 @@ val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")('name -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
+implicit val formatFarm: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+implicit val formatFarmer: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 ```
 we can simply `put` and `get` items from Dynamo, without boilerplate or reflection
 

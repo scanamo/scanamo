@@ -16,6 +16,7 @@ import com.gu.scanamo._
 import com.gu.scanamo.syntax._
 
 case class Transport(mode: String, line: String, colour: String)
+implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
 val transport = Table[Transport]("transport")
 val colourIndex = transport.index("colour-index")
 

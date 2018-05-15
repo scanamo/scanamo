@@ -22,6 +22,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 
 case class Station(line: String, name: String, zone: Int)
+implicit val format: DynamoFormat[Station] = DerivedDynamoFormat.derive
 val stationTable = Table[Station]("Station")
 ```
 ```tut:book

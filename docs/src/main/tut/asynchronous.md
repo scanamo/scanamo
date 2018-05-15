@@ -23,6 +23,8 @@ LocalDynamoDB.createTable(client)("farm")('name -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
+implicit val farmF: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+implicit val farmerF: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 val farmTable = Table[Farmer]("farm")
 val ops = for {
   _ <- farmTable.putAll(Set(
@@ -82,6 +84,8 @@ LocalDynamoDB.createTable(client)("nursery-farmers")('name -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
+implicit val farmF: DynamoFormat[Farm] = DerivedDynamoFormat.derive
+implicit val farmerF: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
 val farmTable = Table[Farmer]("farm")
 val ops = for {
   _ <- farmTable.putAll(Set(

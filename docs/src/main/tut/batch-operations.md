@@ -21,6 +21,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("lemmings")('role -> S)
 
 case class Lemming(role: String, number: Long)
+implicit val format: DynamoFormat[Lemming] = DerivedDynamoFormat.derive
 ```
 
 ```tut:book
