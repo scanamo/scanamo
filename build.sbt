@@ -57,7 +57,7 @@ val dynamoTestSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, alpakka, refined)
+  .aggregate(formats, scanamo, testkit, alpakka, refined)
   .settings(
     commonSettings,
     publishingSettings,
@@ -67,6 +67,8 @@ lazy val root = (project in file("."))
 addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
+
+val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256"
 
 lazy val formats = (project in file("formats"))
   .settings(
@@ -78,7 +80,7 @@ lazy val formats = (project in file("formats"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      awsDynamoDB,
       "com.chuusai" %% "shapeless" % "2.3.3",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % catsVersion,
@@ -116,7 +118,7 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      awsDynamoDB,
       "com.chuusai" %% "shapeless" % "2.3.3",
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
@@ -129,7 +131,18 @@ lazy val scanamo = (project in file("scanamo"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     )
   )
-  .dependsOn(formats)
+  .dependsOn(formats, testkit % "test->test")
+
+lazy val testkit = (project in file("testkit"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+
+    name := "testkit",
+    libraryDependencies ++= Seq(
+      awsDynamoDB
+      )
+)
 
 lazy val cats = (project in file("cats"))
   .settings(
@@ -138,7 +151,7 @@ lazy val cats = (project in file("cats"))
     publishingSettings,
     dynamoTestSettings,
     libraryDependencies ++= List(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
@@ -163,7 +176,7 @@ lazy val scalaz = (project in file("scalaz"))
     publishingSettings,
     dynamoTestSettings,
     libraryDependencies ++= List(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.codecommit" %% "shims" % shimsVersion,
       "org.scalaz" %% "scalaz-core" % "7.2.22",
@@ -193,7 +206,7 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
 
     libraryDependencies ++= Seq(
-      "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.256",
+      awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.15.1",
 
