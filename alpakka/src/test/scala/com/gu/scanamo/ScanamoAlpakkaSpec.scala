@@ -7,6 +7,7 @@ import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 import com.gu.scanamo.generic.auto._
+import com.gu.scanamo.DynamoFormat._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}

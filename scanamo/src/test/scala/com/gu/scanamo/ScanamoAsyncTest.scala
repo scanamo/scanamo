@@ -7,6 +7,7 @@ import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 import com.gu.scanamo.generic.auto._
+import com.gu.scanamo.DynamoFormat._
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
