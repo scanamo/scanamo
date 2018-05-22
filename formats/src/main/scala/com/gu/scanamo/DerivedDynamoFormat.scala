@@ -8,11 +8,10 @@ import cats.syntax.validated._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error._
 import magnolia._
-import scala.language.experimental.macros
 
 import collection.JavaConverters._
 
-object DerivedDynamoFormat {
+trait DerivedDynamoFormat {
   type Typeclass[A] = DynamoFormat[A]
   type Valid[A] = ValidatedNel[DynamoReadError, A]
 
@@ -32,15 +31,28 @@ object DerivedDynamoFormat {
         case None => NoPropertyOfType("M", av).invalidNel
       }
 
-    new DynamoFormat[T] {
-      def read(av: AttributeValue): Either[DynamoReadError, T] = 
-        decode(av).fold(fe => Left(InvalidPropertiesError(fe)), fa => Right(cc.rawConstruct(fa)))
+    /** case objects are inlined as strings */
+    if (cc.isObject)
+      new DynamoFormat[T] {
+        def read(av: AttributeValue): Either[DynamoReadError, T] =
+          Option(av.getS)
+            .filter(_ == cc.typeName.short)
+            .map(_ => cc.rawConstruct(Nil))
+            .fold(Left(NoPropertyOfType("S", av)): Either[DynamoReadError, T])(Right(_))
 
-      def write(t: T): AttributeValue =
-        new AttributeValue().withM(cc.parameters.map { p => 
-          p.label -> p.typeclass.write(p.dereference(t)) 
-        }.toMap.asJava)
-    }
+        def write(t: T): AttributeValue =
+          new AttributeValue().withS(cc.typeName.short)
+      }
+    else
+      new DynamoFormat[T] {
+        def read(av: AttributeValue): Either[DynamoReadError, T] = 
+          decode(av).fold(fe => Left(InvalidPropertiesError(fe)), fa => Right(cc.rawConstruct(fa)))
+
+        def write(t: T): AttributeValue =
+          new AttributeValue().withM(cc.parameters.map { p => 
+            p.label -> p.typeclass.write(p.dereference(t)) 
+          }.toMap.asJava)
+      }
   }
 
   def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] =
@@ -53,6 +65,4 @@ object DerivedDynamoFormat {
       def write(t: T): AttributeValue =
         st.dispatch(t) { sub => sub.typeclass.write(sub.cast(t)) }
     }
-  
-  def derive[T]: Typeclass[T] = macro Magnolia.gen[T]
 }

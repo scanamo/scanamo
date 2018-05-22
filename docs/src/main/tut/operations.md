@@ -28,13 +28,13 @@ Dynamo and subsequently retrieving them:
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("muppets")('name -> S)
 
 case class Muppet(name: String, species: String)
-implicit val format: DynamoFormat[Muppet] = DerivedDynamoFormat.derive
 ```
 ```tut:book
 val muppets = Table[Muppet]("muppets")
@@ -57,13 +57,13 @@ To remove an item in it's entirety, we can use delete:
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("villains")('name -> S)
 
 case class Villain(name: String, catchphrase: String)
-implicit val format: DynamoFormat[Villain] = DerivedDynamoFormat.derive
 ```
 ```tut:book
 val villains = Table[Villain]("villains")
@@ -90,7 +90,6 @@ val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("teams")('name -> S)
 case class Team(name: String, goals: Int, scorers: List[String], mascot: Option[String])
-implicit val format: DynamoFormat[Team] = DerivedDynamoFormat.derive
 val teamTable = Table[Team]("teams")
 val operations = for {
   _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
@@ -112,13 +111,11 @@ import com.gu.scanamo.error.DynamoReadError
 
 LocalDynamoDB.createTable(client)("favourites")('name -> S)
 case class Favourites(name: String, colour: String, number: Long)
-implicit val format: DynamoFormat[Favourites] = DerivedDynamoFormat.derive
 val favouritesTable = Table[Favourites]("favourites")
 
 Scanamo.exec(client)(favouritesTable.put(Favourites("Alice", "Blue", 42L)))
 
 case class FavouriteUpdate(name: String, colour: Option[String], number: Option[Long])
-implicit val formatFU: DynamoFormat[FavouriteUpdate] = DerivedDynamoFormat.derive
 
 def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadError, Favourites]]] = {
   val updates = List(
@@ -157,13 +154,13 @@ supports scanning it:
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("lines")('mode -> S, 'line -> S)
 
 case class Transport(mode: String, line: String)
-implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
 ```
 ```tut:book
 val transportTable = Table[Transport]("lines")
@@ -187,13 +184,13 @@ Scanamo can be used to perform most queries that can be made against DynamoDB
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
 
 case class Transport(mode: String, line: String)
-implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
 val transportTable = Table[Transport]("transports")
 val operations = for {
   _ <- transportTable.putAll(Set(

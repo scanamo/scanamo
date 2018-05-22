@@ -12,6 +12,7 @@ has support for putting, getting and deleting in batches
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -21,7 +22,6 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("lemmings")('role -> S)
 
 case class Lemming(role: String, number: Long)
-implicit val format: DynamoFormat[Lemming] = DerivedDynamoFormat.derive
 ```
 
 ```tut:book

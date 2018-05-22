@@ -25,10 +25,9 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
-    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
-    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
@@ -47,9 +46,9 @@ object Scanamo {
     *
     * {{{
     * >>> case class Rabbit(name: String)
-    * >>> implicit val formatRabbit = DerivedDynamoFormat.derive[Rabbit]
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> LocalDynamoDB.withTable(client)("rabbits")('name -> S) {
     * ...   Scanamo.putAll(client)("rabbits")((
@@ -66,13 +65,12 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
-    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
-    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> import com.gu.scanamo.query._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   Scanamo.put(client)("farmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
     * ...   Scanamo.get[Farmer](client)("farmers")(UniqueKey(KeyEquals('name, "Maggot")))
@@ -91,7 +89,6 @@ object Scanamo {
     * Can also be used with tables that have both a hash and a range key:
     * {{{
     * >>> case class Engine(name: String, number: Int)
-    * >>> implicit val formatEngine = DerivedDynamoFormat.derive[Engine]
     * >>> LocalDynamoDB.withTable(client)("engines")('name -> S, 'number -> N) {
     * ...   Scanamo.put(client)("engines")(Engine("Thomas", 1))
     * ...   Scanamo.get[Engine](client)("engines")('name -> "Thomas" and 'number -> 1)
@@ -106,9 +103,9 @@ object Scanamo {
   /**
     * {{{
     * >>> case class City(name: String, country: String)
-    * >>> implicit val format = DerivedDynamoFormat.derive[City]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> val client = LocalDynamoDB.client()
     * >>> LocalDynamoDB.withTable(client)("asyncCities")('name -> S) {
     * ...  Scanamo.put(client)("asyncCities")(City("Nashville", "US"))
@@ -130,13 +127,12 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
-    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
-    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> import com.gu.scanamo.query._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   Scanamo.putAll(client)("farmers")(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
@@ -159,7 +155,6 @@ object Scanamo {
     * You can also retrieve items from a table with both a hash and range key
     * {{{
     * >>> case class Doctor(actor: String, regeneration: Int)
-    * >>> implicit val formatDoctor = DerivedDynamoFormat.derive[Doctor]
     * >>> LocalDynamoDB.withTable(client)("doctors")('actor -> S, 'regeneration -> N) {
     * ...   Scanamo.putAll(client)("doctors")(
     * ...     Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
@@ -176,13 +171,12 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
-    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
-    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> import com.gu.scanamo.query._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   Scanamo.putAll(client)("farmers")(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
@@ -202,11 +196,10 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
-    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
-    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
@@ -226,11 +219,10 @@ object Scanamo {
     * {{{
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
-    * >>> implicit val formatFarm = DerivedDynamoFormat.derive[Farm]
-    * >>> implicit val formatFarmer = DerivedDynamoFormat.derive[Farmer]
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> val dataSet = Set(
@@ -254,15 +246,15 @@ object Scanamo {
     *
     * {{{
     * >>> case class Forecast(location: String, weather: String)
-    * >>> implicit val format = DerivedDynamoFormat.derive[Forecast]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withTable(client)("forecast")('location -> S) {
     * ...   import com.gu.scanamo.syntax._
+    * ...   import com.gu.scanamo.generic.auto._
     * ...   Scanamo.put(client)("forecast")(Forecast("London", "Rain"))
-    * ...   Scanamo.update(client)("forecast")('location -> "London", set('weather -> "Sun"))
+    * ...   Scanamo.update[Forecast](client)("forecast")('location -> "London", set('weather -> "Sun"))
     * ...   Scanamo.scan[Forecast](client)("forecast").toList
     * ... }
     * List(Right(Forecast(London,Sun)))
@@ -276,11 +268,11 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
-    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
     * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey"))
     * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
@@ -293,8 +285,8 @@ object Scanamo {
     * maximum result set size
     * {{{
     * >>> case class Lemming(name: String, stuff: String)
-    * >>> implicit val formatL = DerivedDynamoFormat.derive[Lemming]
     *
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withTable(client)("lemmings")('name -> S) {
     * ...   Scanamo.putAll(client)("lemmings")(
     * ...     (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
@@ -313,9 +305,9 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
-    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
@@ -335,10 +327,10 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
-    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
     * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
@@ -357,10 +349,10 @@ object Scanamo {
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
-    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
     * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
@@ -381,10 +373,10 @@ object Scanamo {
     * This can be as simple as looking up by a hash key where a range key also exists
     * {{{
     * >>> case class Animal(species: String, number: Int)
-    * >>> implicit val format = DerivedDynamoFormat.derive[Animal]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> val tableResult = LocalDynamoDB.createTable(client)("animals")('species -> S, 'number -> N)
     *
     * >>> val r1 = Scanamo.put(client)("animals")(Animal("Wolf", 1))
@@ -414,7 +406,6 @@ object Scanamo {
     * List(Right(Animal(Pig,2)), Right(Animal(Pig,3)))
     *
     * >>> case class Transport(mode: String, line: String)
-    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
     * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle"),
@@ -444,9 +435,9 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     *
     * >>> case class Transport(mode: String, line: String)
-    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
     * ...   Scanamo.putAll(client)("transport")(Set(
     * ...     Transport("Underground", "Circle"),
@@ -466,10 +457,10 @@ object Scanamo {
     *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
     * ...   Scanamo.putAll(client)("transport")(Set(
@@ -490,9 +481,9 @@ object Scanamo {
     *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> implicit val formatT = DerivedDynamoFormat.derive[Transport]
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> import com.gu.scanamo.syntax._
     *
     * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(

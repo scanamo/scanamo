@@ -1,6 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import com.gu.scanamo.generic.auto._
 
 class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
   it("should bring back all results for queries over large datasets") {
@@ -8,7 +9,6 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
     LocalDynamoDB.createTable(client)("large-query")('name -> S, 'number -> N)
 
     case class Large(name: String, number: Int, stuff: String)
-    implicit val format: DynamoFormat[Large] = DerivedDynamoFormat.derive
     Scanamo.putAll(client)("large-query")(
       (for { i <- 0 until 100 } yield Large("Harry", i, util.Random.nextString(5000))).toSet
     )
@@ -22,7 +22,6 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
   it("should get consistently") {
     val client = LocalDynamoDB.client()
     case class City(name: String, country: String)
-    implicit val format: DynamoFormat[City] = DerivedDynamoFormat.derive
     LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
 
       Scanamo.put(client)("asyncCities")(City("Nashville", "US"))
@@ -34,7 +33,6 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
 
   it("should get consistent") {
     case class City(name: String, country: String)
-    implicit val format: DynamoFormat[City] = DerivedDynamoFormat.derive
 
     val cityTable = Table[City]("asyncCities")
 

@@ -20,8 +20,8 @@ sealed abstract class SecondaryIndex[V] {
     * This will only return items with a value present in the secondary index
     *
     * {{{
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
-    * >>> implicit val format = DerivedDynamoFormat.derive[Bear]
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -47,8 +47,8 @@ sealed abstract class SecondaryIndex[V] {
     * Run a query against keys in a secondary index
     *
     * {{{
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
-    * >>> implicit val format = DerivedDynamoFormat.derive[GithubProject]
     * >>> val githubProjects = Table[GithubProject]("github-projects")
     *
     * >>> val client = LocalDynamoDB.client()
@@ -77,8 +77,8 @@ sealed abstract class SecondaryIndex[V] {
     * Query or scan an index, limiting the number of items evaluated by Dynamo
     *
     * {{{
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> implicit val format = DerivedDynamoFormat.derive[Transport]
     * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
@@ -111,8 +111,8 @@ sealed abstract class SecondaryIndex[V] {
     *
     * Note that rows filtered out still count towards your consumed capacity
     * {{{
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> implicit val format = DerivedDynamoFormat.derive[Transport]
     * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()

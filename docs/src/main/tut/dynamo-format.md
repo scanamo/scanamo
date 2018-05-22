@@ -31,6 +31,7 @@ import org.joda.time._
 
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 
 case class Foo(dateTime: DateTime)
 
@@ -44,7 +45,6 @@ implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, Illeg
 )(
   _.toString
 )
-implicit val format: DynamoFormat[Foo] = DerivedDynamoFormat.derive
 val fooTable = Table[Foo]("foo")
 val operations = for {
   _           <- fooTable.put(Foo(new DateTime(0)))
@@ -71,6 +71,7 @@ And then import the support for refined types and define your model:
 
 ```tut:silent
 import com.gu.scanamo.refined._
+import com.gu.scanamo.generic.auto._
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
@@ -79,7 +80,6 @@ import eu.timepit.refined.numeric._
 type PosInt = Int Refined Positive
 
 case class Customer(age: PosInt)
-implicit val formatC: DynamoFormat[Customer] = DerivedDynamoFormat.derive
 LocalDynamoDB.createTable(client)("Customer")('age -> N)
 ```
 

@@ -14,9 +14,9 @@ with only a hash key on the `colour` attribute:
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 
 case class Transport(mode: String, line: String, colour: String)
-implicit val format: DynamoFormat[Transport] = DerivedDynamoFormat.derive
 val transport = Table[Transport]("transport")
 val colourIndex = transport.index("colour-index")
 

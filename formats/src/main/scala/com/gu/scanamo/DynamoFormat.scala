@@ -32,11 +32,10 @@ import scala.reflect.ClassTag
   * Also supports automatic derivation for case classes
   *
   * {{{
+  * >>> import com.gu.scanamo.generic.auto._
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
-  * >>> val farmF: DynamoFormat[Farm] = DerivedDynamoFormat.derive
-  * >>> val farmerF: DynamoFormat[Farmer] = DerivedDynamoFormat.derive
-  * >>> farmerF.read(farmerF.write(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
+  * >>> DynamoFormat[Farmer].read(DynamoFormat[Farmer].write(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
   * Right(Farmer(McDonald,156,Farm(List(sheep, cow))))
   * }}}
   *
@@ -47,12 +46,10 @@ import scala.reflect.ClassTag
   * >>> case object Aardvark extends Animal
   * >>> case object Zebra extends Animal
   * >>> case class Pet(name: String, animal: Animal)
-  * >>> implicit val animalF: DynamoFormat[Animal] = DerivedEnumerationDynamoFormat.deriveEnum
-  * >>> val petF: DynamoFormat[Pet] = DerivedDynamoFormat.derive
-  * >>> petF.read(petF.write(Pet("Amy", Aardvark)))
+  * >>> DynamoFormat[Pet].read(DynamoFormat[Pet].write(Pet("Amy", Aardvark)))
   * Right(Pet(Amy,Aardvark))
   *
-  * >>> petF.read(petF.write(Pet("Zebediah", Zebra)))
+  * >>> DynamoFormat[Pet].read(DynamoFormat[Pet].write(Pet("Zebediah", Zebra)))
   * Right(Pet(Zebediah,Zebra))
   * }}}
   *
@@ -61,8 +58,7 @@ import scala.reflect.ClassTag
   * >>> import cats.syntax.either._
   *
   * >>> case class Developer(name: String, age: String, problems: Int)
-  * >>> val formatDev = DerivedDynamoFormat.derive[Developer]
-  * >>> val invalid = farmerF.read(formatDev.write(Developer("Alice", "none of your business", 99)))
+  * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
   * >>> invalid
   * Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(age,NoPropertyOfType(N,{S: none of your business,})), PropertyReadError(farm,MissingProperty))))
   *
@@ -73,7 +69,7 @@ import scala.reflect.ClassTag
   * Optional properties are defaulted to None
   * {{{
   * >>> case class LargelyOptional(a: Option[String], b: Option[String])
-  * >>> DerivedDynamoFormat.derive[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
+  * >>> DynamoFormat[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
   * Right(LargelyOptional(None,Some(X)))
   * }}}
   *
@@ -406,6 +402,11 @@ object DynamoFormat {
     *
     * >>> DynamoFormat[Option[Long]].read(new com.amazonaws.services.dynamodbv2.model.AttributeValue().withNULL(true))
     * Right(None)
+    * }}}
+    *
+    * {{{
+    * >>> DynamoFormat[Option[Long]].read(new com.amazonaws.services.dynamodbv2.model.AttributeValue().withN(7859493055794464L.toString))
+    * Right(Some(7859493055794464))
     * }}}
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {

@@ -18,11 +18,11 @@ provisioned capacity to autoscale up to an expensive level.
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 
 case class Station(line: String, name: String, zone: Int)
-implicit val format: DynamoFormat[Station] = DerivedDynamoFormat.derive
 val stationTable = Table[Station]("Station")
 ```
 ```tut:book

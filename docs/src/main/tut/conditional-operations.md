@@ -14,10 +14,10 @@ execution.
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.generic.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)
-implicit val format: DynamoFormat[Gremlin] = DerivedDynamoFormat.derive
 ```
 ```tut:book
 val gremlinsTable = Table[Gremlin]("gremlins")
