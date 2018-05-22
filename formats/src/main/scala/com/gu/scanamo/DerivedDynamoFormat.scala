@@ -35,7 +35,7 @@ trait DerivedDynamoFormat {
         case None => NoPropertyOfType("S", av).invalidNel
       }
 
-    /** case objects are inlined as strings */
+    // case objects are inlined as strings
     if (cc.isObject)
       new DynamoFormat[T] {
         def read(av: AttributeValue): Either[DynamoReadError, T] =
