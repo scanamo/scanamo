@@ -26,6 +26,6 @@ object DynamoReadError {
     case NoSubtypeOfType(typeName) => s"empty sealed trait '$typeName' cannot be instantiated"
     case TypeCoercionError(e) => s"could not be converted to desired type: $e"
     case PropertyReadError(n, e) => s"'$n': ${describe(e)}"
-    case MissingProperty => s"missing"
+    case MissingProperty => "missing"
   }
 }

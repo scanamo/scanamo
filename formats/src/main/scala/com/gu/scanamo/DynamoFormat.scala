@@ -35,7 +35,8 @@ import scala.reflect.ClassTag
   * >>> import com.gu.scanamo.generic.auto._
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
-  * >>> DynamoFormat[Farmer].read(DynamoFormat[Farmer].write(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
+  * >>> val farmerF = DynamoFormat[Farmer]
+  * >>> farmerF.read(farmerF.write(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
   * Right(Farmer(McDonald,156,Farm(List(sheep, cow))))
   * }}}
   *
@@ -46,10 +47,11 @@ import scala.reflect.ClassTag
   * >>> case object Aardvark extends Animal
   * >>> case object Zebra extends Animal
   * >>> case class Pet(name: String, animal: Animal)
-  * >>> DynamoFormat[Pet].read(DynamoFormat[Pet].write(Pet("Amy", Aardvark)))
+  * >>> val petF = DynamoFormat[Pet]
+  * >>> petF.read(petF.write(Pet("Amy", Aardvark)))
   * Right(Pet(Amy,Aardvark))
   *
-  * >>> DynamoFormat[Pet].read(DynamoFormat[Pet].write(Pet("Zebediah", Zebra)))
+  * >>> petF.read(petF.write(Pet("Zebediah", Zebra)))
   * Right(Pet(Zebediah,Zebra))
   * }}}
   *

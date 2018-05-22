@@ -15,8 +15,6 @@ trait DerivedDynamoFormat {
   type Typeclass[A] = DynamoFormat[A]
   type Valid[A] = ValidatedNel[DynamoReadError, A]
 
-  val nullAv = new AttributeValue().withNULL(true)
-
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField[A](m: Map[String, AttributeValue])(p: Param[DynamoFormat, A]): Valid[p.PType] =
       m.get(p.label)
@@ -31,14 +29,17 @@ trait DerivedDynamoFormat {
         case None => NoPropertyOfType("M", av).invalidNel
       }
 
+    def decodeObject(av: AttributeValue): Valid[_] =
+      Option(av.getS).filter(_ == cc.typeName.short) match {
+        case Some(_) => ().validNel
+        case None => NoPropertyOfType("S", av).invalidNel
+      }
+
     /** case objects are inlined as strings */
     if (cc.isObject)
       new DynamoFormat[T] {
         def read(av: AttributeValue): Either[DynamoReadError, T] =
-          Option(av.getS)
-            .filter(_ == cc.typeName.short)
-            .map(_ => cc.rawConstruct(Nil))
-            .fold(Left(NoPropertyOfType("S", av)): Either[DynamoReadError, T])(Right(_))
+          decodeObject(av).fold(fe => Left(InvalidPropertiesError(fe)), _ => Right(cc.rawConstruct(Nil)))
 
         def write(t: T): AttributeValue =
           new AttributeValue().withS(cc.typeName.short)
