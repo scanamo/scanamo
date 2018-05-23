@@ -12,9 +12,81 @@ type class to define how to read and write different types to DynamoDB.
 Many common types have a `DynamoFormat` provided by Scanamo. For a full list see
 of those supported, you can look at the [companion object](latest/api/com/gu/scanamo/DynamoFormat$.html).
 
-Scanamo also supports automatically deriving formats for case classes and 
-sealed trait families where all the contained types have a defined or derivable
-`DynamoFormat`.
+Scanamo also supports semi- and fully automatic derivation of formats for case 
+classes and sealed trait families where all the contained types have a defined 
+or derivable `DynamoFormat`.
+
+### Semi-automatic derivation
+
+As of v???, Scanamo now supports semi-automatic derivation. It's simple, you need 
+to specify which of your data types have to be derived by calling 
+`com.gu.scanamo.generic.semiauto.deriveDynamoFormat`. It is customary, though not 
+a rule at all, to put these in the companion object of your data type.
+
+For example,
+
+```tut:silent
+import com.gu.scanamo._
+import com.gu.scanamo.syntax._
+
+val client = LocalDynamoDB.client()
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+LocalDynamoDB.createTable(client)("forecasts")('location -> S, 'weather -> S)
+```
+```tut:book
+import com.gu.scanamo.generic.semiauto._
+
+sealed trait Weather
+case object Sunny extends Weather
+case object Foggy extends Weather
+case object Rainy extends Weather
+case object Londony extends Weather
+
+case class Forecast(location: String, weather: Weather)
+
+implicit val formatW: DynamoFormat[Weather] = deriveDynamoFormat
+implicit val formatF: DynamoFormat[Forecast] = deriveDynamoFormat
+
+val forecastTable = Table[Forecast]("forecasts")
+val operations = for {
+  _           <- forecastTable.put(Forecast("London", Londony))
+  results     <- forecastTable.scan()
+} yield results
+ 
+Scanamo.exec(client)(operations).toList
+```
+
+### Fully automatic derivation
+
+Before v???, automatic derivation was the only option available. It is still there,
+but you will now need to bring the relevant machinery into scope:
+
+```tut:silent
+import com.gu.scanamo._
+import com.gu.scanamo.syntax._
+
+val client = LocalDynamoDB.client()
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+LocalDynamoDB.createTable(client)("gremlins")('name -> S, 'state -> S)
+```
+```tut:book
+import com.gu.scanamo.generic.auto._
+
+sealed trait State
+case object Dry extends State
+case object Wet extends State
+
+case class Gremlin(name: String, state: State)
+
+val gremlinTable = Table[Gremlin]("gremlins")
+val operations = for {
+  _           <- gremlinTable.put(Gremlin("Gizmo", Dry))
+  _           <- gremlinTable.put(Gremlin("Stripe", Wet))
+  results     <- gremlinTable.scan()
+} yield results
+ 
+Scanamo.exec(client)(operations).toList
+```
 
 ### Custom Formats
 
