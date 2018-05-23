@@ -138,7 +138,7 @@ lazy val testkit = (project in file("testkit"))
     commonSettings,
     publishingSettings,
 
-    name := "testkit",
+    name := "scanamo-testkit",
     libraryDependencies ++= Seq(
       awsDynamoDB
       )
@@ -146,7 +146,7 @@ lazy val testkit = (project in file("testkit"))
 
 lazy val cats = (project in file("cats"))
   .settings(
-    name := "cats-effect",
+    name := "scanamo-cats-effect",
     commonSettings,
     publishingSettings,
     dynamoTestSettings,
@@ -171,7 +171,7 @@ lazy val cats = (project in file("cats"))
 
 lazy val scalaz = (project in file("scalaz"))
   .settings(
-    name := "scalaz",
+    name := "scanamo-scalaz",
     commonSettings,
     publishingSettings,
     dynamoTestSettings,
