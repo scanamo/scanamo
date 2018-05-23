@@ -80,6 +80,7 @@ lazy val formats = (project in file("formats"))
   .settings(
 
     libraryDependencies ++= Seq(
+      awsDynamoDB,
       "com.propensive" %% "magnolia" % "0.7.1",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % catsVersion,
