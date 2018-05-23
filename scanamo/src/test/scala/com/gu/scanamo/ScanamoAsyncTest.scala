@@ -6,8 +6,6 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
-import cats.data.NonEmptySet
-import cats.kernel.instances.all._
 
 class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
   implicit val defaultPatience =
@@ -95,6 +93,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
+      import com.gu.scanamo._
       import com.gu.scanamo.syntax._
 
       val dataSet = Set(
@@ -102,12 +101,12 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Farmer("Ted", 40L, Farm(List("T-Rex"))),
         Farmer("Jack", 2L, Farm(List("velociraptor")))
       )
-      val keySet = NonEmptySet.of("Patty", "Ted", "Jack")
+      val ks = keySet("Patty", "Ted", "Jack")
 
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> keySet)
+        _ <- ScanamoAsync.deleteAll(client)("asyncFarmers")('name -> ks)
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
       maybeFarmer.futureValue should equal(List.empty)
@@ -371,9 +370,10 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       ).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
 
+      import com.gu.scanamo._
       import com.gu.scanamo.syntax._
 
-      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> NonEmptySet.of("Boggis", "Bean")).futureValue should equal(
+      ScanamoAsync.getAll[Farmer](client)("asyncFarmers")('name -> keySet("Boggis", "Bean")).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
@@ -383,9 +383,10 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.putAll(client)("asyncDoctors")(
         Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
+      import com.gu.scanamo._
       import com.gu.scanamo.syntax._
       ScanamoAsync.getAll[Doctor](client)("asyncDoctors")(
-        ('actor and 'regeneration) -> NonEmptySet.of("McCoy" -> 9, "Ecclestone" -> 11)
+        ('actor and 'regeneration) -> keySet("McCoy" -> 9, "Ecclestone" -> 11)
       ).futureValue should equal(
         Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
 

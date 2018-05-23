@@ -49,20 +49,19 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val farm = Table[Farmer]("farmers")
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo._
     * >>> import com.gu.scanamo.syntax._
-    * >>> import cats.data.NonEmptySet
-    * >>> import cats.kernel.instances.string._
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> val dataSet = Set(
     * ...   Farmer("Patty", 200L, Farm(List("unicorn"))),
     * ...   Farmer("Ted", 40L, Farm(List("T-Rex"))),
     * ...   Farmer("Jack", 2L, Farm(List("velociraptor"))))
-    * >>> val keySet = NonEmptySet.of("Patty", "Ted", "Jack")
+    * >>> val ks = keySet("Patty", "Ted", "Jack")
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   val operations = for {
     * ...     _       <- farm.putAll(dataSet)
-    * ...     _       <- farm.deleteAll('name -> keySet)
+    * ...     _       <- farm.deleteAll('name -> ks)
     * ...     scanned <- farm.scan
     * ...   } yield scanned.toList
     * ...   Scanamo.exec(client)(operations)

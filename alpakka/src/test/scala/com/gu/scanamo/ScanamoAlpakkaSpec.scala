@@ -9,8 +9,6 @@ import com.gu.scanamo.query._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
-import cats.data.NonEmptySet
-import cats.kernel.instances.all._
 
 class ScanamoAlpakkaSpec
   extends FunSpecLike
@@ -119,6 +117,7 @@ class ScanamoAlpakkaSpec
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
+      import com.gu.scanamo._
       import com.gu.scanamo.syntax._
 
       val dataSet = Set(
@@ -126,12 +125,12 @@ class ScanamoAlpakkaSpec
         Farmer("Ted", 40L, Farm(List("T-Rex"))),
         Farmer("Jack", 2L, Farm(List("velociraptor")))
       )
-      val keySet = NonEmptySet.of("Patty", "Ted", "Jack")
+      val ks = keySet("Patty", "Ted", "Jack")
 
       Scanamo.putAll(client)("asyncFarmers")(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoAlpakka.deleteAll(alpakkaClient)("asyncFarmers")('name -> keySet)
+        _ <- ScanamoAlpakka.deleteAll(alpakkaClient)("asyncFarmers")('name -> ks)
       } yield Scanamo.scan[Farmer](client)("asyncFarmers")
 
       maybeFarmer.futureValue should equal(List.empty)
@@ -395,9 +394,10 @@ class ScanamoAlpakkaSpec
       ).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
 
+      import com.gu.scanamo._
       import com.gu.scanamo.syntax._
 
-      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")('name -> NonEmptySet.of("Boggis", "Bean")).futureValue should equal(
+      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")('name -> keySet("Boggis", "Bean")).futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
@@ -407,9 +407,10 @@ class ScanamoAlpakkaSpec
       Scanamo.putAll(client)("asyncDoctors")(
         Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
+      import com.gu.scanamo._
       import com.gu.scanamo.syntax._
       ScanamoAlpakka.getAll[Doctor](alpakkaClient)("asyncDoctors")(
-        ('actor and 'regeneration) -> NonEmptySet.of("McCoy" -> 9, "Ecclestone" -> 11)
+        ('actor and 'regeneration) -> keySet("McCoy" -> 9, "Ecclestone" -> 11)
       ).futureValue should equal(
         Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
 

@@ -12,8 +12,6 @@ has support for putting, getting and deleting in batches
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
-import cats.data.NonEmptySet
-import cats.kernel.instances.string._
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -31,8 +29,8 @@ val ops = for {
   _ <- lemmingsTable.putAll(Set(
     Lemming("Walker", 99), Lemming("Blocker", 42), Lemming("Builder", 180)
   ))
-  bLemmings <- lemmingsTable.getAll('role -> NonEmptySet.of("Blocker", "Builder"))
-  _ <- lemmingsTable.deleteAll('role -> NonEmptySet.of("Walker", "Blocker"))
+  bLemmings <- lemmingsTable.getAll('role -> keySet("Blocker", "Builder"))
+  _ <- lemmingsTable.deleteAll('role -> keySet("Walker", "Blocker"))
   survivors <- lemmingsTable.scan()
 } yield (bLemmings, survivors)
 val (bLemmings, survivors) = Scanamo.exec(client)(ops)

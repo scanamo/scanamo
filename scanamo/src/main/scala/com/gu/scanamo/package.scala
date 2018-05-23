@@ -2,7 +2,6 @@ package com.gu
 
 import com.gu.scanamo.query._
 import com.gu.scanamo.update._
-import cats.data.NonEmptySet
 
 package object scanamo {
 
@@ -21,11 +20,11 @@ package object scanamo {
 
     implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
 
-    implicit def symbolListTupleToUniqueKeys[V: DynamoFormat](pair: (Symbol, NonEmptySet[V])) =
-      UniqueKeys(KeyList(pair._1, pair._2.toSortedSet))
+    implicit def symbolListTupleToUniqueKeys[V: DynamoFormat](pair: (Symbol, Set[V])) =
+      UniqueKeys(KeyList(pair._1, pair._2))
 
-    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, NonEmptySet[(H, R)])) =
-      UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2.toSortedSet))
+    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])) =
+      UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
 
     implicit def symbolTupleToQuery[V: DynamoFormat](pair: (Symbol, V)) =
       Query(KeyEquals(pair._1, pair._2))
@@ -70,6 +69,8 @@ package object scanamo {
       UpdateExpression.delete(fieldValue)
     def remove(field: AttributeName): UpdateExpression =
       UpdateExpression.remove(field)
+
+    def keySet[A](a: A, as: A*): Set[A] = as.toSet + a
 
     implicit def symbolAttributeName(s: Symbol): AttributeName = AttributeName.of(s)
     implicit def symbolAttributeNameValue[T](sv: (Symbol, T)): (AttributeName, T) = AttributeName.of(sv._1) -> sv._2
