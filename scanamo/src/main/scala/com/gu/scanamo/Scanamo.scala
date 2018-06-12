@@ -138,12 +138,13 @@ object Scanamo {
     * }}}
     * or with some added syntactic sugar:
     * {{{
+    * >>> import com.gu.scanamo._
     * >>> import com.gu.scanamo.syntax._
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   Scanamo.putAll(client)("farmers")(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
     * ...   ))
-    * ...   Scanamo.getAll[Farmer](client)("farmers")('name -> Set("Boggis", "Bean"))
+    * ...   Scanamo.getAll[Farmer](client)("farmers")('name -> keySet("Boggis", "Bean"))
     * ... }
     * Set(Right(Farmer(Bean,55,Farm(List(turkey)))), Right(Farmer(Boggis,43,Farm(List(chicken)))))
     * }}}
@@ -153,7 +154,7 @@ object Scanamo {
     * >>> LocalDynamoDB.withTable(client)("doctors")('actor -> S, 'regeneration -> N) {
     * ...   Scanamo.putAll(client)("doctors")(
     * ...     Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
-    * ...   Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11))
+    * ...   Scanamo.getAll[Doctor](client)("doctors")(('actor and 'regeneration) -> keySet("McCoy" -> 9, "Ecclestone" -> 11))
     * ... }
     * Set(Right(Doctor(McCoy,9)), Right(Doctor(Ecclestone,11)))
     * }}}
@@ -214,6 +215,7 @@ object Scanamo {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import com.gu.scanamo._
     * >>> import com.gu.scanamo.syntax._
     * >>> val client = LocalDynamoDB.client()
     *
@@ -221,10 +223,11 @@ object Scanamo {
     * ...   Farmer("Patty", 200L, Farm(List("unicorn"))),
     * ...   Farmer("Ted", 40L, Farm(List("T-Rex"))),
     * ...   Farmer("Jack", 2L, Farm(List("velociraptor"))))
+    * >>> val ks = keySet("Patty", "Ted", "Jack")
     *
     * >>> LocalDynamoDB.withTable(client)("farmers")('name -> S) {
     * ...   Scanamo.putAll(client)("farmers")(dataSet)
-    * ...   Scanamo.deleteAll(client)("farmers")('name -> dataSet.map(_.name))
+    * ...   Scanamo.deleteAll(client)("farmers")('name -> ks)
     * ...   Scanamo.scan[Farmer](client)("farmers").toList
     * ... }
     * List()
