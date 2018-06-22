@@ -440,9 +440,11 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
 
       Scanamo.putAll(client)("asyncFarms")(farms)
 
-      ScanamoAsync.getAllWithConsistency[Farm](client)("asyncFarms")(
-        UniqueKeys(KeyList('id, farms.map(_.id)))
-      ).futureValue should equal(farms.map(Right(_)))
+      ScanamoAsync
+        .getAllWithConsistency[Farm](client)("asyncFarms")(
+          UniqueKeys(KeyList('id, farms.map(_.id)))
+        )
+        .futureValue should equal(farms.map(Right(_)))
     }
   }
 
