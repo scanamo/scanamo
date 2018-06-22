@@ -1,20 +1,20 @@
-<html><head><title>Scanamo</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Scanamo Contributors" /><meta name="description" content="Scanamo: simpler DynamoDB access for Scala" /><meta name="og:image" content="/img/poster.png" /><meta name="og:title" content="Scanamo" /><meta name="og:site_name" content="Scanamo" /><meta name="og:url" content="" /><meta name="og:type" content="website" /><meta name="og:description" content="Scanamo: simpler DynamoDB access for Scala" /><link rel="icon" type="image/png" href="/img/favicon.png" /><meta name="twitter:title" content="Scanamo" /><meta name="twitter:image" content="img/poster.png" /><meta name="twitter:description" content="Scanamo: simpler DynamoDB access for Scala" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/highlight/styles/color-brewer.css" /><link rel="stylesheet" href="/css/style.css" /><link rel="stylesheet" href="/css/palette.css" /><link rel="stylesheet" href="/css/codemirror.css" /><link rel="stylesheet" href="/css/kazari-style.css" /><link rel="stylesheet" href="/css/monokai.css" /><link rel="stylesheet" href="/css/scanamo.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/" class="brand"><div class="brand-wrapper"><span>Scanamo</span></div></a></li> <li><a href="/operations.html" class="">Operations</a> <ul class="sub_section"> <li><a href="/operations.html#put-and-get" class="">Put and Get</a></li> <li><a href="/operations.html#delete" class="">Delete</a></li> <li><a href="/operations.html#update" class="">Update</a></li> <li><a href="/operations.html#scan" class="">Scan</a></li> <li><a href="/operations.html#query" class="">Query</a></li></ul></li> <li><a href="/batch-operations.html" class="">Batch Operations</a></li> <li><a href="/conditional-operations.html" class="">Conditional Operations</a></li> <li><a href="/filters.html" class="">Filters</a></li> <li><a href="/using-indexes.html" class="">Using Indexes</a></li> <li><a href="/dynamo-format.html" class=" active ">DynamoFormat</a> <ul class="sub_section"> <li><a href="/dynamo-format.html#custom-formats" class="">Custom Formats</a></li></ul></li> <li><a href="/asynchronous.html" class="">Asynchronous Requests</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/scanamo/scanamo"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/scanamo/scanamo"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Scanamo Scanamo: simpler DynamoDB access for Scala');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Scanamo Scanamo: simpler DynamoDB access for Scala');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="scanamo" data-github-repo="scanamo"><div class="content-wrapper"><section><h2 id="dynamoformat">DynamoFormat</h2>
+<html><head><title>Scanamo: DynamoFormat</title><meta charset="utf-8" /><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="author" content="Scanamo Contributors" /><meta name="description" content="Scanamo: simpler DynamoDB access for Scala" /><meta name="og:image" content="/img/poster.png" /><meta name="og:title" content="Scanamo: DynamoFormat" /><meta name="og:site_name" content="Scanamo" /><meta name="og:url" content="" /><meta name="og:type" content="website" /><meta name="og:description" content="Scanamo: simpler DynamoDB access for Scala" /><link rel="icon" type="image/png" href="/img/favicon.png" /><meta name="twitter:title" content="Scanamo: DynamoFormat" /><meta name="twitter:image" content="img/poster.png" /><meta name="twitter:description" content="Scanamo: simpler DynamoDB access for Scala" /><meta name="twitter:card" content="summary_large_image" /><link rel="icon" type="image/png" sizes="16x16" href="/img/favicon16x16.png" /><link rel="icon" type="image/png" sizes="24x24" href="/img/favicon24x24.png" /><link rel="icon" type="image/png" sizes="32x32" href="/img/favicon32x32.png" /><link rel="icon" type="image/png" sizes="48x48" href="/img/favicon48x48.png" /><link rel="icon" type="image/png" sizes="57x57" href="/img/favicon57x57.png" /><link rel="icon" type="image/png" sizes="60x60" href="/img/favicon60x60.png" /><link rel="icon" type="image/png" sizes="64x64" href="/img/favicon64x64.png" /><link rel="icon" type="image/png" sizes="70x70" href="/img/favicon70x70.png" /><link rel="icon" type="image/png" sizes="72x72" href="/img/favicon72x72.png" /><link rel="icon" type="image/png" sizes="76x76" href="/img/favicon76x76.png" /><link rel="icon" type="image/png" sizes="96x96" href="/img/favicon96x96.png" /><link rel="icon" type="image/png" sizes="114x114" href="/img/favicon114x114.png" /><link rel="icon" type="image/png" sizes="120x120" href="/img/favicon120x120.png" /><link rel="icon" type="image/png" sizes="128x128" href="/img/favicon128x128.png" /><link rel="icon" type="image/png" sizes="144x144" href="/img/favicon144x144.png" /><link rel="icon" type="image/png" sizes="150x150" href="/img/favicon150x150.png" /><link rel="icon" type="image/png" sizes="152x152" href="/img/favicon152x152.png" /><link rel="icon" type="image/png" sizes="196x196" href="/img/favicon196x196.png" /><link rel="icon" type="image/png" sizes="310x310" href="/img/favicon310x310.png" /><link rel="icon" type="image/png" sizes="310x150" href="/img/favicon310x150.png" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" /><link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" /><link rel="stylesheet" href="/highlight/styles/color-brewer.css" /><link rel="stylesheet" href="/css/style.css" /><link rel="stylesheet" href="/css/palette.css" /><link rel="stylesheet" href="/css/codemirror.css" /><link rel="stylesheet" href="/css/scanamo.css" /></head><body class="docs"><div id="wrapper"><div id="sidebar-wrapper"><ul id="sidebar" class="sidebar-nav"><li class="sidebar-brand"><a href="/" class="brand"><div class="brand-wrapper"><span>Scanamo</span></div></a></li> <li><a href="/operations.html" class="">Operations</a> <ul class="sub_section"> <li><a href="/operations.html#put-and-get" class="">Put and Get</a></li> <li><a href="/operations.html#delete" class="">Delete</a></li> <li><a href="/operations.html#update" class="">Update</a></li> <li><a href="/operations.html#scan" class="">Scan</a></li> <li><a href="/operations.html#query" class="">Query</a></li></ul></li> <li><a href="/batch-operations.html" class="">Batch Operations</a></li> <li><a href="/conditional-operations.html" class="">Conditional Operations</a></li> <li><a href="/filters.html" class="">Filters</a></li> <li><a href="/using-indexes.html" class="">Using Indexes</a></li> <li><a href="/dynamo-format.html" class=" active ">DynamoFormat</a> <ul class="sub_section"> <li><a href="/dynamo-format.html#custom-formats" class="">Custom Formats</a></li></ul></li> <li><a href="/asynchronous.html" class="">Asynchronous Requests</a></li></ul></div><div id="page-content-wrapper"><div class="nav"><div class="container-fluid"><div class="row"><div class="col-lg-12"><div class="action-menu pull-left clearfix"><a href="#menu-toggle" id="menu-toggle"><i class="fa fa-bars" aria-hidden="true"></i></a></div><ul class="pull-right"><li id="gh-eyes-item" class="hidden-xs"><a href="https://github.com/scanamo/scanamo"><i class="fa fa-eye"></i><span>WATCH<span id="eyes" class="label label-default">--</span></span></a></li><li id="gh-stars-item" class="hidden-xs"><a href="https://github.com/scanamo/scanamo"><i class="fa fa-star-o"></i><span>STARS<span id="stars" class="label label-default">--</span></span></a></li><li><a href="#" onclick="shareSiteTwitter('Scanamo Scanamo: simpler DynamoDB access for Scala');"><i class="fa fa-twitter"></i></a></li><li><a href="#" onclick="shareSiteFacebook('Scanamo Scanamo: simpler DynamoDB access for Scala');"><i class="fa fa-facebook"></i></a></li><li><a href="#" onclick="shareSiteGoogle();"><i class="fa fa-google-plus"></i></a></li></ul></div></div></div></div><div id="content" data-github-owner="scanamo" data-github-repo="scanamo"><div class="content-wrapper"><section><h2 id="dynamoformat">DynamoFormat</h2>
 
-<p>Scanamo uses the <a href="latest/api/com/gu/scanamo/DynamoFormat.html"><code class="highlighter-rouge">DynamoFormat</code></a> 
+<p>Scanamo uses the <a href="latest/api/com/gu/scanamo/DynamoFormat.html"><code class="highlighter-rouge">DynamoFormat</code></a>
 type class to define how to read and write different types to DynamoDB.</p>
 
 <p>Many common types have a <code class="highlighter-rouge">DynamoFormat</code> provided by Scanamo. For a full list see
 of those supported, you can look at the <a href="latest/api/com/gu/scanamo/DynamoFormat$.html">companion object</a>.</p>
 
-<p>Scanamo also supports automatically deriving formats for case classes and 
+<p>Scanamo also supports automatically deriving formats for case classes and
 sealed trait families where all the contained types have a defined or derivable
 <code class="highlighter-rouge">DynamoFormat</code>.</p>
 
 <h3 id="custom-formats">Custom Formats</h3>
 
-<p>It’s also possible to define a serialisation format for types which Scanamo 
-doesn’t already support and can’t derive. Normally this involves using the 
-<a href="latest/api/com/gu/scanamo/DynamoFormat$.html#xmap[A,B](r:B=&gt;Either[com.gu.scanamo.error.DynamoReadError,A])(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]">xmap</a> 
+<p>It’s also possible to define a serialisation format for types which Scanamo
+doesn’t already support and can’t derive. Normally this involves using the
+<a href="latest/api/com/gu/scanamo/DynamoFormat$.html#xmap[A,B](r:B=&gt;Either[com.gu.scanamo.error.DynamoReadError,A])(w:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B]):com.gu.scanamo.DynamoFormat[A]">xmap</a>
 or <a href="latest/api/com/gu/scanamo/DynamoFormat$.html#coercedXmap[A,B,T&gt;:Null&lt;:Throwable](read:B=&gt;A)(write:A=&gt;B)(implicitf:com.gu.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):com.gu.scanamo.DynamoFormat[A]">coercedXmap</a>
 to translate between the type and one Scanamo does already know about.</p>
 
@@ -36,7 +36,7 @@ to translate between the type and one Scanamo does already know about.</p>
 <span class="o">)(</span>
   <span class="k">_</span><span class="o">.</span><span class="n">toString</span>
 <span class="o">)</span>
-<span class="c1">// jodaStringFormat: com.gu.scanamo.DynamoFormat[org.joda.time.DateTime] = com.gu.scanamo.DynamoFormat$$anon$3@11814f01
+<span class="c1">// jodaStringFormat: com.gu.scanamo.DynamoFormat[org.joda.time.DateTime] = com.gu.scanamo.DynamoFormat$$anon$3@1b3aba27
 </span>
 <span class="k">val</span> <span class="n">fooTable</span> <span class="k">=</span> <span class="nc">Table</span><span class="o">[</span><span class="kt">Foo</span><span class="o">](</span><span class="s">"foo"</span><span class="o">)</span>
 <span class="c1">// fooTable: com.gu.scanamo.Table[Foo] = Table(foo)
@@ -48,7 +48,7 @@ to translate between the type and one Scanamo does already know about.</p>
 <span class="c1">// operations: cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,List[Either[com.gu.scanamo.error.DynamoReadError,Foo]]] = Free(...)
 </span>
 <span class="nc">Scanamo</span><span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="n">operations</span><span class="o">).</span><span class="n">toList</span>
-<span class="c1">// res4: List[Either[com.gu.scanamo.error.DynamoReadError,Foo]] = List(Right(Foo(1970-01-01T00:00:00.000Z)))
+<span class="c1">// res1: List[Either[com.gu.scanamo.error.DynamoReadError,Foo]] = List(Right(Foo(1970-01-01T00:00:00.000Z)))
 </span></code></pre></div></div>
 
 <h3 id="formats-for-refined-types">Formats for Refined Types</h3>
@@ -60,7 +60,7 @@ assign wrong values to them.</p>
 
 <p>To use them in your project you will need to include the dependency in your project:</p>
 
-<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>libraryDependencies += "com.gu.scanamo" %% "scanamo-refined" % "x.y.z"
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>libraryDependencies += "com.gu" %% "scanamo-refined" % "x.y.z"
 </code></pre></div></div>
 
 <p>And then import the support for refined types and define your model:</p>
@@ -90,15 +90,68 @@ assign wrong values to them.</p>
 <span class="c1">// operations: cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,List[Either[com.gu.scanamo.error.DynamoReadError,Customer]]] = Free(...)
 </span>
 <span class="nc">Scanamo</span><span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="n">operations</span><span class="o">).</span><span class="n">toList</span>
-<span class="c1">// res9: List[Either[com.gu.scanamo.error.DynamoReadError,Customer]] = List(Right(Customer(67)))
+<span class="c1">// res3: List[Either[com.gu.scanamo.error.DynamoReadError,Customer]] = List(Right(Customer(67)))
 </span></code></pre></div></div>
+
+<h3 id="derived-formats">Derived Formats</h3>
+
+<p>Scanamo uses <a href="https://github.com/milessabin/shapeless">shapeless</a> and implicit derivation to automatically derive <a href="latest/api/com/gu/scanamo/DynamoFormat"><code class="highlighter-rouge">DynamoFormat</code></a>s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of <code class="highlighter-rouge">id</code> and sort key <code class="highlighter-rouge">seqNo</code>):</p>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">java.util.UUID</span>
+
+<span class="k">import</span> <span class="nn">com.gu.scanamo._</span>
+<span class="k">import</span> <span class="nn">com.gu.scanamo.syntax._</span>
+
+<span class="c1">// Sealed trait family for events.
+</span><span class="k">sealed</span> <span class="k">trait</span> <span class="nc">Event</span>
+<span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">Create</span><span class="o">(</span><span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Event</span>
+<span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">Delete</span><span class="o">(</span><span class="n">reason</span><span class="k">:</span> <span class="kt">String</span><span class="o">)</span> <span class="k">extends</span> <span class="nc">Event</span>
+
+<span class="c1">// An event envelope that wraps events.
+</span><span class="k">final</span> <span class="k">case</span> <span class="k">class</span> <span class="nc">EventEnvelope</span><span class="o">(</span><span class="n">id</span><span class="k">:</span> <span class="kt">UUID</span><span class="o">,</span> <span class="n">seqNo</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">event</span><span class="k">:</span> <span class="kt">Event</span><span class="o">)</span>
+
+<span class="c1">// Example instantiations.
+</span><span class="k">val</span> <span class="n">id</span> <span class="k">=</span> <span class="nc">UUID</span><span class="o">.</span><span class="n">fromString</span><span class="o">(</span><span class="s">"9e5fd6e9-65ef-472c-ad89-e5fe658f14c6"</span><span class="o">)</span>
+<span class="k">val</span> <span class="n">create</span> <span class="k">=</span> <span class="nc">EventEnvelope</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="mi">0</span><span class="o">,</span> <span class="nc">Create</span><span class="o">(</span><span class="s">"Something"</span><span class="o">))</span>
+<span class="k">val</span> <span class="n">delete</span> <span class="k">=</span> <span class="nc">EventEnvelope</span><span class="o">(</span><span class="n">id</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="nc">Delete</span><span class="o">(</span><span class="s">"Oops"</span><span class="o">))</span>
+</code></pre></div></div>
+
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">val</span> <span class="n">attributeValue</span> <span class="k">=</span> <span class="nc">DynamoFormat</span><span class="o">[</span><span class="kt">EventEnvelope</span><span class="o">].</span><span class="n">write</span><span class="o">(</span><span class="n">create</span><span class="o">)</span>
+<span class="c1">// attributeValue: com.amazonaws.services.dynamodbv2.model.AttributeValue = {M: {seqNo={N: 0,}, id={S: 9e5fd6e9-65ef-472c-ad89-e5fe658f14c6,}, event={M: {Create={M: {name={S: Something,}},}},}},}
+</span>
+<span class="k">val</span> <span class="n">dynamoRecord</span> <span class="k">=</span> <span class="nc">DynamoFormat</span><span class="o">[</span><span class="kt">EventEnvelope</span><span class="o">].</span><span class="n">read</span><span class="o">(</span><span class="n">attributeValue</span><span class="o">)</span>
+<span class="c1">// dynamoRecord: Either[com.gu.scanamo.error.DynamoReadError,EventEnvelope] = Right(EventEnvelope(9e5fd6e9-65ef-472c-ad89-e5fe658f14c6,0,Create(Something)))
+</span></code></pre></div></div>
+
+<p>If you look carefully at the attribute value (pretty-printed below) then you can see that the envelope (or wrapper) is necessary. This is because Scanamo writes the sealed trait family and associated case classes into a map. This allows Scanamo to use the map key to disambiguate between the sub-classes when reading attribute values. This makes sense and works well for most use cases, but it does mean you cannot persist an sealed trait family directly (i.e. without an envelope or wrapper) using automatic derivation because partition keys do not support maps.</p>
+
+<p>Here is the pretty-printed attribute value that Scanamo generates:</p>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>{
+  M: {
+    seqNo={
+      N: 0,
+    },
+    id={
+      S: 9e5fd6e9-65ef-472c-ad89-e5fe658f14c6,
+    },
+    event={
+      M: {
+        Create={
+          M: {
+            name={
+              S: Something,
+            }
+          },
+        }
+      },
+    }
+  },
+}
+</code></pre></div></div>
 </section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({
 languages:['scala','java','bash']
 });
 hljs.initHighlighting();
              </script><script>((window.gitter = {}).chat = {}).options = {
-room: 'scanamo/scanamo'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/js/main.js"></script><script src="/js/kazari.js"></script><script>
-$(document).ready(function() {
-	kazari.KazariPlugin().decorateCode('https://scala-evaluator-212.herokuapp.com/eval', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.S2F6YXJp.Jl2eqMfw8IakJF93PjxTbrf-8YUJgX5OoOfy5JHE8Yw', '', 'monokai')
-})
-    </script></body></html>
+room: 'scanamo/scanamo'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/js/main.js"></script></body></html>

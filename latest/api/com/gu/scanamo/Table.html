@@ -215,6 +215,10 @@
                         <a href="EnumerationDynamoFormat.html" title="">EnumerationDynamoFormat</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="object" href="LocalDynamoDB$.html" title=""></a>
+                        <a href="LocalDynamoDB$.html" title="">LocalDynamoDB</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="object" href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB"></a>
                         <a href="Scanamo$.html" title="Provides a simplified interface for reading and writing case classes to DynamoDB">Scanamo</a>
                       </li><li class="current-entities indented3">
@@ -227,8 +231,16 @@
                         <a href="ScanamoAsync$.html" title="Provides the same interface as com.gu.scanamo.Scanamo, except that it requires an implicit concurrent.ExecutionContext and returns a concurrent.Future">ScanamoAsync</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
+                        <a class="object" href="ScanamoCats$.html" title=""></a>
+                        <a href="ScanamoCats$.html" title="">ScanamoCats</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
                         <a class="object" href="ScanamoFree$.html" title=""></a>
                         <a href="ScanamoFree$.html" title="">ScanamoFree</a>
+                      </li><li class="current-entities indented3">
+                        <span class="separator"></span>
+                        <a class="object" href="ScanamoScalaz$.html" title=""></a>
+                        <a href="ScanamoScalaz$.html" title="">ScanamoScalaz</a>
                       </li><li class="current-entities indented3">
                         <span class="separator"></span>
                         <a class="class" href="SecondaryIndex.html" title="Represents a secondary index on a DynamoDB table."></a>
@@ -610,11 +622,11 @@ supported by DynamoDB</p><pre>&gt;&gt;&gt; <span class="kw">case</span> <span cl
 ...       Station(<span class="lit">"Metropolitan"</span>, <span class="lit">"Croxley"</span>, <span class="num">7</span>),
 ...       Station(<span class="lit">"Jubilee"</span>, <span class="lit">"Canons Park"</span>, <span class="num">5</span>)
 ...     ))
-...     filteredStations <span class="kw">&lt;-</span> stationTable.filter('zone &lt; <span class="num">8</span>).query('line -&gt; <span class="lit">"Metropolitan"</span> and ('name beginsWith <span class="lit">"C"</span>))
+...     filteredStations <span class="kw">&lt;-</span> stationTable.filter('zone -&gt; <span class="std">Set</span>(<span class="num">8</span>, <span class="num">7</span>)).query('line -&gt; <span class="lit">"Metropolitan"</span> and ('name beginsWith <span class="lit">"C"</span>))
 ...   } <span class="kw">yield</span> filteredStations
 ...   Scanamo.exec(client)(ops)
 ... }
-<span class="std">List</span>(Right(Station(Metropolitan,Chorleywood,<span class="num">7</span>)), Right(Station(Metropolitan,Croxley,<span class="num">7</span>)))</pre></div></div>
+<span class="std">List</span>(Right(Station(Metropolitan,Chalfont &amp; Latimer,<span class="num">8</span>)), Right(Station(Metropolitan,Chorleywood,<span class="num">7</span>)), Right(Station(Metropolitan,Croxley,<span class="num">7</span>)))</pre></div></div>
     </li><li name="scala.AnyRef#finalize" visbl="prt" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
       <a id="finalize():Unit"></a>
       <span class="permalink">
