@@ -1,3 +1,4 @@
 .idea
 target/
 .dynamodb-local
+.alpakka-dynamodb-local
