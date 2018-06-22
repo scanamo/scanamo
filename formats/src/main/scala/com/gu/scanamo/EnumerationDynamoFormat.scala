@@ -47,6 +47,7 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
       case Inl(_) => new AttributeValue().withS(fieldWitness.value.name)
       case Inr(r) => alternativeFormat.write(r)
     }
+  }
 
   implicit def enumFormat[A, Repr <: Coproduct](implicit
                                                 gen: LabelledGeneric.Aux[A, Repr],
