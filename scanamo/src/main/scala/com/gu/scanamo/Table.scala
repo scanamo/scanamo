@@ -571,11 +571,11 @@ case class Table[V: DynamoFormat](name: String) {
     * ...       Station("Metropolitan", "Croxley", 7),
     * ...       Station("Jubilee", "Canons Park", 5)
     * ...     ))
-    * ...     filteredStations <- stationTable.filter('zone < 8).query('line -> "Metropolitan" and ('name beginsWith "C"))
+    * ...     filteredStations <- stationTable.filter('zone -> Set(8, 7)).query('line -> "Metropolitan" and ('name beginsWith "C"))
     * ...   } yield filteredStations
     * ...   Scanamo.exec(client)(ops)
     * ... }
-    * List(Right(Station(Metropolitan,Chorleywood,7)), Right(Station(Metropolitan,Croxley,7)))
+    * List(Right(Station(Metropolitan,Chalfont & Latimer,8)), Right(Station(Metropolitan,Chorleywood,7)), Right(Station(Metropolitan,Croxley,7)))
     * }}}
     */
   def filter[C: ConditionExpression](condition: C) =

@@ -58,6 +58,28 @@ object ConditionExpression {
     }
   }
 
+  implicit def symbolValueInCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, Set[V])] {
+    override def apply(pair: (Symbol, Set[V]))(condition: Option[RequestCondition]): RequestCondition = {
+      attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))(condition)
+    }
+  }
+
+  implicit def attributeValueInCondition[V: DynamoFormat] = new ConditionExpression[(AttributeName, Set[V])] {
+    val prefix = "inCondition"
+    override def apply(pair: (AttributeName, Set[V]))(condition: Option[RequestCondition]): RequestCondition = {
+      val format = DynamoFormat[V]
+      val attributeName = pair._1
+      val attributeValues = pair._2.zipWithIndex.map { case (v, i) => 
+        s":conditionAttributeValue$i" -> format.write(v)
+      }.toMap
+      RequestCondition(
+        s"""#${attributeName.placeholder(prefix)} IN ${attributeValues.keys.mkString("(", ",", ")")}""",
+        attributeName.attributeNames(s"#$prefix"),
+        Some(attributeValues)
+      )
+    }
+  }
+
   implicit def attributeExistsCondition = new ConditionExpression[AttributeExists] {
     val prefix = "attributeExists"
     override def apply(t: AttributeExists)(condition: Option[RequestCondition]): RequestCondition =
