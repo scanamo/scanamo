@@ -68,7 +68,7 @@ sealed abstract class SecondaryIndex[V] {
     * ... }
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
-  */
+    */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
 
   /**
@@ -137,11 +137,17 @@ sealed abstract class SecondaryIndex[V] {
   def filter[C: ConditionExpression](condition: C): SecondaryIndex[V]
 }
 
-private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](tableName: String, indexName: String, queryOptions: ScanamoQueryOptions) extends SecondaryIndex[V] {
+private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
+    tableName: String,
+    indexName: String,
+    queryOptions: ScanamoQueryOptions)
+    extends SecondaryIndex[V] {
   def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def filter[C: ConditionExpression](condition: C) =
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
-  def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
+  def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =
+    copy(queryOptions = queryOptions.copy(filter = Some(c)))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions))
-  def query(query: Query[_]) = QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
+  def query(query: Query[_]) =
+    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
 }

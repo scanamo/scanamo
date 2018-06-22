@@ -21,8 +21,8 @@ object ScanamoAsync {
   def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A])(implicit ec: ExecutionContext) =
     op.foldMap(ScanamoInterpreters.future(client)(ec))
 
-  def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)
-    (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
+  def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)(
+      implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.put(tableName)(item))
 
   def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: Set[T])(
@@ -41,12 +41,12 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAll[T](tableName)(keys))
 
-  def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])
-                             (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
+  def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])(
+      implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAllWithConsistency[T](tableName)(keys))
 
-  def delete[T](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
-    (implicit ec: ExecutionContext): Future[DeleteItemResult] =
+  def delete[T](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])(
+      implicit ec: ExecutionContext): Future[DeleteItemResult] =
     exec(client)(ScanamoFree.delete(tableName)(key))
 
   def deleteAll(client: AmazonDynamoDBAsync)(tableName: String)(items: UniqueKeys[_])(

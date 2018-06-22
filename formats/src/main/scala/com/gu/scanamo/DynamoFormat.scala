@@ -83,10 +83,9 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat extends EnumDynamoFormat {
-  private def attribute[T](
-                            decode: AttributeValue => T, propertyType: String)(
-                            encode: AttributeValue => T => AttributeValue
-                          ): DynamoFormat[T] = {
+  private def attribute[T](decode: AttributeValue => T, propertyType: String)(
+      encode: AttributeValue => T => AttributeValue
+  ): DynamoFormat[T] = {
     new DynamoFormat[T] {
       override def read(av: AttributeValue): Either[DynamoReadError, T] =
         Either.fromOption(Option(decode(av)), NoPropertyOfType(propertyType, av))
@@ -272,8 +271,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    xmap[List[T], java.util.List[AttributeValue]](
-      _.asScala.toList.traverse(f.read))(
+    xmap[List[T], java.util.List[AttributeValue]](_.asScala.toList.traverse(f.read))(
       _.map(f.write).asJava
     )(javaListFormat)
 
@@ -295,8 +293,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
-    xmap[Vector[T], java.util.List[AttributeValue]](
-      _.asScala.toVector.traverse(f.read))(
+    xmap[Vector[T], java.util.List[AttributeValue]](_.asScala.toVector.traverse(f.read))(
       _.map(f.write).asJava
     )(javaListFormat)
 
@@ -307,17 +304,16 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   a.deep
     * }}}
     */
-  implicit def arrayFormat[T:ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    xmap[Array[T], java.util.List[AttributeValue]](
-      _.asScala.toList.traverse(f.read).map(_.toArray))(
+  implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
+    xmap[Array[T], java.util.List[AttributeValue]](_.asScala.toList.traverse(f.read).map(_.toArray))(
       _.map(f.write).toList.asJava
     )(javaListFormat)
 
   private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
   private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
-  private def setFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
-    xmap[Set[T], java.util.List[String]](
-      _.asScala.toList.traverse(r).map(_.toSet))(
+  private def setFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(
+      df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
+    xmap[Set[T], java.util.List[String]](_.asScala.toList.traverse(r).map(_.toSet))(
       _.map(w).toList.asJava
     )(df)
 

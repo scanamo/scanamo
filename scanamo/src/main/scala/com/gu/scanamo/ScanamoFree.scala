@@ -17,26 +17,31 @@ object ScanamoFree {
   private val batchSize = 25
 
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
-    ScanamoOps.put(
-      ScanamoPutRequest(tableName, f.write(item), None)
-    ).map { r =>
-      if (Option(r.getAttributes).exists(_.asScala.nonEmpty)) {
-        Some(
-          f.read(new AttributeValue().withM(r.getAttributes))
-        )
-      } else {
-        None
+    ScanamoOps
+      .put(
+        ScanamoPutRequest(tableName, f.write(item), None)
+      )
+      .map { r =>
+        if (Option(r.getAttributes).exists(_.asScala.nonEmpty)) {
+          Some(
+            f.read(new AttributeValue().withM(r.getAttributes))
+          )
+        } else {
+          None
+        }
       }
-    }
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.grouped(batchSize).toList.traverse(batch =>
-      ScanamoOps.batchWrite(
-        new BatchWriteItemRequest().withRequestItems(Map(tableName -> batch.toList.map(i =>
-          new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM))
-        ).asJava).asJava)
-      )
-    )
+    items
+      .grouped(batchSize)
+      .toList
+      .traverse(
+        batch =>
+          ScanamoOps.batchWrite(
+            new BatchWriteItemRequest().withRequestItems(Map(tableName -> batch.toList
+              .map(i => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM)))
+              .asJava).asJava)
+        ))
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = {
     items.asAVMap.grouped(batchSize).toList.traverse { batch =>
@@ -64,23 +69,30 @@ object ScanamoFree {
     } yield Option(res.getItem).map(read[T])
 
   def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
-    keys.asAVMap.grouped(batchSize).toList.traverse { batch =>
-      ScanamoOps.batchGet(
-        new BatchGetItemRequest().withRequestItems(Map(tableName ->
-          new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)
-        ).asJava)
-      )
-    }.map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
+    keys.asAVMap
+      .grouped(batchSize)
+      .toList
+      .traverse { batch =>
+        ScanamoOps.batchGet(
+          new BatchGetItemRequest().withRequestItems(Map(tableName ->
+            new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)).asJava)
+        )
+      }
+      .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
   }
 
-  def getAllWithConsistency[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
-    keys.asAVMap.grouped(batchSize).toList.traverse { batch =>
-      ScanamoOps.batchGet(
-        new BatchGetItemRequest().withRequestItems(Map(tableName ->
-          new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(true)
-        ).asJava)
-      )
-    }.map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
+  def getAllWithConsistency[T: DynamoFormat](tableName: String)(
+      keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
+    keys.asAVMap
+      .grouped(batchSize)
+      .toList
+      .traverse { batch =>
+        ScanamoOps.batchGet(
+          new BatchGetItemRequest().withRequestItems(Map(tableName ->
+            new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(true)).asJava)
+        )
+      }
+      .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
   }
 
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
@@ -90,8 +102,7 @@ object ScanamoFree {
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default))
 
   def scanConsistent[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream.stream[T](
-      ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default.copy(consistent = true)))
+    ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default.copy(consistent = true)))
 
   def scanWithLimit[T: DynamoFormat](tableName: String, limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](

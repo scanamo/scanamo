@@ -38,7 +38,8 @@ final case object LTE extends DynamoOperator("<=")
 final case object GT extends DynamoOperator(">")
 final case object GTE extends DynamoOperator(">=")
 
-final case class KeyIs[V: DynamoFormat](key: AttributeName, operator: DynamoOperator, v: V) extends RangeKeyCondition[V]{
+final case class KeyIs[V: DynamoFormat](key: AttributeName, operator: DynamoOperator, v: V)
+    extends RangeKeyCondition[V] {
   val placeholder = "keyIsValue"
   override def keyConditionExpression(s: String): String = s"#${key.placeholder(s)} ${operator.op} :$placeholder"
   override def attributes = Map(placeholder -> v)

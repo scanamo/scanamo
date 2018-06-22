@@ -24,8 +24,7 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
       unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
-  def update(key: UniqueKey[_], update: UpdateExpression):
-  ScanamoOps[Either[ScanamoError, V]] = {
+  def update(key: UniqueKey[_], update: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] = {
 
     val unconditionalRequest = ScanamoUpdateRequest(
       tableName,
@@ -78,8 +77,9 @@ object ConditionExpression {
     override def apply(pair: (AttributeName, Set[V]))(condition: Option[RequestCondition]): RequestCondition = {
       val format = DynamoFormat[V]
       val attributeName = pair._1
-      val attributeValues = pair._2.zipWithIndex.map { case (v, i) => 
-        s":conditionAttributeValue$i" -> format.write(v)
+      val attributeValues = pair._2.zipWithIndex.map {
+        case (v, i) =>
+          s":conditionAttributeValue$i" -> format.write(v)
       }.toMap
       RequestCondition(
         s"""#${attributeName.placeholder(prefix)} IN ${attributeValues.keys.mkString("(", ",", ")")}""",
@@ -124,10 +124,11 @@ object ConditionExpression {
       RequestCondition(
         s"#${b.key.placeholder(prefix)} BETWEEN :lower and :upper",
         b.key.attributeNames(s"#$prefix"),
-        Some(Map(
-          ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
-          ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
-        ))
+        Some(
+          Map(
+            ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
+            ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
+          ))
       )
   }
 

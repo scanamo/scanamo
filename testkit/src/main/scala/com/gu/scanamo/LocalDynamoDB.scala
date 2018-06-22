@@ -45,8 +45,7 @@ object LocalDynamoDB {
   }
 
   def withTableWithSecondaryIndex[T](client: AmazonDynamoDB)(tableName: String, secondaryIndexName: String)(
-      primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
-      secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
+      primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
       thunk: => T
   ): T = {
     client.createTable(

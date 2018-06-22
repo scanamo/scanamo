@@ -150,8 +150,10 @@ private[ops] object JavaRequests {
   }
 
   def query(req: ScanamoQueryRequest): QueryRequest = {
-    def queryRefinement[T](o: ScanamoQueryRequest => Option[T])(rt: (QueryRequest,T) => QueryRequest): QueryRequest => QueryRequest =
-    { qr => o(req).foldLeft(qr)(rt) }
+    def queryRefinement[T](o: ScanamoQueryRequest => Option[T])(
+        rt: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr =>
+      o(req).foldLeft(qr)(rt)
+    }
 
     NonEmptyList
       .of(
@@ -178,11 +180,11 @@ private[ops] object JavaRequests {
         .withTableName(req.tableName)
         .withItem(req.item.getM)
         .withReturnValues(ReturnValue.ALL_OLD)
-    )((r, c) =>
-      c.attributeValues.foldLeft(
-        r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
-      )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
-    )
+    )(
+      (r, c) =>
+        c.attributeValues.foldLeft(
+          r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
+        )((cond, values) => cond.withExpressionAttributeValues(values.asJava)))
 
   def delete(req: ScanamoDeleteRequest): DeleteItemRequest =
     req.condition.foldLeft(

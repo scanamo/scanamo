@@ -180,8 +180,8 @@ object Scanamo {
     * Set(Right(Farmer(Bean,55,Farm(List(turkey)))), Right(Farmer(Boggis,43,Farm(List(chicken)))))
     * }}}
     */
-  def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(keys: UniqueKeys[_])
-  : Set[Either[DynamoReadError, T]] =
+  def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(
+      keys: UniqueKeys[_]): Set[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.getAllWithConsistency(tableName)(keys))
 
   /**
