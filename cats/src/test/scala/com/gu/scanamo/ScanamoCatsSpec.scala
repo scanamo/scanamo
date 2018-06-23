@@ -180,7 +180,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1)
+      val results = ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1, None)
       results.unsafeRunSync() should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
@@ -192,7 +192,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoCats.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1)
+      val results = ScanamoCats.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1, None)
       results.unsafeRunSync() should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
     }
   }
@@ -251,7 +251,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoCats.queryWithLimit[IO, Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      val results = ScanamoCats.queryWithLimit[IO, Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1, None)
       results.unsafeRunSync() should equal(List(Right(Transport("Underground","Central"))))
     }
   }
@@ -271,7 +271,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         Transport("Underground", "Picadilly", "Blue"),
         Transport("Underground", "Northern", "Black")))
       val results = ScanamoCats.queryIndexWithLimit[IO, Transport](client)("transport", "colour-index")(
-        'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
+        'mode -> "Underground" and ('colour beginsWith "Bl"), 1, None)
 
       results.unsafeRunSync() should equal(List(Right(Transport("Underground","Northern","Black"))))
     }

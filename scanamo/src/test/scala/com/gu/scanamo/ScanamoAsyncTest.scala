@@ -180,7 +180,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1)
+      val results = ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1, None)
       results.futureValue should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
@@ -192,7 +192,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
+      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, None)
       results.futureValue should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
     }
   }
@@ -251,7 +251,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoAsync.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      val results = ScanamoAsync.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1, None)
       results.futureValue should equal(List(Right(Transport("Underground","Central"))))
     }
   }
@@ -271,7 +271,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         Transport("Underground", "Picadilly", "Blue"),
         Transport("Underground", "Northern", "Black")))
       val results = ScanamoAsync.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
-        'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
+        'mode -> "Underground" and ('colour beginsWith "Bl"), 1, None)
 
       results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
     }

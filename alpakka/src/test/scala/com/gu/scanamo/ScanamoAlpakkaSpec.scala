@@ -204,7 +204,7 @@ class ScanamoAlpakkaSpec
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1)
+      val results = ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1, None)
       results.futureValue should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
@@ -216,7 +216,7 @@ class ScanamoAlpakkaSpec
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1)
+      val results = ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1, None)
       results.futureValue should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
     }
   }
@@ -275,7 +275,7 @@ class ScanamoAlpakkaSpec
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1, None)
       results.futureValue should equal(List(Right(Transport("Underground","Central"))))
     }
   }
@@ -295,7 +295,7 @@ class ScanamoAlpakkaSpec
         Transport("Underground", "Picadilly", "Blue"),
         Transport("Underground", "Northern", "Black")))
       val results = ScanamoAlpakka.queryIndexWithLimit[Transport](alpakkaClient)("transport", "colour-index")(
-        'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
+        'mode -> "Underground" and ('colour beginsWith "Bl"), 1, None)
 
       results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
     }

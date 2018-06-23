@@ -301,7 +301,7 @@ object Scanamo {
     * >>> LocalDynamoDB.withTable(client)("bears")('name -> S) {
     * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey"))
     * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets"))
-    * ...   Scanamo.scanWithLimit[Bear](client)("bears", 1)
+    * ...   Scanamo.scanWithLimit[Bear](client)("bears", 1, None)
     * ... }
     * List(Right(Bear(Pooh,honey)))
     * }}}
@@ -344,7 +344,7 @@ object Scanamo {
     * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
     * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
     * ...   Scanamo.put(client)("bears")(Bear("Graham", "quinoa", Some("Guardianista")))
-    * ...   Scanamo.scanIndexWithLimit[Bear](client)("bears", "alias-index", 1)
+    * ...   Scanamo.scanIndexWithLimit[Bear](client)("bears", "alias-index", 1, None)
     * ... }
     * List(Right(Bear(Graham,quinoa,Some(Guardianista))))
     * }}}
@@ -427,7 +427,7 @@ object Scanamo {
     * ...     Transport("Underground", "Circle"),
     * ...     Transport("Underground", "Metropolitan"),
     * ...     Transport("Underground", "Central")))
-    * ...   Scanamo.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+    * ...   Scanamo.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1, None)
     * ... }
     * List(Right(Transport(Underground,Central)))
     * }}}
@@ -478,7 +478,7 @@ object Scanamo {
     * ...     Transport("Underground", "Picadilly", "Blue"),
     * ...     Transport("Underground", "Northern", "Black")))
     * ...   Scanamo.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
-    * ...     ('mode -> "Underground" and ('colour beginsWith "Bl")), 1)
+    * ...     ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, None)
     * ... }
     * List(Right(Transport(Underground,Northern,Black)))
     * }}}
