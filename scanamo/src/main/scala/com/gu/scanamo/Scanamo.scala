@@ -427,7 +427,7 @@ object Scanamo {
     * ...     Transport("Underground", "Circle"),
     * ...     Transport("Underground", "Metropolitan"),
     * ...     Transport("Underground", "Central")))
-    * ...   Scanamo.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1, None)
+    * ...   Scanamo.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1, None)._1
     * ... }
     * List(Right(Transport(Underground,Central)))
     * }}}
@@ -478,7 +478,7 @@ object Scanamo {
     * ...     Transport("Underground", "Picadilly", "Blue"),
     * ...     Transport("Underground", "Northern", "Black")))
     * ...   Scanamo.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
-    * ...     ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, None)
+    * ...     ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, None)._1
     * ... }
     * List(Right(Transport(Underground,Northern,Black)))
     * }}}
