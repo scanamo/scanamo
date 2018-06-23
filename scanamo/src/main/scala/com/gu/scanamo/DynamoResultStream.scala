@@ -27,7 +27,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
         res <- exec(req)
         results = items(res).asScala.map(ScanamoFree.read[T]).toList
         resultsStillToGet = limit(req).map(_ - results.length).getOrElse(Int.MaxValue)
-        lastKey = Option(lastEvaluatedKey(res))
+        lastKey = Option(lastEvaluatedKey(res)).filter(_.isEmpty)
         result <-
           lastKey.filterNot(_ => resultsStillToGet <= 0).foldLeft(
             Free.pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[EvaluationKey])]((results, lastKey))
