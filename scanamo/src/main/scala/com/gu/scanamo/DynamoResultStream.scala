@@ -14,6 +14,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
   type EvaluationKey = java.util.Map[String, AttributeValue]
 
   def limit(req: Req): Option[Int]
+  def startKey(req: Req): Option[Map[String, AttributeValue]]
   def items(res: Res): java.util.List[java.util.Map[String, AttributeValue]]
   def lastEvaluatedKey(res: Res): EvaluationKey
   def withExclusiveStartKey(req: Req, key: EvaluationKey): Req
@@ -35,7 +36,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
           } yield items ::: more)
       } yield resultList
     }
-    streamMore(None, limit(req))
+    streamMore(startKey(req).map(_.asJava), limit(req))
   }
 }
 
@@ -49,6 +50,7 @@ private[scanamo] object DynamoResultStream {
     override def exec(req: ScanamoScanRequest): ScanamoOps[ScanResult] = ScanamoOps.scan(req)
 
     override def limit(req: ScanamoScanRequest): Option[Int] = req.options.limit
+    override def startKey(req: ScanamoScanRequest) = req.options.exclusiveStartKey
   }
 
   object QueryResultStream extends DynamoResultStream[ScanamoQueryRequest, QueryResult] {
@@ -60,5 +62,6 @@ private[scanamo] object DynamoResultStream {
     override def exec(req: ScanamoQueryRequest): ScanamoOps[QueryResult] = ScanamoOps.query(req)
 
     override def limit(req: ScanamoQueryRequest): Option[Int] = req.options.limit
+    override def startKey(req: ScanamoQueryRequest) = req.options.exclusiveStartKey
   }
 }
