@@ -77,7 +77,7 @@ object ScanamoCats {
   : F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 
-  def queryIndexWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int)
+  def queryIndexWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[Map[String, AttributeValue]])
   : F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 

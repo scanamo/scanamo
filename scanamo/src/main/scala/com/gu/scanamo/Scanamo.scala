@@ -483,7 +483,7 @@ object Scanamo {
     * List(Right(Transport(Underground,Northern,Black)))
     * }}}
     */
-  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String, startKey: Option[Map[String, AttributeValue]])(query: Query[_], limit: Int)
+  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[Map[String, AttributeValue]])
   : List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit, startKey))
 }

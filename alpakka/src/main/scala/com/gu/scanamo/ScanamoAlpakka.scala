@@ -84,7 +84,7 @@ object ScanamoAlpakka {
                                  (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 
-  def queryIndexWithLimit[T: DynamoFormat](client: DynamoClient)(tableName: String, indexName: String, startKey: Option[Map[String, AttributeValue]])(
-    query: Query[_], limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def queryIndexWithLimit[T: DynamoFormat](client: DynamoClient)(tableName: String, indexName: String)(
+    query: Query[_], limit: Int, startKey: Option[Map[String, AttributeValue]])(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit, startKey))
 }
