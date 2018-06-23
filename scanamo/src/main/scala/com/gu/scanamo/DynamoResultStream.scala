@@ -11,7 +11,6 @@ import com.gu.scanamo.request.{ScanamoQueryRequest, ScanamoScanRequest}
 import scala.collection.JavaConverters._
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
-  type EvaluationKey = java.util.Map[String, AttributeValue]
 
   def limit(req: Req): Option[Int]
   def startKey(req: Req): Option[Map[String, AttributeValue]]
@@ -21,21 +20,22 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
   def withLimit(limit: Int): Req => Req
   def exec(req: Req): ScanamoOps[Res]
 
-  def stream[T: DynamoFormat](req: Req): ScanamoOps[List[Either[DynamoReadError, T]]] = {
+  def stream[T: DynamoFormat](req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] = {
 
-    def streamMore(req: Req): ScanamoOps[List[Either[DynamoReadError, T]]] = {
+    def streamMore(req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] = {
       for {
         res <- exec(req)
         results = items(res).asScala.map(ScanamoFree.read[T]).toList
         resultsStillToGet = limit(req).map(_ - results.length).getOrElse(Int.MaxValue)
-        resultList <-
-          Option(lastEvaluatedKey(res)).filterNot(_ => resultsStillToGet <= 0).foldLeft(
-            Free.pure[ScanamoOpsA, List[Either[DynamoReadError, T]]](results)
+        lastKey = Option(lastEvaluatedKey(res))
+        result <-
+          lastKey.filterNot(_ => resultsStillToGet <= 0).foldLeft(
+            Free.pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[EvaluationKey])]((results, lastKey))
           )((rs, k) => for {
             items <- rs
             more <- streamMore((withExclusiveStartKey(k) andThen withLimit(resultsStillToGet))(req))
-          } yield items ::: more)
-      } yield resultList
+          } yield (items._1 ::: more._1, more._2))
+      } yield result
     }
     streamMore(req)
   }

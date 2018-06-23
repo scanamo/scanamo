@@ -603,8 +603,8 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
-  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+  def scan(): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
-  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
+  def query(query: Query[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
 }
