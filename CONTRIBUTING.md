@@ -20,3 +20,20 @@ to compile Scanamo and run its tests.
 Most, though not all of Scanamo's tests are from examples in the scaladoc, 
 or `README.md`, which are turned into tests by 
 [sbt-doctest](https://github.com/tkawachi/sbt-doctest).
+
+Contributing documentation
+--------------------------
+
+The [website](http://www.scanamo.org) is built using 
+[sbt-microsites](https://47deg.github.io/sbt-microsites/). To check 
+documentation changes: 
+ * run `makeMicrosite` from the root of SBT
+ * run `jekyll serve --incremental --baseurl /` from `docs/target/site`
+ * Load http://127.0.0.1:4000/
+
+Releasing
+---------
+
+`release cross` from the SBT prompt should publish an artifact to Maven 
+Central for both Scala 2.11 and Scala 2.12. It will also attempt to update
+the documentation website at http://www.scanamo.org/ with the latest scaladoc.
