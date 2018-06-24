@@ -13,7 +13,7 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
     )
     Scanamo.put(client)("large-query")(Large("George", 1, "x"))
     import syntax._
-    Scanamo.query[Large](client)("large-query")('name -> "Harry").toList.size should be (100)
+    Scanamo.query[Large](client)("large-query")('name -> "Harry").toList.size should be(100)
 
     client.deleteTable("large-query")
   }
@@ -26,7 +26,8 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
       Scanamo.put(client)("asyncCities")(City("Nashville", "US"))
 
       import com.gu.scanamo.syntax._
-      Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville") should equal(Some(Right(City("Nashville", "US"))))
+      Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville") should equal(
+        Some(Right(City("Nashville", "US"))))
     }
   }
 

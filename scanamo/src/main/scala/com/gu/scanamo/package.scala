@@ -7,7 +7,7 @@ package object scanamo {
 
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
-      def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
+      def and(other: Symbol) = HashAndRangeKeyNames(s, other)
     }
 
     case class HashAndRangeKeyNames(hash: Symbol, range: Symbol)
