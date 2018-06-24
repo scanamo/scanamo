@@ -2,7 +2,7 @@ package com.gu.scanamo
 
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, BatchWriteItemResult, ConditionalCheckFailedException, DeleteItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, ConditionalCheckFailedException, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScalazInterpreter, ScanamoOps}
 import com.gu.scanamo.query._
@@ -55,32 +55,32 @@ object ScanamoScalaz {
   : IO[ConditionalCheckFailedException, List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
-  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int)
+  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int, startKey: Option[EvaluationKey])
   : IO[ConditionalCheckFailedException, (List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanWithLimit(tableName, limit, None))
+    exec(client)(ScanamoFree.scanWithLimit(tableName, limit, startKey))
 
   def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
   : IO[ConditionalCheckFailedException, List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
-  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int)
+  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int, startKey: Option[EvaluationKey])
   : IO[ConditionalCheckFailedException, (List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit, None))
+    exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit, startKey))
 
   def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
   : IO[ConditionalCheckFailedException, List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
-  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int)
+  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
   : IO[ConditionalCheckFailedException, (List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit, None))
+    exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit, startKey))
 
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
   : IO[ConditionalCheckFailedException, List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 
-  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[Map[String, AttributeValue]])
+  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
   : IO[ConditionalCheckFailedException, (List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit, None))
+    exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit, startKey))
 
 }

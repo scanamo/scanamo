@@ -182,6 +182,22 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
     }
   }
 
+  it("paginates with a limit asynchronously") {
+    case class Bear(name: String, favouriteFood: String)
+
+    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
+      val results = for {
+        res1 <- ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1, None)
+        res2 <- ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1, res1._2)
+        res3 <- ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1, res2._2)
+      } yield res2._1 ::: res3._1
+      unsafePerformIO(results) should equal(List(Right(Bear("Yogi","picnic baskets")), Right(Bear("Graham","quinoa"))))
+    }
+  }
+
   it ("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
@@ -191,6 +207,23 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, None).map(_._1)
       unsafePerformIO(results) should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
+    }
+  }
+
+  it ("Paginate scanIndexWithLimit") {
+    case class Bear(name: String, favouriteFood: String, alias: Option[String])
+
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
+      val results = for {
+        res1 <- ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, res2._2)
+      } yield res2._1 ::: res3._1
+
+      unsafePerformIO(results) should equal(List(Right(Bear("Yogi","picnic baskets",Some("Kanga"))), Right(Bear("Pooh","honey",Some("Winnie")))))
     }
   }
 

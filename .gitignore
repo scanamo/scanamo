@@ -2,3 +2,5 @@
 target/
 .dynamodb-local
 .alpakka-dynamodb-local
+.scalaz-ioeffect-dynamodb-local
+.cats-effect-dynamodb-local

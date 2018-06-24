@@ -123,7 +123,7 @@ private[ops] object JavaRequests {
     NonEmptyList.of(
       queryRefinement(_.index)(_.withIndexName(_)),
       queryRefinement(_.options.limit)(_.withLimit(_)),
-      queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.asJava)),
+      queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k)),
       queryRefinement(_.options.filter)((r, f) => {
         val requestCondition = f.apply(None)
         val filteredRequest = r.withFilterExpression(requestCondition.expression)
@@ -144,7 +144,7 @@ private[ops] object JavaRequests {
     NonEmptyList.of(
       queryRefinement(_.index)(_.withIndexName(_)),
       queryRefinement(_.options.limit)(_.withLimit(_)),
-      queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.asJava)),
+      queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k)),
       queryRefinement(_.options.filter)((r, f) => {
         val requestCondition = f.apply(None)
         r.withFilterExpression(requestCondition.expression)

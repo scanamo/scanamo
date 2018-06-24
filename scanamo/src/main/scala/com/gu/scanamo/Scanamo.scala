@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, BatchWriteItemResult, DeleteItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 import com.gu.scanamo.query._
@@ -306,7 +306,7 @@ object Scanamo {
     * List(Right(Bear(Pooh,honey)))
     * }}}
     */
-  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, limit: Int, startKey: Option[Map[String, AttributeValue]])
+  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, limit: Int, startKey: Option[EvaluationKey])
     : (List[Either[DynamoReadError, T]], Option[EvaluationKey]) =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit, startKey))
 
@@ -349,7 +349,7 @@ object Scanamo {
     * List(Right(Bear(Graham,quinoa,Some(Guardianista))))
     * }}}
     */
-  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String, limit: Int, startKey: Option[Map[String, AttributeValue]])
+  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String, limit: Int, startKey: Option[EvaluationKey])
   : (List[Either[DynamoReadError, T]], Option[EvaluationKey]) =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit, startKey))
 
@@ -432,7 +432,7 @@ object Scanamo {
     * List(Right(Transport(Underground,Central)))
     * }}}
     */
-  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_], limit: Int, startKey: Option[Map[String, AttributeValue]])
+  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
   : (List[Either[DynamoReadError, T]], Option[EvaluationKey]) =
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit, startKey))
 
@@ -483,7 +483,7 @@ object Scanamo {
     * List(Right(Transport(Underground,Northern,Black)))
     * }}}
     */
-  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[Map[String, AttributeValue]])
+  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
   : (List[Either[DynamoReadError, T]], Option[EvaluationKey]) =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit, startKey))
 }
