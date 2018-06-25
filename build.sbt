@@ -152,7 +152,7 @@ lazy val catsEffect = (project in file("cats"))
       "AWS_SECRET_KEY" -> "credentials"
     ),
     dynamoDBLocalDownloadDir := file(".cats-effect-dynamodb-local"),
-    dynamoDBLocalPort := 8042,
+    dynamoDBLocalPort := 8043,
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
   .dependsOn(formats, scanamo)
