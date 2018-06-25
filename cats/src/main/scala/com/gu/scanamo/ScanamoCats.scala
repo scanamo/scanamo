@@ -53,32 +53,40 @@ object ScanamoCats {
   : F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
-  def scanWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int, startKey: Option[EvaluationKey])
+  def scanWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int)
+  : F[List[Either[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
+
+  def scanFrom[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int, startKey: Option[EvaluationKey])
   : F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanWithLimit(tableName, limit, startKey))
+    exec(client)(ScanamoFree.scanFrom(tableName, limit, startKey))
 
   def scanIndex[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
   : F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
-  def scanIndexWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int, startKey: Option[EvaluationKey])
-  : F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit, startKey))
+  def scanIndexWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int)
+  : F[List[Either[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
   def query[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
   : F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
-  def queryWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
+  def queryWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int)
+  : F[List[Either[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
+
+  def queryFrom[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
   : F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit, startKey))
+    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey))
 
   def queryIndex[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
   : F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 
-  def queryIndexWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
-  : F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit, startKey))
+  def queryIndexWithLimit[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int)
+  : F[List[Either[DynamoReadError, T]]] =
+    exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 
 }
