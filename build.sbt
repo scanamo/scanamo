@@ -7,11 +7,12 @@ val scalazVersion = "7.2.22" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.1.0"
 val shimsVersion = "1.2.1"
 
-val commonSettings =  Seq(
+val commonSettings = Seq(
   organization := "com.gu",
   scalacOptions := Seq(
     "-deprecation",
-    "-encoding", "UTF-8",
+    "-encoding",
+    "UTF-8",
     "-feature",
     "-unchecked",
     "-language:implicitConversions",
@@ -25,17 +26,14 @@ val commonSettings =  Seq(
     "-Ywarn-value-discard",
     "-Ypartial-unification"
   ),
-
   // for simulacrum
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
   addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.6"),
-
-
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
     val mainScalacOptions = scalacOptions.value
-    if (CrossVersion.partialVersion(scalaVersion.value) == Some((2,12)))
+    if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
       mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
     else
       mainScalacOptions
@@ -48,11 +46,9 @@ val commonSettings =  Seq(
 val dynamoTestSettings = Seq(
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
-
   startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value,
   test in Test := (test in Test).dependsOn(startDynamoDBLocal).value,
   testOptions in Test += dynamoDBLocalTestCleanup.value,
-
   parallelExecution in Test := false
 )
 
@@ -74,11 +70,9 @@ lazy val formats = (project in file("formats"))
   .settings(
     commonSettings,
     publishingSettings,
-
     name := "scanamo-formats",
   )
   .settings(
-
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "com.chuusai" %% "shapeless" % "2.3.3",
@@ -87,7 +81,6 @@ lazy val formats = (project in file("formats"))
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
-
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,
     doctestTestFramework := DoctestTestFramework.ScalaTest
@@ -112,21 +105,17 @@ lazy val scanamo = (project in file("scanamo"))
     commonSettings,
     publishingSettings,
     dynamoTestSettings,
-
     name := "scanamo"
   )
   .settings(
-
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "com.chuusai" %% "shapeless" % "2.3.3",
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
-
       // Use Joda for custom conversion example
       "org.joda" % "joda-convert" % "1.8.3" % Provided,
       "joda-time" % "joda-time" % "2.9.9" % Test,
-
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     )
@@ -137,12 +126,11 @@ lazy val testkit = (project in file("testkit"))
   .settings(
     commonSettings,
     publishingSettings,
-
     name := "scanamo-testkit",
     libraryDependencies ++= Seq(
       awsDynamoDB
-      )
-)
+    )
+  )
 
 lazy val cats = (project in file("cats"))
   .settings(
@@ -200,20 +188,16 @@ lazy val alpakka = (project in file("alpakka"))
     commonSettings,
     publishingSettings,
     dynamoTestSettings,
-
     name := "scanamo-alpakka",
   )
   .settings(
-
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.15.1",
-
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
-
     fork in Test := true,
     envVars in Test := Map(
       "AWS_ACCESS_KEY_ID" -> "dummy",
@@ -221,7 +205,6 @@ lazy val alpakka = (project in file("alpakka"))
     ),
     dynamoDBLocalDownloadDir := file(".alpakka-dynamodb-local"),
     dynamoDBLocalPort := 8052,
-
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
@@ -232,17 +215,13 @@ lazy val docs = (project in file("docs"))
     commonSettings,
     micrositeSettings,
     noPublishSettings,
-
     dynamoDBLocalDownloadDir := file(".dynamodb-local"),
     dynamoDBLocalPort := 8042,
-
     tut := tut.dependsOn(startDynamoDBLocal).value,
     stopDynamoDBLocal := stopDynamoDBLocal.triggeredBy(tut).value,
-
     includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
-
     makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
     addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
     siteSubdirName in ScalaUnidoc := "latest/api",
@@ -251,18 +230,17 @@ lazy val docs = (project in file("docs"))
   .disablePlugins(ReleasePlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
-
 import ReleaseTransformations._
 val publishingSettings = Seq(
   homepage := Some(url("http://www.scanamo.org/")),
   licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
   publishMavenStyle := true,
   publishArtifact in Test := false,
-  scmInfo := Some(ScmInfo(
-    url("https://github.com/scanamo/scanamo"),
-    "scm:git:git@github.com:scanamo/scanamo.git"
-  )),
-
+  scmInfo := Some(
+    ScmInfo(
+      url("https://github.com/scanamo/scanamo"),
+      "scm:git:git@github.com:scanamo/scanamo.git"
+    )),
   pomExtra := {
     <developers>
       <developer>
@@ -272,16 +250,13 @@ val publishingSettings = Seq(
       </developer>
     </developers>
   },
-
   publishTo := Some(
     if (isSnapshot.value)
       Opts.resolver.sonatypeSnapshots
     else
       Opts.resolver.sonatypeStaging
   ),
-
   releaseCrossBuild := true,
-
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
     inquireVersions,
@@ -307,22 +282,22 @@ lazy val noPublishSettings = Seq(
 )
 
 val micrositeSettings = Seq(
-  micrositeName             := "Scanamo",
-  micrositeDescription      := "Scanamo: simpler DynamoDB access for Scala",
-  micrositeAuthor           := "Scanamo Contributors",
-  micrositeGithubOwner      := "scanamo",
-  micrositeGithubRepo       := "scanamo",
-  micrositeBaseUrl          := "",
+  micrositeName := "Scanamo",
+  micrositeDescription := "Scanamo: simpler DynamoDB access for Scala",
+  micrositeAuthor := "Scanamo Contributors",
+  micrositeGithubOwner := "scanamo",
+  micrositeGithubRepo := "scanamo",
+  micrositeBaseUrl := "",
   micrositeDocumentationUrl := "/latest/api",
-  micrositeHighlightTheme   := "color-brewer",
+  micrositeHighlightTheme := "color-brewer",
   micrositePalette := Map(
-    "brand-primary"     -> "#951c55",
-    "brand-secondary"   -> "#005689",
-    "brand-tertiary"    -> "#00456e",
-    "gray-dark"         -> "#453E46",
-    "gray"              -> "#837F84",
-    "gray-light"        -> "#E3E2E3",
-    "gray-lighter"      -> "#F4F3F4",
-    "white-color"       -> "#FFFFFF"
+    "brand-primary" -> "#951c55",
+    "brand-secondary" -> "#005689",
+    "brand-tertiary" -> "#00456e",
+    "gray-dark" -> "#453E46",
+    "gray" -> "#837F84",
+    "gray-light" -> "#E3E2E3",
+    "gray-lighter" -> "#F4F3F4",
+    "white-color" -> "#FFFFFF"
   )
 )

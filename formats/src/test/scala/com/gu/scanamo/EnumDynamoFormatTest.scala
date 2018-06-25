@@ -13,6 +13,5 @@ class EnumDynamoFormatTest extends FunSuite with Matchers {
   def write[T](t: T)(implicit f: DynamoFormat[T]) = f.write(t)
 }
 
-
 sealed trait ExampleEnum
 case object First extends ExampleEnum

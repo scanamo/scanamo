@@ -10,28 +10,36 @@ import simulacrum.typeclass
 import cats.syntax.either._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
-  implicit state: ConditionExpression[T], format: DynamoFormat[V]) {
+    implicit state: ConditionExpression[T],
+    format: DynamoFormat[V]) {
   def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] = {
     val unconditionalRequest = ScanamoPutRequest(tableName, format.write(item), None)
-    ScanamoOps.conditionalPut(unconditionalRequest.copy(
-      condition = Some(state.apply(t)(unconditionalRequest.condition))))
+    ScanamoOps.conditionalPut(
+      unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] = {
     val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None)
-    ScanamoOps.conditionalDelete(unconditionalRequest.copy(
-      condition = Some(state.apply(t)(unconditionalRequest.condition))))
+    ScanamoOps.conditionalDelete(
+      unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
   }
 
-  def update(key: UniqueKey[_], update: UpdateExpression):
-  ScanamoOps[Either[ScanamoError, V]] = {
+  def update(key: UniqueKey[_], update: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] = {
 
     val unconditionalRequest = ScanamoUpdateRequest(
-      tableName, key.asAVMap, update.expression, update.attributeNames, update.attributeValues, None)
-    ScanamoOps.conditionalUpdate(unconditionalRequest.copy(
-      condition = Some(state.apply(t)(unconditionalRequest.condition)))
-    ).map(either => either.leftMap[ScanamoError](ConditionNotMet(_)).flatMap(
-      r => format.read(new AttributeValue().withM(r.getAttributes))))
+      tableName,
+      key.asAVMap,
+      update.expression,
+      update.attributeNames,
+      update.attributeValues,
+      None)
+    ScanamoOps
+      .conditionalUpdate(unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
+      .map(
+        either =>
+          either
+            .leftMap[ScanamoError](ConditionNotMet(_))
+            .flatMap(r => format.read(new AttributeValue().withM(r.getAttributes))))
   }
 }
 
@@ -69,8 +77,9 @@ object ConditionExpression {
     override def apply(pair: (AttributeName, Set[V]))(condition: Option[RequestCondition]): RequestCondition = {
       val format = DynamoFormat[V]
       val attributeName = pair._1
-      val attributeValues = pair._2.zipWithIndex.map { case (v, i) => 
-        s":conditionAttributeValue$i" -> format.write(v)
+      val attributeValues = pair._2.zipWithIndex.map {
+        case (v, i) =>
+          s":conditionAttributeValue$i" -> format.write(v)
       }.toMap
       RequestCondition(
         s"""#${attributeName.placeholder(prefix)} IN ${attributeValues.keys.mkString("(", ",", ")")}""",
@@ -115,10 +124,11 @@ object ConditionExpression {
       RequestCondition(
         s"#${b.key.placeholder(prefix)} BETWEEN :lower and :upper",
         b.key.attributeNames(s"#$prefix"),
-        Some(Map(
-          ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
-          ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
-        ))
+        Some(
+          Map(
+            ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
+            ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
+          ))
       )
   }
 
@@ -145,7 +155,8 @@ object ConditionExpression {
     }
 
   private def combineConditions[L, R](condition: Option[RequestCondition], l: L, r: R, combininingOperator: String)(
-    implicit lce: ConditionExpression[L], rce: ConditionExpression[R]): RequestCondition = {
+      implicit lce: ConditionExpression[L],
+      rce: ConditionExpression[R]): RequestCondition = {
     def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {
       case (k, v) => (newKey(k, prefix, magicChar), v)
     }
@@ -176,12 +187,16 @@ object ConditionExpression {
     val lConditionExpression =
       prefixKeysIn(
         prefixKeysIn(lCondition.expression, lCondition.attributeNames.keys, lPrefix, '#'),
-        lCondition.attributeValues.toList.flatMap(_.keys), lPrefix, ':'
+        lCondition.attributeValues.toList.flatMap(_.keys),
+        lPrefix,
+        ':'
       )
     val rConditionExpression =
       prefixKeysIn(
         prefixKeysIn(rCondition.expression, rCondition.attributeNames.keys, rPrefix, '#'),
-        rCondition.attributeValues.toList.flatMap(_.keys), rPrefix, ':'
+        rCondition.attributeValues.toList.flatMap(_.keys),
+        rPrefix,
+        ':'
       )
     RequestCondition(
       s"($lConditionExpression $combininingOperator $rConditionExpression)",

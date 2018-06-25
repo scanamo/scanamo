@@ -31,16 +31,16 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
         results = items(res).asScala.map(ScanamoFree.read[T]).toList
         newLimit = limit(req).map(_ - results.length)
         lastKey = Option(lastEvaluatedKey(res)).filterNot(_.isEmpty)
-        result <-
-          lastKey.filterNot(_ => newLimit.exists(_ <= 0)).foldLeft(
+        result <- lastKey
+          .filterNot(_ => newLimit.exists(_ <= 0))
+          .foldLeft(
             Free.pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[EvaluationKey])]((results, lastKey))
           )((rs, k) =>
             for {
               results <- rs
               newReq = prepare(newLimit, k)(req)
               more <- streamMore(newReq)
-            } yield (results._1 ::: more._1, more._2)
-          )
+            } yield (results._1 ::: more._1, more._2))
       } yield result
     }
     streamMore(req)
