@@ -221,9 +221,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = for {
-        res1 <- ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, None)
-        res2 <- ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, res1._2)
-        res3 <- ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, res2._2)
+        res1 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res2._2)
       } yield res2._1 ::: res3._1
 
       results.futureValue should equal(
@@ -300,9 +300,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
           Transport("Underground", "Central")))
       val results = ScanamoAsync.queryWithLimit[Transport](client)("transport")(
         'mode -> "Underground" and ('line beginsWith "C"),
-        1,
-        None)
-      results.map(_._1).futureValue should equal(List(Right(Transport("Underground", "Central"))))
+        1)
+      results.futureValue should equal(List(Right(Transport("Underground", "Central"))))
     }
   }
 
@@ -324,10 +323,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
         ))
       val results = ScanamoAsync.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
         'mode -> "Underground" and ('colour beginsWith "Bl"),
-        1,
-        None)
+        1)
 
-      results.map(_._1).futureValue should equal(List(Right(Transport("Underground", "Northern", "Black"))))
+      results.futureValue should equal(List(Right(Transport("Underground", "Northern", "Black"))))
     }
   }
 

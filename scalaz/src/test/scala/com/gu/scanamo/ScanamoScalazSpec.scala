@@ -177,7 +177,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1, None).map(_._1)
+      val results = ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1)
       unsafePerformIO(results) should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
@@ -190,9 +190,9 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
       val results = for {
-        res1 <- ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1, None)
-        res2 <- ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1, res1._2)
-        res3 <- ScanamoScalaz.scanWithLimit[Bear](client)("asyncBears", 1, res2._2)
+        res1 <- ScanamoScalaz.scanFrom[Bear](client)("asyncBears", 1, None)
+        res2 <- ScanamoScalaz.scanFrom[Bear](client)("asyncBears", 1, res1._2)
+        res3 <- ScanamoScalaz.scanFrom[Bear](client)("asyncBears", 1, res2._2)
       } yield res2._1 ::: res3._1
       unsafePerformIO(results) should equal(List(Right(Bear("Yogi","picnic baskets")), Right(Bear("Graham","quinoa"))))
     }
@@ -205,7 +205,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, None).map(_._1)
+      val results = ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
       unsafePerformIO(results) should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
     }
   }
@@ -218,9 +218,9 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = for {
-        res1 <- ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, None)
-        res2 <- ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, res1._2)
-        res3 <- ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, res2._2)
+        res1 <- ScanamoScalaz.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoScalaz.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoScalaz.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res2._2)
       } yield res2._1 ::: res3._1
 
       unsafePerformIO(results) should equal(List(Right(Bear("Yogi","picnic baskets",Some("Kanga"))), Right(Bear("Pooh","honey",Some("Winnie")))))

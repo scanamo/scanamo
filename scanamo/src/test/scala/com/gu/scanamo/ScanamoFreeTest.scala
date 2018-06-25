@@ -13,7 +13,7 @@ import collection.JavaConverters._
 
 class ScanamoFreeTest extends FunSuite with Matchers {
   test("only make one call for a limited result") {
-    val limitedScan = ScanamoFree.scanWithLimit[Int]("x", 1, None)
+    val limitedScan = ScanamoFree.scanWithLimit[Int]("x", 1)
 
     val countingInterpreter = new RequestCountingInterpreter()
 

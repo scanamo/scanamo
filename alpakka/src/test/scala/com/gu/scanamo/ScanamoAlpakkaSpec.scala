@@ -203,8 +203,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1, None)
-      results.map(_._1).futureValue should equal(List(Right(Bear("Pooh", "honey"))))
+      val results = ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1)
+      results.futureValue should equal(List(Right(Bear("Pooh", "honey"))))
     }
   }
 
@@ -216,9 +216,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
       val results = for {
-        res1 <- ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1, None)
-        res2 <- ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1, res1._2)
-        res3 <- ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1, res2._2)
+        res1 <- ScanamoAlpakka.scanFrom[Bear](alpakkaClient)("asyncBears", 1, None)
+        res2 <- ScanamoAlpakka.scanFrom[Bear](alpakkaClient)("asyncBears", 1, res1._2)
+        res3 <- ScanamoAlpakka.scanFrom[Bear](alpakkaClient)("asyncBears", 1, res2._2)
       } yield res2._1 ::: res3._1
       results.futureValue should equal(List(Right(Bear("Yogi", "picnic baskets")), Right(Bear("Graham", "quinoa"))))
     }
@@ -231,8 +231,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1, None)
-      results.map(_._1).futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+      val results = ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1)
+      results.futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
     }
   }
 
@@ -244,9 +244,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = for {
-        res1 <- ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1, None)
-        res2 <- ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1, res1._2)
-        res3 <- ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1, res2._2)
+        res1 <- ScanamoAlpakka.scanIndexFrom[Bear](alpakkaClient)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoAlpakka.scanIndexFrom[Bear](alpakkaClient)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoAlpakka.scanIndexFrom[Bear](alpakkaClient)("asyncBears", "alias-index", 1, res2._2)
       } yield res2._1 ::: res3._1
 
       results.futureValue should equal(
@@ -323,9 +323,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
           Transport("Underground", "Central")))
       val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)("transport")(
         'mode -> "Underground" and ('line beginsWith "C"),
-        1,
-        None)
-      results.map(_._1).futureValue should equal(List(Right(Transport("Underground", "Central"))))
+        1)
+      results.futureValue should equal(List(Right(Transport("Underground", "Central"))))
     }
   }
 
@@ -347,10 +346,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         ))
       val results = ScanamoAlpakka.queryIndexWithLimit[Transport](alpakkaClient)("transport", "colour-index")(
         'mode -> "Underground" and ('colour beginsWith "Bl"),
-        1,
-        None)
+        1)
 
-      results.map(_._1).futureValue should equal(List(Right(Transport("Underground", "Northern", "Black"))))
+      results.futureValue should equal(List(Right(Transport("Underground", "Northern", "Black"))))
     }
   }
 

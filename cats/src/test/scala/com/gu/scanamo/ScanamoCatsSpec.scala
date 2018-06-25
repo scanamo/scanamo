@@ -180,7 +180,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1, None).map(_._1)
+      val results = ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1)
       results.unsafeRunSync() should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
@@ -193,9 +193,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
       val results = for {
-        res1 <- ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1, None)
-        res2 <- ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1, res1._2)
-        res3 <- ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1, res2._2)
+        res1 <- ScanamoCats.queryFrom[IO, Bear](client)("asyncBears", 1, None)
+        res2 <- ScanamoCats.queryFrom[IO, Bear](client)("asyncBears", 1, res1._2)
+        res3 <- ScanamoCats.queryFrom[IO, Bear](client)("asyncBears", 1, res2._2)
       } yield res2._1 ::: res3._1
       results.unsafeRunSync() should equal(List(Right(Bear("Yogi","picnic baskets")), Right(Bear("Graham","quinoa"))))
     }
@@ -208,7 +208,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoCats.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1, None).map(_._1)
+      val results = ScanamoCats.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1)
       results.unsafeRunSync() should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
     }
   }
@@ -221,9 +221,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = for {
-        res1 <- ScanamoCats.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1, None)
-        res2 <- ScanamoCats.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1, res1._2)
-        res3 <- ScanamoCats.scanIndexWithLimit[IO, Bear](client)("asyncBears", "alias-index", 1, res2._2)
+        res1 <- ScanamoCats.scanIndexFrom[IO, Bear](client)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoCats.scanIndexFrom[IO, Bear](client)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoCats.scanIndexFrom[IO, Bear](client)("asyncBears", "alias-index", 1, res2._2)
       } yield res2._1 ::: res3._1
 
       results.unsafeRunSync() should equal(List(Right(Bear("Yogi","picnic baskets",Some("Kanga"))), Right(Bear("Pooh","honey",Some("Winnie")))))
