@@ -71,6 +71,10 @@ object ScanamoScalaz {
   : IO[ConditionalCheckFailedException, List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
+  def scanIndexFrom[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int, startKey: Option[EvaluationKey])
+  : IO[ConditionalCheckFailedException, (List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    exec(client)(ScanamoFree.scanIndexFrom(tableName, indexName, limit, startKey))
+
   def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
   : IO[ConditionalCheckFailedException, List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
@@ -90,5 +94,9 @@ object ScanamoScalaz {
   def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int)
   : IO[ConditionalCheckFailedException, List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
+
+  def queryIndexFrom[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])
+  : IO[ConditionalCheckFailedException, (List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
 
 }

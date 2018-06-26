@@ -379,6 +379,13 @@ object Scanamo {
       limit: Int): List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
+  def scanIndexFrom[T: DynamoFormat](client: AmazonDynamoDB)(
+      tableName: String,
+      indexName: String,
+      limit: Int,
+      startKey: Option[EvaluationKey]): (List[Either[DynamoReadError, T]], Option[EvaluationKey]) =
+    exec(client)(ScanamoFree.scanIndexFrom(tableName, indexName, limit, startKey))
+
   /**
     * Perform a query against a table
     *
@@ -539,4 +546,10 @@ object Scanamo {
       query: Query[_],
       limit: Int): List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
+
+  def queryIndexFrom[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(
+      query: Query[_],
+      limit: Int,
+      startKey: Option[EvaluationKey]): (List[Either[DynamoReadError, T]], Option[EvaluationKey]) =
+    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
 }

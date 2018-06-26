@@ -79,6 +79,11 @@ object ScanamoAlpakka {
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
+  def scanIndexFrom[T: DynamoFormat](
+      client: DynamoClient)(tableName: String, indexName: String, limit: Int, startKey: Option[EvaluationKey])(
+      implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    exec(client)(ScanamoFree.scanIndexFrom(tableName, indexName, limit, startKey))
+
   def query[T: DynamoFormat](client: DynamoClient)(tableName: String)(query: Query[_])(
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
@@ -102,4 +107,10 @@ object ScanamoAlpakka {
       indexName: String)(query: Query[_], limit: Int)(
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
+
+  def queryIndexFrom[T: DynamoFormat](client: DynamoClient)(
+      tableName: String,
+      indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])(
+      implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
 }

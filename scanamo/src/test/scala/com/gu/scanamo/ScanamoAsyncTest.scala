@@ -180,8 +180,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1, None)
-      results.map(_._1).futureValue should equal(List(Right(Bear("Pooh", "honey"))))
+      val results = ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1)
+      results.futureValue should equal(List(Right(Bear("Pooh", "honey"))))
     }
   }
 
@@ -193,9 +193,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
       val results = for {
-        res1 <- ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1, None)
-        res2 <- ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1, res1._2)
-        res3 <- ScanamoAsync.scanWithLimit[Bear](client)("asyncBears", 1, res2._2)
+        res1 <- ScanamoAsync.scanFrom[Bear](client)("asyncBears", 1, None)
+        res2 <- ScanamoAsync.scanFrom[Bear](client)("asyncBears", 1, res1._2)
+        res3 <- ScanamoAsync.scanFrom[Bear](client)("asyncBears", 1, res2._2)
       } yield res2._1 ::: res3._1
       results.futureValue should equal(List(Right(Bear("Yogi", "picnic baskets")), Right(Bear("Graham", "quinoa"))))
     }
@@ -208,8 +208,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1, None)
-      results.map(_._1).futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
+      results.futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
     }
   }
 
