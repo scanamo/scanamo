@@ -278,7 +278,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoScalaz.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1, None).map(_._1)
+      val results = ScanamoScalaz.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
       unsafePerformIO(results) should equal(List(Right(Transport("Underground","Central"))))
     }
   }
@@ -298,7 +298,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
         Transport("Underground", "Picadilly", "Blue"),
         Transport("Underground", "Northern", "Black")))
       val results = ScanamoScalaz.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
-        'mode -> "Underground" and ('colour beginsWith "Bl"), 1, None).map(_._1)
+        'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
 
       unsafePerformIO(results) should equal(List(Right(Transport("Underground","Northern","Black"))))
     }
