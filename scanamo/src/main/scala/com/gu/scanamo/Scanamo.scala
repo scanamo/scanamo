@@ -306,9 +306,8 @@ object Scanamo {
     * List(Right(Bear(Pooh,honey)))
     * }}}
     */
-  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(
-      tableName: String,
-      limit: Int): List[Either[DynamoReadError, T]] =
+  def scanWithLimit[T: DynamoFormat](
+      client: AmazonDynamoDB)(tableName: String, limit: Int): List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
   /**
@@ -373,10 +372,8 @@ object Scanamo {
     * List(Right(Bear(Graham,quinoa,Some(Guardianista))))
     * }}}
     */
-  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(
-      tableName: String,
-      indexName: String,
-      limit: Int): List[Either[DynamoReadError, T]] =
+  def scanIndexWithLimit[T: DynamoFormat](
+      client: AmazonDynamoDB)(tableName: String, indexName: String, limit: Int): List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
   def scanIndexFrom[T: DynamoFormat](client: AmazonDynamoDB)(
@@ -465,9 +462,8 @@ object Scanamo {
     * List(Right(Transport(Underground,Central)))
     * }}}
     */
-  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(
-      query: Query[_],
-      limit: Int): List[Either[DynamoReadError, T]] =
+  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(
+      tableName: String)(query: Query[_], limit: Int): List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
 
   /**

@@ -62,8 +62,7 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
-  def scanWithLimit[T: DynamoFormat](
-      client: AmazonDynamoDBAsync)(tableName: String, limit: Int)(
+  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int)(
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
@@ -76,9 +75,10 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
-  def scanIndexWithLimit[T: DynamoFormat](
-      client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int)(
-      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(
+      tableName: String,
+      indexName: String,
+      limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
   def scanIndexFrom[T: DynamoFormat](
@@ -90,8 +90,7 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
-  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(
-      tableName: String)(query: Query[_], limit: Int)(
+  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int)(
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
 
@@ -104,10 +103,9 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 
-  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(
-      tableName: String,
-      indexName: String)(query: Query[_], limit: Int)(
-      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(
+      query: Query[_],
+      limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 
   def queryIndexFrom[T: DynamoFormat](client: AmazonDynamoDBAsync)(

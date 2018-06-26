@@ -11,7 +11,9 @@ import scalaz.~>
 
 object ScalazInterpreter {
   def io(client: AmazonDynamoDBAsync) = new (ScanamoOpsA ~> IO[ConditionalCheckFailedException, ?]) {
-    private[this] def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => JFuture[B], req: A): IO[Exception, B] =
+    private[this] def eff[A <: AmazonWebServiceRequest, B](
+        f: (A, AsyncHandler[A, B]) => JFuture[B],
+        req: A): IO[Exception, B] =
       IO.async { cb =>
         val handler = new AsyncHandler[A, B] {
           def onError(exception: Exception): Unit =
@@ -26,9 +28,10 @@ object ScalazInterpreter {
     // Refactor this with Leibniz when Scala solves the GADT problem
     private[this] def unifyA[A0, A](io: IO[Exception, A0]): IO[ConditionalCheckFailedException, A] =
       io.catchAll[ConditionalCheckFailedException] {
-        case e: ConditionalCheckFailedException => IO.fail(e)
-        case t => IO.interrupt(t)
-      }.asInstanceOf[IO[ConditionalCheckFailedException, A]]
+          case e: ConditionalCheckFailedException => IO.fail(e)
+          case t => IO.interrupt(t)
+        }
+        .asInstanceOf[IO[ConditionalCheckFailedException, A]]
 
     override def apply[A](fa: ScanamoOpsA[A]): IO[ConditionalCheckFailedException, A] = {
       fa match {
@@ -48,19 +51,20 @@ object ScalazInterpreter {
           unifyA(eff[QueryRequest, QueryResult](client.queryAsync, JavaRequests.query(req)))
         // Overloading means we need explicit parameter types here
         case BatchWrite(req) =>
-          unifyA(eff(
-            client.batchWriteItemAsync(
-              _: BatchWriteItemRequest,
-              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
-            req
-          ))
+          unifyA(
+            eff(
+              client.batchWriteItemAsync(
+                _: BatchWriteItemRequest,
+                _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+              req
+            ))
         case BatchGet(req) =>
-          unifyA(eff(
-            client.batchGetItemAsync(
-              _: BatchGetItemRequest,
-              _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-            req
-          ))
+          unifyA(
+            eff(
+              client
+                .batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+              req
+            ))
         case Update(req) =>
           unifyA(eff(client.updateItemAsync, JavaRequests.update(req)))
         case ConditionalUpdate(req) =>
