@@ -4,16 +4,17 @@ import com.gu.scanamo.DynamoFormat
 import com.gu.scanamo.syntax.Bounds
 
 private[scanamo] case class AttributeName(components: List[Symbol], index: Option[Int]) {
-  def placeholder(prefix: String): String = index.foldLeft(
-    components.map(s => s"$prefix${s.name}").mkString(".#")
-  )(
-    (p, i) => s"$p[$i]"
-  )
+  def placeholder(prefix: String): String =
+    index.foldLeft(
+      components.map(s => s"$prefix${s.name}").mkString(".#")
+    )(
+      (p, i) => s"$p[$i]"
+    )
 
   def attributeNames(prefix: String): Map[String, String] =
     Map(components.map(s => s"$prefix${s.name}" -> s.name): _*)
 
-  def \ (component: Symbol) = copy(components = components :+ component)
+  def \(component: Symbol) = copy(components = components :+ component)
 
   def apply(index: Int): AttributeName = copy(index = Some(index))
 
