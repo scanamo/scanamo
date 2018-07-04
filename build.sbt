@@ -53,7 +53,7 @@ val dynamoTestSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, javaTime)
   .settings(
     commonSettings,
     publishingSettings,
@@ -209,6 +209,22 @@ lazy val alpakka = (project in file("alpakka"))
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
   .dependsOn(formats, scanamo)
+
+lazy val javaTime = (project in file("java-time"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+
+    name := "scanamo-time",
+  )
+  .settings(
+    libraryDependencies ++= List(
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
+    )
+  )
+  .dependsOn(formats)
 
 lazy val docs = (project in file("docs"))
   .settings(
