@@ -165,7 +165,6 @@ lazy val scalaz = (project in file("scalaz"))
     dynamoTestSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel" %% "cats-free" % catsVersion,
       "com.codecommit" %% "shims" % shimsVersion,
       "org.scalaz" %% "scalaz-core" % scalazVersion,
       "org.scalaz" %% "scalaz-ioeffect" % "2.10.1",
