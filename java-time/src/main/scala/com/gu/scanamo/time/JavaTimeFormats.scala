@@ -1,11 +1,12 @@
 package com.gu.scanamo.time
 
 import com.gu.scanamo.DynamoFormat
-import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
-import java.time.format.{ DateTimeParseException, DateTimeFormatter }
+import java.time.{Instant, OffsetDateTime, ZonedDateTime}
+import java.time.format.{DateTimeParseException, DateTimeFormatter}
 import InstantAsLongs._
 
 object JavaTimeFormats {
+
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
     *  {{{
     *  prop> import com.gu.scanamo.DynamoFormat
@@ -17,7 +18,9 @@ object JavaTimeFormats {
     *      | DynamoFormat[InstantAsLong].read(DynamoFormat[InstantAsLong].write(x)) == Right(x)
     *  }}}
     */
-  implicit val instantAsLongFormat = DynamoFormat.coercedXmap[InstantAsLong, Long, ArithmeticException](x => InstantAsLong(Instant.ofEpochMilli(x)))(x => InstantAsLong.unwrap(x).toEpochMilli)
+  implicit val instantAsLongFormat =
+    DynamoFormat.coercedXmap[InstantAsLong, Long, ArithmeticException](x => InstantAsLong(Instant.ofEpochMilli(x)))(x =>
+      InstantAsLong.unwrap(x).toEpochMilli)
 
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
     *  {{{

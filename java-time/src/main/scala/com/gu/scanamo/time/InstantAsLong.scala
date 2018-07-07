@@ -17,4 +17,3 @@ object InstantAsLongs {
 
   type InstantAsLong = InstantAsLong.T
 }
-
