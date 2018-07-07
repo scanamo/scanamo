@@ -56,9 +56,7 @@ object ScalazInterpreter {
           )
         case BatchGet(req) =>
           eff(
-            client.batchGetItemAsync(
-              _: BatchGetItemRequest,
-              _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+            client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
             req
           )
         case Update(req) =>
