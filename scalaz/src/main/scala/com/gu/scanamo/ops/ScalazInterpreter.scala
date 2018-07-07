@@ -45,7 +45,7 @@ object ScalazInterpreter {
         case Scan(req) =>
           eff(client.scanAsync, JavaRequests.scan(req))
         case Query(req) =>
-          eff[QueryRequest, QueryResult](client.queryAsync, JavaRequests.query(req))
+          eff(client.queryAsync, JavaRequests.query(req))
         // Overloading means we need explicit parameter types here
         case BatchWrite(req) =>
           eff(
