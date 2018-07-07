@@ -3,9 +3,9 @@ crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
 val catsVersion = "1.1.0"
 val catsEffectVersion = "1.0.0-RC" // to be updated as this is the only RC
-val scalazVersion = "7.2.22" // Bump as needed for io-effect compat
+val scalazVersion = "7.2.25" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.1.0"
-val shimsVersion = "1.2.1"
+val shimsVersion = "1.3.0"
 
 val commonSettings = Seq(
   organization := "com.gu",
@@ -167,8 +167,8 @@ lazy val scalaz = (project in file("scalaz"))
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.codecommit" %% "shims" % shimsVersion,
-      "org.scalaz" %% "scalaz-core" % "7.2.22",
-      "org.scalaz" %% "scalaz-ioeffect" % "2.1.0",
+      "org.scalaz" %% "scalaz-core" % scalazVersion,
+      "org.scalaz" %% "scalaz-ioeffect" % "2.10.1",
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
