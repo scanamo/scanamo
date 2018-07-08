@@ -53,7 +53,7 @@ val dynamoTestSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz)
   .settings(
     commonSettings,
     publishingSettings,
@@ -81,9 +81,9 @@ lazy val formats = (project in file("formats"))
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
-    doctestMarkdownEnabled := true,
-    doctestDecodeHtmlEntities := true,
-    doctestTestFramework := DoctestTestFramework.ScalaTest
+    // doctestMarkdownEnabled := true,
+    // doctestDecodeHtmlEntities := true,
+    // doctestTestFramework := DoctestTestFramework.ScalaTest
   )
 
 lazy val refined = (project in file("refined"))
