@@ -145,10 +145,6 @@ lazy val cats = (project in file("cats"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    envVars in Test := Map(
-      "AWS_ACCESS_KEY_ID" -> "dummy",
-      "AWS_SECRET_KEY" -> "credentials"
-    ),
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
@@ -169,10 +165,6 @@ lazy val scalaz = (project in file("scalaz"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    envVars in Test := Map(
-      "AWS_ACCESS_KEY_ID" -> "dummy",
-      "AWS_SECRET_KEY" -> "credentials"
-    ),
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
@@ -193,6 +185,7 @@ lazy val alpakka = (project in file("alpakka"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
+    // Alpakka needs credentials and will look in environment variables first
     envVars in Test := Map(
       "AWS_ACCESS_KEY_ID" -> "dummy",
       "AWS_SECRET_KEY" -> "credentials"
