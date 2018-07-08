@@ -53,7 +53,7 @@ val dynamoTestSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz)
+  .aggregate(formats, scanamo, testkit, alpakka, refined)
   .settings(
     commonSettings,
     publishingSettings,
