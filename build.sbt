@@ -2,7 +2,7 @@ scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
 val catsVersion = "1.1.0"
-val catsEffectVersion = "1.0.0-RC" // to be updated as this is the only RC
+val catsEffectVersion = "1.0.0-RC2" // to be updated as this is the (almost) only RC
 val scalazVersion = "7.2.22" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.1.0"
 val shimsVersion = "1.2.1"
