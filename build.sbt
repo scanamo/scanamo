@@ -46,10 +46,7 @@ val commonSettings = Seq(
 val dynamoTestSettings = Seq(
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
-  startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value,
-  test in Test := (test in Test).dependsOn(startDynamoDBLocal).value,
-  testOptions in Test += dynamoDBLocalTestCleanup.value,
-  parallelExecution in Test := false
+  Test / parallelExecution := false
 )
 
 lazy val root = (project in file("."))
@@ -58,6 +55,7 @@ lazy val root = (project in file("."))
     commonSettings,
     publishingSettings,
     noPublishSettings,
+    dynamoTestSettings
   )
 
 addCommandAlias("tut", "docs/tut")
