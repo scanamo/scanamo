@@ -149,11 +149,9 @@ lazy val cats = (project in file("cats"))
       "AWS_ACCESS_KEY_ID" -> "dummy",
       "AWS_SECRET_KEY" -> "credentials"
     ),
-    dynamoDBLocalDownloadDir := file(".cats-effect-dynamodb-local"),
-    dynamoDBLocalPort := 8042,
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
-  .dependsOn(formats, scanamo)
+  .dependsOn(formats, scanamo, testkit % "test->test")
 
 lazy val scalaz = (project in file("scalaz"))
   .settings(
@@ -175,11 +173,9 @@ lazy val scalaz = (project in file("scalaz"))
       "AWS_ACCESS_KEY_ID" -> "dummy",
       "AWS_SECRET_KEY" -> "credentials"
     ),
-    dynamoDBLocalDownloadDir := file(".scalaz-ioeffect-dynamodb-local"),
-    dynamoDBLocalPort := 8042,
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
-  .dependsOn(formats, scanamo)
+  .dependsOn(formats, scanamo, testkit % "test->test")
 
 lazy val alpakka = (project in file("alpakka"))
   .settings(
@@ -201,12 +197,10 @@ lazy val alpakka = (project in file("alpakka"))
       "AWS_ACCESS_KEY_ID" -> "dummy",
       "AWS_SECRET_KEY" -> "credentials"
     ),
-    dynamoDBLocalDownloadDir := file(".alpakka-dynamodb-local"),
-    dynamoDBLocalPort := 8052,
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
-  .dependsOn(formats, scanamo)
+  .dependsOn(formats, scanamo, testkit % "test->test")
 
 lazy val docs = (project in file("docs"))
   .settings(

@@ -29,7 +29,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     DynamoSettings(
       region = "",
       host = "localhost",
-      port = 8052,
+      port = 8042,
       parallelism = 2
     )
   )

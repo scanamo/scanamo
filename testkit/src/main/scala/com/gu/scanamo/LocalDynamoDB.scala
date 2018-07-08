@@ -24,6 +24,10 @@ object LocalDynamoDB {
     )
   }
 
+  def deleteTable(client: AmazonDynamoDB)(tableName: String) = {
+      client.deleteTable(tableName)
+  }
+
   def withTable[T](client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
       thunk: => T
   ): T = {
