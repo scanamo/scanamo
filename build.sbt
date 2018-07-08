@@ -176,10 +176,9 @@ lazy val scalaz = (project in file("scalaz"))
       "AWS_ACCESS_KEY_ID" -> "dummy",
       "AWS_SECRET_KEY" -> "credentials"
     ),
-    dynamoDBLocalPort := 8042,
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
-  .dependsOn(formats, scanamo)
+  .dependsOn(formats, scanamo, testkit % "test->test")
 
 lazy val alpakka = (project in file("alpakka"))
   .settings(
