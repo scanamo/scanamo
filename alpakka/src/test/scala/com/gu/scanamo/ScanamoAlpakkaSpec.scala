@@ -86,7 +86,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).andThen {
         case _ =>
           ScanamoAlpakka
-            .getWithConsistency[City](alpakkaClient)("asyncCities")('name -> "Nashville")
+            .getWithConsistency[City](alpakkaClient)("asyncAlpakkaCities")('name -> "Nashville")
             .futureValue should equal(Some(Right(City("Nashville", "US"))))
       }
     }
