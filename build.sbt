@@ -41,9 +41,6 @@ val commonSettings = Seq(
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
   apiURL := Some(url("http://www.scanamo.org/latest/api/")),
-)
-
-val dynamoTestSettings = Seq(
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
   Test / parallelExecution := false
@@ -54,8 +51,7 @@ lazy val root = (project in file("."))
   .settings(
     commonSettings,
     publishingSettings,
-    noPublishSettings,
-    dynamoTestSettings
+    noPublishSettings
   )
 
 addCommandAlias("tut", "docs/tut")
@@ -102,7 +98,6 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     name := "scanamo"
   )
   .settings(
@@ -135,7 +130,6 @@ lazy val cats = (project in file("cats"))
     name := "scanamo-cats-effect",
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
@@ -154,7 +148,6 @@ lazy val scalaz = (project in file("scalaz"))
     name := "scanamo-scalaz",
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
@@ -173,7 +166,6 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     name := "scanamo-alpakka",
   )
   .settings(
@@ -200,7 +192,6 @@ lazy val docs = (project in file("docs"))
     commonSettings,
     micrositeSettings,
     noPublishSettings,
-    dynamoTestSettings,
     includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
