@@ -41,15 +41,9 @@ val commonSettings = Seq(
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
   apiURL := Some(url("http://www.scanamo.org/latest/api/")),
-)
-
-val dynamoTestSettings = Seq(
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
-  startDynamoDBLocal := startDynamoDBLocal.dependsOn(compile in Test).value,
-  test in Test := (test in Test).dependsOn(startDynamoDBLocal).value,
-  testOptions in Test += dynamoDBLocalTestCleanup.value,
-  parallelExecution in Test := false
+  Test / parallelExecution := false
 )
 
 lazy val root = (project in file("."))
@@ -58,6 +52,9 @@ lazy val root = (project in file("."))
     commonSettings,
     publishingSettings,
     noPublishSettings,
+    startDynamoDBLocal / aggregate := false,
+    dynamoDBLocalTestCleanup / aggregate := false,
+    stopDynamoDBLocal / aggregate := false
   )
 
 addCommandAlias("tut", "docs/tut")
@@ -104,7 +101,6 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     name := "scanamo"
   )
   .settings(
@@ -137,7 +133,6 @@ lazy val cats = (project in file("cats"))
     name := "scanamo-cats-effect",
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
@@ -147,22 +142,15 @@ lazy val cats = (project in file("cats"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    envVars in Test := Map(
-      "AWS_ACCESS_KEY_ID" -> "dummy",
-      "AWS_SECRET_KEY" -> "credentials"
-    ),
-    dynamoDBLocalDownloadDir := file(".cats-effect-dynamodb-local"),
-    dynamoDBLocalPort := 8042,
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
-  .dependsOn(formats, scanamo)
+  .dependsOn(formats, scanamo, testkit % "test->test")
 
 lazy val scalaz = (project in file("scalaz"))
   .settings(
     name := "scanamo-scalaz",
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
@@ -173,21 +161,14 @@ lazy val scalaz = (project in file("scalaz"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    envVars in Test := Map(
-      "AWS_ACCESS_KEY_ID" -> "dummy",
-      "AWS_SECRET_KEY" -> "credentials"
-    ),
-    dynamoDBLocalDownloadDir := file(".scalaz-ioeffect-dynamodb-local"),
-    dynamoDBLocalPort := 8042,
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
-  .dependsOn(formats, scanamo)
+  .dependsOn(formats, scanamo, testkit % "test->test")
 
 lazy val alpakka = (project in file("alpakka"))
   .settings(
     commonSettings,
     publishingSettings,
-    dynamoTestSettings,
     name := "scanamo-alpakka",
   )
   .settings(
@@ -199,26 +180,21 @@ lazy val alpakka = (project in file("alpakka"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
+    // Alpakka needs credentials and will look in environment variables first
     envVars in Test := Map(
       "AWS_ACCESS_KEY_ID" -> "dummy",
       "AWS_SECRET_KEY" -> "credentials"
     ),
-    dynamoDBLocalDownloadDir := file(".alpakka-dynamodb-local"),
-    dynamoDBLocalPort := 8052,
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
-  .dependsOn(formats, scanamo)
+  .dependsOn(formats, scanamo, testkit % "test->test")
 
 lazy val docs = (project in file("docs"))
   .settings(
     commonSettings,
     micrositeSettings,
     noPublishSettings,
-    dynamoDBLocalDownloadDir := file(".dynamodb-local"),
-    dynamoDBLocalPort := 8042,
-    tut := tut.dependsOn(startDynamoDBLocal).value,
-    stopDynamoDBLocal := stopDynamoDBLocal.triggeredBy(tut).value,
     includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
@@ -261,8 +237,11 @@ val publishingSettings = Seq(
     checkSnapshotDependencies,
     inquireVersions,
     runClean,
+    releaseStepCommand("startDynamodbLocal"),
     runTest,
+    releaseStepCommand("dynamodbLocalTestCleanup"),
     releaseStepCommandAndRemaining("+docs/tut"),
+    releaseStepCommand("stopDynamodbLocal"),
     setReleaseVersion,
     commitReleaseVersion,
     tagRelease,
