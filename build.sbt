@@ -51,7 +51,10 @@ lazy val root = (project in file("."))
   .settings(
     commonSettings,
     publishingSettings,
-    noPublishSettings
+    noPublishSettings,
+    startDynamoDBLocal / aggregate := false,
+    dynamoDBLocalTestCleanup / aggregate := false,
+    stopDynamoDBLocal / aggregate := false
   )
 
 addCommandAlias("tut", "docs/tut")
