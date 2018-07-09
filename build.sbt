@@ -4,7 +4,7 @@ crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 val catsVersion = "1.1.0"
 val catsEffectVersion = "1.0.0-RC2" // to be updated as this is the (almost) only RC
 val scalazVersion = "7.2.25" // Bump as needed for io-effect compat
-val scalazIOEffectVersion = "2.1.0"
+val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.3.0"
 
 val commonSettings = Seq(
@@ -78,9 +78,9 @@ lazy val formats = (project in file("formats"))
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
-    // doctestMarkdownEnabled := true,
-    // doctestDecodeHtmlEntities := true,
-    // doctestTestFramework := DoctestTestFramework.ScalaTest
+    doctestMarkdownEnabled := true,
+    doctestDecodeHtmlEntities := true,
+    doctestTestFramework := DoctestTestFramework.ScalaTest
   )
 
 lazy val refined = (project in file("refined"))
@@ -155,7 +155,7 @@ lazy val scalaz = (project in file("scalaz"))
       awsDynamoDB,
       "com.codecommit" %% "shims" % shimsVersion,
       "org.scalaz" %% "scalaz-core" % scalazVersion,
-      "org.scalaz" %% "scalaz-ioeffect" % "2.10.1",
+      "org.scalaz" %% "scalaz-ioeffect" % scalazIOEffectVersion,
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
