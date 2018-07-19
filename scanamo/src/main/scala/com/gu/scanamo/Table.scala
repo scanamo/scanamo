@@ -115,7 +115,8 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
     */
-  def index(indexName: String): SecondaryIndex[V] = SecondaryIndexWithOptions[V](name, indexName, ScanamoQueryOptions.default)
+  def index(indexName: String): SecondaryIndex[V] =
+    SecondaryIndexWithOptions[V](name, indexName, ScanamoQueryOptions.default)
 
   /**
     * Updates an attribute that is not part of the key and returns the updated row
@@ -487,7 +488,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Some(Right(Farmer(McDonald,156,Farm(List(gerbil, hamster, squirrel),20))))
     * }}}
     */
-  def given[T: ConditionExpression](condition: T) = ConditionalOperation[V,T](name, condition)
+  def given[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
   /**
     * Scans all elements of a table
@@ -581,11 +582,11 @@ case class Table[V: DynamoFormat](name: String) {
     * ...       Station("Metropolitan", "Croxley", 7),
     * ...       Station("Jubilee", "Canons Park", 5)
     * ...     ))
-    * ...     filteredStations <- stationTable.filter('zone < 8).query('line -> "Metropolitan" and ('name beginsWith "C"))
+    * ...     filteredStations <- stationTable.filter('zone -> Set(8, 7)).query('line -> "Metropolitan" and ('name beginsWith "C"))
     * ...   } yield filteredStations
     * ...   Scanamo.exec(client)(ops)
     * ... }
-    * List(Right(Station(Metropolitan,Chorleywood,7)), Right(Station(Metropolitan,Croxley,7)))
+    * List(Right(Station(Metropolitan,Chalfont & Latimer,8)), Right(Station(Metropolitan,Chorleywood,7)), Right(Station(Metropolitan,Croxley,7)))
     * }}}
     */
   def filter[C: ConditionExpression](condition: C) =

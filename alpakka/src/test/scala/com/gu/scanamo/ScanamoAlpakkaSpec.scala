@@ -12,11 +12,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
 
-class ScanamoAlpakkaSpec
-  extends FunSpecLike
-  with BeforeAndAfterAll
-  with Matchers
-  with ScalaFutures {
+class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
   implicit val system = ActorSystem("scanamo-alpakka")
 
@@ -35,7 +31,7 @@ class ScanamoAlpakkaSpec
     DynamoSettings(
       region = "",
       host = "localhost",
-      port = 8052,
+      port = 8042,
       parallelism = 2
     )
   )
@@ -62,13 +58,14 @@ class ScanamoAlpakkaSpec
 
       Scanamo.put(client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
 
-      ScanamoAlpakka.get[Farmer](alpakkaClient)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
+      ScanamoAlpakka
+        .get[Farmer](alpakkaClient)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
         .futureValue should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAlpakka.get[Farmer](alpakkaClient)("asyncFarmers")('name -> "Maggot")
-        .futureValue should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
+      ScanamoAlpakka.get[Farmer](alpakkaClient)("asyncFarmers")('name -> "Maggot").futureValue should equal(
+        Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
     }
 
     LocalDynamoDB.usingTable(client)("asyncEngines")('name -> S, 'number -> N) {
@@ -77,7 +74,8 @@ class ScanamoAlpakkaSpec
       Scanamo.put(client)("asyncEngines")(Engine("Thomas", 1))
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.get[Engine](alpakkaClient)("asyncEngines")('name -> "Thomas" and 'number -> 1)
+      ScanamoAlpakka
+        .get[Engine](alpakkaClient)("asyncEngines")('name -> "Thomas" and 'number -> 1)
         .futureValue should equal(Some(Right(Engine("Thomas", 1))))
     }
   }
@@ -88,11 +86,11 @@ class ScanamoAlpakkaSpec
     LocalDynamoDB.usingTable(client)("asyncAlpakkaCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).andThen {
+      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).flatMap {
         case _ =>
-          ScanamoAlpakka.getWithConsistency[City](alpakkaClient)("asyncCities")('name -> "Nashville")
-            .futureValue should equal(Some(Right(City("Nashville", "US"))))
-      }
+          ScanamoAlpakka
+            .getWithConsistency[City](alpakkaClient)("asyncAlpakkaCities")('name -> "Nashville")
+      }.futureValue should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
@@ -194,7 +192,7 @@ class ScanamoAlpakkaSpec
       case class Lemming(name: String, stuff: String)
 
       Scanamo.putAll(client)("asyncLemmings")(
-        (for {_ <- 0 until 100} yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
+        (for { _ <- 0 until 100 } yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
       )
 
       ScanamoAlpakka.scan[Lemming](alpakkaClient)("asyncLemmings").futureValue.toList.size should equal(100)
@@ -208,11 +206,11 @@ class ScanamoAlpakkaSpec
       Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
       val results = ScanamoAlpakka.scanWithLimit[Bear](alpakkaClient)("asyncBears", 1)
-      results.futureValue should equal(List(Right(Bear("Pooh","honey"))))
+      results.futureValue should equal(List(Right(Bear("Pooh", "honey"))))
     }
   }
 
-  it ("scanIndexWithLimit") {
+  it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
     LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
@@ -220,7 +218,7 @@ class ScanamoAlpakkaSpec
       Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1)
-      results.futureValue should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
+      results.futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
     }
   }
 
@@ -231,24 +229,32 @@ class ScanamoAlpakkaSpec
 
       Scanamo.put(client)("asyncAnimals")(Animal("Wolf", 1))
 
-      for {i <- 1 to 3} Scanamo.put(client)("asyncAnimals")(Animal("Pig", i))
+      for { i <- 1 to 3 } Scanamo.put(client)("asyncAnimals")(Animal("Pig", i))
 
       import com.gu.scanamo.syntax._
 
       ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig").futureValue.toList should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number < 3).futureValue.toList should equal(
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
+      ScanamoAlpakka
+        .query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number < 3)
+        .futureValue
+        .toList should equal(List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number > 1).futureValue.toList should equal(
-        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
+      ScanamoAlpakka
+        .query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number > 1)
+        .futureValue
+        .toList should equal(List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number <= 2).futureValue.toList should equal(
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
+      ScanamoAlpakka
+        .query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number <= 2)
+        .futureValue
+        .toList should equal(List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoAlpakka.query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number >= 2).futureValue.toList should equal(
-        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
+      ScanamoAlpakka
+        .query[Animal](alpakkaClient)("asyncAnimals")('species -> "Pig" and 'number >= 2)
+        .futureValue
+        .toList should equal(List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
     }
 
@@ -258,53 +264,63 @@ class ScanamoAlpakkaSpec
 
       import com.gu.scanamo.syntax._
 
-      Scanamo.putAll(client)("asyncTransport")(Set(
-        Transport("Underground", "Circle"),
-        Transport("Underground", "Metropolitan"),
-        Transport("Underground", "Central")))
+      Scanamo.putAll(client)("asyncTransport")(
+        Set(
+          Transport("Underground", "Circle"),
+          Transport("Underground", "Metropolitan"),
+          Transport("Underground", "Central")))
 
-      ScanamoAlpakka.query[Transport](alpakkaClient)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).futureValue.toList should equal(
+      ScanamoAlpakka
+        .query[Transport](alpakkaClient)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C"))
+        .futureValue
+        .toList should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
     }
   }
 
-  it ("queries with a limit asynchronously") {
+  it("queries with a limit asynchronously") {
     import com.gu.scanamo.syntax._
 
     case class Transport(mode: String, line: String)
 
     LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
-      Scanamo.putAll(client)("transport")(Set(
-        Transport("Underground", "Circle"),
-        Transport("Underground", "Metropolitan"),
-        Transport("Underground", "Central")))
-      val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
-      results.futureValue should equal(List(Right(Transport("Underground","Central"))))
+      Scanamo.putAll(client)("transport")(
+        Set(
+          Transport("Underground", "Circle"),
+          Transport("Underground", "Metropolitan"),
+          Transport("Underground", "Central")))
+      val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)("transport")(
+        'mode -> "Underground" and ('line beginsWith "C"),
+        1)
+      results.futureValue should equal(List(Right(Transport("Underground", "Central"))))
     }
   }
 
-  it ("queries an index with a limit asynchronously") {
+  it("queries an index with a limit asynchronously") {
     case class Transport(mode: String, line: String, colour: String)
 
     import com.gu.scanamo.syntax._
 
-    LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
-      'mode -> S, 'line -> S)('mode -> S, 'colour -> S
-    ) {
-      Scanamo.putAll(client)("transport")(Set(
-        Transport("Underground", "Circle", "Yellow"),
-        Transport("Underground", "Metropolitan", "Magenta"),
-        Transport("Underground", "Central", "Red"),
-        Transport("Underground", "Picadilly", "Blue"),
-        Transport("Underground", "Northern", "Black")))
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)(
+      'mode -> S,
+      'colour -> S) {
+      Scanamo.putAll(client)("transport")(
+        Set(
+          Transport("Underground", "Circle", "Yellow"),
+          Transport("Underground", "Metropolitan", "Magenta"),
+          Transport("Underground", "Central", "Red"),
+          Transport("Underground", "Picadilly", "Blue"),
+          Transport("Underground", "Northern", "Black")
+        ))
       val results = ScanamoAlpakka.queryIndexWithLimit[Transport](alpakkaClient)("transport", "colour-index")(
-        'mode -> "Underground" and ('colour beginsWith "Bl"), 1)
+        'mode -> "Underground" and ('colour beginsWith "Bl"),
+        1)
 
-      results.futureValue should equal(List(Right(Transport("Underground","Northern","Black"))))
+      results.futureValue should equal(List(Right(Transport("Underground", "Northern", "Black"))))
     }
   }
 
-  it ("queries an index asynchronously with 'between' sort-key condition") {
+  it("queries an index asynchronously with 'between' sort-key condition") {
     case class Station(mode: String, name: String, zone: Int)
 
     import com.gu.scanamo.syntax._
@@ -320,9 +336,9 @@ class ScanamoAlpakkaSpec
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withTableWithSecondaryIndex(client)("stations", "zone-index")(
-      'mode -> S, 'name -> S)('mode -> S, 'zone -> N
-    ) {
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("stations", "zone-index")('mode -> S, 'name -> S)(
+      'mode -> S,
+      'zone -> N) {
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       Scanamo.putAll(client)("stations")(stations)
       val results1 = ScanamoAlpakka.queryIndex[Station](alpakkaClient)("stations", "zone-index")(
@@ -330,7 +346,8 @@ class ScanamoAlpakkaSpec
 
       results1.futureValue should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
 
-      val maybeStations1 = for {_ <- deletaAllStations(alpakkaClient, stations)} yield Scanamo.scan[Station](client)("stations")
+      val maybeStations1 = for { _ <- deletaAllStations(alpakkaClient, stations) } yield
+        Scanamo.scan[Station](client)("stations")
       maybeStations1.futureValue should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(LiverpoolStreet))
@@ -338,7 +355,8 @@ class ScanamoAlpakkaSpec
         'mode -> "Underground" and ('zone between (2 and 4)))
       results2.futureValue should equal(List.empty)
 
-      val maybeStations2 = for {_ <- deletaAllStations(alpakkaClient, stations)} yield Scanamo.scan[Station](client)("stations")
+      val maybeStations2 = for { _ <- deletaAllStations(alpakkaClient, stations) } yield
+        Scanamo.scan[Station](client)("stations")
       maybeStations2.futureValue should equal(List.empty)
 
       Scanamo.putAll(client)("stations")(Set(CamdenTown))
@@ -370,8 +388,9 @@ class ScanamoAlpakkaSpec
 
     LocalDynamoDB.usingTable(client)("asyncRabbits")('name -> S) {
       val result = for {
-        _ <- ScanamoAlpakka.putAll(alpakkaClient)("asyncRabbits")((
-          for {_ <- 0 until 100} yield Rabbit(util.Random.nextString(500))
+        _ <- ScanamoAlpakka.putAll(alpakkaClient)("asyncRabbits")(
+          (
+            for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))
           ).toSet)
       } yield Scanamo.scan[Rabbit](client)("asyncRabbits")
 
@@ -386,18 +405,25 @@ class ScanamoAlpakkaSpec
       case class Farm(animals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      Scanamo.putAll(client)("asyncFarmers")(Set(
-        Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
-      ))
+      Scanamo.putAll(client)("asyncFarmers")(
+        Set(
+          Farmer("Boggis", 43L, Farm(List("chicken"))),
+          Farmer("Bunce", 52L, Farm(List("goose"))),
+          Farmer("Bean", 55L, Farm(List("turkey")))
+        ))
 
-      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")(
-        UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
-      ).futureValue should equal(
+      ScanamoAlpakka
+        .getAll[Farmer](alpakkaClient)("asyncFarmers")(
+          UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
+        )
+        .futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoAlpakka.getAll[Farmer](alpakkaClient)("asyncFarmers")('name -> Set("Boggis", "Bean")).futureValue should equal(
+      ScanamoAlpakka
+        .getAll[Farmer](alpakkaClient)("asyncFarmers")('name -> Set("Boggis", "Bean"))
+        .futureValue should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
@@ -408,10 +434,11 @@ class ScanamoAlpakkaSpec
         Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.getAll[Doctor](alpakkaClient)("asyncDoctors")(
-        ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
-      ).futureValue should equal(
-        Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
+      ScanamoAlpakka
+        .getAll[Doctor](alpakkaClient)("asyncDoctors")(
+          ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
+        )
+        .futureValue should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
 
     }
   }
@@ -425,9 +452,11 @@ class ScanamoAlpakkaSpec
 
       Scanamo.putAll(client)("asyncFarms")(farms)
 
-      ScanamoAlpakka.getAll[Farm](alpakkaClient)("asyncFarms")(
-        UniqueKeys(KeyList('id, farms.map(_.id)))
-      ).futureValue should equal(farms.map(Right(_)))
+      ScanamoAlpakka
+        .getAll[Farm](alpakkaClient)("asyncFarms")(
+          UniqueKeys(KeyList('id, farms.map(_.id)))
+        )
+        .futureValue should equal(farms.map(Right(_)))
     }
   }
 
@@ -440,9 +469,11 @@ class ScanamoAlpakkaSpec
 
       Scanamo.putAll(client)("asyncFarms")(farms)
 
-      ScanamoAsync.getAllWithConsistency[Farm](client)("asyncFarms")(
-        UniqueKeys(KeyList('id, farms.map(_.id)))
-      ).futureValue should equal(farms.map(Right(_)))
+      ScanamoAsync
+        .getAllWithConsistency[Farm](client)("asyncFarms")(
+          UniqueKeys(KeyList('id, farms.map(_.id)))
+        )
+        .futureValue should equal(farms.map(Right(_)))
     }
   }
 
@@ -503,7 +534,7 @@ class ScanamoAlpakkaSpec
         _ <- gremlinsTable.given('wet -> true).delete('number -> 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
-      ScanamoAlpakka.exec(alpakkaClient)(ops).futureValue.toList should equal(List(Right(Gremlin(1,false))))
+      ScanamoAlpakka.exec(alpakkaClient)(ops).futureValue.toList should equal(List(Right(Gremlin(1, false))))
     }
   }
 

@@ -18,5 +18,5 @@ install:
   - gem update --system
   - gem install sass
   - gem install jekyll -v 3.2.1
-script: "sbt clean coverage test makeMicrosite"
+script: "sbt clean coverage startDynamodbLocal test dynamodbLocalTestCleanup makeMicrosite stopDynamodbLocal"
 #after_success: "sbt coverageReport coveralls"

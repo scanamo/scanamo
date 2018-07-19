@@ -84,10 +84,9 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat {
-  private def attribute[T](
-                            decode: AttributeValue => T, propertyType: String)(
-                            encode: AttributeValue => T => AttributeValue
-                          ): DynamoFormat[T] = {
+  private def attribute[T](decode: AttributeValue => T, propertyType: String)(
+      encode: AttributeValue => T => AttributeValue
+  ): DynamoFormat[T] = {
     new DynamoFormat[T] {
       override def read(av: AttributeValue): Either[DynamoReadError, T] =
         Either.fromOption(Option(decode(av)), NoPropertyOfType(propertyType, av))
@@ -158,7 +157,8 @@ object DynamoFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B, T >: scala.Null <: scala.Throwable](read: B => A)(write: A => B)(implicit f: DynamoFormat[B], T: ClassTag[T], NT: NotNull[T]) =
+  def coercedXmap[A, B, T >: scala.Null <: scala.Throwable](read: B => A)(
+      write: A => B)(implicit f: DynamoFormat[B], T: ClassTag[T], NT: NotNull[T]) =
     xmap(coerce[B, A, T](read))(write)
 
   /**
@@ -177,8 +177,7 @@ object DynamoFormat {
     *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == Right(b)
     * }}}
     */
-  implicit val booleanFormat = xmap[Boolean, java.lang.Boolean](
-    b => Right(Boolean.unbox(b)))(
+  implicit val booleanFormat = xmap[Boolean, java.lang.Boolean](b => Right(Boolean.unbox(b)))(
     Boolean.box
   )(javaBooleanFormat)
 
@@ -186,8 +185,9 @@ object DynamoFormat {
   private def coerceNumber[N](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
 
-  private def coerce[A, B, T >: scala.Null <: scala.Throwable](f: A => B)(implicit T: ClassTag[T], NT: NotNull[T]): A => Either[DynamoReadError, B] = a =>
-    Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
+  private def coerce[A, B, T >: scala.Null <: scala.Throwable](
+      f: A => B)(implicit T: ClassTag[T], NT: NotNull[T]): A => Either[DynamoReadError, B] =
+    a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
 
   /**
     * {{{
@@ -242,7 +242,7 @@ object DynamoFormat {
   private val javaByteBufferFormat = attribute[java.nio.ByteBuffer](_.getB, "B")(_.withB)
 
   private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
-    coerce[ByteBuffer,B, IllegalArgumentException](f)
+    coerce[ByteBuffer, B, IllegalArgumentException](f)
 
   /**
     * {{{
@@ -272,8 +272,7 @@ object DynamoFormat {
     * }}}
     */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    xmap[List[T], java.util.List[AttributeValue]](
-      _.asScala.toList.traverse(f.read))(
+    xmap[List[T], java.util.List[AttributeValue]](_.asScala.toList.traverse(f.read))(
       _.map(f.write).asJava
     )(javaListFormat)
 
@@ -295,8 +294,7 @@ object DynamoFormat {
     * }}}
     */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
-    xmap[Vector[T], java.util.List[AttributeValue]](
-      _.asScala.toVector.traverse(f.read))(
+    xmap[Vector[T], java.util.List[AttributeValue]](_.asScala.toVector.traverse(f.read))(
       _.map(f.write).asJava
     )(javaListFormat)
 
@@ -307,17 +305,16 @@ object DynamoFormat {
     *     |   a.deep
     * }}}
     */
-  implicit def arrayFormat[T:ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    xmap[Array[T], java.util.List[AttributeValue]](
-      _.asScala.toList.traverse(f.read).map(_.toArray))(
+  implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
+    xmap[Array[T], java.util.List[AttributeValue]](_.asScala.toList.traverse(f.read).map(_.toArray))(
       _.map(f.write).toList.asJava
     )(javaListFormat)
 
   private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
   private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
-  private def setFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
-    xmap[Set[T], java.util.List[String]](
-      _.asScala.toList.traverse(r).map(_.toSet))(
+  private def setFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(
+      df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
+    xmap[Set[T], java.util.List[String]](_.asScala.toList.traverse(r).map(_.toSet))(
       _.map(w).toList.asJava
     )(df)
 
@@ -375,8 +372,7 @@ object DynamoFormat {
     * }}}
     */
   implicit val stringSetFormat =
-    xmap[Set[String], java.util.List[String]](
-      s => Right(s.asScala.toSet))(
+    xmap[Set[String], java.util.List[String]](s => Right(s.asScala.toSet))(
       _.toList.asJava
     )(javaStringSetFormat)
 
@@ -413,7 +409,9 @@ object DynamoFormat {
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
     def read(av: AttributeValue): Either[DynamoReadError, Option[T]] = {
-      Option(av).filter(x => !Boolean.unbox(x.isNULL)).map(f.read(_).map(Some(_)))
+      Option(av)
+        .filter(x => !Boolean.unbox(x.isNULL))
+        .map(f.read(_).map(Some(_)))
         .getOrElse(Right(Option.empty[T]))
     }
 

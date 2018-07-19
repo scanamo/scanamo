@@ -21,72 +21,75 @@ object ScanamoAsync {
   def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A])(implicit ec: ExecutionContext) =
     op.foldMap(ScanamoInterpreters.future(client)(ec))
 
-  def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)
-    (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
+  def put[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(item: T)(
+      implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.put(tableName)(item))
 
-  def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: Set[T])
-    (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
+  def putAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(items: Set[T])(
+      implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
     exec(client)(ScanamoFree.putAll(tableName)(items))
 
-  def get[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
-    (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
+  def get[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])(
+      implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.get[T](tableName)(key))
 
-  def getWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
-                          (implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
+  def getWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])(
+      implicit ec: ExecutionContext): Future[Option[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getWithConsistency[T](tableName)(key))
 
-  def getAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])
-    (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
+  def getAll[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])(
+      implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAll[T](tableName)(keys))
 
-  def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])
-                             (implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
+  def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])(
+      implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAllWithConsistency[T](tableName)(keys))
 
-  def delete[T](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])
-    (implicit ec: ExecutionContext): Future[DeleteItemResult] =
+  def delete[T](client: AmazonDynamoDBAsync)(tableName: String)(key: UniqueKey[_])(
+      implicit ec: ExecutionContext): Future[DeleteItemResult] =
     exec(client)(ScanamoFree.delete(tableName)(key))
 
-  def deleteAll(client: AmazonDynamoDBAsync)(tableName: String)(items: UniqueKeys[_])
-                             (implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
+  def deleteAll(client: AmazonDynamoDBAsync)(tableName: String)(items: UniqueKeys[_])(
+      implicit ec: ExecutionContext): Future[List[BatchWriteItemResult]] =
     exec(client)(ScanamoFree.deleteAll(tableName)(items))
 
   def update[V: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(
-    key: UniqueKey[_], expression: UpdateExpression)(implicit ec: ExecutionContext
-  ): Future[Either[DynamoReadError,V]] =
+      key: UniqueKey[_],
+      expression: UpdateExpression)(implicit ec: ExecutionContext): Future[Either[DynamoReadError, V]] =
     exec(client)(ScanamoFree.update[V](tableName)(key)(expression))
 
-  def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def scan[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(
+      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scan(tableName))
 
-  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, limit: Int)(
+      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
-  def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def scanIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(
+      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
-  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def scanIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(
+      tableName: String,
+      indexName: String,
+      limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
-  def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def query[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_])(
+      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.query(tableName)(query))
 
-  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int)
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def queryWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(query: Query[_], limit: Int)(
+      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
 
-  def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])
-    (implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+  def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])(
+      implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndex(tableName, indexName)(query))
 
   def queryIndexWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(
-    query: Query[_], limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
+      query: Query[_],
+      limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 }

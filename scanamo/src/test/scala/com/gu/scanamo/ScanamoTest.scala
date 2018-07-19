@@ -6,17 +6,16 @@ import com.gu.scanamo.generic.auto._
 class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
   it("should bring back all results for queries over large datasets") {
     val client = LocalDynamoDB.client()
-    LocalDynamoDB.createTable(client)("large-query")('name -> S, 'number -> N)
-
     case class Large(name: String, number: Int, stuff: String)
-    Scanamo.putAll(client)("large-query")(
-      (for { i <- 0 until 100 } yield Large("Harry", i, util.Random.nextString(5000))).toSet
-    )
-    Scanamo.put(client)("large-query")(Large("George", 1, "x"))
-    import syntax._
-    Scanamo.query[Large](client)("large-query")('name -> "Harry").toList.size should be (100)
-
-    client.deleteTable("large-query")
+    LocalDynamoDB.usingTable(client)("large-query")('name -> S, 'number -> N) {
+      Scanamo.putAll(client)("large-query")(
+        (for { i <- 0 until 100 } yield Large("Harry", i, util.Random.nextString(5000))).toSet
+      )
+      Scanamo.put(client)("large-query")(Large("George", 1, "x"))
+      import syntax._
+      Scanamo.query[Large](client)("large-query")('name -> "Harry").toList.size should be(100)
+    }
+    client.shutdown()
   }
 
   it("should get consistently") {
@@ -27,7 +26,8 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
       Scanamo.put(client)("asyncCities")(City("Nashville", "US"))
 
       import com.gu.scanamo.syntax._
-      Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville") should equal(Some(Right(City("Nashville", "US"))))
+      Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville") should equal(
+        Some(Right(City("Nashville", "US"))))
     }
   }
 

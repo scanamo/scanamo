@@ -10,10 +10,10 @@ import eu.timepit.refined.api.{RefType, Validate}
 package object refined {
 
   implicit def refTypeDynamoFormat[F[_, _], T, P](
-    implicit
-    baseFormat: DynamoFormat[T],
-    refType: RefType[F],
-    validate: Validate[T, P]
+      implicit
+      baseFormat: DynamoFormat[T],
+      refType: RefType[F],
+      validate: Validate[T, P]
   ): DynamoFormat[F[T, P]] = new DynamoFormat[F[T, P]] {
 
     override def default: Option[F[T, P]] = {
