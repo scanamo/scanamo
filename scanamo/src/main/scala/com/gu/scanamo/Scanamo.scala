@@ -375,10 +375,10 @@ object Scanamo {
     * >>> case class Animal(species: String, number: Int)
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> LocalDynamoDB.withTable(client)("animals")('species -> S, 'number -> N) {
     * ...   Scanamo.put(client)("animals")(Animal("Wolf", 1))
-    * ...   import com.gu.scanamo.generic.auto._
     * ...   import com.gu.scanamo.query._
     * ...   for { i <- 1 to 3 } Scanamo.put(client)("animals")(Animal("Pig", i))
     * ...   Scanamo.query[Animal](client)("animals")(Query(KeyEquals('species, "Pig")))
@@ -398,6 +398,7 @@ object Scanamo {
     * It also supports various conditions on the range key
     * {{{
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> case class Transport(mode: String, line: String)
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
     * ...   Scanamo.putAll(client)("transport")(Set(
