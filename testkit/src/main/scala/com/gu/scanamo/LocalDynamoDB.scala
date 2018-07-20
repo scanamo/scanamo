@@ -27,7 +27,7 @@ object LocalDynamoDB {
         )
         created = true
       } catch {
-        case _ => client.deleteTable(tableName)          
+        case x: ResourceInUseException if x.getMessage.contains("preexisting") => client.deleteTable(tableName)
       }
     }
   }
