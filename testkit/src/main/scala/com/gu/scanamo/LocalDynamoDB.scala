@@ -16,12 +16,20 @@ object LocalDynamoDB {
       .build()
 
   def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) = {
-    client.createTable(
-      attributeDefinitions(attributes),
-      tableName,
-      keySchema(attributes),
-      arbitraryThroughputThatIsIgnoredByDynamoDBLocal
-    )
+    var created = false
+    while (!created) {
+      try {
+        client.createTable(
+          attributeDefinitions(attributes),
+          tableName,
+          keySchema(attributes),
+          arbitraryThroughputThatIsIgnoredByDynamoDBLocal
+        )
+        created = true
+      } catch {
+        case _ => client.deleteTable(tableName)          
+      }
+    }
   }
 
   def deleteTable(client: AmazonDynamoDB)(tableName: String) = {
