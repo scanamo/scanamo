@@ -208,11 +208,11 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
-      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
-      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", None))
-      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+      Scanamo.put(client)(t)(Bear("Pooh", "honey", Some("Winnie")))
+      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets", None))
+      Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
+      val results = ScanamoAsync.scanIndexWithLimit[Bear](client)(t, i, 1)
       results.futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
     }
   }
@@ -220,14 +220,14 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   it("Paginate scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
-      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
-      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
-      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+      Scanamo.put(client)(t)(Bear("Pooh", "honey", Some("Winnie")))
+      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets", Some("Kanga")))
+      Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = for {
-        res1 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, None)
-        res2 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res1._2)
-        res3 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res2._2)
+        res1 <- ScanamoAsync.scanIndexFrom[Bear](client)(t, i, 1, None)
+        res2 <- ScanamoAsync.scanIndexFrom[Bear](client)(t, i, 1, res1._2)
+        res3 <- ScanamoAsync.scanIndexFrom[Bear](client)(t, i, 1, res2._2)
       } yield res2._1 ::: res3._1
 
       results.futureValue should equal(
@@ -314,10 +314,10 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     import com.gu.scanamo.syntax._
 
-    LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)(
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)(
       'mode -> S,
-      'colour -> S) {
-      Scanamo.putAll(client)("transport")(
+      'colour -> S) { (t, i) =>
+      Scanamo.putAll(client)(t)(
         Set(
           Transport("Underground", "Circle", "Yellow"),
           Transport("Underground", "Metropolitan", "Magenta"),
@@ -325,7 +325,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
           Transport("Underground", "Picadilly", "Blue"),
           Transport("Underground", "Northern", "Black")
         ))
-      val results = ScanamoAsync.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
+      val results = ScanamoAsync.queryIndexWithLimit[Transport](client)(t, i)(
         'mode -> "Underground" and ('colour beginsWith "Bl"),
         1)
 
@@ -338,9 +338,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     import com.gu.scanamo.syntax._
 
-    def deletaAllStations(client: AmazonDynamoDBAsync, stations: Set[Station]) = {
-      ScanamoAsync.delete(client)("stations")('mode -> "Underground")
-      ScanamoAsync.deleteAll(client)("stations")(
+    def deletaAllStations(client: AmazonDynamoDBAsync, tableName: String, stations: Set[Station]) = {
+      ScanamoAsync.delete(client)(tableName)('mode -> "Underground")
+      ScanamoAsync.deleteAll(client)(tableName)(
         UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
       )
     }
@@ -349,31 +349,31 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withTableWithSecondaryIndex(client)("stations", "zone-index")('mode -> S, 'name -> S)(
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)(
       'mode -> S,
-      'zone -> N) {
+      'zone -> N) { (t, i) =>
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
-      Scanamo.putAll(client)("stations")(stations)
-      val results1 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+      Scanamo.putAll(client)(t)(stations)
+      val results1 = ScanamoAsync.queryIndex[Station](client)(t, i)(
         'mode -> "Underground" and ('zone between (2 and 4)))
 
       results1.futureValue should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
 
-      val maybeStations1 = for { _ <- deletaAllStations(client, stations) } yield
-        Scanamo.scan[Station](client)("stations")
+      val maybeStations1 = for { _ <- deletaAllStations(client, t, stations) } yield
+        Scanamo.scan[Station](client)(t)
       maybeStations1.futureValue should equal(List.empty)
 
-      Scanamo.putAll(client)("stations")(Set(LiverpoolStreet))
-      val results2 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+      Scanamo.putAll(client)(t)(Set(LiverpoolStreet))
+      val results2 = ScanamoAsync.queryIndex[Station](client)(t, i)(
         'mode -> "Underground" and ('zone between (2 and 4)))
       results2.futureValue should equal(List.empty)
 
-      val maybeStations2 = for { _ <- deletaAllStations(client, stations) } yield
-        Scanamo.scan[Station](client)("stations")
+      val maybeStations2 = for { _ <- deletaAllStations(client, t, stations) } yield
+        Scanamo.scan[Station](client)(t)
       maybeStations2.futureValue should equal(List.empty)
 
-      Scanamo.putAll(client)("stations")(Set(CamdenTown))
-      val results3 = ScanamoAsync.queryIndex[Station](client)("stations", "zone-index")(
+      Scanamo.putAll(client)(t)(Set(CamdenTown))
+      val results3 = ScanamoAsync.queryIndex[Station](client)(t, i)(
         'mode -> "Underground" and ('zone between (1 and 1)))
       results3.futureValue should equal(List.empty)
     }

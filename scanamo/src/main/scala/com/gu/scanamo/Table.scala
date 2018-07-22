@@ -74,19 +74,19 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('colour -> S) { (t, i) =>
+    * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),
     * ...       Transport("Underground", "Metropolitan", "Magenta"),
     * ...       Transport("Underground", "Central", "Red")))
-    * ...     MagentaLine <- transport.index("colour-index").query('colour -> "Magenta")
+    * ...     MagentaLine <- transport.index(i).query('colour -> "Magenta")
     * ...   } yield MagentaLine.toList
     * ...   Scanamo.exec(client)(operations)
     * ... }
@@ -95,9 +95,9 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
-    * >>> val githubProjects = Table[GithubProject]("github-projects")
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("github-projects", "language-license")('organisation -> S, 'repository -> S)('language -> S, 'license -> S) {
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('organisation -> S, 'repository -> S)('language -> S, 'license -> S) { (t, i) =>
+    * ...   val githubProjects = Table[GithubProject](t)
     * ...   val operations = for {
     * ...     _ <- githubProjects.putAll(Set(
     * ...       GithubProject("typelevel", "cats", "Scala", "MIT"),
@@ -105,7 +105,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
     * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
     * ...     ))
-    * ...     scalaMIT <- githubProjects.index("language-license").query('language -> "Scala" and ('license -> "MIT"))
+    * ...     scalaMIT <- githubProjects.index(i).query('language -> "Scala" and ('license -> "MIT"))
     * ...   } yield scalaMIT.toList
     * ...   Scanamo.exec(client)(operations)
     * ... }

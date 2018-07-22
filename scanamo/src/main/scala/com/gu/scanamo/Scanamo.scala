@@ -343,10 +343,10 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
-    * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
-    * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
-    * ...   Scanamo.scanIndex[Bear](client)("bears", "alias-index")
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    * ...   Scanamo.put(client)(t)(Bear("Pooh", "honey", Some("Winnie")))
+    * ...   Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets", None))
+    * ...   Scanamo.scanIndex[Bear](client)(t, i)
     * ... }
     * List(Right(Bear(Pooh,honey,Some(Winnie))))
     * }}}
@@ -364,11 +364,11 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
-    * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
-    * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
-    * ...   Scanamo.put(client)("bears")(Bear("Graham", "quinoa", Some("Guardianista")))
-    * ...   Scanamo.scanIndexWithLimit[Bear](client)("bears", "alias-index", 1)
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    * ...   Scanamo.put(client)(t)(Bear("Pooh", "honey", Some("Winnie")))
+    * ...   Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets", None))
+    * ...   Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
+    * ...   Scanamo.scanIndexWithLimit[Bear](client)(t, i, 1)
     * ... }
     * List(Right(Bear(Graham,quinoa,Some(Guardianista))))
     * }}}
@@ -387,12 +387,12 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "alias-index")('name -> S)('alias -> S) {
-    * ...   Scanamo.put(client)("bears")(Bear("Pooh", "honey", Some("Winnie")))
-    * ...   Scanamo.put(client)("bears")(Bear("Yogi", "picnic baskets", None))
-    * ...   Scanamo.put(client)("bears")(Bear("Graham", "quinoa", Some("Guardianista")))
-    * ...   val res1 = Scanamo.scanIndexFrom[Bear](client)("bears", "alias-index", 1, None)
-    * ...   Scanamo.scanIndexFrom[Bear](client)("bears", "alias-index", 1, res1._2)._1
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    * ...   Scanamo.put(client)(t)(Bear("Pooh", "honey", Some("Winnie")))
+    * ...   Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets", None))
+    * ...   Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
+    * ...   val res1 = Scanamo.scanIndexFrom[Bear](client)(t, i, 1, None)
+    * ...   Scanamo.scanIndexFrom[Bear](client)(t, i, 1, res1._2)._1
     * ... }
     * List(Right(Bear(Pooh,honey,Some(Winnie))))
     * }}}
@@ -510,12 +510,12 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('mode -> S, 'line -> S)('colour -> S) {
-    * ...   Scanamo.putAll(client)("transport")(Set(
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('colour -> S) { (t, i) =>
+    * ...   Scanamo.putAll(client)(t)(Set(
     * ...     Transport("Underground", "Circle", "Yellow"),
     * ...     Transport("Underground", "Metropolitan", "Magenta"),
     * ...     Transport("Underground", "Central", "Red")))
-    * ...   Scanamo.queryIndex[Transport](client)("transport", "colour-index")('colour -> "Magenta")
+    * ...   Scanamo.queryIndex[Transport](client)(t, i)('colour -> "Magenta")
     * ... }
     * List(Right(Transport(Underground,Metropolitan,Magenta)))
     * }}}
@@ -533,16 +533,16 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
-    * ... ) {
-    * ...   Scanamo.putAll(client)("transport")(Set(
+    * ... ) { (t, i) =>
+    * ...   Scanamo.putAll(client)(t)(Set(
     * ...     Transport("Underground", "Circle", "Yellow"),
     * ...     Transport("Underground", "Metropolitan", "Magenta"),
     * ...     Transport("Underground", "Central", "Red"),
     * ...     Transport("Underground", "Picadilly", "Blue"),
     * ...     Transport("Underground", "Northern", "Black")))
-    * ...   Scanamo.queryIndexWithLimit[Transport](client)("transport", "colour-index")(
+    * ...   Scanamo.queryIndexWithLimit[Transport](client)(t, i)(
     * ...     ('mode -> "Underground" and ('colour beginsWith "Bl")), 1)
     * ... }
     * List(Right(Transport(Underground,Northern,Black)))
@@ -562,18 +562,18 @@ object Scanamo {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
-    * ... ) {
-    * ...   Scanamo.putAll(client)("transport")(Set(
+    * ... ) { (t, i) =>
+    * ...   Scanamo.putAll(client)(t)(Set(
     * ...     Transport("Underground", "Circle", "Yellow"),
     * ...     Transport("Underground", "Metropolitan", "Magenta"),
     * ...     Transport("Underground", "Central", "Red"),
     * ...     Transport("Underground", "Picadilly", "Blue"),
     * ...     Transport("Underground", "Northern", "Black")))
-    * ...   val res1 = Scanamo.queryIndexFrom[Transport](client)("transport", "colour-index")(
+    * ...   val res1 = Scanamo.queryIndexFrom[Transport](client)(t, i)(
     * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, None)
-    * ...   Scanamo.queryIndexFrom[Transport](client)("transport", "colour-index")(
+    * ...   Scanamo.queryIndexFrom[Transport](client)(t, i)(
     * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, res1._2)._1
     * ... }
     * List(Right(Transport(Underground,Picadilly,Blue)))
