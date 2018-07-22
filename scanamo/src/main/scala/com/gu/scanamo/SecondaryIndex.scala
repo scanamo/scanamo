@@ -147,7 +147,7 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
-  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions))
+  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def query(query: Query[_]) =
-    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
+    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
 }

@@ -10,7 +10,9 @@ import com.amazonaws.services.dynamodbv2.model._
 
 object CatsInterpreter {
   def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Effect[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
-    private def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B], req: A): F[B] =
+    private def eff[A <: AmazonWebServiceRequest, B](
+        f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
+        req: A): F[B] =
       F.async { cb =>
         val handler = new AsyncHandler[A, B] {
           def onError(exception: Exception): Unit =
@@ -26,8 +28,7 @@ object CatsInterpreter {
       case Put(req) =>
         eff(client.putItemAsync, JavaRequests.put(req))
       case ConditionalPut(req) =>
-        eff(client.putItemAsync, JavaRequests.put(req))
-          .attempt
+        eff(client.putItemAsync, JavaRequests.put(req)).attempt
           .flatMap(
             _.fold(
               _ match {
@@ -42,8 +43,7 @@ object CatsInterpreter {
       case Delete(req) =>
         eff(client.deleteItemAsync, JavaRequests.delete(req))
       case ConditionalDelete(req) =>
-        eff(client.deleteItemAsync, JavaRequests.delete(req))
-          .attempt
+        eff(client.deleteItemAsync, JavaRequests.delete(req)).attempt
           .flatMap(
             _.fold(
               _ match {
@@ -59,14 +59,19 @@ object CatsInterpreter {
         eff(client.queryAsync, JavaRequests.query(req))
       // Overloading means we need explicit parameter types here
       case BatchWrite(req) =>
-        eff(client.batchWriteItemAsync(_: BatchWriteItemRequest, _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]), req)
+        eff(
+          client.batchWriteItemAsync(
+            _: BatchWriteItemRequest,
+            _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+          req)
       case BatchGet(req) =>
-        eff(client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]), req)
+        eff(
+          client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+          req)
       case Update(req) =>
         eff(client.updateItemAsync, JavaRequests.update(req))
       case ConditionalUpdate(req) =>
-        eff(client.updateItemAsync, JavaRequests.update(req))
-          .attempt
+        eff(client.updateItemAsync, JavaRequests.update(req)).attempt
           .flatMap(
             _.fold(
               _ match {
