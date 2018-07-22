@@ -40,13 +40,12 @@ case class ScanamoQueryRequest(
 
 case class ScanamoQueryOptions(
     consistent: Boolean,
-    scanIndexForward: Boolean,
     limit: Option[Int],
     exclusiveStartKey: Option[EvaluationKey],
     filter: Option[Condition[_]]
 )
 object ScanamoQueryOptions {
-  val default = ScanamoQueryOptions(false, true, None, None, None)
+  val default = ScanamoQueryOptions(false, None, None, None)
 }
 
 case class RequestCondition(
