@@ -93,6 +93,13 @@ object LocalDynamoDB {
     ()
   }
 
+  def usingRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+      thunk: String => T
+  ): Unit = {
+    withRandomTable(client)(attributeDefinitions: _*)(thunk)
+    ()
+  }
+
   def withTableWithSecondaryIndex[T](client: AmazonDynamoDB)(tableName: String, secondaryIndexName: String)(
       primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
       thunk: => T
