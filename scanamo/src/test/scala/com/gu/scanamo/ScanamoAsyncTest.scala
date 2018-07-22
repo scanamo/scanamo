@@ -296,13 +296,13 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     case class Transport(mode: String, line: String)
 
-    LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
-      Scanamo.putAll(client)("transport")(
+    LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+      Scanamo.putAll(client)(t)(
         Set(
           Transport("Underground", "Circle"),
           Transport("Underground", "Metropolitan"),
           Transport("Underground", "Central")))
-      val results = ScanamoAsync.queryWithLimit[Transport](client)("transport")(
+      val results = ScanamoAsync.queryWithLimit[Transport](client)(t)(
         'mode -> "Underground" and ('line beginsWith "C"),
         1)
       results.futureValue should equal(List(Right(Transport("Underground", "Central"))))

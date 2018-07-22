@@ -314,13 +314,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
     case class Transport(mode: String, line: String)
 
-    LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
-      Scanamo.putAll(client)("transport")(
+    LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { tableName =>
+      Scanamo.putAll(client)(tableName)(
         Set(
           Transport("Underground", "Circle"),
           Transport("Underground", "Metropolitan"),
           Transport("Underground", "Central")))
-      val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)("transport")(
+      val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)(tableName)(
         'mode -> "Underground" and ('line beginsWith "C"),
         1)
       results.futureValue should equal(List(Right(Transport("Underground", "Central"))))

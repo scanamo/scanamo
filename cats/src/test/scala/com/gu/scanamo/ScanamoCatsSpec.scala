@@ -279,12 +279,12 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
     case class Transport(mode: String, line: String)
 
-    LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
-      Scanamo.putAll(client)("transport")(Set(
+    LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+      Scanamo.putAll(client)(t)(Set(
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoCats.queryWithLimit[IO, Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      val results = ScanamoCats.queryWithLimit[IO, Transport](client)(t)('mode -> "Underground" and ('line beginsWith "C"), 1)
       results.unsafeRunSync() should equal(List(Right(Transport("Underground","Central"))))
     }
   }

@@ -278,12 +278,12 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
 
     case class Transport(mode: String, line: String)
 
-    LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
-      Scanamo.putAll(client)("transport")(Set(
+    LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+      Scanamo.putAll(client)(t)(Set(
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
-      val results = ScanamoScalaz.queryWithLimit[Transport](client)("transport")('mode -> "Underground" and ('line beginsWith "C"), 1)
+      val results = ScanamoScalaz.queryWithLimit[Transport](client)(t)('mode -> "Underground" and ('line beginsWith "C"), 1)
       unsafePerformIO(results) should equal(List(Right(Transport("Underground","Central"))))
     }
   }
