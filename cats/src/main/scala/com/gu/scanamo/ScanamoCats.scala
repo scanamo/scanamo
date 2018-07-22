@@ -90,9 +90,8 @@ object ScanamoCats {
   def queryFrom[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(
       query: Query[_],
       limit: Int,
-      startKey: Option[EvaluationKey], 
-      forward: Boolean): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey, forward))
+      startKey: Option[EvaluationKey]): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey))
 
   def queryIndex[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(
       query: Query[_]): F[List[Either[DynamoReadError, T]]] =
@@ -106,8 +105,7 @@ object ScanamoCats {
   def queryIndexFrom[F[_]: Effect, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(
       query: Query[_],
       limit: Int,
-      startKey: Option[EvaluationKey],
-      forward: Boolean): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey, forward))
+      startKey: Option[EvaluationKey]): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
 
 }

@@ -94,9 +94,9 @@ object ScanamoAlpakka {
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
 
   def queryFrom[T: DynamoFormat](client: DynamoClient)(
-      tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey], forward: Boolean)(
+      tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])(
       implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey, forward))
+    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey))
 
   def queryIndex[T: DynamoFormat](client: DynamoClient)(tableName: String, indexName: String)(query: Query[_])(
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
@@ -110,7 +110,7 @@ object ScanamoAlpakka {
 
   def queryIndexFrom[T: DynamoFormat](client: DynamoClient)(
       tableName: String,
-      indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey], forward: Boolean)(
+      indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])(
       implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey, forward))
+    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
 }
