@@ -1,9 +1,12 @@
 package com.gu
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.query._
 import com.gu.scanamo.update._
 
 package object scanamo {
+
+  type EvaluationKey = java.util.Map[String, AttributeValue]
 
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {

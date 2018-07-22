@@ -29,7 +29,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     DynamoSettings(
       region = "",
       host = "localhost",
-      port = 8052,
+      port = 8042,
       parallelism = 2
     )
   )
@@ -83,12 +83,11 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     LocalDynamoDB.usingTable(client)("asyncAlpakkaCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).andThen {
+      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).flatMap {
         case _ =>
           ScanamoAlpakka
-            .getWithConsistency[City](alpakkaClient)("asyncCities")('name -> "Nashville")
-            .futureValue should equal(Some(Right(City("Nashville", "US"))))
-      }
+            .getWithConsistency[City](alpakkaClient)("asyncAlpakkaCities")('name -> "Nashville")
+      }.futureValue should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
@@ -208,6 +207,22 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     }
   }
 
+  it("paginates with a limit asynchronously") {
+    case class Bear(name: String, favouriteFood: String)
+
+    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
+      val results = for {
+        res1 <- ScanamoAlpakka.scanFrom[Bear](alpakkaClient)("asyncBears", 1, None)
+        res2 <- ScanamoAlpakka.scanFrom[Bear](alpakkaClient)("asyncBears", 1, res1._2)
+        res3 <- ScanamoAlpakka.scanFrom[Bear](alpakkaClient)("asyncBears", 1, res2._2)
+      } yield res2._1 ::: res3._1
+      results.futureValue should equal(List(Right(Bear("Yogi", "picnic baskets")), Right(Bear("Graham", "quinoa"))))
+    }
+  }
+
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
@@ -217,6 +232,24 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = ScanamoAlpakka.scanIndexWithLimit[Bear](alpakkaClient)("asyncBears", "alias-index", 1)
       results.futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+    }
+  }
+
+  it("Paginate scanIndexWithLimit") {
+    case class Bear(name: String, favouriteFood: String, alias: Option[String])
+
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
+      val results = for {
+        res1 <- ScanamoAlpakka.scanIndexFrom[Bear](alpakkaClient)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoAlpakka.scanIndexFrom[Bear](alpakkaClient)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoAlpakka.scanIndexFrom[Bear](alpakkaClient)("asyncBears", "alias-index", 1, res2._2)
+      } yield res2._1 ::: res3._1
+
+      results.futureValue should equal(
+        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie")))))
     }
   }
 

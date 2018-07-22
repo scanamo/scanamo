@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
@@ -9,9 +9,14 @@ import com.gu.scanamo.query._
 import scalaz.ioeffect.RTS
 
 
-class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
+class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll with RTS {
 
   val client = LocalDynamoDB.client()
+
+  override protected def afterAll(): Unit = {
+    client.shutdown()
+    super.afterAll()
+  }
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
@@ -182,6 +187,22 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
     }
   }
 
+  it("paginates with a limit asynchronously") {
+    case class Bear(name: String, favouriteFood: String)
+
+    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
+      val results = for {
+        res1 <- ScanamoScalaz.scanFrom[Bear](client)("asyncBears", 1, None)
+        res2 <- ScanamoScalaz.scanFrom[Bear](client)("asyncBears", 1, res1._2)
+        res3 <- ScanamoScalaz.scanFrom[Bear](client)("asyncBears", 1, res2._2)
+      } yield res2._1 ::: res3._1
+      unsafePerformIO(results) should equal(List(Right(Bear("Yogi","picnic baskets")), Right(Bear("Graham","quinoa"))))
+    }
+  }
+
   it ("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
@@ -191,6 +212,23 @@ class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = ScanamoScalaz.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
       unsafePerformIO(results) should equal(List(Right(Bear("Graham","quinoa",Some("Guardianista")))))
+    }
+  }
+
+  it ("Paginate scanIndexWithLimit") {
+    case class Bear(name: String, favouriteFood: String, alias: Option[String])
+
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
+      val results = for {
+        res1 <- ScanamoScalaz.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoScalaz.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoScalaz.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res2._2)
+      } yield res2._1 ::: res3._1
+
+      unsafePerformIO(results) should equal(List(Right(Bear("Yogi","picnic baskets",Some("Kanga"))), Right(Bear("Pooh","honey",Some("Winnie")))))
     }
   }
 

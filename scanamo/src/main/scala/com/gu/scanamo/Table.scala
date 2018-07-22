@@ -605,7 +605,7 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-    ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
+    ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
+    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
 }

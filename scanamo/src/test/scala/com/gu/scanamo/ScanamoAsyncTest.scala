@@ -3,16 +3,21 @@ package com.gu.scanamo
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 
-class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
+class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with ScalaFutures {
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
 
   val client = LocalDynamoDB.client()
   import scala.concurrent.ExecutionContext.Implicits.global
+
+  override protected def afterAll(): Unit = {
+    client.shutdown()
+    super.afterAll()
+  }
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
@@ -61,11 +66,10 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US")).andThen {
+      ScanamoAsync.put(client)("asyncCities")(City("Nashville", "US")).flatMap {
         case _ =>
-          ScanamoAsync.getWithConsistency[City](client)("asyncCities")('name -> "Nashville").futureValue should equal(
-            Some(Right(City("Nashville", "US"))))
-      }
+          ScanamoAsync.getWithConsistency[City](client)("asyncCities")('name -> "Nashville")
+      }.futureValue should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
@@ -185,6 +189,22 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
     }
   }
 
+  it("paginates with a limit asynchronously") {
+    case class Bear(name: String, favouriteFood: String)
+
+    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
+      val results = for {
+        res1 <- ScanamoAsync.scanFrom[Bear](client)("asyncBears", 1, None)
+        res2 <- ScanamoAsync.scanFrom[Bear](client)("asyncBears", 1, res1._2)
+        res3 <- ScanamoAsync.scanFrom[Bear](client)("asyncBears", 1, res2._2)
+      } yield res2._1 ::: res3._1
+      results.futureValue should equal(List(Right(Bear("Yogi", "picnic baskets")), Right(Bear("Graham", "quinoa"))))
+    }
+  }
+
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
@@ -194,6 +214,24 @@ class ScanamoAsyncTest extends FunSpec with Matchers with ScalaFutures {
       Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = ScanamoAsync.scanIndexWithLimit[Bear](client)("asyncBears", "alias-index", 1)
       results.futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+    }
+  }
+
+  it("Paginate scanIndexWithLimit") {
+    case class Bear(name: String, favouriteFood: String, alias: Option[String])
+
+    LocalDynamoDB.withTableWithSecondaryIndex(client)("asyncBears", "alias-index")('name -> S)('alias -> S) {
+      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey", Some("Winnie")))
+      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets", Some("Kanga")))
+      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa", Some("Guardianista")))
+      val results = for {
+        res1 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, None)
+        res2 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res1._2)
+        res3 <- ScanamoAsync.scanIndexFrom[Bear](client)("asyncBears", "alias-index", 1, res2._2)
+      } yield res2._1 ::: res3._1
+
+      results.futureValue should equal(
+        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie")))))
     }
   }
 
