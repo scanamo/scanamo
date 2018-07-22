@@ -488,9 +488,9 @@ object Scanamo {
     * ...     Transport("Underground", "Metropolitan"),
     * ...     Transport("Underground", "Central")))
     * ...   val res1 = Scanamo.queryFrom[Transport](client)("transport")(
-    * ...       ('mode -> "Underground" and ('line beginsWith "C")), 1, None, true)
+    * ...       ('mode -> "Underground" and ('line beginsWith "C")), 1, None)
     * ...   Scanamo.queryFrom[Transport](client)("transport")(
-    * ...       ('mode -> "Underground" and ('line beginsWith "C")), 1, res1._2, true)._1
+    * ...       ('mode -> "Underground" and ('line beginsWith "C")), 1, res1._2)._1
     * ... }
     * List(Right(Transport(Underground,Circle)))
     * }}}
@@ -573,9 +573,9 @@ object Scanamo {
     * ...     Transport("Underground", "Picadilly", "Blue"),
     * ...     Transport("Underground", "Northern", "Black")))
     * ...   val res1 = Scanamo.queryIndexFrom[Transport](client)("transport", "colour-index")(
-    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, None, true)
+    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, None)
     * ...   Scanamo.queryIndexFrom[Transport](client)("transport", "colour-index")(
-    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, res1._2, true)._1
+    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")), 1, res1._2)._1
     * ... }
     * List(Right(Transport(Underground,Picadilly,Blue)))
     * }}}
