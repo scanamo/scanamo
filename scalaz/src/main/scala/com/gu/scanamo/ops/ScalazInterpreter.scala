@@ -6,14 +6,12 @@ import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model._
-import scalaz.ioeffect.{ExitResult, IO}
+import scalaz.ioeffect.{ExitResult, IO, Task}
 import scalaz.~>
 
 object ScalazInterpreter {
-  def io(client: AmazonDynamoDBAsync) = new (ScanamoOpsA ~> IO[ConditionalCheckFailedException, ?]) {
-    private[this] def eff[A <: AmazonWebServiceRequest, B](
-        f: (A, AsyncHandler[A, B]) => JFuture[B],
-        req: A): IO[Exception, B] =
+  def io(client: AmazonDynamoDBAsync) = new (ScanamoOpsA ~> Task) {
+    private[this] def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => JFuture[B], req: A): Task[B] =
       IO.async { cb =>
         val handler = new AsyncHandler[A, B] {
           def onError(exception: Exception): Unit =
@@ -25,51 +23,46 @@ object ScalazInterpreter {
         val _ = f(req, handler)
       }
 
-    // Refactor this with Leibniz when Scala solves the GADT problem
-    private[this] def unifyA[A0, A](io: IO[Exception, A0]): IO[ConditionalCheckFailedException, A] =
-      io.catchAll[ConditionalCheckFailedException] {
-          case e: ConditionalCheckFailedException => IO.fail(e)
-          case t => IO.interrupt(t)
+    private[this] def catchConditional[A, A0](io: Task[A0]): Task[A] =
+      io.map(Right(_): Either[ConditionalCheckFailedException, A0])
+        .catchSome {
+          case e: ConditionalCheckFailedException => IO.now(Left(e))
         }
-        .asInstanceOf[IO[ConditionalCheckFailedException, A]]
+        .asInstanceOf[Task[A]]
 
-    override def apply[A](fa: ScanamoOpsA[A]): IO[ConditionalCheckFailedException, A] = {
+    override def apply[A](fa: ScanamoOpsA[A]): Task[A] = {
       fa match {
         case Put(req) =>
-          unifyA(eff(client.putItemAsync, JavaRequests.put(req)))
+          eff(client.putItemAsync, JavaRequests.put(req))
         case ConditionalPut(req) =>
-          unifyA(eff(client.putItemAsync, JavaRequests.put(req)))
+          catchConditional(eff(client.putItemAsync, JavaRequests.put(req)))
         case Get(req) =>
-          unifyA(eff(client.getItemAsync, req))
+          eff(client.getItemAsync, req)
         case Delete(req) =>
-          unifyA(eff(client.deleteItemAsync, JavaRequests.delete(req)))
+          eff(client.deleteItemAsync, JavaRequests.delete(req))
         case ConditionalDelete(req) =>
-          unifyA(eff(client.deleteItemAsync, JavaRequests.delete(req)))
+          catchConditional(eff(client.deleteItemAsync, JavaRequests.delete(req)))
         case Scan(req) =>
-          unifyA(eff(client.scanAsync, JavaRequests.scan(req)))
+          eff(client.scanAsync, JavaRequests.scan(req))
         case Query(req) =>
-          unifyA(eff[QueryRequest, QueryResult](client.queryAsync, JavaRequests.query(req)))
+          eff(client.queryAsync, JavaRequests.query(req))
         // Overloading means we need explicit parameter types here
         case BatchWrite(req) =>
-          unifyA(
-            eff(
-              client.batchWriteItemAsync(
-                _: BatchWriteItemRequest,
-                _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
-              req
-            ))
+          eff(
+            client.batchWriteItemAsync(
+              _: BatchWriteItemRequest,
+              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+            req
+          )
         case BatchGet(req) =>
-          unifyA(
-            eff(
-              client
-                .batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-              req
-            ))
+          eff(
+            client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+            req
+          )
         case Update(req) =>
-          unifyA(eff(client.updateItemAsync, JavaRequests.update(req)))
+          eff(client.updateItemAsync, JavaRequests.update(req))
         case ConditionalUpdate(req) =>
-          unifyA(eff[UpdateItemRequest, UpdateItemResult](client.updateItemAsync, JavaRequests.update(req)))
-
+          catchConditional(eff(client.updateItemAsync, JavaRequests.update(req)))
       }
     }
   }

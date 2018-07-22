@@ -29,7 +29,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     DynamoSettings(
       region = "",
       host = "localhost",
-      port = 8052,
+      port = 8042,
       parallelism = 2
     )
   )
@@ -83,12 +83,11 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     LocalDynamoDB.usingTable(client)("asyncAlpakkaCities")('name -> S) {
 
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).andThen {
+      ScanamoAlpakka.put(alpakkaClient)("asyncAlpakkaCities")(City("Nashville", "US")).flatMap {
         case _ =>
           ScanamoAlpakka
-            .getWithConsistency[City](alpakkaClient)("asyncCities")('name -> "Nashville")
-            .futureValue should equal(Some(Right(City("Nashville", "US"))))
-      }
+            .getWithConsistency[City](alpakkaClient)("asyncAlpakkaCities")('name -> "Nashville")
+      }.futureValue should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 

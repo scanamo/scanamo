@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
@@ -9,9 +9,14 @@ import com.gu.scanamo.query._
 import scalaz.ioeffect.RTS
 
 
-class ScanamoScalazSpec extends FunSpec with Matchers with RTS {
+class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll with RTS {
 
   val client = LocalDynamoDB.client()
+
+  override protected def afterAll(): Unit = {
+    client.shutdown()
+    super.afterAll()
+  }
 
   it("should put asynchronously") {
     LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
