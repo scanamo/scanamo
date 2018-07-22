@@ -17,78 +17,78 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   import scala.concurrent.ExecutionContext.Implicits.global
 
   it("should put asynchronously") {
-    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
       import com.gu.scanamo.syntax._
 
       val result = for {
-        _ <- ScanamoCats.put[IO, Farmer](client)("asyncFarmers")(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-      } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McDonald")
+        _ <- ScanamoCats.put[IO, Farmer](client)(t)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+      } yield Scanamo.get[Farmer](client)(t)('name -> "McDonald")
 
       result.unsafeRunSync() should equal(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
     }
   }
 
   it("should get asynchronously") {
-    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      Scanamo.put[Farmer](client)("asyncFarmers")(Farmer("Maggot", 75L, Farm(List("dog"))))
+      Scanamo.put[Farmer](client)(t)(Farmer("Maggot", 75L, Farm(List("dog"))))
 
-      ScanamoCats.get[IO, Farmer](client)("asyncFarmers")(UniqueKey(KeyEquals('name, "Maggot")))
+      ScanamoCats.get[IO, Farmer](client)(t)(UniqueKey(KeyEquals('name, "Maggot")))
         .unsafeRunSync() should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoCats.get[IO, Farmer](client)("asyncFarmers")('name -> "Maggot")
+      ScanamoCats.get[IO, Farmer](client)(t)('name -> "Maggot")
         .unsafeRunSync() should equal(Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
     }
 
-    LocalDynamoDB.usingTable(client)("asyncEngines")('name -> S, 'number -> N) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S, 'number -> N) { t =>
       case class Engine(name: String, number: Int)
 
-      Scanamo.put(client)("asyncEngines")(Engine("Thomas", 1))
+      Scanamo.put(client)(t)(Engine("Thomas", 1))
 
       import com.gu.scanamo.syntax._
-      ScanamoCats.get[IO, Engine](client)("asyncEngines")('name -> "Thomas" and 'number -> 1)
+      ScanamoCats.get[IO, Engine](client)(t)('name -> "Thomas" and 'number -> 1)
         .unsafeRunSync() should equal(Some(Right(Engine("Thomas", 1))))
     }
   }
 
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
-    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
 
       import com.gu.scanamo.syntax._
-      val _ = ScanamoCats.put[IO, City](client)("asyncCities")(City("Nashville", "US")).unsafeRunSync()
-      ScanamoCats.getWithConsistency[IO, City](client)("asyncCities")('name -> "Nashville")
+      val _ = ScanamoCats.put[IO, City](client)(t)(City("Nashville", "US")).unsafeRunSync()
+      ScanamoCats.getWithConsistency[IO, City](client)(t)('name -> "Nashville")
         .unsafeRunSync() should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
   it("should delete asynchronously") {
-    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
 
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      Scanamo.put(client)("asyncFarmers")(Farmer("McGregor", 62L, Farm(List("rabbit"))))
+      Scanamo.put(client)(t)(Farmer("McGregor", 62L, Farm(List("rabbit"))))
 
       import com.gu.scanamo.syntax._
 
       val maybeFarmer = for {
-        _ <- ScanamoCats.delete[IO, Farmer](client)("asyncFarmers")('name -> "McGregor")
-      } yield Scanamo.get[Farmer](client)("asyncFarmers")('name -> "McGregor")
+        _ <- ScanamoCats.delete[IO, Farmer](client)(t)('name -> "McGregor")
+      } yield Scanamo.get[Farmer](client)(t)('name -> "McGregor")
 
       maybeFarmer.unsafeRunSync() should equal(None)
     }
   }
 
   it("should deleteAll asynchronously") {
-    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
 
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
@@ -101,39 +101,39 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         Farmer("Jack", 2L, Farm(List("velociraptor")))
       )
 
-      Scanamo.putAll(client)("asyncFarmers")(dataSet)
+      Scanamo.putAll(client)(t)(dataSet)
 
       val maybeFarmer = for {
-        _ <- ScanamoCats.deleteAll[IO](client)("asyncFarmers")('name -> dataSet.map(_.name))
-      } yield Scanamo.scan[Farmer](client)("asyncFarmers")
+        _ <- ScanamoCats.deleteAll[IO](client)(t)('name -> dataSet.map(_.name))
+      } yield Scanamo.scan[Farmer](client)(t)
 
       maybeFarmer.unsafeRunSync() should equal(List.empty)
     }
   }
 
   it("should update asynchronously") {
-    LocalDynamoDB.usingTable(client)("forecast")('location -> S) {
+    LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
 
       case class Forecast(location: String, weather: String)
 
-      Scanamo.put(client)("forecast")(Forecast("London", "Rain"))
+      Scanamo.put(client)(t)(Forecast("London", "Rain"))
 
       import com.gu.scanamo.syntax._
 
       val forecasts = for {
-        _ <- ScanamoCats.update[IO, Forecast](client)("forecast")('location -> "London", set('weather -> "Sun"))
-      } yield Scanamo.scan[Forecast](client)("forecast")
+        _ <- ScanamoCats.update[IO, Forecast](client)(t)('location -> "London", set('weather -> "Sun"))
+      } yield Scanamo.scan[Forecast](client)(t)
 
       forecasts.unsafeRunSync() should equal(List(Right(Forecast("London", "Sun"))))
     }
   }
 
   it("should update asynchronously if a condition holds") {
-    LocalDynamoDB.usingTable(client)("forecast")('location -> S) {
+    LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
 
       case class Forecast(location: String, weather: String, equipment: Option[String])
 
-      val forecasts = Table[Forecast]("forecast")
+      val forecasts = Table[Forecast](t)
 
       import com.gu.scanamo.syntax._
 
@@ -150,37 +150,37 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   }
 
   it("should scan asynchronously") {
-    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
 
       case class Bear(name: String, favouriteFood: String)
 
-      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
-      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
+      Scanamo.put(client)(t)(Bear("Pooh", "honey"))
+      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets"))
 
-      ScanamoCats.scan[IO, Bear](client)("asyncBears").unsafeRunSync() should equal(
+      ScanamoCats.scan[IO, Bear](client)(t).unsafeRunSync() should equal(
         List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets")))
       )
     }
 
-    LocalDynamoDB.usingTable(client)("asyncLemmings")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
 
       case class Lemming(name: String, stuff: String)
 
-      Scanamo.putAll(client)("asyncLemmings")(
+      Scanamo.putAll(client)(t)(
         (for {_ <- 0 until 100} yield Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet
       )
 
-      ScanamoCats.scan[IO, Lemming](client)("asyncLemmings").unsafeRunSync().size should equal(100)
+      ScanamoCats.scan[IO, Lemming](client)(t).unsafeRunSync().size should equal(100)
     }
   }
 
   it("scans with a limit asynchronously") {
     case class Bear(name: String, favouriteFood: String)
 
-    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
-      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
-      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      val results = ScanamoCats.scanWithLimit[IO, Bear](client)("asyncBears", 1)
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      Scanamo.put(client)(t)(Bear("Pooh", "honey"))
+      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets"))
+      val results = ScanamoCats.scanWithLimit[IO, Bear](client)(t, 1)
       results.unsafeRunSync() should equal(List(Right(Bear("Pooh","honey"))))
     }
   }
@@ -188,14 +188,14 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   it("paginates with a limit asynchronously") {
     case class Bear(name: String, favouriteFood: String)
 
-    LocalDynamoDB.usingTable(client)("asyncBears")('name -> S) {
-      Scanamo.put(client)("asyncBears")(Bear("Pooh", "honey"))
-      Scanamo.put(client)("asyncBears")(Bear("Yogi", "picnic baskets"))
-      Scanamo.put(client)("asyncBears")(Bear("Graham", "quinoa"))
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      Scanamo.put(client)(t)(Bear("Pooh", "honey"))
+      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets"))
+      Scanamo.put(client)(t)(Bear("Graham", "quinoa"))
       val results = for {
-        res1 <- ScanamoCats.queryFrom[IO, Bear](client)("asyncBears", 1, None)
-        res2 <- ScanamoCats.queryFrom[IO, Bear](client)("asyncBears", 1, res1._2)
-        res3 <- ScanamoCats.queryFrom[IO, Bear](client)("asyncBears", 1, res2._2)
+        res1 <- ScanamoCats.queryFrom[IO, Bear](client)(t, 1, None)
+        res2 <- ScanamoCats.queryFrom[IO, Bear](client)(t, 1, res1._2)
+        res3 <- ScanamoCats.queryFrom[IO, Bear](client)(t, 1, res2._2)
       } yield res2._1 ::: res3._1
       results.unsafeRunSync() should equal(List(Right(Bear("Yogi","picnic baskets")), Right(Bear("Graham","quinoa"))))
     }
@@ -231,45 +231,45 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   }
 
   it("should query asynchronously") {
-    LocalDynamoDB.usingTable(client)("asyncAnimals")('species -> S, 'number -> N) {
+    LocalDynamoDB.usingRandomTable(client)('species -> S, 'number -> N) { t =>
 
       case class Animal(species: String, number: Int)
 
-      Scanamo.put(client)("asyncAnimals")(Animal("Wolf", 1))
+      Scanamo.put(client)(t)(Animal("Wolf", 1))
 
-      for {i <- 1 to 3} Scanamo.put(client)("asyncAnimals")(Animal("Pig", i))
+      for {i <- 1 to 3} Scanamo.put(client)(t)(Animal("Pig", i))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoCats.query[IO, Animal](client)("asyncAnimals")('species -> "Pig").unsafeRunSync() should equal(
+      ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig").unsafeRunSync() should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoCats.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number < 3).unsafeRunSync() should equal(
+      ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number < 3).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoCats.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number > 1).unsafeRunSync() should equal(
+      ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number > 1).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
-      ScanamoCats.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number <= 2).unsafeRunSync() should equal(
+      ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number <= 2).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
 
-      ScanamoCats.query[IO, Animal](client)("asyncAnimals")('species -> "Pig" and 'number >= 2).unsafeRunSync() should equal(
+      ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number >= 2).unsafeRunSync() should equal(
         List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
 
     }
 
-    LocalDynamoDB.usingTable(client)("asyncTransport")('mode -> S, 'line -> S) {
+    LocalDynamoDB.usingRandomTable(client)('mode -> S, 'line -> S) { t =>
 
       case class Transport(mode: String, line: String)
 
       import com.gu.scanamo.syntax._
 
-      Scanamo.putAll(client)("asyncTransport")(Set(
+      Scanamo.putAll(client)(t)(Set(
         Transport("Underground", "Circle"),
         Transport("Underground", "Metropolitan"),
         Transport("Underground", "Central")))
 
-      ScanamoCats.query[IO, Transport](client)("asyncTransport")('mode -> "Underground" and ('line beginsWith "C")).unsafeRunSync() should equal(
+      ScanamoCats.query[IO, Transport](client)(t)('mode -> "Underground" and ('line beginsWith "C")).unsafeRunSync() should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
     }
   }
@@ -359,9 +359,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
     import com.gu.scanamo.syntax._
 
-    val farmersTable = Table[Farmer]("nursery-farmers")
 
-    LocalDynamoDB.usingTable(client)("nursery-farmers")('firstName -> S, 'surname -> S) {
+    LocalDynamoDB.usingRandomTable(client)('firstName -> S, 'surname -> S) { t =>
+      val farmersTable = Table[Farmer](t)
       val farmerOps: ScanamoOps[List[Either[DynamoReadError, Farmer]]] = for {
         _ <- farmersTable.put(Farmer("Fred", "Perry", None))
         _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
@@ -374,12 +374,12 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
 
-    LocalDynamoDB.usingTable(client)("asyncRabbits")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       val result = for {
-        _ <- ScanamoCats.putAll[IO, Rabbit](client)("asyncRabbits")((
+        _ <- ScanamoCats.putAll[IO, Rabbit](client)(t)((
           for {_ <- 0 until 100} yield Rabbit(util.Random.nextString(500))
           ).toSet)
-      } yield Scanamo.scan[Rabbit](client)("asyncRabbits")
+      } yield Scanamo.scan[Rabbit](client)(t)
 
       result.unsafeRunSync().size should equal(100)
     }
@@ -387,34 +387,34 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   }
 
   it("should get multiple items asynchronously") {
-    LocalDynamoDB.usingTable(client)("asyncFarmers")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
 
       case class Farm(animals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      Scanamo.putAll(client)("asyncFarmers")(Set(
+      Scanamo.putAll(client)(t)(Set(
         Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
       ))
 
-      ScanamoCats.getAll[IO, Farmer](client)("asyncFarmers")(
+      ScanamoCats.getAll[IO, Farmer](client)(t)(
         UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
       ).unsafeRunSync() should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
 
       import com.gu.scanamo.syntax._
 
-      ScanamoCats.getAll[IO, Farmer](client)("asyncFarmers")('name -> Set("Boggis", "Bean")).unsafeRunSync() should equal(
+      ScanamoCats.getAll[IO, Farmer](client)(t)('name -> Set("Boggis", "Bean")).unsafeRunSync() should equal(
         Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
     }
 
-    LocalDynamoDB.usingTable(client)("asyncDoctors")('actor -> S, 'regeneration -> N) {
+    LocalDynamoDB.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
       case class Doctor(actor: String, regeneration: Int)
 
-      Scanamo.putAll(client)("asyncDoctors")(
+      Scanamo.putAll(client)(t)(
         Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
       import com.gu.scanamo.syntax._
-      ScanamoCats.getAll[IO, Doctor](client)("asyncDoctors")(
+      ScanamoCats.getAll[IO, Doctor](client)(t)(
         ('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11)
       ).unsafeRunSync() should equal(
         Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
@@ -423,28 +423,28 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   }
 
   it("should get multiple items asynchronously (automatically handling batching)") {
-    LocalDynamoDB.usingTable(client)("asyncFarms")('id -> N) {
+    LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
 
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
 
-      Scanamo.putAll(client)("asyncFarms")(farms)
+      Scanamo.putAll(client)(t)(farms)
 
-      ScanamoCats.getAll[IO, Farm](client)("asyncFarms")(
+      ScanamoCats.getAll[IO, Farm](client)(t)(
         UniqueKeys(KeyList('id, farms.map(_.id)))
       ).unsafeRunSync() should equal(farms.map(Right(_)))
     }
   }
 
   it("should get multiple items consistently asynchronously (automatically handling batching)") {
-    LocalDynamoDB.usingTable(client)("asyncFarms")('id -> N) {
+    LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
 
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
 
-      Scanamo.putAll(client)("asyncFarms")(farms)
+      Scanamo.putAll(client)(t)(farms)
 
-      ScanamoCats.getAllWithConsistency[IO, Farm](client)("asyncFarms")(
+      ScanamoCats.getAllWithConsistency[IO, Farm](client)(t)(
         UniqueKeys(KeyList('id, farms.map(_.id)))
       ).unsafeRunSync() should equal(farms.map(Right(_)))
     }
@@ -454,9 +454,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    val farmersTable = Table[Farmer]("nursery-farmers")
 
-    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
         result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
@@ -470,9 +470,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    val farmersTable = Table[Farmer]("nursery-farmers")
 
-    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
@@ -486,9 +486,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
     import com.gu.scanamo.syntax._
 
-    val farmersTable = Table[Farmer]("nursery-farmers")
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      val farmersTable = Table[Farmer](t)
 
-    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
         _ <- farmersTable.given('age -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
@@ -506,9 +506,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
     import com.gu.scanamo.syntax._
 
-    val farmersTable = Table[Farmer]("nursery-farmers")
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      val farmersTable = Table[Farmer](t)
 
-    LocalDynamoDB.usingTable(client)("nursery-farmers")('name -> S) {
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
@@ -528,9 +528,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
     import com.gu.scanamo.syntax._
 
-    val gremlinsTable = Table[Gremlin]("gremlins")
+    LocalDynamoDB.usingRandomTable(client)('number -> N) { t =>
+      val gremlinsTable = Table[Gremlin](t)
 
-    LocalDynamoDB.usingTable(client)("gremlins")('number -> N) {
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false), Gremlin(2, true)))
         _ <- gremlinsTable.given('wet -> true).delete('number -> 1)
