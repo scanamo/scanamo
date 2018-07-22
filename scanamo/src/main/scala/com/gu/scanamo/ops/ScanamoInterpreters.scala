@@ -170,10 +170,7 @@ private[ops] object JavaRequests {
         })
       )
       .reduceLeft(_.compose(_))(
-        req.query(new QueryRequest()
-          .withTableName(req.tableName)
-          .withConsistentRead(req.options.consistent))
-          .withScanIndexForward(req.options.scanIndexForward)
+        req.query(new QueryRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent))
       )
   }
 
