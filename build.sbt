@@ -75,7 +75,7 @@ lazy val formats = (project in file("formats"))
       "com.chuusai" %% "shapeless" % "2.3.3",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % catsVersion,
-      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     doctestMarkdownEnabled := true,
