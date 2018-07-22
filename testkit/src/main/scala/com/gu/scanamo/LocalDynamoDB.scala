@@ -15,22 +15,13 @@ object LocalDynamoDB {
       .withEndpointConfiguration(new EndpointConfiguration("http://localhost:8042", ""))
       .build()
 
-  def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) = {
-    var created = false
-    while (!created) {
-      try {
+  def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) =
         client.createTable(
           attributeDefinitions(attributes),
           tableName,
           keySchema(attributes),
           arbitraryThroughputThatIsIgnoredByDynamoDBLocal
         )
-        created = true
-      } catch {
-        case x: ResourceInUseException if x.getMessage.contains("preexisting") => client.deleteTable(tableName)
-      }
-    }
-  }
 
   def deleteTable(client: AmazonDynamoDB)(tableName: String) = {
       client.deleteTable(tableName)
