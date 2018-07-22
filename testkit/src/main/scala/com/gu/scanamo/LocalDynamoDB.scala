@@ -16,12 +16,12 @@ object LocalDynamoDB {
       .build()
 
   def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) =
-        client.createTable(
-          attributeDefinitions(attributes),
-          tableName,
-          keySchema(attributes),
-          arbitraryThroughputThatIsIgnoredByDynamoDBLocal
-        )
+    client.createTable(
+      attributeDefinitions(attributes),
+      tableName,
+      keySchema(attributes),
+      arbitraryThroughputThatIsIgnoredByDynamoDBLocal
+    )
 
   def deleteTable(client: AmazonDynamoDB)(tableName: String) = {
       client.deleteTable(tableName)
@@ -33,6 +33,30 @@ object LocalDynamoDB {
     createTable(client)(tableName)(attributeDefinitions: _*)
     val res = try {
       thunk
+    } finally {
+      client.deleteTable(tableName)
+      ()
+    }
+    res
+  }
+
+  def withRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+      thunk: String => T
+  ): T = {
+    var created: Boolean = false
+    var tableName: String = null
+    while (!created) {
+      try {
+        tableName = java.util.UUID.randomUUID.toString
+        createTable(client)(tableName)(attributeDefinitions: _*)
+        created = true
+      } catch {
+        case e: ResourceInUseException =>
+      }
+    }
+
+    val res = try {
+      thunk(tableName)
     } finally {
       client.deleteTable(tableName)
       ()
