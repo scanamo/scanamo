@@ -95,9 +95,9 @@ object ScanamoAsync {
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
 
   def queryFrom[T: DynamoFormat](client: AmazonDynamoDBAsync)(
-      tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])(
+      tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey], forward: Boolean)(
       implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey))
+    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey, forward))
 
   def queryIndex[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(query: Query[_])(
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
@@ -110,7 +110,7 @@ object ScanamoAsync {
 
   def queryIndexFrom[T: DynamoFormat](client: AmazonDynamoDBAsync)(
       tableName: String,
-      indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])(
+      indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey], forward: Boolean)(
       implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
+    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey, forward))
 }
