@@ -34,7 +34,7 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
     } yield left and right
 
   def genTree(level: Int): Gen[UpdateExpression] =
-    if (level >= 100) leaf
+    if (level >= 10) leaf
     else {
       Gen.oneOf(leaf, genNode(level + 1))
     }
