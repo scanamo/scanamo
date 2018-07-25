@@ -1,6 +1,7 @@
 package com.gu.scanamo.request
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import com.gu.scanamo.EvaluationKey
 import com.gu.scanamo.query.{Condition, Query}
 
 case class ScanamoPutRequest(
@@ -40,7 +41,7 @@ case class ScanamoQueryRequest(
 case class ScanamoQueryOptions(
     consistent: Boolean,
     limit: Option[Int],
-    exclusiveStartKey: Option[Map[String, AttributeValue]],
+    exclusiveStartKey: Option[EvaluationKey],
     filter: Option[Condition[_]]
 )
 object ScanamoQueryOptions {
