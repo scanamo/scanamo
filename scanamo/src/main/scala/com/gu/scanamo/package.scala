@@ -1,19 +1,16 @@
 package com.gu
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.query._
 import com.gu.scanamo.update._
 
 package object scanamo {
 
+  type EvaluationKey = java.util.Map[String, AttributeValue]
+
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
-      def <[V: DynamoFormat](v: V) = KeyIs(s, LT, v)
-      def >[V: DynamoFormat](v: V) = KeyIs(s, GT, v)
-      def <=[V: DynamoFormat](v: V) = KeyIs(s, LTE, v)
-      def >=[V: DynamoFormat](v: V) = KeyIs(s, GTE, v)
-      def beginsWith[V: DynamoFormat](v: V) = BeginsWith(s, v)
-      def between[V: DynamoFormat](bounds: Bounds[V]) = Between(s, bounds)
-      def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
+      def and(other: Symbol) = HashAndRangeKeyNames(s, other)
     }
 
     case class HashAndRangeKeyNames(hash: Symbol, range: Symbol)
@@ -43,9 +40,9 @@ package object scanamo {
       def and(upperBound: V) = Bounds(Bound(v), Bound(upperBound))
     }
 
-    def attributeExists(symbol: Symbol) = AttributeExists(symbol)
+    def attributeExists(symbol: Symbol) = AttributeExists(AttributeName.of(symbol))
 
-    def attributeNotExists(symbol: Symbol) = AttributeNotExists(symbol)
+    def attributeNotExists(symbol: Symbol) = AttributeNotExists(AttributeName.of(symbol))
 
     def not[T: ConditionExpression](t: T) = Not(t)
 
@@ -57,24 +54,29 @@ package object scanamo {
       def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
     }
 
-    def set(fields: (Field, Field)): UpdateExpression =
+    def set(fields: (AttributeName, AttributeName)): UpdateExpression =
       UpdateExpression.setFromAttribute(fields)
-    def set[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.set(fieldValue)
-    def append[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    def append[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.append(fieldValue)
-    def prepend[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    def prepend[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.prepend(fieldValue)
-    def add[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    def appendAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+      UpdateExpression.appendAll(fieldValue)
+    def prependAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+      UpdateExpression.prependAll(fieldValue)
+    def add[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.add(fieldValue)
-    def delete[V: DynamoFormat](fieldValue: (Field, V)): UpdateExpression =
+    def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.delete(fieldValue)
-    def remove(field: Field): UpdateExpression =
+    def remove(field: AttributeName): UpdateExpression =
       UpdateExpression.remove(field)
 
-    implicit def symbolField(s: Symbol): Field = Field.of(s)
-    implicit def symbolFieldValue[T](sv: (Symbol, T)): (Field, T) = Field.of(sv._1) -> sv._2
-    implicit def fieldField(ss: (Symbol, Symbol)): (Field, Field) = Field.of(ss._1) -> Field.of(ss._2)
+    implicit def symbolAttributeName(s: Symbol): AttributeName = AttributeName.of(s)
+    implicit def symbolAttributeNameValue[T](sv: (Symbol, T)): (AttributeName, T) = AttributeName.of(sv._1) -> sv._2
+    implicit def symbolTupleAttributeNameTuple(ss: (Symbol, Symbol)): (AttributeName, AttributeName) =
+      AttributeName.of(ss._1) -> AttributeName.of(ss._2)
 
     implicit class AndUpdateExpression(x: UpdateExpression) {
       def and(y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
