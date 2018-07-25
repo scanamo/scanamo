@@ -1,7 +1,7 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
-val catsVersion = "1.1.0"
+val catsVersion = "1.2.0"
 val catsEffectVersion = "1.0.0-RC2" // to be updated as this is the (almost) only RC
 val scalazVersion = "7.2.25" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
@@ -47,7 +47,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, javaTime)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime)
   .settings(
     commonSettings,
     publishingSettings,
@@ -128,7 +128,7 @@ lazy val testkit = (project in file("testkit"))
     )
   )
 
-lazy val cats = (project in file("cats"))
+lazy val catsEffect = (project in file("cats"))
   .settings(
     name := "scanamo-cats-effect",
     commonSettings,
