@@ -4,10 +4,11 @@ import com.gu.scanamo.DynamoFormat
 import org.joda.time.DateTime
 
 object JodaFormats {
+
   /**
     *  Convenient, readable format for Joda DateTime, but requires that all dates serialised
     *  have a consistent chronology and time zone.
-    * 
+    *
     *  {{{
     *  prop> import com.gu.scanamo.DynamoFormat
     *  prop> import org.joda.time.DateTime
