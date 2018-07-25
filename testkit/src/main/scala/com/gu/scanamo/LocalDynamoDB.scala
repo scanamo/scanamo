@@ -15,22 +15,35 @@ object LocalDynamoDB {
       .withEndpointConfiguration(new EndpointConfiguration("http://localhost:8042", ""))
       .build()
 
-  def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) = {
-    var created = false
-    while (!created) {
-      try {
-        client.createTable(
-          attributeDefinitions(attributes),
-          tableName,
-          keySchema(attributes),
-          arbitraryThroughputThatIsIgnoredByDynamoDBLocal
-        )
-        created = true
-      } catch {
-        case x: ResourceInUseException if x.getMessage.contains("preexisting") => client.deleteTable(tableName)
-      }
-    }
-  }
+  def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) =
+    client.createTable(
+      attributeDefinitions(attributes),
+      tableName,
+      keySchema(attributes),
+      arbitraryThroughputThatIsIgnoredByDynamoDBLocal
+    )
+
+  def createTableWithIndex(
+    client: AmazonDynamoDB, 
+    tableName: String, 
+    secondaryIndexName: String,
+    primaryIndexAttributes: List[(Symbol, ScalarAttributeType)],
+    secondaryIndexAttributes: List[(Symbol, ScalarAttributeType)]
+  ) =
+    client.createTable(
+      new CreateTableRequest()
+        .withTableName(tableName)
+        .withAttributeDefinitions(attributeDefinitions(
+          primaryIndexAttributes ++ (secondaryIndexAttributes diff primaryIndexAttributes)))
+        .withKeySchema(keySchema(primaryIndexAttributes))
+        .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+        .withGlobalSecondaryIndexes(
+          new GlobalSecondaryIndex()
+            .withIndexName(secondaryIndexName)
+            .withKeySchema(keySchema(secondaryIndexAttributes))
+            .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+            .withProjection(new Projection().withProjectionType(ProjectionType.ALL)))
+    )
 
   def deleteTable(client: AmazonDynamoDB)(tableName: String) = {
       client.deleteTable(tableName)
@@ -49,6 +62,30 @@ object LocalDynamoDB {
     res
   }
 
+  def withRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+      thunk: String => T
+  ): T = {
+    var created: Boolean = false
+    var tableName: String = null
+    while (!created) {
+      try {
+        tableName = java.util.UUID.randomUUID.toString
+        createTable(client)(tableName)(attributeDefinitions: _*)
+        created = true
+      } catch {
+        case e: ResourceInUseException =>
+      }
+    }
+
+    val res = try {
+      thunk(tableName)
+    } finally {
+      client.deleteTable(tableName)
+      ()
+    }
+    res
+  }
+
   def usingTable[T](client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
       thunk: => T
   ): Unit = {
@@ -56,26 +93,46 @@ object LocalDynamoDB {
     ()
   }
 
+  def usingRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+      thunk: String => T
+  ): Unit = {
+    withRandomTable(client)(attributeDefinitions: _*)(thunk)
+    ()
+  }
+
   def withTableWithSecondaryIndex[T](client: AmazonDynamoDB)(tableName: String, secondaryIndexName: String)(
       primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
       thunk: => T
   ): T = {
-    client.createTable(
-      new CreateTableRequest()
-        .withTableName(tableName)
-        .withAttributeDefinitions(attributeDefinitions(
-          primaryIndexAttributes.toList ++ (secondaryIndexAttributes.toList diff primaryIndexAttributes.toList)))
-        .withKeySchema(keySchema(primaryIndexAttributes))
-        .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
-        .withGlobalSecondaryIndexes(
-          new GlobalSecondaryIndex()
-            .withIndexName(secondaryIndexName)
-            .withKeySchema(keySchema(secondaryIndexAttributes))
-            .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
-            .withProjection(new Projection().withProjectionType(ProjectionType.ALL)))
-    )
+    createTableWithIndex(client, tableName, secondaryIndexName, primaryIndexAttributes.toList, secondaryIndexAttributes.toList)
     val res = try {
       thunk
+    } finally {
+      client.deleteTable(tableName)
+      ()
+    }
+    res
+  }
+
+  def withRandomTableWithSecondaryIndex[T](client: AmazonDynamoDB)(primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
+      thunk: (String, String) => T
+  ): T = {
+    var tableName: String = null
+    var indexName: String = null
+    var created: Boolean = false
+    while (!created) {
+      try {
+        tableName = java.util.UUID.randomUUID.toString
+        indexName = java.util.UUID.randomUUID.toString
+        createTableWithIndex(client, tableName, indexName, primaryIndexAttributes.toList, secondaryIndexAttributes.toList)
+        created = true
+      } catch {
+        case t: ResourceInUseException =>
+      }
+    }
+
+    val res = try {
+      thunk(tableName, indexName)
     } finally {
       client.deleteTable(tableName)
       ()

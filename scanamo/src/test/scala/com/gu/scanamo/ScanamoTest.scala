@@ -6,13 +6,13 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
   it("should bring back all results for queries over large datasets") {
     val client = LocalDynamoDB.client()
     case class Large(name: String, number: Int, stuff: String)
-    LocalDynamoDB.usingTable(client)("large-query")('name -> S, 'number -> N) {
-      Scanamo.putAll(client)("large-query")(
+    LocalDynamoDB.usingRandomTable(client)('name -> S, 'number -> N) { t =>
+      Scanamo.putAll(client)(t)(
         (for { i <- 0 until 100 } yield Large("Harry", i, util.Random.nextString(5000))).toSet
       )
-      Scanamo.put(client)("large-query")(Large("George", 1, "x"))
+      Scanamo.put(client)(t)(Large("George", 1, "x"))
       import syntax._
-      Scanamo.query[Large](client)("large-query")('name -> "Harry").toList.size should be(100)
+      Scanamo.query[Large](client)(t)('name -> "Harry").toList.size should be(100)
     }
     client.shutdown()
   }
@@ -20,12 +20,12 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
   it("should get consistently") {
     val client = LocalDynamoDB.client()
     case class City(name: String, country: String)
-    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
 
-      Scanamo.put(client)("asyncCities")(City("Nashville", "US"))
+      Scanamo.put(client)(t)(City("Nashville", "US"))
 
       import com.gu.scanamo.syntax._
-      Scanamo.getWithConsistency[City](client)("asyncCities")('name -> "Nashville") should equal(
+      Scanamo.getWithConsistency[City](client)(t)('name -> "Nashville") should equal(
         Some(Right(City("Nashville", "US"))))
     }
     client.shutdown()
@@ -34,13 +34,13 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
   it("should get consistent") {
     case class City(name: String, country: String)
 
-    val cityTable = Table[City]("asyncCities")
 
     import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 
     val client = LocalDynamoDB.client()
-    LocalDynamoDB.usingTable(client)("asyncCities")('name -> S) {
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       import com.gu.scanamo.syntax._
+      val cityTable = Table[City](t)
       val ops = for {
         _ <- cityTable.put(City("Nashville", "US"))
         res <- cityTable.consistently.get('name -> "Nashville")
