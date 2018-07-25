@@ -3,7 +3,6 @@ package com.gu.scanamo.time
 import com.gu.scanamo.DynamoFormat
 import java.time.{Instant, OffsetDateTime, ZonedDateTime}
 import java.time.format.{DateTimeParseException, DateTimeFormatter}
-import InstantAsLongs._
 
 object JavaTimeFormats {
 
@@ -11,18 +10,17 @@ object JavaTimeFormats {
     *  {{{
     *  prop> import com.gu.scanamo.DynamoFormat
     *  prop> import java.time.Instant
-    *  prop> import com.gu.scanamo.time.InstantAsLongs._
     *  prop> import com.gu.scanamo.time.JavaTimeFormats.instantAsLongFormat
     *  prop> import com.gu.scanamo.time.TimeGenerators.instantAsLongArb
-    *  prop> (x: InstantAsLong) =>
-    *      | DynamoFormat[InstantAsLong].read(DynamoFormat[InstantAsLong].write(x)) == Right(x)
+    *  prop> (x: Instant) =>
+    *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
     *  }}}
     */
   implicit val instantAsLongFormat =
-    DynamoFormat.coercedXmap[InstantAsLong, Long, ArithmeticException](x => InstantAsLong(Instant.ofEpochMilli(x)))(x =>
-      InstantAsLong.unwrap(x).toEpochMilli)
+    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x))(x =>
+      x.toEpochMilli)
 
-  /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
+  /**  Format for dealing with date-times with an offset from UTC.
     *  {{{
     *  prop> import com.gu.scanamo.DynamoFormat
     *  prop> import java.time.OffsetDateTime
@@ -38,7 +36,7 @@ object JavaTimeFormats {
     _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
   )
 
-  /**  Format for dealing with date-times with an offset from UTC.
+  /**  Format for dealing with date-times with a time zone in the ISO-8601 calendar system.
     *  {{{
     *  prop> import com.gu.scanamo.DynamoFormat
     *  prop> import java.time.ZonedDateTime

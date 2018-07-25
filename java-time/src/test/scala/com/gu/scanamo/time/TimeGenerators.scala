@@ -4,7 +4,6 @@ import java.time._
 import org.scalacheck._
 import Gen._
 import Arbitrary.arbitrary
-import InstantAsLongs._
 
 object TimeGenerators {
   implicit val offsetDateTimeArb: Arbitrary[OffsetDateTime] = Arbitrary {
@@ -20,9 +19,9 @@ object TimeGenerators {
     } yield OffsetDateTime.of(year, month, day, hour, minute, second, milli * 1000000, ZoneOffset.UTC)
   }
 
-  implicit val instantAsLongArb: Arbitrary[InstantAsLong] = Arbitrary {
+  implicit val instantAsLongArb: Arbitrary[Instant] = Arbitrary {
     for { 
       l <- arbitrary[Long]
-    } yield InstantAsLong(Instant.ofEpochMilli(l))
+    } yield Instant.ofEpochMilli(l)
   }
 }
