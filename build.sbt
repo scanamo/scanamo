@@ -47,7 +47,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect)
   .settings(
     commonSettings,
     publishingSettings,
@@ -128,7 +128,7 @@ lazy val testkit = (project in file("testkit"))
     )
   )
 
-lazy val cats = (project in file("cats"))
+lazy val catsEffect = (project in file("cats"))
   .settings(
     name := "scanamo-cats-effect",
     commonSettings,
