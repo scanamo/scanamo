@@ -47,7 +47,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda)
   .settings(
     commonSettings,
     publishingSettings,
@@ -204,6 +204,26 @@ lazy val javaTime = (project in file("java-time"))
     )
   )
   .dependsOn(formats)
+
+lazy val joda = (project in file("joda"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+
+    name := "scanamo-joda",
+  )
+  .settings(
+    libraryDependencies ++= List(
+      "org.joda" % "joda-convert" % "1.8.3" % Provided,
+      "joda-time" % "joda-time" % "2.9.9",
+
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
+    )
+  )
+  .dependsOn(formats)
+    
 
 lazy val docs = (project in file("docs"))
   .settings(
