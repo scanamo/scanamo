@@ -1,3 +1,37 @@
+## Version 1.0.0-M6
+
+ * Aggregate `scanamo-refined` in the root project (#194)
+
+## Version 1.0.0-M5
+
+ * Add `getAllWithConsistency` (#184 - @Slakah)
+ * Add support for refined types in `scanamo-refined` submodule (#182 - @alonsodomin)
+ * Improve documentation (#193 and #190 - @howardjohn and @philwills)
+ * Allow append/prepend of list values (#187 - @prurph)
+
+## Version 1.0.0-M4
+
+ * Update cats to 1.0.1
+ * Update shapeless to 2.3.3
+ * Update aws-java-sdk-dynamodb 1.11.256
+ * Update scalatest to 3.0.4
+ * Update scalacheck to 1.13.5
+ * Update travis badge to reflect org move
+
+## Version 1.0.0-M3
+
+ * Update Cats to `1.0.0-RC1` (#166)
+ * Equals condition support for nested attributes (#165 - @ivashin)
+ * Update aws-java-sdk-dynamodb and alpakka (#167)
+
+## Version 1.0.0-M2
+
+ * Add support for [Alpakka](http://developer.lightbend.com/docs/alpakka/current/dynamodb.html) as a client (#151 - @btlines), plus docs (#158 - @calvinlfer)
+ * Return overwritten item from `Put` (#153 - @amirkarimi)
+ * BigDecimal support (#161 - @hunzinker)
+ * Support conditions on nested attribute names (#156)
+ * Rename `Index` to `SecondaryIndex` (#144)
+
 ## Version 1.0.0-M1
 
  * Update Cats to `1.0.0-MF` (#134 - @rstradling)

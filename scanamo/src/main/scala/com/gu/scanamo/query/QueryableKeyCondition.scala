@@ -13,7 +13,8 @@ import collection.JavaConverters._
 object QueryableKeyCondition {
   implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[KeyEquals[V]] {
     override def apply(t: KeyEquals[V])(req: QueryRequest): QueryRequest =
-      req.withKeyConditionExpression(s"#K = :${t.key.name}")
+      req
+        .withKeyConditionExpression(s"#K = :${t.key.name}")
         .withExpressionAttributeNames(Map("#K" -> t.key.name).asJava)
         .withExpressionAttributeValues(Map(s":${t.key.name}" -> DynamoFormat[V].write(t.v)).asJava)
   }
@@ -25,10 +26,12 @@ object QueryableKeyCondition {
           .withKeyConditionExpression(
             s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}"
           )
-          .withExpressionAttributeNames(Map("#K" -> t.hashCondition.key.name, "#R" -> t.rangeCondition.key.name).asJava)
+          .withExpressionAttributeNames(
+            (Map("#K" -> t.hashCondition.key.name) ++ t.rangeCondition.key.attributeNames("#R")).asJava
+          )
           .withExpressionAttributeValues(
             (
-              t.rangeCondition.attributes.map {attrib =>
+              t.rangeCondition.attributes.map { attrib =>
                 s":${attrib._1}" -> DynamoFormat[R].write(attrib._2)
               } + (s":${t.hashCondition.key.name}" -> DynamoFormat[H].write(t.hashCondition.v))
             ).asJava
@@ -39,14 +42,14 @@ object QueryableKeyCondition {
   implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition] =
     new QueryableKeyCondition[AndEqualsCondition[H, R]] {
       override def apply(t: AndEqualsCondition[H, R])(req: QueryRequest): QueryRequest = {
-        val m = UniqueKeyCondition[AndEqualsCondition[H,R]].asAVMap(t)
+        val m = UniqueKeyCondition[AndEqualsCondition[H, R]].asAVMap(t)
         val charWithKey = m.keySet.toList.zipWithIndex.map {
-          case (k, v) =>  (s"#${('A'.toInt + v).toChar}", k)
+          case (k, v) => (s"#${('A'.toInt + v).toChar}", k)
         }
 
         req
           .withKeyConditionExpression(
-            charWithKey.map { case (char, key) => s"$char = :$key"}.mkString(" AND ")
+            charWithKey.map { case (char, key) => s"$char = :$key" }.mkString(" AND ")
           )
           .withExpressionAttributeNames(charWithKey.toMap.asJava)
           .withExpressionAttributeValues(
@@ -55,10 +58,11 @@ object QueryableKeyCondition {
       }
     }
 
-  implicit def descendingQueryCondition[T](implicit condition: QueryableKeyCondition[T]) = new QueryableKeyCondition[Descending[T]] {
-    override def apply(t: Descending[T])(req: QueryRequest): QueryRequest =
-      condition.apply(t.queryCondition)(req).withScanIndexForward(false)
-  }
+  implicit def descendingQueryCondition[T](implicit condition: QueryableKeyCondition[T]) =
+    new QueryableKeyCondition[Descending[T]] {
+      override def apply(t: Descending[T])(req: QueryRequest): QueryRequest =
+        condition.apply(t.queryCondition)(req).withScanIndexForward(false)
+    }
 }
 
 case class Query[T](t: T)(implicit qkc: QueryableKeyCondition[T]) {
