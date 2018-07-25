@@ -316,9 +316,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
     import com.gu.scanamo.syntax._
 
-    def deletaAllStations(client: AmazonDynamoDBAsync, stations: Set[Station]) = {
-      ScanamoCats.delete[IO, Station](client)("stations")('mode -> "Underground")
-      ScanamoCats.deleteAll[IO](client)("stations")(
+    def deletaAllStations(client: AmazonDynamoDBAsync, tableName: String, stations: Set[Station]) = {
+      ScanamoCats.delete[IO, Station](client)(tableName)('mode -> "Underground")
+      ScanamoCats.deleteAll[IO](client)(tableName)(
         UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
       )
     }
@@ -337,7 +337,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
       results1.unsafeRunSync() should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
 
-      val maybeStations1 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)(t)
+      val maybeStations1 = for {_ <- deletaAllStations(client, t, stations)} yield Scanamo.scan[Station](client)(t)
       maybeStations1.unsafeRunSync() should equal(List.empty)
 
       Scanamo.putAll(client)(t)(Set(LiverpoolStreet))
@@ -345,7 +345,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         'mode -> "Underground" and ('zone between (2 and 4)))
       results2.unsafeRunSync() should equal(List.empty)
 
-      val maybeStations2 = for {_ <- deletaAllStations(client, stations)} yield Scanamo.scan[Station](client)(t)
+      val maybeStations2 = for {_ <- deletaAllStations(client, t, stations)} yield Scanamo.scan[Station](client)(t)
       maybeStations2.unsafeRunSync() should equal(List.empty)
 
       Scanamo.putAll(client)(t)(Set(CamdenTown))
