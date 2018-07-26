@@ -7,6 +7,7 @@ import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
 import com.gu.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import com.gu.scanamo.update.UpdateExpression
+import scala.collection.JavaConverters._
 
 /**
   * Represents a DynamoDB table that operations can be performed against
@@ -317,7 +318,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Underground,Central)))
     * }}}
     */
-  def from(k: EvaluationKey) = TableWithOptions[V](name, ScanamoQueryOptions.default).from(k)
+  def from(k: UniqueKey[_]) = TableWithOptions[V](name, ScanamoQueryOptions.default).from(k)
 
   /**
     * Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
@@ -616,7 +617,7 @@ case class Table[V: DynamoFormat](name: String) {
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {
   def limit(n: Int): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.limit(n)
-  def from(k: EvaluationKey): TableWithOptions[V] =
+  def from(k: UniqueKey[_]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(k)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
@@ -633,7 +634,7 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
-  def from(k: EvaluationKey): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(k)))
+  def from(k: UniqueKey[_]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(k.asAVMap.asJava)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
