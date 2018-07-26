@@ -642,4 +642,8 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
+  def scanWithLastKey(): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
+    ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
+  def queryWithLastKey(query: Query[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
+    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
 }
