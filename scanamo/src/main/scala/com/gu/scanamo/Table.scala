@@ -292,6 +292,34 @@ case class Table[V: DynamoFormat](name: String) {
   def limit(n: Int) = TableWithOptions[V](name, ScanamoQueryOptions.default).limit(n)
 
   /**
+    * Query or scan a table, starting from a particular item identified by its key
+    * {{{
+    * >>> case class Transport(mode: String, line: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val transport = Table[Transport](t)
+    * ...   val operations = for {
+    * ...     _ <- transport.putAll(Set(
+    * ...       Transport("Bus", "143"),
+    * ...       Transport("Bus", "390"),
+    * ...       Transport("Underground", "Circle"),
+    * ...       Transport("Underground", "Metropolitan"),
+    * ...       Transport("Underground", "Victorias"),
+    * ...       Transport("Underground", "Central")))
+    * ...     results <- transport.from(???).scan('mode -> "Underground" and ('line beginsWith "C"))
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Transport(Underground,Central)))
+    * }}}
+    */
+  def from(k: EvaluationKey) = TableWithOptions[V](name, ScanamoQueryOptions.default).from(k)
+
+  /**
     * Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
     * read operations against this table. Note that there is no equivalent on
     * table indexes as consistent reads from secondary indexes are not
@@ -588,6 +616,8 @@ case class Table[V: DynamoFormat](name: String) {
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {
   def limit(n: Int): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.limit(n)
+  def from(k: EvaluationKey): TableWithOptions[V] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(k)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
 
@@ -603,6 +633,7 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+  def from(k: EvaluationKey): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(k)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
