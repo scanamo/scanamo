@@ -531,7 +531,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   } yield bears
     * ...   Scanamo.exec(client)(ops)
     * ... }
-    * List(Right(Bear("Baloo", "ants")), Right(Bear("Iorek Byrnison", "seal")), Right(Bear("Rupert Bear", "tuna sandwich")))
+    * List(Right(Bear(Baloo,ants)), Right(Bear(Pooh,honey)), Right(Bear(Iorek Byrnison,seal)), Right(Bear(Rupert Bear,tuna sandwich)))
     * }}}
     */
   def scanFrom[K: UniqueKeyCondition](key: UniqueKey[K]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[UniqueKey[K]])] = 
