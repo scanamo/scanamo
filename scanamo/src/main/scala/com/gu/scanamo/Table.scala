@@ -528,7 +528,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     _ <- table.put(Bear("Iorek Byrnison", "seal"))
     * ...     _ <- table.put(Bear("Rupert Bear", "tuna sandwich"))
     * ...     bears <- table.scanFrom('name -> "Paddington")
-    * ...   } yield bears
+    * ...   } yield bears._1
     * ...   Scanamo.exec(client)(ops)
     * ... }
     * List(Right(Bear(Baloo,ants)), Right(Bear(Pooh,honey)), Right(Bear(Iorek Byrnison,seal)), Right(Bear(Rupert Bear,tuna sandwich)))
