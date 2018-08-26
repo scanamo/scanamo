@@ -311,11 +311,11 @@ case class Table[V: DynamoFormat](name: String) {
     * ...       Transport("Underground", "Metropolitan"),
     * ...       Transport("Underground", "Victorias"),
     * ...       Transport("Underground", "Central")))
-    * ...     results <- transport.from(???).scan('mode -> "Underground" and ('line beginsWith "C"))
-    * ...   } yield results.toList
+    * ...     results <- transport.from('mode -> "Underground" and 'line -> "Circle").scanWithLastKey
+    * ...   } yield results._1.toList
     * ...   Scanamo.exec(client)(operations)
     * ... }
-    * List(Right(Transport(Underground,Central)))
+    * List(Right(Transport(Underground,Metropolitan)), Right(Transport(Underground,Victorias)))
     * }}}
     */
   def from(k: UniqueKey[_]) = TableWithOptions[V](name, ScanamoQueryOptions.default).from(k)
