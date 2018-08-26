@@ -534,7 +534,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Bear("Baloo", "ants")), Right(Bear("Iorek Byrnison", "seal")), Right(Bear("Rupert Bear", "tuna sandwich")))
     * }}}
     */
-  def scanFrom(key: UniqueKey[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] = 
+  def scanFrom[K: UniqueKeyCondition](key: UniqueKey[K]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[UniqueKey[K]])] = 
     TableWithOptions(name, ScanamoQueryOptions.default).scanFrom(key)
 
   /**
@@ -594,7 +594,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Underground,Victorias)))
     * }}}
     */
-  def queryFrom(query: Query[_], key: UniqueKey[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] = 
+  def queryFrom[K: UniqueKeyCondition](query: Query[_], key: UniqueKey[K]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[UniqueKey[K]])] = 
     TableWithOptions(name, ScanamoQueryOptions.default).queryFrom(query, key)
 
   /**
@@ -658,11 +658,11 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     ScanamoFree.getAllWithConsistency[V](tableName)(keys)
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanConsistent[V](tableName)
-  def scanFrom(key: UniqueKey[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
+  def scanFrom[K: UniqueKeyCondition](key: UniqueKey[K]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[UniqueKey[K]])] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scanFrom(key)
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanamoFree.queryConsistent[V](tableName)(query)
-  def queryFrom(query: Query[_], key: UniqueKey[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
+  def queryFrom[K: UniqueKeyCondition](query: Query[_], key: UniqueKey[K]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[UniqueKey[K]])] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.queryFrom(query, key)
 }
 
@@ -673,14 +673,12 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
-  def scanFrom(key: UniqueKey[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
+  def scanFrom[K](key: UniqueKey[K])(implicit K: UniqueKeyCondition[K]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[UniqueKey[K]])] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava))))
+      .map(p => (p._1, p._2.flatMap(k => K.fromAVMap(K.key(key.t), k.asScala.toMap).map(UniqueKey(_)))))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
-  def queryFrom(query: Query[_], key: UniqueKey[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
+  def queryFrom[K](query: Query[_], key: UniqueKey[K])(implicit K: UniqueKeyCondition[K]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[UniqueKey[K]])] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava))))
-  def scanWithLastKey(): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
-    ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions))
-  def queryWithLastKey(query: Query[_]): ScanamoOps[(List[Either[DynamoReadError, V]], Option[EvaluationKey])] =
-    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions))
+      .map(p => (p._1, p._2.flatMap(k => K.fromAVMap(K.key(key.t), k.asScala.toMap).map(UniqueKey(_)))))
 }

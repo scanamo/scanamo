@@ -8,6 +8,7 @@ import simulacrum.typeclass
   type K
   def asAVMap(t: T): Map[String, AttributeValue]
   def fromAVMap(key: K, map: Map[String, AttributeValue]): Option[T]
+  def key(t: T): K
 }
 
 object UniqueKeyCondition {
@@ -17,6 +18,7 @@ object UniqueKeyCondition {
       Map(t.key.name -> DynamoFormat[V].write(t.v))
     override def fromAVMap(key: K, map: Map[String, AttributeValue]) =
       map.get(key.name).flatMap(DynamoFormat[V].read(_).fold(_ => None, v => Some(KeyEquals(key, v))))
+    override def key(t: KeyEquals[V]) = t.key
   }
   implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition] =
     new UniqueKeyCondition[AndEqualsCondition[H, R]] {
@@ -30,6 +32,7 @@ object UniqueKeyCondition {
           h <- H.fromAVMap(key._1, map)
           r <- R.fromAVMap(key._2, map)
         } yield AndEqualsCondition(h, r)
+      override def key(t: AndEqualsCondition[H, R]) = (H.key(t.hashEquality), R.key(t.rangeEquality))
     }
 }
 
