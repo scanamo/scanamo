@@ -510,7 +510,7 @@ case class Table[V: DynamoFormat](name: String) {
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
   /**
-    * Scans all elements of a table
+    * Scans all elements of a table starting from the specified key
     *
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
@@ -566,7 +566,7 @@ case class Table[V: DynamoFormat](name: String) {
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
   /**
-    * Query a table based on the hash key and optionally the range key
+    * Query a table based on the hash key and optionally the range key, starting from the specified key
     *
     * {{{
     * >>> case class Transport(mode: String, line: String)
