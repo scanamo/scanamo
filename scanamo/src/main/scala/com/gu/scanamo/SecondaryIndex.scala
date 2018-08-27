@@ -25,16 +25,16 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> val table = Table[Bear]("bears")
     *
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("bears", "antagonist")('name -> S)('antagonist -> S) {
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('antagonist -> S) { (t, i) =>
+    * ...   val table = Table[Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey", None))
     * ...     _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
     * ...     _ <- table.put(Bear("Paddington", "marmalade sandwiches", Some("Mr Curry")))
-    * ...     antagonisticBears <- table.index("antagonist").scan()
+    * ...     antagonisticBears <- table.index(i).scan()
     * ...   } yield antagonisticBears
     * ...   Scanamo.exec(client)(ops)
     * ... }
@@ -49,14 +49,14 @@ sealed abstract class SecondaryIndex[V] {
     * {{{
     * >>> import com.gu.scanamo.generic.auto._
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
-    * >>> val githubProjects = Table[GithubProject]("github-projects")
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("github-projects", "language-license")('organisation -> S, 'repository -> S)('language -> S, 'license -> S) {
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('organisation -> S, 'repository -> S)('language -> S, 'license -> S) { (t, i) =>
+    * ...   val githubProjects = Table[GithubProject](t)
     * ...   val operations = for {
     * ...     _ <- githubProjects.putAll(Set(
     * ...       GithubProject("typelevel", "cats", "Scala", "MIT"),
@@ -64,7 +64,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
     * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
     * ...     ))
-    * ...     scalaMIT <- githubProjects.index("language-license").query('language -> "Scala" and ('license -> "MIT"))
+    * ...     scalaMIT <- githubProjects.index(i).query('language -> "Scala" and ('license -> "MIT"))
     * ...   } yield scalaMIT.toList
     * ...   Scanamo.exec(client)(operations)
     * ... }
@@ -79,15 +79,15 @@ sealed abstract class SecondaryIndex[V] {
     * {{{
     * >>> import com.gu.scanamo.generic.auto._
     * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
-    * ... ) {
+    * ... ) { (t, i) =>
+    * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),
@@ -95,7 +95,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       Transport("Underground", "Central", "Red"),
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
-    * ...     somethingBeginningWithBl <- transport.index("colour-index").limit(1).query(
+    * ...     somethingBeginningWithBl <- transport.index(i).limit(1).query(
     * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")).descending
     * ...     )
     * ...   } yield somethingBeginningWithBl.toList
@@ -113,15 +113,15 @@ sealed abstract class SecondaryIndex[V] {
     * {{{
     * >>> import com.gu.scanamo.generic.auto._
     * >>> case class Transport(mode: String, line: String, colour: String)
-    * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
     *
-    * >>> LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")(
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
-    * ... ) {
+    * ... ) { (t, i) =>
+    * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),
@@ -129,7 +129,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       Transport("Underground", "Central", "Red"),
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
-    * ...     somethingBeginningWithC <- transport.index("colour-index")
+    * ...     somethingBeginningWithC <- transport.index(i)
     * ...                                   .filter('line beginsWith ("C"))
     * ...                                   .query('mode -> "Underground")
     * ...   } yield somethingBeginningWithC.toList
@@ -151,7 +151,7 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
-  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions))
+  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def query(query: Query[_]) =
-    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
+    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
 }

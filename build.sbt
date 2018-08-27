@@ -1,11 +1,11 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
-val catsVersion = "1.1.0"
+val catsVersion = "1.2.0"
 val catsEffectVersion = "1.0.0-RC2" // to be updated as this is the (almost) only RC
-val scalazVersion = "7.2.22" // Bump as needed for io-effect compat
-val scalazIOEffectVersion = "2.1.0"
-val shimsVersion = "1.2.1"
+val scalazVersion = "7.2.25" // Bump as needed for io-effect compat
+val scalazIOEffectVersion = "2.10.1"
+val shimsVersion = "1.3.0"
 
 val commonSettings = Seq(
   organization := "com.gu",
@@ -47,7 +47,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda)
   .settings(
     commonSettings,
     publishingSettings,
@@ -75,7 +75,7 @@ lazy val formats = (project in file("formats"))
       "com.propensive" %% "magnolia" % "0.8.0",
       "com.github.mpilquist" %% "simulacrum" % "0.11.0",
       "org.typelevel" %% "cats-core" % catsVersion,
-      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     doctestMarkdownEnabled := true,
@@ -128,7 +128,7 @@ lazy val testkit = (project in file("testkit"))
     )
   )
 
-lazy val cats = (project in file("cats"))
+lazy val catsEffect = (project in file("cats"))
   .settings(
     name := "scanamo-cats-effect",
     commonSettings,
@@ -153,10 +153,9 @@ lazy val scalaz = (project in file("scalaz"))
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel" %% "cats-free" % catsVersion,
       "com.codecommit" %% "shims" % shimsVersion,
-      "org.scalaz" %% "scalaz-core" % "7.2.22",
-      "org.scalaz" %% "scalaz-ioeffect" % "2.1.0",
+      "org.scalaz" %% "scalaz-core" % scalazVersion,
+      "org.scalaz" %% "scalaz-ioeffect" % scalazIOEffectVersion,
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
@@ -189,6 +188,42 @@ lazy val alpakka = (project in file("alpakka"))
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
+
+lazy val javaTime = (project in file("java-time"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+
+    name := "scanamo-time",
+  )
+  .settings(
+    libraryDependencies ++= List(
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
+    )
+  )
+  .dependsOn(formats)
+
+lazy val joda = (project in file("joda"))
+  .settings(
+    commonSettings,
+    publishingSettings,
+
+    name := "scanamo-joda",
+  )
+  .settings(
+    libraryDependencies ++= List(
+      "org.joda" % "joda-convert" % "1.8.3" % Provided,
+      "joda-time" % "joda-time" % "2.9.9",
+
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
+    )
+  )
+  .dependsOn(formats)
+    
 
 lazy val docs = (project in file("docs"))
   .settings(
