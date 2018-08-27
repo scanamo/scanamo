@@ -35,8 +35,6 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
     case class City(name: String, country: String)
 
 
-    import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-
     val client = LocalDynamoDB.client()
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       import com.gu.scanamo.syntax._
@@ -46,6 +44,24 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
         res <- cityTable.consistently.get('name -> "Nashville")
       } yield res
       Scanamo.exec(client)(ops) should equal(Some(Right(City("Nashville", "US"))))
+    }
+    client.shutdown()
+  }
+
+  it("should empty a string string set, and be able to get the dynamo item") {
+    case class Person(name: String, pets: Set[String])
+
+    val client = LocalDynamoDB.client()
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      import syntax._
+
+      val personTable = Table[Person](t)
+      val ops = for {
+        _ <- personTable.put(Person("bob", Set("hamster")))
+        _ <- personTable.update('name -> "bob", delete('pets -> Set("hamster")))
+        res <- personTable.get('name -> "bob")
+      } yield res
+      Scanamo.exec(client)(ops) should equal(Some(Right(Person("bob", Set.empty))))
     }
     client.shutdown()
   }
