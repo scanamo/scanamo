@@ -127,7 +127,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       import com.gu.scanamo.syntax._
 
       val forecasts = for {
-        _ <- ScanamoAsync.update(client)(t)('location -> "London", set('weather -> "Sun"))
+        _ <- ScanamoAsync.update[Forecast](client)(t)('location -> "London", set('weather -> "Sun"))
       } yield Scanamo.scan[Forecast](client)(t)
 
       forecasts.futureValue should equal(List(Right(Forecast("London", "Sun"))))

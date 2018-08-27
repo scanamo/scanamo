@@ -70,6 +70,7 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> import com.gu.scanamo.query._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   Scanamo.put(client)(t)(Farmer("Maggot", 75L, Farm(List("dog"))))
     * ...   Scanamo.get[Farmer](client)(t)(UniqueKey(KeyEquals('name, "Maggot")))
@@ -131,6 +132,7 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> import com.gu.scanamo.query._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   Scanamo.putAll(client)(t)(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
@@ -174,6 +176,7 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     *
     * >>> import com.gu.scanamo.query._
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   Scanamo.putAll(client)(t)(Set(
     * ...     Farmer("Boggis", 43L, Farm(List("chicken"))), Farmer("Bunce", 52L, Farm(List("goose"))), Farmer("Bean", 55L, Farm(List("turkey")))
@@ -247,10 +250,11 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withRandomTable(client)('location -> S) { t =>
     * ...   import com.gu.scanamo.syntax._
     * ...   Scanamo.put(client)(t)(Forecast("London", "Rain"))
-    * ...   Scanamo.update(client)(t)('location -> "London", set('weather -> "Sun"))
+    * ...   Scanamo.update[Forecast](client)(t)('location -> "London", set('weather -> "Sun"))
     * ...   Scanamo.scan[Forecast](client)(t).toList
     * ... }
     * List(Right(Forecast(London,Sun)))
@@ -269,6 +273,7 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   Scanamo.put(client)(t)(Bear("Pooh", "honey"))
     * ...   Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets"))
@@ -323,6 +328,7 @@ object Scanamo {
     * >>> case class Bear(name: String, favouriteFood: String)
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
@@ -393,6 +399,7 @@ object Scanamo {
     * >>> case class Bear(name: String, favouriteFood: String, alias: Option[String])
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> import com.gu.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
@@ -491,6 +498,7 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     *
     * >>> case class Transport(mode: String, line: String)
     * >>> LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
@@ -574,6 +582,7 @@ object Scanamo {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S

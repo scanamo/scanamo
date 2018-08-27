@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.generic.auto._
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
 import scalaz.ioeffect.RTS

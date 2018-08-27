@@ -145,7 +145,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       import com.gu.scanamo.syntax._
 
       val forecasts = for {
-        _ <- ScanamoAlpakka.update(alpakkaClient)(t)('location -> "London", set('weather -> "Sun"))
+        _ <- ScanamoAlpakka.update[Forecast](alpakkaClient)(t)('location -> "London", set('weather -> "Sun"))
       } yield Scanamo.scan[Forecast](client)(t)
 
       forecasts.futureValue should equal(List(Right(Forecast("London", "Sun"))))

@@ -7,6 +7,7 @@ import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.error.DynamoReadError
+import com.gu.scanamo.generic.auto._
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
 
