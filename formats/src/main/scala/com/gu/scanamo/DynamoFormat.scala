@@ -115,6 +115,7 @@ object DynamoFormat extends EnumDynamoFormat {
   def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     override def read(item: AttributeValue): Either[DynamoReadError, A] = f.read(item).map(r)
     override def write(t: A): AttributeValue = f.write(w(t))
+    override val default: Option[A] = f.default.map(r)
   }
 
   /**
@@ -310,7 +311,14 @@ object DynamoFormat extends EnumDynamoFormat {
     )(javaListFormat)
 
   private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
-  private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
+  private val javaStringSetFormat: DynamoFormat[java.util.List[String]] =
+    new DynamoFormat[java.util.List[String]] {
+      override def read(av: AttributeValue): Either[DynamoReadError, java.util.List[String]] =
+        Either.fromOption(Option(av.getSS), NoPropertyOfType("SS", av))
+      override def write(t: java.util.List[String]): AttributeValue =
+        new AttributeValue().withSS(t)
+      override val default: Option[java.util.List[String]] = Some(java.util.Collections.emptyList())
+    }
   private def setFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(
       df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
     xmap[Set[T], java.util.List[String]](_.asScala.toList.traverse(r).map(_.toSet))(
@@ -371,7 +379,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val stringSetFormat =
-    xmap[Set[String], java.util.List[String]](s => Right(s.asScala.toSet))(
+    iso[Set[String], java.util.List[String]](s => s.asScala.toSet)(
       _.toList.asJava
     )(javaStringSetFormat)
 

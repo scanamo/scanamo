@@ -48,7 +48,7 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
     client.shutdown()
   }
 
-  it("should empty a string string set, and be able to get the dynamo item") {
+  it("should delete all entries from a string set, and be able to read the dynamo item") {
     case class Person(name: String, pets: Set[String])
 
     val client = LocalDynamoDB.client()
