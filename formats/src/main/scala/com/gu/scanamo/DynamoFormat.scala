@@ -310,78 +310,102 @@ object DynamoFormat extends EnumDynamoFormat {
       _.map(f.write).toList.asJava
     )(javaListFormat)
 
-  private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
-  private val javaStringSetFormat: DynamoFormat[java.util.List[String]] =
-    new DynamoFormat[java.util.List[String]] {
-      override def read(av: AttributeValue): Either[DynamoReadError, java.util.List[String]] =
-        Either.fromOption(Option(av.getSS), NoPropertyOfType("SS", av))
-      override def write(t: java.util.List[String]): AttributeValue =
-        new AttributeValue().withSS(t)
-      override val default: Option[java.util.List[String]] = Some(java.util.Collections.emptyList())
+  private def numSetFormat[T](r: String => Either[DynamoReadError, T])(w: T => String): DynamoFormat[Set[T]] =
+    new DynamoFormat[Set[T]] {
+      override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
+        for {
+          ss <- Either.fromOption(Option(av.getSS), NoPropertyOfType("NS", av))
+          set <- ss.asScala.toList.traverse(r)
+        } yield set.toSet
+      // Set types cannot be empty
+      override def write(t: Set[T]): AttributeValue = t.toList match {
+        case Nil => new AttributeValue().withNULL(true)
+        case xs => new AttributeValue().withSS(xs.map(w): _*)
+      }
+      override val default: Option[Set[T]] = Some(Set.empty)
     }
-  private def setFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(
-      df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
-    xmap[Set[T], java.util.List[String]](_.asScala.toList.traverse(r).map(_.toSet))(
-      _.map(w).toList.asJava
-    )(df)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> (s: Set[Int]) =>
+    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
+    *       (s: Set[Int]) =>
     *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
     *     | DynamoFormat[Set[Int]].write(s) == av &&
     *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
+    * >>> DynamoFormat[Set[Int]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val intSetFormat = setFormat(coerceNumber(_.toInt))(_.toString)(javaNumSetFormat)
+  implicit val intSetFormat: DynamoFormat[Set[Int]] = numSetFormat(coerceNumber(_.toInt))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> (s: Set[Long]) =>
+    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
+    *       (s: Set[Long]) =>
     *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
     *     | DynamoFormat[Set[Long]].write(s) == av &&
     *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
+    * >>> DynamoFormat[Set[Long]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val longSetFormat = setFormat(coerceNumber(_.toLong))(_.toString)(javaNumSetFormat)
+  implicit val longSetFormat: DynamoFormat[Set[Long]] = numSetFormat(coerceNumber(_.toLong))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> (s: Set[Double]) =>
+    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
+    *       (s: Set[Double]) =>
     *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
     *     | DynamoFormat[Set[Double]].write(s) == av &&
     *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
+    * >>> DynamoFormat[Set[Double]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val doubleSetFormat = setFormat(coerceNumber(_.toDouble))(_.toString)(javaNumSetFormat)
+  implicit val doubleSetFormat: DynamoFormat[Set[Double]] = numSetFormat(coerceNumber(_.toDouble))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> (s: Set[BigDecimal]) =>
+    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
+    *       (s: Set[BigDecimal]) =>
     *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
     *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
     *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
+    * >>> DynamoFormat[Set[BigDecimal]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val BigDecimalSetFormat = setFormat(coerceNumber(BigDecimal(_)))(_.toString)(javaNumSetFormat)
+  implicit val BigDecimalSetFormat: DynamoFormat[Set[BigDecimal]] =
+    numSetFormat(coerceNumber(BigDecimal(_)))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> (s: Set[String]) =>
+    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
+    *       (s: Set[String]) =>
     *     | val av = new AttributeValue().withSS(s.toList: _*)
     *     | DynamoFormat[Set[String]].write(s) == av &&
     *     |   DynamoFormat[Set[String]].read(av) == Right(s)
+    * >>> DynamoFormat[Set[String]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val stringSetFormat =
-    iso[Set[String], java.util.List[String]](s => s.asScala.toSet)(
-      _.toList.asJava
-    )(javaStringSetFormat)
+  implicit val stringSetFormat: DynamoFormat[Set[String]] =
+    new DynamoFormat[Set[String]] {
+      override def read(av: AttributeValue): Either[DynamoReadError, Set[String]] =
+        Either.fromOption(Option(av.getSS), NoPropertyOfType("SS", av))
+          .map(_.asScala.toSet)
+      // Set types cannot be empty
+      override def write(t: Set[String]): AttributeValue = t.toList match {
+        case Nil => new AttributeValue().withNULL(true)
+        case xs => new AttributeValue().withSS(xs: _*)
+      }
+      override val default: Option[Set[String]] = Some(Set.empty)
+    }
 
   private val javaMapFormat = attribute(_.getM, "M")(_.withM)
 
