@@ -174,16 +174,11 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.15.1",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.20",
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    // Alpakka needs credentials and will look in environment variables first
-    envVars in Test := Map(
-      "AWS_ACCESS_KEY_ID" -> "dummy",
-      "AWS_SECRET_KEY" -> "credentials"
-    ),
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )

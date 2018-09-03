@@ -4,6 +4,7 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.dynamodb.impl.DynamoSettings
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 import org.scalatest.concurrent.ScalaFutures
@@ -25,12 +26,14 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
 
   val client = LocalDynamoDB.client()
+  val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
   val alpakkaClient = DynamoClient(
     DynamoSettings(
       region = "",
       host = "localhost",
       port = 8042,
-      parallelism = 2
+      parallelism = 2,
+      credentialsProvider = dummyCreds
     )
   )
 
