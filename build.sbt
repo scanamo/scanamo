@@ -82,6 +82,7 @@ lazy val formats = (project in file("formats"))
     doctestDecodeHtmlEntities := true,
     doctestTestFramework := DoctestTestFramework.ScalaTest
   )
+  .dependsOn(testkit % "test->test")
 
 lazy val refined = (project in file("refined"))
   .settings(

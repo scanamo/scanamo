@@ -314,8 +314,11 @@ object DynamoFormat extends EnumDynamoFormat {
     new DynamoFormat[Set[T]] {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
         for {
-          ns <- Either.fromOption(Option(av.getNS), NoPropertyOfType("NS", av))
-          set <- ns.asScala.toList.traverse(r)
+          ns <- Either.fromOption(
+            if (av.isNULL) Some(Nil) else Option(av.getNS).map(_.asScala.toList),
+            NoPropertyOfType("NS", av)
+          )
+          set <- ns.traverse(r)
         } yield set.toSet
       // Set types cannot be empty
       override def write(t: Set[T]): AttributeValue = t.toList match {
@@ -412,13 +415,16 @@ object DynamoFormat extends EnumDynamoFormat {
   implicit val stringSetFormat: DynamoFormat[Set[String]] =
     new DynamoFormat[Set[String]] {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[String]] =
-        Either
-          .fromOption(Option(av.getSS), NoPropertyOfType("SS", av))
-          .map(_.asScala.toSet)
+        for {
+          ss <- Either.fromOption(
+            if (av.isNULL) Some(Nil) else Option(av.getSS).map(_.asScala.toList),
+            NoPropertyOfType("SS", av)
+          )
+        } yield ss.toSet
       // Set types cannot be empty
       override def write(t: Set[String]): AttributeValue = t.toList match {
         case Nil => new AttributeValue().withNULL(true)
-        case xs => new AttributeValue().withSS(xs: _*)
+        case xs => new AttributeValue().withSS(xs.asJava)
       }
       override val default: Option[Set[String]] = Some(Set.empty)
     }
