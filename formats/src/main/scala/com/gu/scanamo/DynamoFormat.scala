@@ -314,13 +314,13 @@ object DynamoFormat extends EnumDynamoFormat {
     new DynamoFormat[Set[T]] {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
         for {
-          ss <- Either.fromOption(Option(av.getSS), NoPropertyOfType("NS", av))
-          set <- ss.asScala.toList.traverse(r)
+          ns <- Either.fromOption(Option(av.getNS), NoPropertyOfType("NS", av))
+          set <- ns.asScala.toList.traverse(r)
         } yield set.toSet
       // Set types cannot be empty
       override def write(t: Set[T]): AttributeValue = t.toList match {
         case Nil => new AttributeValue().withNULL(true)
-        case xs => new AttributeValue().withSS(xs.map(w): _*)
+        case xs => new AttributeValue().withNS(xs.map(w).asJava)
       }
       override val default: Option[Set[T]] = Some(Set.empty)
     }
@@ -328,11 +328,14 @@ object DynamoFormat extends EnumDynamoFormat {
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
-    *       (s: Set[Int]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
+    * prop> (s: Set[Int]) =>
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[Int]].write(s) == av &&
     *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
+    *
     * >>> DynamoFormat[Set[Int]].write(Set.empty).getNULL
     * true
     * }}}
@@ -342,11 +345,14 @@ object DynamoFormat extends EnumDynamoFormat {
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
-    *       (s: Set[Long]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
+    * prop> (s: Set[Long]) =>
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[Long]].write(s) == av &&
     *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
+    *
     * >>> DynamoFormat[Set[Long]].write(Set.empty).getNULL
     * true
     * }}}
@@ -356,11 +362,14 @@ object DynamoFormat extends EnumDynamoFormat {
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
-    *       (s: Set[Double]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
+    * prop> (s: Set[Double]) =>
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[Double]].write(s) == av &&
     *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
+    *
     * >>> DynamoFormat[Set[Double]].write(Set.empty).getNULL
     * true
     * }}}
@@ -370,11 +379,14 @@ object DynamoFormat extends EnumDynamoFormat {
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
-    *       (s: Set[BigDecimal]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
+    * prop> (s: Set[BigDecimal]) =>
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
     *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
+    *
     * >>> DynamoFormat[Set[BigDecimal]].write(Set.empty).getNULL
     * true
     * }}}
@@ -385,11 +397,14 @@ object DynamoFormat extends EnumDynamoFormat {
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
-    * prop> implicit val conf = PropertyCheckConfiguration(minSize = 1)
-    *       (s: Set[String]) =>
+    * prop> import org.scalacheck._
+    * prop> implicit val arbSet = Arbitrary(Gen.nonEmptyContainerOf[Set, String](Arbitrary.arbitrary[String]))
+    *
+    * prop> (s: Set[String]) =>
     *     | val av = new AttributeValue().withSS(s.toList: _*)
     *     | DynamoFormat[Set[String]].write(s) == av &&
     *     |   DynamoFormat[Set[String]].read(av) == Right(s)
+    *
     * >>> DynamoFormat[Set[String]].write(Set.empty).getNULL
     * true
     * }}}
@@ -397,7 +412,8 @@ object DynamoFormat extends EnumDynamoFormat {
   implicit val stringSetFormat: DynamoFormat[Set[String]] =
     new DynamoFormat[Set[String]] {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[String]] =
-        Either.fromOption(Option(av.getSS), NoPropertyOfType("SS", av))
+        Either
+          .fromOption(Option(av.getSS), NoPropertyOfType("SS", av))
           .map(_.asScala.toSet)
       // Set types cannot be empty
       override def write(t: Set[String]): AttributeValue = t.toList match {
