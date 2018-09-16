@@ -1,13 +1,16 @@
 package com.gu
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.query._
 import com.gu.scanamo.update._
 
 package object scanamo {
 
+  type EvaluationKey = java.util.Map[String, AttributeValue]
+
   object syntax {
     implicit class SymbolKeyCondition(s: Symbol) {
-      def and(other: Symbol) =  HashAndRangeKeyNames(s, other)
+      def and(other: Symbol) = HashAndRangeKeyNames(s, other)
     }
 
     case class HashAndRangeKeyNames(hash: Symbol, range: Symbol)
@@ -59,6 +62,10 @@ package object scanamo {
       UpdateExpression.append(fieldValue)
     def prepend[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.prepend(fieldValue)
+    def appendAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+      UpdateExpression.appendAll(fieldValue)
+    def prependAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
+      UpdateExpression.prependAll(fieldValue)
     def add[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
       UpdateExpression.add(fieldValue)
     def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =

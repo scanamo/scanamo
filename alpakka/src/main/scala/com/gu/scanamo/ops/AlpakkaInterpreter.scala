@@ -24,19 +24,22 @@ object AlpakkaInterpreter {
           case BatchWrite(req) => client.single(req)
           case BatchGet(req) => client.single(req)
           case ConditionalDelete(req) =>
-            client.single(JavaRequests.delete(req))
+            client
+              .single(JavaRequests.delete(req))
               .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalPut(req) =>
-            client.single(JavaRequests.put(req))
+            client
+              .single(JavaRequests.put(req))
               .map(Either.right[ConditionalCheckFailedException, PutItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalUpdate(req) =>
-            client.single(JavaRequests.update(req))
+            client
+              .single(JavaRequests.update(req))
               .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)

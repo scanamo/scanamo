@@ -33,8 +33,8 @@ val ops = for {
   bunce <- farmTable.get('name -> "Bunce")
 } yield bunce
 ```
-```tut:book
-//concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
+```scala
+concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
 ```
 
 Note that `AmazonDynamoDBAsyncClient` uses a thread pool internally.
@@ -61,6 +61,7 @@ import akka.stream.ActorMaterializer
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import akka.stream.alpakka.dynamodb.impl.DynamoSettings
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import scala.concurrent.duration._
 
 implicit val system = ActorSystem("scanamo-alpakka")
@@ -72,7 +73,8 @@ val alpakkaClient = DynamoClient(
       region = "",
       host = "localhost",
       port = 8042,
-      parallelism = 2
+      parallelism = 2,
+      credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance
     )
 )
 

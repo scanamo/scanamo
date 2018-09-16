@@ -1,3 +1,23 @@
+## Version 1.0.0-M6
+
+ * Aggregate `scanamo-refined` in the root project (#194)
+
+## Version 1.0.0-M5
+
+ * Add `getAllWithConsistency` (#184 - @Slakah)
+ * Add support for refined types in `scanamo-refined` submodule (#182 - @alonsodomin)
+ * Improve documentation (#193 and #190 - @howardjohn and @philwills)
+ * Allow append/prepend of list values (#187 - @prurph)
+
+## Version 1.0.0-M4
+
+ * Update cats to 1.0.1
+ * Update shapeless to 2.3.3
+ * Update aws-java-sdk-dynamodb 1.11.256
+ * Update scalatest to 3.0.4
+ * Update scalacheck to 1.13.5
+ * Update travis badge to reflect org move
+
 ## Version 1.0.0-M3
 
  * Update Cats to `1.0.0-RC1` (#166)
