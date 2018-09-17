@@ -29,6 +29,8 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
   def testReadWrite[A: DynamoFormat](label: String)(implicit arb: Arbitrary[A]): Unit =
     testReadWrite(label, arb.arbitrary)
 
-  testReadWrite[Option[String]]("Option[String]")
+  val nonEmptyStringGen: Gen[String] =
+    Gen.nonEmptyContainerOf[Array, Char](Arbitrary.arbChar.arbitrary).map(arr => new String(arr))
+  testReadWrite[Option[String]]("Option[String]", Gen.option(nonEmptyStringGen))
   testReadWrite[Option[Int]]("Option[Int]")
 }
