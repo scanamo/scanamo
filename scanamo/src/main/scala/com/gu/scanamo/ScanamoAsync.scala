@@ -50,6 +50,7 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAll[T](tableName)(keys))
 
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.getAll]] and [[com.gu.scanamo.Table.consistently]]", "1.0")
   def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(keys: UniqueKeys[_])(
       implicit ec: ExecutionContext): Future[Set[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.getAllWithConsistency[T](tableName)(keys))
@@ -80,6 +81,7 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]]", "1.0")
   def scanFrom[T: DynamoFormat](
       client: AmazonDynamoDBAsync)(tableName: String, limit: Int, startKey: Option[EvaluationKey])(
       implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
@@ -97,6 +99,7 @@ object ScanamoAsync {
       limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
   def scanIndexFrom[T: DynamoFormat](
       client: AmazonDynamoDBAsync)(tableName: String, indexName: String, limit: Int, startKey: Option[EvaluationKey])(
       implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
@@ -112,6 +115,7 @@ object ScanamoAsync {
       implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
 
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]]", "1.0")
   def queryFrom[T: DynamoFormat](client: AmazonDynamoDBAsync)(
       tableName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])(
       implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
@@ -128,6 +132,7 @@ object ScanamoAsync {
       limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
   def queryIndexFrom[T: DynamoFormat](client: AmazonDynamoDBAsync)(
       tableName: String,
       indexName: String)(query: Query[_], limit: Int, startKey: Option[EvaluationKey])(

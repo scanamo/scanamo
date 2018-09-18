@@ -210,6 +210,7 @@ object Scanamo {
     * Set(Right(Farmer(Bean,55,Farm(List(turkey)))), Right(Farmer(Boggis,43,Farm(List(chicken)))))
     * }}}
     */
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.consistently]]", "1.0")
   def getAllWithConsistency[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(
       keys: UniqueKeys[_]): Set[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.getAllWithConsistency(tableName)(keys))
@@ -363,6 +364,7 @@ object Scanamo {
     * List(Right(Bear(Yogi,picnic baskets)))
     * }}}
     */
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]]", "1.0")
   def scanFrom[T: DynamoFormat](client: AmazonDynamoDB)(
       tableName: String,
       limit: Int,
@@ -434,6 +436,7 @@ object Scanamo {
     * List(Right(Bear(Pooh,honey,Some(Winnie))))
     * }}}
     */
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
   def scanIndexFrom[T: DynamoFormat](client: AmazonDynamoDB)(
       tableName: String,
       indexName: String,
@@ -534,6 +537,7 @@ object Scanamo {
     * List(Right(Transport(Underground,Circle)))
     * }}}
     */
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]]", "1.0")
   def queryFrom[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String)(
       query: Query[_],
       limit: Int,
@@ -620,6 +624,7 @@ object Scanamo {
     * List(Right(Transport(Underground,Picadilly,Blue)))
     * }}}
     */
+  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
   def queryIndexFrom[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String, indexName: String)(
       query: Query[_],
       limit: Int,
