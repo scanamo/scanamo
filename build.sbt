@@ -33,11 +33,10 @@ val commonSettings = Seq(
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
     val mainScalacOptions = scalacOptions.value
-    if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
+    (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
       mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
-    } else {
-      mainScalacOptions
-    }).filter(_  != "-Xfatal-warnings")
+    else
+      mainScalacOptions).filter(_  != "-Xfatal-warnings")
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
