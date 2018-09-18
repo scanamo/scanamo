@@ -1,16 +1,16 @@
 package com.gu.scanamo.error
 
 import cats.data.NonEmptyList
-import cats.{Semigroup, Show}
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ConditionalCheckFailedException}
+import cats.{ Semigroup, Show }
+import com.amazonaws.services.dynamodbv2.model.{ AttributeValue, ConditionalCheckFailedException }
 
 sealed abstract class ScanamoError
 final case class ConditionNotMet(e: ConditionalCheckFailedException) extends ScanamoError
 
-sealed abstract class DynamoReadError extends ScanamoError
+sealed abstract class DynamoReadError                                           extends ScanamoError
 final case class NoPropertyOfType(propertyType: String, actual: AttributeValue) extends DynamoReadError
-final case class TypeCoercionError(t: Throwable) extends DynamoReadError
-final case object MissingProperty extends DynamoReadError
+final case class TypeCoercionError(t: Throwable)                                extends DynamoReadError
+final case object MissingProperty                                               extends DynamoReadError
 
 final case class PropertyReadError(name: String, problem: DynamoReadError)
 final case class InvalidPropertiesError(errors: NonEmptyList[PropertyReadError]) extends DynamoReadError
@@ -31,7 +31,7 @@ object DynamoReadError {
     case InvalidPropertiesError(problems) =>
       problems.toList.map(p => s"'${p.name}': ${describe(p.problem)}").mkString(", ")
     case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
-    case TypeCoercionError(e) => s"could not be converted to desired type: $e"
-    case MissingProperty => "missing"
+    case TypeCoercionError(e)                   => s"could not be converted to desired type: $e"
+    case MissingProperty                        => "missing"
   }
 }

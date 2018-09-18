@@ -10,9 +10,8 @@ import com.amazonaws.services.dynamodbv2.model._
 
 object CatsInterpreter {
   def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Effect[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
-    private def eff[A <: AmazonWebServiceRequest, B](
-        f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
-        req: A): F[B] =
+    private def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
+                                                     req: A): F[B] =
       F.async { cb =>
         val handler = new AsyncHandler[A, B] {
           def onError(exception: Exception): Unit =
@@ -33,7 +32,7 @@ object CatsInterpreter {
             _.fold(
               _ match {
                 case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t => F.raiseError(t) // raise error as opposed to swallowing
+                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
               },
               a => F.delay(Right(a))
             )
@@ -48,7 +47,7 @@ object CatsInterpreter {
             _.fold(
               _ match {
                 case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t => F.raiseError(t) // raise error as opposed to swallowing
+                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
               },
               a => F.delay(Right(a))
             )
@@ -59,15 +58,12 @@ object CatsInterpreter {
         eff(client.queryAsync, JavaRequests.query(req))
       // Overloading means we need explicit parameter types here
       case BatchWrite(req) =>
-        eff(
-          client.batchWriteItemAsync(
-            _: BatchWriteItemRequest,
-            _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
-          req)
+        eff(client.batchWriteItemAsync(_: BatchWriteItemRequest,
+                                       _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+            req)
       case BatchGet(req) =>
-        eff(
-          client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-          req)
+        eff(client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+            req)
       case Update(req) =>
         eff(client.updateItemAsync, JavaRequests.update(req))
       case ConditionalUpdate(req) =>
@@ -76,7 +72,7 @@ object CatsInterpreter {
             _.fold(
               _ match {
                 case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t => F.raiseError(t) // raise error as opposed to swallowing
+                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
               },
               a => F.delay(Right(a))
             )

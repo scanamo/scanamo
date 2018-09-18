@@ -1,12 +1,12 @@
 package com.gu.scanamo.ops
 
-import java.util.concurrent.{Future => JFuture}
+import java.util.concurrent.{ Future => JFuture }
 
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model._
-import scalaz.ioeffect.{ExitResult, IO, Task}
+import scalaz.ioeffect.{ ExitResult, IO, Task }
 import scalaz.~>
 
 object ScalazInterpreter {
@@ -30,7 +30,7 @@ object ScalazInterpreter {
         }
         .asInstanceOf[Task[A]]
 
-    override def apply[A](fa: ScanamoOpsA[A]): Task[A] = {
+    override def apply[A](fa: ScanamoOpsA[A]): Task[A] =
       fa match {
         case Put(req) =>
           eff(client.putItemAsync, JavaRequests.put(req))
@@ -49,9 +49,8 @@ object ScalazInterpreter {
         // Overloading means we need explicit parameter types here
         case BatchWrite(req) =>
           eff(
-            client.batchWriteItemAsync(
-              _: BatchWriteItemRequest,
-              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+            client.batchWriteItemAsync(_: BatchWriteItemRequest,
+                                       _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
             req
           )
         case BatchGet(req) =>
@@ -64,6 +63,5 @@ object ScalazInterpreter {
         case ConditionalUpdate(req) =>
           catchConditional(eff(client.updateItemAsync, JavaRequests.update(req)))
       }
-    }
   }
 }

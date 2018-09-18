@@ -2,44 +2,45 @@ package com.gu.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model._
 import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.error.{ConditionNotMet, ScanamoError}
+import com.gu.scanamo.error.{ ConditionNotMet, ScanamoError }
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
+import com.gu.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import com.gu.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import cats.syntax.either._
 
-case class ConditionalOperation[V, T](tableName: String, t: T)(
-    implicit state: ConditionExpression[T],
-    format: DynamoFormat[V]) {
+case class ConditionalOperation[V, T](tableName: String, t: T)(implicit state: ConditionExpression[T],
+                                                               format: DynamoFormat[V]) {
   def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] = {
     val unconditionalRequest = ScanamoPutRequest(tableName, format.write(item), None)
     ScanamoOps.conditionalPut(
-      unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
+      unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition)))
+    )
   }
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] = {
     val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None)
     ScanamoOps.conditionalDelete(
-      unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
+      unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition)))
+    )
   }
 
   def update(key: UniqueKey[_], update: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] = {
 
-    val unconditionalRequest = ScanamoUpdateRequest(
-      tableName,
-      key.asAVMap,
-      update.expression,
-      update.attributeNames,
-      update.attributeValues,
-      None)
+    val unconditionalRequest = ScanamoUpdateRequest(tableName,
+                                                    key.asAVMap,
+                                                    update.expression,
+                                                    update.attributeNames,
+                                                    update.attributeValues,
+                                                    None)
     ScanamoOps
       .conditionalUpdate(unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
       .map(
         either =>
           either
             .leftMap[ScanamoError](ConditionNotMet(_))
-            .flatMap(r => format.read(new AttributeValue().withM(r.getAttributes))))
+            .flatMap(r => format.read(new AttributeValue().withM(r.getAttributes)))
+      )
   }
 }
 
@@ -49,9 +50,8 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
 
 object ConditionExpression {
   implicit def symbolValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, V)] {
-    override def apply(pair: (Symbol, V))(condition: Option[RequestCondition]): RequestCondition = {
+    override def apply(pair: (Symbol, V))(condition: Option[RequestCondition]): RequestCondition =
       attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))(condition)
-    }
   }
 
   implicit def attributeValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(AttributeName, V)] {
@@ -67,15 +67,14 @@ object ConditionExpression {
   }
 
   implicit def symbolValueInCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, Set[V])] {
-    override def apply(pair: (Symbol, Set[V]))(condition: Option[RequestCondition]): RequestCondition = {
+    override def apply(pair: (Symbol, Set[V]))(condition: Option[RequestCondition]): RequestCondition =
       attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))(condition)
-    }
   }
 
   implicit def attributeValueInCondition[V: DynamoFormat] = new ConditionExpression[(AttributeName, Set[V])] {
     val prefix = "inCondition"
     override def apply(pair: (AttributeName, Set[V]))(condition: Option[RequestCondition]): RequestCondition = {
-      val format = DynamoFormat[V]
+      val format        = DynamoFormat[V]
       val attributeName = pair._1
       val attributeValues = pair._2.zipWithIndex.map {
         case (v, i) =>
@@ -128,7 +127,8 @@ object ConditionExpression {
           Map(
             ":lower" -> DynamoFormat[V].write(b.bounds.lowerBound.v),
             ":upper" -> DynamoFormat[V].write(b.bounds.upperBound.v)
-          ))
+          )
+        )
       )
   }
 
@@ -155,8 +155,9 @@ object ConditionExpression {
     }
 
   private def combineConditions[L, R](condition: Option[RequestCondition], l: L, r: R, combininingOperator: String)(
-      implicit lce: ConditionExpression[L],
-      rce: ConditionExpression[R]): RequestCondition = {
+    implicit lce: ConditionExpression[L],
+    rce: ConditionExpression[R]
+  ): RequestCondition = {
     def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char) = map.map {
       case (k, v) => (newKey(k, prefix, magicChar), v)
     }
@@ -181,7 +182,7 @@ object ConditionExpression {
 
     val mergedExpressionAttributeValues = lValues match {
       case Some(m) => Some(m ++ rValues.getOrElse(Map.empty))
-      case _ => rValues
+      case _       => rValues
     }
 
     val lConditionExpression =
@@ -198,10 +199,9 @@ object ConditionExpression {
         rPrefix,
         ':'
       )
-    RequestCondition(
-      s"($lConditionExpression $combininingOperator $rConditionExpression)",
-      mergedExpressionAttributeNames,
-      mergedExpressionAttributeValues)
+    RequestCondition(s"($lConditionExpression $combininingOperator $rConditionExpression)",
+                     mergedExpressionAttributeNames,
+                     mergedExpressionAttributeValues)
   }
 }
 
@@ -211,8 +211,8 @@ case class OrCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: 
 
 case class Condition[T: ConditionExpression](t: T) {
   def apply(condition: Option[RequestCondition]) = implicitly[ConditionExpression[T]].apply(t)(condition)
-  def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
-  def or[Y: ConditionExpression](other: Y) = OrCondition(t, other)
+  def and[Y: ConditionExpression](other: Y)      = AndCondition(t, other)
+  def or[Y: ConditionExpression](other: Y)       = OrCondition(t, other)
 }
 
 object Condition {

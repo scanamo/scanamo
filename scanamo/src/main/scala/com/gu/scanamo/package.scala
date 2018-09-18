@@ -73,7 +73,7 @@ package object scanamo {
     def remove(field: AttributeName): UpdateExpression =
       UpdateExpression.remove(field)
 
-    implicit def symbolAttributeName(s: Symbol): AttributeName = AttributeName.of(s)
+    implicit def symbolAttributeName(s: Symbol): AttributeName                    = AttributeName.of(s)
     implicit def symbolAttributeNameValue[T](sv: (Symbol, T)): (AttributeName, T) = AttributeName.of(sv._1) -> sv._2
     implicit def symbolTupleAttributeNameTuple(ss: (Symbol, Symbol)): (AttributeName, AttributeName) =
       AttributeName.of(ss._1) -> AttributeName.of(ss._2)

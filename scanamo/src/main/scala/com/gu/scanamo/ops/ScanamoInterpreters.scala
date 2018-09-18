@@ -5,28 +5,28 @@ import cats.data.NonEmptyList
 import cats.syntax.either._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
-import com.amazonaws.services.dynamodbv2.model.{UpdateItemResult, _}
+import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBAsync }
+import com.amazonaws.services.dynamodbv2.model.{ UpdateItemResult, _ }
 import com.gu.scanamo.request._
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future, Promise }
+import scala.util.{ Failure, Success }
 
 /**
-  * Interpreters to take the operations defined with Scanamo and execute them
-  * by transforming them from a [[https://typelevel.org/cats/datatypes/freemonad.html Free Monad]]
-  * grammar using a [[https://typelevel.org/cats/datatypes/functionk.html FunctionK]]
-  */
+ * Interpreters to take the operations defined with Scanamo and execute them
+ * by transforming them from a [[https://typelevel.org/cats/datatypes/freemonad.html Free Monad]]
+ * grammar using a [[https://typelevel.org/cats/datatypes/functionk.html FunctionK]]
+ */
 object ScanamoInterpreters {
 
   /**
-    * Interpret Scanamo operations using blocking requests to DynamoDB with any
-    * transport errors or semantic errors within DynamoDB thrown as exceptions.
-    *
-    * We need to interpret into a type with a type parameter, so cheat by using
-    * the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
-    * a type alias for the type itself (`type Id[A] = A`).
-    */
+   * Interpret Scanamo operations using blocking requests to DynamoDB with any
+   * transport errors or semantic errors within DynamoDB thrown as exceptions.
+   *
+   * We need to interpret into a type with a type parameter, so cheat by using
+   * the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
+   * a type alias for the type itself (`type Id[A] = A`).
+   */
   def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
       case Put(req) =>
@@ -61,13 +61,14 @@ object ScanamoInterpreters {
   }
 
   /**
-    * Interpret Scanamo operations into a `Future` using the AmazonDynamoDBAsync client
-    * which doesn't block, using it's own thread pool for I/O requests internally
-    */
+   * Interpret Scanamo operations into a `Future` using the AmazonDynamoDBAsync client
+   * which doesn't block, using it's own thread pool for I/O requests internally
+   */
   def future(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) = new (ScanamoOpsA ~> Future) {
     private def futureOf[X <: AmazonWebServiceRequest, T](
-        call: (X, AsyncHandler[X, T]) => java.util.concurrent.Future[T],
-        req: X): Future[T] = {
+      call: (X, AsyncHandler[X, T]) => java.util.concurrent.Future[T],
+      req: X
+    ): Future[T] = {
       val p = Promise[T]()
       val h = new AsyncHandler[X, T] {
         def onError(exception: Exception) { p.complete(Failure(exception)); () }
@@ -100,15 +101,14 @@ object ScanamoInterpreters {
         futureOf(client.queryAsync, JavaRequests.query(req))
       // Overloading means we need explicit parameter types here
       case BatchWrite(req) =>
-        futureOf(
-          client.batchWriteItemAsync(
-            _: BatchWriteItemRequest,
-            _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
-          req)
+        futureOf(client.batchWriteItemAsync(_: BatchWriteItemRequest,
+                                            _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+                 req)
       case BatchGet(req) =>
         futureOf(
           client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-          req)
+          req
+        )
       case Update(req) =>
         futureOf(client.updateItemAsync, JavaRequests.update(req))
       case ConditionalUpdate(req) =>
@@ -125,8 +125,9 @@ private[ops] object JavaRequests {
   import collection.JavaConverters._
 
   def scan(req: ScanamoScanRequest): ScanRequest = {
-    def queryRefinement[T](o: ScanamoScanRequest => Option[T])(
-        rt: (ScanRequest, T) => ScanRequest): ScanRequest => ScanRequest = { qr =>
+    def queryRefinement[T](
+      o: ScanamoScanRequest => Option[T]
+    )(rt: (ScanRequest, T) => ScanRequest): ScanRequest => ScanRequest = { qr =>
       o(req).foldLeft(qr)(rt)
     }
 
@@ -140,8 +141,8 @@ private[ops] object JavaRequests {
           val filteredRequest = r
             .withFilterExpression(requestCondition.expression)
             .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
-          requestCondition.attributeValues.fold(filteredRequest)(avs =>
-            filteredRequest.withExpressionAttributeValues(avs.asJava))
+          requestCondition.attributeValues
+            .fold(filteredRequest)(avs => filteredRequest.withExpressionAttributeValues(avs.asJava))
         })
       )
       .reduceLeft(_.compose(_))(
@@ -150,8 +151,9 @@ private[ops] object JavaRequests {
   }
 
   def query(req: ScanamoQueryRequest): QueryRequest = {
-    def queryRefinement[T](o: ScanamoQueryRequest => Option[T])(
-        rt: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr =>
+    def queryRefinement[T](
+      o: ScanamoQueryRequest => Option[T]
+    )(rt: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr =>
       o(req).foldLeft(qr)(rt)
     }
 
@@ -164,9 +166,11 @@ private[ops] object JavaRequests {
           val requestCondition = f.apply(None)
           r.withFilterExpression(requestCondition.expression)
             .withExpressionAttributeNames(
-              (r.getExpressionAttributeNames.asScala ++ requestCondition.attributeNames).asJava)
+              (r.getExpressionAttributeNames.asScala ++ requestCondition.attributeNames).asJava
+            )
             .withExpressionAttributeValues(
-              (r.getExpressionAttributeValues.asScala ++ requestCondition.attributeValues.getOrElse(Map.empty)).asJava)
+              (r.getExpressionAttributeValues.asScala ++ requestCondition.attributeValues.getOrElse(Map.empty)).asJava
+            )
         })
       )
       .reduceLeft(_.compose(_))(
@@ -184,7 +188,8 @@ private[ops] object JavaRequests {
       (r, c) =>
         c.attributeValues.foldLeft(
           r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
-        )((cond, values) => cond.withExpressionAttributeValues(values.asJava)))
+        )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
+    )
 
   def delete(req: ScanamoDeleteRequest): DeleteItemRequest =
     req.condition.foldLeft(
@@ -193,7 +198,8 @@ private[ops] object JavaRequests {
       (r, c) =>
         c.attributeValues.foldLeft(
           r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
-        )((cond, values) => cond.withExpressionAttributeValues(values.asJava)))
+        )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
+    )
 
   def update(req: ScanamoUpdateRequest): UpdateItemRequest = {
     val reqWithoutValues = req.condition.foldLeft(
@@ -208,7 +214,8 @@ private[ops] object JavaRequests {
         c.attributeValues.foldLeft(
           r.withConditionExpression(c.expression)
             .withExpressionAttributeNames((c.attributeNames ++ req.attributeNames).asJava)
-        )((cond, values) => cond.withExpressionAttributeValues((values ++ req.attributeValues).asJava)))
+        )((cond, values) => cond.withExpressionAttributeValues((values ++ req.attributeValues).asJava))
+    )
 
     val attributeValues = req.condition.flatMap(_.attributeValues).foldLeft(req.attributeValues)(_ ++ _)
     if (attributeValues.isEmpty) reqWithoutValues
