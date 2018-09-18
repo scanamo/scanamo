@@ -5,18 +5,34 @@ import com.gu.scanamo.DynamoFormat
 import simulacrum.typeclass
 
 @typeclass trait UniqueKeyCondition[T] {
+  type K
   def asAVMap(t: T): Map[String, AttributeValue]
+  def fromAVMap(key: K, map: Map[String, AttributeValue]): Option[T]
+  def key(t: T): K
 }
 
 object UniqueKeyCondition {
   implicit def uniqueEqualsKey[V: DynamoFormat] = new UniqueKeyCondition[KeyEquals[V]] {
+    type K = Symbol
     override def asAVMap(t: KeyEquals[V]): Map[String, AttributeValue] =
       Map(t.key.name -> DynamoFormat[V].write(t.v))
+    override def fromAVMap(key: K, map: Map[String, AttributeValue]) =
+      map.get(key.name).flatMap(DynamoFormat[V].read(_).fold(_ => None, v => Some(KeyEquals(key, v))))
+    override def key(t: KeyEquals[V]) = t.key
   }
   implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition] =
     new UniqueKeyCondition[AndEqualsCondition[H, R]] {
+      val H = UniqueKeyCondition[H]
+      val R = UniqueKeyCondition[R]
+      type K = (H.K, R.K)
       override def asAVMap(t: AndEqualsCondition[H, R]): Map[String, AttributeValue] =
-        UniqueKeyCondition[H].asAVMap(t.hashEquality) ++ UniqueKeyCondition[R].asAVMap(t.rangeEquality)
+        H.asAVMap(t.hashEquality) ++ R.asAVMap(t.rangeEquality)
+      override def fromAVMap(key: K, map: Map[String, AttributeValue]) =
+        for {
+          h <- H.fromAVMap(key._1, map)
+          r <- R.fromAVMap(key._2, map)
+        } yield AndEqualsCondition(h, r)
+      override def key(t: AndEqualsCondition[H, R]) = (H.key(t.hashEquality), R.key(t.rangeEquality))
     }
 }
 
