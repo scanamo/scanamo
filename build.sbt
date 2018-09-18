@@ -1,8 +1,8 @@
 scalaVersion in ThisBuild := "2.12.4"
 crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
 
-val catsVersion = "1.2.0"
-val catsEffectVersion = "1.0.0-RC2" // to be updated as this is the (almost) only RC
+val catsVersion = "1.3.1"
+val catsEffectVersion = "1.0.0"
 val scalazVersion = "7.2.25" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.3.0"
@@ -34,9 +34,9 @@ val commonSettings = Seq(
   scalacOptions in Test := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
-       mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
-     else
-       mainScalacOptions).filter(_ != "-Xfatal-warnings")
+      mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+    else
+      mainScalacOptions).filter(_  != "-Xfatal-warnings")
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
@@ -82,6 +82,7 @@ lazy val formats = (project in file("formats"))
     doctestDecodeHtmlEntities := true,
     doctestTestFramework := DoctestTestFramework.ScalaTest
   )
+  .dependsOn(testkit % "test->test")
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -174,16 +175,11 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.15.1",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.20",
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    // Alpakka needs credentials and will look in environment variables first
-    envVars in Test := Map(
-      "AWS_ACCESS_KEY_ID" -> "dummy",
-      "AWS_SECRET_KEY" -> "credentials"
-    ),
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings",
   )

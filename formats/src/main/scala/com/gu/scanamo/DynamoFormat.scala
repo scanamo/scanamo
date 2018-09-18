@@ -115,6 +115,7 @@ object DynamoFormat extends EnumDynamoFormat {
   def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     override def read(item: AttributeValue): Either[DynamoReadError, A] = f.read(item).map(r)
     override def write(t: A): AttributeValue = f.write(w(t))
+    override val default: Option[A] = f.default.map(r)
   }
 
   /**
@@ -309,71 +310,124 @@ object DynamoFormat extends EnumDynamoFormat {
       _.map(f.write).toList.asJava
     )(javaListFormat)
 
-  private val javaNumSetFormat = attribute(_.getNS, "NS")(_.withNS)
-  private val javaStringSetFormat = attribute(_.getSS, "SS")(_.withSS)
-  private def setFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(
-      df: DynamoFormat[java.util.List[String]]): DynamoFormat[Set[T]] =
-    xmap[Set[T], java.util.List[String]](_.asScala.toList.traverse(r).map(_.toSet))(
-      _.map(w).toList.asJava
-    )(df)
+  private def numSetFormat[T](r: String => Either[DynamoReadError, T])(w: T => String): DynamoFormat[Set[T]] =
+    new DynamoFormat[Set[T]] {
+      override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
+        for {
+          ns <- Either.fromOption(
+            if (av.isNULL) Some(Nil) else Option(av.getNS).map(_.asScala.toList),
+            NoPropertyOfType("NS", av)
+          )
+          set <- ns.traverse(r)
+        } yield set.toSet
+      // Set types cannot be empty
+      override def write(t: Set[T]): AttributeValue = t.toList match {
+        case Nil => new AttributeValue().withNULL(true)
+        case xs => new AttributeValue().withNS(xs.map(w).asJava)
+      }
+      override val default: Option[Set[T]] = Some(Set.empty)
+    }
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
     * prop> (s: Set[Int]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[Int]].write(s) == av &&
     *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
+    *
+    * >>> DynamoFormat[Set[Int]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val intSetFormat = setFormat(coerceNumber(_.toInt))(_.toString)(javaNumSetFormat)
+  implicit val intSetFormat: DynamoFormat[Set[Int]] = numSetFormat(coerceNumber(_.toInt))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
     * prop> (s: Set[Long]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[Long]].write(s) == av &&
     *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
+    *
+    * >>> DynamoFormat[Set[Long]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val longSetFormat = setFormat(coerceNumber(_.toLong))(_.toString)(javaNumSetFormat)
+  implicit val longSetFormat: DynamoFormat[Set[Long]] = numSetFormat(coerceNumber(_.toLong))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
     * prop> (s: Set[Double]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[Double]].write(s) == av &&
     *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
+    *
+    * >>> DynamoFormat[Set[Double]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val doubleSetFormat = setFormat(coerceNumber(_.toDouble))(_.toString)(javaNumSetFormat)
+  implicit val doubleSetFormat: DynamoFormat[Set[Double]] = numSetFormat(coerceNumber(_.toDouble))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
     * prop> (s: Set[BigDecimal]) =>
-    *     | val av = new AttributeValue().withNS(s.map(_.toString).toList: _*)
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
     *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
     *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
+    *
+    * >>> DynamoFormat[Set[BigDecimal]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val BigDecimalSetFormat = setFormat(coerceNumber(BigDecimal(_)))(_.toString)(javaNumSetFormat)
+  implicit val BigDecimalSetFormat: DynamoFormat[Set[BigDecimal]] =
+    numSetFormat(coerceNumber(BigDecimal(_)))(_.toString)
 
   /**
     * {{{
     * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> import org.scalacheck._
+    * prop> implicit val arbSet = Arbitrary(Gen.nonEmptyContainerOf[Set, String](Arbitrary.arbitrary[String]))
+    *
     * prop> (s: Set[String]) =>
     *     | val av = new AttributeValue().withSS(s.toList: _*)
     *     | DynamoFormat[Set[String]].write(s) == av &&
     *     |   DynamoFormat[Set[String]].read(av) == Right(s)
+    *
+    * >>> DynamoFormat[Set[String]].write(Set.empty).getNULL
+    * true
     * }}}
     */
-  implicit val stringSetFormat =
-    xmap[Set[String], java.util.List[String]](s => Right(s.asScala.toSet))(
-      _.toList.asJava
-    )(javaStringSetFormat)
+  implicit val stringSetFormat: DynamoFormat[Set[String]] =
+    new DynamoFormat[Set[String]] {
+      override def read(av: AttributeValue): Either[DynamoReadError, Set[String]] =
+        for {
+          ss <- Either.fromOption(
+            if (av.isNULL) Some(Nil) else Option(av.getSS).map(_.asScala.toList),
+            NoPropertyOfType("SS", av)
+          )
+        } yield ss.toSet
+      // Set types cannot be empty
+      override def write(t: Set[String]): AttributeValue = t.toList match {
+        case Nil => new AttributeValue().withNULL(true)
+        case xs => new AttributeValue().withSS(xs.asJava)
+      }
+      override val default: Option[Set[String]] = Some(Set.empty)
+    }
 
   private val javaMapFormat = attribute(_.getM, "M")(_.withM)
 
