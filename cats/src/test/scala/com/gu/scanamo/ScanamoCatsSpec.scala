@@ -3,8 +3,8 @@ package com.gu.scanamo
 import cats.effect.IO
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
-import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps

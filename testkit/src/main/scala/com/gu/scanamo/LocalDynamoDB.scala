@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
 import com.amazonaws.services.dynamodbv2._
 import com.amazonaws.services.dynamodbv2.model._

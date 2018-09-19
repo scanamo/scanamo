@@ -5,7 +5,7 @@ import cats.~>
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 object AlpakkaInterpreter {
 

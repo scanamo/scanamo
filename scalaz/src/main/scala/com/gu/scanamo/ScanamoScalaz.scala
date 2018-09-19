@@ -1,9 +1,9 @@
 package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{ BatchWriteItemResult, DeleteItemResult }
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.ops.{ ScalazInterpreter, ScanamoOps }
+import com.gu.scanamo.ops.{ScalazInterpreter, ScanamoOps}
 import com.gu.scanamo.query._
 import com.gu.scanamo.update.UpdateExpression
 import scalaz.ioeffect.Task

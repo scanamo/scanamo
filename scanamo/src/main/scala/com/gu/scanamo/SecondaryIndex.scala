@@ -1,10 +1,10 @@
 package com.gu.scanamo
 
-import com.gu.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query.{ Condition, ConditionExpression, Query }
-import com.gu.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import com.gu.scanamo.query.{Condition, ConditionExpression, Query}
+import com.gu.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 
 /**
  * Represents a secondary index on a DynamoDB table.

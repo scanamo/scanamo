@@ -1,7 +1,7 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{ PutRequest, WriteRequest, _ }
-import com.gu.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
+import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._

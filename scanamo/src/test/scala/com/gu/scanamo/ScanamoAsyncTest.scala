@@ -2,8 +2,8 @@ package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
-import org.scalatest.{ BeforeAndAfterAll, FunSpec, Matchers }
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 

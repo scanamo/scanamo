@@ -2,10 +2,10 @@ package com.gu.scanamo
 
 import cats.effect.Effect
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{ BatchWriteItemResult, DeleteItemResult }
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.ops.{ CatsInterpreter, ScanamoOps }
-import com.gu.scanamo.query.{ Query, UniqueKey, UniqueKeys }
+import com.gu.scanamo.ops.{CatsInterpreter, ScanamoOps}
+import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 import com.gu.scanamo.update.UpdateExpression
 
 object ScanamoCats {

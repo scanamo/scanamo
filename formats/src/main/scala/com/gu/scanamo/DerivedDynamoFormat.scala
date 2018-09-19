@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import cats.data.{ NonEmptyList, Validated }
+import cats.data.{NonEmptyList, Validated}
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error._

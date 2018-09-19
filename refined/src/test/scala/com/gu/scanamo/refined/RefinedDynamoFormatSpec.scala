@@ -8,7 +8,7 @@ import eu.timepit.refined.numeric.Positive
 import com.gu.scanamo.error.TypeCoercionError
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.{FlatSpec, Matchers}
 
 class RefinedDynamoFormatSpec extends FlatSpec with Matchers {
 

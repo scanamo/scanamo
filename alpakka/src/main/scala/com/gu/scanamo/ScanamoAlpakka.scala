@@ -1,13 +1,13 @@
 package com.gu.scanamo
 
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import com.amazonaws.services.dynamodbv2.model.{ BatchWriteItemResult, DeleteItemResult }
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
 import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps }
-import com.gu.scanamo.query.{ Query, UniqueKey, UniqueKeys }
+import com.gu.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
+import com.gu.scanamo.query.{Query, UniqueKey, UniqueKeys}
 import com.gu.scanamo.update.UpdateExpression
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
  * Provides the same interface as [[com.gu.scanamo.Scanamo]], except that it requires an

@@ -3,10 +3,10 @@ package com.gu.scanamo
 import java.util
 
 import cats.free.Free
-import com.amazonaws.services.dynamodbv2.model.{ AttributeValue, QueryResult, ScanResult }
+import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryResult, ScanResult}
 import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.ops.{ ScanamoOps, ScanamoOpsA }
-import com.gu.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
+import com.gu.scanamo.ops.{ScanamoOps, ScanamoOpsA}
+import com.gu.scanamo.request.{ScanamoQueryRequest, ScanamoScanRequest}
 
 import scala.collection.JavaConverters._
 

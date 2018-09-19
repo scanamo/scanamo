@@ -1,6 +1,6 @@
 package com.gu.scanamo.update
 
-import org.scalacheck.{ Arbitrary, Gen }
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
 import com.gu.scanamo.syntax._
 import scala.collection.JavaConverters._

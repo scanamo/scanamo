@@ -4,12 +4,12 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.dynamodb.impl.DynamoSettings
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.gu.scanamo.query._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
-import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
 
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
