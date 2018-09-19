@@ -8,24 +8,24 @@ import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness
 abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
 
 /**
- * {{{
- * prop> sealed trait Animal
- * prop> case object Aardvark extends Animal
- * prop> case object Hippopotamus extends Animal
- * prop> case object Zebra extends Animal
- *
- * prop> import org.scalacheck._
- * prop> implicit val arbitraryAnimal: Arbitrary[Animal] = Arbitrary(Gen.oneOf(List(Aardvark, Hippopotamus, Zebra)))
- *
- * prop> (a: Animal) =>
- *     | DynamoFormat[Animal].read(DynamoFormat[Animal].write(a)) == Right(a)
- * }}}
- *
- * {{{
- * >>> DynamoFormat[Animal].write(Zebra).getS
- * Zebra
- * }}}
- */
+  * {{{
+  * prop> sealed trait Animal
+  * prop> case object Aardvark extends Animal
+  * prop> case object Hippopotamus extends Animal
+  * prop> case object Zebra extends Animal
+  *
+  * prop> import org.scalacheck._
+  * prop> implicit val arbitraryAnimal: Arbitrary[Animal] = Arbitrary(Gen.oneOf(List(Aardvark, Hippopotamus, Zebra)))
+  *
+  * prop> (a: Animal) =>
+  *     | DynamoFormat[Animal].read(DynamoFormat[Animal].write(a)) == Right(a)
+  * }}}
+  *
+  * {{{
+  * >>> DynamoFormat[Animal].write(Zebra).getS
+  * Zebra
+  * }}}
+  */
 trait EnumDynamoFormat extends DerivedDynamoFormat {
   implicit val enumDynamoFormatCNil: EnumerationDynamoFormat[CNil] = new EnumerationDynamoFormat[CNil] {
     override def read(av: AttributeValue): Either[DynamoReadError, CNil] = Left(

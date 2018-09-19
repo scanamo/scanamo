@@ -34,9 +34,9 @@ val commonSettings = Seq(
   scalacOptions in Test := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
-      mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
-    else
-      mainScalacOptions).filter(_  != "-Xfatal-warnings")
+       mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+     else
+       mainScalacOptions).filter(_ != "-Xfatal-warnings")
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
@@ -208,11 +208,11 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda" % "joda-convert" % "1.8.3" % Provided,
-      "joda-time" % "joda-time" % "2.9.9",
-      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
-      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
+      "org.joda"       % "joda-convert"                 % "1.8.3" % Provided,
+      "joda-time"      % "joda-time"                    % "2.9.9",
+      "org.scalatest"  %% "scalatest"                   % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
+      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
     )
   )
   .dependsOn(formats)

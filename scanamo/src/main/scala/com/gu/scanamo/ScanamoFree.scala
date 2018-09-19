@@ -233,16 +233,16 @@ object ScanamoFree {
       )
 
   /**
-   * {{{
-   * prop> import collection.JavaConverters._
-   * prop> import com.amazonaws.services.dynamodbv2.model._
-   *
-   * prop> (m: Map[String, Int]) =>
-   *     |   ScanamoFree.read[Map[String, Int]](
-   *     |     m.mapValues(i => new AttributeValue().withN(i.toString)).asJava
-   *     |   ) == Right(m)
-   * }}}
-   */
+    * {{{
+    * prop> import collection.JavaConverters._
+    * prop> import com.amazonaws.services.dynamodbv2.model._
+    *
+    * prop> (m: Map[String, Int]) =>
+    *     |   ScanamoFree.read[Map[String, Int]](
+    *     |     m.mapValues(i => new AttributeValue().withN(i.toString)).asJava
+    *     |   ) == Right(m)
+    * }}}
+    */
   def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): Either[DynamoReadError, T] =
     f.read(new AttributeValue().withM(m))
 }

@@ -5,12 +5,12 @@ import com.gu.scanamo.export.Exported
 import shapeless._
 
 /**
- * Fully automatic configurable codec derivation.
- *
- * Extending this trait provides [[io.circe.Decoder]] and [[io.circe.Encoder]]
- * instances for case classes (if all members have instances), "incomplete" case classes, sealed
- * trait hierarchies, etc.
- */
+  * Fully automatic configurable codec derivation.
+  *
+  * Extending this trait provides [[io.circe.Decoder]] and [[io.circe.Encoder]]
+  * instances for case classes (if all members have instances), "incomplete" case classes, sealed
+  * trait hierarchies, etc.
+  */
 object auto extends DerivedDynamoFormat {
   implicit def genericProductAuto[T, R](
     implicit
