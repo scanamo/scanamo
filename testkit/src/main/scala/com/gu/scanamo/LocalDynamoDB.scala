@@ -66,7 +66,7 @@ object LocalDynamoDB {
   def withRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
     thunk: String => T
   ): T = {
-    var created: Boolean  = false
+    var created: Boolean = false
     var tableName: String = null
     while (!created) {
       try {
@@ -106,11 +106,13 @@ object LocalDynamoDB {
   )(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
     thunk: => T
   ): T = {
-    createTableWithIndex(client,
-                         tableName,
-                         secondaryIndexName,
-                         primaryIndexAttributes.toList,
-                         secondaryIndexAttributes.toList)
+    createTableWithIndex(
+      client,
+      tableName,
+      secondaryIndexName,
+      primaryIndexAttributes.toList,
+      secondaryIndexAttributes.toList
+    )
     val res = try {
       thunk
     } finally {
@@ -127,16 +129,18 @@ object LocalDynamoDB {
   ): T = {
     var tableName: String = null
     var indexName: String = null
-    var created: Boolean  = false
+    var created: Boolean = false
     while (!created) {
       try {
         tableName = java.util.UUID.randomUUID.toString
         indexName = java.util.UUID.randomUUID.toString
-        createTableWithIndex(client,
-                             tableName,
-                             indexName,
-                             primaryIndexAttributes.toList,
-                             secondaryIndexAttributes.toList)
+        createTableWithIndex(
+          client,
+          tableName,
+          indexName,
+          primaryIndexAttributes.toList,
+          secondaryIndexAttributes.toList
+        )
         created = true
       } catch {
         case t: ResourceInUseException =>
@@ -154,7 +158,7 @@ object LocalDynamoDB {
 
   private def keySchema(attributes: Seq[(Symbol, ScalarAttributeType)]) = {
     val hashKeyWithType :: rangeKeyWithType = attributes.toList
-    val keySchemas                          = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
+    val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
     keySchemas.map { case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType) }.asJava
   }
 

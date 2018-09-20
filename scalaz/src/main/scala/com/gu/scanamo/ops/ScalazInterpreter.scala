@@ -49,8 +49,10 @@ object ScalazInterpreter {
         // Overloading means we need explicit parameter types here
         case BatchWrite(req) =>
           eff(
-            client.batchWriteItemAsync(_: BatchWriteItemRequest,
-                                       _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+            client.batchWriteItemAsync(
+              _: BatchWriteItemRequest,
+              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]
+            ),
             req
           )
         case BatchGet(req) =>

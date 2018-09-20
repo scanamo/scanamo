@@ -33,8 +33,10 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
   // Generate limited values for double and big decimal
   // see: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes.Number
   testReadWrite[Set[Double]]("Set[Double]", Gen.containerOf[Set, Double](Arbitrary.arbLong.arbitrary.map(_.toDouble)))
-  testReadWrite[Set[BigDecimal]]("Set[BigDecimal]",
-                                 Gen.containerOf[Set, BigDecimal](Arbitrary.arbLong.arbitrary.map(BigDecimal(_))))
+  testReadWrite[Set[BigDecimal]](
+    "Set[BigDecimal]",
+    Gen.containerOf[Set, BigDecimal](Arbitrary.arbLong.arbitrary.map(BigDecimal(_)))
+  )
   val nonEmptyStringGen: Gen[String] =
     Gen.nonEmptyContainerOf[Array, Char](Arbitrary.arbChar.arbitrary).map(arr => new String(arr))
   testReadWrite[Set[String]]("Set[String]", Gen.containerOf[Set, String](nonEmptyStringGen))

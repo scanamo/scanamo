@@ -35,11 +35,11 @@ import scala.collection.JavaConverters._
   */
 case class Table[V: DynamoFormat](name: String) {
 
-  def put(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]]                = ScanamoFree.put(name)(v)
-  def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]]               = ScanamoFree.putAll(name)(vs)
-  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]]   = ScanamoFree.get[V](name)(key)
+  def put(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.put(name)(v)
+  def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.putAll(name)(vs)
+  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] = ScanamoFree.getAll[V](name)(keys)
-  def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResult]                  = ScanamoFree.delete(name)(key)
+  def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] = ScanamoFree.delete(name)(key)
 
   /**
     * Deletes multiple items by a unique key
@@ -677,8 +677,8 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 }
 
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
-  def limit(n: Int): TableWithOptions[V]              = copy(queryOptions = queryOptions.copy(limit = Some(n)))
-  def consistently: TableWithOptions[V]               = copy(queryOptions = queryOptions.copy(consistent = true))
+  def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+  def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =

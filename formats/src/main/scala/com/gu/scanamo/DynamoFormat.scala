@@ -113,8 +113,8 @@ object DynamoFormat extends EnumDynamoFormat {
     */
   def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     override def read(item: AttributeValue): Either[DynamoReadError, A] = f.read(item).map(r)
-    override def write(t: A): AttributeValue                            = f.write(w(t))
-    override val default: Option[A]                                     = f.default.map(r)
+    override def write(t: A): AttributeValue = f.write(w(t))
+    override val default: Option[A] = f.default.map(r)
   }
 
   /**
@@ -133,7 +133,7 @@ object DynamoFormat extends EnumDynamoFormat {
     */
   def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     override def read(item: AttributeValue): Either[DynamoReadError, A] = f.read(item).flatMap(r)
-    override def write(t: A): AttributeValue                            = f.write(w(t))
+    override def write(t: A): AttributeValue = f.write(w(t))
   }
 
   /**
@@ -316,9 +316,9 @@ object DynamoFormat extends EnumDynamoFormat {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
         for {
           ns <- Either.fromOption(
-                 if (av.isNULL) Some(Nil) else Option(av.getNS).map(_.asScala.toList),
-                 NoPropertyOfType("NS", av)
-               )
+            if (av.isNULL) Some(Nil) else Option(av.getNS).map(_.asScala.toList),
+            NoPropertyOfType("NS", av)
+          )
           set <- ns.traverse(r)
         } yield set.toSet
       // Set types cannot be empty
@@ -418,9 +418,9 @@ object DynamoFormat extends EnumDynamoFormat {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[String]] =
         for {
           ss <- Either.fromOption(
-                 if (av.isNULL) Some(Nil) else Option(av.getSS).map(_.asScala.toList),
-                 NoPropertyOfType("SS", av)
-               )
+            if (av.isNULL) Some(Nil) else Option(av.getSS).map(_.asScala.toList),
+            NoPropertyOfType("SS", av)
+          )
         } yield ss.toSet
       // Set types cannot be empty
       override def write(t: Set[String]): AttributeValue = t.toList match {
@@ -464,7 +464,7 @@ object DynamoFormat extends EnumDynamoFormat {
         .getOrElse(Right(Option.empty[T]))
 
     def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(null)
-    override val default                    = Some(None)
+    override val default = Some(None)
   }
 
   /**

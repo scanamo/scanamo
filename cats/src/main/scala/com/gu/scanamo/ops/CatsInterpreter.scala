@@ -58,12 +58,18 @@ object CatsInterpreter {
         eff(client.queryAsync, JavaRequests.query(req))
       // Overloading means we need explicit parameter types here
       case BatchWrite(req) =>
-        eff(client.batchWriteItemAsync(_: BatchWriteItemRequest,
-                                       _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
-            req)
+        eff(
+          client.batchWriteItemAsync(
+            _: BatchWriteItemRequest,
+            _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]
+          ),
+          req
+        )
       case BatchGet(req) =>
-        eff(client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-            req)
+        eff(
+          client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+          req
+        )
       case Update(req) =>
         eff(client.updateItemAsync, JavaRequests.update(req))
       case ConditionalUpdate(req) =>

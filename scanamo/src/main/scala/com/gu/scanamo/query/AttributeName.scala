@@ -18,11 +18,11 @@ private[scanamo] case class AttributeName(components: List[Symbol], index: Optio
 
   def apply(index: Int): AttributeName = copy(index = Some(index))
 
-  def <[V: DynamoFormat](v: V)                    = KeyIs(this, LT, v)
-  def >[V: DynamoFormat](v: V)                    = KeyIs(this, GT, v)
-  def <=[V: DynamoFormat](v: V)                   = KeyIs(this, LTE, v)
-  def >=[V: DynamoFormat](v: V)                   = KeyIs(this, GTE, v)
-  def beginsWith[V: DynamoFormat](v: V)           = BeginsWith(this, v)
+  def <[V: DynamoFormat](v: V) = KeyIs(this, LT, v)
+  def >[V: DynamoFormat](v: V) = KeyIs(this, GT, v)
+  def <=[V: DynamoFormat](v: V) = KeyIs(this, LTE, v)
+  def >=[V: DynamoFormat](v: V) = KeyIs(this, GTE, v)
+  def beginsWith[V: DynamoFormat](v: V) = BeginsWith(this, v)
   def between[V: DynamoFormat](bounds: Bounds[V]) = Between(this, bounds)
 }
 

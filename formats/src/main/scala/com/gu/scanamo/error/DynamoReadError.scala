@@ -7,10 +7,10 @@ import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ConditionalCheck
 sealed abstract class ScanamoError
 final case class ConditionNotMet(e: ConditionalCheckFailedException) extends ScanamoError
 
-sealed abstract class DynamoReadError                                           extends ScanamoError
+sealed abstract class DynamoReadError extends ScanamoError
 final case class NoPropertyOfType(propertyType: String, actual: AttributeValue) extends DynamoReadError
-final case class TypeCoercionError(t: Throwable)                                extends DynamoReadError
-final case object MissingProperty                                               extends DynamoReadError
+final case class TypeCoercionError(t: Throwable) extends DynamoReadError
+final case object MissingProperty extends DynamoReadError
 
 final case class PropertyReadError(name: String, problem: DynamoReadError)
 final case class InvalidPropertiesError(errors: NonEmptyList[PropertyReadError]) extends DynamoReadError

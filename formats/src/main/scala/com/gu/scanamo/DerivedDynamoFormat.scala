@@ -11,7 +11,7 @@ import collection.JavaConverters._
 
 trait DerivedDynamoFormat {
   type ValidatedPropertiesError[T] = Validated[InvalidPropertiesError, T]
-  type NotSymbol[T]                = |¬|[Symbol]#λ[T]
+  type NotSymbol[T] = |¬|[Symbol]#λ[T]
 
   trait ConstructedDynamoFormat[T] {
     def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
@@ -19,11 +19,11 @@ trait DerivedDynamoFormat {
   }
 
   trait InvalidConstructedDynamoFormat[T] extends ConstructedDynamoFormat[T]
-  trait ValidConstructedDynamoFormat[T]   extends ConstructedDynamoFormat[T]
+  trait ValidConstructedDynamoFormat[T] extends ConstructedDynamoFormat[T]
 
   implicit val hnil: InvalidConstructedDynamoFormat[HNil] =
     new InvalidConstructedDynamoFormat[HNil] {
-      def read(av: AttributeValue)       = Validated.valid(HNil)
+      def read(av: AttributeValue) = Validated.valid(HNil)
       def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty[String, AttributeValue].asJava)
     }
 
@@ -46,7 +46,7 @@ trait DerivedDynamoFormat {
           x.leftMap(e => InvalidPropertiesError(NonEmptyList(PropertyReadError(fieldName, e), Nil))).toValidated
 
         val head: Validated[InvalidPropertiesError, FieldType[K, V]] = validatedProperty(valueOrError).map(field[K](_))
-        val tail                                                     = tailFormat.value.read(av)
+        val tail = tailFormat.value.read(av)
 
         cats.Apply[ValidatedPropertiesError].map2(head, tail)(_ :: _)
       }
@@ -95,13 +95,13 @@ trait DerivedDynamoFormat {
                                                formatR: Lazy[ValidConstructedDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
-      def write(t: T): AttributeValue                          = formatR.value.write(gen.to(t))
+      def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 
   implicit def genericCoProduct[T, R](implicit gen: LabelledGeneric.Aux[T, R],
                                       formatR: Lazy[CoProductDynamoFormat[R]]): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
-      def write(t: T): AttributeValue                          = formatR.value.write(gen.to(t))
+      def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 }

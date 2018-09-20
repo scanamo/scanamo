@@ -33,22 +33,22 @@ sealed abstract class RangeKeyCondition[V: DynamoFormat] extends Product with Se
 }
 
 sealed abstract class DynamoOperator(val op: String) extends Product with Serializable
-final case object LT                                 extends DynamoOperator("<")
-final case object LTE                                extends DynamoOperator("<=")
-final case object GT                                 extends DynamoOperator(">")
-final case object GTE                                extends DynamoOperator(">=")
+final case object LT extends DynamoOperator("<")
+final case object LTE extends DynamoOperator("<=")
+final case object GT extends DynamoOperator(">")
+final case object GTE extends DynamoOperator(">=")
 
 final case class KeyIs[V: DynamoFormat](key: AttributeName, operator: DynamoOperator, v: V)
     extends RangeKeyCondition[V] {
-  val placeholder                                        = "keyIsValue"
+  val placeholder = "keyIsValue"
   override def keyConditionExpression(s: String): String = s"#${key.placeholder(s)} ${operator.op} :$placeholder"
-  override def attributes                                = Map(placeholder -> v)
+  override def attributes = Map(placeholder -> v)
 }
 
 final case class BeginsWith[V: DynamoFormat](key: AttributeName, v: V) extends RangeKeyCondition[V] {
-  val placeholder                                        = "beginsWithValue"
+  val placeholder = "beginsWithValue"
   override def keyConditionExpression(s: String): String = s"begins_with(#${key.placeholder(s)}, :$placeholder)"
-  override def attributes                                = Map(placeholder -> v)
+  override def attributes = Map(placeholder -> v)
 }
 
 final case class Between[V: DynamoFormat](key: AttributeName, bounds: Bounds[V]) extends RangeKeyCondition[V] {
