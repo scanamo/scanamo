@@ -11,7 +11,7 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
-  def testReadWrite[A: DynamoFormat](label: String, gen: Gen[A]): Unit = {
+  def testReadWrite[A: DynamoFormat](label: String, gen: Gen[A]): Unit =
     it(s"should write and then read a $label from dynamo") {
       val client = LocalDynamoDB.client()
       LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
@@ -24,7 +24,6 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
         }
       }
     }
-  }
 
   def testReadWrite[A: DynamoFormat](label: String)(implicit arb: Arbitrary[A]): Unit =
     testReadWrite(label, arb.arbitrary)
@@ -34,7 +33,10 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
   // Generate limited values for double and big decimal
   // see: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes.Number
   testReadWrite[Set[Double]]("Set[Double]", Gen.containerOf[Set, Double](Arbitrary.arbLong.arbitrary.map(_.toDouble)))
-  testReadWrite[Set[BigDecimal]]("Set[BigDecimal]", Gen.containerOf[Set, BigDecimal](Arbitrary.arbLong.arbitrary.map(BigDecimal(_))))
+  testReadWrite[Set[BigDecimal]](
+    "Set[BigDecimal]",
+    Gen.containerOf[Set, BigDecimal](Arbitrary.arbLong.arbitrary.map(BigDecimal(_)))
+  )
   val nonEmptyStringGen: Gen[String] =
     Gen.nonEmptyContainerOf[Array, Char](Arbitrary.arbChar.arbitrary).map(arr => new String(arr))
   testReadWrite[Set[String]]("Set[String]", Gen.containerOf[Set, String](nonEmptyStringGen))

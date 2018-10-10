@@ -24,8 +24,8 @@ object LocalDynamoDB {
     )
 
   def createTableWithIndex(
-    client: AmazonDynamoDB, 
-    tableName: String, 
+    client: AmazonDynamoDB,
+    tableName: String,
     secondaryIndexName: String,
     primaryIndexAttributes: List[(Symbol, ScalarAttributeType)],
     secondaryIndexAttributes: List[(Symbol, ScalarAttributeType)]
@@ -33,8 +33,9 @@ object LocalDynamoDB {
     client.createTable(
       new CreateTableRequest()
         .withTableName(tableName)
-        .withAttributeDefinitions(attributeDefinitions(
-          primaryIndexAttributes ++ (secondaryIndexAttributes diff primaryIndexAttributes)))
+        .withAttributeDefinitions(
+          attributeDefinitions(primaryIndexAttributes ++ (secondaryIndexAttributes diff primaryIndexAttributes))
+        )
         .withKeySchema(keySchema(primaryIndexAttributes))
         .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
         .withGlobalSecondaryIndexes(
@@ -42,15 +43,15 @@ object LocalDynamoDB {
             .withIndexName(secondaryIndexName)
             .withKeySchema(keySchema(secondaryIndexAttributes))
             .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
-            .withProjection(new Projection().withProjectionType(ProjectionType.ALL)))
+            .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
+        )
     )
 
-  def deleteTable(client: AmazonDynamoDB)(tableName: String) = {
-      client.deleteTable(tableName)
-  }
+  def deleteTable(client: AmazonDynamoDB)(tableName: String) =
+    client.deleteTable(tableName)
 
   def withTable[T](client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
-      thunk: => T
+    thunk: => T
   ): T = {
     createTable(client)(tableName)(attributeDefinitions: _*)
     val res = try {
@@ -63,7 +64,7 @@ object LocalDynamoDB {
   }
 
   def withRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
-      thunk: String => T
+    thunk: String => T
   ): T = {
     var created: Boolean = false
     var tableName: String = null
@@ -87,24 +88,31 @@ object LocalDynamoDB {
   }
 
   def usingTable[T](client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
-      thunk: => T
+    thunk: => T
   ): Unit = {
     withTable(client)(tableName)(attributeDefinitions: _*)(thunk)
     ()
   }
 
   def usingRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
-      thunk: String => T
+    thunk: String => T
   ): Unit = {
     withRandomTable(client)(attributeDefinitions: _*)(thunk)
     ()
   }
 
   def withTableWithSecondaryIndex[T](client: AmazonDynamoDB)(tableName: String, secondaryIndexName: String)(
-      primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
-      thunk: => T
+    primaryIndexAttributes: (Symbol, ScalarAttributeType)*
+  )(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
+    thunk: => T
   ): T = {
-    createTableWithIndex(client, tableName, secondaryIndexName, primaryIndexAttributes.toList, secondaryIndexAttributes.toList)
+    createTableWithIndex(
+      client,
+      tableName,
+      secondaryIndexName,
+      primaryIndexAttributes.toList,
+      secondaryIndexAttributes.toList
+    )
     val res = try {
       thunk
     } finally {
@@ -114,8 +122,10 @@ object LocalDynamoDB {
     res
   }
 
-  def withRandomTableWithSecondaryIndex[T](client: AmazonDynamoDB)(primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
-      thunk: (String, String) => T
+  def withRandomTableWithSecondaryIndex[T](
+    client: AmazonDynamoDB
+  )(primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
+    thunk: (String, String) => T
   ): T = {
     var tableName: String = null
     var indexName: String = null
@@ -124,7 +134,13 @@ object LocalDynamoDB {
       try {
         tableName = java.util.UUID.randomUUID.toString
         indexName = java.util.UUID.randomUUID.toString
-        createTableWithIndex(client, tableName, indexName, primaryIndexAttributes.toList, secondaryIndexAttributes.toList)
+        createTableWithIndex(
+          client,
+          tableName,
+          indexName,
+          primaryIndexAttributes.toList,
+          secondaryIndexAttributes.toList
+        )
         created = true
       } catch {
         case t: ResourceInUseException =>
@@ -146,9 +162,8 @@ object LocalDynamoDB {
     keySchemas.map { case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType) }.asJava
   }
 
-  private def attributeDefinitions(attributes: Seq[(Symbol, ScalarAttributeType)]) = {
+  private def attributeDefinitions(attributes: Seq[(Symbol, ScalarAttributeType)]) =
     attributes.map { case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType) }.asJava
-  }
 
   private val arbitraryThroughputThatIsIgnoredByDynamoDBLocal = new ProvisionedThroughput(1L, 1L)
 }

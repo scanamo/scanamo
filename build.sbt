@@ -34,9 +34,9 @@ val commonSettings = Seq(
   scalacOptions in Test := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
-      mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
-    else
-      mainScalacOptions).filter(_  != "-Xfatal-warnings")
+       mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+     else
+       mainScalacOptions).filter(_ != "-Xfatal-warnings")
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
@@ -243,7 +243,8 @@ val publishingSettings = Seq(
     ScmInfo(
       url("https://github.com/scanamo/scanamo"),
       "scm:git:git@github.com:scanamo/scanamo.git"
-    )),
+    )
+  ),
   pomExtra := {
     <developers>
       <developer>

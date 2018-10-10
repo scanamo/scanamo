@@ -21,7 +21,7 @@ object QueryableKeyCondition {
 
   implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat] =
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
-      override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest = {
+      override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest =
         req
           .withKeyConditionExpression(
             s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}"
@@ -36,7 +36,6 @@ object QueryableKeyCondition {
               } + (s":${t.hashCondition.key.name}" -> DynamoFormat[H].write(t.hashCondition.v))
             ).asJava
           )
-      }
     }
 
   implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition] =

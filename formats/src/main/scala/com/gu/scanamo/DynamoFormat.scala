@@ -84,15 +84,14 @@ import scala.reflect.ClassTag
 
 object DynamoFormat extends EnumDynamoFormat {
   private def attribute[T](decode: AttributeValue => T, propertyType: String)(
-      encode: AttributeValue => T => AttributeValue
-  ): DynamoFormat[T] = {
+    encode: AttributeValue => T => AttributeValue
+  ): DynamoFormat[T] =
     new DynamoFormat[T] {
       override def read(av: AttributeValue): Either[DynamoReadError, T] =
         Either.fromOption(Option(decode(av)), NoPropertyOfType(propertyType, av))
       override def write(t: T): AttributeValue =
         encode(new AttributeValue())(t)
     }
-  }
 
   /**
     * Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
@@ -157,8 +156,9 @@ object DynamoFormat extends EnumDynamoFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B, T >: scala.Null <: scala.Throwable](read: B => A)(
-      write: A => B)(implicit f: DynamoFormat[B], T: ClassTag[T], NT: NotNull[T]) =
+  def coercedXmap[A, B, T >: scala.Null <: scala.Throwable](
+    read: B => A
+  )(write: A => B)(implicit f: DynamoFormat[B], T: ClassTag[T], NT: NotNull[T]) =
     xmap(coerce[B, A, T](read))(write)
 
   /**
@@ -186,7 +186,8 @@ object DynamoFormat extends EnumDynamoFormat {
     coerce[String, N, NumberFormatException](f)
 
   private def coerce[A, B, T >: scala.Null <: scala.Throwable](
-      f: A => B)(implicit T: ClassTag[T], NT: NotNull[T]): A => Either[DynamoReadError, B] =
+    f: A => B
+  )(implicit T: ClassTag[T], NT: NotNull[T]): A => Either[DynamoReadError, B] =
     a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
 
   /**
@@ -323,7 +324,7 @@ object DynamoFormat extends EnumDynamoFormat {
       // Set types cannot be empty
       override def write(t: Set[T]): AttributeValue = t.toList match {
         case Nil => new AttributeValue().withNULL(true)
-        case xs => new AttributeValue().withNS(xs.map(w).asJava)
+        case xs  => new AttributeValue().withNS(xs.map(w).asJava)
       }
       override val default: Option[Set[T]] = Some(Set.empty)
     }
@@ -424,7 +425,7 @@ object DynamoFormat extends EnumDynamoFormat {
       // Set types cannot be empty
       override def write(t: Set[String]): AttributeValue = t.toList match {
         case Nil => new AttributeValue().withNULL(true)
-        case xs => new AttributeValue().withSS(xs.asJava)
+        case xs  => new AttributeValue().withSS(xs.asJava)
       }
       override val default: Option[Set[String]] = Some(Set.empty)
     }
@@ -456,12 +457,11 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
-    def read(av: AttributeValue): Either[DynamoReadError, Option[T]] = {
+    def read(av: AttributeValue): Either[DynamoReadError, Option[T]] =
       Option(av)
         .filter(x => !Boolean.unbox(x.isNULL))
         .map(f.read(_).map(Some(_)))
         .getOrElse(Right(Option.empty[T]))
-    }
 
     def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(null)
     override val default = Some(None)
@@ -472,9 +472,8 @@ object DynamoFormat extends EnumDynamoFormat {
     * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
     */
   implicit def someFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Some[T]] {
-    def read(av: AttributeValue): Either[DynamoReadError, Some[T]] = {
+    def read(av: AttributeValue): Either[DynamoReadError, Some[T]] =
       Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
-    }
 
     def write(t: Some[T]): AttributeValue = f.write(t.get)
   }

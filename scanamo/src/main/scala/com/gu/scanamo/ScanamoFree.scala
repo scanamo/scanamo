@@ -38,62 +38,78 @@ object ScanamoFree {
       .traverse(
         batch =>
           ScanamoOps.batchWrite(
-            new BatchWriteItemRequest().withRequestItems(Map(tableName -> batch.toList
-              .map(i => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM)))
-              .asJava).asJava)
-        ))
+            new BatchWriteItemRequest().withRequestItems(
+              Map(
+                tableName -> batch.toList
+                  .map(i => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM)))
+                  .asJava
+              ).asJava
+            )
+        )
+      )
 
-  def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = {
+  def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
     items.asAVMap.grouped(batchSize).toList.traverse { batch =>
       ScanamoOps.batchWrite(
         new BatchWriteItemRequest().withRequestItems(
           Map(
             tableName -> batch.toList
               .map(item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.asJava)))
-              .asJava).asJava)
+              .asJava
+          ).asJava
+        )
       )
     }
-  }
 
-  def get[T](tableName: String)(key: UniqueKey[_])(
-      implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  def get[T](
+    tableName: String
+  )(key: UniqueKey[_])(implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     for {
       res <- ScanamoOps.get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava))
     } yield Option(res.getItem).map(read[T])
 
-  def getWithConsistency[T](tableName: String)(key: UniqueKey[_])(
-      implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  def getWithConsistency[T](
+    tableName: String
+  )(key: UniqueKey[_])(implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     for {
       res <- ScanamoOps.get(
-        new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(true))
+        new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(true)
+      )
     } yield Option(res.getItem).map(read[T])
 
-  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
+  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] =
     keys.asAVMap
       .grouped(batchSize)
       .toList
       .traverse { batch =>
         ScanamoOps.batchGet(
-          new BatchGetItemRequest().withRequestItems(Map(tableName ->
-            new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)).asJava)
+          new BatchGetItemRequest().withRequestItems(
+            Map(
+              tableName ->
+                new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)
+            ).asJava
+          )
         )
       }
       .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
-  }
 
-  def getAllWithConsistency[T: DynamoFormat](tableName: String)(
-      keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] = {
+  def getAllWithConsistency[T: DynamoFormat](
+    tableName: String
+  )(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] =
     keys.asAVMap
       .grouped(batchSize)
       .toList
       .traverse { batch =>
         ScanamoOps.batchGet(
-          new BatchGetItemRequest().withRequestItems(Map(tableName ->
-            new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(true)).asJava)
+          new BatchGetItemRequest().withRequestItems(
+            Map(
+              tableName ->
+                new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(true)
+            ).asJava
+          )
         )
       }
       .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
-  }
 
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.asAVMap, None))
@@ -112,90 +128,104 @@ object ScanamoFree {
       .map(_._1)
 
   def scanFrom[T: DynamoFormat](
-      tableName: String,
-      limit: Int,
-      startKey: Option[EvaluationKey]): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    tableName: String,
+    limit: Int,
+    startKey: Option[EvaluationKey]
+  ): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
     ScanResultStream.stream[T](
       ScanamoScanRequest(
         tableName,
         None,
-        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)))
+        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)
+      )
+    )
 
   def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, Some(indexName), ScanamoQueryOptions.default)).map(_._1)
 
-  def scanIndexWithLimit[T: DynamoFormat](
-      tableName: String,
-      indexName: String,
-      limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
+  def scanIndexWithLimit[T: DynamoFormat](tableName: String,
+                                          indexName: String,
+                                          limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream
       .stream[T](ScanamoScanRequest(tableName, Some(indexName), ScanamoQueryOptions.default.copy(limit = Some(limit))))
       .map(_._1)
 
   def scanIndexFrom[T: DynamoFormat](
-      tableName: String,
-      indexName: String,
-      limit: Int,
-      startKey: Option[EvaluationKey]): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    tableName: String,
+    indexName: String,
+    limit: Int,
+    startKey: Option[EvaluationKey]
+  ): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
     ScanResultStream.stream[T](
       ScanamoScanRequest(
         tableName,
         Some(indexName),
-        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)))
+        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)
+      )
+    )
 
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default)).map(_._1)
 
-  def queryConsistent[T: DynamoFormat](tableName: String)(
-      query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
+  def queryConsistent[T: DynamoFormat](
+    tableName: String
+  )(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream
       .stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default.copy(consistent = true)))
       .map(_._1)
 
-  def queryWithLimit[T: DynamoFormat](
-      tableName: String)(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
+  def queryWithLimit[T: DynamoFormat](tableName: String)(query: Query[_],
+                                                         limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream
       .stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default.copy(limit = Some(limit))))
       .map(_._1)
 
   def queryFrom[T: DynamoFormat](tableName: String)(
-      query: Query[_],
-      limit: Int,
-      startKey: Option[EvaluationKey]): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    query: Query[_],
+    limit: Int,
+    startKey: Option[EvaluationKey]
+  ): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
     QueryResultStream.stream[T](
       ScanamoQueryRequest(
         tableName,
         None,
         query,
-        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)))
+        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)
+      )
+    )
 
-  def queryIndex[T: DynamoFormat](tableName: String, indexName: String)(
-      query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
+  def queryIndex[T: DynamoFormat](tableName: String,
+                                  indexName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream
       .stream[T](ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default))
       .map(_._1)
 
-  def queryIndexWithLimit[T: DynamoFormat](tableName: String, indexName: String)(
-      query: Query[_],
-      limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
+  def queryIndexWithLimit[T: DynamoFormat](
+    tableName: String,
+    indexName: String
+  )(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream
       .stream[T](
-        ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default.copy(limit = Some(limit))))
+        ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default.copy(limit = Some(limit)))
+      )
       .map(_._1)
 
   def queryIndexFrom[T: DynamoFormat](tableName: String, indexName: String)(
-      query: Query[_],
-      limit: Int,
-      startKey: Option[EvaluationKey]): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
+    query: Query[_],
+    limit: Int,
+    startKey: Option[EvaluationKey]
+  ): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
     QueryResultStream.stream[T](
       ScanamoQueryRequest(
         tableName,
         Some(indexName),
         query,
-        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)))
+        ScanamoQueryOptions.default.copy(limit = Some(limit), exclusiveStartKey = startKey)
+      )
+    )
 
   def update[T](tableName: String)(key: UniqueKey[_])(update: UpdateExpression)(
-      implicit format: DynamoFormat[T]
+    implicit format: DynamoFormat[T]
   ): ScanamoOps[Either[DynamoReadError, T]] =
     ScanamoOps
       .update(
@@ -205,7 +235,9 @@ object ScanamoFree {
           update.expression,
           update.attributeNames,
           update.attributeValues,
-          None))
+          None
+        )
+      )
       .map(
         r => format.read(new AttributeValue().withM(r.getAttributes))
       )

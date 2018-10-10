@@ -137,10 +137,9 @@ sealed abstract class SecondaryIndex[V] {
   def filter[C: ConditionExpression](condition: C): SecondaryIndex[V]
 }
 
-private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
-    tableName: String,
-    indexName: String,
-    queryOptions: ScanamoQueryOptions)
+private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](tableName: String,
+                                                                       indexName: String,
+                                                                       queryOptions: ScanamoQueryOptions)
     extends SecondaryIndex[V] {
   def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def filter[C: ConditionExpression](condition: C) =

@@ -21,19 +21,18 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
     val client = LocalDynamoDB.client()
     case class City(name: String, country: String)
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       Scanamo.put(client)(t)(City("Nashville", "US"))
 
       import com.gu.scanamo.syntax._
       Scanamo.getWithConsistency[City](client)(t)('name -> "Nashville") should equal(
-        Some(Right(City("Nashville", "US"))))
+        Some(Right(City("Nashville", "US")))
+      )
     }
     client.shutdown()
   }
 
   it("should get consistent") {
     case class City(name: String, country: String)
-
 
     val client = LocalDynamoDB.client()
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>

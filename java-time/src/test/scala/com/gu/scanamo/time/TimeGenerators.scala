@@ -7,7 +7,7 @@ import Arbitrary.arbitrary
 
 object TimeGenerators {
   implicit val offsetDateTimeArb: Arbitrary[OffsetDateTime] = Arbitrary {
-    for { 
+    for {
       year <- Gen.choose[Int](Year.MIN_VALUE, Year.MAX_VALUE)
       month <- Gen.choose[Int](1, 12)
       days = YearMonth.of(year, month).lengthOfMonth
@@ -20,7 +20,7 @@ object TimeGenerators {
   }
 
   implicit val instantAsLongArb: Arbitrary[Instant] = Arbitrary {
-    for { 
+    for {
       l <- arbitrary[Long]
     } yield Instant.ofEpochMilli(l)
   }
