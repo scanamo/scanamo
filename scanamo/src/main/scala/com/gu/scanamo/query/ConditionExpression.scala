@@ -9,8 +9,10 @@ import com.gu.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import cats.syntax.either._
 
-case class ConditionalOperation[V, T](tableName: String, t: T)(implicit state: ConditionExpression[T],
-                                                               format: DynamoFormat[V]) {
+case class ConditionalOperation[V, T](tableName: String, t: T)(
+  implicit state: ConditionExpression[T],
+  format: DynamoFormat[V]
+) {
   def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] = {
     val unconditionalRequest = ScanamoPutRequest(tableName, format.write(item), None)
     ScanamoOps.conditionalPut(

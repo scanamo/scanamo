@@ -71,8 +71,9 @@ object ScanamoScalaz {
     exec(client)(ScanamoFree.scan(tableName))
 
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.limit]]", "1.0")
-  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String,
-                                                                  limit: Int): Task[List[Either[DynamoReadError, T]]] =
+  def scanWithLimit[T: DynamoFormat](
+    client: AmazonDynamoDBAsync
+  )(tableName: String, limit: Int): Task[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]]", "1.0")

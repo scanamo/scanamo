@@ -91,15 +91,19 @@ trait DerivedDynamoFormat {
     }
   }
 
-  implicit def genericProduct[T: NotSymbol, R](implicit gen: LabelledGeneric.Aux[T, R],
-                                               formatR: Lazy[ValidConstructedDynamoFormat[R]]): DynamoFormat[T] =
+  implicit def genericProduct[T: NotSymbol, R](
+    implicit gen: LabelledGeneric.Aux[T, R],
+    formatR: Lazy[ValidConstructedDynamoFormat[R]]
+  ): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 
-  implicit def genericCoProduct[T, R](implicit gen: LabelledGeneric.Aux[T, R],
-                                      formatR: Lazy[CoProductDynamoFormat[R]]): DynamoFormat[T] =
+  implicit def genericCoProduct[T, R](
+    implicit gen: LabelledGeneric.Aux[T, R],
+    formatR: Lazy[CoProductDynamoFormat[R]]
+  ): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
