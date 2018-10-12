@@ -67,7 +67,7 @@ lazy val formats = (project in file("formats"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-formats",
+    name := "scanamo-formats"
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -143,7 +143,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings",
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
 
@@ -161,7 +161,7 @@ lazy val scalaz = (project in file("scalaz"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings",
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
 
@@ -169,7 +169,7 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-alpakka",
+    name := "scanamo-alpakka"
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -181,7 +181,7 @@ lazy val alpakka = (project in file("alpakka"))
     ),
     fork in Test := true,
     // unidoc can work out links to other project, but scalac can't
-    scalacOptions in (Compile, doc) += "-no-link-warnings",
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
 
@@ -189,7 +189,7 @@ lazy val javaTime = (project in file("java-time"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-time",
+    name := "scanamo-time"
   )
   .settings(
     libraryDependencies ++= List(
@@ -204,7 +204,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-joda",
+    name := "scanamo-joda"
   )
   .settings(
     libraryDependencies ++= List(
@@ -227,7 +227,7 @@ lazy val docs = (project in file("docs"))
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
     makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
     addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
-    siteSubdirName in ScalaUnidoc := "latest/api",
+    siteSubdirName in ScalaUnidoc := "latest/api"
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
   .disablePlugins(ReleasePlugin)
@@ -278,7 +278,7 @@ val publishingSettings = Seq(
     commitNextVersion,
     releaseStepCommandAndRemaining("+sonatypeReleaseAll"),
     pushChanges,
-    releaseStepCommandAndRemaining("publishMicrosite"),
+    releaseStepCommandAndRemaining("publishMicrosite")
   )
 )
 
