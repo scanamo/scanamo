@@ -10,8 +10,10 @@ import com.amazonaws.services.dynamodbv2.model._
 
 object CatsInterpreter {
   def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Effect[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
-    private def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
-                                                     req: A): F[B] =
+    private def eff[A <: AmazonWebServiceRequest, B](
+      f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
+      req: A
+    ): F[B] =
       F.async { cb =>
         val handler = new AsyncHandler[A, B] {
           def onError(exception: Exception): Unit =

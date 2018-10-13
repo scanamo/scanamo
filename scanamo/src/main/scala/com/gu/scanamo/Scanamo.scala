@@ -347,8 +347,9 @@ object Scanamo {
     * }}}
     */
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.limit]]", "1.0")
-  def scanWithLimit[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String,
-                                                             limit: Int): List[Either[DynamoReadError, T]] =
+  def scanWithLimit[T: DynamoFormat](
+    client: AmazonDynamoDB
+  )(tableName: String, limit: Int): List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
   /**
@@ -395,8 +396,9 @@ object Scanamo {
     * }}}
     */
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.index]]", "1.0")
-  def scanIndex[T: DynamoFormat](client: AmazonDynamoDB)(tableName: String,
-                                                         indexName: String): List[Either[DynamoReadError, T]] =
+  def scanIndex[T: DynamoFormat](
+    client: AmazonDynamoDB
+  )(tableName: String, indexName: String): List[Either[DynamoReadError, T]] =
     exec(client)(ScanamoFree.scanIndex(tableName, indexName))
 
   /**
