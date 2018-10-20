@@ -6,6 +6,7 @@ val catsEffectVersion = "1.0.0"
 val scalazVersion = "7.2.25" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.3.0"
+val zioVersion = "0.3.1"
 
 val commonSettings = Seq(
   organization := "com.gu",
@@ -47,7 +48,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -157,6 +158,25 @@ lazy val scalaz = (project in file("scalaz"))
       "com.codecommit" %% "shims" % shimsVersion,
       "org.scalaz" %% "scalaz-core" % scalazVersion,
       "org.scalaz" %% "scalaz-ioeffect" % scalazIOEffectVersion,
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+    ),
+    fork in Test := true,
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
+  )
+  .dependsOn(formats, scanamo, testkit % "test->test")
+
+lazy val zio = (project in file("scalaz-zio"))
+  .settings(
+    name := "scanamo-scalaz-zio",
+    commonSettings,
+    publishingSettings,
+    libraryDependencies ++= List(
+      awsDynamoDB,
+      "org.typelevel" %% "cats-core" % catsVersion,
+      "org.typelevel" %% "cats-effect" % catsEffectVersion,
+      "org.scalaz" %% "scalaz-zio" % zioVersion,
+      "org.scalaz" %% "scalaz-zio-interop" % zioVersion,
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
