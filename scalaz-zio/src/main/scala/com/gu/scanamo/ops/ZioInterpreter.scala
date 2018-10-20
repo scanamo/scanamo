@@ -55,7 +55,6 @@ object ZioInterpreter {
           eff(client.scanAsync, JavaRequests.scan(req))
         case Query(req) =>
           eff(client.queryAsync, JavaRequests.query(req))
-        // Overloading means we need explicit parameter types here
         case BatchWrite(req) =>
           eff(
             client.batchWriteItemAsync(
@@ -75,7 +74,7 @@ object ZioInterpreter {
           eff(client.updateItemAsync, JavaRequests.update(req)).redeem(
             _ match {
               case e: ConditionalCheckFailedException => IO.now(Left(e))
-              case t                                  => IO.fail(t) // raise error as opposed to swallowing
+              case t                                  => IO.fail(t)
             },
             a => IO.now(Right(a))
           )
