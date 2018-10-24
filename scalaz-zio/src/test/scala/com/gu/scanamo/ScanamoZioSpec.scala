@@ -322,46 +322,42 @@ class ScanamoZioSpec extends FunSpec with Matchers {
     }
   }
 
-//   it("queries an index asynchronously with 'between' sort-key condition") {
-//     case class Station(mode: String, name: String, zone: Int)
+  it("queries an index asynchronously with 'between' sort-key condition") {
+    case class Station(mode: String, name: String, zone: Int)
 
-//     def deletaAllStations(client: AmazonDynamoDBAsync, tableName: String, stations: Set[Station]) = {
-//       ScanamoZio.delete[IO, Station](client)(tableName)('mode -> "Underground")
-//       ScanamoZio.deleteAll[IO](client)(tableName)(
-//         UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
-//       )
-//     }
-//     val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
-//     val CamdenTown = Station("Underground", "Camden Town", 2)
-//     val GoldersGreen = Station("Underground", "Golders Green", 3)
-//     val Hainault = Station("Underground", "Hainault", 4)
+    def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
+      stationTable.deleteAll(
+        UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
+      )
 
-//     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
-//       val farmers = Table[Farmer](t)
-//       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
-//       Scanamo.putAll(client)(t)(stations)
-//       val results1 =
-//         ScanamoZio.queryIndex[IO, Station](client)(t, i)('mode -> "Underground" and ('zone between (2 and 4)))
+    val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
+    val CamdenTown = Station("Underground", "Camden Town", 2)
+    val GoldersGreen = Station("Underground", "Golders Green", 3)
+    val Hainault = Station("Underground", "Hainault", 4)
 
-//       results1.unsafeRunSync() should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
+      val stationTable = Table[Station](t)
+      val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
+      val ops = for {
+        _ <- stationTable.putAll(stations)
+        ts1 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (2 and 4)))
+        ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+        _ <- stationTable.putAll(Set(LiverpoolStreet))
+        ts3 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (2 and 4)))
+        ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+        _ <- stationTable.putAll(Set(CamdenTown))
+        ts5 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (1 and 1)))
+      } yield (ts1, ts2, ts3, ts4, ts5)
 
-//       val maybeStations1 = for { _ <- deletaAllStations(client, t, stations) } yield Scanamo.scan[Station](client)(t)
-//       maybeStations1.unsafeRunSync() should equal(List.empty)
-
-//       Scanamo.putAll(client)(t)(Set(LiverpoolStreet))
-//       val results2 =
-//         ScanamoZio.queryIndex[IO, Station](client)(t, i)('mode -> "Underground" and ('zone between (2 and 4)))
-//       results2.unsafeRunSync() should equal(List.empty)
-
-//       val maybeStations2 = for { _ <- deletaAllStations(client, t, stations) } yield Scanamo.scan[Station](client)(t)
-//       maybeStations2.unsafeRunSync() should equal(List.empty)
-
-//       Scanamo.putAll(client)(t)(Set(CamdenTown))
-//       val results3 =
-//         ScanamoZio.queryIndex[IO, Station](client)(t, i)('mode -> "Underground" and ('zone between (1 and 1)))
-//       results3.unsafeRunSync() should equal(List.empty)
-//     }
-//   }
+      unsafeRun(ScanamoZio.exec(client)(ops)) should equal((
+        List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
+        List.empty,
+        List.empty,
+        List.empty,
+        List.empty
+      ))
+    }
+  }
 
   it("queries for items that are missing an attribute") {
     case class Farmer(firstName: String, surname: String, age: Option[Int])
