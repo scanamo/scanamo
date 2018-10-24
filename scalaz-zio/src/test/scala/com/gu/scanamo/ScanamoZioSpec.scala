@@ -10,7 +10,7 @@ import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
 import com.gu.scanamo.syntax._
 import cats.implicits._
-import scalaz.zio.{ IO, RTS }
+import scalaz.zio.{IO, RTS}
 
 class ScanamoZioSpec extends FunSpec with Matchers {
 
@@ -31,7 +31,9 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         f <- farmers.get('name -> "McDonald")
       } yield f
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"))))))
+      unsafeRun(ScanamoZio.exec(client)(result)) should equal(
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow")))))
+      )
     }
   }
 
@@ -48,7 +50,9 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         r2 <- farmers.get('name -> "Maggot")
       } yield (r1, r1 == r2)
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal((Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true))
+      unsafeRun(ScanamoZio.exec(client)(result)) should equal(
+        (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
+      )
     }
 
     LocalDynamoDB.usingRandomTable(client)('name -> S, 'number -> N) { t =>
@@ -68,7 +72,6 @@ class ScanamoZioSpec extends FunSpec with Matchers {
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       val cities = Table[City](t)
 
       val result = for {
@@ -87,7 +90,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
 
       val farmers = Table[Farmer](t)
 
-      unsafeRun(ScanamoZio.exec(client){
+      unsafeRun(ScanamoZio.exec(client) {
         for {
           _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
           _ <- farmers.delete('name -> "McGregor")
@@ -157,7 +160,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
   it("should scan asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       case class Bear(name: String, favouriteFood: String)
-      
+
       val bears = Table[Bear](t)
 
       val ops = for {
@@ -178,7 +181,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         _ <- lemmings.putAll(List.fill(100)(Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet)
         ls <- lemmings.scan
       } yield ls
-        
+
       unsafeRun(ScanamoZio.exec(client)(ops)).size should equal(100)
     }
   }
@@ -248,13 +251,15 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         r5 <- animals.query('species -> "Pig" and 'number >= 2)
       } yield (r1, r2, r3, r4, r5)
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal((
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
-        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
-        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3)))
-      ))
+      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+        (
+          List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
+          List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
+          List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
+          List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
+          List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3)))
+        )
+      )
     }
 
     LocalDynamoDB.usingRandomTable(client)('mode -> S, 'line -> S) { t =>
@@ -292,7 +297,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         )
         rs <- transports.limit(1).query('mode -> "Underground" and ('line beginsWith "C"))
       } yield rs
-      
+
       unsafeRun(ScanamoZio.exec(client)(result)) should equal(List(Right(Transport("Underground", "Central"))))
     }
   }
@@ -302,23 +307,28 @@ class ScanamoZioSpec extends FunSpec with Matchers {
 
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('mode -> S, 'colour -> S) {
       (t, i) =>
-      val transports = Table[Transport](t)
-      val result = for {
-        _ <- transports.putAll(
-          Set(
-            Transport("Underground", "Circle", "Yellow"),
-            Transport("Underground", "Metropolitan", "Magenta"),
-            Transport("Underground", "Central", "Red"),
-            Transport("Underground", "Picadilly", "Blue"),
-            Transport("Underground", "Northern", "Black")
+        val transports = Table[Transport](t)
+        val result = for {
+          _ <- transports.putAll(
+            Set(
+              Transport("Underground", "Circle", "Yellow"),
+              Transport("Underground", "Metropolitan", "Magenta"),
+              Transport("Underground", "Central", "Red"),
+              Transport("Underground", "Picadilly", "Blue"),
+              Transport("Underground", "Northern", "Black")
+            )
           )
-        )
-        rs <- transports.index(i).limit(1).query(
-          'mode -> "Underground" and ('colour beginsWith "Bl")
-        )
-      } yield rs
+          rs <- transports
+            .index(i)
+            .limit(1)
+            .query(
+              'mode -> "Underground" and ('colour beginsWith "Bl")
+            )
+        } yield rs
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal(List(Right(Transport("Underground", "Northern", "Black"))))
+        unsafeRun(ScanamoZio.exec(client)(result)) should equal(
+          List(Right(Transport("Underground", "Northern", "Black")))
+        )
     }
   }
 
@@ -349,13 +359,15 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         ts5 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (1 and 1)))
       } yield (ts1, ts2, ts3, ts4, ts5)
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal((
-        List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
-        List.empty,
-        List.empty,
-        List.empty,
-        List.empty
-      ))
+      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+        (
+          List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
+          List.empty,
+          List.empty,
+          List.empty,
+          List.empty
+        )
+      )
     }
   }
 
@@ -396,17 +408,21 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       val farmers = Table[Farmer](t)
 
       unsafeRun(ScanamoZio.exec(client)(for {
-        _ <- farmers.putAll(Set(
-          Farmer("Boggis", 43L, Farm(List("chicken"))),
-          Farmer("Bunce", 52L, Farm(List("goose"))),
-          Farmer("Bean", 55L, Farm(List("turkey")))
-        ))
+        _ <- farmers.putAll(
+          Set(
+            Farmer("Boggis", 43L, Farm(List("chicken"))),
+            Farmer("Bunce", 52L, Farm(List("goose"))),
+            Farmer("Bean", 55L, Farm(List("turkey")))
+          )
+        )
         fs1 <- farmers.getAll(UniqueKeys(KeyList('name, Set("Boggis", "Bean"))))
         fs2 <- farmers.getAll('name -> Set("Boggis", "Bean"))
-      } yield (fs1, fs2))) should equal((
-        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))),
-        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
-      ))
+      } yield (fs1, fs2))) should equal(
+        (
+          Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))),
+          Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
+        )
+      )
     }
 
     LocalDynamoDB.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
@@ -429,7 +445,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       unsafeRun(ScanamoZio.exec(client)(for {
         _ <- farmsTable.putAll(farms)
         fs <- farmsTable.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
-      } yield fs)) should equal (farms.map(Right(_)))
+      } yield fs)) should equal(farms.map(Right(_)))
     }
   }
 
@@ -442,7 +458,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       unsafeRun(ScanamoZio.exec(client)(for {
         _ <- farmsTable.putAll(farms)
         fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
-      } yield fs)) should equal (farms.map(Right(_)))
+      } yield fs)) should equal(farms.map(Right(_)))
     }
   }
 
