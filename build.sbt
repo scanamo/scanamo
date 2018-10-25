@@ -178,7 +178,7 @@ lazy val zio = (project in file("scalaz-zio"))
       "org.scalaz" %% "scalaz-zio" % zioVersion,
       "org.scalaz" %% "scalaz-zio-interop" % zioVersion,
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
