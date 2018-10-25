@@ -1,3 +1,17 @@
+## Version 1.0.0-M7
+
+In this release, new effect modules have been added for cats-effect, scalaz and scalaz-zio 🎉
+
+* Added `scanamo-scalaz-zio`, an interpreter for the new Scalaz IO monad (https://github.com/scanamo/scanamo/pull/262)
+* Added cleaner formatting rules, PRs will be checked for proper formatting from now on (https://github.com/scanamo/scanamo/pull/258)
+* All functions but `exec` have been marked as deprecated in `Scanamo`, `ScanamoAsync`, `ScanamoCats`, `ScanamoAlpakka` and `ScanamoScalaz` (https://github.com/scanamo/scanamo/pull/257)
+* Read a Set which has been deleted after an update operation (https://github.com/scanamo/scanamo/pull/250 - @Slakah)
+* Upgrade to cats to 1.3.1 and cats-effect to 1.0.0 (https://github.com/scanamo/scanamo/pull/254/files)
+* Upgrade to sbt 1.2.3 (https://github.com/scanamo/scanamo/pull/259)
+* Upgrade to alpakka 0.20 (https://github.com/scanamo/scanamo/pull/252 - @Slakah) 
+* Add pagination API (https://github.com/scanamo/scanamo/pull/227)
+* `DynamoFormat` for Java's `Instant` and `OffsetDateTime` (https://github.com/scanamo/scanamo/pull/229) and for Joda's `DateTime` (https://github.com/scanamo/scanamo/pull/220)
+
 ## Version 1.0.0-M6
 
  * Aggregate `scanamo-refined` in the root project (#194)
