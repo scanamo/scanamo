@@ -1,5 +1,5 @@
-scalaVersion in ThisBuild := "2.12.4"
-crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
+scalaVersion in ThisBuild := "2.12.7"
+crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "1.3.1"
 val catsEffectVersion = "1.0.0"
@@ -288,7 +288,7 @@ val publishingSettings = Seq(
     releaseStepCommand("startDynamodbLocal"),
     runTest,
     releaseStepCommand("dynamodbLocalTestCleanup"),
-    releaseStepCommandAndRemaining("+docs/tut"),
+    releaseStepCommandAndRemaining("docs/tut"),
     releaseStepCommand("stopDynamodbLocal"),
     setReleaseVersion,
     commitReleaseVersion,
@@ -296,7 +296,7 @@ val publishingSettings = Seq(
     releaseStepCommandAndRemaining("+publishSigned"),
     setNextVersion,
     commitNextVersion,
-    releaseStepCommandAndRemaining("+sonatypeReleaseAll"),
+    releaseStepCommandAndRemaining("+sonatypeRelease"),
     pushChanges,
     releaseStepCommandAndRemaining("publishMicrosite")
   )
