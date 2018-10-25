@@ -316,7 +316,7 @@ object DynamoFormat extends EnumDynamoFormat {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
         for {
           ns <- Either.fromOption(
-            if (av.isNULL) Some(Nil) else Option(av.getNS).map(_.asScala.toList),
+            if ((av.isNULL ne null) && av.isNULL) Some(Nil) else Option(av.getNS).map(_.asScala.toList),
             NoPropertyOfType("NS", av)
           )
           set <- ns.traverse(r)
@@ -418,7 +418,7 @@ object DynamoFormat extends EnumDynamoFormat {
       override def read(av: AttributeValue): Either[DynamoReadError, Set[String]] =
         for {
           ss <- Either.fromOption(
-            if (av.isNULL) Some(Nil) else Option(av.getSS).map(_.asScala.toList),
+            if ((av.isNULL ne null) && av.isNULL) Some(Nil) else Option(av.getSS).map(_.asScala.toList),
             NoPropertyOfType("SS", av)
           )
         } yield ss.toSet
