@@ -293,6 +293,31 @@ case class Table[V: DynamoFormat](name: String) {
   def limit(n: Int) = TableWithOptions[V](name, ScanamoQueryOptions.default).limit(n)
 
   /**
+    * Query a table in reverse order
+    * {{{
+    * >>> case class Transport(mode: String, line: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+    * ...   import com.gu.scanamo.syntax._
+    * ...   val transport = Table[Transport](t)
+    * ...   val operations = for {
+    * ...     _ <- transport.putAll(Set(
+    * ...       Transport("Underground", "Circle"),
+    * ...       Transport("Underground", "Metropolitan"),
+    * ...       Transport("Underground", "Central")))
+    * ...     results <- transport.reverse.query('mode -> "Underground")
+    * ...   } yield results.toList
+    * ...   Scanamo.exec(client)(operations)
+    * ... }
+    * List(Right(Transport(Underground,Metropolitan)), Right(Transport(Underground,Circle)), Right(Transport(Underground,Central)))
+    * }}}
+    */
+  def reverse = TableWithOptions[V](name, ScanamoQueryOptions.default).reverse
+
+  /**
     * Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
     * read operations against this table. Note that there is no equivalent on
     * table indexes as consistent reads from secondary indexes are not
@@ -680,6 +705,7 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
+  def reverse: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(scanIndexForward = false))
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
