@@ -1,6 +1,6 @@
 package com.gu.scanamo.ops
 
-import cats.effect.Effect
+import cats.effect.Async
 import cats.implicits._
 import cats.~>
 import com.amazonaws.AmazonWebServiceRequest
@@ -9,7 +9,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model._
 
 object CatsInterpreter {
-  def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Effect[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
+  def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
     private def eff[A <: AmazonWebServiceRequest, B](
       f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
       req: A
