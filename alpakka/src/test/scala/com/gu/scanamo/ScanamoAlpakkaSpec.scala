@@ -38,7 +38,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   )
 
   it("should put asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t=>
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -66,7 +66,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       import com.gu.scanamo.syntax._
 
       ScanamoAlpakka.get[Farmer](alpakkaClient)(t)('name -> "Maggot").futureValue should equal(
-        Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))))
+        Some(Right(Farmer("Maggot", 75, Farm(List("dog")))))
+      )
     }
 
     LocalDynamoDB.usingRandomTable(client)('name -> S, 'number -> N) { t =>
@@ -84,19 +85,20 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       import com.gu.scanamo.syntax._
-      ScanamoAlpakka.put(alpakkaClient)(t)(City("Nashville", "US")).flatMap {
-        case _ =>
-          ScanamoAlpakka
-            .getWithConsistency[City](alpakkaClient)(t)('name -> "Nashville")
-      }.futureValue should equal(Some(Right(City("Nashville", "US"))))
+      ScanamoAlpakka
+        .put(alpakkaClient)(t)(City("Nashville", "US"))
+        .flatMap {
+          case _ =>
+            ScanamoAlpakka
+              .getWithConsistency[City](alpakkaClient)(t)('name -> "Nashville")
+        }
+        .futureValue should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
   it("should delete asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -114,7 +116,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should deleteAll asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -138,7 +139,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should update asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
-
       case class Forecast(location: String, weather: String)
 
       Scanamo.put(client)(t)(Forecast("London", "Rain"))
@@ -155,7 +155,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should update asynchronously if a condition holds") {
     LocalDynamoDB.usingRandomTable(client)('location -> S) { T =>
-
       case class Forecast(location: String, weather: String, equipment: Option[String])
 
       val forecasts = Table[Forecast](T)
@@ -170,13 +169,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       } yield results
 
       ScanamoAlpakka.exec(alpakkaClient)(ops).futureValue should equal(
-        List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None))))
+        List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None)))
+      )
     }
   }
 
   it("should scan asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       case class Bear(name: String, favouriteFood: String)
 
       Scanamo.put(client)(t)(Bear("Pooh", "honey"))
@@ -188,7 +187,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     }
 
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       case class Lemming(name: String, stuff: String)
 
       Scanamo.putAll(client)(t)(
@@ -252,13 +250,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       } yield res2._1 ::: res3._1
 
       results.futureValue should equal(
-        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie")))))
+        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
+      )
     }
   }
 
   it("should query asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('species -> S, 'number -> N) { t =>
-
       case class Animal(species: String, number: Int)
 
       Scanamo.put(client)(t)(Animal("Wolf", 1))
@@ -268,7 +266,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       import com.gu.scanamo.syntax._
 
       ScanamoAlpakka.query[Animal](alpakkaClient)(t)('species -> "Pig").futureValue.toList should equal(
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
+        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3)))
+      )
 
       ScanamoAlpakka
         .query[Animal](alpakkaClient)(t)('species -> "Pig" and 'number < 3)
@@ -293,7 +292,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     }
 
     LocalDynamoDB.usingRandomTable(client)('mode -> S, 'line -> S) { t =>
-
       case class Transport(mode: String, line: String)
 
       import com.gu.scanamo.syntax._
@@ -302,13 +300,16 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         Set(
           Transport("Underground", "Circle"),
           Transport("Underground", "Metropolitan"),
-          Transport("Underground", "Central")))
+          Transport("Underground", "Central")
+        )
+      )
 
       ScanamoAlpakka
         .query[Transport](alpakkaClient)(t)('mode -> "Underground" and ('line beginsWith "C"))
         .futureValue
         .toList should equal(
-        List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
+        List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle")))
+      )
     }
   }
 
@@ -322,10 +323,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         Set(
           Transport("Underground", "Circle"),
           Transport("Underground", "Metropolitan"),
-          Transport("Underground", "Central")))
+          Transport("Underground", "Central")
+        )
+      )
       val results = ScanamoAlpakka.queryWithLimit[Transport](alpakkaClient)(tableName)(
         'mode -> "Underground" and ('line beginsWith "C"),
-        1)
+        1
+      )
       results.futureValue should equal(List(Right(Transport("Underground", "Central"))))
     }
   }
@@ -335,22 +339,23 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
     import com.gu.scanamo.syntax._
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)(
-      'mode -> S,
-      'colour -> S) { (t, i) =>
-      Scanamo.putAll(client)(t)(
-        Set(
-          Transport("Underground", "Circle", "Yellow"),
-          Transport("Underground", "Metropolitan", "Magenta"),
-          Transport("Underground", "Central", "Red"),
-          Transport("Underground", "Picadilly", "Blue"),
-          Transport("Underground", "Northern", "Black")
-        ))
-      val results = ScanamoAlpakka.queryIndexWithLimit[Transport](alpakkaClient)(t, i)(
-        'mode -> "Underground" and ('colour beginsWith "Bl"),
-        1)
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('mode -> S, 'colour -> S) {
+      (t, i) =>
+        Scanamo.putAll(client)(t)(
+          Set(
+            Transport("Underground", "Circle", "Yellow"),
+            Transport("Underground", "Metropolitan", "Magenta"),
+            Transport("Underground", "Central", "Red"),
+            Transport("Underground", "Picadilly", "Blue"),
+            Transport("Underground", "Northern", "Black")
+          )
+        )
+        val results = ScanamoAlpakka.queryIndexWithLimit[Transport](alpakkaClient)(t, i)(
+          'mode -> "Underground" and ('colour beginsWith "Bl"),
+          1
+        )
 
-      results.futureValue should equal(List(Right(Transport("Underground", "Northern", "Black"))))
+        results.futureValue should equal(List(Right(Transport("Underground", "Northern", "Black"))))
     }
   }
 
@@ -370,13 +375,11 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)(
-      'mode -> S,
-      'zone -> N) { (t, i) =>
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       Scanamo.putAll(client)(t)(stations)
-      val results1 = ScanamoAlpakka.queryIndex[Station](alpakkaClient)(t, i)(
-        'mode -> "Underground" and ('zone between (2 and 4)))
+      val results1 =
+        ScanamoAlpakka.queryIndex[Station](alpakkaClient)(t, i)('mode -> "Underground" and ('zone between (2 and 4)))
 
       results1.futureValue should equal(List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)))
 
@@ -385,8 +388,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       maybeStations1.futureValue should equal(List.empty)
 
       Scanamo.putAll(client)(t)(Set(LiverpoolStreet))
-      val results2 = ScanamoAlpakka.queryIndex[Station](alpakkaClient)(t, i)(
-        'mode -> "Underground" and ('zone between (2 and 4)))
+      val results2 =
+        ScanamoAlpakka.queryIndex[Station](alpakkaClient)(t, i)('mode -> "Underground" and ('zone between (2 and 4)))
       results2.futureValue should equal(List.empty)
 
       val maybeStations2 = for { _ <- deletaAllStations(alpakkaClient, t, stations) } yield
@@ -394,8 +397,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       maybeStations2.futureValue should equal(List.empty)
 
       Scanamo.putAll(client)(t)(Set(CamdenTown))
-      val results3 = ScanamoAlpakka.queryIndex[Station](alpakkaClient)(t, i)(
-        'mode -> "Underground" and ('zone between (1 and 1)))
+      val results3 =
+        ScanamoAlpakka.queryIndex[Station](alpakkaClient)(t, i)('mode -> "Underground" and ('zone between (1 and 1)))
       results3.futureValue should equal(List.empty)
     }
   }
@@ -424,7 +427,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         _ <- ScanamoAlpakka.putAll(alpakkaClient)(t)(
           (
             for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))
-          ).toSet)
+          ).toSet
+        )
       } yield Scanamo.scan[Rabbit](client)(t)
 
       result.futureValue.toList.size should equal(100)
@@ -434,7 +438,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should get multiple items asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       case class Farm(animals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -443,28 +446,30 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
           Farmer("Boggis", 43L, Farm(List("chicken"))),
           Farmer("Bunce", 52L, Farm(List("goose"))),
           Farmer("Bean", 55L, Farm(List("turkey")))
-        ))
+        )
+      )
 
       ScanamoAlpakka
         .getAll[Farmer](alpakkaClient)(t)(
           UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
         )
         .futureValue should equal(
-        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
+        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
+      )
 
       import com.gu.scanamo.syntax._
 
       ScanamoAlpakka
         .getAll[Farmer](alpakkaClient)(t)('name -> Set("Boggis", "Bean"))
         .futureValue should equal(
-        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
+        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
+      )
     }
 
     LocalDynamoDB.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
       case class Doctor(actor: String, regeneration: Int)
 
-      Scanamo.putAll(client)(t)(
-        Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+      Scanamo.putAll(client)(t)(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
 
       import com.gu.scanamo.syntax._
       ScanamoAlpakka
@@ -478,7 +483,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should get multiple items asynchronously (automatically handling batching)") {
     LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
-
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
 
@@ -494,7 +498,6 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should get multiple items consistently asynchronously (automatically handling batching)") {
     LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
-
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
 
@@ -524,7 +527,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
       } yield farmerWithNewStock
       ScanamoAlpakka.exec(alpakkaClient)(farmerOps).futureValue should equal(
-        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"))))))
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken")))))
+      )
     }
   }
 

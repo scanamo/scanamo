@@ -1,11 +1,12 @@
-scalaVersion in ThisBuild := "2.12.4"
-crossScalaVersions in ThisBuild := Seq("2.11.11", scalaVersion.value)
+scalaVersion in ThisBuild := "2.12.7"
+crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "1.3.1"
 val catsEffectVersion = "1.0.0"
 val scalazVersion = "7.2.25" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.3.0"
+val zioVersion = "0.3.1"
 
 val commonSettings = Seq(
   organization := "com.gu",
@@ -33,10 +34,10 @@ val commonSettings = Seq(
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
     val mainScalacOptions = scalacOptions.value
-    if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
-      mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
-    else
-      mainScalacOptions
+    (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
+       mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+     else
+       mainScalacOptions).filter(_ != "-Xfatal-warnings")
   },
   scalacOptions in (Compile, console) := (scalacOptions in Test).value,
   autoAPIMappings := true,
@@ -47,7 +48,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -67,7 +68,7 @@ lazy val formats = (project in file("formats"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-formats",
+    name := "scanamo-formats"
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -143,7 +144,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings",
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
 
@@ -161,7 +162,26 @@ lazy val scalaz = (project in file("scalaz"))
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
     ),
     fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings",
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
+  )
+  .dependsOn(formats, scanamo, testkit % "test->test")
+
+lazy val zio = (project in file("scalaz-zio"))
+  .settings(
+    name := "scanamo-scalaz-zio",
+    commonSettings,
+    publishingSettings,
+    libraryDependencies ++= List(
+      awsDynamoDB,
+      "org.typelevel" %% "cats-core" % catsVersion,
+      "org.typelevel" %% "cats-effect" % catsEffectVersion,
+      "org.scalaz" %% "scalaz-zio" % zioVersion,
+      "org.scalaz" %% "scalaz-zio-interop" % zioVersion,
+      "org.scalatest" %% "scalatest" % "3.0.4" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
+    ),
+    fork in Test := true,
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
 
@@ -169,7 +189,7 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-alpakka",
+    name := "scanamo-alpakka"
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -181,7 +201,7 @@ lazy val alpakka = (project in file("alpakka"))
     ),
     fork in Test := true,
     // unidoc can work out links to other project, but scalac can't
-    scalacOptions in (Compile, doc) += "-no-link-warnings",
+    scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
 
@@ -189,8 +209,7 @@ lazy val javaTime = (project in file("java-time"))
   .settings(
     commonSettings,
     publishingSettings,
-
-    name := "scanamo-time",
+    name := "scanamo-time"
   )
   .settings(
     libraryDependencies ++= List(
@@ -205,21 +224,18 @@ lazy val joda = (project in file("joda"))
   .settings(
     commonSettings,
     publishingSettings,
-
-    name := "scanamo-joda",
+    name := "scanamo-joda"
   )
   .settings(
     libraryDependencies ++= List(
       "org.joda" % "joda-convert" % "1.8.3" % Provided,
       "joda-time" % "joda-time" % "2.9.9",
-
       "org.scalatest" %% "scalatest" % "3.0.4" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
       "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
     )
   )
   .dependsOn(formats)
-    
 
 lazy val docs = (project in file("docs"))
   .settings(
@@ -231,7 +247,7 @@ lazy val docs = (project in file("docs"))
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
     makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
     addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
-    siteSubdirName in ScalaUnidoc := "latest/api",
+    siteSubdirName in ScalaUnidoc := "latest/api"
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
   .disablePlugins(ReleasePlugin)
@@ -247,7 +263,8 @@ val publishingSettings = Seq(
     ScmInfo(
       url("https://github.com/scanamo/scanamo"),
       "scm:git:git@github.com:scanamo/scanamo.git"
-    )),
+    )
+  ),
   pomExtra := {
     <developers>
       <developer>
@@ -271,7 +288,7 @@ val publishingSettings = Seq(
     releaseStepCommand("startDynamodbLocal"),
     runTest,
     releaseStepCommand("dynamodbLocalTestCleanup"),
-    releaseStepCommandAndRemaining("+docs/tut"),
+    releaseStepCommandAndRemaining("docs/tut"),
     releaseStepCommand("stopDynamodbLocal"),
     setReleaseVersion,
     commitReleaseVersion,
@@ -279,9 +296,9 @@ val publishingSettings = Seq(
     releaseStepCommandAndRemaining("+publishSigned"),
     setNextVersion,
     commitNextVersion,
-    releaseStepCommandAndRemaining("+sonatypeReleaseAll"),
+    releaseStepCommandAndRemaining("+sonatypeRelease"),
     pushChanges,
-    releaseStepCommandAndRemaining("publishMicrosite"),
+    releaseStepCommandAndRemaining("publishMicrosite")
   )
 )
 

@@ -2,7 +2,7 @@ package com.gu.scanamo.time
 
 import com.gu.scanamo.DynamoFormat
 import java.time.{Instant, OffsetDateTime, ZonedDateTime}
-import java.time.format.{DateTimeParseException, DateTimeFormatter}
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
 
 object JavaTimeFormats {
 

@@ -28,10 +28,11 @@ trait DerivedDynamoFormat {
     }
 
   implicit def hcons[K <: Symbol, V, T <: HList](
-      implicit
-      headFormat: Lazy[DynamoFormat[V]],
-      tailFormat: Lazy[ConstructedDynamoFormat[T]],
-      fieldWitness: Witness.Aux[K]): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
+    implicit
+    headFormat: Lazy[DynamoFormat[V]],
+    tailFormat: Lazy[ConstructedDynamoFormat[T]],
+    fieldWitness: Witness.Aux[K]
+  ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
     new ValidConstructedDynamoFormat[FieldType[K, V] :: T] {
       def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :: T] = {
         val fieldName = fieldWitness.value.name
@@ -66,13 +67,14 @@ trait DerivedDynamoFormat {
   }
 
   implicit def coproduct[K <: Symbol, V, T <: Coproduct](
-      implicit
-      headFormat: Lazy[DynamoFormat[V]],
-      tailFormat: CoProductDynamoFormat[T],
-      fieldWitness: Witness.Aux[K]): CoProductDynamoFormat[FieldType[K, V] :+: T] = {
+    implicit
+    headFormat: Lazy[DynamoFormat[V]],
+    tailFormat: CoProductDynamoFormat[T],
+    fieldWitness: Witness.Aux[K]
+  ): CoProductDynamoFormat[FieldType[K, V] :+: T] = {
     val fieldName = fieldWitness.value.name
     new CoProductDynamoFormat[FieldType[K, V] :+: T] {
-      def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: T] = {
+      def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: T] =
         av.getM.asScala.get(fieldName) match {
           case Some(nestedAv) =>
             val value = headFormat.value.read(nestedAv)
@@ -80,7 +82,6 @@ trait DerivedDynamoFormat {
           case None =>
             tailFormat.read(av).map(v => Inr(v))
         }
-      }
 
       def write(field: FieldType[K, V] :+: T): AttributeValue = field match {
         case Inl(h) =>
@@ -92,16 +93,18 @@ trait DerivedDynamoFormat {
   }
 
   implicit def genericProduct[T: NotSymbol, R](
-      implicit gen: LabelledGeneric.Aux[T, R],
-      formatR: Lazy[ValidConstructedDynamoFormat[R]]): DynamoFormat[T] =
+    implicit gen: LabelledGeneric.Aux[T, R],
+    formatR: Lazy[ValidConstructedDynamoFormat[R]]
+  ): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
     }
 
   implicit def genericCoProduct[T, R](
-      implicit gen: LabelledGeneric.Aux[T, R],
-      formatR: Lazy[CoProductDynamoFormat[R]]): DynamoFormat[T] =
+    implicit gen: LabelledGeneric.Aux[T, R],
+    formatR: Lazy[CoProductDynamoFormat[R]]
+  ): DynamoFormat[T] =
     new DynamoFormat[T] {
       def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
       def write(t: T): AttributeValue = formatR.value.write(gen.to(t))

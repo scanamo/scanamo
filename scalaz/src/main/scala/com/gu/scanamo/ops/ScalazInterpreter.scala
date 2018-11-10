@@ -30,7 +30,7 @@ object ScalazInterpreter {
         }
         .asInstanceOf[Task[A]]
 
-    override def apply[A](fa: ScanamoOpsA[A]): Task[A] = {
+    override def apply[A](fa: ScanamoOpsA[A]): Task[A] =
       fa match {
         case Put(req) =>
           eff(client.putItemAsync, JavaRequests.put(req))
@@ -51,7 +51,8 @@ object ScalazInterpreter {
           eff(
             client.batchWriteItemAsync(
               _: BatchWriteItemRequest,
-              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]),
+              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]
+            ),
             req
           )
         case BatchGet(req) =>
@@ -64,6 +65,5 @@ object ScalazInterpreter {
         case ConditionalUpdate(req) =>
           catchConditional(eff(client.updateItemAsync, JavaRequests.update(req)))
       }
-    }
   }
 }

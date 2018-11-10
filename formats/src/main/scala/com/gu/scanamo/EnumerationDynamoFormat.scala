@@ -2,7 +2,7 @@ package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error.{DynamoReadError, TypeCoercionError}
-import shapeless.labelled.{FieldType, field}
+import shapeless.labelled.{field, FieldType}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
 
 abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
@@ -35,10 +35,11 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
   }
 
   implicit def enumDynamoFormatCCons[K <: Symbol, V, R <: Coproduct](
-      implicit
-      fieldWitness: Witness.Aux[K],
-      emptyGeneric: LabelledGeneric.Aux[V, HNil],
-      alternativeFormat: EnumerationDynamoFormat[R]): EnumerationDynamoFormat[FieldType[K, V] :+: R] =
+    implicit
+    fieldWitness: Witness.Aux[K],
+    emptyGeneric: LabelledGeneric.Aux[V, HNil],
+    alternativeFormat: EnumerationDynamoFormat[R]
+  ): EnumerationDynamoFormat[FieldType[K, V] :+: R] =
     new EnumerationDynamoFormat[FieldType[K, V] :+: R] {
       override def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: R] =
         if (av.getS == fieldWitness.value.name) Right(Inl(field[K](emptyGeneric.from(HNil))))
@@ -51,9 +52,10 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
     }
 
   implicit def enumFormat[A, Repr <: Coproduct](
-      implicit
-      gen: LabelledGeneric.Aux[A, Repr],
-      genericFormat: EnumerationDynamoFormat[Repr]): EnumerationDynamoFormat[A] =
+    implicit
+    gen: LabelledGeneric.Aux[A, Repr],
+    genericFormat: EnumerationDynamoFormat[Repr]
+  ): EnumerationDynamoFormat[A] =
     new EnumerationDynamoFormat[A] {
       override def read(av: AttributeValue): Either[DynamoReadError, A] = genericFormat.read(av).right.map(gen.from)
       override def write(t: A): AttributeValue = genericFormat.write(gen.to(t))
