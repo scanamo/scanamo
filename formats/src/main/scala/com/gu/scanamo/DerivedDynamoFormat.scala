@@ -52,7 +52,8 @@ trait DerivedDynamoFormat {
       }
       def write(t: FieldType[K, V] :: T): AttributeValue = {
         val tailValue = tailFormat.value.write(t.tail)
-        tailValue.withM((tailValue.getM.asScala + (fieldWitness.value.name -> headFormat.value.write(t.head))).asJava)
+        val optKeyAv = Option(headFormat.value.write(t.head)).filter(!_.isNULL).map(fieldWitness.value.name -> _)
+        tailValue.withM((tailValue.getM.asScala ++ optKeyAv).asJava)
       }
     }
 

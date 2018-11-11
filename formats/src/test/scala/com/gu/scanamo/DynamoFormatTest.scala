@@ -1,6 +1,7 @@
 package com.gu.scanamo
 
 import scala.collection.JavaConverters._
+import scala.reflect.runtime.universe._
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -11,8 +12,9 @@ import org.scalatest.prop.GeneratorDrivenPropertyChecks
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
-  def testReadWrite[A: DynamoFormat](label: String, gen: Gen[A]): Unit =
-    it(s"should write and then read a $label from dynamo") {
+  def testReadWrite[A: DynamoFormat: TypeTag](gen: Gen[A]): Unit = {
+    val typeLabel = typeTag[A].tpe.toString
+    it(s"should write and then read a $typeLabel from dynamo") {
       val client = LocalDynamoDB.client()
       LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
         final case class Person(name: String, item: A)
@@ -24,20 +26,22 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
         }
       }
     }
+  }
 
-  def testReadWrite[A: DynamoFormat](label: String)(implicit arb: Arbitrary[A]): Unit =
-    testReadWrite(label, arb.arbitrary)
+  def testReadWrite[A: DynamoFormat: TypeTag]()(implicit arb: Arbitrary[A]): Unit =
+    testReadWrite(arb.arbitrary)
 
-  testReadWrite[Set[Int]]("Set[Int]")
-  testReadWrite[Set[Long]]("Set[Long]")
+  testReadWrite[Set[Int]]()
+  testReadWrite[Set[Long]]()
   // Generate limited values for double and big decimal
   // see: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.NamingRulesDataTypes.html#HowItWorks.DataTypes.Number
-  testReadWrite[Set[Double]]("Set[Double]", Gen.containerOf[Set, Double](Arbitrary.arbLong.arbitrary.map(_.toDouble)))
+  testReadWrite[Set[Double]](Gen.containerOf[Set, Double](Arbitrary.arbLong.arbitrary.map(_.toDouble)))
   testReadWrite[Set[BigDecimal]](
-    "Set[BigDecimal]",
     Gen.containerOf[Set, BigDecimal](Arbitrary.arbLong.arbitrary.map(BigDecimal(_)))
   )
   val nonEmptyStringGen: Gen[String] =
     Gen.nonEmptyContainerOf[Array, Char](Arbitrary.arbChar.arbitrary).map(arr => new String(arr))
-  testReadWrite[Set[String]]("Set[String]", Gen.containerOf[Set, String](nonEmptyStringGen))
+  testReadWrite[Set[String]](Gen.containerOf[Set, String](nonEmptyStringGen))
+  testReadWrite[Option[String]](Gen.option(nonEmptyStringGen))
+  testReadWrite[Option[Int]]()
 }

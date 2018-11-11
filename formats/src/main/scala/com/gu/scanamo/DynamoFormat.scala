@@ -454,6 +454,9 @@ object DynamoFormat extends EnumDynamoFormat {
     *
     * >>> DynamoFormat[Option[Long]].read(new com.amazonaws.services.dynamodbv2.model.AttributeValue().withNULL(true))
     * Right(None)
+    *
+    * >>> DynamoFormat[Option[Long]].write(None).isNULL()
+    * true
     * }}}
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
@@ -463,7 +466,7 @@ object DynamoFormat extends EnumDynamoFormat {
         .map(f.read(_).map(Some(_)))
         .getOrElse(Right(Option.empty[T]))
 
-    def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(null)
+    def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(new AttributeValue().withNULL(true))
     override val default = Some(None)
   }
 
