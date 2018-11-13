@@ -30,7 +30,8 @@ object ScanamoOps {
   def delete(req: ScanamoDeleteRequest): ScanamoOps[DeleteItemResult] =
     liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
   def conditionalDelete(
-      req: ScanamoDeleteRequest): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
+    req: ScanamoDeleteRequest
+  ): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
     liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, DeleteItemResult]](ConditionalDelete(req))
   def scan(req: ScanamoScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
   def query(req: ScanamoQueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](Query(req))
@@ -41,6 +42,7 @@ object ScanamoOps {
   def update(req: ScanamoUpdateRequest): ScanamoOps[UpdateItemResult] =
     liftF[ScanamoOpsA, UpdateItemResult](Update(req))
   def conditionalUpdate(
-      req: ScanamoUpdateRequest): ScanamoOps[Either[ConditionalCheckFailedException, UpdateItemResult]] =
+    req: ScanamoUpdateRequest
+  ): ScanamoOps[Either[ConditionalCheckFailedException, UpdateItemResult]] =
     liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, UpdateItemResult]](ConditionalUpdate(req))
 }

@@ -25,7 +25,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
 
   def stream[T: DynamoFormat](req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] = {
 
-    def streamMore(req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] = {
+    def streamMore(req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
       for {
         res <- exec(req)
         results = items(res).asScala.map(ScanamoFree.read[T]).toList
@@ -34,15 +34,17 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
         result <- lastKey
           .filterNot(_ => newLimit.exists(_ <= 0))
           .foldLeft(
-            Free.pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[EvaluationKey])]((results, lastKey))
-          )((rs, k) =>
-            for {
-              results <- rs
-              newReq = prepare(newLimit, k)(req)
-              more <- streamMore(newReq)
-            } yield (results._1 ::: more._1, more._2))
+            Free
+              .pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[EvaluationKey])]((results, lastKey))
+          )(
+            (rs, k) =>
+              for {
+                results <- rs
+                newReq = prepare(newLimit, k)(req)
+                more <- streamMore(newReq)
+              } yield (results._1 ::: more._1, more._2)
+          )
       } yield result
-    }
     streamMore(req)
   }
 }

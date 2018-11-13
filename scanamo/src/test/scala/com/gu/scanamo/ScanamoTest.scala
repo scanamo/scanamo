@@ -22,21 +22,18 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
     val client = LocalDynamoDB.client()
     case class City(name: String, country: String)
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-
       Scanamo.put(client)(t)(City("Nashville", "US"))
 
       import com.gu.scanamo.syntax._
       Scanamo.getWithConsistency[City](client)(t)('name -> "Nashville") should equal(
-        Some(Right(City("Nashville", "US"))))
+        Some(Right(City("Nashville", "US")))
+      )
     }
     client.shutdown()
   }
 
   it("should get consistent") {
     case class City(name: String, country: String)
-
-
-    import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 
     val client = LocalDynamoDB.client()
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
@@ -47,6 +44,24 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
         res <- cityTable.consistently.get('name -> "Nashville")
       } yield res
       Scanamo.exec(client)(ops) should equal(Some(Right(City("Nashville", "US"))))
+    }
+    client.shutdown()
+  }
+
+  it("should delete all entries from a string set, and be able to read the dynamo item") {
+    case class Person(name: String, pets: Set[String])
+
+    val client = LocalDynamoDB.client()
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      import syntax._
+
+      val personTable = Table[Person](t)
+      val ops = for {
+        _ <- personTable.put(Person("bob", Set("hamster")))
+        _ <- personTable.update('name -> "bob", delete('pets -> Set("hamster")))
+        res <- personTable.get('name -> "bob")
+      } yield res
+      Scanamo.exec(client)(ops) should equal(Some(Right(Person("bob", Set.empty))))
     }
     client.shutdown()
   }

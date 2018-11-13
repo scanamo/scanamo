@@ -144,7 +144,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       } yield results
 
       ScanamoCats.exec[IO, List[Either[DynamoReadError, Forecast]]](client)(ops).unsafeRunSync() should equal(
-        List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None))))
+        List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None)))
+      )
     }
   }
 
@@ -225,7 +226,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       } yield res2._1 ::: res3._1
 
       results.unsafeRunSync() should equal(
-        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie")))))
+        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
+      )
     }
   }
 
@@ -240,19 +242,24 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       import com.gu.scanamo.syntax._
 
       ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig").unsafeRunSync() should equal(
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
+        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3)))
+      )
 
       ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number < 3).unsafeRunSync() should equal(
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
+        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)))
+      )
 
       ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number > 1).unsafeRunSync() should equal(
-        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
+        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3)))
+      )
 
       ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number <= 2).unsafeRunSync() should equal(
-        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))))
+        List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)))
+      )
 
       ScanamoCats.query[IO, Animal](client)(t)('species -> "Pig" and 'number >= 2).unsafeRunSync() should equal(
-        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))))
+        List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3)))
+      )
 
     }
 
@@ -265,12 +272,15 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         Set(
           Transport("Underground", "Circle"),
           Transport("Underground", "Metropolitan"),
-          Transport("Underground", "Central")))
+          Transport("Underground", "Central")
+        )
+      )
 
       ScanamoCats
         .query[IO, Transport](client)(t)('mode -> "Underground" and ('line beginsWith "C"))
         .unsafeRunSync() should equal(
-        List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle"))))
+        List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle")))
+      )
     }
   }
 
@@ -284,7 +294,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         Set(
           Transport("Underground", "Circle"),
           Transport("Underground", "Metropolitan"),
-          Transport("Underground", "Central")))
+          Transport("Underground", "Central")
+        )
+      )
       val results =
         ScanamoCats.queryWithLimit[IO, Transport](client)(t)('mode -> "Underground" and ('line beginsWith "C"), 1)
       results.unsafeRunSync() should equal(List(Right(Transport("Underground", "Central"))))
@@ -305,10 +317,12 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
             Transport("Underground", "Central", "Red"),
             Transport("Underground", "Picadilly", "Blue"),
             Transport("Underground", "Northern", "Black")
-          ))
+          )
+        )
         val results = ScanamoCats.queryIndexWithLimit[IO, Transport](client)(t, i)(
           'mode -> "Underground" and ('colour beginsWith "Bl"),
-          1)
+          1
+        )
 
         results.unsafeRunSync() should equal(List(Right(Transport("Underground", "Northern", "Black"))))
     }
@@ -369,7 +383,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         farmerWithNoAge <- farmersTable.filter(attributeNotExists('age)).query('firstName -> "Fred")
       } yield farmerWithNoAge
       ScanamoCats.exec[IO, List[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(
-        List(Right(Farmer("Fred", "Perry", None))))
+        List(Right(Farmer("Fred", "Perry", None)))
+      )
     }
   }
 
@@ -381,7 +396,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         _ <- ScanamoCats.putAll[IO, Rabbit](client)(t)(
           (
             for { _ <- 0 until 100 } yield Rabbit(util.Random.nextString(500))
-          ).toSet)
+          ).toSet
+        )
       } yield Scanamo.scan[Rabbit](client)(t)
 
       result.unsafeRunSync().size should equal(100)
@@ -399,19 +415,22 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
           Farmer("Boggis", 43L, Farm(List("chicken"))),
           Farmer("Bunce", 52L, Farm(List("goose"))),
           Farmer("Bean", 55L, Farm(List("turkey")))
-        ))
+        )
+      )
 
       ScanamoCats
         .getAll[IO, Farmer](client)(t)(
           UniqueKeys(KeyList('name, Set("Boggis", "Bean")))
         )
         .unsafeRunSync() should equal(
-        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
+        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
+      )
 
       import com.gu.scanamo.syntax._
 
       ScanamoCats.getAll[IO, Farmer](client)(t)('name -> Set("Boggis", "Bean")).unsafeRunSync() should equal(
-        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))))
+        Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
+      )
     }
 
     LocalDynamoDB.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
@@ -470,7 +489,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
       ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(
-        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))))
+        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
+      )
     }
   }
 
@@ -484,7 +504,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
       ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(
-        None)
+        None
+      )
     }
   }
 
@@ -504,7 +525,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
       } yield farmerWithNewStock
       ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync() should equal(
-        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"))))))
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken")))))
+      )
     }
   }
 
@@ -546,7 +568,8 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
       ScanamoCats.exec[IO, List[Either[DynamoReadError, Gremlin]]](client)(ops).unsafeRunSync() should equal(
-        List(Right(Gremlin(1, false))))
+        List(Right(Gremlin(1, false)))
+      )
     }
   }
 }

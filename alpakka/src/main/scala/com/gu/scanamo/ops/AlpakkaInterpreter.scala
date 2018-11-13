@@ -13,16 +13,16 @@ object AlpakkaInterpreter {
     new (ScanamoOpsA ~> Future) {
       import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
 
-      override def apply[A](ops: ScanamoOpsA[A]) = {
+      override def apply[A](ops: ScanamoOpsA[A]) =
         ops match {
-          case Put(req) => client.single(JavaRequests.put(req))
-          case Get(req) => client.single(req)
-          case Delete(req) => client.single(JavaRequests.delete(req))
-          case Scan(req) => client.single(JavaRequests.scan(req))
-          case Query(req) => client.single(JavaRequests.query(req))
-          case Update(req) => client.single(JavaRequests.update(req))
+          case Put(req)        => client.single(JavaRequests.put(req))
+          case Get(req)        => client.single(req)
+          case Delete(req)     => client.single(JavaRequests.delete(req))
+          case Scan(req)       => client.single(JavaRequests.scan(req))
+          case Query(req)      => client.single(JavaRequests.query(req))
+          case Update(req)     => client.single(JavaRequests.update(req))
           case BatchWrite(req) => client.single(req)
-          case BatchGet(req) => client.single(req)
+          case BatchGet(req)   => client.single(req)
           case ConditionalDelete(req) =>
             client
               .single(JavaRequests.delete(req))
@@ -45,7 +45,6 @@ object AlpakkaInterpreter {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
         }
-      }
     }
 
 }

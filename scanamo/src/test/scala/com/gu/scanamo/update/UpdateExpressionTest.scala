@@ -24,7 +24,9 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
           append(s -> i),
           prepend(s -> i),
           appendAll(s -> l),
-          prependAll(s -> l)))
+          prependAll(s -> l)
+        )
+      )
     } yield u
 
   def genNode(level: Int): Gen[UpdateExpression] =
