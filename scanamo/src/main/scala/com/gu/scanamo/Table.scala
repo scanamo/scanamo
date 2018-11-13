@@ -13,7 +13,7 @@ import scala.collection.JavaConverters._
   * Represents a DynamoDB table that operations can be performed against
   *
   * {{{
-    * >>> import com.gu.scanamo.generic.auto._
+  * >>> import com.gu.scanamo.generic.auto._
   * >>> case class Transport(mode: String, line: String)
   *
   * >>> val client = LocalDynamoDB.client()

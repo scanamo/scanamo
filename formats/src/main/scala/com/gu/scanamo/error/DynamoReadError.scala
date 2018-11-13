@@ -20,12 +20,12 @@ object DynamoReadError {
     def show(e: DynamoReadError): String = describe(e)
   }
 
-  def describe(d: DynamoReadError): String =  d match {
-    case InvalidPropertiesError(problems) => problems.toList.map(describe).mkString(", ")
+  def describe(d: DynamoReadError): String = d match {
+    case InvalidPropertiesError(problems)       => problems.toList.map(describe).mkString(", ")
     case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
-    case NoSubtypeOfType(typeName) => s"empty sealed trait '$typeName' cannot be instantiated"
-    case TypeCoercionError(e) => s"could not be converted to desired type: $e"
-    case PropertyReadError(n, e) => s"'$n': ${describe(e)}"
-    case MissingProperty => "missing"
+    case NoSubtypeOfType(typeName)              => s"empty sealed trait '$typeName' cannot be instantiated"
+    case TypeCoercionError(e)                   => s"could not be converted to desired type: $e"
+    case PropertyReadError(n, e)                => s"'$n': ${describe(e)}"
+    case MissingProperty                        => "missing"
   }
 }
