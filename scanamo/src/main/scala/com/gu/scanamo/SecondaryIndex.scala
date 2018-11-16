@@ -3,8 +3,9 @@ package com.gu.scanamo
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query.{Condition, ConditionExpression, Query}
+import com.gu.scanamo.query.{Condition, ConditionExpression, Query, UniqueKeyCondition, UniqueKey}
 import com.gu.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
+import scala.collection.JavaConverters._
 
 /**
   * Represents a secondary index on a DynamoDB table.
@@ -135,6 +136,8 @@ sealed abstract class SecondaryIndex[V] {
     * }}}
     */
   def filter[C: ConditionExpression](condition: C): SecondaryIndex[V]
+
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]): SecondaryIndex[V]
 }
 
 private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
@@ -143,6 +146,7 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   queryOptions: ScanamoQueryOptions
 ) extends SecondaryIndex[V] {
   def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]) = copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava)))
   def filter[C: ConditionExpression](condition: C) =
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =

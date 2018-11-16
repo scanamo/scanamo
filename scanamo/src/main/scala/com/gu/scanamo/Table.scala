@@ -486,6 +486,8 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def given[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]) = TableWithOptions(name, ScanamoQueryOptions.default).from(key)
+
   /**
     * Scans all elements of a table
     *
@@ -654,6 +656,8 @@ case class Table[V: DynamoFormat](name: String) {
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {
   def limit(n: Int): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.limit(n)
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]) = 
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
 
@@ -679,6 +683,7 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]) = copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava)))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
