@@ -117,16 +117,6 @@ object ScanamoFree {
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)
 
-  def scanConsistent[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream
-      .stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default.copy(consistent = true)))
-      .map(_._1)
-
-  def scanWithLimit[T: DynamoFormat](tableName: String, limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream
-      .stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default.copy(limit = Some(limit))))
-      .map(_._1)
-
   def scanFrom[T: DynamoFormat](
     tableName: String,
     limit: Int,
@@ -142,15 +132,6 @@ object ScanamoFree {
 
   def scanIndex[T: DynamoFormat](tableName: String, indexName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, Some(indexName), ScanamoQueryOptions.default)).map(_._1)
-
-  def scanIndexWithLimit[T: DynamoFormat](
-    tableName: String,
-    indexName: String,
-    limit: Int
-  ): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream
-      .stream[T](ScanamoScanRequest(tableName, Some(indexName), ScanamoQueryOptions.default.copy(limit = Some(limit))))
-      .map(_._1)
 
   def scanIndexFrom[T: DynamoFormat](
     tableName: String,
@@ -168,20 +149,6 @@ object ScanamoFree {
 
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default)).map(_._1)
-
-  def queryConsistent[T: DynamoFormat](
-    tableName: String
-  )(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream
-      .stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default.copy(consistent = true)))
-      .map(_._1)
-
-  def queryWithLimit[T: DynamoFormat](
-    tableName: String
-  )(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream
-      .stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default.copy(limit = Some(limit))))
-      .map(_._1)
 
   def queryFrom[T: DynamoFormat](tableName: String)(
     query: Query[_],
@@ -202,16 +169,6 @@ object ScanamoFree {
   ): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream
       .stream[T](ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default))
-      .map(_._1)
-
-  def queryIndexWithLimit[T: DynamoFormat](
-    tableName: String,
-    indexName: String
-  )(query: Query[_], limit: Int): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream
-      .stream[T](
-        ScanamoQueryRequest(tableName, Some(indexName), query, ScanamoQueryOptions.default.copy(limit = Some(limit)))
-      )
       .map(_._1)
 
   def queryIndexFrom[T: DynamoFormat](tableName: String, indexName: String)(
