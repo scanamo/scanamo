@@ -317,6 +317,7 @@ val micrositeSettings = Seq(
   micrositeBaseUrl := "",
   micrositeDocumentationUrl := "/latest/api",
   micrositeHighlightTheme := "color-brewer",
+  micrositeGitterChannel := false,
   micrositePalette := Map(
     "brand-primary" -> "#951c55",
     "brand-secondary" -> "#005689",
