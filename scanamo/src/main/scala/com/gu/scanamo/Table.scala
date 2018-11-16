@@ -490,6 +490,11 @@ case class Table[V: DynamoFormat](name: String) {
     * Primes a search request with a key to start from:
     *
     * {{{
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.query._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.client()
+    *
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   val table = Table[Bear](t)
     * ...   val ops = for {
