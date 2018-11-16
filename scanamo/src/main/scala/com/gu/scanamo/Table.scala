@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, ScanResult, QueryResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, QueryResult, ScanResult}
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
@@ -487,10 +487,10 @@ case class Table[V: DynamoFormat](name: String) {
   def given[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
   /**
-   * Primes a search request with a key to start from:
-   * 
-   * {{{
-   * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
+    * Primes a search request with a key to start from:
+    *
+    * {{{
+    * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   val table = Table[Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey"))
@@ -501,14 +501,14 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(ops)
     * ... }
     * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
-   * }}}
-   * 
-   * Of course it works with queries too:
-   * 
-   * {{{
-   * >>> case class Sorceress(name: String, age: Long, power: String)
-   * 
-   * >>> LocalDynamoDB.withRandomTable(client)('name -> S, 'age -> N) { t =>
+    * }}}
+    *
+    * Of course it works with queries too:
+    *
+    * {{{
+    * >>> case class Sorceress(name: String, age: Long, power: String)
+    *
+    * >>> LocalDynamoDB.withRandomTable(client)('name -> S, 'age -> N) { t =>
     * ...   val table = Table[Sorceress](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Sorceress("Circe", 192L, "Transforms matter"))
@@ -521,9 +521,9 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   Scanamo.exec(client)(ops)
     * ... }
     * List(Right(Sorceress(Karnilla,85L,Magical spells)), Right(Sorceress(Satana,403L,Feeds from human soul)))
-   * }}}
-   * 
-   */
+    * }}}
+    *
+    */
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) = TableWithOptions(name, ScanamoQueryOptions.default).from(key)
 
   /**
@@ -633,7 +633,7 @@ case class Table[V: DynamoFormat](name: String) {
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {
   def limit(n: Int): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.limit(n)
-  def from[K: UniqueKeyCondition](key: UniqueKey[K]) = 
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
@@ -651,7 +651,8 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
-  def from[K: UniqueKeyCondition](key: UniqueKey[K]) = copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava)))
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
+    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava)))
   def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
