@@ -1,6 +1,6 @@
 package com.gu.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult}
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, ScanResult, QueryResult}
 import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
@@ -511,6 +511,8 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
+  def scan0: ScanamoOps[ScanResult] = ScanamoFree.scan0[V](name)
+
   /**
     * Query a table based on the hash key and optionally the range key
     *
@@ -538,6 +540,8 @@ case class Table[V: DynamoFormat](name: String) {
     * }}}
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
+
+  def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
 
   /**
     * Filter the results of a Scan or Query
@@ -614,6 +618,10 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
+  def scan0: ScanamoOps[ScanResult] =
+    ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
+  def query0(query: Query[_]): ScanamoOps[QueryResult] =
+    ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, queryOptions))
 }
