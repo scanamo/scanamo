@@ -48,7 +48,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         r2 <- farmers.get('name -> "Maggot")
       } yield (r1, r1 == r2)
 
-      ScanamoCats.exec[IO, (Option[Either[DynamoReadError, Farmer]], Boolean)](client)(result).unsafeRunSync should equal(
+      ScanamoCats
+        .exec[IO, (Option[Either[DynamoReadError, Farmer]], Boolean)](client)(result)
+        .unsafeRunSync should equal(
         (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
       )
     }
@@ -63,7 +65,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         e <- engines.get('name -> "Thomas" and 'number -> 1)
       } yield e
 
-      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Engine]]](client)(result).unsafeRunSync should equal(Some(Right(Engine("Thomas", 1))))
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Engine]]](client)(result).unsafeRunSync should equal(
+        Some(Right(Engine("Thomas", 1)))
+      )
     }
   }
 
@@ -77,7 +81,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         c <- cities.consistently.get('name -> "Nashville")
       } yield c
 
-      ScanamoCats.exec[IO, Option[Either[DynamoReadError, City]]](client)(result).unsafeRunSync should equal(Some(Right(City("Nashville", "US"))))
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, City]]](client)(result).unsafeRunSync should equal(
+        Some(Right(City("Nashville", "US")))
+      )
     }
   }
 
@@ -88,13 +94,15 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
 
       val farmers = Table[Farmer](t)
 
-      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client) {
-        for {
-          _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
-          _ <- farmers.delete('name -> "McGregor")
-          f <- farmers.get('name -> "McGregor")
-        } yield f
-      }.unsafeRunSync should equal(None)
+      ScanamoCats
+        .exec[IO, Option[Either[DynamoReadError, Farmer]]](client) {
+          for {
+            _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
+            _ <- farmers.delete('name -> "McGregor")
+            f <- farmers.get('name -> "McGregor")
+          } yield f
+        }
+        .unsafeRunSync should equal(None)
     }
   }
 
@@ -132,7 +140,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         fs <- forecasts.scan
       } yield fs
 
-      ScanamoCats.exec[IO, List[Either[DynamoReadError, Forecast]]](client)(ops).unsafeRunSync should equal(List(Right(Forecast("London", "Sun"))))
+      ScanamoCats.exec[IO, List[Either[DynamoReadError, Forecast]]](client)(ops).unsafeRunSync should equal(
+        List(Right(Forecast("London", "Sun")))
+      )
     }
   }
 
@@ -194,7 +204,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         _ <- bears.put(Bear("Yogi", "picnic baskets"))
         bs <- bears.limit(1).scan
       } yield bs
-      ScanamoCats.exec[IO, List[Either[DynamoReadError, Bear]]](client)(ops).unsafeRunSync should equal(List(Right(Bear("Pooh", "honey"))))
+      ScanamoCats.exec[IO, List[Either[DynamoReadError, Bear]]](client)(ops).unsafeRunSync should equal(
+        List(Right(Bear("Pooh", "honey")))
+      )
     }
   }
 
@@ -209,7 +221,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- bears.index(i).limit(1).scan
       } yield bs
-      ScanamoCats.exec[IO, List[Either[DynamoReadError, Bear]]](client)(ops).unsafeRunSync should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+      ScanamoCats.exec[IO, List[Either[DynamoReadError, Bear]]](client)(ops).unsafeRunSync should equal(
+        List(Right(Bear("Graham", "quinoa", Some("Guardianista"))))
+      )
     }
   }
 
@@ -249,7 +263,18 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         r5 <- animals.query('species -> "Pig" and 'number >= 2)
       } yield (r1, r2, r3, r4, r5)
 
-      ScanamoCats.exec[IO, (List[Either[com.gu.scanamo.error.DynamoReadError,Animal]], List[Either[com.gu.scanamo.error.DynamoReadError,Animal]], List[Either[com.gu.scanamo.error.DynamoReadError,Animal]], List[Either[com.gu.scanamo.error.DynamoReadError,Animal]], List[Either[com.gu.scanamo.error.DynamoReadError,Animal]])](client)(ops).unsafeRunSync should equal(
+      ScanamoCats
+        .exec[
+          IO,
+          (
+            List[Either[com.gu.scanamo.error.DynamoReadError, Animal]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Animal]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Animal]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Animal]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Animal]]
+          )
+        ](client)(ops)
+        .unsafeRunSync should equal(
         (
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
@@ -296,7 +321,9 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         rs <- transports.limit(1).query('mode -> "Underground" and ('line beginsWith "C"))
       } yield rs
 
-      ScanamoCats.exec[IO, List[Either[DynamoReadError, Transport]]](client)(result).unsafeRunSync should equal(List(Right(Transport("Underground", "Central"))))
+      ScanamoCats.exec[IO, List[Either[DynamoReadError, Transport]]](client)(result).unsafeRunSync should equal(
+        List(Right(Transport("Underground", "Central")))
+      )
     }
   }
 
@@ -357,7 +384,18 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         ts5 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (1 and 1)))
       } yield (ts1, ts2, ts3, ts4, ts5)
 
-      ScanamoCats.exec[IO, (List[Either[com.gu.scanamo.error.DynamoReadError,Station]], List[Either[com.gu.scanamo.error.DynamoReadError,Station]], List[Either[com.gu.scanamo.error.DynamoReadError,Station]], List[Either[com.gu.scanamo.error.DynamoReadError,Station]], List[Either[com.gu.scanamo.error.DynamoReadError,Station]])](client)(ops).unsafeRunSync should equal(
+      ScanamoCats
+        .exec[
+          IO,
+          (
+            List[Either[com.gu.scanamo.error.DynamoReadError, Station]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Station]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Station]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Station]],
+            List[Either[com.gu.scanamo.error.DynamoReadError, Station]]
+          )
+        ](client)(ops)
+        .unsafeRunSync should equal(
         (
           List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
           List.empty,
@@ -405,17 +443,19 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       case class Farmer(name: String, age: Long, farm: Farm)
       val farmers = Table[Farmer](t)
 
-      ScanamoCats.exec[IO, (Set[Either[DynamoReadError, Farmer]], Set[Either[DynamoReadError, Farmer]])](client)(for {
-        _ <- farmers.putAll(
-          Set(
-            Farmer("Boggis", 43L, Farm(List("chicken"))),
-            Farmer("Bunce", 52L, Farm(List("goose"))),
-            Farmer("Bean", 55L, Farm(List("turkey")))
+      ScanamoCats
+        .exec[IO, (Set[Either[DynamoReadError, Farmer]], Set[Either[DynamoReadError, Farmer]])](client)(for {
+          _ <- farmers.putAll(
+            Set(
+              Farmer("Boggis", 43L, Farm(List("chicken"))),
+              Farmer("Bunce", 52L, Farm(List("goose"))),
+              Farmer("Bean", 55L, Farm(List("turkey")))
+            )
           )
-        )
-        fs1 <- farmers.getAll(UniqueKeys(KeyList('name, Set("Boggis", "Bean"))))
-        fs2 <- farmers.getAll('name -> Set("Boggis", "Bean"))
-      } yield (fs1, fs2)).unsafeRunSync should equal(
+          fs1 <- farmers.getAll(UniqueKeys(KeyList('name, Set("Boggis", "Bean"))))
+          fs2 <- farmers.getAll('name -> Set("Boggis", "Bean"))
+        } yield (fs1, fs2))
+        .unsafeRunSync should equal(
         (
           Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))),
           Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
@@ -427,10 +467,12 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       case class Doctor(actor: String, regeneration: Int)
       val doctors = Table[Doctor](t)
 
-      ScanamoCats.exec[IO, Set[Either[DynamoReadError, Doctor]]](client)(for {
-        _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
-        ds <- doctors.getAll(('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11))
-      } yield ds).unsafeRunSync should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
+      ScanamoCats
+        .exec[IO, Set[Either[DynamoReadError, Doctor]]](client)(for {
+          _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+          ds <- doctors.getAll(('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11))
+        } yield ds)
+        .unsafeRunSync should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
     }
   }
 
@@ -440,10 +482,12 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
 
-      ScanamoCats.exec[IO, Set[Either[DynamoReadError, Farm]]](client)(for {
-        _ <- farmsTable.putAll(farms)
-        fs <- farmsTable.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
-      } yield fs).unsafeRunSync should equal(farms.map(Right(_)))
+      ScanamoCats
+        .exec[IO, Set[Either[DynamoReadError, Farm]]](client)(for {
+          _ <- farmsTable.putAll(farms)
+          fs <- farmsTable.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
+        } yield fs)
+        .unsafeRunSync should equal(farms.map(Right(_)))
     }
   }
 
@@ -453,10 +497,12 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
 
-      ScanamoCats.exec[IO, Set[Either[DynamoReadError, Farm]]](client)(for {
-        _ <- farmsTable.putAll(farms)
-        fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
-      } yield fs).unsafeRunSync should equal(farms.map(Right(_)))
+      ScanamoCats
+        .exec[IO, Set[Either[DynamoReadError, Farm]]](client)(for {
+          _ <- farmsTable.putAll(farms)
+          fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
+        } yield fs)
+        .unsafeRunSync should equal(farms.map(Right(_)))
     }
   }
 

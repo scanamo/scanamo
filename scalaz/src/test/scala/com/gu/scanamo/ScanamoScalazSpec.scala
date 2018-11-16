@@ -180,7 +180,9 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
       case class Lemming(name: String, stuff: String)
       val lemmings = Table[Lemming](t)
       val ops = for {
-        _ <- lemmings.putAll(List.fill(100)(Lemming(scala.util.Random.nextString(500), scala.util.Random.nextString(5000))).toSet)
+        _ <- lemmings.putAll(
+          List.fill(100)(Lemming(scala.util.Random.nextString(500), scala.util.Random.nextString(5000))).toSet
+        )
         ls <- lemmings.scan
       } yield ls
 
@@ -213,7 +215,9 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- bears.index(i).limit(1).scan
       } yield bs
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+        List(Right(Bear("Graham", "quinoa", Some("Guardianista"))))
+      )
     }
   }
 
