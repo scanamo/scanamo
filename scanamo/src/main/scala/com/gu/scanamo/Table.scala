@@ -502,6 +502,27 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
    * }}}
+   * 
+   * Of course it works with queries too:
+   * 
+   * {{{
+   * >>> case class Sorceress(name: String, age: Long, power: String)
+   * 
+   * >>> LocalDynamoDB.withRandomTable(client)('name -> S, 'age -> N) { t =>
+    * ...   val table = Table[Sorceress](t)
+    * ...   val ops = for {
+    * ...     _ <- table.put(Sorceress("Circe", 192L, "Transforms matter"))
+    * ...     _ <- table.put(Sorceress("Karnilla", 85L, "Magical spells"))
+    * ...     _ <- table.put(Sorceress("Agatha Harkness", 1046L, "Teleportation"))
+    * ...     _ <- table.put(Sorceress("Morgan le Fay", 892L, "Invokes Danu"))
+    * ...     _ <- table.put(Sorceress("Satana", 403L, "Feeds from human soul"))
+    * ...     sorceresses <- table.from('name -> "Karnilla" and 'age -> 85L).query('age < 800L)
+    * ...   } yield sorceresses
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Sorceress(Karnilla,85L,Magical spells)), Right(Sorceress(Satana,403L,Feeds from human soul)))
+   * }}}
+   * 
    */
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) = TableWithOptions(name, ScanamoQueryOptions.default).from(key)
 
