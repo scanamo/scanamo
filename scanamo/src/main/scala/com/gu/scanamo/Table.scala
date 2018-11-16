@@ -486,6 +486,23 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def given[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
+  /**
+   * Primes a search request with a key to start from:
+   * 
+   * {{{
+   * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
+    * ...   val table = Table[Bear](t)
+    * ...   val ops = for {
+    * ...     _ <- table.put(Bear("Pooh", "honey"))
+    * ...     _ <- table.put(Bear("Baloo", "ants"))
+    * ...     _ <- table.put(Bear("Yogi", "picnic baskets"))
+    * ...     bears <- table.from('name -> "Pooh").scan()
+    * ...   } yield bears
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
+   * }}}
+   */
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) = TableWithOptions(name, ScanamoQueryOptions.default).from(key)
 
   /**
