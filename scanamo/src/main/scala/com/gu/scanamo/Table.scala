@@ -503,7 +503,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     _ <- table.put(Bear("Pooh", "honey"))
     * ...     _ <- table.put(Bear("Baloo", "ants"))
     * ...     _ <- table.put(Bear("Yogi", "picnic baskets"))
-    * ...     bears <- table.from('name -> "Pooh").scan()
+    * ...     bears <- table.from('name -> "Baloo").scan()
     * ...   } yield bears
     * ...   Scanamo.exec(client)(ops)
     * ... }
@@ -513,21 +513,25 @@ case class Table[V: DynamoFormat](name: String) {
     * Of course it works with queries too:
     *
     * {{{
-    * >>> case class Sorceress(name: String, age: Long, power: String)
+    * >>> case class Event(`type`: String, tag: String, count: Int)
     *
-    * >>> LocalDynamoDB.withRandomTable(client)('name -> S, 'age -> N) { t =>
-    * ...   val table = Table[Sorceress](t)
+    * >>> LocalDynamoDB.withRandomTable(client)('type -> S, 'tag -> S) { t =>
+    * ...   val table = Table[Event](t)
     * ...   val ops = for {
-    * ...     _ <- table.put(Sorceress("Circe", 192L, "Transforms matter"))
-    * ...     _ <- table.put(Sorceress("Karnilla", 85L, "Magical spells"))
-    * ...     _ <- table.put(Sorceress("Agatha Harkness", 1046L, "Teleportation"))
-    * ...     _ <- table.put(Sorceress("Morgan le Fay", 892L, "Invokes Danu"))
-    * ...     _ <- table.put(Sorceress("Satana", 403L, "Feeds from human soul"))
-    * ...     sorceresses <- table.from('name -> "Karnilla" and 'age -> 85L).query('age < 800L)
-    * ...   } yield sorceresses
+    * ...     _ <- table.putAll(Set(
+    * ...            Event("click", "paid", 600),
+    * ...            Event("play", "profile", 100),
+    * ...            Event("play", "politics", 200),
+    * ...            Event("click", "profile", 400),
+    * ...            Event("play", "print", 600),
+    * ...            Event("click", "print", 300),
+    * ...            Event("play", "paid", 900)
+    * ...          ))
+    * ...     events <- table.from('type -> "play" and 'tag -> "politics").query('type -> "play" and ('tag beginsWith "p"))
+    * ...   } yield events
     * ...   Scanamo.exec(client)(ops)
     * ... }
-    * List(Right(Sorceress(Karnilla,85L,Magical spells)), Right(Sorceress(Satana,403L,Feeds from human soul)))
+    * List(Right(Event(play,print,600)), Right(Event(play,profile,100)))
     * }}}
     *
     */
