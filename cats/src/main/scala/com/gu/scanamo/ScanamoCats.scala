@@ -89,15 +89,6 @@ object ScanamoCats {
   )(tableName: String, indexName: String, limit: Int): F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
-  def scanIndexFrom[F[_]: Async, T: DynamoFormat](client: AmazonDynamoDBAsync)(
-    tableName: String,
-    indexName: String,
-    limit: Int,
-    startKey: Option[EvaluationKey]
-  ): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanIndexFrom(tableName, indexName, limit, startKey))
-
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.query]]", "1.0")
   def query[F[_]: Async, T: DynamoFormat](
     client: AmazonDynamoDBAsync
