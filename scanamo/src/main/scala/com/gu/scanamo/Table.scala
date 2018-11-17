@@ -495,6 +495,8 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
+    * >>> case class Bear(name: String, favouriteFood: String)
+    *
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   val table = Table[Bear](t)
     * ...   val ops = for {
@@ -554,6 +556,9 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
+  /**
+    * A more powerful scan method that retunrs the DynamoDB result without post-processing
+    */
   def scan0: ScanamoOps[ScanResult] = ScanamoFree.scan0[V](name)
 
   /**
@@ -584,6 +589,9 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
+  /**
+    * A more powerful query method that retunrs the DynamoDB result without post-processing
+    */
   def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
 
   /**
