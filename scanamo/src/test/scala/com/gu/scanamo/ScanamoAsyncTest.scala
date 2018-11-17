@@ -189,22 +189,6 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     }
   }
 
-  it("paginates with a limit asynchronously") {
-    case class Bear(name: String, favouriteFood: String)
-
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-      Scanamo.put(client)(t)(Bear("Pooh", "honey"))
-      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets"))
-      Scanamo.put(client)(t)(Bear("Graham", "quinoa"))
-      val results = for {
-        res1 <- ScanamoAsync.scanFrom[Bear](client)(t, 1, None)
-        res2 <- ScanamoAsync.scanFrom[Bear](client)(t, 1, res1._2)
-        res3 <- ScanamoAsync.scanFrom[Bear](client)(t, 1, res2._2)
-      } yield res2._1 ::: res3._1
-      results.futureValue should equal(List(Right(Bear("Yogi", "picnic baskets")), Right(Bear("Graham", "quinoa"))))
-    }
-  }
-
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
@@ -214,25 +198,6 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = ScanamoAsync.scanIndexWithLimit[Bear](client)(t, i, 1)
       results.futureValue should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
-    }
-  }
-
-  it("Paginate scanIndexWithLimit") {
-    case class Bear(name: String, favouriteFood: String, alias: Option[String])
-
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
-      Scanamo.put(client)(t)(Bear("Pooh", "honey", Some("Winnie")))
-      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets", Some("Kanga")))
-      Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = for {
-        res1 <- ScanamoAsync.scanIndexFrom[Bear](client)(t, i, 1, None)
-        res2 <- ScanamoAsync.scanIndexFrom[Bear](client)(t, i, 1, res1._2)
-        res3 <- ScanamoAsync.scanIndexFrom[Bear](client)(t, i, 1, res2._2)
-      } yield res2._1 ::: res3._1
-
-      results.futureValue should equal(
-        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
-      )
     }
   }
 

@@ -77,14 +77,6 @@ object ScanamoCats {
   )(tableName: String, limit: Int): F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]]", "1.0")
-  def scanFrom[F[_]: Async, T: DynamoFormat](client: AmazonDynamoDBAsync)(
-    tableName: String,
-    limit: Int,
-    startKey: Option[EvaluationKey]
-  ): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanFrom(tableName, limit, startKey))
-
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.index]]", "1.0")
   def scanIndex[F[_]: Async, T: DynamoFormat](
     client: AmazonDynamoDBAsync
@@ -118,14 +110,6 @@ object ScanamoCats {
   )(tableName: String)(query: Query[_], limit: Int): F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
 
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]]", "1.0")
-  def queryFrom[F[_]: Async, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String)(
-    query: Query[_],
-    limit: Int,
-    startKey: Option[EvaluationKey]
-  ): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey))
-
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.index]]", "1.0")
   def queryIndex[F[_]: Async, T: DynamoFormat](
     client: AmazonDynamoDBAsync
@@ -137,13 +121,5 @@ object ScanamoCats {
     client: AmazonDynamoDBAsync
   )(tableName: String, indexName: String)(query: Query[_], limit: Int): F[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
-
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
-  def queryIndexFrom[F[_]: Async, T: DynamoFormat](client: AmazonDynamoDBAsync)(tableName: String, indexName: String)(
-    query: Query[_],
-    limit: Int,
-    startKey: Option[EvaluationKey]
-  ): F[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
 
 }

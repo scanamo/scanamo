@@ -182,23 +182,6 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
     }
   }
 
-  // it("paginates with a limit asynchronously") {
-  //   case class Bear(name: String, favouriteFood: String)
-
-  //   LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
-  //     import com.gu.scanamo.syntax._
-  //     Scanamo.put(client)(t)(Bear("Pooh", "honey"))
-  //     Scanamo.put(client)(t)(Bear("Piglet", "picnic baskets"))
-  //     Scanamo.put(client)(t)(Bear("Possum", "quinoa"))
-  //     val results = for {
-  //       res1 <- ScanamoCats.queryFrom[IO, Bear](client)(t)(('name beginsWith "P"), 1, None)
-  //       res2 <- ScanamoCats.queryFrom[IO, Bear](client)(t)(('name beginsWith "P"), 1, res1._2)
-  //       res3 <- ScanamoCats.queryFrom[IO, Bear](client)(t)(('name beginsWith "P"), 1, res2._2)
-  //     } yield res2._1 ::: res3._1
-  //     results.unsafeRunSync() should equal(List(Right(Bear("Piglet","picnic baskets")), Right(Bear("Possum","quinoa"))))
-  //   }
-  // }
-
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
@@ -208,25 +191,6 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
       val results = ScanamoCats.scanIndexWithLimit[IO, Bear](client)(t, i, 1)
       results.unsafeRunSync() should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
-    }
-  }
-
-  it("Paginate scanIndexWithLimit") {
-    case class Bear(name: String, favouriteFood: String, alias: Option[String])
-
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
-      Scanamo.put(client)(t)(Bear("Pooh", "honey", Some("Winnie")))
-      Scanamo.put(client)(t)(Bear("Yogi", "picnic baskets", Some("Kanga")))
-      Scanamo.put(client)(t)(Bear("Graham", "quinoa", Some("Guardianista")))
-      val results = for {
-        res1 <- ScanamoCats.scanIndexFrom[IO, Bear](client)(t, i, 1, None)
-        res2 <- ScanamoCats.scanIndexFrom[IO, Bear](client)(t, i, 1, res1._2)
-        res3 <- ScanamoCats.scanIndexFrom[IO, Bear](client)(t, i, 1, res2._2)
-      } yield res2._1 ::: res3._1
-
-      results.unsafeRunSync() should equal(
-        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
-      )
     }
   }
 

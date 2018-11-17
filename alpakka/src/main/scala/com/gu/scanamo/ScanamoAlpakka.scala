@@ -86,12 +86,6 @@ object ScanamoAlpakka {
   )(tableName: String, limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanWithLimit(tableName, limit))
 
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]]", "1.0")
-  def scanFrom[T: DynamoFormat](client: DynamoClient)(tableName: String, limit: Int, startKey: Option[EvaluationKey])(
-    implicit ec: ExecutionContext
-  ): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanFrom(tableName, limit, startKey))
-
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.index]]", "1.0")
   def scanIndex[T: DynamoFormat](
     client: DynamoClient
@@ -104,15 +98,6 @@ object ScanamoAlpakka {
   ): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.scanIndexWithLimit(tableName, indexName, limit))
 
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.scanFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
-  def scanIndexFrom[T: DynamoFormat](client: DynamoClient)(
-    tableName: String,
-    indexName: String,
-    limit: Int,
-    startKey: Option[EvaluationKey]
-  )(implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.scanIndexFrom(tableName, indexName, limit, startKey))
-
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.query]]", "1.0")
   def query[T: DynamoFormat](
     client: DynamoClient
@@ -124,14 +109,6 @@ object ScanamoAlpakka {
     tableName: String
   )(query: Query[_], limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryWithLimit(tableName)(query, limit))
-
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]]", "1.0")
-  def queryFrom[T: DynamoFormat](client: DynamoClient)(tableName: String)(
-    query: Query[_],
-    limit: Int,
-    startKey: Option[EvaluationKey]
-  )(implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryFrom(tableName)(query, limit, startKey))
 
   @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.index]]", "1.0")
   def queryIndex[T: DynamoFormat](client: DynamoClient)(tableName: String, indexName: String)(
@@ -146,11 +123,4 @@ object ScanamoAlpakka {
   )(query: Query[_], limit: Int)(implicit ec: ExecutionContext): Future[List[Either[DynamoReadError, T]]] =
     exec(client)(ScanamoFree.queryIndexWithLimit(tableName, indexName)(query, limit))
 
-  @deprecated("Use [[exec]] with [[com.gu.scanamo.Table.queryFrom]] and [[com.gu.scanamo.Table.index]]", "1.0")
-  def queryIndexFrom[T: DynamoFormat](client: DynamoClient)(tableName: String, indexName: String)(
-    query: Query[_],
-    limit: Int,
-    startKey: Option[EvaluationKey]
-  )(implicit ec: ExecutionContext): Future[(List[Either[DynamoReadError, T]], Option[EvaluationKey])] =
-    exec(client)(ScanamoFree.queryIndexFrom(tableName, indexName)(query, limit, startKey))
 }
