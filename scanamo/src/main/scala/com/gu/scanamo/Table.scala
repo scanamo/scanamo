@@ -654,15 +654,15 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
+  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scan()
+  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.query(query)
 
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
     ScanamoFree.getWithConsistency[V](tableName)(key)
   def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
     ScanamoFree.getAllWithConsistency[V](tableName)(keys)
-  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-    ScanamoFree.scanConsistent[V](tableName)
-  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-    ScanamoFree.queryConsistent[V](tableName)(query)
 }
 
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
