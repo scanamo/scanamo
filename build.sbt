@@ -20,7 +20,7 @@ val commonSettings = Seq(
     "-language:higherKinds",
     "-language:existentials",
     "-Xfatal-warnings",
-    "-Xlint",
+    "-Xlint:_",
     "-Yno-adapted-args",
     "-Ywarn-dead-code",
     "-Ywarn-numeric-widen",

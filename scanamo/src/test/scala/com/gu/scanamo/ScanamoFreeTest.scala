@@ -12,16 +12,6 @@ import org.scalatest.{FunSuite, Matchers}
 import collection.JavaConverters._
 
 class ScanamoFreeTest extends FunSuite with Matchers {
-  test("only make one call for a limited result") {
-    val limitedScan = ScanamoFree.scanWithLimit[Int]("x", 1)
-
-    val countingInterpreter = new RequestCountingInterpreter()
-
-    val numOps = limitedScan.foldMap(countingInterpreter).runEmptyS.value
-
-    assert(numOps == 1)
-  }
-
   test("unlimited scan, scans exhaustively") {
     val limitedScan = ScanamoFree.scan[Int]("x")
 
