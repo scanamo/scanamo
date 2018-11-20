@@ -561,7 +561,7 @@ case class Table[V: DynamoFormat](name: String) {
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
   /**
-    * A more powerful scan method that retunrs the DynamoDB result without post-processing
+    * A more powerful scan method that returns the DynamoDB result without post-processing
     */
   def scan0: ScanamoOps[ScanResult] = ScanamoFree.scan0[V](name)
 
@@ -594,7 +594,7 @@ case class Table[V: DynamoFormat](name: String) {
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
   /**
-    * A more powerful query method that retunrs the DynamoDB result without post-processing
+    * A more powerful query method that returns the DynamoDB result without post-processing
     */
   def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
 
