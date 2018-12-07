@@ -17,6 +17,8 @@ higher level abstractions.
 Quick start
 -----------
 
+Note: the `LocalDynamoDB` object is provided by the `scanamo-testkit` package.
+
 Scanamo is published for Scala 2.11 and 2.12 to Maven Central, so just add the following to your `build.sbt`:
 
 ```scala

@@ -22,6 +22,8 @@ Scanamo is published for Scala 2.12 and Scala 2.11
 Basic Usage
 -----------
 
+Note: the `LocalDynamoDB` object is provided by the `scanamo-testkit` package.
+
 ```scala
 scala> import com.gu.scanamo._
 scala> import com.gu.scanamo.syntax._
