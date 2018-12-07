@@ -215,27 +215,27 @@ class ScanamoZioSpec extends FunSpec with Matchers {
     }
   }
 
-  // it("Paginate scanIndexWithLimit") {
-  //   case class Bear(name: String, favouriteFood: String, alias: Option[String])
+  it("Paginate scanIndexWithLimit") {
+    case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-  //   LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
-  //     val bears = Table[Bear](t)
-  //     val ops = for {
-  //       _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
-  //       _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
-  //       _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
-  //       bs <- for {
-  //         res1 <- bears.index(i).limit(1).scanFrom(None)
-  //         res2 <- bears.index(i).limit(1).scanFrom(res1._2)
-  //         res3 <- bears.index(i).limit(1).scanFrom(res2._2)
-  //       } yield res2._1 ::: res3._1
-  //     } yield bs
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+      val bears = Table[Bear](t)
+      val ops = for {
+        _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
+        _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
+        _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
+        bs <- for {
+          res1 <- bears.index(i).limit(1).scan
+          res2 <- bears.index(i).limit(1).from('name -> "Graham" and ('alias -> "Guardianista")).scan
+          res3 <- bears.index(i).limit(1).from('name -> "Yogi" and ('alias -> "Kanga")).scan
+        } yield res2 ::: res3
+      } yield bs
 
-  //     unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
-  //       List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
-  //     )
-  //   }
-  // }
+      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+        List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
+      )
+    }
+  }
 
   it("should query asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('species -> S, 'number -> N) { t =>
