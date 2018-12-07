@@ -257,7 +257,6 @@ import ReleaseTransformations._
 val publishingSettings = Seq(
   homepage := Some(url("http://www.scanamo.org/")),
   licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
-  publishMavenStyle := true,
   publishArtifact in Test := false,
   scmInfo := Some(
     ScmInfo(
@@ -274,12 +273,6 @@ val publishingSettings = Seq(
       </developer>
     </developers>
   },
-  publishTo := Some(
-    if (isSnapshot.value)
-      Opts.resolver.sonatypeSnapshots
-    else
-      Opts.resolver.sonatypeStaging
-  ),
   releaseCrossBuild := true,
   releaseProcess := Seq[ReleaseStep](
     checkSnapshotDependencies,
