@@ -668,7 +668,8 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Transport(Bus,390)), Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
     * }}}
-    */  def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
+    */
+  def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
 
   /**
     * Filter the results of a Scan or Query
