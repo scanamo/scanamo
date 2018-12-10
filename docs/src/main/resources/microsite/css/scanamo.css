@@ -1,3 +1,8 @@
+/* A couple of useful variables */
+:root {
+    --pre-margin: 3rem 0;
+}
+
 body {
     font-family: Georgia, sans-serif;
     line-height: 1.5;
@@ -5,16 +10,24 @@ body {
 }
 
 p {
-    margin: 0.25rem 0 0.5rem 0;
+    margin: 0.75rem 0 1.5rem 0;
+}
+
+table {
+    margin: 0 0 1.5rem;
 }
 
 pre {
-    margin: 0;
-    border: none;
+    margin: var(--pre-margin);
+    background: none;
+    border-width: 1px 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, .1); 
 }
 
-#content p {
-    padding-left: 0.25rem;
+#page-content-wrapper section pre {
+    background: none;
+    margin: var(--pre-margin);
 }
 
 #content a {
