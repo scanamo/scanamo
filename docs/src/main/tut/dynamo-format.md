@@ -35,6 +35,21 @@ table.putAll(
 )
 ```
 
+### Semi-automatic Derivation
+
+Scanamo offers a convenient way (semi-automoatic) to derive `DynamoFormat` in your code. 
+Ex:
+
+```tut:silent
+import com.gu.scanamo.semiauto._
+
+case class Farm(animals: List[String])
+case class Farmer(name: String, age: Long, farm: Farm)
+
+implicit val formatFarm: DynamoFormat[Farm] = deriveFormat[Farm]
+implicit val formatFarmer: DynamoFormat[Farmer] = deriveFormat
+```
+
 ### Custom Formats
 
 It's also possible to define a serialisation format for types which Scanamo

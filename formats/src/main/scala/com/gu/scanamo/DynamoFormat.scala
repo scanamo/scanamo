@@ -27,6 +27,9 @@ import scala.reflect.ClassTag
   * >>> val listOptionFormat = DynamoFormat[List[Option[Int]]]
   * >>> listOptionFormat.read(listOptionFormat.write(List(Some(1), None, Some(3))))
   * Right(List(Some(1), None, Some(3)))
+  *
+  * Also supports automatic and semi-automatic derivation for case classes
+  *
   * }}}
   *
   * {{{
