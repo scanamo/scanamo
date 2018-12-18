@@ -16,6 +16,25 @@ Scanamo also supports automatically deriving formats for case classes and
 sealed trait families where all the contained types have a defined or derivable
 `DynamoFormat`.
 
+### Automatic Derivation
+
+Scanamo can automatically derive `DynamoFormat` for case classes (as long as all its members can also be derived). Ex:
+
+```tut:silent
+import com.gu.scanamo.auto._
+
+case class Farm(animals: List[String])
+case class Farmer(name: String, age: Long, farm: Farm)
+
+val table = Table[Farmer]("farmer")
+table.putAll(
+    Set(
+        Farmer("McDonald", 156L, Farm(List("sheep", "cow"))),
+        Farmer("Boggis", 43L, Farm(List("chicken")))
+    )
+)
+```
+
 ### Custom Formats
 
 It's also possible to define a serialisation format for types which Scanamo

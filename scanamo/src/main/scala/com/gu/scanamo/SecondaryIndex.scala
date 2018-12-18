@@ -27,6 +27,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('antagonist -> S) { (t, i) =>
     * ...   val table = Table[Bear](t)
@@ -53,6 +54,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('organisation -> S, 'repository -> S)('language -> S, 'license -> S) { (t, i) =>
     * ...   val githubProjects = Table[GithubProject](t)
@@ -81,6 +83,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
@@ -114,6 +117,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S

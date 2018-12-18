@@ -29,9 +29,9 @@ import scala.reflect.ClassTag
   * Right(List(Some(1), None, Some(3)))
   * }}}
   *
-  * Also supports automatic derivation for case classes
-  *
   * {{{
+  * >>> import com.gu.scanamo.auto._
+  * >>>
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
   * >>> val farmerF = DynamoFormat[Farmer]

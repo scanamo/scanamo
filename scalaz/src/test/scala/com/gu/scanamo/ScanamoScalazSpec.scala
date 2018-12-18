@@ -7,6 +7,7 @@ import com.gu.scanamo.error.DynamoReadError
 import com.gu.scanamo.ops.ScanamoOps
 import com.gu.scanamo.query._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
 import scalaz.ioeffect.RTS
 import scalaz._
 import Scalaz._

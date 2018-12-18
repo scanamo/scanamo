@@ -8,6 +8,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import com.gu.scanamo.auto._
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 

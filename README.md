@@ -25,6 +25,7 @@ Note: the `LocalDynamoDB` object is provided by the `scanamo-testkit` package.
 ```scala
 scala> import com.gu.scanamo._
 scala> import com.gu.scanamo.syntax._
+scala> import com.gu.scanamo.auto._
  
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._

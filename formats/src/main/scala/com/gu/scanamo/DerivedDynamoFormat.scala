@@ -4,6 +4,7 @@ import cats.data.{NonEmptyList, Validated}
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error._
+import com.gu.scanamo.export.Exported
 import shapeless._
 import shapeless.labelled._
 
@@ -95,18 +96,22 @@ trait DerivedDynamoFormat {
   implicit def genericProduct[T: NotSymbol, R](
     implicit gen: LabelledGeneric.Aux[T, R],
     formatR: Lazy[ValidConstructedDynamoFormat[R]]
-  ): DynamoFormat[T] =
-    new DynamoFormat[T] {
-      def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
-      def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
-    }
+  ): Exported[DynamoFormat[T]] =
+    Exported(
+      new DynamoFormat[T] {
+        def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
+        def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
+      }
+    )
 
   implicit def genericCoProduct[T, R](
     implicit gen: LabelledGeneric.Aux[T, R],
     formatR: Lazy[CoProductDynamoFormat[R]]
-  ): DynamoFormat[T] =
-    new DynamoFormat[T] {
-      def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
-      def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
-    }
+  ): Exported[DynamoFormat[T]] =
+    Exported(
+      new DynamoFormat[T] {
+        def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
+        def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
+      }
+    )
 }
