@@ -50,8 +50,8 @@ import com.gu.scanamo.semiauto._
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
 
-implicit val formatFarm: DynamoFormat[Farm] = deriveFormat[Farm]
-implicit val formatFarmer: DynamoFormat[Farmer] = deriveFormat
+implicit val formatFarm: DynamoFormat[Farm] = deriveDynamoFormat[Farm]
+implicit val formatFarmer: DynamoFormat[Farmer] = deriveDynamoFormat
 ```
 
 ### Custom Formats
