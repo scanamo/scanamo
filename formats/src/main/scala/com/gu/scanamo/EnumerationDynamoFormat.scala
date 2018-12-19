@@ -2,6 +2,7 @@ package com.gu.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.gu.scanamo.error.{DynamoReadError, TypeCoercionError}
+import com.gu.scanamo.export.Exported
 import shapeless.labelled.{field, FieldType}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
 
@@ -26,7 +27,7 @@ abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
   * Zebra
   * }}}
   */
-trait EnumDynamoFormat extends DerivedDynamoFormat {
+trait EnumDynamoFormat extends LowPriorityDynamoFormat {
   implicit val enumDynamoFormatCNil: EnumerationDynamoFormat[CNil] = new EnumerationDynamoFormat[CNil] {
     override def read(av: AttributeValue): Either[DynamoReadError, CNil] = Left(
       TypeCoercionError(new Exception(s"$av is not a recognised member of the Enumeration"))
@@ -60,4 +61,9 @@ trait EnumDynamoFormat extends DerivedDynamoFormat {
       override def read(av: AttributeValue): Either[DynamoReadError, A] = genericFormat.read(av).right.map(gen.from)
       override def write(t: A): AttributeValue = genericFormat.write(gen.to(t))
     }
+}
+
+trait LowPriorityDynamoFormat {
+  implicit def dynamoFormat[T](implicit exported: Exported[DynamoFormat[T]]): DynamoFormat[T] =
+    exported.instance
 }
