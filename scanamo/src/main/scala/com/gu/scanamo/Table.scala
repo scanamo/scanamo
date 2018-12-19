@@ -561,7 +561,42 @@ case class Table[V: DynamoFormat](name: String) {
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
   /**
-    * A more powerful scan method that returns the DynamoDB result without post-processing
+    * Scans the table and returns the raw DynamoDB result. Sometimes, one might want to
+    * access metadata returned in the `ScanResult` object, such as the last evaluated
+    * key for example. `Table#scan` only returns a list of results, so there is no
+    * place for putting that information: this is where `scan0` comes in handy!
+    *
+    * A particular use case is when one wants to paginate through result sets, say:
+    * {{{
+    * >>> case class Transport(mode: String, line: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> import collection.JavaConverters._
+    * >>> import cats.implicits._
+    * >>> import com.gu.scanamo.error._
+    * >>> import com.gu.scanamo.ops._
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.query._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+    * ...   val table = Table[Transport](t)
+    * ...   val ops = for {
+    * ...     _ <- table.putAll(Set(
+    * ...       Transport("Underground", "Circle"),
+    * ...       Transport("Underground", "Metropolitan"),
+    * ...       Transport("Underground", "Central")
+    * ...     ))
+    * ...     res <- table.limit(1).scan0
+    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]]]
+    * ...     lastKey = uniqueKeyCondition.fromAVMap(('mode, 'line), res.getLastEvaluatedKey.asScala.toMap)
+    * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
+    * ...   } yield ts
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
+    * }}}
     */
   def scan0: ScanamoOps[ScanResult] = ScanamoFree.scan0[V](name)
 
@@ -594,7 +629,45 @@ case class Table[V: DynamoFormat](name: String) {
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
   /**
-    * A more powerful query method that returns the DynamoDB result without post-processing
+    * Queries the table and returns the raw DynamoDB result. Sometimes, one might want to
+    * access metadata returned in the `QueryResult` object, such as the last evaluated
+    * key for example. `Table#query` only returns a list of results, so there is no
+    * place for putting that information: this is where `query0` comes in handy!
+    *
+    * A particular use case is when one wants to paginate through result sets, say:
+    * {{{
+    * >>> case class Transport(mode: String, line: String)
+    *
+    * >>> val client = LocalDynamoDB.client()
+    *
+    * >>> import collection.JavaConverters._
+    * >>> import cats.implicits._
+    * >>> import com.gu.scanamo.error._
+    * >>> import com.gu.scanamo.ops._
+    * >>> import com.gu.scanamo.syntax._
+    * >>> import com.gu.scanamo.query._
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    *
+    * >>> LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+    * ...   val table = Table[Transport](t)
+    * ...   val ops = for {
+    * ...     _ <- table.putAll(Set(
+    * ...       Transport("Underground", "Circle"),
+    * ...       Transport("Underground", "Metropolitan"),
+    * ...       Transport("Underground", "Central"),
+    * ...       Transport("Bus", "390"),
+    * ...       Transport("Bus", "143"),
+    * ...       Transport("Bus", "234")
+    * ...     ))
+    * ...     res <- table.limit(1).query0('mode -> "Bus" and 'line -> "234")
+    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]]]
+    * ...     lastKey = uniqueKeyCondition.fromAVMap(('mode, 'line), res.getLastEvaluatedKey.asScala.toMap)
+    * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
+    * ...   } yield ts
+    * ...   Scanamo.exec(client)(ops)
+    * ... }
+    * List(Right(Transport(Bus,390)), Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
+    * }}}
     */
   def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
 
