@@ -12,6 +12,7 @@ has support for putting, getting and deleting in batches
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

@@ -14,6 +14,7 @@ execution.
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)

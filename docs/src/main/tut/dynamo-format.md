@@ -21,6 +21,8 @@ sealed trait families where all the contained types have a defined or derivable
 Scanamo can automatically derive `DynamoFormat` for case classes (as long as all its members can also be derived). Ex:
 
 ```tut:silent
+import com.gu.scanamo._
+import com.gu.scanamo.syntax._
 import com.gu.scanamo.auto._
 
 case class Farm(animals: List[String])
@@ -41,6 +43,8 @@ Scanamo offers a convenient way (semi-automoatic) to derive `DynamoFormat` in yo
 Ex:
 
 ```tut:silent
+import com.gu.scanamo._
+import com.gu.scanamo.syntax._
 import com.gu.scanamo.semiauto._
 
 case class Farm(animals: List[String])
@@ -65,6 +69,7 @@ import org.joda.time._
 
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
 
 case class Foo(dateTime: DateTime)
 
@@ -103,7 +108,9 @@ libraryDependencies += "com.gu" %% "scanamo-refined" % "x.y.z"
 And then import the support for refined types and define your model:
 
 ```tut:silent
+import com.gu.scanamo._
 import com.gu.scanamo.refined._
+import com.gu.scanamo.auto._
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
@@ -137,6 +144,7 @@ import java.util.UUID
 
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
 
 // Sealed trait family for events.
 sealed trait Event
