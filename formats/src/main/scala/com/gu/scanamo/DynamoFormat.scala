@@ -27,11 +27,14 @@ import scala.reflect.ClassTag
   * >>> val listOptionFormat = DynamoFormat[List[Option[Int]]]
   * >>> listOptionFormat.read(listOptionFormat.write(List(Some(1), None, Some(3))))
   * Right(List(Some(1), None, Some(3)))
+  *
+  * Also supports automatic and semi-automatic derivation for case classes
+  *
   * }}}
   *
-  * Also supports automatic derivation for case classes
-  *
   * {{{
+  * >>> import com.gu.scanamo.auto._
+  * >>>
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
   * >>> val farmerF = DynamoFormat[Farmer]

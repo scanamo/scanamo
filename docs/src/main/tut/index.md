@@ -30,6 +30,7 @@ then, given a table and some case classes
 ```tut:silent
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
  
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._

@@ -15,6 +15,8 @@ object Scanamo {
     * provided synchronously
     *
     * {{{
+    * >>> import com.gu.scanamo.auto._
+    *
     * >>> case class Transport(mode: String, line: String)
     * >>> val transport = Table[Transport]("transport")
     *

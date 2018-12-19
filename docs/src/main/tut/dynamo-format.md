@@ -16,6 +16,44 @@ Scanamo also supports automatically deriving formats for case classes and
 sealed trait families where all the contained types have a defined or derivable
 `DynamoFormat`.
 
+### Automatic Derivation
+
+Scanamo can automatically derive `DynamoFormat` for case classes (as long as all its members can also be derived). Ex:
+
+```tut:silent
+import com.gu.scanamo._
+import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
+
+case class Farm(animals: List[String])
+case class Farmer(name: String, age: Long, farm: Farm)
+
+val table = Table[Farmer]("farmer")
+table.putAll(
+    Set(
+        Farmer("McDonald", 156L, Farm(List("sheep", "cow"))),
+        Farmer("Boggis", 43L, Farm(List("chicken")))
+    )
+)
+```
+
+### Semi-automatic Derivation
+
+Scanamo offers a convenient way (semi-automoatic) to derive `DynamoFormat` in your code. 
+Ex:
+
+```tut:silent
+import com.gu.scanamo._
+import com.gu.scanamo.syntax._
+import com.gu.scanamo.semiauto._
+
+case class Farm(animals: List[String])
+case class Farmer(name: String, age: Long, farm: Farm)
+
+implicit val formatFarm: DynamoFormat[Farm] = deriveDynamoFormat[Farm]
+implicit val formatFarmer: DynamoFormat[Farmer] = deriveDynamoFormat
+```
+
 ### Custom Formats
 
 It's also possible to define a serialisation format for types which Scanamo
@@ -31,6 +69,7 @@ import org.joda.time._
 
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
 
 case class Foo(dateTime: DateTime)
 
@@ -69,7 +108,9 @@ libraryDependencies += "com.gu" %% "scanamo-refined" % "x.y.z"
 And then import the support for refined types and define your model:
 
 ```tut:silent
+import com.gu.scanamo._
 import com.gu.scanamo.refined._
+import com.gu.scanamo.auto._
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
@@ -103,6 +144,7 @@ import java.util.UUID
 
 import com.gu.scanamo._
 import com.gu.scanamo.syntax._
+import com.gu.scanamo.auto._
 
 // Sealed trait family for events.
 sealed trait Event
