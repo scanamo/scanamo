@@ -264,7 +264,12 @@ val publishingSettings = Seq(
   ),
   developers := List(
     Developer("philwills", "Phil Wills", "", url("https://github.com/philwills")),
-    Developer("regiskuckaertz", "Regis Kuckaertz", "regis.kuckaertz@theguardian.com", url("https://github.com/regiskuckaertz"))
+    Developer(
+      "regiskuckaertz",
+      "Regis Kuckaertz",
+      "regis.kuckaertz@theguardian.com",
+      url("https://github.com/regiskuckaertz")
+    )
   )
 )
 
