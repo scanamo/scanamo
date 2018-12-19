@@ -45,7 +45,7 @@ object ScanamoFree {
                   .asJava
               ).asJava
             )
-        )
+          )
       )
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
