@@ -36,7 +36,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       region = "",
       host = "localhost",
       port = 8042,
-      parallelism = 2,
+      parallelism = 1,
       credentialsProvider = dummyCreds
     )
   )
