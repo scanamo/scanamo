@@ -14,7 +14,7 @@ object LocalDynamoDB {
       .asyncBuilder()
       .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials")))
       .withEndpointConfiguration(new EndpointConfiguration("http://localhost:8042", ""))
-      .withClientConfiguration(new ClientConfiguration().withRequestTimeout(5000))
+      .withClientConfiguration(new ClientConfiguration().withClientExecutionTimeout(50000).withRequestTimeout(5000))
       .build()
 
   def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) =
