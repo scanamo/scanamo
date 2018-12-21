@@ -27,7 +27,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   implicit val materializer = ActorMaterializer.create(system)
   implicit val executor = system.dispatcher
   implicit val defaultPatience =
-    PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
+    PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
 
   val client = LocalDynamoDB.client()
   val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
