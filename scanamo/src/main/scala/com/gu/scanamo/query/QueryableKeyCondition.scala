@@ -1,7 +1,7 @@
-package com.gu.scanamo.query
+package org.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model.QueryRequest
-import com.gu.scanamo.DynamoFormat
+import org.scanamo.DynamoFormat
 import simulacrum.typeclass
 
 import collection.JavaConverters._

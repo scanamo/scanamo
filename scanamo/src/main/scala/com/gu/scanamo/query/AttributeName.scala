@@ -1,7 +1,7 @@
-package com.gu.scanamo.query
+package org.scanamo.query
 
-import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.syntax.Bounds
+import org.scanamo.DynamoFormat
+import org.scanamo.syntax.Bounds
 
 private[scanamo] case class AttributeName(components: List[Symbol], index: Option[Int]) {
   def placeholder(prefix: String): String =

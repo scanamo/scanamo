@@ -1,4 +1,4 @@
-package com.gu.scanamo
+package org.scanamo
 
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}

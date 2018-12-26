@@ -1,11 +1,11 @@
-package com.gu.scanamo.query
+package org.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.error.{ConditionNotMet, ScanamoError}
-import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
-import com.gu.scanamo.update.UpdateExpression
+import org.scanamo.DynamoFormat
+import org.scanamo.error.{ConditionNotMet, ScanamoError}
+import org.scanamo.ops.ScanamoOps
+import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
+import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import cats.syntax.either._
 

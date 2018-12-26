@@ -16,9 +16,9 @@ returned, it could still exhaust the provisioned capacity or force the
 provisioned capacity to autoscale up to an expensive level.
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
-import com.gu.scanamo.auto._
+import org.scanamo._
+import org.scanamo.syntax._
+import org.scanamo.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 
@@ -44,4 +44,4 @@ LocalDynamoDB.withTable(client)("Station")('line -> S, 'name -> S) {
 }
 ```
 
-More examples can be found in the [Table ScalaDoc](/latest/api/com/gu/scanamo/Table.html#filter[C](condition:C)(implicitevidence$3:com.gu.scanamo.query.ConditionExpression[C]):com.gu.scanamo.TableWithOptions[V]).
+More examples can be found in the [Table ScalaDoc](/latest/api/com/gu/scanamo/Table.html#filter[C](condition:C)(implicitevidence$3:org.scanamo.query.ConditionExpression[C]):org.scanamo.TableWithOptions[V]).

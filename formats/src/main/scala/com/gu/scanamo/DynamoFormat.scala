@@ -1,4 +1,4 @@
-package com.gu.scanamo
+package org.scanamo
 
 import java.nio.ByteBuffer
 import java.util.UUID
@@ -12,7 +12,7 @@ import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.gu.scanamo.error._
+import org.scanamo.error._
 import simulacrum.typeclass
 
 import scala.collection.JavaConverters._
@@ -33,7 +33,7 @@ import scala.reflect.ClassTag
   * }}}
   *
   * {{{
-  * >>> import com.gu.scanamo.auto._
+  * >>> import org.scanamo.auto._
   * >>>
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)

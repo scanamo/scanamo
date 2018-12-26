@@ -1,3 +1,3 @@
-package com.gu.scanamo.export
+package org.scanamo.export
 
 final case class Exported[T](instance: T) extends AnyVal

@@ -1,4 +1,4 @@
-package com.gu.scanamo.ops
+package org.scanamo.ops
 
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import cats.~>

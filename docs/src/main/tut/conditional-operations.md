@@ -12,9 +12,9 @@ only have an effect if some state of the DynamoDB table is true at the time of
 execution.
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
-import com.gu.scanamo.auto._
+import org.scanamo._
+import org.scanamo.syntax._
+import org.scanamo.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)
@@ -45,4 +45,4 @@ LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
 }
 ```
 
-More examples can be found in the [Table ScalaDoc](/latest/api/com/gu/scanamo/Table.html#given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[V,T]).
+More examples can be found in the [Table ScalaDoc](/latest/api/com/gu/scanamo/Table.html#given[T](condition:T)(implicitevidence$2:org.scanamo.query.ConditionExpression[T]):org.scanamo.query.ConditionalOperation[V,T]).

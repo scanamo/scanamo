@@ -1,7 +1,7 @@
-package com.gu.scanamo.Derivation
+package org.scanamo.Derivation
 
-import com.gu.scanamo.{DerivedDynamoFormat, DynamoFormat}
-import com.gu.scanamo.export.Exported
+import org.scanamo.{DerivedDynamoFormat, DynamoFormat}
+import org.scanamo.export.Exported
 
 trait SemiAutoDerivation extends DerivedDynamoFormat {
 

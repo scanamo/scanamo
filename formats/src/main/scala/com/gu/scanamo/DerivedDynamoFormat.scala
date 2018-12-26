@@ -1,10 +1,10 @@
-package com.gu.scanamo
+package org.scanamo
 
 import cats.data.{NonEmptyList, Validated}
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.gu.scanamo.error._
-import com.gu.scanamo.export.Exported
+import org.scanamo.error._
+import org.scanamo.export.Exported
 import shapeless._
 import shapeless.labelled._
 

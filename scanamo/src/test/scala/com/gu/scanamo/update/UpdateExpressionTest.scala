@@ -1,8 +1,8 @@
-package com.gu.scanamo.update
+package org.scanamo.update
 
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
-import com.gu.scanamo.syntax._
+import org.scanamo.syntax._
 import scala.collection.JavaConverters._
 
 class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matchers with org.scalatest.prop.Checkers {

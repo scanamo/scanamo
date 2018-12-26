@@ -1,7 +1,7 @@
-package com.gu.scanamo.query
+package org.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.gu.scanamo.DynamoFormat
+import org.scanamo.DynamoFormat
 import simulacrum.typeclass
 
 @typeclass trait UniqueKeyCondition[T] {

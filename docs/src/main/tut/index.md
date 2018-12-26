@@ -28,9 +28,9 @@ libraryDependencies += "com.gu" %% "scanamo" % "1.0.0-M8"
 then, given a table and some case classes
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
-import com.gu.scanamo.auto._
+import org.scanamo._
+import org.scanamo.syntax._
+import org.scanamo.auto._
  
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
