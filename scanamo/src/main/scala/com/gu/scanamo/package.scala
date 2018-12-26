@@ -1,4 +1,4 @@
-package com.gu
+package org
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.query._
