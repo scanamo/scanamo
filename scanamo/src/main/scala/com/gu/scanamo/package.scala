@@ -1,8 +1,8 @@
-package com.gu
+package org
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.gu.scanamo.query._
-import com.gu.scanamo.update._
+import org.scanamo.query._
+import org.scanamo.update._
 
 package object scanamo {
 

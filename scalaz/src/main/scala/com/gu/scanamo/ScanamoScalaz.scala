@@ -1,7 +1,7 @@
-package com.gu.scanamo
+package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.gu.scanamo.ops.{ScalazInterpreter, ScanamoOps}
+import org.scanamo.ops.{ScalazInterpreter, ScanamoOps}
 import scalaz.ioeffect.Task
 import shims._
 

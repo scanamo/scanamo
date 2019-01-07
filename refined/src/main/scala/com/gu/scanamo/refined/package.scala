@@ -1,8 +1,8 @@
-package com.gu.scanamo
+package org.scanamo
 
 import cats.syntax.either._
 
-import com.gu.scanamo.error.{DynamoReadError, TypeCoercionError}
+import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
 import eu.timepit.refined.api.{RefType, Validate}

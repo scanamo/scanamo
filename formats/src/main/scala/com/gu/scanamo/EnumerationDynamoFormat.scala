@@ -1,8 +1,8 @@
-package com.gu.scanamo
+package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.gu.scanamo.error.{DynamoReadError, TypeCoercionError}
-import com.gu.scanamo.export.Exported
+import org.scanamo.error.{DynamoReadError, TypeCoercionError}
+import org.scanamo.export.Exported
 import shapeless.labelled.{field, FieldType}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
 

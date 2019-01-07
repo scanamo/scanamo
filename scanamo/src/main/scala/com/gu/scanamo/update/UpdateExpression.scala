@@ -1,11 +1,11 @@
-package com.gu.scanamo.update
+package org.scanamo.update
 
 import cats.data.NonEmptyVector
 import cats.kernel.Semigroup
 import cats.kernel.instances.map._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.gu.scanamo.DynamoFormat
-import com.gu.scanamo.query._
+import org.scanamo.DynamoFormat
+import org.scanamo.query._
 
 sealed trait UpdateExpression extends Product with Serializable {
   def expression: String =

@@ -1,16 +1,16 @@
-package com.gu.scanamo
+package org.scanamo
 
-import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query.{Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition}
-import com.gu.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
+import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
+import org.scanamo.error.DynamoReadError
+import org.scanamo.ops.ScanamoOps
+import org.scanamo.query.{Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition}
+import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import scala.collection.JavaConverters._
 
 /**
   * Represents a secondary index on a DynamoDB table.
   *
-  * Can be constructed via the [[com.gu.scanamo.Table#index index]] method on [[com.gu.scanamo.Table Table]]
+  * Can be constructed via the [[org.scanamo.Table#index index]] method on [[org.scanamo.Table Table]]
   */
 sealed abstract class SecondaryIndex[V] {
 
@@ -26,8 +26,8 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> import com.gu.scanamo.syntax._
-    * >>> import com.gu.scanamo.auto._
+    * >>> import org.scanamo.syntax._
+    * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('antagonist -> S) { (t, i) =>
     * ...   val table = Table[Bear](t)
@@ -53,8 +53,8 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> import com.gu.scanamo.syntax._
-    * >>> import com.gu.scanamo.auto._
+    * >>> import org.scanamo.syntax._
+    * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('organisation -> S, 'repository -> S)('language -> S, 'license -> S) { (t, i) =>
     * ...   val githubProjects = Table[GithubProject](t)
@@ -82,8 +82,8 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> import com.gu.scanamo.syntax._
-    * >>> import com.gu.scanamo.auto._
+    * >>> import org.scanamo.syntax._
+    * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
@@ -116,8 +116,8 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> import com.gu.scanamo.syntax._
-    * >>> import com.gu.scanamo.auto._
+    * >>> import org.scanamo.syntax._
+    * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S

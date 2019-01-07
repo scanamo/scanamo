@@ -1,11 +1,11 @@
-package com.gu.scanamo
+package org.scanamo
 package refined
 
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 
-import com.gu.scanamo.error.TypeCoercionError
+import org.scanamo.error.TypeCoercionError
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
 import org.scalatest.{FlatSpec, Matchers}

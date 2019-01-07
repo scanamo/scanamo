@@ -1,17 +1,17 @@
-package com.gu.scanamo
+package org.scanamo
 
-import com.gu.scanamo.Derivation.SemiAutoDerivation
+import org.scanamo.Derivation.SemiAutoDerivation
 
 /**
   * Semi-automatic format derivation.
   *
-  * This object provides helpers for creating [[com.gu.scanamo.DynamoFormat]]
+  * This object provides helpers for creating [[org.scanamo.DynamoFormat]]
   * instances for case classes
   *
   * Typical usage will look like the following:
   *
   * {{{
-  * import com.gu.scanamo.semiauto._
+  * import org.scanamo.semiauto._
   *
   * case class Bear(name: String, favouriteFood: String)
   * object Bear {

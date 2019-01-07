@@ -1,4 +1,4 @@
-package com.gu.scanamo.ops
+package org.scanamo.ops
 
 import cats._
 import cats.data.NonEmptyList
@@ -7,7 +7,7 @@ import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
 import com.amazonaws.services.dynamodbv2.model.{UpdateItemResult, _}
-import com.gu.scanamo.request._
+import org.scanamo.request._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}

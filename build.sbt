@@ -9,7 +9,6 @@ val shimsVersion = "1.3.0"
 val zioVersion = "0.3.1"
 
 val commonSettings = Seq(
-  organization := "com.gu",
   scalacOptions := Seq(
     "-deprecation",
     "-encoding",
@@ -250,14 +249,12 @@ lazy val docs = (project in file("docs"))
     siteSubdirName in ScalaUnidoc := "latest/api"
   )
   .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
-  .disablePlugins(ReleasePlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
-import ReleaseTransformations._
 val publishingSettings = Seq(
+  organization := "org.scanamo",
   homepage := Some(url("http://www.scanamo.org/")),
   licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
-  publishMavenStyle := true,
   publishArtifact in Test := false,
   scmInfo := Some(
     ScmInfo(
@@ -265,40 +262,14 @@ val publishingSettings = Seq(
       "scm:git:git@github.com:scanamo/scanamo.git"
     )
   ),
-  pomExtra := {
-    <developers>
-      <developer>
-        <id>philwills</id>
-        <name>Phil Wills</name>
-        <url>https://github.com/philwills</url>
-      </developer>
-    </developers>
-  },
-  publishTo := Some(
-    if (isSnapshot.value)
-      Opts.resolver.sonatypeSnapshots
-    else
-      Opts.resolver.sonatypeStaging
-  ),
-  releaseCrossBuild := true,
-  releaseProcess := Seq[ReleaseStep](
-    checkSnapshotDependencies,
-    inquireVersions,
-    runClean,
-    releaseStepCommand("startDynamodbLocal"),
-    runTest,
-    releaseStepCommand("dynamodbLocalTestCleanup"),
-    releaseStepCommandAndRemaining("docs/tut"),
-    releaseStepCommand("stopDynamodbLocal"),
-    setReleaseVersion,
-    commitReleaseVersion,
-    tagRelease,
-    releaseStepCommandAndRemaining("+publishSigned"),
-    setNextVersion,
-    commitNextVersion,
-    releaseStepCommandAndRemaining("+sonatypeRelease"),
-    pushChanges,
-    releaseStepCommandAndRemaining("publishMicrosite")
+  developers := List(
+    Developer("philwills", "Phil Wills", "", url("https://github.com/philwills")),
+    Developer(
+      "regiskuckaertz",
+      "Regis Kuckaertz",
+      "regis.kuckaertz@theguardian.com",
+      url("https://github.com/regiskuckaertz")
+    )
   )
 )
 

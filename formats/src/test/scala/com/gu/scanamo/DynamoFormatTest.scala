@@ -1,4 +1,4 @@
-package com.gu.scanamo
+package org.scanamo
 
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
@@ -8,7 +8,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import com.gu.scanamo.auto._
+import org.scanamo.auto._
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 

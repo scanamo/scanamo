@@ -11,9 +11,9 @@ requests to DynamoDB, Scanamo supports making the requests asynchronously with
 a client that implements the `AmazonDynamoDBAsync` interface:
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
-import com.gu.scanamo.auto._
+import org.scanamo._
+import org.scanamo.syntax._
+import org.scanamo.auto._
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -55,8 +55,8 @@ Using the Alpakka client means you need an `ActorSystem` and an
 that the Alpakka interpreter uses behind the scenes:
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
+import org.scanamo._
+import org.scanamo.syntax._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient

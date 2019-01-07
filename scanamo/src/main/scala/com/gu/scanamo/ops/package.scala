@@ -1,4 +1,4 @@
-package com.gu.scanamo
+package org.scanamo
 
 import cats.free.Free
 

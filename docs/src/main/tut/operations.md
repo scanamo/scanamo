@@ -26,9 +26,9 @@ Often when using DynamoDB, the primary use case is simply putting objects into
 Dynamo and subsequently retrieving them:
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
-import com.gu.scanamo.auto._
+import org.scanamo._
+import org.scanamo.syntax._
+import org.scanamo.auto._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -55,8 +55,8 @@ Note that when using `Table` no operations are actually executed against DynamoD
 To remove an item in it's entirety, we can use delete:
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
+import org.scanamo._
+import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -82,8 +82,8 @@ If you want to change some of the fields of an item, that don't form part of it'
  without replacing the item entirely, you can use the `update` operation:
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
+import org.scanamo._
+import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -105,8 +105,8 @@ Which fields are updated can be based on incoming data:
 ```tut:silent
 import cats.data.NonEmptyList
 import cats.implicits._
-import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.error.DynamoReadError
+import org.scanamo.ops.ScanamoOps
+import org.scanamo.error.DynamoReadError
 
 LocalDynamoDB.createTable(client)("favourites")('name -> S)
 case class Favourites(name: String, colour: String, number: Long)
@@ -142,7 +142,7 @@ Scanamo.exec(client)(
 ```
 
 Further examples, showcasing different types of update can be found in the 
-[scaladoc for the `update` method on `Table`](/latest/api/com/gu/scanamo/Table.html#update(key:com.gu.scanamo.query.UniqueKey[_],expression:com.gu.scanamo.update.UpdateExpression):com.gu.scanamo.ops.ScanamoOps[Either[com.gu.scanamo.error.DynamoReadError,V]])
+[scaladoc for the `update` method on `Table`](/latest/api/com/gu/scanamo/Table.html#update(key:org.scanamo.query.UniqueKey[_],expression:org.scanamo.update.UpdateExpression):org.scanamo.ops.ScanamoOps[Either[org.scanamo.error.DynamoReadError,V]])
 
 ### Scan
 
@@ -150,8 +150,8 @@ If you want to go through all elements of a table, or index, Scanamo
 supports scanning it:
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
+import org.scanamo._
+import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
@@ -179,8 +179,8 @@ Scanamo.exec(client)(operations)
 Scanamo can be used to perform most queries that can be made against DynamoDB
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
+import org.scanamo._
+import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._

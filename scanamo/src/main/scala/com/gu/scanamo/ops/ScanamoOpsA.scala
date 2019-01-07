@@ -1,7 +1,7 @@
-package com.gu.scanamo.ops
+package org.scanamo.ops
 
 import com.amazonaws.services.dynamodbv2.model._
-import com.gu.scanamo.request._
+import org.scanamo.request._
 
 sealed trait ScanamoOpsA[A] extends Product with Serializable
 final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResult]

@@ -1,4 +1,4 @@
-package com.gu.scanamo.error
+package org.scanamo.error
 
 import cats.data.NonEmptyList
 import cats.{Semigroup, Show}

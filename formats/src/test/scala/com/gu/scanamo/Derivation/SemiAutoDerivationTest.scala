@@ -1,6 +1,6 @@
-package com.gu.scanamo.Derivation
+package org.scanamo.Derivation
 
-import com.gu.scanamo.DynamoFormat
+import org.scanamo.DynamoFormat
 import org.scalatest.{FunSuite, Matchers}
 
 class SemiAutoDerivationTest extends FunSuite with Matchers {
@@ -11,7 +11,7 @@ class SemiAutoDerivationTest extends FunSuite with Matchers {
 
   test("Derivation should succeed if derived format in scope") {
     """
-      |import com.gu.scanamo.semiauto._
+      |import org.scanamo.semiauto._
       |implicit val formatPerson: DynamoFormat[Person] = deriveDynamoFormat[Person]
       |
       |write(Person("Bob", 12))

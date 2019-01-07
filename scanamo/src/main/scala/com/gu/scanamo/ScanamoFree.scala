@@ -1,12 +1,12 @@
-package com.gu.scanamo
+package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
-import com.gu.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
-import com.gu.scanamo.error.DynamoReadError
-import com.gu.scanamo.ops.ScanamoOps
-import com.gu.scanamo.query._
-import com.gu.scanamo.request._
-import com.gu.scanamo.update.UpdateExpression
+import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
+import org.scanamo.error.DynamoReadError
+import org.scanamo.ops.ScanamoOps
+import org.scanamo.query._
+import org.scanamo.request._
+import org.scanamo.update.UpdateExpression
 
 object ScanamoFree {
 

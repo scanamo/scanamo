@@ -1,11 +1,11 @@
-package com.gu.scanamo
+package org.scanamo
 
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import com.gu.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
+import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
-  * Provides the same interface as [[com.gu.scanamo.Scanamo]], except that it requires an
+  * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
   * [[https://github.com/akka/alpakka Alpakka]] client
   * and an implicit [[scala.concurrent.ExecutionContext]] and returns a [[scala.concurrent.Future]]
   */

@@ -1,4 +1,4 @@
-package com.gu.scanamo.time
+package org.scanamo.time
 
 import java.time._
 import org.scalacheck._

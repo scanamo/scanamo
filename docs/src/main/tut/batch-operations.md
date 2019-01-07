@@ -10,9 +10,9 @@ Many operations against Dynamo can be performed in batches. Scanamo
 has support for putting, getting and deleting in batches
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
-import com.gu.scanamo.auto._
+import org.scanamo._
+import org.scanamo.syntax._
+import org.scanamo.auto._
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

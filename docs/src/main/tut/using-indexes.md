@@ -12,9 +12,9 @@ of `mode` and range key of `line` and a global secondary called `colour-index`
 with only a hash key on the `colour` attribute:
 
 ```tut:silent
-import com.gu.scanamo._
-import com.gu.scanamo.syntax._
-import com.gu.scanamo.auto._
+import org.scanamo._
+import org.scanamo.syntax._
+import org.scanamo.auto._
 
 case class Transport(mode: String, line: String, colour: String)
 val transport = Table[Transport]("transport")
