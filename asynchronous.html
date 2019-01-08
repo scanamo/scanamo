@@ -4,8 +4,9 @@
 requests to DynamoDB, Scanamo supports making the requests asynchronously with
 a client that implements the <code class="highlighter-rouge">AmazonDynamoDBAsync</code> interface:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">com.gu.scanamo._</span>
-<span class="k">import</span> <span class="nn">com.gu.scanamo.syntax._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.scanamo._</span>
+<span class="k">import</span> <span class="nn">org.scanamo.syntax._</span>
+<span class="k">import</span> <span class="nn">org.scanamo.auto._</span>
 
 <span class="k">import</span> <span class="nn">scala.concurrent.duration._</span>
 <span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext.Implicits.global</span>
@@ -45,13 +46,14 @@ Using the Alpakka client means you need an <code class="highlighter-rouge">Actor
 <code class="highlighter-rouge">ActorMaterializer</code> in order to make use of the streaming infrastructure
 that the Alpakka interpreter uses behind the scenes:</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">com.gu.scanamo._</span>
-<span class="k">import</span> <span class="nn">com.gu.scanamo.syntax._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.scanamo._</span>
+<span class="k">import</span> <span class="nn">org.scanamo.syntax._</span>
 <span class="k">import</span> <span class="nn">akka.actor.ActorSystem</span>
 <span class="k">import</span> <span class="nn">akka.stream.ActorMaterializer</span>
 <span class="k">import</span> <span class="nn">akka.stream.alpakka.dynamodb.scaladsl.DynamoClient</span>
 <span class="k">import</span> <span class="nn">akka.stream.alpakka.dynamodb.impl.DynamoSettings</span>
 <span class="k">import</span> <span class="nn">com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._</span>
+<span class="k">import</span> <span class="nn">com.amazonaws.auth.DefaultAWSCredentialsProviderChain</span>
 <span class="k">import</span> <span class="nn">scala.concurrent.duration._</span>
 
 <span class="k">implicit</span> <span class="k">val</span> <span class="n">system</span> <span class="k">=</span> <span class="nc">ActorSystem</span><span class="o">(</span><span class="s">"scanamo-alpakka"</span><span class="o">)</span>
@@ -63,7 +65,8 @@ that the Alpakka interpreter uses behind the scenes:</p>
       <span class="n">region</span> <span class="k">=</span> <span class="s">""</span><span class="o">,</span>
       <span class="n">host</span> <span class="k">=</span> <span class="s">"localhost"</span><span class="o">,</span>
       <span class="n">port</span> <span class="k">=</span> <span class="mi">8042</span><span class="o">,</span>
-      <span class="n">parallelism</span> <span class="k">=</span> <span class="mi">2</span>
+      <span class="n">parallelism</span> <span class="k">=</span> <span class="mi">2</span><span class="o">,</span>
+      <span class="n">credentialsProvider</span> <span class="k">=</span> <span class="nc">DefaultAWSCredentialsProviderChain</span><span class="o">.</span><span class="n">getInstance</span>
     <span class="o">)</span>
 <span class="o">)</span>
 
@@ -93,9 +96,6 @@ that the Alpakka interpreter uses behind the scenes:</p>
 <pre><code class="language-sbt">val scanamoV = "&lt;latest scanamo version&gt;"
 libraryDependencies += "com.gu" %% "scanamo-alpakka" % scanamoV
 </code></pre>
-</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({
-languages:['scala','java','bash']
-});
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
 hljs.initHighlighting();
-             </script><script>((window.gitter = {}).chat = {}).options = {
-room: 'scanamo/scanamo'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/js/main.js"></script></body></html>
+              </script><script src="/js/main.js"></script></body></html>

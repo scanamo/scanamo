@@ -5,14 +5,15 @@
 only have an effect if some state of the DynamoDB table is true at the time of 
 execution.</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">com.gu.scanamo._</span>
-<span class="k">import</span> <span class="nn">com.gu.scanamo.syntax._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.scanamo._</span>
+<span class="k">import</span> <span class="nn">org.scanamo.syntax._</span>
+<span class="k">import</span> <span class="nn">org.scanamo.auto._</span>
 <span class="k">import</span> <span class="nn">com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._</span>
 <span class="k">val</span> <span class="n">client</span> <span class="k">=</span> <span class="nc">LocalDynamoDB</span><span class="o">.</span><span class="n">client</span><span class="o">()</span>
 <span class="k">case</span> <span class="k">class</span> <span class="nc">Gremlin</span><span class="o">(</span><span class="n">number</span><span class="k">:</span> <span class="kt">Int</span><span class="o">,</span> <span class="n">name</span><span class="k">:</span> <span class="kt">String</span><span class="o">,</span> <span class="n">wet</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">,</span> <span class="n">friendly</span><span class="k">:</span> <span class="kt">Boolean</span><span class="o">)</span>
 </code></pre></div></div>
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">val</span> <span class="n">gremlinsTable</span> <span class="k">=</span> <span class="nc">Table</span><span class="o">[</span><span class="kt">Gremlin</span><span class="o">](</span><span class="s">"gremlins"</span><span class="o">)</span>
-<span class="c1">// gremlinsTable: com.gu.scanamo.Table[Gremlin] = Table(gremlins)
+<span class="c1">// gremlinsTable: org.scanamo.Table[Gremlin] = Table(gremlins)
 </span>
 <span class="nc">LocalDynamoDB</span><span class="o">.</span><span class="n">withTable</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="s">"gremlins"</span><span class="o">)(</span><span class="ss">'number </span><span class="o">-&gt;</span> <span class="n">N</span><span class="o">)</span> <span class="o">{</span>
   <span class="k">val</span> <span class="n">ops</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
@@ -36,13 +37,10 @@ execution.</p>
   <span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">allGremlins</span><span class="o">,</span> <span class="n">remainingGremlins</span><span class="o">)</span>
   <span class="nc">Scanamo</span><span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="n">ops</span><span class="o">)</span>
 <span class="o">}</span>
-<span class="c1">// res0: (List[Either[com.gu.scanamo.error.DynamoReadError,Gremlin]], List[Either[com.gu.scanamo.error.DynamoReadError,Gremlin]]) = (List(Right(Gremlin(2,George,true,false)), Right(Gremlin(1,Gizmo,false,true)), Right(Gremlin(3,Greta,true,true))),List(Right(Gremlin(1,Gizmo,false,true)), Right(Gremlin(3,Greta,true,false))))
+<span class="c1">// res0: (List[Either[org.scanamo.error.DynamoReadError,Gremlin]], List[Either[org.scanamo.error.DynamoReadError,Gremlin]]) = (List(Right(Gremlin(2,George,true,false)), Right(Gremlin(1,Gizmo,false,true)), Right(Gremlin(3,Greta,true,true))),List(Right(Gremlin(1,Gizmo,false,true)), Right(Gremlin(3,Greta,true,false))))
 </span></code></pre></div></div>
 
-<p>More examples can be found in the <a href="/latest/api/com/gu/scanamo/Table.html#given[T](condition:T)(implicitevidence$2:com.gu.scanamo.query.ConditionExpression[T]):com.gu.scanamo.query.ConditionalOperation[V,T]">Table ScalaDoc</a>.</p>
-</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({
-languages:['scala','java','bash']
-});
+<p>More examples can be found in the <a href="/latest/api/com/gu/scanamo/Table.html#given[T](condition:T)(implicitevidence$2:org.scanamo.query.ConditionExpression[T]):org.scanamo.query.ConditionalOperation[V,T]">Table ScalaDoc</a>.</p>
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
 hljs.initHighlighting();
-             </script><script>((window.gitter = {}).chat = {}).options = {
-room: 'scanamo/scanamo'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/js/main.js"></script></body></html>
+              </script><script src="/js/main.js"></script></body></html>

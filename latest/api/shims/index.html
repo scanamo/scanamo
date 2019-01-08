@@ -1,0 +1,1543 @@
+<!DOCTYPE html >
+<html>
+        <head>
+          <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+          <title></title>
+          <meta name="description" content="" />
+          <meta name="keywords" content="" />
+          <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+          
+      <link href="../lib/index.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/template.css" media="screen" type="text/css" rel="stylesheet" />
+      <link href="../lib/diagrams.css" media="screen" type="text/css" rel="stylesheet" id="diagrams-css" />
+      <script type="text/javascript" src="../lib/jquery.js"></script>
+      <script type="text/javascript" src="../lib/jquery.panzoom.min.js"></script>
+      <script type="text/javascript" src="../lib/jquery.mousewheel.min.js"></script>
+      <script type="text/javascript" src="../lib/index.js"></script>
+      <script type="text/javascript" src="../index.js"></script>
+      <script type="text/javascript" src="../lib/scheduler.js"></script>
+      <script type="text/javascript" src="../lib/template.js"></script>
+      <script type="text/javascript" src="../lib/tools.tooltip.js"></script>
+      
+      <script type="text/javascript">
+        /* this variable can be used by the JS to determine the path to the root document */
+        var toRoot = '../';
+      </script>
+    
+        </head>
+        <body>
+      <div id="search">
+        <span id="doc-title"><span id="doc-version"></span></span>
+        <span class="close-results"><span class="left">&lt;</span> Back</span>
+        <div id="textfilter">
+          <span class="input">
+            <input autocapitalize="none" placeholder="Search" id="index-input" type="text" accesskey="/" />
+            <i class="clear material-icons"></i>
+            <i id="search-icon" class="material-icons"></i>
+          </span>
+        </div>
+    </div>
+      <div id="search-results">
+        <div id="search-progress">
+          <div id="progress-fill"></div>
+        </div>
+        <div id="results-content">
+          <div id="entity-results"></div>
+          <div id="member-results"></div>
+        </div>
+      </div>
+      <div id="content-scroll-container" style="-webkit-overflow-scrolling: touch;">
+        <div id="content-container" style="-webkit-overflow-scrolling: touch;">
+          <div id="subpackage-spacer">
+            <div id="packages">
+              <h1>Packages</h1>
+              <ul>
+                <li name="_root_.root" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="_root_"></a><a id="root:_root_"></a>
+      <span class="permalink">
+      <a href="index.html#_root_" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <a title="" href="../index.html"><span class="name">root</span></a>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li name="_root_.shims" visbl="pub" class="indented1 current" data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="shims"></a><a id="shims:shims"></a>
+      <span class="permalink">
+      <a href="index.html#shims" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shims</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd><a href="../index.html" class="extype" name="_root_">root</a></dd></dl></div>
+    </li><li class="current-entities indented1">
+                        <span class="separator"></span>
+                        <a class="class" href="AsSyntax.html" title=""></a>
+                        <a href="AsSyntax.html" title="">AsSyntax</a>
+                      </li>
+              </ul>
+            </div>
+          </div>
+          <div id="content">
+            <body class="package value">
+      <div id="definition">
+        <div class="big-circle package">p</div>
+        
+        <h1>shims<span class="permalink">
+      <a href="../shims/index.html" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span></h1>
+        
+      </div>
+
+      <h4 id="signature" class="signature">
+      <span class="modifier_kind">
+        <span class="modifier"></span>
+        <span class="kind">package</span>
+      </span>
+      <span class="symbol">
+        <span class="name">shims</span>
+      </span>
+      </h4>
+
+      
+          <div id="comment" class="fullcommenttop"><div class="toggleContainer block">
+          <span class="toggle">
+            Linear Supertypes
+          </span>
+          <div class="superTypes hiddenContent"><span class="extype" name="shims.ShimsCore">ShimsCore</span>, <span class="extype" name="shims.conversions.RWSTConverters">RWSTConverters</span>, <span class="extype" name="shims.conversions.CokleisliConverters">CokleisliConverters</span>, <span class="extype" name="shims.conversions.ConstConverters">ConstConverters</span>, <span class="extype" name="shims.conversions.IorConverters">IorConverters</span>, <span class="extype" name="shims.conversions.WriterTConverters">WriterTConverters</span>, <span class="extype" name="shims.conversions.MaybeTConverters">MaybeTConverters</span>, <span class="extype" name="shims.conversions.MaybeConverters">MaybeConverters</span>, <span class="extype" name="shims.conversions.OneAndConverters">OneAndConverters</span>, <span class="extype" name="shims.conversions.ValidatedNELConverters">ValidatedNELConverters</span>, <span class="extype" name="shims.conversions.NELConverters">NELConverters</span>, <span class="extype" name="shims.conversions.ValidatedConverters">ValidatedConverters</span>, <span class="extype" name="shims.conversions.OptionTConverters">OptionTConverters</span>, <span class="extype" name="shims.conversions.KleisliConverters">KleisliConverters</span>, <span class="extype" name="shims.conversions.EitherTConverters">EitherTConverters</span>, <span class="extype" name="shims.conversions.EitherKConverters">EitherKConverters</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters">IndexedStateTConverters</span>, <span class="extype" name="shims.conversions.EvalConverters">EvalConverters</span>, <span class="extype" name="shims.conversions.FreeConverters">FreeConverters</span>, <span class="extype" name="shims.conversions.FunctionKConverters">FunctionKConverters</span>, <span class="extype" name="shims.conversions.InjectConversions">InjectConversions</span>, <span class="extype" name="shims.conversions.ChoiceConversions">ChoiceConversions</span>, <span class="extype" name="shims.conversions.ArrowConversions">ArrowConversions</span>, <span class="extype" name="shims.conversions.StrongConversions">StrongConversions</span>, <span class="extype" name="shims.conversions.ProfunctorConversions">ProfunctorConversions</span>, <span class="extype" name="shims.conversions.EitherConverters">EitherConverters</span>, <span class="extype" name="shims.conversions.CategoryConversions">CategoryConversions</span>, <span class="extype" name="shims.conversions.ComposeConversions">ComposeConversions</span>, <span class="extype" name="shims.conversions.BitraverseConversions">BitraverseConversions</span>, <span class="extype" name="shims.conversions.BifoldableConversions">BifoldableConversions</span>, <span class="extype" name="shims.conversions.BifunctorConversions">BifunctorConversions</span>, <span class="extype" name="shims.conversions.ShowConversions">ShowConversions</span>, <span class="extype" name="shims.conversions.MonadErrorConversions">MonadErrorConversions</span>, <span class="extype" name="shims.conversions.MonadConversions">MonadConversions</span>, <span class="extype" name="shims.conversions.FlatMapConversions">FlatMapConversions</span>, <span class="extype" name="shims.conversions.ComonadConversions">ComonadConversions</span>, <span class="extype" name="shims.conversions.CoflatMapConversions">CoflatMapConversions</span>, <span class="extype" name="shims.conversions.TraverseConversions">TraverseConversions</span>, <span class="extype" name="shims.conversions.FoldableConversions">FoldableConversions</span>, <span class="extype" name="shims.conversions.MonoidConversions">MonoidConversions</span>, <span class="extype" name="shims.conversions.SemigroupConversions">SemigroupConversions</span>, <span class="extype" name="shims.conversions.OrderConversions">OrderConversions</span>, <span class="extype" name="shims.conversions.EqConversions">EqConversions</span>, <span class="extype" name="shims.conversions.ApplicativeConversions">ApplicativeConversions</span>, <span class="extype" name="shims.conversions.ApplyConversions">ApplyConversions</span>, <span class="extype" name="shims.conversions.FunctorConversions">FunctorConversions</span>, <span class="extype" name="shims.conversions.ContravariantConversions">ContravariantConversions</span>, <span class="extype" name="shims.conversions.IFunctorConversions">IFunctorConversions</span>, <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a>, <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></div>
+        </div></div>
+        
+
+      <div id="mbrsel">
+        <div class="toggle"></div>
+        <div id="memberfilter">
+          <i class="material-icons arrow"></i>
+          <span class="input">
+            <input id="mbrsel-input" placeholder="Filter all members" type="text" accesskey="/" />
+          </span>
+          <i class="clear material-icons"></i>
+        </div>
+        <div id="filterby">
+          <div id="order">
+            <span class="filtertype">Ordering</span>
+            <ol>
+              
+              <li class="alpha in"><span>Alphabetic</span></li>
+              <li class="inherit out"><span>By Inheritance</span></li>
+            </ol>
+          </div>
+          <div class="ancestors">
+                  <span class="filtertype">Inherited<br />
+                  </span>
+                  <ol id="linearization">
+                    <li class="in" name="shims"><span>shims</span></li><li class="in" name="shims.ShimsCore"><span>ShimsCore</span></li><li class="in" name="shims.conversions.RWSTConverters"><span>RWSTConverters</span></li><li class="in" name="shims.conversions.CokleisliConverters"><span>CokleisliConverters</span></li><li class="in" name="shims.conversions.ConstConverters"><span>ConstConverters</span></li><li class="in" name="shims.conversions.IorConverters"><span>IorConverters</span></li><li class="in" name="shims.conversions.WriterTConverters"><span>WriterTConverters</span></li><li class="in" name="shims.conversions.MaybeTConverters"><span>MaybeTConverters</span></li><li class="in" name="shims.conversions.MaybeConverters"><span>MaybeConverters</span></li><li class="in" name="shims.conversions.OneAndConverters"><span>OneAndConverters</span></li><li class="in" name="shims.conversions.ValidatedNELConverters"><span>ValidatedNELConverters</span></li><li class="in" name="shims.conversions.NELConverters"><span>NELConverters</span></li><li class="in" name="shims.conversions.ValidatedConverters"><span>ValidatedConverters</span></li><li class="in" name="shims.conversions.OptionTConverters"><span>OptionTConverters</span></li><li class="in" name="shims.conversions.KleisliConverters"><span>KleisliConverters</span></li><li class="in" name="shims.conversions.EitherTConverters"><span>EitherTConverters</span></li><li class="in" name="shims.conversions.EitherKConverters"><span>EitherKConverters</span></li><li class="in" name="shims.conversions.IndexedStateTConverters"><span>IndexedStateTConverters</span></li><li class="in" name="shims.conversions.EvalConverters"><span>EvalConverters</span></li><li class="in" name="shims.conversions.FreeConverters"><span>FreeConverters</span></li><li class="in" name="shims.conversions.FunctionKConverters"><span>FunctionKConverters</span></li><li class="in" name="shims.conversions.InjectConversions"><span>InjectConversions</span></li><li class="in" name="shims.conversions.ChoiceConversions"><span>ChoiceConversions</span></li><li class="in" name="shims.conversions.ArrowConversions"><span>ArrowConversions</span></li><li class="in" name="shims.conversions.StrongConversions"><span>StrongConversions</span></li><li class="in" name="shims.conversions.ProfunctorConversions"><span>ProfunctorConversions</span></li><li class="in" name="shims.conversions.EitherConverters"><span>EitherConverters</span></li><li class="in" name="shims.conversions.CategoryConversions"><span>CategoryConversions</span></li><li class="in" name="shims.conversions.ComposeConversions"><span>ComposeConversions</span></li><li class="in" name="shims.conversions.BitraverseConversions"><span>BitraverseConversions</span></li><li class="in" name="shims.conversions.BifoldableConversions"><span>BifoldableConversions</span></li><li class="in" name="shims.conversions.BifunctorConversions"><span>BifunctorConversions</span></li><li class="in" name="shims.conversions.ShowConversions"><span>ShowConversions</span></li><li class="in" name="shims.conversions.MonadErrorConversions"><span>MonadErrorConversions</span></li><li class="in" name="shims.conversions.MonadConversions"><span>MonadConversions</span></li><li class="in" name="shims.conversions.FlatMapConversions"><span>FlatMapConversions</span></li><li class="in" name="shims.conversions.ComonadConversions"><span>ComonadConversions</span></li><li class="in" name="shims.conversions.CoflatMapConversions"><span>CoflatMapConversions</span></li><li class="in" name="shims.conversions.TraverseConversions"><span>TraverseConversions</span></li><li class="in" name="shims.conversions.FoldableConversions"><span>FoldableConversions</span></li><li class="in" name="shims.conversions.MonoidConversions"><span>MonoidConversions</span></li><li class="in" name="shims.conversions.SemigroupConversions"><span>SemigroupConversions</span></li><li class="in" name="shims.conversions.OrderConversions"><span>OrderConversions</span></li><li class="in" name="shims.conversions.EqConversions"><span>EqConversions</span></li><li class="in" name="shims.conversions.ApplicativeConversions"><span>ApplicativeConversions</span></li><li class="in" name="shims.conversions.ApplyConversions"><span>ApplyConversions</span></li><li class="in" name="shims.conversions.FunctorConversions"><span>FunctorConversions</span></li><li class="in" name="shims.conversions.ContravariantConversions"><span>ContravariantConversions</span></li><li class="in" name="shims.conversions.IFunctorConversions"><span>IFunctorConversions</span></li><li class="in" name="scala.AnyRef"><span>AnyRef</span></li><li class="in" name="scala.Any"><span>Any</span></li>
+                  </ol>
+                </div><div class="ancestors">
+              <span class="filtertype"></span>
+              <ol>
+                <li class="hideall out"><span>Hide All</span></li>
+                <li class="showall in"><span>Show All</span></li>
+              </ol>
+            </div>
+          <div id="visbl">
+              <span class="filtertype">Visibility</span>
+              <ol><li class="public in"><span>Public</span></li><li class="all out"><span>All</span></li></ol>
+            </div>
+        </div>
+      </div>
+
+      <div id="template">
+        <div id="allMembers">
+        
+
+        <div id="types" class="types members">
+              <h3>Type Members</h3>
+              <ol><li name="shims.ShimsCore.AsSyntax" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="AsSyntax[A]extendsAnyRef"></a><a id="AsSyntax[A]:AsSyntax[A]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#AsSyntax[A]extendsAnyRef" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit final </span>
+        <span class="kind">class</span>
+      </span>
+      <span class="symbol">
+        <span class="name">AsSyntax</span><span class="tparams">[<span name="A">A</span>]</span><span class="result"> extends <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ShimsCore</dd></dl></div>
+    </li></ol>
+            </div>
+
+        
+
+        <div class="values members">
+              <h3>Value Members</h3>
+              <ol>
+                <li name="shims.conversions.ApplicativeConversions#applicativeToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="applicativeToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Applicative[F]]):cats.Applicative[F]withshims.conversions.Synthetic"></a><a id="applicativeToCats[F[_]](Capture[Applicative[F]]):Applicative[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#applicativeToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Applicative[F]]):cats.Applicative[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">applicativeToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Applicative">Applicative</span>[<span class="extype" name="shims.conversions.ApplicativeConversions.applicativeToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/Applicative.html#cats.Applicative" class="extype" name="cats.Applicative">Applicative</a>[<span class="extype" name="shims.conversions.ApplicativeConversions.applicativeToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ApplicativeConversions</dd></dl></div>
+    </li><li name="shims.conversions.ApplicativeConversions#applicativeToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="applicativeToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Applicative[F]]):scalaz.Applicative[F]withshims.conversions.Synthetic"></a><a id="applicativeToScalaz[F[_]](Capture[Applicative[F]]):Applicative[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#applicativeToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Applicative[F]]):scalaz.Applicative[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">applicativeToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/Applicative.html#cats.Applicative" class="extype" name="cats.Applicative">Applicative</a>[<span class="extype" name="shims.conversions.ApplicativeConversions.applicativeToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Applicative">Applicative</span>[<span class="extype" name="shims.conversions.ApplicativeConversions.applicativeToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ApplicativeConversions</dd></dl></div>
+    </li><li name="shims.conversions.ApplyConversions#applyToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="applyToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Apply[F]]):cats.Apply[F]withshims.conversions.Synthetic"></a><a id="applyToCats[F[_]](Capture[Apply[F]]):Apply[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#applyToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Apply[F]]):cats.Apply[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">applyToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Apply">Apply</span>[<span class="extype" name="shims.conversions.ApplyConversions.applyToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/Apply.html#cats.Apply" class="extype" name="cats.Apply">Apply</a>[<span class="extype" name="shims.conversions.ApplyConversions.applyToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ApplyConversions</dd></dl></div>
+    </li><li name="shims.conversions.ApplyConversions#applyToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="applyToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Apply[F]]):scalaz.Apply[F]withshims.conversions.Synthetic"></a><a id="applyToScalaz[F[_]](Capture[Apply[F]]):Apply[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#applyToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Apply[F]]):scalaz.Apply[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">applyToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/Apply.html#cats.Apply" class="extype" name="cats.Apply">Apply</a>[<span class="extype" name="shims.conversions.ApplyConversions.applyToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Apply">Apply</span>[<span class="extype" name="shims.conversions.ApplyConversions.applyToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ApplyConversions</dd></dl></div>
+    </li><li name="shims.conversions.ArrowConversions#arrowToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="arrowToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Arrow[F]]):cats.arrow.Arrow[F]withshims.conversions.Synthetic"></a><a id="arrowToCats[F[_,_]](Capture[Arrow[F]]):Arrow[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#arrowToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Arrow[F]]):cats.arrow.Arrow[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">arrowToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Arrow">Arrow</span>[<span class="extype" name="shims.conversions.ArrowConversions.arrowToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.arrow.Arrow">Arrow</span>[<span class="extype" name="shims.conversions.ArrowConversions.arrowToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ArrowConversions</dd></dl></div>
+    </li><li name="shims.conversions.ArrowConversions#arrowToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="arrowToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Arrow[F]]):scalaz.Arrow[F]withshims.conversions.Synthetic"></a><a id="arrowToScalaz[F[_,_]](Capture[Arrow[F]]):Arrow[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#arrowToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Arrow[F]]):scalaz.Arrow[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">arrowToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.arrow.Arrow">Arrow</span>[<span class="extype" name="shims.conversions.ArrowConversions.arrowToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Arrow">Arrow</span>[<span class="extype" name="shims.conversions.ArrowConversions.arrowToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ArrowConversions</dd></dl></div>
+    </li><li name="shims.conversions.BifoldableConversions#bifoldableToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bifoldableToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Bifoldable[F]]):cats.Bifoldable[F]withshims.conversions.Synthetic"></a><a id="bifoldableToCats[F[_,_]](Capture[Bifoldable[F]]):Bifoldable[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#bifoldableToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Bifoldable[F]]):cats.Bifoldable[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bifoldableToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Bifoldable">Bifoldable</span>[<span class="extype" name="shims.conversions.BifoldableConversions.bifoldableToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Bifoldable">Bifoldable</span>[<span class="extype" name="shims.conversions.BifoldableConversions.bifoldableToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BifoldableConversions</dd></dl></div>
+    </li><li name="shims.conversions.BifoldableConversions#bifoldableToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bifoldableToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.Bifoldable[F]]):scalaz.Bifoldable[F]withshims.conversions.Synthetic"></a><a id="bifoldableToScalaz[F[_,_]](Capture[Bifoldable[F]]):Bifoldable[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#bifoldableToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.Bifoldable[F]]):scalaz.Bifoldable[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bifoldableToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Bifoldable">Bifoldable</span>[<span class="extype" name="shims.conversions.BifoldableConversions.bifoldableToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Bifoldable">Bifoldable</span>[<span class="extype" name="shims.conversions.BifoldableConversions.bifoldableToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BifoldableConversions</dd></dl></div>
+    </li><li name="shims.conversions.BifunctorConversions#bifunctorToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bifunctorToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Bifunctor[F]]):cats.Bifunctor[F]withshims.conversions.Synthetic"></a><a id="bifunctorToCats[F[_,_]](Capture[Bifunctor[F]]):Bifunctor[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#bifunctorToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Bifunctor[F]]):cats.Bifunctor[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bifunctorToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Bifunctor">Bifunctor</span>[<span class="extype" name="shims.conversions.BifunctorConversions.bifunctorToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Bifunctor">Bifunctor</span>[<span class="extype" name="shims.conversions.BifunctorConversions.bifunctorToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BifunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.BifunctorConversions#bifunctorToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bifunctorToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.Bifunctor[F]]):scalaz.Bifunctor[F]withshims.conversions.Synthetic"></a><a id="bifunctorToScalaz[F[_,_]](Capture[Bifunctor[F]]):Bifunctor[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#bifunctorToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.Bifunctor[F]]):scalaz.Bifunctor[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bifunctorToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Bifunctor">Bifunctor</span>[<span class="extype" name="shims.conversions.BifunctorConversions.bifunctorToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Bifunctor">Bifunctor</span>[<span class="extype" name="shims.conversions.BifunctorConversions.bifunctorToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BifunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.FlatMapConversions#bindToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bindToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Bind[F]],implicitEFC:shims.util.EitherCapture[scalaz.Applicative[F],scalaz.BindRec[F]]):cats.FlatMap[F]withshims.conversions.Synthetic"></a><a id="bindToCats[F[_]](Capture[Bind[F]],EitherCapture[Applicative[F],BindRec[F]]):FlatMap[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#bindToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Bind[F]],implicitEFC:shims.util.EitherCapture[scalaz.Applicative[F],scalaz.BindRec[F]]):cats.FlatMap[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bindToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Bind">Bind</span>[<span class="extype" name="shims.conversions.FlatMapConversions.bindToCats.F">F</span>]]</span>, <span name="EFC">EFC: <span class="extype" name="shims.util.EitherCapture">EitherCapture</span>[<span class="extype" name="scalaz.Applicative">Applicative</span>[<span class="extype" name="shims.conversions.FlatMapConversions.bindToCats.F">F</span>], <span class="extype" name="scalaz.BindRec">BindRec</span>[<span class="extype" name="shims.conversions.FlatMapConversions.bindToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/FlatMap.html#cats.FlatMap" class="extype" name="cats.FlatMap">FlatMap</a>[<span class="extype" name="shims.conversions.FlatMapConversions.bindToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatMapConversions</dd></dl></div>
+    </li><li name="shims.conversions.BitraverseConversions#bitraverseToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bitraverseToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Bitraverse[F]]):cats.Bitraverse[F]withshims.conversions.Synthetic"></a><a id="bitraverseToCats[F[_,_]](Capture[Bitraverse[F]]):Bitraverse[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#bitraverseToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Bitraverse[F]]):cats.Bitraverse[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bitraverseToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Bitraverse">Bitraverse</span>[<span class="extype" name="shims.conversions.BitraverseConversions.bitraverseToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/Bitraverse.html#cats.Bitraverse" class="extype" name="cats.Bitraverse">Bitraverse</a>[<span class="extype" name="shims.conversions.BitraverseConversions.bitraverseToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BitraverseConversions</dd></dl></div>
+    </li><li name="shims.conversions.BitraverseConversions#bitraverseToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="bitraverseToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.Bitraverse[F]]):scalaz.Bitraverse[F]withshims.conversions.Synthetic"></a><a id="bitraverseToScalaz[F[_,_]](Capture[Bitraverse[F]]):Bitraverse[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#bitraverseToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.Bitraverse[F]]):scalaz.Bitraverse[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">bitraverseToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/Bitraverse.html#cats.Bitraverse" class="extype" name="cats.Bitraverse">Bitraverse</a>[<span class="extype" name="shims.conversions.BitraverseConversions.bitraverseToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Bitraverse">Bitraverse</span>[<span class="extype" name="shims.conversions.BitraverseConversions.bitraverseToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>BitraverseConversions</dd></dl></div>
+    </li><li name="shims.conversions.CategoryConversions#categoryToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="categoryToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Category[F]]):cats.arrow.Category[F]withshims.conversions.Synthetic"></a><a id="categoryToCats[F[_,_]](Capture[Category[F]]):Category[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#categoryToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Category[F]]):cats.arrow.Category[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">categoryToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Category">Category</span>[<span class="extype" name="shims.conversions.CategoryConversions.categoryToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/arrow/Category.html#cats.arrow.Category" class="extype" name="cats.arrow.Category">Category</a>[<span class="extype" name="shims.conversions.CategoryConversions.categoryToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CategoryConversions</dd></dl></div>
+    </li><li name="shims.conversions.CategoryConversions#categoryToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="categoryToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Category[F]]):scalaz.Category[F]withshims.conversions.Synthetic"></a><a id="categoryToScalaz[F[_,_]](Capture[Category[F]]):Category[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#categoryToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Category[F]]):scalaz.Category[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">categoryToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/arrow/Category.html#cats.arrow.Category" class="extype" name="cats.arrow.Category">Category</a>[<span class="extype" name="shims.conversions.CategoryConversions.categoryToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Category">Category</span>[<span class="extype" name="shims.conversions.CategoryConversions.categoryToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CategoryConversions</dd></dl></div>
+    </li><li name="shims.conversions.ChoiceConversions#choiceToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="choiceToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Choice[F]],implicitBF:scalaz.Bifunctor[F]):cats.arrow.Choice[F]withshims.conversions.Synthetic"></a><a id="choiceToCats[F[_,_]](Capture[Choice[F]],Bifunctor[F]):Choice[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#choiceToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Choice[F]],implicitBF:scalaz.Bifunctor[F]):cats.arrow.Choice[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">choiceToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Choice">Choice</span>[<span class="extype" name="shims.conversions.ChoiceConversions.choiceToCats.F">F</span>]]</span>, <span name="BF">BF: <span class="extype" name="scalaz.Bifunctor">Bifunctor</span>[<span class="extype" name="shims.conversions.ChoiceConversions.choiceToCats.F">F</span>]</span>)</span><span class="result">: <span class="extype" name="cats.arrow.Choice">Choice</span>[<span class="extype" name="shims.conversions.ChoiceConversions.choiceToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChoiceConversions</dd></dl></div>
+    </li><li name="shims.conversions.ChoiceConversions#choiceToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="choiceToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Choice[F]],implicitBF:cats.Bifunctor[F]):scalaz.Choice[F]withshims.conversions.Synthetic"></a><a id="choiceToScalaz[F[_,_]](Capture[Choice[F]],Bifunctor[F]):Choice[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#choiceToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Choice[F]],implicitBF:cats.Bifunctor[F]):scalaz.Choice[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">choiceToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.arrow.Choice">Choice</span>[<span class="extype" name="shims.conversions.ChoiceConversions.choiceToScalaz.F">F</span>]]</span>, <span name="BF">BF: <span class="extype" name="cats.Bifunctor">Bifunctor</span>[<span class="extype" name="shims.conversions.ChoiceConversions.choiceToScalaz.F">F</span>]</span>)</span><span class="result">: <span class="extype" name="scalaz.Choice">Choice</span>[<span class="extype" name="shims.conversions.ChoiceConversions.choiceToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ChoiceConversions</dd></dl></div>
+    </li><li name="shims.conversions.CoflatMapConversions#cobindToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cobindToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Cobind[F]]):cats.CoflatMap[F]withshims.conversions.Synthetic"></a><a id="cobindToCats[F[_]](Capture[Cobind[F]]):CoflatMap[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#cobindToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Cobind[F]]):cats.CoflatMap[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cobindToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Cobind">Cobind</span>[<span class="extype" name="shims.conversions.CoflatMapConversions.cobindToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/CoflatMap.html#cats.CoflatMap" class="extype" name="cats.CoflatMap">CoflatMap</a>[<span class="extype" name="shims.conversions.CoflatMapConversions.cobindToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CoflatMapConversions</dd></dl></div>
+    </li><li name="shims.conversions.CoflatMapConversions#coflatMapToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="coflatMapToScalaz[F[_]](implicitFC:shims.util.Capture[cats.CoflatMap[F]]):scalaz.Cobind[F]withshims.conversions.Synthetic"></a><a id="coflatMapToScalaz[F[_]](Capture[CoflatMap[F]]):Cobind[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#coflatMapToScalaz[F[_]](implicitFC:shims.util.Capture[cats.CoflatMap[F]]):scalaz.Cobind[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">coflatMapToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/CoflatMap.html#cats.CoflatMap" class="extype" name="cats.CoflatMap">CoflatMap</a>[<span class="extype" name="shims.conversions.CoflatMapConversions.coflatMapToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Cobind">Cobind</span>[<span class="extype" name="shims.conversions.CoflatMapConversions.coflatMapToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CoflatMapConversions</dd></dl></div>
+    </li><li name="shims.conversions.CokleisliConverters#cokleisliAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="cokleisliAs[F[_],A,B]:shims.conversions.AsScalaz[cats.data.Cokleisli[F,A,B],scalaz.Cokleisli[F,A,B]]withshims.conversions.AsCats[scalaz.Cokleisli[F,A,B],cats.data.Cokleisli[F,A,B]]"></a><a id="cokleisliAs[F[_],A,B]:AsScalaz[Cokleisli[F,A,B],Cokleisli[F,A,B]]withAsCats[Cokleisli[F,A,B],Cokleisli[F,A,B]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#cokleisliAs[F[_],A,B]:shims.conversions.AsScalaz[cats.data.Cokleisli[F,A,B],scalaz.Cokleisli[F,A,B]]withshims.conversions.AsCats[scalaz.Cokleisli[F,A,B],cats.data.Cokleisli[F,A,B]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">cokleisliAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>, <span name="B">B</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.Cokleisli">Cokleisli</span>[<span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.F">F</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.A">A</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.B">B</span>], <span class="extype" name="scalaz.Cokleisli">Cokleisli</span>[<span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.F">F</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.A">A</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.B">B</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Cokleisli">Cokleisli</span>[<span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.F">F</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.A">A</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.B">B</span>], <span class="extype" name="cats.data.Cokleisli">Cokleisli</span>[<span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.F">F</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.A">A</span>, <span class="extype" name="shims.conversions.CokleisliConverters.cokleisliAs.B">B</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>CokleisliConverters</dd></dl></div>
+    </li><li name="shims.conversions.ComonadConversions#comonadToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="comonadToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Comonad[F]]):cats.Comonad[F]withshims.conversions.Synthetic"></a><a id="comonadToCats[F[_]](Capture[Comonad[F]]):Comonad[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#comonadToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Comonad[F]]):cats.Comonad[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">comonadToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Comonad">Comonad</span>[<span class="extype" name="shims.conversions.ComonadConversions.comonadToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Comonad">Comonad</span>[<span class="extype" name="shims.conversions.ComonadConversions.comonadToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ComonadConversions</dd></dl></div>
+    </li><li name="shims.conversions.ComonadConversions#comonadToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="comonadToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Comonad[F]]):scalaz.Comonad[F]withshims.conversions.Synthetic"></a><a id="comonadToScalaz[F[_]](Capture[Comonad[F]]):Comonad[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#comonadToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Comonad[F]]):scalaz.Comonad[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">comonadToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Comonad">Comonad</span>[<span class="extype" name="shims.conversions.ComonadConversions.comonadToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Comonad">Comonad</span>[<span class="extype" name="shims.conversions.ComonadConversions.comonadToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ComonadConversions</dd></dl></div>
+    </li><li name="shims.conversions.ComposeConversions#composeToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="composeToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Compose[F]]):cats.arrow.Compose[F]withshims.conversions.Synthetic"></a><a id="composeToCats[F[_,_]](Capture[Compose[F]]):Compose[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#composeToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Compose[F]]):cats.arrow.Compose[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">composeToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Compose">Compose</span>[<span class="extype" name="shims.conversions.ComposeConversions.composeToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.arrow.Compose">Compose</span>[<span class="extype" name="shims.conversions.ComposeConversions.composeToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ComposeConversions</dd></dl></div>
+    </li><li name="shims.conversions.ComposeConversions#composeToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="composeToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Compose[F]]):scalaz.Compose[F]withshims.conversions.Synthetic"></a><a id="composeToScalaz[F[_,_]](Capture[Compose[F]]):Compose[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#composeToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Compose[F]]):scalaz.Compose[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">composeToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.arrow.Compose">Compose</span>[<span class="extype" name="shims.conversions.ComposeConversions.composeToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Compose">Compose</span>[<span class="extype" name="shims.conversions.ComposeConversions.composeToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ComposeConversions</dd></dl></div>
+    </li><li name="shims.conversions.ConstConverters#constAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="constAs[A,B]:shims.conversions.AsScalaz[cats.data.Const[A,B],scalaz.Const[A,B]]withshims.conversions.AsCats[scalaz.Const[A,B],cats.data.Const[A,B]]"></a><a id="constAs[A,B]:AsScalaz[Const[A,B],Const[A,B]]withAsCats[Const[A,B],Const[A,B]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#constAs[A,B]:shims.conversions.AsScalaz[cats.data.Const[A,B],scalaz.Const[A,B]]withshims.conversions.AsCats[scalaz.Const[A,B],cats.data.Const[A,B]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">constAs</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.Const">Const</span>[<span class="extype" name="shims.conversions.ConstConverters.constAs.A">A</span>, <span class="extype" name="shims.conversions.ConstConverters.constAs.B">B</span>], <span class="extype" name="scalaz.Const">Const</span>[<span class="extype" name="shims.conversions.ConstConverters.constAs.A">A</span>, <span class="extype" name="shims.conversions.ConstConverters.constAs.B">B</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Const">Const</span>[<span class="extype" name="shims.conversions.ConstConverters.constAs.A">A</span>, <span class="extype" name="shims.conversions.ConstConverters.constAs.B">B</span>], <span class="extype" name="cats.data.Const">Const</span>[<span class="extype" name="shims.conversions.ConstConverters.constAs.A">A</span>, <span class="extype" name="shims.conversions.ConstConverters.constAs.B">B</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ConstConverters</dd></dl></div>
+    </li><li name="shims.conversions.ContravariantConversions#contravariantToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="contravariantToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Contravariant[F]]):cats.Contravariant[F]withshims.conversions.Synthetic"></a><a id="contravariantToCats[F[_]](Capture[Contravariant[F]]):Contravariant[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#contravariantToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Contravariant[F]]):cats.Contravariant[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">contravariantToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Contravariant">Contravariant</span>[<span class="extype" name="shims.conversions.ContravariantConversions.contravariantToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Contravariant">Contravariant</span>[<span class="extype" name="shims.conversions.ContravariantConversions.contravariantToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ContravariantConversions</dd></dl></div>
+    </li><li name="shims.conversions.ContravariantConversions#contravariantToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="contravariantToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Contravariant[F]]):scalaz.Contravariant[F]withshims.conversions.Synthetic"></a><a id="contravariantToScalaz[F[_]](Capture[Contravariant[F]]):Contravariant[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#contravariantToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Contravariant[F]]):scalaz.Contravariant[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">contravariantToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Contravariant">Contravariant</span>[<span class="extype" name="shims.conversions.ContravariantConversions.contravariantToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Contravariant">Contravariant</span>[<span class="extype" name="shims.conversions.ContravariantConversions.contravariantToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ContravariantConversions</dd></dl></div>
+    </li><li name="shims.conversions.EitherConverters#eitherAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eitherAs[A,B]:shims.conversions.AsScalaz[Either[A,B],A\/B]withshims.conversions.AsCats[A\/B,Either[A,B]]"></a><a id="eitherAs[A,B]:AsScalaz[Either[A,B],\/[A,B]]withAsCats[\/[A,B],Either[A,B]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#eitherAs[A,B]:shims.conversions.AsScalaz[Either[A,B],A\/B]withshims.conversions.AsCats[A\/B,Either[A,B]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eitherAs</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="scala.Either">Either</span>[<span class="extype" name="shims.conversions.EitherConverters.eitherAs.A">A</span>, <span class="extype" name="shims.conversions.EitherConverters.eitherAs.B">B</span>], <span class="extype" name="scalaz.\/">\/</span>[<span class="extype" name="shims.conversions.EitherConverters.eitherAs.A">A</span>, <span class="extype" name="shims.conversions.EitherConverters.eitherAs.B">B</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.\/">\/</span>[<span class="extype" name="shims.conversions.EitherConverters.eitherAs.A">A</span>, <span class="extype" name="shims.conversions.EitherConverters.eitherAs.B">B</span>], <span class="extype" name="scala.Either">Either</span>[<span class="extype" name="shims.conversions.EitherConverters.eitherAs.A">A</span>, <span class="extype" name="shims.conversions.EitherConverters.eitherAs.B">B</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EitherConverters</dd></dl></div>
+    </li><li name="shims.conversions.EitherKConverters#eitherKAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eitherKAs[F[_],G[_],A]:shims.conversions.AsScalaz[cats.data.EitherK[F,G,A],scalaz.Coproduct[F,G,A]]withshims.conversions.AsCats[scalaz.Coproduct[F,G,A],cats.data.EitherK[F,G,A]]"></a><a id="eitherKAs[F[_],G[_],A]:AsScalaz[EitherK[F,G,A],Coproduct[F,G,A]]withAsCats[Coproduct[F,G,A],EitherK[F,G,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#eitherKAs[F[_],G[_],A]:shims.conversions.AsScalaz[cats.data.EitherK[F,G,A],scalaz.Coproduct[F,G,A]]withshims.conversions.AsCats[scalaz.Coproduct[F,G,A],cats.data.EitherK[F,G,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eitherKAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="G">G<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.EitherK">EitherK</span>[<span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.F">F</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.G">G</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.A">A</span>], <span class="extype" name="scalaz.Coproduct">Coproduct</span>[<span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.F">F</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.G">G</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Coproduct">Coproduct</span>[<span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.F">F</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.G">G</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.A">A</span>], <span class="extype" name="cats.data.EitherK">EitherK</span>[<span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.F">F</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.G">G</span>, <span class="extype" name="shims.conversions.EitherKConverters.eitherKAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EitherKConverters</dd></dl></div>
+    </li><li name="shims.conversions.EitherTConverters#eitherTAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eitherTAs[F[_],A,B](implicitF:cats.Functor[F]):shims.conversions.AsScalaz[cats.data.EitherT[F,A,B],scalaz.EitherT[F,A,B]]withshims.conversions.AsCats[scalaz.EitherT[F,A,B],cats.data.EitherT[F,A,B]]"></a><a id="eitherTAs[F[_],A,B](Functor[F]):AsScalaz[EitherT[F,A,B],EitherT[F,A,B]]withAsCats[EitherT[F,A,B],EitherT[F,A,B]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#eitherTAs[F[_],A,B](implicitF:cats.Functor[F]):shims.conversions.AsScalaz[cats.data.EitherT[F,A,B],scalaz.EitherT[F,A,B]]withshims.conversions.AsCats[scalaz.EitherT[F,A,B],cats.data.EitherT[F,A,B]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eitherTAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>, <span name="B">B</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="F">F: <a href="http://typelevel.org/cats/api/cats/Functor.html#cats.Functor" class="extype" name="cats.Functor">Functor</a>[<span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.F">F</span>]</span>)</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.EitherT">EitherT</span>[<span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.F">F</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.A">A</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.B">B</span>], <span class="extype" name="scalaz.EitherT">EitherT</span>[<span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.F">F</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.A">A</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.B">B</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.EitherT">EitherT</span>[<span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.F">F</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.A">A</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.B">B</span>], <span class="extype" name="cats.data.EitherT">EitherT</span>[<span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.F">F</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.A">A</span>, <span class="extype" name="shims.conversions.EitherTConverters.eitherTAs.B">B</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EitherTConverters</dd></dl></div>
+    </li><li name="shims.conversions.EqConversions#eqToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="eqToScalaz[A](implicitAC:shims.util.Capture[cats.kernel.Eq[A]]):scalaz.Equal[A]withshims.conversions.Synthetic"></a><a id="eqToScalaz[A](Capture[Eq[A]]):Equal[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#eqToScalaz[A](implicitAC:shims.util.Capture[cats.kernel.Eq[A]]):scalaz.Equal[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">eqToScalaz</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="AC">AC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/kernel/Eq.html#cats.kernel.Eq" class="extype" name="cats.kernel.Eq">Eq</a>[<span class="extype" name="shims.conversions.EqConversions.eqToScalaz.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Equal">Equal</span>[<span class="extype" name="shims.conversions.EqConversions.eqToScalaz.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EqConversions</dd></dl></div>
+    </li><li name="shims.conversions.EqConversions#equalToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="equalToCats[A](implicitAC:shims.util.Capture[scalaz.Equal[A]]):cats.kernel.Eq[A]withshims.conversions.Synthetic"></a><a id="equalToCats[A](Capture[Equal[A]]):Eq[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#equalToCats[A](implicitAC:shims.util.Capture[scalaz.Equal[A]]):cats.kernel.Eq[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">equalToCats</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="AC">AC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Equal">Equal</span>[<span class="extype" name="shims.conversions.EqConversions.equalToCats.A">A</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/kernel/Eq.html#cats.kernel.Eq" class="extype" name="cats.kernel.Eq">Eq</a>[<span class="extype" name="shims.conversions.EqConversions.equalToCats.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EqConversions</dd></dl></div>
+    </li><li name="shims.conversions.EvalConverters#evalAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="evalAs[A]:shims.conversions.AsScalaz[cats.Eval[A],scalaz.Free.Trampoline[A]]withshims.conversions.AsCats[scalaz.Free.Trampoline[A],cats.Eval[A]]"></a><a id="evalAs[A]:AsScalaz[Eval[A],Trampoline[A]]withAsCats[Trampoline[A],Eval[A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#evalAs[A]:shims.conversions.AsScalaz[cats.Eval[A],scalaz.Free.Trampoline[A]]withshims.conversions.AsCats[scalaz.Free.Trampoline[A],cats.Eval[A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">evalAs</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.Eval">Eval</span>[<span class="extype" name="shims.conversions.EvalConverters.evalAs.A">A</span>], <span class="extype" name="scalaz.Free.Trampoline">Trampoline</span>[<span class="extype" name="shims.conversions.EvalConverters.evalAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Free.Trampoline">Trampoline</span>[<span class="extype" name="shims.conversions.EvalConverters.evalAs.A">A</span>], <span class="extype" name="cats.Eval">Eval</span>[<span class="extype" name="shims.conversions.EvalConverters.evalAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EvalConverters</dd></dl></div>
+    </li><li name="shims.conversions.FlatMapConversions#flatMapToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="flatMapToScalaz[F[_]](implicitFC:shims.util.Capture[cats.FlatMap[F]]):scalaz.BindRec[F]withshims.conversions.Synthetic"></a><a id="flatMapToScalaz[F[_]](Capture[FlatMap[F]]):BindRec[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#flatMapToScalaz[F[_]](implicitFC:shims.util.Capture[cats.FlatMap[F]]):scalaz.BindRec[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">flatMapToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/FlatMap.html#cats.FlatMap" class="extype" name="cats.FlatMap">FlatMap</a>[<span class="extype" name="shims.conversions.FlatMapConversions.flatMapToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.BindRec">BindRec</span>[<span class="extype" name="shims.conversions.FlatMapConversions.flatMapToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FlatMapConversions</dd></dl></div>
+    </li><li name="shims.conversions.FoldableConversions#foldableToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="foldableToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Foldable[F]]):cats.Foldable[F]withshims.conversions.Synthetic"></a><a id="foldableToCats[F[_]](Capture[Foldable[F]]):Foldable[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#foldableToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Foldable[F]]):cats.Foldable[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">foldableToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Foldable">Foldable</span>[<span class="extype" name="shims.conversions.FoldableConversions.foldableToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Foldable">Foldable</span>[<span class="extype" name="shims.conversions.FoldableConversions.foldableToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FoldableConversions</dd></dl></div>
+    </li><li name="shims.conversions.FoldableConversions#foldableToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="foldableToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Foldable[F]]):scalaz.Foldable[F]withshims.conversions.Synthetic"></a><a id="foldableToScalaz[F[_]](Capture[Foldable[F]]):Foldable[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#foldableToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Foldable[F]]):scalaz.Foldable[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">foldableToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Foldable">Foldable</span>[<span class="extype" name="shims.conversions.FoldableConversions.foldableToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Foldable">Foldable</span>[<span class="extype" name="shims.conversions.FoldableConversions.foldableToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FoldableConversions</dd></dl></div>
+    </li><li name="shims.conversions.FreeConverters#freeAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="freeAs[S[_],A]:shims.conversions.AsScalaz[cats.free.Free[S,A],scalaz.Free[S,A]]withshims.conversions.AsCats[scalaz.Free[S,A],cats.free.Free[S,A]]"></a><a id="freeAs[S[_],A]:AsScalaz[Free[S,A],Free[S,A]]withAsCats[Free[S,A],Free[S,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#freeAs[S[_],A]:shims.conversions.AsScalaz[cats.free.Free[S,A],scalaz.Free[S,A]]withshims.conversions.AsCats[scalaz.Free[S,A],cats.free.Free[S,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">freeAs</span><span class="tparams">[<span name="S">S<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<a href="http://typelevel.org/cats/api/cats/free/Free.html#cats.free.Free" class="extype" name="cats.free.Free">Free</a>[<span class="extype" name="shims.conversions.FreeConverters.freeAs.S">S</span>, <span class="extype" name="shims.conversions.FreeConverters.freeAs.A">A</span>], <span class="extype" name="scalaz.Free">Free</span>[<span class="extype" name="shims.conversions.FreeConverters.freeAs.S">S</span>, <span class="extype" name="shims.conversions.FreeConverters.freeAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Free">Free</span>[<span class="extype" name="shims.conversions.FreeConverters.freeAs.S">S</span>, <span class="extype" name="shims.conversions.FreeConverters.freeAs.A">A</span>], <a href="http://typelevel.org/cats/api/cats/free/Free.html#cats.free.Free" class="extype" name="cats.free.Free">Free</a>[<span class="extype" name="shims.conversions.FreeConverters.freeAs.S">S</span>, <span class="extype" name="shims.conversions.FreeConverters.freeAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FreeConverters</dd></dl></div>
+    </li><li name="shims.conversions.FunctionKConverters#functionkAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="functionkAs[F[_],G[_]]:shims.conversions.AsScalaz[cats.arrow.FunctionK[F,G],F~&gt;G]withshims.conversions.AsCats[F~&gt;G,cats.arrow.FunctionK[F,G]]"></a><a id="functionkAs[F[_],G[_]]:AsScalaz[FunctionK[F,G],~&gt;[F,G]]withAsCats[~&gt;[F,G],FunctionK[F,G]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#functionkAs[F[_],G[_]]:shims.conversions.AsScalaz[cats.arrow.FunctionK[F,G],F~&gt;G]withshims.conversions.AsCats[F~&gt;G,cats.arrow.FunctionK[F,G]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">functionkAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="G">G<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<a href="http://typelevel.org/cats/api/cats/arrow/FunctionK.html#cats.arrow.FunctionK" class="extype" name="cats.arrow.FunctionK">FunctionK</a>[<span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.F">F</span>, <span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.G">G</span>], <span class="extype" name="scalaz.~&gt;">~&gt;</span>[<span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.F">F</span>, <span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.G">G</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.~&gt;">~&gt;</span>[<span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.F">F</span>, <span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.G">G</span>], <a href="http://typelevel.org/cats/api/cats/arrow/FunctionK.html#cats.arrow.FunctionK" class="extype" name="cats.arrow.FunctionK">FunctionK</a>[<span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.F">F</span>, <span class="extype" name="shims.conversions.FunctionKConverters.functionkAs.G">G</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FunctionKConverters</dd></dl></div>
+    </li><li name="shims.conversions.FunctorConversions#functorToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="functorToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Functor[F]]):cats.Functor[F]withshims.conversions.Synthetic"></a><a id="functorToCats[F[_]](Capture[Functor[F]]):Functor[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#functorToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Functor[F]]):cats.Functor[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">functorToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Functor">Functor</span>[<span class="extype" name="shims.conversions.FunctorConversions.functorToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/Functor.html#cats.Functor" class="extype" name="cats.Functor">Functor</a>[<span class="extype" name="shims.conversions.FunctorConversions.functorToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.FunctorConversions#functorToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="functorToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Functor[F]]):scalaz.Functor[F]withshims.conversions.Synthetic"></a><a id="functorToScalaz[F[_]](Capture[Functor[F]]):Functor[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#functorToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Functor[F]]):scalaz.Functor[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">functorToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/Functor.html#cats.Functor" class="extype" name="cats.Functor">Functor</a>[<span class="extype" name="shims.conversions.FunctorConversions.functorToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Functor">Functor</span>[<span class="extype" name="shims.conversions.FunctorConversions.functorToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>FunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.IFunctorConversions#ifunctorToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ifunctorToCats[F[_]](implicitFC:shims.util.Capture[scalaz.InvariantFunctor[F]]):cats.Invariant[F]withshims.conversions.Synthetic"></a><a id="ifunctorToCats[F[_]](Capture[InvariantFunctor[F]]):Invariant[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#ifunctorToCats[F[_]](implicitFC:shims.util.Capture[scalaz.InvariantFunctor[F]]):cats.Invariant[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ifunctorToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.InvariantFunctor">InvariantFunctor</span>[<span class="extype" name="shims.conversions.IFunctorConversions.ifunctorToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/Invariant.html#cats.Invariant" class="extype" name="cats.Invariant">Invariant</a>[<span class="extype" name="shims.conversions.IFunctorConversions.ifunctorToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IFunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.IFunctorConversions#ifunctorToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="ifunctorToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Invariant[F]]):scalaz.InvariantFunctor[F]withshims.conversions.Synthetic"></a><a id="ifunctorToScalaz[F[_]](Capture[Invariant[F]]):InvariantFunctor[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#ifunctorToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Invariant[F]]):scalaz.InvariantFunctor[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">ifunctorToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/Invariant.html#cats.Invariant" class="extype" name="cats.Invariant">Invariant</a>[<span class="extype" name="shims.conversions.IFunctorConversions.ifunctorToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.InvariantFunctor">InvariantFunctor</span>[<span class="extype" name="shims.conversions.IFunctorConversions.ifunctorToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IFunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.InjectConversions#injectToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="injectToCats[F[_],G[_]](implicitFC:shims.util.Capture[scalaz.Inject[F,G]]):cats.InjectK[F,G]withshims.conversions.Synthetic"></a><a id="injectToCats[F[_],G[_]](Capture[Inject[F,G]]):InjectK[F,G]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#injectToCats[F[_],G[_]](implicitFC:shims.util.Capture[scalaz.Inject[F,G]]):cats.InjectK[F,G]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">injectToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="G">G<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Inject">Inject</span>[<span class="extype" name="shims.conversions.InjectConversions.injectToCats.F">F</span>, <span class="extype" name="shims.conversions.InjectConversions.injectToCats.G">G</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/InjectK.html#cats.InjectK" class="extype" name="cats.InjectK">InjectK</a>[<span class="extype" name="shims.conversions.InjectConversions.injectToCats.F">F</span>, <span class="extype" name="shims.conversions.InjectConversions.injectToCats.G">G</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>InjectConversions</dd></dl></div>
+    </li><li name="shims.conversions.IorConverters#iorAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="iorAs[A,B]:shims.conversions.AsScalaz[cats.data.Ior[A,B],A\&amp;/B]withshims.conversions.AsCats[A\&amp;/B,cats.data.Ior[A,B]]"></a><a id="iorAs[A,B]:AsScalaz[Ior[A,B],\&amp;/[A,B]]withAsCats[\&amp;/[A,B],Ior[A,B]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#iorAs[A,B]:shims.conversions.AsScalaz[cats.data.Ior[A,B],A\&amp;/B]withshims.conversions.AsCats[A\&amp;/B,cats.data.Ior[A,B]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">iorAs</span><span class="tparams">[<span name="A">A</span>, <span name="B">B</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.Ior">Ior</span>[<span class="extype" name="shims.conversions.IorConverters.iorAs.A">A</span>, <span class="extype" name="shims.conversions.IorConverters.iorAs.B">B</span>], <span class="extype" name="scalaz.\&amp;/">\&amp;/</span>[<span class="extype" name="shims.conversions.IorConverters.iorAs.A">A</span>, <span class="extype" name="shims.conversions.IorConverters.iorAs.B">B</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.\&amp;/">\&amp;/</span>[<span class="extype" name="shims.conversions.IorConverters.iorAs.A">A</span>, <span class="extype" name="shims.conversions.IorConverters.iorAs.B">B</span>], <span class="extype" name="cats.data.Ior">Ior</span>[<span class="extype" name="shims.conversions.IorConverters.iorAs.A">A</span>, <span class="extype" name="shims.conversions.IorConverters.iorAs.B">B</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IorConverters</dd></dl></div>
+    </li><li name="shims.conversions.KleisliConverters#kleisliAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="kleisliAs[F[_],A,B]:shims.conversions.AsScalaz[cats.data.Kleisli[F,A,B],scalaz.Kleisli[F,A,B]]withshims.conversions.AsCats[scalaz.Kleisli[F,A,B],cats.data.Kleisli[F,A,B]]"></a><a id="kleisliAs[F[_],A,B]:AsScalaz[Kleisli[F,A,B],Kleisli[F,A,B]]withAsCats[Kleisli[F,A,B],Kleisli[F,A,B]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#kleisliAs[F[_],A,B]:shims.conversions.AsScalaz[cats.data.Kleisli[F,A,B],scalaz.Kleisli[F,A,B]]withshims.conversions.AsCats[scalaz.Kleisli[F,A,B],cats.data.Kleisli[F,A,B]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">kleisliAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>, <span name="B">B</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.Kleisli">Kleisli</span>[<span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.F">F</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.A">A</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.B">B</span>], <span class="extype" name="scalaz.Kleisli">Kleisli</span>[<span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.F">F</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.A">A</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.B">B</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Kleisli">Kleisli</span>[<span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.F">F</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.A">A</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.B">B</span>], <span class="extype" name="cats.data.Kleisli">Kleisli</span>[<span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.F">F</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.A">A</span>, <span class="extype" name="shims.conversions.KleisliConverters.kleisliAs.B">B</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>KleisliConverters</dd></dl></div>
+    </li><li name="shims.conversions.MaybeConverters#maybeAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="maybeAs[A]:shims.conversions.AsCats[scalaz.Maybe[A],Option[A]]"></a><a id="maybeAs[A]:AsCats[Maybe[A],Option[A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#maybeAs[A]:shims.conversions.AsCats[scalaz.Maybe[A],Option[A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maybeAs</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Maybe">Maybe</span>[<span class="extype" name="shims.conversions.MaybeConverters.maybeAs.A">A</span>], <a href="http://www.scala-lang.org/api/2.12.8/scala/Option.html#scala.Option" class="extype" name="scala.Option">Option</a>[<span class="extype" name="shims.conversions.MaybeConverters.maybeAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MaybeConverters</dd></dl></div>
+    </li><li name="shims.conversions.MaybeTConverters#maybeTAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="maybeTAs[F[_],A](implicitF:scalaz.Functor[F]):shims.conversions.AsCats[scalaz.MaybeT[F,A],cats.data.OptionT[F,A]]"></a><a id="maybeTAs[F[_],A](Functor[F]):AsCats[MaybeT[F,A],OptionT[F,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#maybeTAs[F[_],A](implicitF:scalaz.Functor[F]):shims.conversions.AsCats[scalaz.MaybeT[F,A],cats.data.OptionT[F,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">maybeTAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="F">F: <span class="extype" name="scalaz.Functor">Functor</span>[<span class="extype" name="shims.conversions.MaybeTConverters.maybeTAs.F">F</span>]</span>)</span><span class="result">: <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.MaybeT">MaybeT</span>[<span class="extype" name="shims.conversions.MaybeTConverters.maybeTAs.F">F</span>, <span class="extype" name="shims.conversions.MaybeTConverters.maybeTAs.A">A</span>], <span class="extype" name="cats.data.OptionT">OptionT</span>[<span class="extype" name="shims.conversions.MaybeTConverters.maybeTAs.F">F</span>, <span class="extype" name="shims.conversions.MaybeTConverters.maybeTAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MaybeTConverters</dd></dl></div>
+    </li><li name="shims.conversions.MonadErrorConversions#monadErrorToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monadErrorToCats[F[_],E](implicitFC:shims.util.Capture[scalaz.MonadError[F,E]],implicitOFC:shims.util.OptionCapture[scalaz.BindRec[F]]):cats.MonadError[F,E]withshims.conversions.Synthetic"></a><a id="monadErrorToCats[F[_],E](Capture[MonadError[F,E]],OptionCapture[BindRec[F]]):MonadError[F,E]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#monadErrorToCats[F[_],E](implicitFC:shims.util.Capture[scalaz.MonadError[F,E]],implicitOFC:shims.util.OptionCapture[scalaz.BindRec[F]]):cats.MonadError[F,E]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">monadErrorToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="E">E</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.MonadError">MonadError</span>[<span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToCats.F">F</span>, <span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToCats.E">E</span>]]</span>, <span name="OFC">OFC: <span class="extype" name="shims.util.OptionCapture">OptionCapture</span>[<span class="extype" name="scalaz.BindRec">BindRec</span>[<span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/MonadError.html#cats.MonadError" class="extype" name="cats.MonadError">MonadError</a>[<span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToCats.F">F</span>, <span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToCats.E">E</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MonadErrorConversions</dd></dl></div>
+    </li><li name="shims.conversions.MonadErrorConversions#monadErrorToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monadErrorToScalaz[F[_],E](implicitFC:shims.util.Capture[cats.MonadError[F,E]]):scalaz.MonadError[F,E]withshims.conversions.Synthetic"></a><a id="monadErrorToScalaz[F[_],E](Capture[MonadError[F,E]]):MonadError[F,E]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#monadErrorToScalaz[F[_],E](implicitFC:shims.util.Capture[cats.MonadError[F,E]]):scalaz.MonadError[F,E]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">monadErrorToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="E">E</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/MonadError.html#cats.MonadError" class="extype" name="cats.MonadError">MonadError</a>[<span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToScalaz.F">F</span>, <span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToScalaz.E">E</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.MonadError">MonadError</span>[<span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToScalaz.F">F</span>, <span class="extype" name="shims.conversions.MonadErrorConversions.monadErrorToScalaz.E">E</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MonadErrorConversions</dd></dl></div>
+    </li><li name="shims.conversions.MonadConversions#monadToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monadToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Monad[F]],implicitOFC:shims.util.OptionCapture[scalaz.BindRec[F]]):cats.Monad[F]withshims.conversions.Synthetic"></a><a id="monadToCats[F[_]](Capture[Monad[F]],OptionCapture[BindRec[F]]):Monad[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#monadToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Monad[F]],implicitOFC:shims.util.OptionCapture[scalaz.BindRec[F]]):cats.Monad[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">monadToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Monad">Monad</span>[<span class="extype" name="shims.conversions.MonadConversions.monadToCats.F">F</span>]]</span>, <span name="OFC">OFC: <span class="extype" name="shims.util.OptionCapture">OptionCapture</span>[<span class="extype" name="scalaz.BindRec">BindRec</span>[<span class="extype" name="shims.conversions.MonadConversions.monadToCats.F">F</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/Monad.html#cats.Monad" class="extype" name="cats.Monad">Monad</a>[<span class="extype" name="shims.conversions.MonadConversions.monadToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MonadConversions</dd></dl></div>
+    </li><li name="shims.conversions.MonadConversions#monadToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monadToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Monad[F]]):scalaz.Monad[F]withshims.conversions.Synthetic"></a><a id="monadToScalaz[F[_]](Capture[Monad[F]]):Monad[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#monadToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Monad[F]]):scalaz.Monad[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">monadToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/Monad.html#cats.Monad" class="extype" name="cats.Monad">Monad</a>[<span class="extype" name="shims.conversions.MonadConversions.monadToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Monad">Monad</span>[<span class="extype" name="shims.conversions.MonadConversions.monadToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MonadConversions</dd></dl></div>
+    </li><li name="shims.conversions.MonoidConversions#monoidToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monoidToCats[A](implicitFC:shims.util.Capture[scalaz.Monoid[A]]):cats.Monoid[A]withshims.conversions.Synthetic"></a><a id="monoidToCats[A](Capture[Monoid[A]]):Monoid[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#monoidToCats[A](implicitFC:shims.util.Capture[scalaz.Monoid[A]]):cats.Monoid[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">monoidToCats</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Monoid">Monoid</span>[<span class="extype" name="shims.conversions.MonoidConversions.monoidToCats.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Monoid">Monoid</span>[<span class="extype" name="shims.conversions.MonoidConversions.monoidToCats.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MonoidConversions</dd></dl></div>
+    </li><li name="shims.conversions.MonoidConversions#monoidToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="monoidToScalaz[A](implicitFC:shims.util.Capture[cats.Monoid[A]]):scalaz.Monoid[A]withshims.conversions.Synthetic"></a><a id="monoidToScalaz[A](Capture[Monoid[A]]):Monoid[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#monoidToScalaz[A](implicitFC:shims.util.Capture[cats.Monoid[A]]):scalaz.Monoid[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">monoidToScalaz</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Monoid">Monoid</span>[<span class="extype" name="shims.conversions.MonoidConversions.monoidToScalaz.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Monoid">Monoid</span>[<span class="extype" name="shims.conversions.MonoidConversions.monoidToScalaz.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>MonoidConversions</dd></dl></div>
+    </li><li name="shims.conversions.EvalConverters#nameAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nameAs[A]:shims.conversions.AsCats[scalaz.Name[A],cats.Eval[A]]"></a><a id="nameAs[A]:AsCats[Name[A],Eval[A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#nameAs[A]:shims.conversions.AsCats[scalaz.Name[A],cats.Eval[A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nameAs</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Name">Name</span>[<span class="extype" name="shims.conversions.EvalConverters.nameAs.A">A</span>], <span class="extype" name="cats.Eval">Eval</span>[<span class="extype" name="shims.conversions.EvalConverters.nameAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EvalConverters</dd></dl></div>
+    </li><li name="shims.conversions.EvalConverters#needAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="needAs[A]:shims.conversions.AsCats[scalaz.Need[A],cats.Eval[A]]"></a><a id="needAs[A]:AsCats[Need[A],Eval[A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#needAs[A]:shims.conversions.AsCats[scalaz.Need[A],cats.Eval[A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">needAs</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Need">Need</span>[<span class="extype" name="shims.conversions.EvalConverters.needAs.A">A</span>], <span class="extype" name="cats.Eval">Eval</span>[<span class="extype" name="shims.conversions.EvalConverters.needAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EvalConverters</dd></dl></div>
+    </li><li name="shims.conversions.NELConverters#nelAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="nelAs[A]:shims.conversions.AsScalaz[cats.data.NonEmptyList[A],scalaz.NonEmptyList[A]]withshims.conversions.AsCats[scalaz.NonEmptyList[A],cats.data.NonEmptyList[A]]"></a><a id="nelAs[A]:AsScalaz[NonEmptyList[A],NonEmptyList[A]]withAsCats[NonEmptyList[A],NonEmptyList[A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#nelAs[A]:shims.conversions.AsScalaz[cats.data.NonEmptyList[A],scalaz.NonEmptyList[A]]withshims.conversions.AsCats[scalaz.NonEmptyList[A],cats.data.NonEmptyList[A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">nelAs</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<a href="http://typelevel.org/cats/api/cats/data/NonEmptyList.html#cats.data.NonEmptyList" class="extype" name="cats.data.NonEmptyList">NonEmptyList</a>[<span class="extype" name="shims.conversions.NELConverters.nelAs.A">A</span>], <span class="extype" name="scalaz.NonEmptyList">NonEmptyList</span>[<span class="extype" name="shims.conversions.NELConverters.nelAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.NonEmptyList">NonEmptyList</span>[<span class="extype" name="shims.conversions.NELConverters.nelAs.A">A</span>], <a href="http://typelevel.org/cats/api/cats/data/NonEmptyList.html#cats.data.NonEmptyList" class="extype" name="cats.data.NonEmptyList">NonEmptyList</a>[<span class="extype" name="shims.conversions.NELConverters.nelAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>NELConverters</dd></dl></div>
+    </li><li name="shims.conversions.OneAndConverters#oneAndAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="oneAndAs[F[_],A]:shims.conversions.AsScalaz[cats.data.OneAnd[F,A],scalaz.OneAnd[F,A]]withshims.conversions.AsCats[scalaz.OneAnd[F,A],cats.data.OneAnd[F,A]]"></a><a id="oneAndAs[F[_],A]:AsScalaz[OneAnd[F,A],OneAnd[F,A]]withAsCats[OneAnd[F,A],OneAnd[F,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#oneAndAs[F[_],A]:shims.conversions.AsScalaz[cats.data.OneAnd[F,A],scalaz.OneAnd[F,A]]withshims.conversions.AsCats[scalaz.OneAnd[F,A],cats.data.OneAnd[F,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">oneAndAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.OneAnd">OneAnd</span>[<span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.F">F</span>, <span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.A">A</span>], <span class="extype" name="scalaz.OneAnd">OneAnd</span>[<span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.F">F</span>, <span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.OneAnd">OneAnd</span>[<span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.F">F</span>, <span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.A">A</span>], <span class="extype" name="cats.data.OneAnd">OneAnd</span>[<span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.F">F</span>, <span class="extype" name="shims.conversions.OneAndConverters.oneAndAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OneAndConverters</dd></dl></div>
+    </li><li name="shims.conversions.OptionTConverters#optionTAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="optionTAs[F[_],A]:shims.conversions.AsScalaz[cats.data.OptionT[F,A],scalaz.OptionT[F,A]]withshims.conversions.AsCats[scalaz.OptionT[F,A],cats.data.OptionT[F,A]]"></a><a id="optionTAs[F[_],A]:AsScalaz[OptionT[F,A],OptionT[F,A]]withAsCats[OptionT[F,A],OptionT[F,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#optionTAs[F[_],A]:shims.conversions.AsScalaz[cats.data.OptionT[F,A],scalaz.OptionT[F,A]]withshims.conversions.AsCats[scalaz.OptionT[F,A],cats.data.OptionT[F,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">optionTAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.OptionT">OptionT</span>[<span class="extype" name="shims.conversions.OptionTConverters.optionTAs.F">F</span>, <span class="extype" name="shims.conversions.OptionTConverters.optionTAs.A">A</span>], <span class="extype" name="scalaz.OptionT">OptionT</span>[<span class="extype" name="shims.conversions.OptionTConverters.optionTAs.F">F</span>, <span class="extype" name="shims.conversions.OptionTConverters.optionTAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.OptionT">OptionT</span>[<span class="extype" name="shims.conversions.OptionTConverters.optionTAs.F">F</span>, <span class="extype" name="shims.conversions.OptionTConverters.optionTAs.A">A</span>], <span class="extype" name="cats.data.OptionT">OptionT</span>[<span class="extype" name="shims.conversions.OptionTConverters.optionTAs.F">F</span>, <span class="extype" name="shims.conversions.OptionTConverters.optionTAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OptionTConverters</dd></dl></div>
+    </li><li name="shims.conversions.OrderConversions#orderToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="orderToCats[A](implicitAC:shims.util.Capture[scalaz.Order[A]]):cats.kernel.Order[A]withshims.conversions.Synthetic"></a><a id="orderToCats[A](Capture[Order[A]]):Order[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#orderToCats[A](implicitAC:shims.util.Capture[scalaz.Order[A]]):cats.kernel.Order[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">orderToCats</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="AC">AC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Order">Order</span>[<span class="extype" name="shims.conversions.OrderConversions.orderToCats.A">A</span>]]</span>)</span><span class="result">: <a href="http://typelevel.org/cats/api/cats/kernel/Order.html#cats.kernel.Order" class="extype" name="cats.kernel.Order">Order</a>[<span class="extype" name="shims.conversions.OrderConversions.orderToCats.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OrderConversions</dd></dl></div>
+    </li><li name="shims.conversions.OrderConversions#orderToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="orderToScalaz[A](implicitAC:shims.util.Capture[cats.kernel.Order[A]]):scalaz.Order[A]withshims.conversions.Synthetic"></a><a id="orderToScalaz[A](Capture[Order[A]]):Order[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#orderToScalaz[A](implicitAC:shims.util.Capture[cats.kernel.Order[A]]):scalaz.Order[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">orderToScalaz</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="AC">AC: <span class="extype" name="shims.util.Capture">Capture</span>[<a href="http://typelevel.org/cats/api/cats/kernel/Order.html#cats.kernel.Order" class="extype" name="cats.kernel.Order">Order</a>[<span class="extype" name="shims.conversions.OrderConversions.orderToScalaz.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Order">Order</span>[<span class="extype" name="shims.conversions.OrderConversions.orderToScalaz.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>OrderConversions</dd></dl></div>
+    </li><li name="shims.conversions.ProfunctorConversions#profunctorToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="profunctorToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Profunctor[F]]):cats.arrow.Profunctor[F]withshims.conversions.Synthetic"></a><a id="profunctorToCats[F[_,_]](Capture[Profunctor[F]]):Profunctor[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#profunctorToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Profunctor[F]]):cats.arrow.Profunctor[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">profunctorToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Profunctor">Profunctor</span>[<span class="extype" name="shims.conversions.ProfunctorConversions.profunctorToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.arrow.Profunctor">Profunctor</span>[<span class="extype" name="shims.conversions.ProfunctorConversions.profunctorToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProfunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.ProfunctorConversions#profunctorToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="profunctorToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Profunctor[F]]):scalaz.Profunctor[F]withshims.conversions.Synthetic"></a><a id="profunctorToScalaz[F[_,_]](Capture[Profunctor[F]]):Profunctor[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#profunctorToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Profunctor[F]]):scalaz.Profunctor[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">profunctorToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.arrow.Profunctor">Profunctor</span>[<span class="extype" name="shims.conversions.ProfunctorConversions.profunctorToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Profunctor">Profunctor</span>[<span class="extype" name="shims.conversions.ProfunctorConversions.profunctorToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ProfunctorConversions</dd></dl></div>
+    </li><li name="shims.conversions.RWSTConverters#rwstAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="rwstAs[F[_],E,L,S,A](implicitF:cats.Monad[F]):shims.conversions.AsScalaz[cats.data.RWST[F,E,L,S,A],scalaz.RWST[F,E,L,S,A]]withshims.conversions.AsCats[scalaz.RWST[F,E,L,S,A],cats.data.RWST[F,E,L,S,A]]"></a><a id="rwstAs[F[_],E,L,S,A](Monad[F]):AsScalaz[RWST[F,E,L,S,A],RWST[F,E,L,S,A]]withAsCats[RWST[F,E,L,S,A],RWST[F,E,L,S,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#rwstAs[F[_],E,L,S,A](implicitF:cats.Monad[F]):shims.conversions.AsScalaz[cats.data.RWST[F,E,L,S,A],scalaz.RWST[F,E,L,S,A]]withshims.conversions.AsCats[scalaz.RWST[F,E,L,S,A],cats.data.RWST[F,E,L,S,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">rwstAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="E">E</span>, <span name="L">L</span>, <span name="S">S</span>, <span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="F">F: <a href="http://typelevel.org/cats/api/cats/Monad.html#cats.Monad" class="extype" name="cats.Monad">Monad</a>[<span class="extype" name="shims.conversions.RWSTConverters.rwstAs.F">F</span>]</span>)</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.RWST">RWST</span>[<span class="extype" name="shims.conversions.RWSTConverters.rwstAs.F">F</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.E">E</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.L">L</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.S">S</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.A">A</span>], <span class="extype" name="scalaz.RWST">RWST</span>[<span class="extype" name="shims.conversions.RWSTConverters.rwstAs.F">F</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.E">E</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.L">L</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.S">S</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.RWST">RWST</span>[<span class="extype" name="shims.conversions.RWSTConverters.rwstAs.F">F</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.E">E</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.L">L</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.S">S</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.A">A</span>], <span class="extype" name="cats.data.RWST">RWST</span>[<span class="extype" name="shims.conversions.RWSTConverters.rwstAs.F">F</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.E">E</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.L">L</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.S">S</span>, <span class="extype" name="shims.conversions.RWSTConverters.rwstAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>RWSTConverters</dd></dl></div>
+    </li><li name="shims.conversions.SemigroupConversions#semigroupToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="semigroupToCats[A](implicitFC:shims.util.Capture[scalaz.Semigroup[A]]):cats.Semigroup[A]withshims.conversions.Synthetic"></a><a id="semigroupToCats[A](Capture[Semigroup[A]]):Semigroup[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#semigroupToCats[A](implicitFC:shims.util.Capture[scalaz.Semigroup[A]]):cats.Semigroup[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">semigroupToCats</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Semigroup">Semigroup</span>[<span class="extype" name="shims.conversions.SemigroupConversions.semigroupToCats.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Semigroup">Semigroup</span>[<span class="extype" name="shims.conversions.SemigroupConversions.semigroupToCats.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SemigroupConversions</dd></dl></div>
+    </li><li name="shims.conversions.SemigroupConversions#semigroupToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="semigroupToScalaz[A](implicitFC:shims.util.Capture[cats.Semigroup[A]]):scalaz.Semigroup[A]withshims.conversions.Synthetic"></a><a id="semigroupToScalaz[A](Capture[Semigroup[A]]):Semigroup[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#semigroupToScalaz[A](implicitFC:shims.util.Capture[cats.Semigroup[A]]):scalaz.Semigroup[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">semigroupToScalaz</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Semigroup">Semigroup</span>[<span class="extype" name="shims.conversions.SemigroupConversions.semigroupToScalaz.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Semigroup">Semigroup</span>[<span class="extype" name="shims.conversions.SemigroupConversions.semigroupToScalaz.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>SemigroupConversions</dd></dl></div>
+    </li><li name="shims.conversions.ShowConversions#showToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="showToCats[A](implicitFC:shims.util.Capture[scalaz.Show[A]]):cats.Show[A]withshims.conversions.Synthetic"></a><a id="showToCats[A](Capture[Show[A]]):Show[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#showToCats[A](implicitFC:shims.util.Capture[scalaz.Show[A]]):cats.Show[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">showToCats</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Show">Show</span>[<span class="extype" name="shims.conversions.ShowConversions.showToCats.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Show">Show</span>[<span class="extype" name="shims.conversions.ShowConversions.showToCats.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ShowConversions</dd></dl></div>
+    </li><li name="shims.conversions.ShowConversions#showToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="showToScalaz[A](implicitFC:shims.util.Capture[cats.Show.ContravariantShow[A]]):scalaz.Show[A]withshims.conversions.Synthetic"></a><a id="showToScalaz[A](Capture[ContravariantShow[A]]):Show[A]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#showToScalaz[A](implicitFC:shims.util.Capture[cats.Show.ContravariantShow[A]]):scalaz.Show[A]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">showToScalaz</span><span class="tparams">[<span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Show.ContravariantShow">ContravariantShow</span>[<span class="extype" name="shims.conversions.ShowConversions.showToScalaz.A">A</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Show">Show</span>[<span class="extype" name="shims.conversions.ShowConversions.showToScalaz.A">A</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ShowConversions</dd></dl></div>
+    </li><li name="shims.conversions.IndexedStateTConverters#stateTAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="stateTAs[F[_],S1,S2,A](implicitevidence$1:cats.Monad[F]):shims.conversions.AsScalaz[cats.data.IndexedStateT[F,S1,S2,A],scalaz.IndexedStateT[F,S1,S2,A]]withshims.conversions.AsCats[scalaz.IndexedStateT[F,S1,S2,A],cats.data.IndexedStateT[F,S1,S2,A]]"></a><a id="stateTAs[F[_],S1,S2,A](Monad[F]):AsScalaz[IndexedStateT[F,S1,S2,A],IndexedStateT[F,S1,S2,A]]withAsCats[IndexedStateT[F,S1,S2,A],IndexedStateT[F,S1,S2,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#stateTAs[F[_],S1,S2,A](implicitevidence$1:cats.Monad[F]):shims.conversions.AsScalaz[cats.data.IndexedStateT[F,S1,S2,A],scalaz.IndexedStateT[F,S1,S2,A]]withshims.conversions.AsCats[scalaz.IndexedStateT[F,S1,S2,A],cats.data.IndexedStateT[F,S1,S2,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">stateTAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="S1">S1</span>, <span name="S2">S2</span>, <span name="A">A</span>]</span><span class="params">(<span class="implicit">implicit </span><span name="arg0">arg0: <a href="http://typelevel.org/cats/api/cats/Monad.html#cats.Monad" class="extype" name="cats.Monad">Monad</a>[<span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.F">F</span>]</span>)</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.IndexedStateT">IndexedStateT</span>[<span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.F">F</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S1">S1</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S2">S2</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.A">A</span>], <span class="extype" name="scalaz.IndexedStateT">IndexedStateT</span>[<span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.F">F</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S1">S1</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S2">S2</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.IndexedStateT">IndexedStateT</span>[<span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.F">F</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S1">S1</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S2">S2</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.A">A</span>], <span class="extype" name="cats.data.IndexedStateT">IndexedStateT</span>[<span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.F">F</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S1">S1</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.S2">S2</span>, <span class="extype" name="shims.conversions.IndexedStateTConverters.stateTAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>IndexedStateTConverters</dd></dl></div>
+    </li><li name="shims.conversions.StrongConversions#strongToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="strongToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Strong[F]]):cats.arrow.Strong[F]withshims.conversions.Synthetic"></a><a id="strongToCats[F[_,_]](Capture[Strong[F]]):Strong[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#strongToCats[F[_,_]](implicitFC:shims.util.Capture[scalaz.Strong[F]]):cats.arrow.Strong[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">strongToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Strong">Strong</span>[<span class="extype" name="shims.conversions.StrongConversions.strongToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.arrow.Strong">Strong</span>[<span class="extype" name="shims.conversions.StrongConversions.strongToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StrongConversions</dd></dl></div>
+    </li><li name="shims.conversions.StrongConversions#strongToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="strongToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Strong[F]]):scalaz.Strong[F]withshims.conversions.Synthetic"></a><a id="strongToScalaz[F[_,_]](Capture[Strong[F]]):Strong[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#strongToScalaz[F[_,_]](implicitFC:shims.util.Capture[cats.arrow.Strong[F]]):scalaz.Strong[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">strongToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>, <span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.arrow.Strong">Strong</span>[<span class="extype" name="shims.conversions.StrongConversions.strongToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Strong">Strong</span>[<span class="extype" name="shims.conversions.StrongConversions.strongToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>StrongConversions</dd></dl></div>
+    </li><li name="shims.conversions.TraverseConversions#traverseToCats" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="traverseToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Traverse[F]]):cats.Traverse[F]withshims.conversions.Synthetic"></a><a id="traverseToCats[F[_]](Capture[Traverse[F]]):Traverse[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#traverseToCats[F[_]](implicitFC:shims.util.Capture[scalaz.Traverse[F]]):cats.Traverse[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">traverseToCats</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="scalaz.Traverse">Traverse</span>[<span class="extype" name="shims.conversions.TraverseConversions.traverseToCats.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="cats.Traverse">Traverse</span>[<span class="extype" name="shims.conversions.TraverseConversions.traverseToCats.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraverseConversions</dd></dl></div>
+    </li><li name="shims.conversions.TraverseConversions#traverseToScalaz" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="traverseToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Traverse[F]]):scalaz.Traverse[F]withshims.conversions.Synthetic"></a><a id="traverseToScalaz[F[_]](Capture[Traverse[F]]):Traverse[F]withSynthetic"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#traverseToScalaz[F[_]](implicitFC:shims.util.Capture[cats.Traverse[F]]):scalaz.Traverse[F]withshims.conversions.Synthetic" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">traverseToScalaz</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>]</span><span class="params">(<span class="implicit">implicit </span><span name="FC">FC: <span class="extype" name="shims.util.Capture">Capture</span>[<span class="extype" name="cats.Traverse">Traverse</span>[<span class="extype" name="shims.conversions.TraverseConversions.traverseToScalaz.F">F</span>]]</span>)</span><span class="result">: <span class="extype" name="scalaz.Traverse">Traverse</span>[<span class="extype" name="shims.conversions.TraverseConversions.traverseToScalaz.F">F</span>] with <span class="extype" name="shims.conversions.Synthetic">Synthetic</span></span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>TraverseConversions</dd></dl></div>
+    </li><li name="shims.conversions.ValidatedConverters#validatedAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="validatedAs[E,A]:shims.conversions.AsScalaz[cats.data.Validated[E,A],scalaz.Validation[E,A]]withshims.conversions.AsCats[scalaz.Validation[E,A],cats.data.Validated[E,A]]"></a><a id="validatedAs[E,A]:AsScalaz[Validated[E,A],Validation[E,A]]withAsCats[Validation[E,A],Validated[E,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#validatedAs[E,A]:shims.conversions.AsScalaz[cats.data.Validated[E,A],scalaz.Validation[E,A]]withshims.conversions.AsCats[scalaz.Validation[E,A],cats.data.Validated[E,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">validatedAs</span><span class="tparams">[<span name="E">E</span>, <span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<a href="http://typelevel.org/cats/api/cats/data/Validated.html#cats.data.Validated" class="extype" name="cats.data.Validated">Validated</a>[<span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.A">A</span>], <span class="extype" name="scalaz.Validation">Validation</span>[<span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Validation">Validation</span>[<span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.A">A</span>], <a href="http://typelevel.org/cats/api/cats/data/Validated.html#cats.data.Validated" class="extype" name="cats.data.Validated">Validated</a>[<span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedConverters.validatedAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ValidatedConverters</dd></dl></div>
+    </li><li name="shims.conversions.ValidatedNELConverters#validatedNelAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="validatedNelAs[E,A]:shims.conversions.AsScalaz[cats.data.ValidatedNel[E,A],scalaz.ValidationNel[E,A]]withshims.conversions.AsCats[scalaz.ValidationNel[E,A],cats.data.ValidatedNel[E,A]]"></a><a id="validatedNelAs[E,A]:AsScalaz[ValidatedNel[E,A],ValidationNel[E,A]]withAsCats[ValidationNel[E,A],ValidatedNel[E,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#validatedNelAs[E,A]:shims.conversions.AsScalaz[cats.data.ValidatedNel[E,A],scalaz.ValidationNel[E,A]]withshims.conversions.AsCats[scalaz.ValidationNel[E,A],cats.data.ValidatedNel[E,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">validatedNelAs</span><span class="tparams">[<span name="E">E</span>, <span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.A">A</span>], <span class="extype" name="scalaz.ValidationNel">ValidationNel</span>[<span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.ValidationNel">ValidationNel</span>[<span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.A">A</span>], <span class="extype" name="cats.data.ValidatedNel">ValidatedNel</span>[<span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.E">E</span>, <span class="extype" name="shims.conversions.ValidatedNELConverters.validatedNelAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>ValidatedNELConverters</dd></dl></div>
+    </li><li name="shims.conversions.EvalConverters#valueAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="valueAs[A]:shims.conversions.AsCats[scalaz.Value[A],cats.Eval[A]]"></a><a id="valueAs[A]:AsCats[Value[A],Eval[A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#valueAs[A]:shims.conversions.AsCats[scalaz.Value[A],cats.Eval[A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">valueAs</span><span class="tparams">[<span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.Value">Value</span>[<span class="extype" name="shims.conversions.EvalConverters.valueAs.A">A</span>], <span class="extype" name="cats.Eval">Eval</span>[<span class="extype" name="shims.conversions.EvalConverters.valueAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>EvalConverters</dd></dl></div>
+    </li><li name="shims.conversions.WriterTConverters#writerTAs" visbl="pub" class="indented0 " data-isabs="false" fullComment="yes" group="Ungrouped">
+      <a id="writerTAs[F[_],W,A]:shims.conversions.AsScalaz[cats.data.WriterT[F,W,A],scalaz.WriterT[F,W,A]]withshims.conversions.AsCats[scalaz.WriterT[F,W,A],cats.data.WriterT[F,W,A]]"></a><a id="writerTAs[F[_],W,A]:AsScalaz[WriterT[F,W,A],WriterT[F,W,A]]withAsCats[WriterT[F,W,A],WriterT[F,W,A]]"></a>
+      <span class="permalink">
+      <a href="../shims/index.html#writerTAs[F[_],W,A]:shims.conversions.AsScalaz[cats.data.WriterT[F,W,A],scalaz.WriterT[F,W,A]]withshims.conversions.AsCats[scalaz.WriterT[F,W,A],cats.data.WriterT[F,W,A]]" title="Permalink">
+        <i class="material-icons"></i>
+      </a>
+    </span>
+      <span class="modifier_kind">
+        <span class="modifier">implicit </span>
+        <span class="kind">def</span>
+      </span>
+      <span class="symbol">
+        <span class="name">writerTAs</span><span class="tparams">[<span name="F">F<span class="tparams">[<span name="_">_</span>]</span></span>, <span name="W">W</span>, <span name="A">A</span>]</span><span class="result">: <span class="extype" name="shims.conversions.AsScalaz">AsScalaz</span>[<span class="extype" name="cats.data.WriterT">WriterT</span>[<span class="extype" name="shims.conversions.WriterTConverters.writerTAs.F">F</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.W">W</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.A">A</span>], <span class="extype" name="scalaz.WriterT">WriterT</span>[<span class="extype" name="shims.conversions.WriterTConverters.writerTAs.F">F</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.W">W</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.A">A</span>]] with <span class="extype" name="shims.conversions.AsCats">AsCats</span>[<span class="extype" name="scalaz.WriterT">WriterT</span>[<span class="extype" name="shims.conversions.WriterTConverters.writerTAs.F">F</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.W">W</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.A">A</span>], <span class="extype" name="cats.data.WriterT">WriterT</span>[<span class="extype" name="shims.conversions.WriterTConverters.writerTAs.F">F</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.W">W</span>, <span class="extype" name="shims.conversions.WriterTConverters.writerTAs.A">A</span>]]</span>
+      </span>
+      
+      <div class="fullcomment"><dl class="attributes block"> <dt>Definition Classes</dt><dd>WriterTConverters</dd></dl></div>
+    </li>
+              </ol>
+            </div>
+
+        
+
+        
+        </div>
+
+        <div id="inheritedMembers">
+        <div class="parent" name="shims.ShimsCore">
+              <h3>Inherited from <span class="extype" name="shims.ShimsCore">ShimsCore</span></h3>
+            </div><div class="parent" name="shims.conversions.RWSTConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.RWSTConverters">RWSTConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.CokleisliConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.CokleisliConverters">CokleisliConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.ConstConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ConstConverters">ConstConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.IorConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.IorConverters">IorConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.WriterTConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.WriterTConverters">WriterTConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.MaybeTConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.MaybeTConverters">MaybeTConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.MaybeConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.MaybeConverters">MaybeConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.OneAndConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.OneAndConverters">OneAndConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.ValidatedNELConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ValidatedNELConverters">ValidatedNELConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.NELConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.NELConverters">NELConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.ValidatedConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ValidatedConverters">ValidatedConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.OptionTConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.OptionTConverters">OptionTConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.KleisliConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.KleisliConverters">KleisliConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.EitherTConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.EitherTConverters">EitherTConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.EitherKConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.EitherKConverters">EitherKConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.IndexedStateTConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.IndexedStateTConverters">IndexedStateTConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.EvalConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.EvalConverters">EvalConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.FreeConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.FreeConverters">FreeConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.FunctionKConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.FunctionKConverters">FunctionKConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.InjectConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.InjectConversions">InjectConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ChoiceConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ChoiceConversions">ChoiceConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ArrowConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ArrowConversions">ArrowConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.StrongConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.StrongConversions">StrongConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ProfunctorConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ProfunctorConversions">ProfunctorConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.EitherConverters">
+              <h3>Inherited from <span class="extype" name="shims.conversions.EitherConverters">EitherConverters</span></h3>
+            </div><div class="parent" name="shims.conversions.CategoryConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.CategoryConversions">CategoryConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ComposeConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ComposeConversions">ComposeConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.BitraverseConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.BitraverseConversions">BitraverseConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.BifoldableConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.BifoldableConversions">BifoldableConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.BifunctorConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.BifunctorConversions">BifunctorConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ShowConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ShowConversions">ShowConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.MonadErrorConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.MonadErrorConversions">MonadErrorConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.MonadConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.MonadConversions">MonadConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.FlatMapConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.FlatMapConversions">FlatMapConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ComonadConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ComonadConversions">ComonadConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.CoflatMapConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.CoflatMapConversions">CoflatMapConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.TraverseConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.TraverseConversions">TraverseConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.FoldableConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.FoldableConversions">FoldableConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.MonoidConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.MonoidConversions">MonoidConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.SemigroupConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.SemigroupConversions">SemigroupConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.OrderConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.OrderConversions">OrderConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.EqConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.EqConversions">EqConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ApplicativeConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ApplicativeConversions">ApplicativeConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ApplyConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ApplyConversions">ApplyConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.FunctorConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.FunctorConversions">FunctorConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.ContravariantConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.ContravariantConversions">ContravariantConversions</span></h3>
+            </div><div class="parent" name="shims.conversions.IFunctorConversions">
+              <h3>Inherited from <span class="extype" name="shims.conversions.IFunctorConversions">IFunctorConversions</span></h3>
+            </div><div class="parent" name="scala.AnyRef">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/AnyRef.html#scala.AnyRef" class="extype" name="scala.AnyRef">AnyRef</a></h3>
+            </div><div class="parent" name="scala.Any">
+              <h3>Inherited from <a href="http://www.scala-lang.org/api/2.12.8/scala/Any.html#scala.Any" class="extype" name="scala.Any">Any</a></h3>
+            </div>
+        
+        </div>
+
+        <div id="groupedMembers">
+        <div class="group" name="Ungrouped">
+              <h3>Ungrouped</h3>
+              
+            </div>
+        </div>
+
+      </div>
+
+      <div id="tooltip"></div>
+
+      <div id="footer">  </div>
+    </body>
+          </div>
+        </div>
+      </div>
+    </body>
+      </html>

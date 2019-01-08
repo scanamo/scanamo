@@ -3,8 +3,9 @@
 <p>Many operations against Dynamo can be performed in batches. Scanamo
 has support for putting, getting and deleting in batches</p>
 
-<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">com.gu.scanamo._</span>
-<span class="k">import</span> <span class="nn">com.gu.scanamo.syntax._</span>
+<div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.scanamo._</span>
+<span class="k">import</span> <span class="nn">org.scanamo.syntax._</span>
+<span class="k">import</span> <span class="nn">org.scanamo.auto._</span>
 
 <span class="k">import</span> <span class="nn">scala.concurrent.duration._</span>
 <span class="k">import</span> <span class="nn">scala.concurrent.ExecutionContext.Implicits.global</span>
@@ -17,7 +18,7 @@ has support for putting, getting and deleting in batches</p>
 </code></pre></div></div>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">val</span> <span class="n">lemmingsTable</span> <span class="k">=</span> <span class="nc">Table</span><span class="o">[</span><span class="kt">Lemming</span><span class="o">](</span><span class="s">"lemmings"</span><span class="o">)</span>
-<span class="c1">// lemmingsTable: com.gu.scanamo.Table[Lemming] = Table(lemmings)
+<span class="c1">// lemmingsTable: org.scanamo.Table[Lemming] = Table(lemmings)
 </span>
 <span class="k">val</span> <span class="n">ops</span> <span class="k">=</span> <span class="k">for</span> <span class="o">{</span>
   <span class="k">_</span> <span class="k">&lt;-</span> <span class="n">lemmingsTable</span><span class="o">.</span><span class="n">putAll</span><span class="o">(</span><span class="nc">Set</span><span class="o">(</span>
@@ -27,11 +28,11 @@ has support for putting, getting and deleting in batches</p>
   <span class="k">_</span> <span class="k">&lt;-</span> <span class="n">lemmingsTable</span><span class="o">.</span><span class="n">deleteAll</span><span class="o">(</span><span class="ss">'role </span><span class="o">-&gt;</span> <span class="nc">Set</span><span class="o">(</span><span class="s">"Walker"</span><span class="o">,</span> <span class="s">"Blocker"</span><span class="o">))</span>
   <span class="n">survivors</span> <span class="k">&lt;-</span> <span class="n">lemmingsTable</span><span class="o">.</span><span class="n">scan</span><span class="o">()</span>
 <span class="o">}</span> <span class="k">yield</span> <span class="o">(</span><span class="n">bLemmings</span><span class="o">,</span> <span class="n">survivors</span><span class="o">)</span>
-<span class="c1">// ops: cats.free.Free[com.gu.scanamo.ops.ScanamoOpsA,(Set[Either[com.gu.scanamo.error.DynamoReadError,Lemming]], List[Either[com.gu.scanamo.error.DynamoReadError,Lemming]])] = Free(...)
+<span class="c1">// ops: cats.free.Free[org.scanamo.ops.ScanamoOpsA,(Set[Either[org.scanamo.error.DynamoReadError,Lemming]], List[Either[org.scanamo.error.DynamoReadError,Lemming]])] = Free(...)
 </span>
 <span class="k">val</span> <span class="o">(</span><span class="n">bLemmings</span><span class="o">,</span> <span class="n">survivors</span><span class="o">)</span> <span class="k">=</span> <span class="nc">Scanamo</span><span class="o">.</span><span class="n">exec</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="n">ops</span><span class="o">)</span>
-<span class="c1">// bLemmings: Set[Either[com.gu.scanamo.error.DynamoReadError,Lemming]] = Set(Right(Lemming(Builder,180)), Right(Lemming(Blocker,42)))
-// survivors: List[Either[com.gu.scanamo.error.DynamoReadError,Lemming]] = List(Right(Lemming(Builder,180)))
+<span class="c1">// bLemmings: Set[Either[org.scanamo.error.DynamoReadError,Lemming]] = Set(Right(Lemming(Builder,180)), Right(Lemming(Blocker,42)))
+// survivors: List[Either[org.scanamo.error.DynamoReadError,Lemming]] = List(Right(Lemming(Builder,180)))
 </span>
 <span class="k">import</span> <span class="nn">cats.syntax.either._</span>
 <span class="c1">// import cats.syntax.either._
@@ -42,9 +43,6 @@ has support for putting, getting and deleting in batches</p>
 <span class="n">survivors</span><span class="o">.</span><span class="n">flatMap</span><span class="o">(</span><span class="k">_</span><span class="o">.</span><span class="n">toOption</span><span class="o">)</span>
 <span class="c1">// res2: List[Lemming] = List(Lemming(Builder,180))
 </span></code></pre></div></div>
-</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({
-languages:['scala','java','bash']
-});
+</section></div></div></div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script><script src="/highlight/highlight.pack.js"></script><script>hljs.configure({languages:['scala','java','bash']});
 hljs.initHighlighting();
-             </script><script>((window.gitter = {}).chat = {}).options = {
-room: 'scanamo/scanamo'};</script><script src="https://sidecar.gitter.im/dist/sidecar.v1.js"></script><script src="/js/main.js"></script></body></html>
+              </script><script src="/js/main.js"></script></body></html>
