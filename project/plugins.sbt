@@ -9,9 +9,7 @@ addSbtPlugin("com.47deg" % "sbt-microsites" % "0.7.23")
 addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.6.7")
 addSbtPlugin("com.eed3si9n" % "sbt-unidoc" % "0.4.2")
 
-addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.2.1")
+addSbtPlugin("com.geirsson" % "sbt-ci-release" % "1.2.2")
 
 addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.5.1")
 addSbtPlugin("com.geirsson" % "sbt-scalafmt" % "1.6.0-RC4")
-
-addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.3.5")
