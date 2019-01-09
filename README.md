@@ -72,3 +72,11 @@ language governing permissions and limitations under the License.
 [Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg "Maven Releases"
 [Badge-Travis]: https://travis-ci.org/scanamo/scanamo.svg?branch=master "Travis CI"
 [Badge-Gitter]: https://badges.gitter.im/guardian/scanamo.svg "Gitter chat"
+### Code Visualization:
+
+Here is a cool visualization of the code evolution
+
+ [![Watch the video](https://img.youtube.com/vi/zT0Gc6KnN_w/0.jpg)](https://www.youtube.com/watch?v=zT0Gc6KnN_w)
+
+ [https://www.youtube.com/watch?v=zT0Gc6KnN_w](https://www.youtube.com/watch?v=zT0Gc6KnN_w)
+
