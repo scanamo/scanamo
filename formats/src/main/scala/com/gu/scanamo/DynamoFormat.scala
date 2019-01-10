@@ -211,6 +211,14 @@ object DynamoFormat extends EnumDynamoFormat {
 
   /**
     * {{{
+    * prop> (d: Float) =>
+    *     | DynamoFormat[Float].read(DynamoFormat[Float].write(d)) == Right(d)
+    * }}}
+    */
+  implicit val floatFormat = xmap(coerceNumber(_.toFloat))(_.toString)(numFormat)
+
+  /**
+    * {{{
     * prop> (d: Double) =>
     *     | DynamoFormat[Double].read(DynamoFormat[Double].write(d)) == Right(d)
     * }}}
@@ -365,6 +373,23 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val longSetFormat: DynamoFormat[Set[Long]] = numSetFormat(coerceNumber(_.toLong))(_.toString)
+
+  /**
+    * {{{
+    * prop> import com.amazonaws.services.dynamodbv2.model.AttributeValue
+    * prop> import org.scalacheck._
+    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+    *
+    * prop> (s: Set[Float]) =>
+    *     | val av = new AttributeValue().withNS(s.toList.map(_.toString): _*)
+    *     | DynamoFormat[Set[Float]].write(s) == av &&
+    *     |   DynamoFormat[Set[Float]].read(av) == Right(s)
+    *
+    * >>> DynamoFormat[Set[Float]].write(Set.empty).getNULL
+    * true
+    * }}}
+    */
+  implicit val floatSetFormat: DynamoFormat[Set[Float]] = numSetFormat(coerceNumber(_.toFloat))(_.toString)
 
   /**
     * {{{
