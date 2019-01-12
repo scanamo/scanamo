@@ -214,7 +214,7 @@ lazy val javaTime = (project in file("java-time"))
     libraryDependencies ++= List(
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
-      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
+      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
     )
   )
   .dependsOn(formats)
@@ -231,7 +231,7 @@ lazy val joda = (project in file("joda"))
       "joda-time" % "joda-time" % "2.9.9",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
-      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.4" % Test
+      "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
     )
   )
   .dependsOn(formats)
