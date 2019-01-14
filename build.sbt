@@ -5,7 +5,7 @@ val catsVersion = "1.5.0"
 val catsEffectVersion = "1.0.0"
 val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
-val shimsVersion = "1.6.1"
+val shimsVersion = "1.7.0"
 val zioVersion = "0.3.1"
 
 val commonSettings = Seq(
