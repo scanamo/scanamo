@@ -61,7 +61,7 @@ addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.482"
+val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.483"
 
 lazy val formats = (project in file("formats"))
   .settings(
