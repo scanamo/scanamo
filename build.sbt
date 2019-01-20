@@ -111,7 +111,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.github.mpilquist" %% "simulacrum" % "0.15.0",
       // Use Joda for custom conversion example
-      "org.joda" % "joda-convert" % "1.8.3" % Provided,
+      "org.joda" % "joda-convert" % "1.9.2" % Provided,
       "joda-time" % "joda-time" % "2.10.1" % Test,
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
@@ -227,7 +227,7 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda" % "joda-convert" % "1.8.3" % Provided,
+      "org.joda" % "joda-convert" % "1.9.2" % Provided,
       "joda-time" % "joda-time" % "2.10.1",
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
