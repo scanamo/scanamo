@@ -2,7 +2,7 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
 import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
-import org.scanamo.error.DynamoReadError
+import org.scanamo.error.{DynamoReadError, MissingKeyValue}
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.request._
@@ -66,7 +66,13 @@ object ScanamoFree {
   )(key: UniqueKey[_])(implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     for {
       res <- ScanamoOps.get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava))
-    } yield Option(res.getItem).map(read[T])
+    } yield
+      res.fold(
+        e => Some(Left(MissingKeyValue(key.t.toString))),
+        r => Option(r.getItem).map(read[T])
+      )
+
+
 
   def getWithConsistency[T](
     tableName: String
@@ -75,7 +81,11 @@ object ScanamoFree {
       res <- ScanamoOps.get(
         new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(true)
       )
-    } yield Option(res.getItem).map(read[T])
+    } yield
+      res.fold(
+        e => Some(Left(MissingKeyValue(key.t.toString))),
+        r => Option(r.getItem).map(read[T])
+      )
 
   def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] =
     keys.asAVMap

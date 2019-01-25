@@ -7,7 +7,7 @@ sealed trait ScanamoOpsA[A] extends Product with Serializable
 final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResult]
 final case class ConditionalPut(req: ScanamoPutRequest)
     extends ScanamoOpsA[Either[ConditionalCheckFailedException, PutItemResult]]
-final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
+final case class Get(req: GetItemRequest) extends ScanamoOpsA[Either[AmazonDynamoDBException, GetItemResult]]
 final case class Delete(req: ScanamoDeleteRequest) extends ScanamoOpsA[DeleteItemResult]
 final case class ConditionalDelete(req: ScanamoDeleteRequest)
     extends ScanamoOpsA[Either[ConditionalCheckFailedException, DeleteItemResult]]
@@ -26,7 +26,8 @@ object ScanamoOps {
   def put(req: ScanamoPutRequest): ScanamoOps[PutItemResult] = liftF[ScanamoOpsA, PutItemResult](Put(req))
   def conditionalPut(req: ScanamoPutRequest): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
     liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, PutItemResult]](ConditionalPut(req))
-  def get(req: GetItemRequest): ScanamoOps[GetItemResult] = liftF[ScanamoOpsA, GetItemResult](Get(req))
+  def get(req: GetItemRequest): ScanamoOps[Either[AmazonDynamoDBException, GetItemResult]] =
+    liftF[ScanamoOpsA, Either[AmazonDynamoDBException, GetItemResult]](Get(req))
   def delete(req: ScanamoDeleteRequest): ScanamoOps[DeleteItemResult] =
     liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
   def conditionalDelete(

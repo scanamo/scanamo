@@ -11,6 +11,8 @@ sealed abstract class DynamoReadError extends ScanamoError
 final case class NoPropertyOfType(propertyType: String, actual: AttributeValue) extends DynamoReadError
 final case class TypeCoercionError(t: Throwable) extends DynamoReadError
 final case object MissingProperty extends DynamoReadError
+//TODO: Is missing key value a dynamo read error?
+final case class MissingKeyValue(attribute: String) extends DynamoReadError
 
 final case class PropertyReadError(name: String, problem: DynamoReadError)
 final case class InvalidPropertiesError(errors: NonEmptyList[PropertyReadError]) extends DynamoReadError
@@ -33,5 +35,6 @@ object DynamoReadError {
     case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
     case TypeCoercionError(e)                   => s"could not be converted to desired type: $e"
     case MissingProperty                        => "missing"
+    case MissingKeyValue(attribute)             => s"Attribute $attribute is not the partition or sort key"
   }
 }
