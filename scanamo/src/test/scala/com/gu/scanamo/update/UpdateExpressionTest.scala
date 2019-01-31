@@ -60,15 +60,15 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
 
   it("append/prepend should wrap scalar values in a list") {
     check { (s: Symbol, v: String) =>
-      append(s -> v).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == List(v))
-      prepend(s -> v).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == List(v))
+      append(s -> v).unprefixedAttributeValues.get("update").exists(_.l.asScala.toList.map(_.s) == List(v))
+      prepend(s -> v).unprefixedAttributeValues.get("update").exists(_.l.asScala.toList.map(_.s) == List(v))
     }
   }
 
   it("appendAll/prependAll should take the value as a list") {
     check { (s: Symbol, l: List[String]) =>
-      appendAll(s -> l).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == l)
-      prependAll(s -> l).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == l)
+      appendAll(s -> l).unprefixedAttributeValues.get("update").exists(_.l.asScala.toList.map(_.s) == l)
+      prependAll(s -> l).unprefixedAttributeValues.get("update").exists(_.l.asScala.toList.map(_.s) == l)
     }
   }
 }

@@ -1,8 +1,8 @@
 package org.scanamo.query
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.DynamoFormat
 import simulacrum.typeclass
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 @typeclass trait UniqueKeyCondition[T] {
   type K

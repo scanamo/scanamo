@@ -1,12 +1,13 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, QueryResult, ScanResult}
 import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import org.scanamo.update.UpdateExpression
+import software.amazon.awssdk.services.dynamodb.model.{BatchWriteItemResponse, DeleteItemResponse, QueryResponse, ScanResponse}
+
 import scala.collection.JavaConverters._
 
 /**
@@ -37,10 +38,10 @@ import scala.collection.JavaConverters._
 case class Table[V: DynamoFormat](name: String) {
 
   def put(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.put(name)(v)
-  def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.putAll(name)(vs)
+  def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResponse]] = ScanamoFree.putAll(name)(vs)
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] = ScanamoFree.getAll[V](name)(keys)
-  def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] = ScanamoFree.delete(name)(key)
+  def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResponse] = ScanamoFree.delete(name)(key)
 
   /**
     * Deletes multiple items by a unique key
@@ -691,7 +692,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Bus,390)), Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
     * }}}
     */
-  def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
+  def query0(query: Query[_]): ScanamoOps[QueryResponse] = ScanamoFree.query0[V](name)(query)
 
   /**
     * Filter the results of a Scan or Query
@@ -770,10 +771,10 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
-  def scan0: ScanamoOps[ScanResult] =
+  def scan0: ScanamoOps[ScanResponse] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
-  def query0(query: Query[_]): ScanamoOps[QueryResult] =
+  def query0(query: Query[_]): ScanamoOps[QueryResponse] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, queryOptions))
 }

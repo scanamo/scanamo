@@ -1,7 +1,7 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
 /**
   * Provides a simplified interface for reading and writing case classes to DynamoDB
@@ -37,5 +37,5 @@ object Scanamo {
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
     */
-  def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]): A = op.foldMap(ScanamoInterpreters.id(client))
+  def exec[A](client: DynamoDbClient)(op: ScanamoOps[A]): A = op.foldMap(ScanamoInterpreters.id(client))
 }

@@ -8,6 +8,8 @@ import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
 import com.amazonaws.services.dynamodbv2.model.{UpdateItemResult, _}
 import org.scanamo.request._
+import software.amazon.awssdk.services.dynamodb.{DynamoDbAsyncClient, DynamoDbClient}
+import software.amazon.awssdk.services.dynamodb.model.{ConditionalCheckFailedException, PutItemRequest, ScanRequest}
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
@@ -27,7 +29,7 @@ object ScanamoInterpreters {
     * the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
     * a type alias for the type itself (`type Id[A] = A`).
     */
-  def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
+  def id(client: DynamoDbClient) = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
       case Put(req) =>
         client.putItem(JavaRequests.put(req))
@@ -64,7 +66,7 @@ object ScanamoInterpreters {
     * Interpret Scanamo operations into a `Future` using the AmazonDynamoDBAsync client
     * which doesn't block, using it's own thread pool for I/O requests internally
     */
-  def future(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) = new (ScanamoOpsA ~> Future) {
+  def future(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) = new (ScanamoOpsA ~> Future) {
     private def futureOf[X <: AmazonWebServiceRequest, T](
       call: (X, AsyncHandler[X, T]) => java.util.concurrent.Future[T],
       req: X
@@ -184,8 +186,8 @@ private[ops] object JavaRequests {
 
   def put(req: ScanamoPutRequest): PutItemRequest =
     req.condition.foldLeft(
-      new PutItemRequest()
-        .withTableName(req.tableName)
+      PutItemRequest.builder().tableName(req.tableName)
+        .item(req.item.get)
         .withItem(req.item.getM)
         .withReturnValues(ReturnValue.ALL_OLD)
     )(

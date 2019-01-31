@@ -1,7 +1,8 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+
 import scala.concurrent.{ExecutionContext, Future}
 
 /**
@@ -18,7 +19,7 @@ object ScanamoAsync {
     * Execute the operations built with [[org.scanamo.Table]], using the client
     * provided asynchronously
     */
-  def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A])(implicit ec: ExecutionContext): Future[A] =
+  def exec[A](client: DynamoDbAsyncClient)(op: ScanamoOps[A])(implicit ec: ExecutionContext): Future[A] =
     op.foldMap(ScanamoInterpreters.future(client)(ec))
 
 }
