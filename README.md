@@ -12,7 +12,7 @@ Installation
 ------------
 
 ```scala
-libraryDependencies += "com.gu" %% "scanamo" % "1.0.0-M8"
+libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M9"
 ```
 
 Scanamo is published for Scala 2.12 and Scala 2.11
