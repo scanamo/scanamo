@@ -98,9 +98,14 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
             _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
             _ <- farmers.delete('name -> "McGregor")
             f <- farmers.get('name -> "McGregor")
-          } yield f
+            scanOut <- farmers.scan()
+            out <- farmers.consistently.get('name -> "McGregor")
+          } yield {
+            println(scanOut)
+            out
+          }
         }
-        .futureValue should equal(None)
+        .futureValue should contain(None)
     }
   }
 

@@ -8,7 +8,7 @@ val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
 val zioVersion = "0.3.2"
 val awsDynamoVersion1 = "1.11.487"
-val awsDynamoVersion2 = "2.2.0"
+val awsDynamoVersion2 = "2.3.9"
 
 
 val commonSettings = Seq(

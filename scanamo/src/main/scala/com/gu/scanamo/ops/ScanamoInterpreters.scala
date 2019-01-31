@@ -186,15 +186,18 @@ private[ops] object JavaRequests {
         )((cond, values) => cond.expressionAttributeValues(values.asJava))
     ).build()
 
-  def delete(req: ScanamoDeleteRequest): DeleteItemRequest =
+  def delete(req: ScanamoDeleteRequest): DeleteItemRequest = {
     req.condition.foldLeft(
-      DeleteItemRequest.builder().tableName(req.tableName).key(req.key.asJava)
+      DeleteItemRequest.builder().tableName(req.tableName)
+        .key(req.key.asJava)
+        .returnValues(ReturnValue.ALL_OLD)
     )(
       (r, c) =>
         c.attributeValues.foldLeft(
           r.conditionExpression(c.expression).expressionAttributeNames(c.attributeNames.asJava)
         )((cond, values) => cond.expressionAttributeValues(values.asJava))
     ).build()
+  }
 
   def update(req: ScanamoUpdateRequest): UpdateItemRequest = {
     val reqWithoutValues = req.condition.foldLeft(
