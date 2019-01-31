@@ -2,7 +2,7 @@ package org.scanamo
 
 import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
-import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.{DynamoDbAsyncClient, DynamoDbClient}
 import software.amazon.awssdk.services.dynamodb.model._
 
 import scala.collection.JavaConverters._
@@ -24,6 +24,22 @@ object LocalDynamoDB {
 
   }
 
+  def clientAsync(): DynamoDbAsyncClient= {
+
+    val cfgs = ClientOverrideConfiguration.builder()
+      .apiCallTimeout(java.time.Duration.ofSeconds(50L))
+      .apiCallAttemptTimeout(java.time.Duration.ofSeconds(5L))
+      .build()
+
+    DynamoDbAsyncClient
+      .builder()
+      .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "credentials")))
+      .overrideConfiguration(cfgs)
+      .endpointOverride(java.net.URI.create("http://localhost:8042"))
+      .build()
+
+  }
+
   def createTable(client: DynamoDbClient)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*): CreateTableResponse = {
     val req = CreateTableRequest.builder()
       .attributeDefinitions(attributeDefinitions(attributes))
@@ -34,7 +50,6 @@ object LocalDynamoDB {
 
     client.createTable(req)
   }
-
 
   def createTableWithIndex(
     client: DynamoDbClient,
@@ -61,6 +76,7 @@ object LocalDynamoDB {
         )
         .build()
     )
+
 
   def deleteTable(client: DynamoDbClient)(tableName: String): DeleteTableResponse =
     client.deleteTable(
@@ -172,7 +188,6 @@ object LocalDynamoDB {
     }
     res
   }
-
   private def keySchema(attributes: Seq[(Symbol, ScalarAttributeType)]) = {
     val hashKeyWithType :: rangeKeyWithType = attributes.toList
     val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)

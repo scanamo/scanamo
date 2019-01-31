@@ -64,6 +64,6 @@ object QueryableKeyCondition {
 }
 
 case class Query[T](t: T)(implicit qkc: QueryableKeyCondition[T]) {
-  def apply(req: QueryRequest.Builder): QueryRequest =
-    qkc.apply(t)(req).build()
+  def apply(req: QueryRequest.Builder): QueryRequest.Builder =
+    qkc.apply(t)(req)
 }

@@ -1,7 +1,5 @@
 package org.scanamo.update
 
-import java.util.Collections
-
 import cats.data.NonEmptyVector
 import cats.kernel.Semigroup
 import cats.kernel.instances.map._

@@ -5,9 +5,9 @@ import java.util
 import cats._
 import cats.data.State
 import cats.implicits._
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryResult, ScanResult}
 import org.scanamo.ops.{BatchGet, BatchWrite, Query, _}
 import org.scalatest.{FunSuite, Matchers}
+import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, QueryResponse, ScanResponse}
 
 import collection.JavaConverters._
 
@@ -34,21 +34,25 @@ class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpre
       State(
         counter =>
           if (counter < 42)
-            counter + 1 -> new ScanResult()
-              .withLastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1)).asJava)
-              .withItems(List.fill(req.options.limit.getOrElse(50))(new util.HashMap[String, AttributeValue]()): _*)
+            counter + 1 -> ScanResponse.builder
+              .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1)).asJava)
+              .items(List.fill(req.options.limit.getOrElse(50))(new util.HashMap[String, AttributeValue]()): _*)
+              .build()
           else
-            counter -> new ScanResult().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
+            counter -> ScanResponse.builder().items(List.empty[java.util.Map[String, AttributeValue]].asJava).build()
       )
     case Query(req) =>
       State(
         counter =>
           if (counter < 42)
-            counter + 1 -> new QueryResult()
-              .withLastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1)).asJava)
-              .withItems(List.fill(req.options.limit.getOrElse(0))(new util.HashMap[String, AttributeValue]()): _*)
+            counter + 1 -> QueryResponse.builder()
+              .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1)).asJava)
+              .items(List.fill(req.options.limit.getOrElse(0))(new util.HashMap[String, AttributeValue]()): _*)
+              .build()
           else
-            counter -> new QueryResult().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
+            counter -> QueryResponse.builder()
+              .items(List.empty[java.util.Map[String, AttributeValue]].asJava)
+              .build()
       )
     case BatchWrite(_)        => ???
     case BatchGet(_)          => ???

@@ -1,8 +1,8 @@
 package org.scanamo.request
 
+import org.scanamo.EvaluationKey
 import org.scanamo.query.{Condition, Query}
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import org.scanamo.{EvaluationKey, _}
 
 case class ScanamoPutRequest(
   tableName: String,
