@@ -1,10 +1,10 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 import org.scanamo.export.Exported
-import shapeless.labelled.{field, FieldType}
+import shapeless.labelled.{FieldType, field}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
 
@@ -23,7 +23,7 @@ abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
   * }}}
   *
   * {{{
-  * >>> DynamoFormat[Animal].write(Zebra).getS
+  * >>> DynamoFormat[Animal].write(Zebra).s
   * Zebra
   * }}}
   */
@@ -43,11 +43,11 @@ trait EnumDynamoFormat extends LowPriorityDynamoFormat {
   ): EnumerationDynamoFormat[FieldType[K, V] :+: R] =
     new EnumerationDynamoFormat[FieldType[K, V] :+: R] {
       override def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: R] =
-        if (av.getS == fieldWitness.value.name) Right(Inl(field[K](emptyGeneric.from(HNil))))
+        if (av.s() == fieldWitness.value.name) Right(Inl(field[K](emptyGeneric.from(HNil))))
         else alternativeFormat.read(av).right.map(Inr(_))
 
       override def write(t: FieldType[K, V] :+: R): AttributeValue = t match {
-        case Inl(_) => new AttributeValue().withS(fieldWitness.value.name)
+        case Inl(_) => AttributeValue.builder().s(fieldWitness.value.name).build()
         case Inr(r) => alternativeFormat.write(r)
       }
     }

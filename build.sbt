@@ -81,7 +81,10 @@ lazy val formats = (project in file("formats"))
       "com.github.mpilquist" %% "simulacrum" % "0.15.0",
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "org.joda" % "joda-convert" % "2.2.0" % Provided,
+      "joda-time" % "joda-time" % "2.10.1",
+      "joda-time" % "joda-time" % "2.10.1" % Test
     ),
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,

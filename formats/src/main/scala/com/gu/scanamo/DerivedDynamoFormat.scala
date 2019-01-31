@@ -2,11 +2,11 @@ package org.scanamo
 
 import cats.data.{NonEmptyList, Validated}
 import cats.syntax.either._
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.error._
 import org.scanamo.export.Exported
 import shapeless._
 import shapeless.labelled._
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import collection.JavaConverters._
 
@@ -25,7 +25,9 @@ trait DerivedDynamoFormat {
   implicit val hnil: InvalidConstructedDynamoFormat[HNil] =
     new InvalidConstructedDynamoFormat[HNil] {
       def read(av: AttributeValue) = Validated.valid(HNil)
-      def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty[String, AttributeValue].asJava)
+      def write(t: HNil): AttributeValue = {
+        AttributeValue.builder().m(Map.empty[String, AttributeValue].asJava).build()
+      }
     }
 
   implicit def hcons[K <: Symbol, V, T <: HList](
@@ -39,7 +41,7 @@ trait DerivedDynamoFormat {
         val fieldName = fieldWitness.value.name
 
         val possibleValue =
-          av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Either.right))
+          av.m().asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Either.right))
 
         val valueOrError = possibleValue.getOrElse(Either.left[DynamoReadError, V](MissingProperty))
 
@@ -54,10 +56,12 @@ trait DerivedDynamoFormat {
       def write(t: FieldType[K, V] :: T): AttributeValue = {
         val tailValue = tailFormat.value.write(t.tail)
         val av = headFormat.value.write(t.head)
-        if (!(av.isNULL eq null) && av.isNULL)
+        if (!(av.nul() eq null) && av.nul())
           tailValue
-        else
-          new AttributeValue().withM((tailValue.getM.asScala + (fieldWitness.value.name -> av)).asJava)
+        else {
+          val content = (tailValue.m().asScala + (fieldWitness.value.name -> av)).asJava
+          AttributeValue.builder().m(content).build()
+        }
       }
     }
 
@@ -79,7 +83,7 @@ trait DerivedDynamoFormat {
     val fieldName = fieldWitness.value.name
     new CoProductDynamoFormat[FieldType[K, V] :+: T] {
       def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: T] =
-        av.getM.asScala.get(fieldName) match {
+        av.m().asScala.get(fieldName) match {
           case Some(nestedAv) =>
             val value = headFormat.value.read(nestedAv)
             value.map(v => Inl(field[K](v)))
@@ -89,7 +93,7 @@ trait DerivedDynamoFormat {
 
       def write(field: FieldType[K, V] :+: T): AttributeValue = field match {
         case Inl(h) =>
-          new AttributeValue().withM(Map(fieldName -> headFormat.value.write(h)).asJava)
+          AttributeValue.builder().m(Map(fieldName -> headFormat.value.write(h)).asJava).build()
         case Inr(t) =>
           tailFormat.write(t)
       }

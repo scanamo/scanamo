@@ -1,11 +1,9 @@
 package org.scanamo
 
 import cats.syntax.either._
-
 import org.scanamo.error.{DynamoReadError, TypeCoercionError}
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
-
 import eu.timepit.refined.api.{RefType, Validate}
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 package object refined {
 

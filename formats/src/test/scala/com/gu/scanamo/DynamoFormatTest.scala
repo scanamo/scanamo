@@ -2,13 +2,11 @@ package org.scanamo
 
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
-
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
 import org.scanamo.auto._
+import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, GetItemRequest, PutItemRequest, ScalarAttributeType}
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -17,13 +15,18 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
     val typeLabel = typeTag[A].tpe.toString
     it(s"should write and then read a $typeLabel from dynamo") {
       val client = LocalDynamoDB.client()
-      LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      LocalDynamoDB.usingRandomTable(client)('name -> ScalarAttributeType.S) { t =>
         final case class Person(name: String, item: A)
         forAll(gen) { a: A =>
           val person = Person("bob", a)
-          client.putItem(t, DynamoFormat[Person].write(person).getM)
-          val resp = client.getItem(t, Map("name" -> new AttributeValue().withS("bob")).asJava)
-          DynamoFormat[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
+
+          val putReq = PutItemRequest.builder()
+            .tableName(t).item(DynamoFormat[Person].write(person).m()).build()
+          client.putItem(putReq)
+
+          val getReq = GetItemRequest.builder().tableName(t).key(Map("name" -> AttributeValue.builder().s("bob").build()).asJava).build()
+          val resp = client.getItem(getReq)
+          DynamoFormat[Person].read(AttributeValue.builder().m(resp.item()).build()) shouldBe Right(person)
         }
       }
     }

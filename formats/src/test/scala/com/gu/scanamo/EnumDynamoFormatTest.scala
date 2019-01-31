@@ -1,12 +1,12 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scalatest.{FunSuite, Matchers}
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class EnumDynamoFormatTest extends FunSuite with Matchers {
 
   test("automatic derivation for case object should only work if treating it as an enum") {
-    write[ExampleEnum](First) shouldBe (new AttributeValue().withS("First"))
+    write[ExampleEnum](First) shouldBe AttributeValue.builder().s("First").build()
     "write(First)" shouldNot typeCheck
   }
 

@@ -2,21 +2,20 @@ package org.scanamo
 
 import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model._
-import software.amazon.awssdk.services.dynamodb.{DynamoDbAsyncClient, DynamoDbClient}
 
 import scala.collection.JavaConverters._
-import scala.language.postfixOps
 
 object LocalDynamoDB {
-  def client(): DynamoDbAsyncClient = {
+  def client(): DynamoDbClient = {
 
     val cfgs = ClientOverrideConfiguration.builder()
       .apiCallTimeout(java.time.Duration.ofSeconds(50L))
       .apiCallAttemptTimeout(java.time.Duration.ofSeconds(5L))
       .build()
 
-    DynamoDbAsyncClient
+    DynamoDbClient
       .builder()
       .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "credentials")))
       .overrideConfiguration(cfgs)
@@ -25,13 +24,15 @@ object LocalDynamoDB {
 
   }
 
-  def createTable(client: DynamoDbClient)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*): CreateTableRequest = {
-    CreateTableRequest.builder()
+  def createTable(client: DynamoDbClient)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*): CreateTableResponse = {
+    val req = CreateTableRequest.builder()
       .attributeDefinitions(attributeDefinitions(attributes))
       .keySchema(keySchema(attributes))
       .tableName(tableName)
       .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
       .build()
+
+    client.createTable(req)
   }
 
 
@@ -175,11 +176,11 @@ object LocalDynamoDB {
   private def keySchema(attributes: Seq[(Symbol, ScalarAttributeType)]) = {
     val hashKeyWithType :: rangeKeyWithType = attributes.toList
     val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
-    keySchemas.map { case (symbol, keyType) => new KeySchemaElement(symbol.name, keyType) }.asJava
+    keySchemas.map { case (symbol, keyType) => KeySchemaElement.builder().attributeName(symbol.name).keyType(keyType).build() }.asJava
   }
 
   private def attributeDefinitions(attributes: Seq[(Symbol, ScalarAttributeType)]) =
-    attributes.map { case (symbol, attributeType) => new AttributeDefinition(symbol.name, attributeType) }.asJava
+    attributes.map { case (symbol, attributeType) => AttributeDefinition.builder.attributeName(symbol.name).attributeType(attributeType).build() }.asJava
 
-  private val arbitraryThroughputThatIsIgnoredByDynamoDBLocal = new ProvisionedThroughput(1L, 1L)
+  private val arbitraryThroughputThatIsIgnoredByDynamoDBLocal = ProvisionedThroughput.builder.readCapacityUnits(1L).writeCapacityUnits(1L).build()
 }
