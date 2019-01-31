@@ -1,71 +1,85 @@
 package org.scanamo
 
-import com.amazonaws.ClientConfiguration
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
-import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.services.dynamodbv2._
-import com.amazonaws.services.dynamodbv2.model._
+import software.amazon.awssdk.auth.credentials.{AwsBasicCredentials, StaticCredentialsProvider}
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
+import software.amazon.awssdk.services.dynamodb.model._
+import software.amazon.awssdk.services.dynamodb.{DynamoDbAsyncClient, DynamoDbClient}
 
 import scala.collection.JavaConverters._
+import scala.language.postfixOps
 
 object LocalDynamoDB {
-  def client(): AmazonDynamoDBAsync =
-    AmazonDynamoDBAsyncClient
-      .asyncBuilder()
-      .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials")))
-      .withEndpointConfiguration(new EndpointConfiguration("http://localhost:8042", ""))
-      .withClientConfiguration(new ClientConfiguration().withClientExecutionTimeout(50000).withRequestTimeout(5000))
+  def client(): DynamoDbAsyncClient = {
+
+    val cfgs = ClientOverrideConfiguration.builder()
+      .apiCallTimeout(java.time.Duration.ofSeconds(50L))
+      .apiCallAttemptTimeout(java.time.Duration.ofSeconds(5L))
       .build()
 
-  def createTable(client: AmazonDynamoDB)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*) =
-    client.createTable(
-      attributeDefinitions(attributes),
-      tableName,
-      keySchema(attributes),
-      arbitraryThroughputThatIsIgnoredByDynamoDBLocal
-    )
+    DynamoDbAsyncClient
+      .builder()
+      .credentialsProvider(StaticCredentialsProvider.create(AwsBasicCredentials.create("dummy", "credentials")))
+      .overrideConfiguration(cfgs)
+      .endpointOverride(java.net.URI.create("http://localhost:8042"))
+      .build()
+
+  }
+
+  def createTable(client: DynamoDbClient)(tableName: String)(attributes: (Symbol, ScalarAttributeType)*): CreateTableRequest = {
+    CreateTableRequest.builder()
+      .attributeDefinitions(attributeDefinitions(attributes))
+      .keySchema(keySchema(attributes))
+      .tableName(tableName)
+      .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+      .build()
+  }
+
 
   def createTableWithIndex(
-    client: AmazonDynamoDB,
+    client: DynamoDbClient,
     tableName: String,
     secondaryIndexName: String,
     primaryIndexAttributes: List[(Symbol, ScalarAttributeType)],
     secondaryIndexAttributes: List[(Symbol, ScalarAttributeType)]
-  ) =
+  ): CreateTableResponse =
     client.createTable(
-      new CreateTableRequest()
-        .withTableName(tableName)
-        .withAttributeDefinitions(
+      CreateTableRequest.builder()
+        .tableName(tableName)
+        .attributeDefinitions(
           attributeDefinitions(primaryIndexAttributes ++ (secondaryIndexAttributes diff primaryIndexAttributes))
         )
-        .withKeySchema(keySchema(primaryIndexAttributes))
-        .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
-        .withGlobalSecondaryIndexes(
-          new GlobalSecondaryIndex()
-            .withIndexName(secondaryIndexName)
-            .withKeySchema(keySchema(secondaryIndexAttributes))
-            .withProvisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
-            .withProjection(new Projection().withProjectionType(ProjectionType.ALL))
+        .keySchema(keySchema(primaryIndexAttributes))
+        .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+        .globalSecondaryIndexes(
+          GlobalSecondaryIndex.builder()
+            .indexName(secondaryIndexName)
+            .keySchema(keySchema(secondaryIndexAttributes))
+            .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+            .projection(Projection.builder().projectionType(ProjectionType.ALL).build())
+            .build()
         )
+        .build()
     )
 
-  def deleteTable(client: AmazonDynamoDB)(tableName: String) =
-    client.deleteTable(tableName)
+  def deleteTable(client: DynamoDbClient)(tableName: String): DeleteTableResponse =
+    client.deleteTable(
+      DeleteTableRequest.builder().tableName(tableName).build()
+    )
 
-  def withTable[T](client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+  def withTable[T](client: DynamoDbClient)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
     thunk: => T
   ): T = {
     createTable(client)(tableName)(attributeDefinitions: _*)
     val res = try {
       thunk
     } finally {
-      client.deleteTable(tableName)
+      deleteTable(client)(tableName)
       ()
     }
     res
   }
 
-  def withRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+  def withRandomTable[T](client: DynamoDbClient)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
     thunk: String => T
   ): T = {
     var created: Boolean = false
@@ -83,27 +97,27 @@ object LocalDynamoDB {
     val res = try {
       thunk(tableName)
     } finally {
-      client.deleteTable(tableName)
+      deleteTable(client)(tableName)
       ()
     }
     res
   }
 
-  def usingTable[T](client: AmazonDynamoDB)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+  def usingTable[T](client: DynamoDbClient)(tableName: String)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
     thunk: => T
   ): Unit = {
     withTable(client)(tableName)(attributeDefinitions: _*)(thunk)
     ()
   }
 
-  def usingRandomTable[T](client: AmazonDynamoDB)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
+  def usingRandomTable[T](client: DynamoDbClient)(attributeDefinitions: (Symbol, ScalarAttributeType)*)(
     thunk: String => T
   ): Unit = {
     withRandomTable(client)(attributeDefinitions: _*)(thunk)
     ()
   }
 
-  def withTableWithSecondaryIndex[T](client: AmazonDynamoDB)(tableName: String, secondaryIndexName: String)(
+  def withTableWithSecondaryIndex[T](client: DynamoDbClient)(tableName: String, secondaryIndexName: String)(
     primaryIndexAttributes: (Symbol, ScalarAttributeType)*
   )(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
     thunk: => T
@@ -118,14 +132,14 @@ object LocalDynamoDB {
     val res = try {
       thunk
     } finally {
-      client.deleteTable(tableName)
+      deleteTable(client)(tableName)
       ()
     }
     res
   }
 
   def withRandomTableWithSecondaryIndex[T](
-    client: AmazonDynamoDB
+    client: DynamoDbClient
   )(primaryIndexAttributes: (Symbol, ScalarAttributeType)*)(secondaryIndexAttributes: (Symbol, ScalarAttributeType)*)(
     thunk: (String, String) => T
   ): T = {
@@ -152,7 +166,7 @@ object LocalDynamoDB {
     val res = try {
       thunk(tableName, indexName)
     } finally {
-      client.deleteTable(tableName)
+      deleteTable(client)(tableName)
       ()
     }
     res
