@@ -1,0 +1,15 @@
+version: "3.5"
+
+services:
+  dynamodb-e:
+    container_name: dynamodb-e
+    image: amazon/dynamodb-local:latest
+    expose:
+    - 8042
+    ports:
+    - 8042:8000
+
+networks:
+  persistence-e:
+    name: persistence-e
+    driver: bridge

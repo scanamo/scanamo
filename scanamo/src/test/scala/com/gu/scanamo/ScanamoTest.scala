@@ -90,8 +90,13 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
         for {
           _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
           _ <- farmers.delete('name -> "McGregor")
-          f <- farmers.get('name -> "McGregor")
-        } yield f
+//          f <- farmers.get('name -> "McGregor") // It retrieves an item with empty attributes map. see https://github.com/aws/aws-sdk-java-v2/issues/1051
+          f <- farmers.scan().map(_.collectFirst {
+            case Right(farmer) if farmer.name == "McGregor" => farmer
+          })
+        } yield {
+          f
+        }
       } should equal(None)
     }
   }
