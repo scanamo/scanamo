@@ -148,6 +148,17 @@ object ScanamoFree {
         }
       )
 
+  /**
+    * {{{
+    * prop> import collection.JavaConverters._
+    * prop> import software.amazon.awssdk.services.dynamodb.model._
+    *
+    * prop> (m: Map[String, Int]) =>
+    *     |   ScanamoFree.read[Map[String, Int]](
+    *     |     m.mapValues(i => AttributeValue.builder.n(i.toString).build).asJava
+    *     |   ) == Right(m)
+    * }}}
+    */
   def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): Either[DynamoReadError, T] =
     f.read(AttributeValue.builder().m(m).build())
 }
