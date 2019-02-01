@@ -15,6 +15,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
   val clientAsync = LocalDynamoDB.clientAsync()
   val clientSync = LocalDynamoDB.client()
+
   import scala.concurrent.ExecutionContext.Implicits.global
 
   override protected def afterAll(): Unit = {
@@ -99,14 +100,14 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
           for {
             _ <- farmers.put(Farmer(farmerName, 62L, Farm(List("rabbit"))))
             _ <- farmers.delete('name -> farmerName)
-//            f1<- farmers.get('name -> farmerName) // TODO: remove
-//            f2 <- farmers.consistently.get('name -> farmerName) // TODO: remove
+            //            f1<- farmers.get('name -> farmerName) // TODO: remove
+            //            f2 <- farmers.consistently.get('name -> farmerName) // TODO: remove
             scanOut <- farmers.scan().map(_.collectFirst {
               case Right(f) if f.name == farmerName => f
             })
           } yield {
-//            println(f1) // Some(Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(name,MissingProperty), PropertyReadError(age,MissingProperty), PropertyReadError(farm,MissingProperty)))))
-//            println(f2) // Some(Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(name,MissingProperty), PropertyReadError(age,MissingProperty), PropertyReadError(farm,MissingProperty)))))
+            //            println(f1) // Some(Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(name,MissingProperty), PropertyReadError(age,MissingProperty), PropertyReadError(farm,MissingProperty)))))
+            //            println(f2) // Some(Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(name,MissingProperty), PropertyReadError(age,MissingProperty), PropertyReadError(farm,MissingProperty)))))
             scanOut
           }
         }
@@ -367,10 +368,10 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       val ops = for {
         _ <- stationTable.putAll(stations)
         ts1 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (2 and 4)))
-        ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+        ts2 <- for {_ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan} yield ts
         _ <- stationTable.putAll(Set(LiverpoolStreet))
         ts3 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (2 and 4)))
-        ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+        ts4 <- for {_ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan} yield ts
         _ <- stationTable.putAll(Set(CamdenTown))
         ts5 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (1 and 1)))
       } yield (ts1, ts2, ts3, ts4, ts5)

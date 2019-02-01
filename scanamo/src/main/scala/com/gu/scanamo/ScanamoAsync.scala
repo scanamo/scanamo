@@ -19,7 +19,8 @@ object ScanamoAsync {
     * Execute the operations built with [[org.scanamo.Table]], using the client
     * provided asynchronously
     */
-  def exec[A](client: DynamoDbAsyncClient)(op: ScanamoOps[A])(implicit ec: ExecutionContext): Future[A] =
-    op.foldMap(ScanamoInterpreters.future(client)(ec))
+  def exec[A](client: DynamoDbAsyncClient)(op: ScanamoOps[A])
+             (implicit ec: ExecutionContext): Future[A] =
+    op.foldMap(ScanamoInterpreters.future(client))
 
 }

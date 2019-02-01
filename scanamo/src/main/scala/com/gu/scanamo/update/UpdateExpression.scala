@@ -6,6 +6,7 @@ import cats.kernel.instances.map._
 import org.scanamo.DynamoFormat
 import org.scanamo.query._
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+import scala.collection.JavaConverters._
 
 sealed trait UpdateExpression extends Product with Serializable {
   def expression: String =
@@ -129,7 +130,7 @@ private[update] case class LeafAppendExpression(
   av: AttributeValue
 ) extends LeafUpdateExpression {
   override val updateType = SET
-  override val constantValue = Some("emptyList" -> AttributeValue.builder().build()) //TODO: not sure, maybe builder().l(List.empy.asJava) but what type ?..
+  override val constantValue = Some("emptyList" -> AttributeValue.builder().l(List.empty[AttributeValue].asJava).build())
   override val attributeValue = Some(valuePlaceholder -> av)
   override def expression: String =
     s"#$namePlaceholder = list_append(if_not_exists(#$namePlaceholder, :emptyList), :$valuePlaceholder)"
@@ -162,7 +163,7 @@ private[update] case class LeafPrependExpression(
   av: AttributeValue
 ) extends LeafUpdateExpression {
   override val updateType = SET
-  override val constantValue = Some("emptyList" -> AttributeValue.builder().build())
+  override val constantValue = Some("emptyList" -> AttributeValue.builder().l(List.empty[AttributeValue].asJava).build())
   override val attributeValue = Some(valuePlaceholder -> av)
   override def expression: String =
     s"#$namePlaceholder = list_append(:$valuePlaceholder, if_not_exists(#$namePlaceholder, :emptyList))"

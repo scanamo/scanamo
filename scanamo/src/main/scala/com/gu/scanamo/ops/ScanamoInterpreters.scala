@@ -1,6 +1,6 @@
 package org.scanamo.ops
 
-import java.util.concurrent.CompletableFuture
+import java.util.concurrent.{CompletableFuture, ExecutionException}
 
 import cats._
 import cats.data.NonEmptyList
@@ -8,8 +8,8 @@ import cats.syntax.either._
 import org.scanamo.request._
 import software.amazon.awssdk.services.dynamodb.model._
 import software.amazon.awssdk.services.dynamodb.{DynamoDbAsyncClient, DynamoDbClient}
-
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.Future
+import scala.util.Try
 
 /**
   * Interpreters to take the operations defined with Scanamo and execute them
@@ -63,14 +63,22 @@ object ScanamoInterpreters {
     * Interpret Scanamo operations into a `Future` using the AmazonDynamoDBAsync client
     * which doesn't block, using it's own thread pool for I/O requests internally
     */
-  def future(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) = new (ScanamoOpsA ~> Future) {
+  def future(client: DynamoDbAsyncClient) = new (ScanamoOpsA ~> Future) {
 
     private def futureOf[T]
     (
       req: CompletableFuture[T],
     ): Future[T] = {
-      Future.apply {
-        req.get()
+      Future.fromTry(Try(req.get()))
+    }
+
+    private def futureAsEither[T, E <: DynamoDbException](req: CompletableFuture[T])(f : Throwable => Option[E]) : Future[Either[E, T]] = {
+      Future.fromTry {
+        Try(req.get()).map(Either.right[E, T]).recover {
+          case ec : ExecutionException if f(ec.getCause).isDefined =>
+            val a = f(ec.getCause).get
+            Either.left(a)
+        }
       }
     }
 
@@ -78,19 +86,19 @@ object ScanamoInterpreters {
       case Put(req) =>
         futureOf(client.putItem(JavaRequests.put(req)))
       case ConditionalPut(req) =>
-        futureOf(client.putItem(JavaRequests.put(req)))
-          .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-          .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
-          }
+        futureAsEither[PutItemResponse, ConditionalCheckFailedException](client.putItem(JavaRequests.put(req))) {
+          case e: ConditionalCheckFailedException => Some(e)
+          case _ => None
+        }
       case Get(req) =>
         futureOf(client.getItem(req))
       case Delete(req) =>
         futureOf(client.deleteItem(JavaRequests.delete(req)))
       case ConditionalDelete(req) =>
-        futureOf(client.deleteItem(JavaRequests.delete(req)))
-          .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+        futureAsEither[DeleteItemResponse, ConditionalCheckFailedException](client.deleteItem(JavaRequests.delete(req))) {
+          case e: ConditionalCheckFailedException => Some(e)
+          case _ => None
+        }
       case Scan(req) =>
         futureOf(client.scan(JavaRequests.scan(req)))
       case Query(req) =>
@@ -103,11 +111,10 @@ object ScanamoInterpreters {
       case Update(req) =>
         futureOf(client.updateItem(JavaRequests.update(req)))
       case ConditionalUpdate(req) =>
-        futureOf(client.updateItem(JavaRequests.update(req)))
-          .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-          .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
-          }
+        futureAsEither[UpdateItemResponse, ConditionalCheckFailedException](client.updateItem(JavaRequests.update(req))){
+          case e: ConditionalCheckFailedException => Some(e)
+          case _ => None
+        }
     }
   }
 }
