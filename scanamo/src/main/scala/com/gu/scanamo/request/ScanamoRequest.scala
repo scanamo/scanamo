@@ -45,7 +45,7 @@ case class ScanamoQueryOptions(
   filter: Option[Condition[_]]
 )
 object ScanamoQueryOptions {
-  val default = ScanamoQueryOptions(true, None, None, None)
+  val default = ScanamoQueryOptions(false, None, None, None)
 }
 
 case class RequestCondition(
