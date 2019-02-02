@@ -1,4 +1,4 @@
-version: "3.5"
+version: "3.0"
 
 services:
   dynamodb-e:
@@ -8,8 +8,3 @@ services:
     - 8042
     ports:
     - 8042:8000
-
-networks:
-  persistence-e:
-    name: persistence-e
-    driver: bridge
