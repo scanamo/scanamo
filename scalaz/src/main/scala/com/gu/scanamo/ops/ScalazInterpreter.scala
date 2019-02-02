@@ -1,26 +1,28 @@
 package org.scanamo.ops
 
-import java.util.concurrent.{Future => JFuture}
+import java.util.concurrent.CompletionException
 
-import com.amazonaws.AmazonWebServiceRequest
-import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
 import scalaz.ioeffect.{ExitResult, IO, Task}
 import scalaz.~>
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
+
+import scala.compat.java8.FutureConverters
+import scala.concurrent.ExecutionContext
+import scala.util.{Failure, Success}
 
 object ScalazInterpreter {
-  def io(client: AmazonDynamoDBAsync) = new (ScanamoOpsA ~> Task) {
-    private[this] def eff[A <: AmazonWebServiceRequest, B](f: (A, AsyncHandler[A, B]) => JFuture[B], req: A): Task[B] =
+  def io(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) = new (ScanamoOpsA ~> Task) {
+    private[this] def eff[B]
+    (
+      f: java.util.concurrent.CompletionStage[B]
+    ): Task[B] =
       IO.async { cb =>
-        val handler = new AsyncHandler[A, B] {
-          def onError(exception: Exception): Unit =
-            cb(ExitResult.Failed(exception))
-
-          def onSuccess(request: A, result: B): Unit =
-            cb(ExitResult.Completed(result))
+        FutureConverters.toScala(f).onComplete {
+          case Success(v) => cb(ExitResult.Completed(v))
+          case Failure(e: CompletionException) ⇒ cb(ExitResult.Failed(e.getCause))
+          case Failure(e) ⇒ cb(ExitResult.Failed(e))
         }
-        val _ = f(req, handler)
       }
 
     private[this] def catchConditional[A, A0](io: Task[A0]): Task[A] =
@@ -33,37 +35,28 @@ object ScalazInterpreter {
     override def apply[A](fa: ScanamoOpsA[A]): Task[A] =
       fa match {
         case Put(req) =>
-          eff(client.putItemAsync, JavaRequests.put(req))
+          eff(client.putItem(JavaRequests.put(req)))
         case ConditionalPut(req) =>
-          catchConditional(eff(client.putItemAsync, JavaRequests.put(req)))
+          catchConditional(eff(client.putItem(JavaRequests.put(req))))
         case Get(req) =>
-          eff(client.getItemAsync, req)
+          eff(client.getItem(req))
         case Delete(req) =>
-          eff(client.deleteItemAsync, JavaRequests.delete(req))
+          eff(client.deleteItem(JavaRequests.delete(req)))
         case ConditionalDelete(req) =>
-          catchConditional(eff(client.deleteItemAsync, JavaRequests.delete(req)))
+          catchConditional(eff(client.deleteItem(JavaRequests.delete(req))))
         case Scan(req) =>
-          eff(client.scanAsync, JavaRequests.scan(req))
+          eff(client.scan(JavaRequests.scan(req)))
         case Query(req) =>
-          eff(client.queryAsync, JavaRequests.query(req))
+          eff(client.query(JavaRequests.query(req)))
         // Overloading means we need explicit parameter types here
         case BatchWrite(req) =>
-          eff(
-            client.batchWriteItemAsync(
-              _: BatchWriteItemRequest,
-              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]
-            ),
-            req
-          )
+          eff(client.batchWriteItem(req))
         case BatchGet(req) =>
-          eff(
-            client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-            req
-          )
+          eff(client.batchGetItem(req))
         case Update(req) =>
-          eff(client.updateItemAsync, JavaRequests.update(req))
+          eff(client.updateItem(JavaRequests.update(req)))
         case ConditionalUpdate(req) =>
-          catchConditional(eff(client.updateItemAsync, JavaRequests.update(req)))
+          catchConditional(eff(client.updateItem(JavaRequests.update(req))))
       }
   }
 }
