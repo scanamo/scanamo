@@ -1,38 +1,49 @@
 package org.scanamo.ops
 
+import java.util.concurrent.CompletionStage
+
 import cats.~>
-import com.amazonaws.AmazonWebServiceRequest
-import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import scalaz.zio.ExitResult.Cause
 import scalaz.zio.{ExitResult, IO}
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model._
+
+import scala.compat.java8.FutureConverters
+import scala.concurrent.java8.FuturesConvertersImpl._
+import scala.concurrent.{ExecutionContext, Future}
+import scala.util.{Success, Try}
 
 object ZioInterpreter {
-  def effect(client: AmazonDynamoDBAsync): ScanamoOpsA ~> IO[AmazonDynamoDBException, ?] =
-    new (ScanamoOpsA ~> IO[AmazonDynamoDBException, ?]) {
-      private def eff[A <: AmazonWebServiceRequest, B](
-        f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
+  def effect(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext): ScanamoOpsA ~> IO[DynamoDbException, ?] =
+    new (ScanamoOpsA ~> IO[DynamoDbException, ?]) {
+      private def eff[A <: DynamoDbRequest, B](
+        f: A => java.util.concurrent.CompletionStage[B],
         req: A
-      ): IO[AmazonDynamoDBException, B] =
-        IO.async[AmazonDynamoDBException, B] { cb =>
-          val handler = new AsyncHandler[A, B] {
-            def onError(exception: Exception): Unit =
-              exception match {
-                case e: AmazonDynamoDBException => cb(ExitResult.Failed(e))
-                case t                          => cb(ExitResult.Terminated(t :: Nil))
-              }
+      ): IO[DynamoDbException, B] =
+        IO.async[DynamoDbException, B] { cb =>
 
-            def onSuccess(request: A, result: B): Unit =
-              cb(ExitResult.Completed(result))
-          }
+
+          val a = FutureConverters.toScala(f(req))
+            .transform {
+              case scala.util.Success(result) =>
+                Success(cb(ExitResult.succeeded(result)))
+              case scala.util.Failure(exception: DynamoDbException) =>
+                Success(cb(ExitResult.failed(Cause.checked(exception))))
+              case scala.util.Failure(exception) =>
+                Success(cb(ExitResult.failed(Cause.unchecked(exception))))
+            }
+
+
+          IO.fromTry(a)
+
           val _ = f(req, handler)
         }
 
-      def apply[A](op: ScanamoOpsA[A]): IO[AmazonDynamoDBException, A] = op match {
+      def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] = op match {
         case Put(req) =>
-          eff(client.putItemAsync, JavaRequests.put(req))
+          eff(client.putItem, JavaRequests.put(req))
         case ConditionalPut(req) =>
-          eff(client.putItemAsync, JavaRequests.put(req)).redeem(
+          eff(client.putItem, JavaRequests.put(req)).redeem(
             _ match {
               case e: ConditionalCheckFailedException => IO.now(Left(e))
               case t                                  => IO.fail(t)
@@ -40,11 +51,11 @@ object ZioInterpreter {
             a => IO.now(Right(a))
           )
         case Get(req) =>
-          eff(client.getItemAsync, req)
+          eff(client.getItem, req)
         case Delete(req) =>
-          eff(client.deleteItemAsync, JavaRequests.delete(req))
+          eff(client.deleteItem, JavaRequests.delete(req))
         case ConditionalDelete(req) =>
-          eff(client.deleteItemAsync, JavaRequests.delete(req)).redeem(
+          eff(client.deleteItem, JavaRequests.delete(req)).redeem(
             _ match {
               case e: ConditionalCheckFailedException => IO.now(Left(e))
               case t                                  => IO.fail(t)
@@ -52,26 +63,26 @@ object ZioInterpreter {
             a => IO.now(Right(a))
           )
         case Scan(req) =>
-          eff(client.scanAsync, JavaRequests.scan(req))
+          eff(client.scan, JavaRequests.scan(req))
         case Query(req) =>
-          eff(client.queryAsync, JavaRequests.query(req))
+          eff(client.query, JavaRequests.query(req))
         case BatchWrite(req) =>
           eff(
-            client.batchWriteItemAsync(
+            client.batchWriteItem(
               _: BatchWriteItemRequest,
-              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]
+              _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResponse]
             ),
             req
           )
         case BatchGet(req) =>
           eff(
-            client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
+            client.batchGetItem(_: BatchGetItemRequest),
             req
           )
         case Update(req) =>
-          eff(client.updateItemAsync, JavaRequests.update(req))
+          eff(client.updateItem, JavaRequests.update(req))
         case ConditionalUpdate(req) =>
-          eff(client.updateItemAsync, JavaRequests.update(req)).redeem(
+          eff(client.updateItem, JavaRequests.update(req)).redeem(
             _ match {
               case e: ConditionalCheckFailedException => IO.now(Left(e))
               case t                                  => IO.fail(t)

@@ -3,13 +3,11 @@ package org.scanamo.ops
 import cats.effect.Async
 import cats.implicits._
 import cats.~>
-import com.amazonaws.AmazonWebServiceRequest
-import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model.{BatchWriteItemRequest, ConditionalCheckFailedException}
 
 object CatsInterpreter {
-  def effect[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
+  def effect[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]): ScanamoOpsA ~> F = new (ScanamoOpsA ~> F) {
     private def eff[A <: AmazonWebServiceRequest, B](
       f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
       req: A

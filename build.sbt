@@ -6,7 +6,7 @@ val catsEffectVersion = "1.2.0"
 val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
-val zioVersion = "0.3.2"
+val zioVersion = "0.5.0"
 val awsDynamoVersion1 = "1.11.487"
 val awsDynamoVersion2 = "2.3.9"
 
@@ -122,7 +122,8 @@ lazy val scanamo = (project in file("scanamo"))
       "org.joda" % "joda-convert" % "2.2.0" % Provided,
       "joda-time" % "joda-time" % "2.10.1" % Test,
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "org.scala-lang.modules" % "scala-java8-compat_2.12" % "0.9.0"
     )
   )
   .dependsOn(formats, testkit % "test->test")
