@@ -1,13 +1,13 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scanamo.ops.{ScalazInterpreter, ScanamoOps}
 import scalaz.ioeffect.Task
 import shims._
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 object ScanamoScalaz {
 
-  def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A]): Task[A] =
+  def exec[A](client: DynamoDbAsyncClient)(op: ScanamoOps[A]): Task[A] =
     op.asScalaz.foldMap(ScalazInterpreter.io(client))
 
 }
