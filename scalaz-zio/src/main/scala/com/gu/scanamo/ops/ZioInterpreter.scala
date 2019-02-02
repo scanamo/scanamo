@@ -19,7 +19,7 @@ object ZioInterpreter {
         f: java.util.concurrent.CompletionStage[B],
       ): IO[DynamoDbException, B] =
         IO.fromFuture(ec)(() => FutureConverters.toScala(f)).redeem( {
-          case FutureCompletionException(e: DynamoDbException) => IO.fail(e)
+          case e: DynamoDbException => IO.fail(e)
           case t: Throwable => IO.terminate(t)
         }, IO.now)
 
@@ -76,10 +76,10 @@ object ZioInterpreter {
             f.onComplete {
               case Success(value) =>
                 cb(ExitResult.succeeded(value))
-              case Failure(value) if value.isInstanceOf[CompletionException] =>
-                cb(ExitResult.failed(ExitResult.Cause.checked(FutureCompletionException.fromJava(value.asInstanceOf[CompletionException]))))
+              case Failure(value: CompletionException) =>
+                cb(ExitResult.failed(ExitResult.Cause.checked(value.getCause)))
               case Failure(value) =>
-                cb(ExitResult.failed(ExitResult.Cause.unchecked(value)))
+                cb(ExitResult.failed(ExitResult.Cause.checked(value)))
             }(ec)
           }
         }
@@ -92,13 +92,5 @@ object ZioInterpreter {
 
     def fromFutureIO[A, E >: Throwable](ec: ExecutionContext)(ftrio: IO[E, Future[A]]): IO[E, A] =
       ftrio.flatMap(unsafeFromFuture(ec, _))
-  }
-
-  case class FutureCompletionException(cause: Throwable) extends Throwable
-
-  object FutureCompletionException {
-    def fromJava(ec: CompletionException) : FutureCompletionException = {
-      new FutureCompletionException(ec.getCause)
-    }
   }
 }
