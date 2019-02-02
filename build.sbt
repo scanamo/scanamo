@@ -64,7 +64,7 @@ addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-//val awsDynamoDBv1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % awsDynamoVersion1
+val awsDynamoDBv1 = "com.amazonaws" % "aws-java-sdk-dynamodb" % awsDynamoVersion1
 val awsDynamoDBv2 = "software.amazon.awssdk" % "dynamodb" % awsDynamoVersion2
 
 lazy val formats = (project in file("formats"))
@@ -205,7 +205,7 @@ lazy val alpakka = (project in file("alpakka"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      //      awsDynamoDBv1,
+      awsDynamoDBv1,
       awsDynamoDBv2,
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.20",
