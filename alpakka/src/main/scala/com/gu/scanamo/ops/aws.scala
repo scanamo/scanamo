@@ -21,8 +21,10 @@ object aws {
       )
   }
 
-  implicit final def v1AttrValueUpdate(atr: AttributeValueUpdate): v1.AttributeValueUpdate = ???
-  implicit final def v2AttrValueUpdate(atr: v1.AttributeValueUpdate): AttributeValueUpdate = ???
+  implicit final def v1AttrValueUpdate(atr: AttributeValueUpdate): v1.AttributeValueUpdate =
+    new v1.AttributeValueUpdate(atr.value().asLegacy, atr.actionAsString())
+  implicit final def v2AttrValueUpdate(atr: v1.AttributeValueUpdate): AttributeValueUpdate =
+    AttributeValueUpdate.builder().action(atr.getAction).value(atr.getValue.fromLegacy).build()
 
   implicit final class UpdateRespOps(req: v1.UpdateItemResult) {
     def fromLegacy: UpdateItemResponse =
@@ -105,9 +107,12 @@ object aws {
   }
 
   implicit final class BatchWriteItemOps(req: BatchWriteItemRequest) {
-    def legacy: v1.BatchWriteItemRequest =
-      //        new v1.BatchWriteItemRequest(req.requestItems().asScala.mapValues(_.asScala.map(_.le)))
-      ???
+    def legacy: v1.BatchWriteItemRequest = {
+      val a = new v1.BatchWriteItemRequest(req.requestItems().asScala.mapValues(_.asScala.map(_.legacy).asJava).asJava)
+      a.setReturnConsumedCapacity(req.returnConsumedCapacityAsString())
+      a.setReturnItemCollectionMetrics(req.returnItemCollectionMetricsAsString())
+      a
+    }
   }
 
   implicit final def legacyItemCollMetrics(v2Metrics: ItemCollectionMetrics): v1.ItemCollectionMetrics = {
@@ -124,12 +129,32 @@ object aws {
       .sizeEstimateRangeGB(v1Metrics.getSizeEstimateRangeGB)
       .build()
 
-  implicit final def v1WriteRequest(req: WriteRequest): v1.WriteRequest =
-    //      new v1.WriteRequest(req.putRequest(), req.deleteRequest())
-    ???
+  implicit final class v1WriteRequest(req: WriteRequest) {
+    def legacy: v1.WriteRequest = {
+      val r = new v1.WriteRequest()
+      r.setDeleteRequest(req.deleteRequest().legacy)
+      r.setPutRequest(req.putRequest().legacy)
+      r
+    }
+  }
+
+  implicit final class v1PutRequest(req: PutRequest) {
+    def legacy: v1.PutRequest = {
+      new v1.PutRequest(req.item())
+    }
+  }
+
+  implicit final class v1DeleteRequest(req: DeleteRequest) {
+    def legacy: v1.DeleteRequest = {
+      new v1.DeleteRequest(req.key())
+    }
+  }
 
   implicit final class BatchWriteItemRespOps(req: v1.BatchWriteItemResult) {
-    def fromLegacy: BatchWriteItemResponse = ???
+    def fromLegacy: BatchWriteItemResponse = {
+//      BatchWriteItemResponse.builder().consumedCapacity(???).itemCollectionMetrics(???).unprocessedItems(???).build()
+      ???
+    }
   }
 
   implicit def v1PutRequest(v2: v1.PutItemRequest): PutItemRequest =
@@ -153,9 +178,19 @@ object aws {
   }
 
   implicit final class BatchGetItemOps(req: BatchGetItemRequest) {
-    def legacy: v1.BatchGetItemRequest =
-      //        new v1.BatchGetItemRequest(req.requestItems(), req.returnConsumedCapacity())
-      ???
+    def legacy: v1.BatchGetItemRequest = {
+      new v1.BatchGetItemRequest(req.requestItems().asScala.mapValues {
+        v => {
+          val atr = new v1.KeysAndAttributes()
+          atr.setAttributesToGet(v.attributesToGet())
+          atr.setConsistentRead(v.consistentRead())
+          atr.setExpressionAttributeNames(v.expressionAttributeNames())
+          atr.setKeys(v.keys().asScala.map(_.asScala.mapValues(_.asLegacy).asJava).asJava)
+          atr.setProjectionExpression(v.projectionExpression())
+          atr
+        }
+      }.asJava, req.returnConsumedCapacityAsString())
+    }
   }
 
   implicit final class BatchGetItemRespOps(req: v1.BatchGetItemResult) {
@@ -169,26 +204,26 @@ object aws {
           .attributesToGet(k.getAttributesToGet)
           .consistentRead(k.getConsistentRead)
           .expressionAttributeNames(k.getExpressionAttributeNames)
+          .build()
       }
-
-      val a = BatchGetItemResponse
-        .builder()
-        .responses(req.getResponses)
+      BatchGetItemResponse.builder
         .unprocessedKeys(req.getUnprocessedKeys.asScala.mapValues(_.fromLegacy).asJava)
         .consumedCapacity(req.getConsumedCapacity.asScala.map(_.fromLegacy).asJava)
-      a
+        .responses(null)
+        .build()
     }
   }
 
   implicit final class KeyAndAttributesOps(req: v1.KeysAndAttributes) {
     def fromLegacy: KeysAndAttributes =
-      //        KeysAndAttributes.builder()
-      //          .attributesToGet(req.getAttributesToGet)
-      //          .consistentRead(req.getConsistentRead)
-      //          .projectionExpression(req.getProjectionExpression)
-      //          .expressionAttributeNames(req.getExpressionAttributeNames)
-      //          .keys(req.getKeys.asScala.map(_.asScala.mapValues(_.fromLegacy).asJava).asJava)
-      ???
+      KeysAndAttributes
+        .builder()
+        .attributesToGet(req.getAttributesToGet)
+        .consistentRead(req.getConsistentRead)
+        .projectionExpression(req.getProjectionExpression)
+        .expressionAttributeNames(req.getExpressionAttributeNames)
+        .keys(req.getKeys.asScala.map(_.asScala.mapValues(_.fromLegacy).asJava).asJava)
+        .build()
   }
 
   implicit final class ConsumedCapacityOps(req: v1.ConsumedCapacity) {
@@ -197,8 +232,6 @@ object aws {
         .builder()
         .tableName(req.getTableName)
         .table(req.getTable.fromLegacy)
-        .readCapacityUnits(req.getCapacityUnits)
-        .writeCapacityUnits(req.getWriteCapacityUnits)
         .capacityUnits(req.getCapacityUnits)
         .localSecondaryIndexes(req.getLocalSecondaryIndexes.asScala.mapValues(_.fromLegacy).asJava)
         .globalSecondaryIndexes(req.getGlobalSecondaryIndexes.asScala.mapValues(_.fromLegacy).asJava)
@@ -210,8 +243,6 @@ object aws {
       Capacity
         .builder()
         .capacityUnits(cap.getCapacityUnits)
-        .readCapacityUnits(cap.getReadCapacityUnits)
-        .writeCapacityUnits(cap.getWriteCapacityUnits)
         .build()
   }
 
@@ -236,16 +267,32 @@ object aws {
   implicit final class AttributeValue2Ops(req: AttributeValue) {
     def asLegacy: v1.AttributeValue = {
       val v = new v1.AttributeValue()
-      v.withB(req.b().asByteBuffer())
-      v.withBOOL(req.bool())
-      v.withBS(req.bs().asScala.map(_.asByteBuffer()).asJava)
-      v.withL(req.l().asScala.map(_.asLegacy).asJava)
-      v.withM(req.m().asScala.mapValues(_.asLegacy).asJava)
-      v.withN(req.n())
-      v.withNS(req.ns())
-      v.withNULL(req.nul())
-      v.withS(req.s())
-      v.withSS(req.ss())
+      Option(req.b()).foreach(b => {
+        v.setB(b.asByteBuffer())
+      })
+
+      Option(req.bool()).foreach(b => {
+        v.setBOOL(b)
+      })
+
+      Option(req.n()).foreach(b => {
+        v.setN(b)
+      })
+
+      Option(req.s()).foreach(b => {
+        v.setS(b)
+      })
+
+      Option(req.nul()).foreach(b => {
+        v.setNULL(b)
+      })
+
+      v.setBS(req.bs().asScala.map(_.asByteBuffer()).asJava)
+      v.setL(req.l().asScala.map(_.asLegacy).asJava)
+      v.setM(req.m().asScala.mapValues(_.asLegacy).asJava)
+      v.setNS(req.ns())
+      v.setSS(req.ss())
+      v
     }
   }
 
