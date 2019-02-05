@@ -20,10 +20,11 @@ object Scanamo {
     * >>> case class Transport(mode: String, line: String)
     * >>> val transport = Table[Transport]("transport")
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val localDb = LocalDynamoDB.v1
+    * >>> val client = localDb.clientSync()
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
+    * >>> localDb.withTable(client)("transport")('mode -> S, 'line -> S) {
     * ...   import org.scanamo.syntax._
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(

@@ -29,8 +29,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
 
-  val client = LocalDynamoDB.client()
+  val client = LocalDynamoDB.v1.clientSync()
+  val clientAsync = LocalDynamoDB.v1.clientAsync()
+
+  val localDb = LocalDynamoDB.v1
+  
   val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
+  
   val alpakkaClient = DynamoClient(
     DynamoSettings(
       region = "",
@@ -42,7 +47,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   )
 
   it("should put asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -60,7 +65,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should get asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -77,7 +82,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S, 'number -> N) { t =>
+    localDb.usingRandomTable(client)('name -> S, 'number -> N) { t =>
       case class Engine(name: String, number: Int)
 
       val engines = Table[Engine](t)
@@ -93,7 +98,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val cities = Table[City](t)
 
       val result = for {
@@ -106,7 +111,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should delete asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -125,7 +130,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should deleteAll asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -148,7 +153,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should update asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
+    localDb.usingRandomTable(client)('location -> S) { t =>
       case class Forecast(location: String, weather: String)
 
       val forecasts = Table[Forecast](t)
@@ -163,7 +168,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should update asynchronously if a condition holds") {
-    LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
+    localDb.usingRandomTable(client)('location -> S) { t =>
       case class Forecast(location: String, weather: String, equipment: Option[String])
 
       val forecasts = Table[Forecast](t)
@@ -182,7 +187,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should scan asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Bear(name: String, favouriteFood: String)
 
       val bears = Table[Bear](t)
@@ -198,7 +203,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Lemming(name: String, stuff: String)
       val lemmings = Table[Lemming](t)
       val ops = for {
@@ -213,7 +218,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("scans with a limit asynchronously") {
     case class Bear(name: String, favouriteFood: String)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey"))
@@ -227,7 +232,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    localDb.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
@@ -244,7 +249,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("Paginate scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    localDb.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
@@ -264,7 +269,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should query asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('species -> S, 'number -> N) { t =>
+    localDb.usingRandomTable(client)('species -> S, 'number -> N) { t =>
       case class Animal(species: String, number: Int)
       val animals = Table[Animal](t)
       val ops = for {
@@ -288,7 +293,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('mode -> S, 'line -> S) { t =>
+    localDb.usingRandomTable(client)('mode -> S, 'line -> S) { t =>
       case class Transport(mode: String, line: String)
       val transports = Table[Transport](t)
       val ops = for {
@@ -311,7 +316,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("queries with a limit asynchronously") {
     case class Transport(mode: String, line: String)
 
-    LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+    localDb.withRandomTable(client)('mode -> S, 'line -> S) { t =>
       val transports = Table[Transport](t)
       val result = for {
         _ <- transports.putAll(
@@ -333,7 +338,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("queries an index with a limit asynchronously") {
     case class Transport(mode: String, line: String, colour: String)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('mode -> S, 'colour -> S) {
+    localDb.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('mode -> S, 'colour -> S) {
       (t, i) =>
         val transports = Table[Transport](t)
         val result = for {
@@ -373,7 +378,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
+    localDb.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
       val stationTable = Table[Station](t)
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       val ops = for {
@@ -402,7 +407,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("queries for items that are missing an attribute") {
     case class Farmer(firstName: String, surname: String, age: Option[Int])
 
-    LocalDynamoDB.usingRandomTable(client)('firstName -> S, 'surname -> S) { t =>
+    localDb.usingRandomTable(client)('firstName -> S, 'surname -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("Fred", "Perry", None))
@@ -418,7 +423,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val rabbits = Table[Rabbit](t)
       val result = for {
         _ <- rabbits.putAll(List.fill(100)(Rabbit(util.Random.nextString(500))).toSet)
@@ -430,7 +435,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should get multiple items asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(animals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
       val farmers = Table[Farmer](t)
@@ -455,7 +460,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
+    localDb.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
       case class Doctor(actor: String, regeneration: Int)
       val doctors = Table[Doctor](t)
 
@@ -469,7 +474,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should get multiple items asynchronously (automatically handling batching)") {
-    LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
+    localDb.usingRandomTable(client)('id -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
@@ -484,7 +489,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   }
 
   it("should get multiple items consistently asynchronously (automatically handling batching)") {
-    LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
+    localDb.usingRandomTable(client)('id -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
@@ -502,7 +507,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
@@ -519,7 +524,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
@@ -535,7 +540,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
@@ -555,7 +560,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
@@ -575,7 +580,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("conditionally delete asynchronously") {
     case class Gremlin(number: Int, wet: Boolean)
 
-    LocalDynamoDB.usingRandomTable(client)('number -> N) { t =>
+    localDb.usingRandomTable(client)('number -> N) { t =>
       val gremlinsTable = Table[Gremlin](t)
 
       val ops = for {

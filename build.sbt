@@ -62,6 +62,7 @@ addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
 val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.487"
+val awsDynamoDBv2 = "software.amazon.awssdk" % "dynamodb" % "2.3.9"
 
 lazy val formats = (project in file("formats"))
   .settings(
@@ -72,6 +73,7 @@ lazy val formats = (project in file("formats"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
+      awsDynamoDBv2,
       "com.chuusai" %% "shapeless" % "2.3.3",
       "com.github.mpilquist" %% "simulacrum" % "0.15.0",
       "org.typelevel" %% "cats-core" % catsVersion,
@@ -125,7 +127,8 @@ lazy val testkit = (project in file("testkit"))
     publishingSettings,
     name := "scanamo-testkit",
     libraryDependencies ++= Seq(
-      awsDynamoDB
+      awsDynamoDB,
+      awsDynamoDBv2
     )
   )
 

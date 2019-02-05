@@ -11,19 +11,23 @@ import org.scanamo.auto._
 import scalaz.ioeffect.RTS
 import scalaz._
 import Scalaz._
+
 import shims._
 
 class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll with RTS {
 
-  val client = LocalDynamoDB.client()
+  val client = LocalDynamoDB.v1.clientSync()
+  val clientAsync = LocalDynamoDB.v1.clientAsync()
 
+  val localDb = LocalDynamoDB.v1
+  
   override protected def afterAll(): Unit = {
     client.shutdown()
     super.afterAll()
   }
 
   it("should put asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -34,14 +38,14 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         f <- farmers.get('name -> "McDonald")
       } yield f
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(result)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(result)) should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow")))))
       )
     }
   }
 
   it("should get asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -53,12 +57,12 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         r2 <- farmers.get('name -> "Maggot")
       } yield (r1, r1 == r2)
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(result)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(result)) should equal(
         (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S, 'number -> N) { t =>
+    localDb.usingRandomTable(client)('name -> S, 'number -> N) { t =>
       case class Engine(name: String, number: Int)
 
       val engines = Table[Engine](t)
@@ -68,13 +72,13 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         e <- engines.get('name -> "Thomas" and 'number -> 1)
       } yield e
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(result)) should equal(Some(Right(Engine("Thomas", 1))))
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(result)) should equal(Some(Right(Engine("Thomas", 1))))
     }
   }
 
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val cities = Table[City](t)
 
       val result = for {
@@ -82,18 +86,18 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         c <- cities.consistently.get('name -> "Nashville")
       } yield c
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(result)) should equal(Some(Right(City("Nashville", "US"))))
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(result)) should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
   it("should delete asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
       val farmers = Table[Farmer](t)
 
-      unsafePerformIO(ScanamoScalaz.exec(client) {
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync) {
         for {
           _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
           _ <- farmers.delete('name -> "McGregor")
@@ -104,7 +108,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   }
 
   it("should deleteAll asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
@@ -122,12 +126,12 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         fs <- farmers.scan
       } yield fs
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(List.empty)
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(List.empty)
     }
   }
 
   it("should update asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
+    localDb.usingRandomTable(client)('location -> S) { t =>
       case class Forecast(location: String, weather: String)
 
       val forecasts = Table[Forecast](t)
@@ -137,12 +141,12 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         fs <- forecasts.scan
       } yield fs
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(List(Right(Forecast("London", "Sun"))))
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(List(Right(Forecast("London", "Sun"))))
     }
   }
 
   it("should update asynchronously if a condition holds") {
-    LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
+    localDb.usingRandomTable(client)('location -> S) { t =>
       case class Forecast(location: String, weather: String, equipment: Option[String])
 
       val forecasts = Table[Forecast](t)
@@ -154,14 +158,14 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         results <- forecasts.scan()
       } yield results
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None)))
       )
     }
   }
 
   it("should scan asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Bear(name: String, favouriteFood: String)
 
       val bears = Table[Bear](t)
@@ -172,12 +176,12 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         bs <- bears.scan
       } yield bs
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets")))
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Lemming(name: String, stuff: String)
       val lemmings = Table[Lemming](t)
       val ops = for {
@@ -187,28 +191,28 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         ls <- lemmings.scan
       } yield ls
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)).size should equal(100)
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)).size should equal(100)
     }
   }
 
   it("scans with a limit asynchronously") {
     case class Bear(name: String, favouriteFood: String)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey"))
         _ <- bears.put(Bear("Yogi", "picnic baskets"))
         bs <- bears.limit(1).scan
       } yield bs
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(List(Right(Bear("Pooh", "honey"))))
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(List(Right(Bear("Pooh", "honey"))))
     }
   }
 
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    localDb.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
@@ -216,7 +220,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- bears.index(i).limit(1).scan
       } yield bs
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         List(Right(Bear("Graham", "quinoa", Some("Guardianista"))))
       )
     }
@@ -225,7 +229,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   it("Paginate scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    localDb.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
@@ -238,14 +242,14 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         } yield res2 ::: res3
       } yield bs
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
       )
     }
   }
 
   it("should query asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('species -> S, 'number -> N) { t =>
+    localDb.usingRandomTable(client)('species -> S, 'number -> N) { t =>
       case class Animal(species: String, number: Int)
       val animals = Table[Animal](t)
       val ops = for {
@@ -258,7 +262,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         r5 <- animals.query('species -> "Pig" and 'number >= 2)
       } yield (r1, r2, r3, r4, r5)
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         (
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
@@ -269,7 +273,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('mode -> S, 'line -> S) { t =>
+    localDb.usingRandomTable(client)('mode -> S, 'line -> S) { t =>
       case class Transport(mode: String, line: String)
       val transports = Table[Transport](t)
       val ops = for {
@@ -283,7 +287,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         ts <- transports.query('mode -> "Underground" and ('line beginsWith "C"))
       } yield ts
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle")))
       )
     }
@@ -292,7 +296,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   it("queries with a limit asynchronously") {
     case class Transport(mode: String, line: String)
 
-    LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
+    localDb.withRandomTable(client)('mode -> S, 'line -> S) { t =>
       val transports = Table[Transport](t)
       val result = for {
         _ <- transports.putAll(
@@ -305,14 +309,14 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         rs <- transports.limit(1).query('mode -> "Underground" and ('line beginsWith "C"))
       } yield rs
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(result)) should equal(List(Right(Transport("Underground", "Central"))))
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(result)) should equal(List(Right(Transport("Underground", "Central"))))
     }
   }
 
   it("queries an index with a limit asynchronously") {
     case class Transport(mode: String, line: String, colour: String)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('mode -> S, 'colour -> S) {
+    localDb.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('mode -> S, 'colour -> S) {
       (t, i) =>
         val transports = Table[Transport](t)
         val result = for {
@@ -333,7 +337,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
             )
         } yield rs
 
-        unsafePerformIO(ScanamoScalaz.exec(client)(result)) should equal(
+        unsafePerformIO(ScanamoScalaz.exec(clientAsync)(result)) should equal(
           List(Right(Transport("Underground", "Northern", "Black")))
         )
     }
@@ -352,7 +356,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
+    localDb.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
       val stationTable = Table[Station](t)
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       val ops = for {
@@ -366,7 +370,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         ts5 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (1 and 1)))
       } yield (ts1, ts2, ts3, ts4, ts5)
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         (
           List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
           List.empty,
@@ -381,14 +385,14 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   it("queries for items that are missing an attribute") {
     case class Farmer(firstName: String, surname: String, age: Option[Int])
 
-    LocalDynamoDB.usingRandomTable(client)('firstName -> S, 'surname -> S) { t =>
+    localDb.usingRandomTable(client)('firstName -> S, 'surname -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("Fred", "Perry", None))
         _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
         farmerWithNoAge <- farmersTable.filter(attributeNotExists('age)).query('firstName -> "Fred")
       } yield farmerWithNoAge
-      unsafePerformIO(ScanamoScalaz.exec(client)(farmerOps)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(farmerOps)) should equal(
         List(Right(Farmer("Fred", "Perry", None)))
       )
     }
@@ -397,24 +401,24 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   it("should put multiple items asynchronously") {
     case class Rabbit(name: String)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val rabbits = Table[Rabbit](t)
       val result = for {
         _ <- rabbits.putAll(List.fill(100)(Rabbit(scala.util.Random.nextString(500))).toSet)
         rs <- rabbits.scan
       } yield rs
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(result)).size should equal(100)
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(result)).size should equal(100)
     }
   }
 
   it("should get multiple items asynchronously") {
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       case class Farm(animals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
       val farmers = Table[Farmer](t)
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(for {
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(for {
         _ <- farmers.putAll(
           Set(
             Farmer("Boggis", 43L, Farm(List("chicken"))),
@@ -432,11 +436,11 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
       )
     }
 
-    LocalDynamoDB.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
+    localDb.usingRandomTable(client)('actor -> S, 'regeneration -> N) { t =>
       case class Doctor(actor: String, regeneration: Int)
       val doctors = Table[Doctor](t)
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(for {
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(for {
         _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
         ds <- doctors.getAll(('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11))
       } yield ds)) should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
@@ -444,12 +448,12 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   }
 
   it("should get multiple items asynchronously (automatically handling batching)") {
-    LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
+    localDb.usingRandomTable(client)('id -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(for {
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(for {
         _ <- farmsTable.putAll(farms)
         fs <- farmsTable.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
       } yield fs)) should equal(farms.map(Right(_)))
@@ -457,12 +461,12 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   }
 
   it("should get multiple items consistently asynchronously (automatically handling batching)") {
-    LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
+    localDb.usingRandomTable(client)('id -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(for {
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(for {
         _ <- farmsTable.putAll(farms)
         fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
       } yield fs)) should equal(farms.map(Right(_)))
@@ -473,14 +477,14 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
         result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(farmerOps)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(farmerOps)) should equal(
         Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
       )
     }
@@ -490,13 +494,13 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(farmerOps)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(farmerOps)) should equal(
         None
       )
     }
@@ -506,7 +510,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
@@ -516,7 +520,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
       } yield farmerWithNewStock
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(farmerOps)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(farmerOps)) should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken")))))
       )
     }
@@ -526,7 +530,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
 
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    localDb.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
@@ -537,7 +541,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get('name -> "Butch")
       } yield farmerButch
-      unsafePerformIO(ScanamoScalaz.exec(client)(farmerOps)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(farmerOps)) should equal(
         Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
       )
     }
@@ -546,7 +550,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
   it("conditionally delete asynchronously") {
     case class Gremlin(number: Int, wet: Boolean)
 
-    LocalDynamoDB.usingRandomTable(client)('number -> N) { t =>
+    localDb.usingRandomTable(client)('number -> N) { t =>
       val gremlinsTable = Table[Gremlin](t)
 
       val ops = for {
@@ -556,7 +560,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
 
-      unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
+      unsafePerformIO(ScanamoScalaz.exec(clientAsync)(ops)) should equal(
         List(Right(Gremlin(1, false)))
       )
     }

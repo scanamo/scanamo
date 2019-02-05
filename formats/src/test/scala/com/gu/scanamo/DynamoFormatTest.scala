@@ -2,7 +2,6 @@ package org.scanamo
 
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
-
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
@@ -12,12 +11,14 @@ import org.scanamo.auto._
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
+  val localDb = LocalDynamoDB.v1
+  val client = localDb.clientSync()
+
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
   def testReadWrite[A: DynamoFormat: TypeTag](gen: Gen[A]): Unit = {
     val typeLabel = typeTag[A].tpe.toString
     it(s"should write and then read a $typeLabel from dynamo") {
-      val client = LocalDynamoDB.client()
-      LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      localDb.usingRandomTable(client)('name -> S) { t =>
         final case class Person(name: String, item: A)
         forAll(gen) { a: A =>
           val person = Person("bob", a)
