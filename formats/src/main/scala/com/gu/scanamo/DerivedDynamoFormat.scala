@@ -30,7 +30,7 @@ trait DerivedDynamoFormat {
 
   implicit def hcons[K <: Symbol, V, T <: HList](
     implicit
-    headFormat: Lazy[DynamoFormat[V]],
+    headFormat: Lazy[DynamoFormat[V, AttributeValue]],
     tailFormat: Lazy[ConstructedDynamoFormat[T]],
     fieldWitness: Witness.Aux[K]
   ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
@@ -61,7 +61,7 @@ trait DerivedDynamoFormat {
       }
     }
 
-  trait CoProductDynamoFormat[T] extends DynamoFormat[T]
+  trait CoProductDynamoFormat[T] extends DynamoFormat[T, AttributeValue]
 
   implicit val cnil: CoProductDynamoFormat[CNil] = new CoProductDynamoFormat[CNil] {
     def read(av: AttributeValue): Either[DynamoReadError, CNil] =
@@ -72,7 +72,7 @@ trait DerivedDynamoFormat {
 
   implicit def coproduct[K <: Symbol, V, T <: Coproduct](
     implicit
-    headFormat: Lazy[DynamoFormat[V]],
+    headFormat: Lazy[DynamoFormat[V, AttributeValue]],
     tailFormat: CoProductDynamoFormat[T],
     fieldWitness: Witness.Aux[K]
   ): CoProductDynamoFormat[FieldType[K, V] :+: T] = {
@@ -99,9 +99,9 @@ trait DerivedDynamoFormat {
   implicit def genericProduct[T: NotSymbol, R](
     implicit gen: LabelledGeneric.Aux[T, R],
     formatR: Lazy[ValidConstructedDynamoFormat[R]]
-  ): Exported[DynamoFormat[T]] =
+  ): Exported[DynamoFormat[T, AttributeValue]] =
     Exported(
-      new DynamoFormat[T] {
+      new DynamoFormat[T, AttributeValue] {
         def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
         def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
       }
@@ -110,9 +110,9 @@ trait DerivedDynamoFormat {
   implicit def genericCoProduct[T, R](
     implicit gen: LabelledGeneric.Aux[T, R],
     formatR: Lazy[CoProductDynamoFormat[R]]
-  ): Exported[DynamoFormat[T]] =
+  ): Exported[DynamoFormat[T, AttributeValue]] =
     Exported(
-      new DynamoFormat[T] {
+      new DynamoFormat[T, AttributeValue] {
         def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
         def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
       }

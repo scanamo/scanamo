@@ -1,6 +1,5 @@
 package org.scanamo
 
-import java.nio.ByteBuffer
 import java.util.UUID
 
 import cats.NotNull
@@ -11,11 +10,8 @@ import cats.instances.string._
 import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import org.scanamo.aws.models.AmazonAttribute
 import org.scanamo.error._
-import simulacrum.typeclass
-
-import scala.collection.JavaConverters._
 import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
 
@@ -79,21 +75,28 @@ import scala.reflect.ClassTag
   *
   * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.iso]]
   */
-@typeclass trait DynamoFormat[T] {
-  def read(av: AttributeValue): Either[DynamoReadError, T]
-  def write(t: T): AttributeValue
+abstract class DynamoFormat[T, Value: AmazonAttribute] {
+  def read(av: Value): Either[DynamoReadError, T]
+  def write(t: T): Value
   def default: Option[T] = None
 }
 
 object DynamoFormat extends EnumDynamoFormat {
-  private def attribute[T](decode: AttributeValue => T, propertyType: String)(
-    encode: AttributeValue => T => AttributeValue
-  ): DynamoFormat[T] =
-    new DynamoFormat[T] {
-      override def read(av: AttributeValue): Either[DynamoReadError, T] =
-        Either.fromOption(Option(decode(av)), NoPropertyOfType(propertyType, av))
-      override def write(t: T): AttributeValue =
-        encode(new AttributeValue())(t)
+  private def attribute[T, AttributeValue: AmazonAttribute](
+    decode: AmazonAttribute[AttributeValue] => AttributeValue => T,
+    propertyType: String
+  )(
+    encode: AmazonAttribute[AttributeValue] => AttributeValue => T => AttributeValue
+  ): DynamoFormat[T, AttributeValue] =
+    new DynamoFormat[T, AttributeValue] {
+      override def read(av: AttributeValue): Either[DynamoReadError, T] = {
+        val opt = Option(decode(implicitly[AmazonAttribute[AttributeValue]])(av))
+        Either.fromOption(opt, NoPropertyOfType(propertyType, av))
+      }
+      override def write(t: T): AttributeValue = {
+        val zero = implicitly[AmazonAttribute[AttributeValue]]
+        encode(zero)(zero.init)(t)
+      }
     }
 
   /**
@@ -114,11 +117,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(UserId(Eric))
     * }}}
     */
-  def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
-    override def read(item: AttributeValue): Either[DynamoReadError, A] = f.read(item).map(r)
-    override def write(t: A): AttributeValue = f.write(w(t))
-    override val default: Option[A] = f.default.map(r)
-  }
+  def iso[AttributeValue: AmazonAttribute, A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B, AttributeValue]) =
+    new DynamoFormat[A, AttributeValue] {
+      override def read(item: AttributeValue): Either[DynamoReadError, A] = f.read(item).map(r)
+      override def write(t: A): AttributeValue = f.write(w(t))
+      override val default: Option[A] = f.default.map(r)
+    }
 
   /**
     * {{{
@@ -134,7 +138,9 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+  def xmap[AttributeValue: AmazonAttribute, A, B](
+    r: B => Either[DynamoReadError, A]
+  )(w: A => B)(implicit f: DynamoFormat[B, AttributeValue]) = new DynamoFormat[A, AttributeValue] {
     override def read(item: AttributeValue): Either[DynamoReadError, A] = f.read(item).flatMap(r)
     override def write(t: A): AttributeValue = f.write(w(t))
   }
@@ -159,9 +165,9 @@ object DynamoFormat extends EnumDynamoFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B, T >: scala.Null <: scala.Throwable](
+  def coercedXmap[AttributeValue: AmazonAttribute, A, B, T >: scala.Null <: scala.Throwable](
     read: B => A
-  )(write: A => B)(implicit f: DynamoFormat[B], T: ClassTag[T], NT: NotNull[T]) =
+  )(write: A => B)(implicit f: DynamoFormat[B, AttributeValue], T: ClassTag[T], NT: NotNull[T]) =
     xmap(coerce[B, A, T](read))(write)
 
   /**
@@ -170,21 +176,12 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == Right(s)
     * }}}
     */
-  implicit val stringFormat = attribute(_.getS, "S")(_.withS)
+  private def stringFormat[AttributeValue: AmazonAttribute] =
+    attribute[String, AttributeValue](_.getString, "S")(_.setString)
 
-  private val javaBooleanFormat = attribute[java.lang.Boolean](_.getBOOL, "BOOL")(_.withBOOL)
+  private def numFormat[AttributeValue: AmazonAttribute]: DynamoFormat[String, AttributeValue] =
+    attribute[String, AttributeValue](_.getNumericString, "N")(_.setNumericString)
 
-  /**
-    * {{{
-    * prop> (b: Boolean) =>
-    *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == Right(b)
-    * }}}
-    */
-  implicit val booleanFormat = xmap[Boolean, java.lang.Boolean](b => Right(Boolean.unbox(b)))(
-    Boolean.box
-  )(javaBooleanFormat)
-
-  private val numFormat = attribute(_.getN, "N")(_.withN)
   private def coerceNumber[N](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
 
@@ -199,7 +196,11 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == Right(l)
     * }}}
     */
-  implicit val longFormat = xmap(coerceNumber(_.toLong))(_.toString)(numFormat)
+  implicit def longFormat[AttributeValue: AmazonAttribute]: DynamoFormat[Long, AttributeValue] =
+    xmap[AttributeValue, Long, String](coerceNumber(_.toLong))(_.toString)(
+      implicitly[AmazonAttribute[AttributeValue]],
+      numFormat[AttributeValue]
+    )
 
   /**
     * {{{
@@ -207,7 +208,11 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == Right(i)
     * }}}
     */
-  implicit val intFormat = xmap(coerceNumber(_.toInt))(_.toString)(numFormat)
+  implicit def intFormat[AttributeValue: AmazonAttribute] =
+    xmap[AttributeValue, Int, String](coerceNumber(_.toInt))(_.toString)(
+      implicitly[AmazonAttribute[AttributeValue]],
+      numFormat[AttributeValue]
+    )
 
   /**
     * {{{
@@ -215,7 +220,11 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Float].read(DynamoFormat[Float].write(d)) == Right(d)
     * }}}
     */
-  implicit val floatFormat = xmap(coerceNumber(_.toFloat))(_.toString)(numFormat)
+  implicit def floatFormat[AttributeValue: AmazonAttribute] =
+    xmap[AttributeValue, Float, String](coerceNumber(_.toFloat))(_.toString)(
+      implicitly[AmazonAttribute[AttributeValue]],
+      numFormat[AttributeValue]
+    )
 
   /**
     * {{{
@@ -223,7 +232,8 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Double].read(DynamoFormat[Double].write(d)) == Right(d)
     * }}}
     */
-  implicit val doubleFormat = xmap(coerceNumber(_.toDouble))(_.toString)(numFormat)
+  implicit def doubleFormat[AttributeValue: AmazonAttribute] =
+    xmap(coerceNumber(_.toDouble))(_.toString)(implicitly[AmazonAttribute[AttributeValue]], numFormat[AttributeValue])
 
   /**
     * {{{
@@ -231,7 +241,11 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[BigDecimal].read(DynamoFormat[BigDecimal].write(d)) == Right(d)
     * }}}
     */
-  implicit val bigDecimalFormat = xmap(coerceNumber(BigDecimal(_)))(_.toString)(numFormat)
+  implicit def bigDecimalFormat[AttributeValue: AmazonAttribute] =
+    xmap(coerceNumber(BigDecimal(_)))(_.toString)(
+      implicitly[AmazonAttribute[AttributeValue]],
+      numFormat[AttributeValue]
+    )
 
   /**
     * {{{
@@ -239,7 +253,8 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Short].read(DynamoFormat[Short].write(s)) == Right(s)
     * }}}
     */
-  implicit val shortFormat = xmap(coerceNumber(_.toShort))(_.toString)(numFormat)
+  implicit def shortFormat[AttributeValue: AmazonAttribute] =
+    xmap(coerceNumber(_.toShort))(_.toString)(implicitly[AmazonAttribute[AttributeValue]], numFormat[AttributeValue])
 
   /**
     * {{{
@@ -248,13 +263,8 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
-  implicit val byteFormat = xmap(coerceNumber(_.toByte))(_.toString)(numFormat)
-
-  // Since AttributeValue includes a ByteBuffer instance, creating byteArray format backed by ByteBuffer
-  private val javaByteBufferFormat = attribute[java.nio.ByteBuffer](_.getB, "B")(_.withB)
-
-  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
-    coerce[ByteBuffer, B, IllegalArgumentException](f)
+  implicit def byteFormat[AttributeValue: AmazonAttribute] =
+    xmap(coerceNumber(_.toByte))(_.toString)(implicitly[AmazonAttribute[AttributeValue]], numFormat[AttributeValue])
 
   /**
     * {{{
@@ -262,7 +272,10 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Array[Byte]].read(DynamoFormat[Array[Byte]].write(ab)) == Right(ab)
     * }}}
     */
-  implicit val byteArrayFormat = xmap(coerceByteBuffer(_.array()))(a => ByteBuffer.wrap(a))(javaByteBufferFormat)
+  implicit def byteArrayFormat[AttributeValue: AmazonAttribute] =
+    attribute[Array[Byte], AttributeValue](_.getBytesArray, "B")(_.setBytesArray)(
+      implicitly[AmazonAttribute[AttributeValue]]
+    )
 
   /**
     * {{{
@@ -272,9 +285,13 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   Right(uuid)
     * }}}
     */
-  implicit val uuidFormat = coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
+  implicit def uuidFormat[AttributeValue: AmazonAttribute] = {
+    implicit val d = stringFormat[AttributeValue]
+    coercedXmap[AttributeValue, UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
+  }
 
-  val javaListFormat = attribute(_.getL, "L")(_.withL)
+  def javaListFormat[AttributeValue: AmazonAttribute] =
+    attribute[List[AttributeValue], AttributeValue](_.getList, "L")(_.setList)
 
   /**
     * {{{
@@ -283,10 +300,13 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   Right(l)
     * }}}
     */
-  implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    xmap[List[T], java.util.List[AttributeValue]](_.asScala.toList.traverse(f.read))(
-      _.map(f.write).asJava
-    )(javaListFormat)
+  implicit def listFormat[T, AttributeValue: AmazonAttribute](
+    implicit r: DynamoFormat[T, AttributeValue]
+  ): DynamoFormat[List[T], AttributeValue] =
+    xmap[AttributeValue, List[T], List[AttributeValue]](_.traverse(r.read))(items => items.map(r.write))(
+      implicitly[AmazonAttribute[AttributeValue]],
+      javaListFormat
+    )
 
   /**
     * {{{
@@ -295,8 +315,10 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   Right(sq)
     * }}}
     */
-  implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
-    xmap[Seq[T], List[T]](l => Right(l.toSeq))(_.toList)
+  implicit def seqFormat[T, AttributeValue: AmazonAttribute](
+    implicit f: DynamoFormat[T, AttributeValue]
+  ): DynamoFormat[Seq[T], AttributeValue] =
+    xmap[AttributeValue, Seq[T], List[T]](l => Right(l))(_.toList)
 
   /**
     * {{{
@@ -305,10 +327,12 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   Right(v)
     * }}}
     */
-  implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
-    xmap[Vector[T], java.util.List[AttributeValue]](_.asScala.toVector.traverse(f.read))(
-      _.map(f.write).asJava
-    )(javaListFormat)
+  implicit def vectorFormat[T, AttributeValue: AmazonAttribute](
+    implicit f: DynamoFormat[T, AttributeValue]
+  ): DynamoFormat[Vector[T], AttributeValue] =
+    xmap[AttributeValue, Vector[T], List[AttributeValue]](_.toVector.traverse(f.read))(
+      _.toList.map(f.write)
+    )(implicitly[AmazonAttribute[AttributeValue]], javaListFormat)
 
   /**
     * {{{
@@ -317,25 +341,30 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   a.deep
     * }}}
     */
-  implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    xmap[Array[T], java.util.List[AttributeValue]](_.asScala.toList.traverse(f.read).map(_.toArray))(
-      _.map(f.write).toList.asJava
-    )(javaListFormat)
+  implicit def arrayFormat[T: ClassTag, AttributeValue: AmazonAttribute](
+    implicit f: DynamoFormat[T, AttributeValue]
+  ): DynamoFormat[Array[T], AttributeValue] =
+    xmap[AttributeValue, Array[T], List[AttributeValue]](_.traverse(f.read).map(_.toArray))(
+      _.toArray.map(f.write).toList
+    )(implicitly[AmazonAttribute[AttributeValue]], javaListFormat)
 
-  private def numSetFormat[T](r: String => Either[DynamoReadError, T])(w: T => String): DynamoFormat[Set[T]] =
-    new DynamoFormat[Set[T]] {
+  private def numSetFormat[T, AttributeValue: AmazonAttribute](r: String => Either[DynamoReadError, T])(w: T => String): DynamoFormat[Set[T], AttributeValue] =
+    new DynamoFormat[Set[T], AttributeValue] {
+
+      val hellper = implicitly[AmazonAttribute[AttributeValue]]
+
       override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
         for {
-          ns <- Either.fromOption(
-            if ((av.isNULL ne null) && av.isNULL) Some(Nil) else Option(av.getNS).map(_.asScala.toList),
-            NoPropertyOfType("NS", av)
-          )
+          ns <- Either.fromOption(if (hellper.isNull(av)) Some(Nil) else Option(hellper.getNS(av)), NoPropertyOfType("NS", av))
           set <- ns.traverse(r)
         } yield set.toSet
       // Set types cannot be empty
-      override def write(t: Set[T]): AttributeValue = t.toList match {
-        case Nil => new AttributeValue().withNULL(true)
-        case xs  => new AttributeValue().withNS(xs.map(w).asJava)
+      override def write(t: Set[T]): AttributeValue = {
+        val zero = hellper.init
+        t.toList match {
+          case Nil => hellper.setNull(zero)
+          case xs  => hellper.setNS(zero)(xs.map(w))
+        }
       }
       override val default: Option[Set[T]] = Some(Set.empty)
     }
@@ -355,7 +384,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * true
     * }}}
     */
-  implicit val intSetFormat: DynamoFormat[Set[Int]] = numSetFormat(coerceNumber(_.toInt))(_.toString)
+  implicit def intSetFormat[AttributeValue: AmazonAttribute]: DynamoFormat[Set[Int], AttributeValue] = numSetFormat(coerceNumber(_.toInt))(_.toString)
 
   /**
     * {{{
@@ -372,7 +401,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * true
     * }}}
     */
-  implicit val longSetFormat: DynamoFormat[Set[Long]] = numSetFormat(coerceNumber(_.toLong))(_.toString)
+  implicit def longSetFormat[AttributeValue: AmazonAttribute]: DynamoFormat[Set[Long], AttributeValue] = numSetFormat(coerceNumber(_.toLong))(_.toString)
 
   /**
     * {{{
@@ -389,7 +418,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * true
     * }}}
     */
-  implicit val floatSetFormat: DynamoFormat[Set[Float]] = numSetFormat(coerceNumber(_.toFloat))(_.toString)
+  implicit def floatSetFormat[AttributeValue: AmazonAttribute]: DynamoFormat[Set[Float], AttributeValue] = numSetFormat(coerceNumber(_.toFloat))(_.toString)
 
   /**
     * {{{
@@ -406,7 +435,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * true
     * }}}
     */
-  implicit val doubleSetFormat: DynamoFormat[Set[Double]] = numSetFormat(coerceNumber(_.toDouble))(_.toString)
+  implicit def doubleSetFormat[AttributeValue: AmazonAttribute]: DynamoFormat[Set[Double], AttributeValue] = numSetFormat(coerceNumber(_.toDouble))(_.toString)
 
   /**
     * {{{
@@ -423,7 +452,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * true
     * }}}
     */
-  implicit val BigDecimalSetFormat: DynamoFormat[Set[BigDecimal]] =
+  implicit def BigDecimalSetFormat[AttributeValue: AmazonAttribute]: DynamoFormat[Set[BigDecimal], AttributeValue] =
     numSetFormat(coerceNumber(BigDecimal(_)))(_.toString)
 
   /**
@@ -441,24 +470,26 @@ object DynamoFormat extends EnumDynamoFormat {
     * true
     * }}}
     */
-  implicit val stringSetFormat: DynamoFormat[Set[String]] =
-    new DynamoFormat[Set[String]] {
+  implicit def stringSetFormat[AttributeValue: AmazonAttribute]: DynamoFormat[Set[String], AttributeValue] =
+    new DynamoFormat[Set[String], AttributeValue] {
+      val helper = implicitly[AmazonAttribute[AttributeValue]]
+
       override def read(av: AttributeValue): Either[DynamoReadError, Set[String]] =
         for {
           ss <- Either.fromOption(
-            if ((av.isNULL ne null) && av.isNULL) Some(Nil) else Option(av.getSS).map(_.asScala.toList),
+            if (helper.isNull(av)) Some(Nil) else Option(helper.getSS(av)),
             NoPropertyOfType("SS", av)
           )
         } yield ss.toSet
       // Set types cannot be empty
       override def write(t: Set[String]): AttributeValue = t.toList match {
-        case Nil => new AttributeValue().withNULL(true)
-        case xs  => new AttributeValue().withSS(xs.asJava)
+        case Nil => helper.setNull(helper.init)
+        case xs  => helper.setSS(helper.init)(xs)
       }
       override val default: Option[Set[String]] = Some(Set.empty)
     }
 
-  private val javaMapFormat = attribute(_.getM, "M")(_.withM)
+  private def javaMapFormat[AttributeValue: AmazonAttribute] = attribute[Map[String, AttributeValue], AttributeValue](_.getMap, "M")(_.setMap)
 
   /**
     * {{{
@@ -467,12 +498,10 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   Right(m)
     * }}}
     */
-  implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    xmap[Map[String, V], java.util.Map[String, AttributeValue]](
-      m => (SortedMap[String, AttributeValue]() ++ m.asScala).traverse(f.read)
-    )(
-      _.mapValues(f.write).asJava
-    )(javaMapFormat)
+  implicit def mapFormat[V, AttributeValue: AmazonAttribute](implicit f: DynamoFormat[V, AttributeValue]): DynamoFormat[Map[String, V], AttributeValue] =
+    xmap[AttributeValue, Map[String, V], Map[String, AttributeValue]](
+      m => (SortedMap[String, AttributeValue]() ++ m).traverse(f.read)
+    )(_.mapValues(f.write))(implicitly[AmazonAttribute[AttributeValue]], javaMapFormat)
 
   /**
     * {{{
@@ -487,25 +516,30 @@ object DynamoFormat extends EnumDynamoFormat {
     * true
     * }}}
     */
-  implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
-    def read(av: AttributeValue): Either[DynamoReadError, Option[T]] =
-      Option(av)
-        .filter(x => !Boolean.unbox(x.isNULL))
-        .map(f.read(_).map(Some(_)))
-        .getOrElse(Right(Option.empty[T]))
+  implicit def optionFormat[T, AttributeValue: AmazonAttribute](implicit f: DynamoFormat[T, AttributeValue]) =
+    new DynamoFormat[Option[T], AttributeValue] {
 
-    def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(new AttributeValue().withNULL(true))
-    override val default = Some(None)
-  }
+      val attOps = implicitly[AmazonAttribute[AttributeValue]]
+
+      def read(av: AttributeValue): Either[DynamoReadError, Option[T]] =
+        Option(av)
+          .filter(x => attOps.isNull(x))
+          .map(f.read(_).map(Some(_)))
+          .getOrElse(Right(Option.empty[T]))
+
+      def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(attOps.setNull(attOps.init))
+      override val default = Some(None)
+    }
 
   /**
     * This ensures that if, for instance, you specify an update with Some(5) rather
     * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
     */
-  implicit def someFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Some[T]] {
-    def read(av: AttributeValue): Either[DynamoReadError, Some[T]] =
-      Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
+  implicit def someFormat[T, AttributeValue: AmazonAttribute](implicit f: DynamoFormat[T, AttributeValue]) =
+    new DynamoFormat[Some[T], AttributeValue] {
+      def read(av: AttributeValue): Either[DynamoReadError, Some[T]] =
+        Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
 
-    def write(t: Some[T]): AttributeValue = f.write(t.get)
-  }
+      def write(t: Some[T]): AttributeValue = f.write(t.get)
+    }
 }

@@ -6,7 +6,7 @@ import org.scanamo.export.Exported
 import shapeless.labelled.{field, FieldType}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
 
-abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
+abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T, AttributeValue]
 
 /**
   * {{{
@@ -64,6 +64,6 @@ trait EnumDynamoFormat extends LowPriorityDynamoFormat {
 }
 
 trait LowPriorityDynamoFormat {
-  implicit def dynamoFormat[T](implicit exported: Exported[DynamoFormat[T]]): DynamoFormat[T] =
+  implicit def dynamoFormat[T](implicit exported: Exported[DynamoFormat[T, AttributeValue]]): DynamoFormat[T, AttributeValue] =
     exported.instance
 }
