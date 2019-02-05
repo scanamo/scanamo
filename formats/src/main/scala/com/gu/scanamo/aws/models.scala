@@ -1,5 +1,4 @@
 package org.scanamo.aws
-import java.lang
 import java.nio.ByteBuffer
 
 import com.amazonaws.services.dynamodbv2.model.{AttributeValue => v1AttributeValue}
@@ -9,6 +8,7 @@ import simulacrum.typeclass
 import scala.collection.JavaConverters._
 
 object models {
+  // TODO: rename to dynamoDB
   @typeclass trait AmazonAttribute[A] {
 
     type Func[T] = A => T
@@ -48,8 +48,7 @@ object models {
       override val getBoolean: Func[Boolean] = _.getBOOL
       override val getBytesArray: Func[Array[Byte]] = a => a.getB.array()
       override def getBytesBuffer: Func[ByteBuffer] = a => a.getB
-      override def isNull: Func[Boolean] = {
-        av => (av.isNULL ne null) && av.isNULL
+      override def isNull: Func[Boolean] = { av => (av.isNULL ne null) && av.isNULL
       }
 
       override def getNS: Func[List[String]] = _.getNS.asScala.toList
@@ -61,10 +60,9 @@ object models {
 
       override def setString: FuncBack[String] = _.withS
       override def setNumericString: FuncBack[String] = _.withN
-      override def setBoolean: FuncBack[Boolean] = { a => {
-        val f: Boolean => java.lang.Boolean = b => new lang.Boolean(b: java.lang.Boolean)
+      override def setBoolean: FuncBack[Boolean] =  a => {
+        val f: Boolean => java.lang.Boolean = Boolean2boolean(_)
         f.andThen(a.withBOOL)
-      }
       }
       override def setBytesArray: FuncBack[Array[Byte]] = b => {
         val f: Array[Byte] => ByteBuffer = ByteBuffer.wrap
