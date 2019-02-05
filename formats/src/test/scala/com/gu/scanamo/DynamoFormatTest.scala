@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scanamo
 import org.scanamo.auto._
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
@@ -22,9 +23,10 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
         final case class Person(name: String, item: A)
         forAll(gen) { a: A =>
           val person = Person("bob", a)
-          client.putItem(t, DynamoFormat[Person].write(person).getM)
+
+          client.putItem(t, DynamoFormatV1[Person].write(person).getM)
           val resp = client.getItem(t, Map("name" -> new AttributeValue().withS("bob")).asJava)
-          DynamoFormat[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
+          DynamoFormatV1[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
         }
       }
     }

@@ -3,15 +3,14 @@ package org.scanamo
 import java.util.UUID
 
 import cats.NotNull
-import cats.instances.either._
 import cats.instances.list._
-import cats.instances.sortedMap._
-import cats.instances.string._
 import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import org.scanamo.aws.models.AmazonAttribute
 import org.scanamo.error._
+import simulacrum.typeclass
+
 import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
 
@@ -176,7 +175,7 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
     *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == Right(s)
     * }}}
     */
-  private def stringFormat =
+  implicit def stringFormat =
     attribute[String](_.getString, "S")(_.setString)
 
   private def numFormat: DynamoFormat[String, AttributeValue] =
@@ -223,6 +222,7 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
     * }}}
     */
   implicit val doubleFormat = xmap(coerceNumber(_.toDouble))(_.toString)(numFormat)
+  implicit val doubleFormat: DynamoFormatV1[Double] = ???
 
   /**
     * {{{
@@ -230,7 +230,7 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
     *     | DynamoFormat[BigDecimal].read(DynamoFormat[BigDecimal].write(d)) == Right(d)
     * }}}
     */
-  implicit val bigDecimalFormat=
+  implicit val bigDecimalFormat =
     xmap(coerceNumber(BigDecimal(_)))(_.toString)(numFormat)
 
   /**
@@ -276,7 +276,7 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
   /**
     * {{{
     * prop> (l: List[String]) =>
-    *     | DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) ==
+    *     | DynamoFormatV1[List[String]].read(DynamoFormat[List[String]].write(l)) ==
     *     |   Right(l)
     * }}}
     */
@@ -325,14 +325,19 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
       _.toArray.map(f.write).toList
     )(javaListFormat)
 
-  private def numSetFormat[T](r: String => Either[DynamoReadError, T])(w: T => String): DynamoFormat[Set[T], AttributeValue] =
+  private def numSetFormat[T](
+    r: String => Either[DynamoReadError, T]
+  )(w: T => String): DynamoFormat[Set[T], AttributeValue] =
     new DynamoFormat[Set[T], AttributeValue] {
 
       val hellper = implicitly[AmazonAttribute[AttributeValue]]
 
       override def read(av: AttributeValue): Either[DynamoReadError, Set[T]] =
         for {
-          ns <- Either.fromOption(if (hellper.isNull(av)) Some(Nil) else Option(hellper.getNS(av)), NoPropertyOfType("NS", av))
+          ns <- Either.fromOption(
+            if (hellper.isNull(av)) Some(Nil) else Option(hellper.getNS(av)),
+            NoPropertyOfType("NS", av)
+          )
           set <- ns.traverse(r)
         } yield set.toSet
       // Set types cannot be empty
@@ -395,7 +400,8 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
     * true
     * }}}
     */
-  implicit val floatSetFormat: DynamoFormat[Set[Float], AttributeValue] = numSetFormat(coerceNumber(_.toFloat))(_.toString)
+  implicit val floatSetFormat: DynamoFormat[Set[Float], AttributeValue] =
+    numSetFormat(coerceNumber(_.toFloat))(_.toString)
 
   /**
     * {{{
@@ -412,7 +418,8 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
     * true
     * }}}
     */
-  implicit val doubleSetFormat: DynamoFormat[Set[Double], AttributeValue] = numSetFormat(coerceNumber(_.toDouble))(_.toString)
+  implicit val doubleSetFormat: DynamoFormat[Set[Double], AttributeValue] =
+    numSetFormat(coerceNumber(_.toDouble))(_.toString)
 
   /**
     * {{{
@@ -520,6 +527,10 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute] extends EnumDyna
       def write(t: Some[T]): AttributeValue = f.write(t.get)
     }
 }
+@typeclass trait DynamoFormatV1[T] extends DynamoFormat[T, com.amazonaws.services.dynamodbv2.model.AttributeValue]
+object DynamoFormatV1 extends DynamoFormatAPI[com.amazonaws.services.dynamodbv2.model.AttributeValue] {}
 
-//TODO: rename to v1
-object DynamoFormat extends DynamoFormatAPI[com.amazonaws.services.dynamodbv2.model.AttributeValue]
+// TODO: dunno what to do...
+object A extends App {
+  val z = DynamoFormatV1[String]
+}

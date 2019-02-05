@@ -14,7 +14,7 @@ abstract class EnumerationDynamoFormat[T, AttributeValue: AmazonAttribute] exten
   * prop> case object Aardvark extends Animal
   * prop> case object Hippopotamus extends Animal
   * prop> case object Zebra extends Animal
-  *
+  * prop> import org.scanamo.impl.v1.DynamoFormat
   * prop> import org.scalacheck._
   * prop> implicit val arbitraryAnimal: Arbitrary[Animal] = Arbitrary(Gen.oneOf(List(Aardvark, Hippopotamus, Zebra)))
   *
