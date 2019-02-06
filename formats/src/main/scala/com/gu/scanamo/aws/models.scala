@@ -48,7 +48,8 @@ object models {
       override val getBoolean: Func[Boolean] = _.getBOOL
       override val getBytesArray: Func[Array[Byte]] = a => a.getB.array()
       override def getBytesBuffer: Func[ByteBuffer] = a => a.getB
-      override def isNull: Func[Boolean] = { av => (av.isNULL ne null) && av.isNULL
+      override def isNull: Func[Boolean] = { av =>
+        (av.isNULL ne null) && av.isNULL
       }
 
       override def getNS: Func[List[String]] = _.getNS.asScala.toList

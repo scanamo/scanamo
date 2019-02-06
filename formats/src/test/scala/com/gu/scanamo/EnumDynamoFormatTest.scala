@@ -2,6 +2,7 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scalatest.{FunSuite, Matchers}
+import org.scanamo.Foo.DynamoFormatV1
 
 class EnumDynamoFormatTest extends FunSuite with Matchers {
 
@@ -10,7 +11,7 @@ class EnumDynamoFormatTest extends FunSuite with Matchers {
     "write(First)" shouldNot typeCheck
   }
 
-  def write[T](t: T)(implicit f: DynamoFormat[T]) = f.write(t)
+  def write[T](t: T)(implicit f: DynamoFormatV1[T]) = f.write(t)
 }
 
 sealed trait ExampleEnum

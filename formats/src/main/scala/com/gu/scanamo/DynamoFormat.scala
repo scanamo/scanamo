@@ -20,8 +20,8 @@ abstract class DynamoFormat[T, Value: AmazonAttribute] {
   def default: Option[T] = None
 }
 
-abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute, Format[_] <: DynamoFormat[_, AttributeValue]]
-  extends EnumDynamoFormat[AttributeValue] {
+abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute, Format[T] <: DynamoFormat[T, AttributeValue]]
+  extends EnumDynamoFormat {
 
   protected def attribute[T](
                               decode: AmazonAttribute[AttributeValue] => AttributeValue => T,
@@ -72,23 +72,19 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute, Format[_] <: Dyn
 
   val javaListFormat: Format[List[AttributeValue]] = attribute[List[AttributeValue]](_.getList, "L")(_.setList)
 
-  implicit def listFormat[T](implicit r: Format[T]): Format[List[T]] = {
-//    xmap[List[T], List[AttributeValue]](_.traverse(r.read))(items => items.map(r.write))(javaListFormat)
-    ???
+  implicit def listFormat[T](implicit r: Format[T], a: Applicative[Either[DynamoReadError, ?]]): Format[List[T]] = {
+    xmap[List[T], List[AttributeValue]](_.traverse[Either[DynamoReadError, ?], T](r.read))(_.map(r.write))(javaListFormat)
   }
 
-  implicit def seqFormat[T](implicit f: Format[T]): Format[Seq[T]] = xmap[Seq[T], List[T]](l => Right(l))(_.toList)
+  implicit def seqFormat[T](implicit f: Format[T], a: Applicative[Either[DynamoReadError, ?]]): Format[Seq[T]] = xmap[Seq[T], List[T]](l => Right(l))(_.toList)(listFormat[T])
 
-  implicit def vectorFormat[T](
-                                implicit f: Format[T]
-                                , a : Applicative[Either[DynamoReadError, ?]]
-                              ): Format[Vector[T]]
+  implicit def vectorFormat[T](implicit f: Format[T], a : Applicative[Either[DynamoReadError, ?]]): Format[Vector[T]]
 
   implicit def arrayFormat[T: ClassTag](implicit f: Format[T], a : Applicative[Either[DynamoReadError, ?]]): Format[Array[T]]
 
   protected def numSetFormat[T](r: String => Either[DynamoReadError, T])(w: T => String)(implicit a : Applicative[Either[DynamoReadError, ?]]): Format[Set[T]]
 
-  implicit def intSetFormat(implicit a : Applicative[Either[DynamoReadError, ?]]): Format[Set[Int]] = numSetFormat(coerceNumber(_.toInt))(_.toString)
+  implicit def intSetFormat(implicit a : Applicative[Either[DynamoReadError, ?]]): Format[Set[Int]] = numSetFormat(coerceNumber(_.toInt))(_.toString)(implicitly)
 
   implicit def longSetFormat(implicit a : Applicative[Either[DynamoReadError, ?]]): Format[Set[Long]] = numSetFormat(coerceNumber(_.toLong))(_.toString)
 
@@ -96,8 +92,7 @@ abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute, Format[_] <: Dyn
 
   implicit def doubleSetFormat(implicit a : Applicative[Either[DynamoReadError, ?]]): Format[Set[Double]] = numSetFormat(coerceNumber(_.toDouble))(_.toString)
 
-  implicit def BigDecimalSetFormat(implicit a : Applicative[Either[DynamoReadError, ?]]): Format[Set[BigDecimal]] =
-    numSetFormat(coerceNumber(BigDecimal(_)))(_.toString)
+  implicit def BigDecimalSetFormat(implicit a : Applicative[Either[DynamoReadError, ?]]): Format[Set[BigDecimal]] = numSetFormat(coerceNumber(BigDecimal(_)))(_.toString)
 
   implicit def stringSetFormat: Format[Set[String]]
 
@@ -168,10 +163,10 @@ object Foo extends App {
 
 
     override implicit def arrayFormat[T: ClassTag](
-                                                    implicit f: DynamoFormatV1[T],
-                                                    a : Applicative[Either[DynamoReadError, ?]]
+                                                    implicit f: DynamoFormatV1[T]
+                                                    , a : Applicative[Either[DynamoReadError, ?]]
                                                   ): DynamoFormatV1[Array[T]] = {
-      xmap[Array[T], List[AWSV1]](_.traverse(f.read).map(_.toArray))(
+      xmap[Array[T], List[AWSV1]](_.traverse[Either[DynamoReadError, ?], T](f.read).map(_.toArray))(
         _.toArray.map(f.write).toList
       )(javaListFormat)
     }
@@ -244,11 +239,12 @@ object Foo extends App {
                                          ): DynamoFormatV1[Option[T]] = {
       new DynamoFormatV1[Option[T]] {
         val attOps = implicitly[AmazonAttribute[AWSV1]]
-        def read(av: AWSV1): Either[DynamoReadError, Option[T]] =
+        def read(av: AWSV1): Either[DynamoReadError, Option[T]] = {
           Option(av)
-            .filter(x => attOps.isNull(x))
+            .filterNot(attOps.isNull)
             .map(f.read(_).map(Some(_)))
             .getOrElse(Right(Option.empty[T]))
+        }
 
         def write(t: Option[T]): AWSV1 = t.map(f.write).getOrElse(attOps.setNull(attOps.init))
         override val default = Some(None)
@@ -267,8 +263,6 @@ object Foo extends App {
 
 
   val a = DynamoFormatV1[String]
-
-  println(a.write("hello"))
 
 
 }

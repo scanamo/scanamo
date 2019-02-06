@@ -1,34 +1,17 @@
 package org.scanamo
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import org.scanamo.Foo.DynamoFormatV1
 import org.scanamo.aws.models.AmazonAttribute
 import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 import org.scanamo.export.Exported
 import shapeless.labelled.{FieldType, field}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
 
-abstract class EnumerationDynamoFormat[T, AttributeValue: AmazonAttribute] extends DynamoFormat[T, AttributeValue]
+abstract class EnumerationDynamoFormat[T] extends DynamoFormatV1[T]
 
-/**
-  * {{{
-  * prop> sealed trait Animal
-  * prop> case object Aardvark extends Animal
-  * prop> case object Hippopotamus extends Animal
-  * prop> case object Zebra extends Animal
-  * prop> import org.scanamo.impl.v1.DynamoFormat
-  * prop> import org.scalacheck._
-  * prop> implicit val arbitraryAnimal: Arbitrary[Animal] = Arbitrary(Gen.oneOf(List(Aardvark, Hippopotamus, Zebra)))
-  *
-  * prop> (a: Animal) =>
-  *     | DynamoFormat[Animal].read(DynamoFormat[Animal].write(a)) == Right(a)
-  * }}}
-  *
-  * {{{
-  * >>> DynamoFormat[Animal].write(Zebra).getS
-  * Zebra
-  * }}}
-  */
-abstract class EnumDynamoFormat[AttributeValue: AmazonAttribute] extends LowPriorityDynamoFormat[AttributeValue] {
-  implicit val enumDynamoFormatCNil: EnumerationDynamoFormat[CNil, AttributeValue] = new EnumerationDynamoFormat[CNil, AttributeValue] {
+abstract class EnumDynamoFormat extends LowPriorityDynamoFormat {
+  implicit val enumDynamoFormatCNil: EnumerationDynamoFormat[CNil] = new EnumerationDynamoFormat[CNil] {
     override def read(av: AttributeValue): Either[DynamoReadError, CNil] = Left(
       TypeCoercionError(new Exception(s"$av is not a recognised member of the Enumeration"))
     )
@@ -39,9 +22,9 @@ abstract class EnumDynamoFormat[AttributeValue: AmazonAttribute] extends LowPrio
     implicit
     fieldWitness: Witness.Aux[K],
     emptyGeneric: LabelledGeneric.Aux[V, HNil],
-    alternativeFormat: EnumerationDynamoFormat[R, AttributeValue]
-  ): EnumerationDynamoFormat[FieldType[K, V] :+: R, AttributeValue] =
-    new EnumerationDynamoFormat[FieldType[K, V] :+: R, AttributeValue] {
+    alternativeFormat: EnumerationDynamoFormat[R]
+  ): EnumerationDynamoFormat[FieldType[K, V] :+: R] =
+    new EnumerationDynamoFormat[FieldType[K, V] :+: R] {
       private val helper = implicitly[AmazonAttribute[AttributeValue]]
       override def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: R] = {
         if (helper.getString(av) == fieldWitness.value.name) Right(Inl(field[K](emptyGeneric.from(HNil))))
@@ -58,15 +41,15 @@ abstract class EnumDynamoFormat[AttributeValue: AmazonAttribute] extends LowPrio
   implicit def enumFormat[A, Repr <: Coproduct](
     implicit
     gen: LabelledGeneric.Aux[A, Repr],
-    genericFormat: EnumerationDynamoFormat[Repr, AttributeValue]
-  ): EnumerationDynamoFormat[A, AttributeValue] =
-    new EnumerationDynamoFormat[A, AttributeValue] {
+    genericFormat: EnumerationDynamoFormat[Repr]
+  ): EnumerationDynamoFormat[A] =
+    new EnumerationDynamoFormat[A] {
       override def read(av: AttributeValue): Either[DynamoReadError, A] = genericFormat.read(av).right.map(gen.from)
       override def write(t: A): AttributeValue = genericFormat.write(gen.to(t))
     }
 }
 
-abstract class LowPriorityDynamoFormat[AttributeValue: AmazonAttribute] {
-  implicit def dynamoFormat[T](implicit exported: Exported[DynamoFormat[T, AttributeValue]]): DynamoFormat[T, AttributeValue] =
+abstract class LowPriorityDynamoFormat {
+  implicit def dynamoFormat[T](implicit exported: Exported[DynamoFormatV1[T]]): DynamoFormatV1[T] =
     exported.instance
 }
