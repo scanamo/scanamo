@@ -1,4 +1,4 @@
-package org.scanamo
+package org.scanamo.foooo
 
 import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
@@ -7,8 +7,10 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scanamo.Foo.DynamoFormatV1
+import org.scanamo.{DynamoFormat, LocalDynamoDB}
 import org.scanamo.auto._
+import org.scanamo.v1.DynamoFormat
+import org.scanamo.v1.DynamoFormat._
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -16,7 +18,7 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
   val client = localDb.clientSync()
 
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
-  def testReadWrite[A: DynamoFormatV1: TypeTag](gen: Gen[A]): Unit = {
+  def testReadWrite[A: TypeTag](gen: Gen[A]): Unit = {
     val typeLabel = typeTag[A].tpe.toString
     it(s"should write and then read a $typeLabel from dynamo") {
       localDb.usingRandomTable(client)('name -> S) { t =>
@@ -24,18 +26,17 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
         forAll(gen) { a: A =>
           val person = Person("bob", a)
 
-          client.putItem(t, DynamoFormatV1[Person].write(person).getM)
+          client.putItem(t, DynamoFormat[Person].write(person).getM)
           val resp = client.getItem(t, Map("name" -> new AttributeValue().withS("bob")).asJava)
-          DynamoFormatV1[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
+          DynamoFormat[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
         }
       }
     }
   }
 
-  def testReadWrite[A: DynamoFormatV1: TypeTag]()(implicit arb: Arbitrary[A]): Unit =
+  def testReadWrite[A: TypeTag]()(implicit aa: DynamoFormat[A, AttributeValue], arb: Arbitrary[A]): Unit =
     testReadWrite(arb.arbitrary)
 
-  import DynamoFormatV1._
 
   testReadWrite[List[String]]()
   testReadWrite[List[Long]]()
@@ -52,6 +53,5 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
 //  testReadWrite[Set[Int]](Gen.containerOf[Set, Int](???))
 
   testReadWrite[Option[String]](Gen.option(nonEmptyStringGen))
-  testReadWrite[Option[String]](Gen.const(Some("ssss")))
-    testReadWrite[Option[Int]]()
+  testReadWrite[Option[Int]]()
 }

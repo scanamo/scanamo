@@ -1,8 +1,8 @@
 package org.scanamo.Derivation
 
-import org.scanamo.DynamoFormat
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scalatest.{FunSuite, Matchers}
-import org.scanamo.Foo.DynamoFormatV1
+import org.scanamo.DynamoFormat
 
 class SemiAutoDerivationTest extends FunSuite with Matchers {
 
@@ -19,7 +19,7 @@ class SemiAutoDerivationTest extends FunSuite with Matchers {
       |""".stripMargin should compile
   }
 
-  def write[T](t: T)(implicit f: DynamoFormatV1[T]) = f.write(t)
+  def write[T](t: T)(implicit f: DynamoFormat[T, AttributeValue]) = f.write(t)
 }
 
 case class Person(name: String, age: Int)
