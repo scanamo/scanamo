@@ -7,9 +7,10 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scanamo.LocalDynamoDB
+import org.scanamo.{DynamoFormat, LocalDynamoDB}
 import org.scanamo.auto._
-import org.scanamo.v1.DynamoFormatV1
+import org.scanamo.v1.DynamoFormat
+import org.scanamo.v1.DynamoFormat._
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -25,15 +26,15 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
         forAll(gen) { a: A =>
           val person = Person("bob", a)
 
-          client.putItem(t, DynamoFormatV1[Person].write(person).getM)
+          client.putItem(t, DynamoFormat.find[Person, AttributeValue].write(person).getM)
           val resp = client.getItem(t, Map("name" -> new AttributeValue().withS("bob")).asJava)
-          DynamoFormatV1[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
+          DynamoFormat.find[Person, AttributeValue].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
         }
       }
     }
   }
 
-  def testReadWrite[A: TypeTag]()(implicit aa: DynamoFormatV1[A], arb: Arbitrary[A]): Unit =
+  def testReadWrite[A: TypeTag]()(implicit arb: Arbitrary[A], v: DynamoFormat[A, AttributeValue]): Unit =
     testReadWrite(arb.arbitrary)
 
 
