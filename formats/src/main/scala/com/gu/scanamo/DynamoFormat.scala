@@ -9,7 +9,7 @@ import java.util.UUID
 import cats.Applicative
 import org.scanamo.aws.models.AmazonAttribute
 import org.scanamo.error._
-import org.scanamo.export.Exported
+import simulacrum.typeclass
 
 //import scala.collection.immutable.SortedMap
 import scala.reflect.ClassTag
@@ -22,15 +22,15 @@ abstract class DynamoFormat[T, Value: AmazonAttribute] {
 
 
 object v1 {
-  object DynamoFormat extends DynamoFormatAPI[com.amazonaws.services.dynamodbv2.model.AttributeValue] {
-    def apply[T](implicit e : Exported[DynamoFormat[T, com.amazonaws.services.dynamodbv2.model.AttributeValue]]): DynamoFormat[T, com.amazonaws.services.dynamodbv2.model.AttributeValue] = {
-      e.instance
-    }
-  }
+
+  @typeclass
+  trait DynamoFormatV1[T] extends DynamoFormat[T, com.amazonaws.services.dynamodbv2.model.AttributeValue]
+
+  object DynamoFormatV1 extends DynamoFormatAPI[com.amazonaws.services.dynamodbv2.model.AttributeValue] with EnumDynamoFormat
 }
 
 
-abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute]  extends EnumDynamoFormat {
+abstract class DynamoFormatAPI[AttributeValue: AmazonAttribute]  {
   private def attribute[T](
     decode: AmazonAttribute[AttributeValue] => AttributeValue => T,
     propertyType: String

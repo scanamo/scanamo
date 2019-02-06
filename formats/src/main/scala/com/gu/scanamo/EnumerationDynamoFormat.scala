@@ -4,10 +4,11 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.aws.models.AmazonAttribute
 import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 import org.scanamo.export.Exported
+import org.scanamo.v1.DynamoFormatV1
 import shapeless.labelled.{FieldType, field}
 import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
 
-abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T, AttributeValue]
+abstract class EnumerationDynamoFormat[T] extends DynamoFormatV1[T]
 
 trait EnumDynamoFormat extends LowPriorityDynamoFormat {
   implicit val enumDynamoFormatCNil: EnumerationDynamoFormat[CNil] = new EnumerationDynamoFormat[CNil] {
@@ -49,6 +50,6 @@ trait EnumDynamoFormat extends LowPriorityDynamoFormat {
 }
 
 trait LowPriorityDynamoFormat {
-  implicit def dynamoFormat[T](implicit exported: Exported[DynamoFormat[T, AttributeValue]]): DynamoFormat[T, AttributeValue] =
+  implicit def dynamoFormat[T](implicit exported: Exported[DynamoFormatV1[T]]): DynamoFormatV1[T] =
     exported.instance
 }

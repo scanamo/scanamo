@@ -7,10 +7,9 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import org.scanamo.{DynamoFormat, LocalDynamoDB}
+import org.scanamo.LocalDynamoDB
 import org.scanamo.auto._
-import org.scanamo.v1.DynamoFormat
-import org.scanamo.v1.DynamoFormat._
+import org.scanamo.v1.DynamoFormatV1
 
 class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
 
@@ -26,15 +25,15 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
         forAll(gen) { a: A =>
           val person = Person("bob", a)
 
-          client.putItem(t, DynamoFormat[Person].write(person).getM)
+          client.putItem(t, DynamoFormatV1[Person].write(person).getM)
           val resp = client.getItem(t, Map("name" -> new AttributeValue().withS("bob")).asJava)
-          DynamoFormat[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
+          DynamoFormatV1[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
         }
       }
     }
   }
 
-  def testReadWrite[A: TypeTag]()(implicit aa: DynamoFormat[A, AttributeValue], arb: Arbitrary[A]): Unit =
+  def testReadWrite[A: TypeTag]()(implicit aa: DynamoFormatV1[A], arb: Arbitrary[A]): Unit =
     testReadWrite(arb.arbitrary)
 
 
@@ -48,10 +47,7 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
   )
   val nonEmptyStringGen: Gen[String] =
     Gen.nonEmptyContainerOf[Array, Char](Arbitrary.arbChar.arbitrary).map(arr => new String(arr))
-//  testReadWrite[Set[String]](Gen.containerOf[Set, String](nonEmptyStringGen))
-
-//  testReadWrite[Set[Int]](Gen.containerOf[Set, Int](???))
-
+  testReadWrite[Set[String]](Gen.containerOf[Set, String](nonEmptyStringGen))
   testReadWrite[Option[String]](Gen.option(nonEmptyStringGen))
   testReadWrite[Option[Int]]()
 }
