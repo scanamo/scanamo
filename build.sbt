@@ -1,12 +1,12 @@
 scalaVersion in ThisBuild := "2.12.8"
 crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
-val catsVersion = "1.5.0"
+val catsVersion = "1.6.0"
 val catsEffectVersion = "1.2.0"
 val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
-val zioVersion = "0.3.2"
+val zioVersion = "0.6.0"
 
 val commonSettings = Seq(
   scalacOptions := Seq(
@@ -61,7 +61,7 @@ addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.487"
+val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.494"
 
 lazy val formats = (project in file("formats"))
   .settings(
@@ -175,7 +175,7 @@ lazy val zio = (project in file("scalaz-zio"))
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.scalaz" %% "scalaz-zio" % zioVersion,
-      "org.scalaz" %% "scalaz-zio-interop" % zioVersion,
+      "org.scalaz" %% "scalaz-zio-interop-cats" % zioVersion,
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     ),
