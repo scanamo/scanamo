@@ -5,7 +5,7 @@ import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model._
-import scalaz.zio.{ExitResult, IO}
+import scalaz.zio.IO
 
 object ZioInterpreter {
   def effect(client: AmazonDynamoDBAsync): ScanamoOpsA ~> IO[AmazonDynamoDBException, ?] =
@@ -18,12 +18,12 @@ object ZioInterpreter {
           val handler = new AsyncHandler[A, B] {
             def onError(exception: Exception): Unit =
               exception match {
-                case e: AmazonDynamoDBException => cb(ExitResult.Failed(e))
-                case t                          => cb(ExitResult.Terminated(t :: Nil))
+                case e: AmazonDynamoDBException => cb(IO.fail(e))
+                case t                          => cb(IO.die(t))
               }
 
             def onSuccess(request: A, result: B): Unit =
-              cb(ExitResult.Completed(result))
+              cb(IO.succeed(result))
           }
           val _ = f(req, handler)
         }
@@ -34,10 +34,10 @@ object ZioInterpreter {
         case ConditionalPut(req) =>
           eff(client.putItemAsync, JavaRequests.put(req)).redeem(
             _ match {
-              case e: ConditionalCheckFailedException => IO.now(Left(e))
+              case e: ConditionalCheckFailedException => IO.succeed(Left(e))
               case t                                  => IO.fail(t)
             },
-            a => IO.now(Right(a))
+            a => IO.succeed(Right(a))
           )
         case Get(req) =>
           eff(client.getItemAsync, req)
@@ -46,10 +46,10 @@ object ZioInterpreter {
         case ConditionalDelete(req) =>
           eff(client.deleteItemAsync, JavaRequests.delete(req)).redeem(
             _ match {
-              case e: ConditionalCheckFailedException => IO.now(Left(e))
+              case e: ConditionalCheckFailedException => IO.succeed(Left(e))
               case t                                  => IO.fail(t)
             },
-            a => IO.now(Right(a))
+            a => IO.succeed(Right(a))
           )
         case Scan(req) =>
           eff(client.scanAsync, JavaRequests.scan(req))
@@ -73,10 +73,10 @@ object ZioInterpreter {
         case ConditionalUpdate(req) =>
           eff(client.updateItemAsync, JavaRequests.update(req)).redeem(
             _ match {
-              case e: ConditionalCheckFailedException => IO.now(Left(e))
+              case e: ConditionalCheckFailedException => IO.succeed(Left(e))
               case t                                  => IO.fail(t)
             },
-            a => IO.now(Right(a))
+            a => IO.succeed(Right(a))
           )
       }
     }
