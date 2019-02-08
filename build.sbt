@@ -61,7 +61,7 @@ addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.487"
+val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.494"
 
 lazy val formats = (project in file("formats"))
   .settings(
@@ -175,7 +175,7 @@ lazy val zio = (project in file("scalaz-zio"))
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.scalaz" %% "scalaz-zio" % zioVersion,
-      "org.scalaz" %% "scalaz-zio-interop" % zioVersion,
+      "org.scalaz" %% "scalaz-zio-interop-cats" % zioVersion,
       "org.scalatest" %% "scalatest" % "3.0.5" % Test,
       "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     ),
