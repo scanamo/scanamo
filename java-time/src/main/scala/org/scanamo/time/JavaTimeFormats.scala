@@ -40,7 +40,7 @@ object JavaTimeFormats {
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import java.time.ZonedDateTime
     *  prop> import org.scanamo.time.JavaTimeFormats.zonedDateTimeFormat
-    *  prop> import com.fortysevendeg.scalacheck.datetime.jdk8.ArbitraryJdk8._
+    *  prop> import org.scanamo.time.TimeGenerators.zonedDateTimeArb
     *  prop> (x: ZonedDateTime) =>
     *      | DynamoFormat[ZonedDateTime].read(DynamoFormat[ZonedDateTime].write(x)) == Right(x)
     *  }}}
