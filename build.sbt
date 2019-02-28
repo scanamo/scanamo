@@ -76,7 +76,7 @@ lazy val formats = (project in file("formats"))
       "com.github.mpilquist" %% "simulacrum" % "0.15.0",
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.scalatest" %% "scalatest" % "3.0.6" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     ),
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,
@@ -114,7 +114,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.joda" % "joda-convert" % "2.2.0" % Provided,
       "joda-time" % "joda-time" % "2.10.1" % Test,
       "org.scalatest" %% "scalatest" % "3.0.6" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     )
   )
   .dependsOn(formats, testkit % "test->test")
@@ -140,7 +140,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.typelevel" %% "cats-effect" % catsEffectVersion,
       "org.scalatest" %% "scalatest" % "3.0.6" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -158,7 +158,7 @@ lazy val scalaz = (project in file("scalaz"))
       "org.scalaz" %% "scalaz-core" % scalazVersion,
       "org.scalaz" %% "scalaz-ioeffect" % scalazIOEffectVersion,
       "org.scalatest" %% "scalatest" % "3.0.6" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -196,7 +196,7 @@ lazy val alpakka = (project in file("alpakka"))
       "org.typelevel" %% "cats-free" % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "0.20",
       "org.scalatest" %% "scalatest" % "3.0.6" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
     ),
     fork in Test := true,
     // unidoc can work out links to other project, but scalac can't
@@ -213,7 +213,7 @@ lazy val javaTime = (project in file("java-time"))
   .settings(
     libraryDependencies ++= List(
       "org.scalatest" %% "scalatest" % "3.0.6" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
       "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
     )
   )
@@ -230,7 +230,7 @@ lazy val joda = (project in file("joda"))
       "org.joda" % "joda-convert" % "2.2.0" % Provided,
       "joda-time" % "joda-time" % "2.10.1",
       "org.scalatest" %% "scalatest" % "3.0.6" % Test,
-      "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
       "com.47deg" %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
     )
   )
