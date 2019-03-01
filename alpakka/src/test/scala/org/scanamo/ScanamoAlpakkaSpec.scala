@@ -14,6 +14,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
 import cats.implicits._
+import org.scanamo.error.MissingKeyValue
 
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
@@ -588,6 +589,41 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       ScanamoAlpakka.exec(alpakkaClient)(ops).futureValue should equal(
         List(Right(Gremlin(1, false)))
       )
+    }
+  }
+
+  it("should return MissingKeyError when queried field is not a key") {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+      val farm = Farm(List("dog"))
+
+      val farmers = Table[Farmer](t)
+
+      val result = for {
+        _ <- farmers.put(Farmer("Maggot", 75L, farm))
+        r<- farmers.get('farm -> farm)
+      } yield r
+
+      ScanamoAlpakka.exec(alpakkaClient)(result).futureValue.get.left.get shouldBe a [MissingKeyValue]
+
+    }
+  }
+
+  it("should return MissingKeyError when queried field does not exist") {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+      val farm = Farm(List("dog"))
+
+      val farmers = Table[Farmer](t)
+
+      val result = for {
+        _ <- farmers.put(Farmer("Maggot", 75L, farm))
+        r<- farmers.get('DoesNotExist -> farm)
+      } yield r
+
+      ScanamoAlpakka.exec(alpakkaClient)(result).futureValue.get.left.get shouldBe a [MissingKeyValue]
     }
   }
 }

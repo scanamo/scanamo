@@ -16,7 +16,12 @@ object AlpakkaInterpreter {
       override def apply[A](ops: ScanamoOpsA[A]) =
         ops match {
           case Put(req)        => client.single(JavaRequests.put(req))
-          case Get(req)        => client.single(req)
+          case Get(req)        =>
+            client.single(req)
+              .map(Either.right[AmazonDynamoDBException, GetItemResult])
+              .recover{
+                case e: AmazonDynamoDBException => Either.left(e)
+              }
           case Delete(req)     => client.single(JavaRequests.delete(req))
           case Scan(req)       => client.single(JavaRequests.scan(req))
           case Query(req)      => client.single(JavaRequests.query(req))
