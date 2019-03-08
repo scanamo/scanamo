@@ -40,7 +40,12 @@ object ZioInterpreter {
             a => IO.succeed(Right(a))
           )
         case Get(req) =>
-          eff(client.getItemAsync, req)
+          eff(client.getItemAsync, req).redeem(
+            _ match {
+              case e: AmazonDynamoDBException => IO.now(Left(e))
+              case t                          => IO.fail(t)
+            }, a => IO.now(Right(a))
+          )
         case Delete(req) =>
           eff(client.deleteItemAsync, JavaRequests.delete(req))
         case ConditionalDelete(req) =>
