@@ -30,6 +30,13 @@ object ScalazInterpreter {
         }
         .asInstanceOf[Task[A]]
 
+    private[this] def catchAmazonDBException[A, A0](io: Task[A0]): Task[A] =
+      io.map(Right(_): Either[AmazonDynamoDBException, A0])
+        .catchSome {
+          case e: AmazonDynamoDBException => IO.now(Left(e))
+        }
+        .asInstanceOf[Task[A]]
+
     override def apply[A](fa: ScanamoOpsA[A]): Task[A] =
       fa match {
         case Put(req) =>
@@ -37,7 +44,7 @@ object ScalazInterpreter {
         case ConditionalPut(req) =>
           catchConditional(eff(client.putItemAsync, JavaRequests.put(req)))
         case Get(req) =>
-          eff(client.getItemAsync, req)
+          catchAmazonDBException(eff(client.getItemAsync, req))
         case Delete(req) =>
           eff(client.deleteItemAsync, JavaRequests.delete(req))
         case ConditionalDelete(req) =>

@@ -3,7 +3,7 @@ package org.scanamo
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scanamo.error.DynamoReadError
+import org.scanamo.error.{DynamoReadError, MissingKeyValue}
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
@@ -559,6 +559,41 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
       unsafePerformIO(ScanamoScalaz.exec(client)(ops)) should equal(
         List(Right(Gremlin(1, false)))
       )
+    }
+  }
+
+  it("should return MissingKeyError when queried field is not a key") {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+      val farm = Farm(List("dog"))
+
+      val farmers = Table[Farmer](t)
+
+      val ops = for {
+        _ <- farmers.put(Farmer("Maggot", 75L, farm))
+        r<- farmers.get('farm -> farm)
+      } yield r
+
+
+      unsafePerformIO(ScanamoScalaz.exec(client)(ops)).get.left.get shouldBe a [MissingKeyValue]
+
+    }
+  }
+
+  it("should return MissingKeyError when queried field does not exist") {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+      val farm = Farm(List("dog"))
+
+      val farmers = Table[Farmer](t)
+
+      val ops = for {
+        _ <- farmers.put(Farmer("Maggot", 75L, farm))
+        r<- farmers.get('DoesNotExist -> farm)
+      } yield r
+      unsafePerformIO(ScanamoScalaz.exec(client)(ops)).get.left.get shouldBe a [MissingKeyValue]
     }
   }
 }
