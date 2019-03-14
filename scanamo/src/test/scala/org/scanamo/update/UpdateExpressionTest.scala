@@ -43,6 +43,8 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
     }
   implicit lazy val update: Arbitrary[UpdateExpression] = Arbitrary(genTree(0))
 
+  val stringList = DynamoFormat[List[String]]
+
   it("should have all value placeholders in the expression") {
     check { (ue: UpdateExpression) =>
       ue.attributeValues.keys.forall(s => {
@@ -61,15 +63,15 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
 
   it("append/prepend should wrap scalar values in a list") {
     check { (s: Symbol, v: String) =>
-      append(s -> v).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(List(v)))
-      prepend(s -> v).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(List(v)))
+      append(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
+      prepend(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
     }
   }
 
   it("appendAll/prependAll should take the value as a list") {
     check { (s: Symbol, l: List[String]) =>
-      appendAll(s -> l).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(l))
-      prependAll(s -> l).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(l))
+      appendAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
+      prependAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
     }
   }
 }
