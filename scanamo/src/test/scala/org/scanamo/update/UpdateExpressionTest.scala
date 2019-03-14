@@ -3,6 +3,7 @@ package org.scanamo.update
 import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
 import org.scanamo.syntax._
+import org.scanamo.DynamoFormat
 import scala.collection.JavaConverters._
 
 class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matchers with org.scalatest.prop.Checkers {
@@ -60,15 +61,15 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
 
   it("append/prepend should wrap scalar values in a list") {
     check { (s: Symbol, v: String) =>
-      append(s -> v).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == List(v))
-      prepend(s -> v).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == List(v))
+      append(s -> v).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(List(v)))
+      prepend(s -> v).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(List(v)))
     }
   }
 
   it("appendAll/prependAll should take the value as a list") {
     check { (s: Symbol, l: List[String]) =>
-      appendAll(s -> l).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == l)
-      prependAll(s -> l).unprefixedAttributeValues.get("update").exists(_.getL.asScala.toList.map(_.getS) == l)
+      appendAll(s -> l).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(l))
+      prependAll(s -> l).unprefixedAttributeValues.get("update").exists(DynamoFormat[List[String]].read(_) == Right(l))
     }
   }
 }
