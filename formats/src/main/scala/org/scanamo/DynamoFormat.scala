@@ -173,8 +173,8 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val stringFormat: DynamoFormat[String] = new DynamoFormat[String] {
-    val default = Some("")
-    
+    override val default = Some("")
+
     def read(av: AttributeValue): Either[DynamoReadError, String] =
       if ((av.isNULL ne null) && av.isNULL)
         Right("")
