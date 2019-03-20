@@ -86,6 +86,8 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat extends EnumDynamoFormat {
+  val NullAv = new AttributeValue().withNULL(true)
+
   private def attribute[T](decode: AttributeValue => T, propertyType: String)(
     encode: AttributeValue => T => AttributeValue
   ): DynamoFormat[T] =
@@ -170,7 +172,19 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == Right(s)
     * }}}
     */
-  implicit val stringFormat = attribute(_.getS, "S")(_.withS)
+  implicit val stringFormat: DynamoFormat[String] = new DynamoFormat[String] {
+    override val default = Some("")
+
+    def read(av: AttributeValue): Either[DynamoReadError, String] =
+      if ((av.isNULL ne null) && av.isNULL)
+        Right("")
+      else
+        Either.fromOption(Option(av.getS), NoPropertyOfType("S", av))
+    def write(s: String): AttributeValue = s match {
+      case "" => NullAv
+      case _  => new AttributeValue().withS(s)
+    }
+  }
 
   private val javaBooleanFormat = attribute[java.lang.Boolean](_.getBOOL, "BOOL")(_.withBOOL)
 
@@ -333,7 +347,7 @@ object DynamoFormat extends EnumDynamoFormat {
         } yield set.toSet
       // Set types cannot be empty
       override def write(t: Set[T]): AttributeValue = t.toList match {
-        case Nil => new AttributeValue().withNULL(true)
+        case Nil => NullAv
         case xs  => new AttributeValue().withNS(xs.map(w).asJava)
       }
       override val default: Option[Set[T]] = Some(Set.empty)
