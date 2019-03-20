@@ -266,7 +266,6 @@ object DynamoFormat extends EnumDynamoFormat {
 
   /**
     * {{{
-    * prop> implicit val arbitraryUUID = org.scalacheck.Arbitrary(org.scalacheck.Gen.uuid)
     * prop> (uuid: java.util.UUID) =>
     *     | DynamoFormat[java.util.UUID].read(DynamoFormat[java.util.UUID].write(uuid)) ==
     *     |   Right(uuid)
