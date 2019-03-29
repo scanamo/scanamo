@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.DynamoFormat
 import org.scanamo.error.{ConditionNotMet, ScanamoError}
 import org.scanamo.ops.ScanamoOps
-import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
+import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoUpdateRequest}
 import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import cats.syntax.either._
@@ -13,12 +13,6 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T],
   format: DynamoFormat[V]
 ) {
-  def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] = {
-    val unconditionalRequest = ScanamoPutRequest(tableName, format.write(item), None)
-    ScanamoOps.conditionalPut(
-      unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition)))
-    )
-  }
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] = {
     val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None)

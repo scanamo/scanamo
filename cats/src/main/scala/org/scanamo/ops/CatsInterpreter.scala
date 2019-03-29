@@ -27,14 +27,12 @@ object CatsInterpreter {
 
     override def apply[A](fa: ScanamoOpsA[A]): F[A] = fa match {
       case Put(req) =>
-        eff(client.putItemAsync, JavaRequests.put(req))
-      case ConditionalPut(req) =>
         eff(client.putItemAsync, JavaRequests.put(req)).attempt
           .flatMap(
             _.fold(
               _ match {
-                case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
+                case e: AmazonDynamoDBException => F.delay(Left(e))
+                case t                          => F.raiseError(t) // raise error as opposed to swallowing
               },
               a => F.delay(Right(a))
             )

@@ -2,7 +2,7 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
 import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
-import org.scanamo.error.DynamoReadError
+import org.scanamo.error.{DynamoDBException, DynamoReadError, ScanamoError}
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.request._
@@ -16,19 +16,23 @@ object ScanamoFree {
 
   private val batchSize = 25
 
-  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[ScanamoError, T]]] =
     ScanamoOps
       .put(
         ScanamoPutRequest(tableName, f.write(item), None)
       )
-      .map { r =>
-        if (Option(r.getAttributes).exists(_.asScala.nonEmpty)) {
-          Some(
-            f.read(new AttributeValue().withM(r.getAttributes))
-          )
-        } else {
-          None
-        }
+      .map {
+        _.fold(
+          e => Some(Left(DynamoDBException(e))),
+          r =>
+            if (Option(r.getAttributes).exists(_.asScala.nonEmpty)) {
+              Some(
+                f.read(new AttributeValue().withM(r.getAttributes))
+              )
+            } else {
+              None
+            }
+        )
       }
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =

@@ -30,9 +30,7 @@ object ScanamoInterpreters {
   def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
       case Put(req) =>
-        client.putItem(JavaRequests.put(req))
-      case ConditionalPut(req) =>
-        Either.catchOnly[ConditionalCheckFailedException] {
+        Either.catchOnly[AmazonDynamoDBException] {
           client.putItem(JavaRequests.put(req))
         }
       case Get(req) =>
@@ -81,9 +79,7 @@ object ScanamoInterpreters {
     override def apply[A](op: ScanamoOpsA[A]): Future[A] = op match {
       case Put(req) =>
         futureOf(client.putItemAsync, JavaRequests.put(req))
-      case ConditionalPut(req) =>
-        futureOf(client.putItemAsync, JavaRequests.put(req))
-          .map(Either.right[ConditionalCheckFailedException, PutItemResult])
+          .map(Either.right[AmazonDynamoDBException, PutItemResult])
           .recover {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
