@@ -9,7 +9,7 @@ object ScanamoOpsA {
   type ScanamoResult[A] = Either[AmazonDynamoDBException, A]
 }
 final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[ScanamoResult[PutItemResult]]
-final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
+final case class Get(req: GetItemRequest) extends ScanamoOpsA[ScanamoResult[GetItemResult]]
 final case class Delete(req: ScanamoDeleteRequest) extends ScanamoOpsA[DeleteItemResult]
 final case class ConditionalDelete(req: ScanamoDeleteRequest)
     extends ScanamoOpsA[Either[ConditionalCheckFailedException, DeleteItemResult]]
@@ -26,7 +26,7 @@ object ScanamoOps {
   import cats.free.Free.liftF
 
   def put(req: ScanamoPutRequest): ScanamoOps[ScanamoResult[PutItemResult]] = liftF[ScanamoOpsA, ScanamoResult[PutItemResult]](Put(req))
-  def get(req: GetItemRequest): ScanamoOps[GetItemResult] = liftF[ScanamoOpsA, GetItemResult](Get(req))
+  def get(req: GetItemRequest): ScanamoOps[ScanamoResult[GetItemResult]] = liftF[ScanamoOpsA, ScanamoResult[GetItemResult]](Get(req))
   def delete(req: ScanamoDeleteRequest): ScanamoOps[DeleteItemResult] =
     liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
   def conditionalDelete(

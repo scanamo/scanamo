@@ -38,7 +38,16 @@ object CatsInterpreter {
             )
           )
       case Get(req) =>
-        eff(client.getItemAsync, req)
+        eff(client.getItemAsync, req).attempt
+          .flatMap(
+            _.fold(
+              _ match {
+                case e: AmazonDynamoDBException => F.delay(Left(e))
+                case t                          => F.raiseError(t) // raise error as opposed to swallowing
+              },
+              a => F.delay(Right(a))
+            )
+          )
       case Delete(req) =>
         eff(client.deleteItemAsync, JavaRequests.delete(req))
       case ConditionalDelete(req) =>
