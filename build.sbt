@@ -28,7 +28,7 @@ val commonSettings = Seq(
   ),
   // for simulacrum
   addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.full),
-  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.9"),
+  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.10"),
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
