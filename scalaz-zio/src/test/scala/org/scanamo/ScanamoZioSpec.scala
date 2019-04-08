@@ -11,12 +11,12 @@ import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
 import cats.implicits._
-import scalaz.zio.{IO, RTS}
+import scalaz.zio.{IO, DefaultRuntime}
 
 class ScanamoZioSpec extends FunSpec with Matchers {
 
   val client = LocalDynamoDB.client()
-  val RTS = new RTS {}
+  val RTS = new DefaultRuntime {}
 
   import RTS._
 
