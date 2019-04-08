@@ -141,7 +141,7 @@ private[ops] object JavaRequests {
         queryRefinement(_.options.limit)(_.withLimit(_)),
         queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k)),
         queryRefinement(_.options.filter)((r, f) => {
-          val requestCondition = f.apply(None)
+          val requestCondition = f.apply
           val filteredRequest = r
             .withFilterExpression(requestCondition.expression)
             .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
@@ -167,7 +167,7 @@ private[ops] object JavaRequests {
         queryRefinement(_.options.limit)(_.withLimit(_)),
         queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k)),
         queryRefinement(_.options.filter)((r, f) => {
-          val requestCondition = f.apply(None)
+          val requestCondition = f.apply
           r.withFilterExpression(requestCondition.expression)
             .withExpressionAttributeNames(
               (r.getExpressionAttributeNames.asScala ++ requestCondition.attributeNames).asJava
