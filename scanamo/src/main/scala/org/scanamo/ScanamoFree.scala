@@ -22,13 +22,7 @@ object ScanamoFree {
         ScanamoPutRequest(tableName, f.write(item), None)
       )
       .map { r =>
-        if (Option(r.getAttributes).exists(_.asScala.nonEmpty)) {
-          Some(
-            f.read(new AttributeValue().withM(r.getAttributes))
-          )
-        } else {
-          None
-        }
+        Option(r.getAttributes).filter(!_.isEmpty).map(attrs => f.read(new AttributeValue().withM(attrs)))
       }
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
