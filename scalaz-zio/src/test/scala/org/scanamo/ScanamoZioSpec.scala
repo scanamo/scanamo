@@ -11,7 +11,7 @@ import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
 import cats.implicits._
-import scalaz.zio.{IO, DefaultRuntime}
+import scalaz.zio.{DefaultRuntime, IO}
 
 class ScanamoZioSpec extends FunSpec with Matchers {
 
