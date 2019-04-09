@@ -61,19 +61,16 @@ object ScanamoFree {
           )
       )
 
-  def get[T: DynamoFormat](tableName: String)(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
-    ScanamoOps
-      .get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava))
-      .map(res => Option(res.getItem).map(read[T]))
-
-  def getWithConsistency[T: DynamoFormat](
+  def get[T: DynamoFormat](
     tableName: String
-  )(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  )(key: UniqueKey[_], consistent: Boolean): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     ScanamoOps
-      .get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(true))
+      .get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(consistent))
       .map(res => Option(res.getItem).map(read[T]))
 
-  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] =
+  def getAll[T: DynamoFormat](
+    tableName: String
+  )(keys: UniqueKeys[_], consistent: Boolean): ScanamoOps[Set[Either[DynamoReadError, T]]] =
     keys.asAVMap
       .grouped(batchSize)
       .toList
@@ -82,25 +79,7 @@ object ScanamoFree {
           ScanamoOps.batchGet(
             new BatchGetItemRequest().withRequestItems(
               Map(
-                tableName -> new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)
-              ).asJava
-            )
-          )
-      )
-      .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
-
-  def getAllWithConsistency[T: DynamoFormat](
-    tableName: String
-  )(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] =
-    keys.asAVMap
-      .grouped(batchSize)
-      .toList
-      .traverse(
-        batch =>
-          ScanamoOps.batchGet(
-            new BatchGetItemRequest().withRequestItems(
-              Map(
-                tableName -> new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(true)
+                tableName -> new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(consistent)
               ).asJava
             )
           )

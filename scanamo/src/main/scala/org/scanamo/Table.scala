@@ -38,8 +38,8 @@ case class Table[V: DynamoFormat](name: String) {
 
   def put(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.put(name)(v)
   def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.putAll(name)(vs)
-  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.get[V](name)(key)
-  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] = ScanamoFree.getAll[V](name)(keys)
+  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.get[V](name)(key, false)
+  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] = ScanamoFree.getAll[V](name)(keys, false)
   def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] = ScanamoFree.delete(name)(key)
 
   /**
@@ -756,9 +756,9 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.query(query)
 
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
-    ScanamoFree.getWithConsistency[V](tableName)(key)
+    ScanamoFree.get[V](tableName)(key, true)
   def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
-    ScanamoFree.getAllWithConsistency[V](tableName)(keys)
+    ScanamoFree.getAll[V](tableName)(keys, true)
 }
 
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
