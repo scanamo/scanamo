@@ -34,21 +34,21 @@ object ScanamoFree {
           ScanamoOps.batchWrite(
             new BatchWriteItemRequest().withRequestItems(
               Map(
-                tableName -> batch.toList
-                  .map(i => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM)))
-                  .asJava
-              ).asJava
-            )
-          )
+            tableName -> batch
+              .foldRight(List.empty[WriteRequest]) { case (i, reqs) => reqs :+ new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM)) }
+              .asJava
+          ).asJava
+        )
       )
+    )
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
     items.asAVMap.grouped(batchSize).toList.traverse { batch =>
       ScanamoOps.batchWrite(
         new BatchWriteItemRequest().withRequestItems(
           Map(
-            tableName -> batch.toList
-              .map(item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.asJava)))
+            tableName -> batch
+              .foldRight(List.empty[WriteRequest]) { case (i, reqs) => reqs :+ new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(i.asJava)) }
               .asJava
           ).asJava
         )
