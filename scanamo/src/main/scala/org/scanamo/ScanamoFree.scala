@@ -15,6 +15,7 @@ object ScanamoFree {
   import collection.JavaConverters._
 
   private val batchSize = 25
+  private val batchGetSize = 100
 
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     ScanamoOps
@@ -72,7 +73,7 @@ object ScanamoFree {
     tableName: String
   )(keys: UniqueKeys[_], consistent: Boolean): ScanamoOps[Set[Either[DynamoReadError, T]]] =
     keys.asAVMap
-      .grouped(batchSize)
+      .grouped(batchGetSize)
       .toList
       .traverse(
         batch =>
