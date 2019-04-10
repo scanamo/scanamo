@@ -14,7 +14,7 @@ object ZioInterpreter {
         f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
         req: A
       ): IO[AmazonDynamoDBException, B] =
-        IO.async[AmazonDynamoDBException, B] { cb =>
+        IO.effectAsync[AmazonDynamoDBException, B] { cb =>
           val handler = new AsyncHandler[A, B] {
             def onError(exception: Exception): Unit =
               exception match {
@@ -32,25 +32,21 @@ object ZioInterpreter {
         case Put(req) =>
           eff(client.putItemAsync, JavaRequests.put(req))
         case ConditionalPut(req) =>
-          eff(client.putItemAsync, JavaRequests.put(req)).redeem(
-            _ match {
+          eff(client.putItemAsync, JavaRequests.put(req))
+            .map[Either[ConditionalCheckFailedException, PutItemResult]](Right(_))
+            .catchSome {
               case e: ConditionalCheckFailedException => IO.succeed(Left(e))
-              case t                                  => IO.fail(t)
-            },
-            a => IO.succeed(Right(a))
-          )
+            }
         case Get(req) =>
           eff(client.getItemAsync, req)
         case Delete(req) =>
           eff(client.deleteItemAsync, JavaRequests.delete(req))
         case ConditionalDelete(req) =>
-          eff(client.deleteItemAsync, JavaRequests.delete(req)).redeem(
-            _ match {
+          eff(client.deleteItemAsync, JavaRequests.delete(req))
+            .map[Either[ConditionalCheckFailedException, DeleteItemResult]](Right(_))
+            .catchSome {
               case e: ConditionalCheckFailedException => IO.succeed(Left(e))
-              case t                                  => IO.fail(t)
-            },
-            a => IO.succeed(Right(a))
-          )
+            }
         case Scan(req) =>
           eff(client.scanAsync, JavaRequests.scan(req))
         case Query(req) =>
@@ -71,13 +67,11 @@ object ZioInterpreter {
         case Update(req) =>
           eff(client.updateItemAsync, JavaRequests.update(req))
         case ConditionalUpdate(req) =>
-          eff(client.updateItemAsync, JavaRequests.update(req)).redeem(
-            _ match {
+          eff(client.updateItemAsync, JavaRequests.update(req))
+            .map[Either[ConditionalCheckFailedException, UpdateItemResult]](Right(_))
+            .catchSome {
               case e: ConditionalCheckFailedException => IO.succeed(Left(e))
-              case t                                  => IO.fail(t)
-            },
-            a => IO.succeed(Right(a))
-          )
+            }
       }
     }
 }
