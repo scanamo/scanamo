@@ -1,6 +1,7 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
+import java.util.{List => JList, Map => JMap}
 import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
@@ -26,41 +27,27 @@ object ScanamoFree {
     items
       .grouped(batchSize)
       .toList
-      .traverse(
-        batch =>
-          ScanamoOps.batchWrite(
-            new BatchWriteItemRequest().withRequestItems(
-              Map(
-                tableName -> batch
-                  .foldRight(List.empty[WriteRequest]) {
-                    case (i, reqs) =>
-                      reqs :+ new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM))
-                  }
-                  .asJava
-              ).asJava
-            )
-          )
-      )
+      .traverse { batch =>
+        val map = buildMap[T, WriteRequest](
+          tableName,
+          batch,
+          item => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(item).getM))
+        )
+        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
+      }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
     items.asAVMap
       .grouped(batchSize)
       .toList
-      .traverse(
-        batch =>
-          ScanamoOps.batchWrite(
-            new BatchWriteItemRequest().withRequestItems(
-              Map(
-                tableName -> batch
-                  .foldRight(List.empty[WriteRequest]) {
-                    case (i, reqs) =>
-                      reqs :+ new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(i.asJava))
-                  }
-                  .asJava
-              ).asJava
-            )
-          )
-      )
+      .traverse { batch =>
+        val map = buildMap[Map[String, AttributeValue], WriteRequest](
+          tableName,
+          batch,
+          item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.asJava))
+        )
+        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
+      }
 
   def get[T: DynamoFormat](
     tableName: String
@@ -75,16 +62,22 @@ object ScanamoFree {
     keys.asAVMap
       .grouped(batchGetSize)
       .toList
-      .traverse(
-        batch =>
-          ScanamoOps.batchGet(
-            new BatchGetItemRequest().withRequestItems(
-              Map(
-                tableName -> new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(consistent)
-              ).asJava
+      .traverse { batch =>
+        val map = emptyMap[String, KeysAndAttributes](1)
+        map.put(
+          tableName,
+          new KeysAndAttributes()
+            .withKeys(
+              batch.foldLeft(emptyList[JMap[String, AttributeValue]](batch.size)) {
+                case (keys, key) =>
+                  keys.add(key.asJava)
+                  keys
+              }
             )
-          )
-      )
+            .withConsistentRead(consistent)
+        )
+        ScanamoOps.batchGet(new BatchGetItemRequest().withRequestItems(map))
+      }
       .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
 
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
@@ -131,4 +124,21 @@ object ScanamoFree {
     */
   def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): Either[DynamoReadError, T] =
     f.read(new AttributeValue().withM(m))
+
+  private def emptyList[T](capacity: Int): JList[T] = new java.util.ArrayList[T](capacity)
+  private def emptyMap[K, T](capacity: Int): JMap[K, T] = new java.util.HashMap[K, T](capacity, 1)
+
+  private def buildMap[A, B](tableName: String, batch: Iterable[A], f: A => B): JMap[String, JList[B]] = {
+    val map = emptyMap[String, JList[B]](1)
+    map.put(
+      tableName,
+      batch
+        .foldLeft(emptyList[B](batch.size)) {
+          case (reqs, i) =>
+            reqs.add(f(i))
+            reqs
+        }
+    )
+    map
+  }
 }
