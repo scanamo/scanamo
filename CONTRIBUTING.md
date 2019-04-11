@@ -26,6 +26,7 @@ Contributing documentation
 The [website](http://www.scanamo.org) is built using 
 [sbt-microsites](https://47deg.github.io/sbt-microsites/). To check 
 documentation changes: 
+ * Make sure [jekyll](https://jekyllrb.com/docs/installation/) is installed locally
  * run `makeMicrosite` from the root of SBT
  * run `jekyll serve --incremental --baseurl /` from `docs/target/site`
  * Load http://127.0.0.1:4000/
