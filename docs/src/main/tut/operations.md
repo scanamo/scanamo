@@ -142,7 +142,7 @@ Scanamo.exec(client)(
 ```
 
 Further examples, showcasing different types of update can be found in the 
-[scaladoc for the `update` method on `Table`](/latest/api/com/gu/scanamo/Table.html#update(key:org.scanamo.query.UniqueKey[_],expression:org.scanamo.update.UpdateExpression):org.scanamo.ops.ScanamoOps[Either[org.scanamo.error.DynamoReadError,V]])
+[scaladoc for the `update` method on `Table`](/latest/api/org/scanamo/Table.html#update(key:org.scanamo.query.UniqueKey[_],expression:org.scanamo.update.UpdateExpression):org.scanamo.ops.ScanamoOps[Either[org.scanamo.error.DynamoReadError,V]])
 
 ### Scan
 

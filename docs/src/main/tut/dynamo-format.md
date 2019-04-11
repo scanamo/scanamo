@@ -6,11 +6,11 @@ position:  6
 
 ## DynamoFormat
 
-Scanamo uses the [`DynamoFormat`](latest/api/com/gu/scanamo/DynamoFormat.html)
+Scanamo uses the [`DynamoFormat`](latest/api/org/scanamo/DynamoFormat.html)
 type class to define how to read and write different types to DynamoDB.
 
 Many common types have a `DynamoFormat` provided by Scanamo. For a full list see
-of those supported, you can look at the [companion object](latest/api/com/gu/scanamo/DynamoFormat$.html).
+of those supported, you can look at the [companion object](latest/api/org/scanamo/DynamoFormat$.html).
 
 Scanamo also supports automatically deriving formats for case classes and
 sealed trait families where all the contained types have a defined or derivable
@@ -58,8 +58,8 @@ implicit val formatFarmer: DynamoFormat[Farmer] = deriveDynamoFormat
 
 It's also possible to define a serialisation format for types which Scanamo
 doesn't already support and can't derive. Normally this involves using the
-[xmap](latest/api/com/gu/scanamo/DynamoFormat$.html#xmap[A,B](r:B=>Either[org.scanamo.error.DynamoReadError,A])(w:A=>B)(implicitf:org.scanamo.DynamoFormat[B]):org.scanamo.DynamoFormat[A])
-or [coercedXmap](latest/api/com/gu/scanamo/DynamoFormat$.html#coercedXmap[A,B,T>:Null<:Throwable](read:B=>A)(write:A=>B)(implicitf:org.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):org.scanamo.DynamoFormat[A])
+[xmap](latest/api/org/scanamo/DynamoFormat$.html#xmap[A,B](r:B=>Either[org.scanamo.error.DynamoReadError,A])(w:A=>B)(implicitf:org.scanamo.DynamoFormat[B]):org.scanamo.DynamoFormat[A])
+or [coercedXmap](latest/api/org/scanamo/DynamoFormat$.html#coercedXmap[A,B,T>:Null<:Throwable](read:B=>A)(write:A=>B)(implicitf:org.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):org.scanamo.DynamoFormat[A])
 to translate between the type and one Scanamo does already know about.
 
 For example, to store Joda `DateTime` objects as ISO `String`s in Dynamo:
@@ -137,7 +137,7 @@ Scanamo.exec(client)(operations).toList
 
 ### Derived Formats
 
-Scanamo uses [shapeless](https://github.com/milessabin/shapeless) and implicit derivation to automatically derive [`DynamoFormat`](latest/api/com/gu/scanamo/DynamoFormat)s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of `id` and sort key `seqNo`):
+Scanamo uses [shapeless](https://github.com/milessabin/shapeless) and implicit derivation to automatically derive [`DynamoFormat`](latest/api/org/scanamo/DynamoFormat)s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of `id` and sort key `seqNo`):
 
 ```tut:silent
 import java.util.UUID
