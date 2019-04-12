@@ -1,6 +1,7 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
+import java.util.{List => JList, Map => JMap}
 import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
@@ -15,99 +16,67 @@ object ScanamoFree {
   import collection.JavaConverters._
 
   private val batchSize = 25
+  private val batchGetSize = 100
 
   def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     ScanamoOps
-      .put(
-        ScanamoPutRequest(tableName, f.write(item), None)
-      )
-      .map { r =>
-        if (Option(r.getAttributes).exists(_.asScala.nonEmpty)) {
-          Some(
-            f.read(new AttributeValue().withM(r.getAttributes))
-          )
-        } else {
-          None
-        }
-      }
+      .put(ScanamoPutRequest(tableName, f.write(item), None))
+      .map(r => Option(r.getAttributes).filter(!_.isEmpty).map(read[T]))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
     items
       .grouped(batchSize)
       .toList
-      .traverse(
-        batch =>
-          ScanamoOps.batchWrite(
-            new BatchWriteItemRequest().withRequestItems(
-              Map(
-                tableName -> batch.toList
-                  .map(i => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(i).getM)))
-                  .asJava
-              ).asJava
-            )
-          )
-      )
+      .traverse { batch =>
+        val map = buildMap[T, WriteRequest](
+          tableName,
+          batch,
+          item => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(item).getM))
+        )
+        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
+      }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.asAVMap.grouped(batchSize).toList.traverse { batch =>
-      ScanamoOps.batchWrite(
-        new BatchWriteItemRequest().withRequestItems(
-          Map(
-            tableName -> batch.toList
-              .map(item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.asJava)))
-              .asJava
-          ).asJava
-        )
-      )
-    }
-
-  def get[T](
-    tableName: String
-  )(key: UniqueKey[_])(implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
-    for {
-      res <- ScanamoOps.get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava))
-    } yield Option(res.getItem).map(read[T])
-
-  def getWithConsistency[T](
-    tableName: String
-  )(key: UniqueKey[_])(implicit ft: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
-    for {
-      res <- ScanamoOps.get(
-        new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(true)
-      )
-    } yield Option(res.getItem).map(read[T])
-
-  def getAll[T: DynamoFormat](tableName: String)(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] =
-    keys.asAVMap
+    items.asAVMap
       .grouped(batchSize)
       .toList
       .traverse { batch =>
-        ScanamoOps.batchGet(
-          new BatchGetItemRequest().withRequestItems(
-            Map(
-              tableName ->
-                new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava)
-            ).asJava
-          )
+        val map = buildMap[Map[String, AttributeValue], WriteRequest](
+          tableName,
+          batch,
+          item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.asJava))
         )
+        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
-      .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
 
-  def getAllWithConsistency[T: DynamoFormat](
+  def get[T: DynamoFormat](
     tableName: String
-  )(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, T]]] =
+  )(key: UniqueKey[_], consistent: Boolean): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+    ScanamoOps
+      .get(new GetItemRequest().withTableName(tableName).withKey(key.asAVMap.asJava).withConsistentRead(consistent))
+      .map(res => Option(res.getItem).map(read[T]))
+
+  def getAll[T: DynamoFormat](
+    tableName: String
+  )(keys: UniqueKeys[_], consistent: Boolean): ScanamoOps[Set[Either[DynamoReadError, T]]] =
     keys.asAVMap
-      .grouped(batchSize)
+      .grouped(batchGetSize)
       .toList
       .traverse { batch =>
-        ScanamoOps.batchGet(
-          new BatchGetItemRequest().withRequestItems(
-            Map(
-              tableName ->
-                new KeysAndAttributes().withKeys(batch.map(_.asJava).asJava).withConsistentRead(true)
-            ).asJava
-          )
+        val map = emptyMap[String, KeysAndAttributes](1)
+        map.put(
+          tableName,
+          new KeysAndAttributes()
+            .withKeys(
+              batch.foldLeft(emptyList[JMap[String, AttributeValue]](batch.size)) {
+                case (keys, key) =>
+                  keys.add(key.asJava)
+                  keys
+              }
+            )
+            .withConsistentRead(consistent)
         )
+        ScanamoOps.batchGet(new BatchGetItemRequest().withRequestItems(map))
       }
       .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
 
@@ -126,9 +95,9 @@ object ScanamoFree {
   def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResult] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
 
-  def update[T](tableName: String)(key: UniqueKey[_])(update: UpdateExpression)(
-    implicit format: DynamoFormat[T]
-  ): ScanamoOps[Either[DynamoReadError, T]] =
+  def update[T: DynamoFormat](
+    tableName: String
+  )(key: UniqueKey[_])(update: UpdateExpression): ScanamoOps[Either[DynamoReadError, T]] =
     ScanamoOps
       .update(
         ScanamoUpdateRequest(
@@ -140,9 +109,7 @@ object ScanamoFree {
           None
         )
       )
-      .map(
-        r => format.read(new AttributeValue().withM(r.getAttributes))
-      )
+      .map(r => read[T](r.getAttributes))
 
   /**
     * {{{
@@ -157,4 +124,21 @@ object ScanamoFree {
     */
   def read[T](m: java.util.Map[String, AttributeValue])(implicit f: DynamoFormat[T]): Either[DynamoReadError, T] =
     f.read(new AttributeValue().withM(m))
+
+  private def emptyList[T](capacity: Int): JList[T] = new java.util.ArrayList[T](capacity)
+  private def emptyMap[K, T](capacity: Int): JMap[K, T] = new java.util.HashMap[K, T](capacity, 1)
+
+  private def buildMap[A, B](tableName: String, batch: Iterable[A], f: A => B): JMap[String, JList[B]] = {
+    val map = emptyMap[String, JList[B]](1)
+    map.put(
+      tableName,
+      batch
+        .foldLeft(emptyList[B](batch.size)) {
+          case (reqs, i) =>
+            reqs.add(f(i))
+            reqs
+        }
+    )
+    map
+  }
 }
