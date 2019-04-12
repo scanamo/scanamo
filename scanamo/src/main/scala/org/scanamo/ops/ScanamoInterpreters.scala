@@ -38,9 +38,7 @@ object ScanamoInterpreters {
           client.getItem(req)
         }
       case Delete(req) =>
-        client.deleteItem(JavaRequests.delete(req))
-      case ConditionalDelete(req) =>
-        Either.catchOnly[ConditionalCheckFailedException] {
+        Either.catchOnly[AmazonDynamoDBException] {
           client.deleteItem(JavaRequests.delete(req))
         }
       case Scan(req) =>
@@ -93,10 +91,8 @@ object ScanamoInterpreters {
           }
       case Delete(req) =>
         futureOf(client.deleteItemAsync, JavaRequests.delete(req))
-      case ConditionalDelete(req) =>
-        futureOf(client.deleteItemAsync, JavaRequests.delete(req))
-          .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
-          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+          .map(Either.right[AmazonDynamoDBException, DeleteItemResult])
+          .recover { case e: AmazonDynamoDBException => Either.left(e) }
       case Scan(req) =>
         futureOf(client.scanAsync, JavaRequests.scan(req))
       case Query(req) =>

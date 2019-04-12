@@ -10,9 +10,8 @@ object ScanamoOpsA {
 }
 final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[ScanamoResult[PutItemResult]]
 final case class Get(req: GetItemRequest) extends ScanamoOpsA[ScanamoResult[GetItemResult]]
-final case class Delete(req: ScanamoDeleteRequest) extends ScanamoOpsA[DeleteItemResult]
-final case class ConditionalDelete(req: ScanamoDeleteRequest)
-    extends ScanamoOpsA[Either[ConditionalCheckFailedException, DeleteItemResult]]
+final case class Delete(req: ScanamoDeleteRequest)
+    extends ScanamoOpsA[ScanamoResult[DeleteItemResult]]
 final case class Scan(req: ScanamoScanRequest) extends ScanamoOpsA[ScanResult]
 final case class Query(req: ScanamoQueryRequest) extends ScanamoOpsA[QueryResult]
 final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
@@ -27,12 +26,10 @@ object ScanamoOps {
 
   def put(req: ScanamoPutRequest): ScanamoOps[ScanamoResult[PutItemResult]] = liftF[ScanamoOpsA, ScanamoResult[PutItemResult]](Put(req))
   def get(req: GetItemRequest): ScanamoOps[ScanamoResult[GetItemResult]] = liftF[ScanamoOpsA, ScanamoResult[GetItemResult]](Get(req))
-  def delete(req: ScanamoDeleteRequest): ScanamoOps[DeleteItemResult] =
-    liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
-  def conditionalDelete(
+  def delete(
     req: ScanamoDeleteRequest
-  ): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
-    liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, DeleteItemResult]](ConditionalDelete(req))
+  ): ScanamoOps[ScanamoResult[DeleteItemResult]] =
+    liftF[ScanamoOpsA,ScanamoResult[DeleteItemResult]](Delete(req))
   def scan(req: ScanamoScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
   def query(req: ScanamoQueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](Query(req))
   def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResult] =

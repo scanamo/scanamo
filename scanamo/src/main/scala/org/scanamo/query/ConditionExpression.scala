@@ -22,9 +22,9 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
     )
   }
 
-  def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] = {
+  def delete(key: UniqueKey[_]): ScanamoOps[ScanamoResult[DeleteItemResult]] = {
     val unconditionalRequest = ScanamoDeleteRequest(tableName = tableName, key = key.asAVMap, None)
-    ScanamoOps.conditionalDelete(
+    ScanamoOps.delete(
       unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition)))
     )
   }

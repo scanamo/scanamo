@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
 import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.{DynamoDBException, DynamoReadError, ScanamoError}
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.ScanamoOpsA.ScanamoResult
 import org.scanamo.query._
 import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
@@ -124,7 +125,7 @@ object ScanamoFree {
       }
       .map(_.flatMap(_.getResponses.get(tableName).asScala.toSet.map(read[T])).toSet)
 
-  def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
+  def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[ScanamoResult[DeleteItemResult]] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.asAVMap, None))
 
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =

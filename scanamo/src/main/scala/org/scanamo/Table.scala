@@ -4,6 +4,7 @@ import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItem
 import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.{DynamoReadError, ScanamoError}
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.ScanamoOpsA.ScanamoResult
 import org.scanamo.query._
 import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import org.scanamo.update.UpdateExpression
@@ -41,7 +42,7 @@ case class Table[V: DynamoFormat](name: String) {
   def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.putAll(name)(vs)
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[ScanamoError, V]]] = ScanamoFree.get[V](name)(key)
   def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] = ScanamoFree.getAll[V](name)(keys)
-  def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] = ScanamoFree.delete(name)(key)
+  def delete(key: UniqueKey[_]): ScanamoOps[ScanamoResult[DeleteItemResult]] = ScanamoFree.delete(name)(key)
 
   /**
     * Deletes multiple items by a unique key
