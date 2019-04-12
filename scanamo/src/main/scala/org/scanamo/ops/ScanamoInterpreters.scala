@@ -29,32 +29,31 @@ object ScanamoInterpreters {
     */
   def id(client: AmazonDynamoDB) = new (ScanamoOpsA ~> Id) {
     def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
-      case Put(req) =>
-        Either.catchOnly[AmazonDynamoDBException] {
+      case Put(req, res) =>
+        res(Either.catchOnly[AmazonDynamoDBException] {
           client.putItem(JavaRequests.put(req))
-        }
-      case Get(req) =>
-        Either.catchOnly[AmazonDynamoDBException] {
+        })
+      case Get(req, res) =>
+        res(Either.catchOnly[AmazonDynamoDBException] {
           client.getItem(req)
-        }
-      case Delete(req) =>
-        Either.catchOnly[AmazonDynamoDBException] {
+        })
+      case Delete(req, res) =>
+        res(Either.catchOnly[AmazonDynamoDBException] {
           client.deleteItem(JavaRequests.delete(req))
-        }
-      case Scan(req) =>
-        client.scan(JavaRequests.scan(req))
-      case Query(req) =>
-        client.query(JavaRequests.query(req))
-      case BatchWrite(req) =>
-        client.batchWriteItem(req)
-      case BatchGet(req) =>
-        client.batchGetItem(req)
-      case Update(req) =>
-        client.updateItem(JavaRequests.update(req))
-      case ConditionalUpdate(req) =>
-        Either.catchOnly[ConditionalCheckFailedException] {
+        })
+      case Scan(req, res) =>
+        res(client.scan(JavaRequests.scan(req)))
+      case Query(req, res) =>
+        res(client.query(JavaRequests.query(req)))
+      case BatchWrite(req, res) =>
+        res(client.batchWriteItem(req))
+      case BatchGet(req, res) =>
+        res(client.batchGetItem(req))
+      case Update(req, res) =>
+        res(Either.catchOnly[AmazonDynamoDBException] {
           client.updateItem(JavaRequests.update(req))
-        }
+        })
+      case Fail(error) => throw error
     }
   }
 
@@ -77,48 +76,49 @@ object ScanamoInterpreters {
     }
 
     override def apply[A](op: ScanamoOpsA[A]): Future[A] = op match {
-      case Put(req) =>
+      case Put(req, res) =>
         futureOf(client.putItemAsync, JavaRequests.put(req))
-          .map(Either.right[AmazonDynamoDBException, PutItemResult])
+          .map(x => res(Either.right[AmazonDynamoDBException, PutItemResult](x)))
           .recover {
-            case e: AmazonDynamoDBException => Either.left(e)
+            case e: AmazonDynamoDBException => res(Either.left(e))
           }
-      case Get(req) =>
+      case Get(req, res) =>
         futureOf(client.getItemAsync, req)
-          .map(Either.right[AmazonDynamoDBException, GetItemResult])
+          .map(x => res(Either.right[AmazonDynamoDBException, GetItemResult](x)))
           .recover {
-            case e: AmazonDynamoDBException => Either.left(e)
+            case e: AmazonDynamoDBException => res(Either.left(e))
           }
-      case Delete(req) =>
+      case Delete(req, res) =>
         futureOf(client.deleteItemAsync, JavaRequests.delete(req))
-          .map(Either.right[AmazonDynamoDBException, DeleteItemResult])
-          .recover { case e: AmazonDynamoDBException => Either.left(e) }
-      case Scan(req) =>
+          .map(x => res(Either.right[AmazonDynamoDBException, DeleteItemResult](x)))
+          .recover { case e: AmazonDynamoDBException => res(Either.left(e)) }
+      case Scan(req, res) =>
         futureOf(client.scanAsync, JavaRequests.scan(req))
-      case Query(req) =>
+          .map(res)
+      case Query(req, res) =>
         futureOf(client.queryAsync, JavaRequests.query(req))
+          .map(res)
       // Overloading means we need explicit parameter types here
-      case BatchWrite(req) =>
+      case BatchWrite(req, res) =>
         futureOf(
           client.batchWriteItemAsync(
             _: BatchWriteItemRequest,
             _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]
           ),
           req
-        )
-      case BatchGet(req) =>
+        ).map(res)
+      case BatchGet(req, res) =>
         futureOf(
           client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
           req
-        )
-      case Update(req) =>
+        ).map(res)
+      case Update(req, res) =>
         futureOf(client.updateItemAsync, JavaRequests.update(req))
-      case ConditionalUpdate(req) =>
-        futureOf(client.updateItemAsync, JavaRequests.update(req))
-          .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
+          .map(x => res(Either.right[AmazonDynamoDBException, UpdateItemResult](x)))
           .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
+            case e: AmazonDynamoDBException => res(Either.left(e))
           }
+      case Fail(error) => Future.failed(error)
     }
   }
 }

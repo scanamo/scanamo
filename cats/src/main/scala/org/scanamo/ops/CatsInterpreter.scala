@@ -92,6 +92,7 @@ object CatsInterpreter {
               a => F.delay(Right(a))
             )
           )
+      case Fail(error) => F.raiseError(error)
     }
   }
 }

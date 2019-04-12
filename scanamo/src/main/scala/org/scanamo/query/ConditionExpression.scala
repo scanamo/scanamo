@@ -1,5 +1,6 @@
 package org.scanamo.query
 
+import cats.Monad
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.DynamoFormat
 import org.scanamo.error.{ConditionNotMet, ScanamoError}
@@ -7,8 +8,8 @@ import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
 import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
-import cats.syntax.either._
 import org.scanamo.ops.ScanamoOpsA.ScanamoResult
+import org.scanamo.ops.ScanamoOps.monadErrorScanamoOps._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T],
@@ -40,12 +41,15 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
       None
     )
     ScanamoOps
-      .conditionalUpdate(unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
-      .map(
-        either =>
-          either
-            .leftMap[ScanamoError](ConditionNotMet(_))
-            .flatMap(r => format.read(new AttributeValue().withM(r.getAttributes)))
+      .update(unconditionalRequest.copy(condition = Some(state.apply(t)(unconditionalRequest.condition))))
+      .flatMap(
+        _.fold(
+          _ match {
+            case t: ConditionalCheckFailedException => Monad[ScanamoOps].pure(Left(ConditionNotMet(t)))
+            case e => raiseError(e)
+          },
+          r => Monad[ScanamoOps].pure(format.read(new AttributeValue().withM(r.getAttributes)))
+        )
       )
   }
 }

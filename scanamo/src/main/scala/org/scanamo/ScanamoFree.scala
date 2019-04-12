@@ -142,7 +142,7 @@ object ScanamoFree {
 
   def update[T](tableName: String)(key: UniqueKey[_])(update: UpdateExpression)(
     implicit format: DynamoFormat[T]
-  ): ScanamoOps[Either[DynamoReadError, T]] =
+  ): ScanamoOps[Either[ScanamoError, T]] =
     ScanamoOps
       .update(
         ScanamoUpdateRequest(
@@ -154,9 +154,12 @@ object ScanamoFree {
           None
         )
       )
-      .map(
-        r => format.read(new AttributeValue().withM(r.getAttributes))
-      )
+      .map {
+        _.fold(
+          e => Left(DynamoDBException(e)),
+          r => format.read(new AttributeValue().withM(r.getAttributes))
+        )
+      }
 
   /**
     * {{{

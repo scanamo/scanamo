@@ -280,7 +280,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Right(Thing(a1,3,Some(3)))
     * }}}
     */
-  def update(key: UniqueKey[_], expression: UpdateExpression): ScanamoOps[Either[DynamoReadError, V]] =
+  def update(key: UniqueKey[_], expression: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] =
     ScanamoFree.update[V](name)(key)(expression)
 
   /**
