@@ -7,10 +7,10 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
-import org.scalatest.prop.GeneratorDrivenPropertyChecks
+import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scanamo.auto._
 
-class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropertyChecks {
+class DynamoFormatTest extends FunSpec with Matchers with ScalaCheckDrivenPropertyChecks {
 
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
   def testReadWrite[A: DynamoFormat: TypeTag](gen: Gen[A]): Unit = {
@@ -19,11 +19,12 @@ class DynamoFormatTest extends FunSpec with Matchers with GeneratorDrivenPropert
       val client = LocalDynamoDB.client()
       LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
         final case class Person(name: String, item: A)
+        val format = DynamoFormat[Person]
         forAll(gen) { a: A =>
           val person = Person("bob", a)
-          client.putItem(t, DynamoFormat[Person].write(person).getM)
+          client.putItem(t, format.write(person).toAttributeValue.getM)
           val resp = client.getItem(t, Map("name" -> new AttributeValue().withS("bob")).asJava)
-          DynamoFormat[Person].read(new AttributeValue().withM(resp.getItem)) shouldBe Right(person)
+          format.read(DynamoValue.fromAttributeValue(new AttributeValue().withM(resp.getItem))) shouldBe Right(person)
         }
       }
     }

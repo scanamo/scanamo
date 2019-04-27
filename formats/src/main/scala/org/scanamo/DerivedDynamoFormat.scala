@@ -2,21 +2,18 @@ package org.scanamo
 
 import cats.data.{NonEmptyList, Validated}
 import cats.syntax.either._
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.error._
 import org.scanamo.export.Exported
 import shapeless._
 import shapeless.labelled._
-
-import collection.JavaConverters._
 
 trait DerivedDynamoFormat {
   type ValidatedPropertiesError[T] = Validated[InvalidPropertiesError, T]
   type NotSymbol[T] = |¬|[Symbol]#λ[T]
 
   trait ConstructedDynamoFormat[T] {
-    def read(av: AttributeValue): Validated[InvalidPropertiesError, T]
-    def write(t: T): AttributeValue
+    def read(av: DynamoValue): Validated[InvalidPropertiesError, T]
+    def write(t: T): DynamoValue
   }
 
   trait InvalidConstructedDynamoFormat[T] extends ConstructedDynamoFormat[T]
@@ -24,8 +21,8 @@ trait DerivedDynamoFormat {
 
   implicit val hnil: InvalidConstructedDynamoFormat[HNil] =
     new InvalidConstructedDynamoFormat[HNil] {
-      def read(av: AttributeValue) = Validated.valid(HNil)
-      def write(t: HNil): AttributeValue = new AttributeValue().withM(Map.empty[String, AttributeValue].asJava)
+      final def read(av: DynamoValue) = Validated.valid(HNil)
+      final def write(t: HNil): DynamoValue = DynamoValue.nil
     }
 
   implicit def hcons[K <: Symbol, V, T <: HList](
@@ -35,11 +32,14 @@ trait DerivedDynamoFormat {
     fieldWitness: Witness.Aux[K]
   ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
     new ValidConstructedDynamoFormat[FieldType[K, V] :: T] {
-      def read(av: AttributeValue): Validated[InvalidPropertiesError, FieldType[K, V] :: T] = {
-        val fieldName = fieldWitness.value.name
-
+      private final val fieldName = fieldWitness.value.name
+      
+      final def read(av: DynamoValue): Validated[InvalidPropertiesError, FieldType[K, V] :: T] = {
         val possibleValue =
-          av.getM.asScala.get(fieldName).map(headFormat.value.read).orElse(headFormat.value.default.map(Either.right))
+          av.asObject
+            .flatMap(_.get(fieldName))
+            .map(headFormat.value.read)
+            .orElse(headFormat.value.default.map(Either.right))
 
         val valueOrError = possibleValue.getOrElse(Either.left[DynamoReadError, V](MissingProperty))
 
@@ -51,23 +51,21 @@ trait DerivedDynamoFormat {
 
         cats.Apply[ValidatedPropertiesError].map2(head, tail)(_ :: _)
       }
-      def write(t: FieldType[K, V] :: T): AttributeValue = {
+
+      final def write(t: FieldType[K, V] :: T): DynamoValue = {
         val tailValue = tailFormat.value.write(t.tail)
         val av = headFormat.value.write(t.head)
-        if (!(av.isNULL eq null) && av.isNULL)
-          tailValue
-        else
-          new AttributeValue().withM((tailValue.getM.asScala + (fieldWitness.value.name -> av)).asJava)
+        DynamoValue.keyStore(fieldName -> av) <> tailValue
       }
     }
 
   trait CoProductDynamoFormat[T] extends DynamoFormat[T]
 
   implicit val cnil: CoProductDynamoFormat[CNil] = new CoProductDynamoFormat[CNil] {
-    def read(av: AttributeValue): Either[DynamoReadError, CNil] =
+    final def read(av: DynamoValue): Either[DynamoReadError, CNil] =
       Left(TypeCoercionError(new Exception(s"$av was not of the expected type")))
 
-    def write(t: CNil): AttributeValue = sys.error("CNil cannot be written to an AttributeValue")
+    final def write(t: CNil): DynamoValue = sys.error("CNil cannot be written to an DynamoValue")
   }
 
   implicit def coproduct[K <: Symbol, V, T <: Coproduct](
@@ -75,11 +73,12 @@ trait DerivedDynamoFormat {
     headFormat: Lazy[DynamoFormat[V]],
     tailFormat: CoProductDynamoFormat[T],
     fieldWitness: Witness.Aux[K]
-  ): CoProductDynamoFormat[FieldType[K, V] :+: T] = {
-    val fieldName = fieldWitness.value.name
+  ): CoProductDynamoFormat[FieldType[K, V] :+: T] =
     new CoProductDynamoFormat[FieldType[K, V] :+: T] {
-      def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: T] =
-        av.getM.asScala.get(fieldName) match {
+      private final val fieldName = fieldWitness.value.name
+
+      final def read(av: DynamoValue): Either[DynamoReadError, FieldType[K, V] :+: T] =
+        av.asObject.flatMap(_.get(fieldName)) match {
           case Some(nestedAv) =>
             val value = headFormat.value.read(nestedAv)
             value.map(v => Inl(field[K](v)))
@@ -87,14 +86,13 @@ trait DerivedDynamoFormat {
             tailFormat.read(av).map(v => Inr(v))
         }
 
-      def write(field: FieldType[K, V] :+: T): AttributeValue = field match {
+      final def write(field: FieldType[K, V] :+: T): DynamoValue = field match {
         case Inl(h) =>
-          new AttributeValue().withM(Map(fieldName -> headFormat.value.write(h)).asJava)
+          DynamoValue.keyStore(fieldName -> headFormat.value.write(h))
         case Inr(t) =>
           tailFormat.write(t)
       }
     }
-  }
 
   implicit def genericProduct[T: NotSymbol, R](
     implicit gen: LabelledGeneric.Aux[T, R],
@@ -102,8 +100,8 @@ trait DerivedDynamoFormat {
   ): Exported[DynamoFormat[T]] =
     Exported(
       new DynamoFormat[T] {
-        def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
-        def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
+        final def read(av: DynamoValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from).toEither
+        final def write(t: T): DynamoValue = formatR.value.write(gen.to(t))
       }
     )
 
@@ -113,8 +111,8 @@ trait DerivedDynamoFormat {
   ): Exported[DynamoFormat[T]] =
     Exported(
       new DynamoFormat[T] {
-        def read(av: AttributeValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
-        def write(t: T): AttributeValue = formatR.value.write(gen.to(t))
+        final def read(av: DynamoValue): Either[DynamoReadError, T] = formatR.value.read(av).map(gen.from)
+        final def write(t: T): DynamoValue = formatR.value.write(gen.to(t))
       }
     )
 }

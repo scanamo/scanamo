@@ -1,6 +1,5 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 import org.scanamo.export.Exported
 import shapeless.labelled.{field, FieldType}
@@ -23,16 +22,16 @@ abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
   * }}}
   *
   * {{{
-  * >>> DynamoFormat[Animal].write(Zebra).getS
-  * Zebra
+  * >>> DynamoFormat[Animal].write(Zebra).asString
+  * Some(Zebra)
   * }}}
   */
 trait EnumDynamoFormat extends LowPriorityDynamoFormat {
   implicit val enumDynamoFormatCNil: EnumerationDynamoFormat[CNil] = new EnumerationDynamoFormat[CNil] {
-    override def read(av: AttributeValue): Either[DynamoReadError, CNil] = Left(
+    final def read(av: DynamoValue): Either[DynamoReadError, CNil] = Left(
       TypeCoercionError(new Exception(s"$av is not a recognised member of the Enumeration"))
     )
-    override def write(t: CNil): AttributeValue = sys.error("Cannot write CNil")
+    final def write(t: CNil): DynamoValue = sys.error("Cannot write CNil")
   }
 
   implicit def enumDynamoFormatCCons[K <: Symbol, V, R <: Coproduct](
@@ -42,12 +41,12 @@ trait EnumDynamoFormat extends LowPriorityDynamoFormat {
     alternativeFormat: EnumerationDynamoFormat[R]
   ): EnumerationDynamoFormat[FieldType[K, V] :+: R] =
     new EnumerationDynamoFormat[FieldType[K, V] :+: R] {
-      override def read(av: AttributeValue): Either[DynamoReadError, FieldType[K, V] :+: R] =
-        if (av.getS == fieldWitness.value.name) Right(Inl(field[K](emptyGeneric.from(HNil))))
+      final def read(av: DynamoValue): Either[DynamoReadError, FieldType[K, V] :+: R] =
+        if (av.asString.exists(_ == fieldWitness.value.name)) Right(Inl(field[K](emptyGeneric.from(HNil))))
         else alternativeFormat.read(av).right.map(Inr(_))
 
-      override def write(t: FieldType[K, V] :+: R): AttributeValue = t match {
-        case Inl(_) => new AttributeValue().withS(fieldWitness.value.name)
+      final def write(t: FieldType[K, V] :+: R): DynamoValue = t match {
+        case Inl(_) => DynamoValue.string(fieldWitness.value.name)
         case Inr(r) => alternativeFormat.write(r)
       }
     }
@@ -58,8 +57,8 @@ trait EnumDynamoFormat extends LowPriorityDynamoFormat {
     genericFormat: EnumerationDynamoFormat[Repr]
   ): EnumerationDynamoFormat[A] =
     new EnumerationDynamoFormat[A] {
-      override def read(av: AttributeValue): Either[DynamoReadError, A] = genericFormat.read(av).right.map(gen.from)
-      override def write(t: A): AttributeValue = genericFormat.write(gen.to(t))
+      final def read(av: DynamoValue): Either[DynamoReadError, A] = genericFormat.read(av).right.map(gen.from)
+      final def write(t: A): DynamoValue = genericFormat.write(gen.to(t))
     }
 }
 
