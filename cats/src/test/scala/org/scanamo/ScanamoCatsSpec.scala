@@ -7,12 +7,11 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scanamo.error.{DynamoReadError, ScanamoError}
+import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
-import org.scanamo.ops.ScanamoOpsA.ScanamoResult
 
 class ScanamoCatsSpec extends FunSpec with Matchers {
 
@@ -31,7 +30,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         f <- farmers.get('name -> "McDonald")
       } yield f
 
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Farmer]]](client)(result).unsafeRunSync should equal(
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(result).unsafeRunSync should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow")))))
       )
     }
@@ -51,7 +50,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       } yield (r1, r1 == r2)
 
       ScanamoCats
-        .exec[IO, (Option[Either[ScanamoError, Farmer]], Boolean)](client)(result)
+        .exec[IO, (Option[Either[DynamoReadError, Farmer]], Boolean)](client)(result)
         .unsafeRunSync should equal(
         (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
       )
@@ -67,7 +66,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         e <- engines.get('name -> "Thomas" and 'number -> 1)
       } yield e
 
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Engine]]](client)(result).unsafeRunSync should equal(
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Engine]]](client)(result).unsafeRunSync should equal(
         Some(Right(Engine("Thomas", 1)))
       )
     }
@@ -83,7 +82,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         c <- cities.consistently.get('name -> "Nashville")
       } yield c
 
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, City]]](client)(result).unsafeRunSync should equal(
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, City]]](client)(result).unsafeRunSync should equal(
         Some(Right(City("Nashville", "US")))
       )
     }
@@ -97,7 +96,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       val farmers = Table[Farmer](t)
 
       ScanamoCats
-        .exec[IO, Option[Either[ScanamoError, Farmer]]](client) {
+        .exec[IO, Option[Either[DynamoReadError, Farmer]]](client) {
           for {
             _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
             _ <- farmers.delete('name -> "McGregor")
@@ -519,7 +518,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
         Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
       )
     }
@@ -535,7 +534,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
         None
       )
     }
@@ -555,7 +554,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
       } yield farmerWithNewStock
 
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken")))))
       )
     }
@@ -576,7 +575,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get('name -> "Butch")
       } yield farmerButch
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
+      ScanamoCats.exec[IO, Option[Either[DynamoReadError, Farmer]]](client)(farmerOps).unsafeRunSync should equal(
         Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
       )
     }
@@ -598,43 +597,6 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       ScanamoCats.exec[IO, List[Either[DynamoReadError, Gremlin]]](client)(ops).unsafeRunSync should equal(
         List(Right(Gremlin(1, false)))
       )
-    }
-  }
-
-  it("should return MissingKeyError when queried field is not a key") {
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
-      case class Farm(asyncAnimals: List[String])
-      case class Farmer(name: String, age: Long, farm: Farm)
-      val farm = Farm(List("dog"))
-
-      val farmers = Table[Farmer](t)
-
-      val result = for {
-        _ <- farmers.put(Farmer("Maggot", 75L, farm))
-        r<- farmers.get('farm -> farm)
-      } yield r
-
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Farmer]]](client)(result)
-        .unsafeRunSync.get.left.get shouldBe a [ScanamoError]
-
-    }
-  }
-
-  it("should return MissingKeyError when queried field does not exist") {
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
-      case class Farm(asyncAnimals: List[String])
-      case class Farmer(name: String, age: Long, farm: Farm)
-      val farm = Farm(List("dog"))
-
-      val farmers = Table[Farmer](t)
-
-      val result = for {
-        _ <- farmers.put(Farmer("Maggot", 75L, farm))
-        r<- farmers.get('DoesNotExist -> farm)
-      } yield r
-
-      ScanamoCats.exec[IO, Option[Either[ScanamoError, Farmer]]](client)(result)
-        .unsafeRunSync.get.left.get shouldBe a [ScanamoError]
     }
   }
 }
