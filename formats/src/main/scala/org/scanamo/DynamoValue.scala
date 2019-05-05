@@ -1,10 +1,5 @@
 package org.scanamo
 
-import cats.Monoid
-import cats.kernel.Eq
-import cats.instances.string._
-import cats.instances.list._
-import cats.syntax.eq._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
 
@@ -18,19 +13,63 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     case DynNum(n)      => new AttributeValue().withN(n.toString)
     case DynString(s)   => new AttributeValue().withS(s)
     case DynByte(b)     => new AttributeValue().withB(b)
-    case DynMap(as) =>
-      val m = new java.util.HashMap[String, AttributeValue](as.size)
-      as foreach { case (k, a) => m.put(k, a.toAttributeValue) }
-      new AttributeValue().withM(m)
-    case DynArray(as)       => collection[AttributeValue](as.map(_.toAttributeValue), _ withL _)
-    case DynNumArray(ns)    => collection[String](ns.map(_.toString), _ withNS _)
-    case DynStringArray(ss) => collection[String](ss, _ withSS _)
-    case DynByteArray(bs)   => collection[ByteBuffer](bs, _ withBS _)
+    case DynObject(as)  => as.toAttributeValue
+    case DynArray(as)   => as.toAttributeValue
   }
 
-  final def isNil: Boolean = self match {
+  final def isNull: Boolean = self match {
     case DynNull => true
     case _       => false
+  }
+
+  final def isBoolean: Boolean = self match {
+    case _: DynBool => true
+    case _ => false
+  }
+
+  final def isNumber: Boolean = self match {
+    case _: DynNum => true
+    case _ => false
+  }
+
+  final def isString: Boolean = self match {
+    case _: DynString => true
+    case _ => false
+  }
+
+  final def isByteBuffer: Boolean = self match {
+    case _: DynByte => true
+    case _ => false
+  }
+
+  final def isObject: Boolean = self match {
+    case _: DynObject => true
+    case _ => false
+  }
+
+  final def isArray: Boolean = self match {
+    case x: DynArray => x.isAttributeValueArray
+    case _ => false
+  }
+
+  final def isNumArray: Boolean = self match {
+    case x: DynArray => x.isNumArray
+    case _ => false
+  }
+
+  final def isStringArray: Boolean = self match {
+    case x: DynArray => x.isStringArray
+    case _ => false
+  }
+
+  final def isByteButterArray: Boolean = self match {
+    case x: DynArray => x.isByteButterArray
+    case _ => false
+  }
+
+  final def asNull: Option[Unit] = self match {
+    case DynNull => Some(())
+    case _ => None
   }
 
   final def asBoolean: Option[Boolean] = self match {
@@ -53,63 +92,88 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     case _          => None
   }
 
-  final def asList: Option[List[DynamoValue]] = self match {
+  final def asArray: Option[DynamoArray] = self match {
     case DynArray(as) => Some(as)
     case _            => None
   }
 
-  final def asObject: Option[Map[String, DynamoValue]] = self match {
-    case DynMap(as) => Some(as)
+  final def asObject: Option[DynamoObject] = self match {
+    case DynObject(as) => Some(as)
     case _          => None
   }
 
-  final def asNumArray: Option[List[String]] = self match {
-    case DynNumArray(ns) => Some(ns)
-    case _               => None
+  final def withNull(f: => DynamoValue): DynamoValue = self match {
+    case DynNull => f
+    case _ => self
   }
 
-  final def asStringArray: Option[List[String]] = self match {
-    case DynStringArray(ns) => Some(ns)
-    case _                  => None
+  final def withBoolean(f: Boolean => DynamoValue): DynamoValue = self match {
+    case DynBool(b) => f(b)
+    case _          => self
   }
 
-  def <>(that: DynamoValue): DynamoValue = self match {
-    case DynNull => that
-    case DynArray(as) =>
-      that match {
-        case DynArray(bs) => DynArray(as ++ bs)
-        case DynNull      => self
-        case a            => DynArray(as :+ a)
-      }
-    case a @ DynMap(as) =>
-      that match {
-        case DynMap(bs)   => DynMap(as ++ bs)
-        case DynNull      => self
-        case DynArray(bs) => DynArray(a :: bs)
-        case b            => DynArray(a :: b :: Nil)
-      }
-    case a =>
-      that match {
-        case DynArray(as) => DynArray(a :: as)
-        case DynNull      => self
-        case b            => DynArray(a :: b :: Nil)
-      }
+  final def withString(f: String => DynamoValue): DynamoValue = self match {
+    case DynString(s) => f(s)
+    case _            => self
   }
 
-  def ::(that: DynamoValue)(implicit ev: self.type =:= DynArray): DynamoValue =
-    DynArray(that :: self.as)
+  final def withNumber(f: String => DynamoValue): DynamoValue = self match {
+    case DynNum(n) => f(n)
+    case _         => self
+  }
 
-  def :+(that: DynamoValue)(implicit ev: self.type =:= DynArray): DynamoValue =
-    DynArray(self.as :+ that)
+  final def withByteBuffer(f: ByteBuffer => DynamoValue): DynamoValue = self match {
+    case DynByte(b) => f(b)
+    case _          => self
+  }
 
-  def +(that: (String, DynamoValue))(implicit ev: self.type =:= DynMap): DynamoValue =
-    DynMap(self.as + that)
+  final def withArray(f: DynamoArray => DynamoValue): DynamoValue = self match {
+    case DynArray(as) => f(as)
+    case _            => self
+  }
+
+  final def withObject(f: DynamoObject => DynamoValue): DynamoValue = self match {
+    case DynObject(as) => f(as)
+    case _          => self
+  }
+
+  // def <>(that: DynamoValue): DynamoValue = self match {
+  //   case DynNull => that
+  //   case DynArray(as) =>
+  //     that match {
+  //       case DynArray(bs) => DynArray(as ++ bs)
+  //       case DynNull      => self
+  //       case a            => DynArray(as :+ a)
+  //     }
+  //   case a @ DynObject(as) =>
+  //     that match {
+  //       case DynObject(bs)   => DynObject(as ++ bs)
+  //       case DynNull      => self
+  //       case DynArray(bs) => DynArray(a :: bs)
+  //       case b            => DynArray(a :: b :: Nil)
+  //     }
+  //   case a =>
+  //     that match {
+  //       case DynArray(as) => DynArray(a :: as)
+  //       case DynNull      => self
+  //       case b            => DynArray(a :: b :: Nil)
+  //     }
+  // }
+
+  // def ::(that: DynamoValue)(implicit ev: self.type =:= DynArray): DynamoValue =
+  //   DynArray(that :: self.as)
+
+  // def :+(that: DynamoValue)(implicit ev: self.type =:= DynArray): DynamoValue =
+  //   DynArray(self.as :+ that)
+
+  // def +(that: (String, DynamoValue))(implicit ev: self.type =:= DynObject): DynamoValue =
+  //   DynObject(self.as + that)
 }
 
 object DynamoValue {
-  private[DynamoValue] val Null = new AttributeValue().withNULL(true)
-  private[DynamoValue] val True = new AttributeValue().withBOOL(true)
-  private[DynamoValue] val False = new AttributeValue().withBOOL(false)
+  private[scanamo] val Null = new AttributeValue().withNULL(true)
+  private[scanamo] val True = new AttributeValue().withBOOL(true)
+  private[scanamo] val False = new AttributeValue().withBOOL(false)
 
   private[DynamoValue] def collection[A](
     xs: Iterable[A],
@@ -125,11 +189,8 @@ object DynamoValue {
   private[DynamoValue] final case class DynNum(n: String) extends DynamoValue
   private[DynamoValue] final case class DynString(s: String) extends DynamoValue
   private[DynamoValue] final case class DynByte(b: ByteBuffer) extends DynamoValue
-  private[DynamoValue] final case class DynArray(as: List[DynamoValue]) extends DynamoValue
-  private[DynamoValue] final case class DynMap(as: Map[String, DynamoValue]) extends DynamoValue
-  private[DynamoValue] final case class DynNumArray(ns: List[String]) extends DynamoValue
-  private[DynamoValue] final case class DynStringArray(ss: List[String]) extends DynamoValue
-  private[DynamoValue] final case class DynByteArray(bs: List[ByteBuffer]) extends DynamoValue
+  private[DynamoValue] final case class DynArray(as: DynamoArray) extends DynamoValue
+  private[DynamoValue] final case class DynObject(as: DynamoObject) extends DynamoValue
 
   ////
   // Constructors
@@ -139,14 +200,14 @@ object DynamoValue {
   final def string(s: String): DynamoValue = DynString(s)
   final def byteBuffer(b: ByteBuffer): DynamoValue = DynByte(b)
   final def array(as: DynamoValue*): DynamoValue = DynArray(as.toList)
-  final def keyStore(as: (String, DynamoValue)*): DynamoValue = DynMap(Map(as: _*))
-  final def keyStore(as: Map[String, DynamoValue]): DynamoValue = DynMap(as)
+  final def map(as: (String, DynamoValue)*): DynamoValue = DynObject(DynamoObject(as.toMap))
+  final def map(as: Map[String, DynamoValue]): DynamoValue = DynObject(as)
   final def numbers[N: Numeric](ns: N*): DynamoValue = DynNumArray(ns.toList.map(_.toString))
   final def strings(ss: String*): DynamoValue = DynStringArray(ss.toList)
   final def byteBuffers(bs: ByteBuffer*): DynamoValue = DynByteArray(bs.toList)
 
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
-    if (av.isNULL)
+    if ((av eq null) || av.isNULL)
       DynNull
     else if (av.isBOOL)
       DynBool(av.getBOOL)
@@ -157,49 +218,17 @@ object DynamoValue {
     else if (av.getB ne null)
       DynByte(av.getB)
     else if (av.getNS ne null)
-      DynNumArray(av.getNS.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+      DynArray(DynamoArray.numbers(av.getNS))
     else if (av.getBS ne null)
-      DynByteArray(av.getBS.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
+      DynArray(DynamoArray.byteBuffers(av.getBS))
     else if (av.getSS ne null)
-      DynStringArray(av.getSS.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+      DynArray(DynamoArray.strings(av.getSS))
     else if (av.getL ne null)
-      av.getL.stream
-        .reduce[DynamoValue](
-          DynNull,
-          (acc, av) => acc <> fromAttributeValue(av),
-          _ <> _
-        )
+      DynArray(DynamoArray(av.getL))
     else
-      DynMap(
-        av.getM.entrySet.stream
-          .reduce[Map[String, DynamoValue]](
-            Map.empty,
-            (xs, x) => xs + (x.getKey -> fromAttributeValue(x.getValue)),
-            _ ++ _
-          )
-      )
+      DynObject(DynamoObject(av.getM))
 
-  ////
-  // Typeclass instances
-  implicit val monoid: Monoid[DynamoValue] = new Monoid[DynamoValue] {
-    final def combine(x: DynamoValue, y: DynamoValue) = x <> y
-    final val empty = nil
-  }
+  def fromDynamoObject(xs: DynamoObject): DynamoValue = DynObject(xs)
 
-  implicit val eq: Eq[DynamoValue] = new Eq[DynamoValue] {
-    final def eqv(x: DynamoValue, y: DynamoValue): Boolean = (x, y) match {
-      case (DynNull, DynNull)           => true
-      case (DynNum(x), DynNum(y))       => x == y
-      case (DynBool(x), DynBool(y))     => x == y
-      case (DynString(x), DynString(y)) => x == y
-      case (DynByte(x), DynByte(y))     => x equals y
-      case (DynArray(xs), DynArray(ys)) => (xs zip ys).forall { case (x, y) => eqv(x, y) }
-      case (DynMap(xs), DynMap(ys)) =>
-        xs.keys.toList === ys.keys.toList && (xs.values zip ys.values).forall { case (x, y) => eqv(x, y) }
-      case (DynNumArray(xs), DynNumArray(ys))       => xs == ys
-      case (DynStringArray(xs), DynStringArray(ys)) => xs == ys
-      case (DynByteArray(xs), DynByteArray(ys))     => xs == ys
-      case _                                        => false
-    }
-  }
+  def fromDynamoArray(xs: DynamoArray): DynamoValue = DynArray(xs)
 }
