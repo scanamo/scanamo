@@ -2,25 +2,85 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.util.{Map => JMap, HashMap}
+import org.scanamo.error.DynamoReadError
 
 sealed abstract class DynamoObject extends Product with Serializable { self =>
   import DynamoObject._
 
-  final def apply: JMap[String, AttributeValue] = self match {
-    case Strict(xs) => xs
-    case Pure(xs) => unsafeToMap(xs)
-    case Concat(xs, ys) => unsafeMerge(xs.apply, ys.apply)
-  }
-
-  final def get(key: String): Option[AttributeValue] = self match {
+  final def apply(key: String): Option[AttributeValue] = self match {
     case Strict(xs) => Option(xs.get(key))
     case Pure(xs) => xs.get(key).map(_.toAttributeValue)
-    case Concat(xs, ys) => xs.get(key) orElse ys.get(key)
+    case Concat(xs, ys) => xs(key) orElse ys(key)
+  }
+
+  final def size: Int = self match {
+    case Strict(xs) => xs.size
+    case Pure(xs) => xs.size
+    case Concat(xs, ys) => xs.size + ys.size
+  }
+
+  final def isEmpty: Boolean = self match {
+    case Strict(xs) => xs.isEmpty
+    case Pure(xs) => xs.isEmpty
+    case Concat(xs, ys) => xs.isEmpty && ys.isEmpty
+  }
+
+  final def nonEmpty: Boolean = !isEmpty
+
+  final def contains(key: String): Boolean = self match {
+    case Strict(xs) => xs.containsKey(key)
+    case Pure(xs) => xs.contains(key)
+    case Concat(xs, ys) => xs.contains(key) || ys.contains(key)
+  }
+
+  final def keys: Iterable[String] = self match {
+    case Strict(xs) => new Iterable[String] {
+      final val iterator = new Iterator[String] {
+        private[this] val underlying = xs.keySet.iterator
+        final def hasNext = underlying.hasNext
+        final def next = underlying.next
+      }
+    }
+
+    case Pure(xs) => xs.keys
+
+    case Concat(xs, ys) => xs.keys ++ ys.keys
+  }
+
+  final def values: Iterable[DynamoValue] = self match {
+    case Strict(xs) => new Iterable[DynamoValue] {
+      final val iterator = new Iterator[DynamoValue] {
+        private[this] val underlying = xs.values.iterator
+        final def hasNext = underlying.hasNext
+        final def next = DynamoValue.fromAttributeValue(underlying.next)
+      }
+    }
+    case Pure(xs) => xs.values
+    case Concat(xs, ys) => xs.values ++ ys.values
+  }
+
+  final def toJavaMap: JMap[String, AttributeValue] = self match {
+    case Strict(xs) => xs
+    case Pure(xs) => unsafeToMap(xs)
+    case Concat(xs, ys) => unsafeMerge(xs.toJavaMap, ys.toJavaMap)
   }
 
   final def toDynamoValue: DynamoValue = DynamoValue.fromDynamoObject(self)
 
-  final def toAttributeValue: AttributeValue = ???
+  final def toAttributeValue: AttributeValue = new AttributeValue().withM(toJavaMap)
+
+  final def toMap[V](implicit D: DynamoFormat[V]) = self match {
+    case Strict(xs) => xs.entrySet.stream.reduce[Either[DynamoReadError, Map[String, V]]](
+      Right(Map.empty),
+      (xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x),
+      (xs0, ys0) => for { xs <- xs0; ys <- ys0 } yield xs ++ ys
+    )    
+    case Pure(xs) => xs.foldLeft[Either[DynamoReadError, Map[String, V]]](Right(Map.empty)){
+      case (e @ Left(_), _) => e
+      case (Right(m), (k, x)) => D.read(x).map(x => m + (k -> x))
+    }
+    case Concat(xs, ys) => ???
+  }
 
   final def toExpressionAttributeValues: JMap[String, AttributeValue] = self match {
     case Strict(xs) => unsafeToJMap { m => xs.entrySet.stream.forEach({x => m.put(":" ++ x.getKey, x.getValue); ()}) }
@@ -40,6 +100,10 @@ object DynamoObject {
   def apply(xs: (String, DynamoValue)*): DynamoObject = apply(xs.toMap)
   def apply(xs: Map[String, DynamoValue]): DynamoObject = Pure(xs)
   def apply[A](xs: (String, A)*)(implicit D: DynamoFormat[A]): DynamoObject = apply(xs.foldLeft(Map.empty[String, DynamoValue]) { case (m, (k, x)) => m + (k -> D.write(x)) })
+
+  val empty: DynamoObject = Pure(Map.empty)
+
+  def singleton(key: String, x: DynamoValue): DynamoObject = Pure(Map(key -> x))
 
   private[DynamoObject] def unsafeToMap(m: Map[String, DynamoValue]): JMap[String, AttributeValue] = {
     val n = new HashMap[String, AttributeValue]
