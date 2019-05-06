@@ -1,5 +1,6 @@
 package org.scanamo
 
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
 import java.util.UUID
 
@@ -75,6 +76,7 @@ import scala.reflect.ClassTag
   */
 @typeclass trait DynamoFormat[T] {
   def read(av: DynamoValue): Either[DynamoReadError, T]
+  def read(av: AttributeValue): Either[DynamoReadError, T] = read(DynamoValue.fromAttributeValue(av))
   def write(t: T): DynamoValue
   def default: Option[T] = None
 }
@@ -166,14 +168,14 @@ object DynamoFormat extends EnumDynamoFormat {
     override final val default = Some("")
 
     final def read(av: DynamoValue) =
-      if (av.isNil)
+      if (av.isNull)
         Right("")
       else
         av.asString.fold[Either[DynamoReadError, String]](Left(NoPropertyOfType("S", av)))(Right(_))
 
     final def write(s: String): DynamoValue = s match {
       case "" => nil
-      case _  => string(s)
+      case _  => DynamoValue.string(s)
     }
   }
 
@@ -185,11 +187,15 @@ object DynamoFormat extends EnumDynamoFormat {
     */
   implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.boolean, "BOOL")
 
-  private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] =
-    attribute[N](_.asNumber.flatMap { s =>
-      val g = coerceNumber(f)
-      g(s).toOption
-    }, DynamoValue.number, "N")
+  private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] = new DynamoFormat[N] {
+    final def read(av: DynamoValue) = for {
+      ns <- Either.fromOption(av.asNumber, NoPropertyOfType("N", av))
+      transform = coerceNumber(f)
+      n <- transform(ns)
+    } yield n
+
+    final def write(n: N) = DynamoValue.number(n)
+  }
 
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
@@ -279,7 +285,7 @@ object DynamoFormat extends EnumDynamoFormat {
   implicit val uuidFormat: DynamoFormat[UUID] =
     coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
 
-  implicit val javaListFormat: DynamoFormat[List[DynamoValue]] = attribute(_.asList, l => DynamoValue.array(l: _*), "L")
+  implicit val javaListFormat: DynamoFormat[List[DynamoValue]] = attribute(_.asArray.flatMap(_.asArray), l => DynamoValue.array(l: _*), "L")
 
   /**
     * {{{
@@ -326,11 +332,11 @@ object DynamoFormat extends EnumDynamoFormat {
   private def numSetFormat[T: Numeric](r: String => Either[DynamoReadError, T]): DynamoFormat[Set[T]] =
     new DynamoFormat[Set[T]] {
       final def read(av: DynamoValue) =
-        if (av.isNil)
+        if (av.isNull)
           Right(Set.empty[T])
         else
           for {
-            ns <- Either.fromOption(av.asNumArray, NoPropertyOfType("NS", av))
+            ns <- Either.fromOption(av.asArray.flatMap(_.asNumArray), NoPropertyOfType("NS", av))
             set <- ns.traverse(r)
           } yield set.toSet
 
@@ -354,7 +360,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Set[Int]].write(s) == av &&
     *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
     *
-    * >>> DynamoFormat[Set[Int]].write(Set.empty).isNil
+    * >>> DynamoFormat[Set[Int]].write(Set.empty).isNull
     * true
     * }}}
     */
@@ -370,7 +376,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Set[Long]].write(s) == av &&
     *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
     *
-    * >>> DynamoFormat[Set[Long]].write(Set.empty).isNil
+    * >>> DynamoFormat[Set[Long]].write(Set.empty).isNull
     * true
     * }}}
     */
@@ -386,7 +392,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Set[Float]].write(s) == av &&
     *     |   DynamoFormat[Set[Float]].read(av) == Right(s)
     *
-    * >>> DynamoFormat[Set[Float]].write(Set.empty).isNil
+    * >>> DynamoFormat[Set[Float]].write(Set.empty).isNull
     * true
     * }}}
     */
@@ -402,7 +408,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Set[Double]].write(s) == av &&
     *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
     *
-    * >>> DynamoFormat[Set[Double]].write(Set.empty).isNil
+    * >>> DynamoFormat[Set[Double]].write(Set.empty).isNull
     * true
     * }}}
     */
@@ -418,7 +424,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
     *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
     *
-    * >>> DynamoFormat[Set[BigDecimal]].write(Set.empty).isNil
+    * >>> DynamoFormat[Set[BigDecimal]].write(Set.empty).isNull
     * true
     * }}}
     */
@@ -434,17 +440,17 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Set[String]].write(s) == av &&
     *     |   DynamoFormat[Set[String]].read(av) == Right(s)
     *
-    * >>> DynamoFormat[Set[String]].write(Set.empty).isNil
+    * >>> DynamoFormat[Set[String]].write(Set.empty).isNull
     * true
     * }}}
     */
   implicit val stringSetFormat: DynamoFormat[Set[String]] =
     new DynamoFormat[Set[String]] {
       final def read(av: DynamoValue) =
-        if (av.isNil)
+        if (av.isNull)
           Right(Set.empty)
         else
-          Either.fromOption(av.asStringArray.map(_.toSet), NoPropertyOfType("SS", av))
+          Either.fromOption(av.asArray.flatMap(_.asStringArray).map(_.toSet), NoPropertyOfType("SS", av))
 
       // Set types cannot be empty
       final def write(t: Set[String]) =
@@ -456,8 +462,8 @@ object DynamoFormat extends EnumDynamoFormat {
       override final val default = Some(Set.empty)
     }
 
-  private val javaMapFormat: DynamoFormat[Map[String, DynamoValue]] =
-    attribute(_.asObject, m => DynamoValue.keyStore(m.toSeq: _*), "M")
+  private val javaMapFormat: DynamoFormat[DynamoObject] =
+    attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
 
   /**
     * {{{
@@ -467,12 +473,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    xmap[Map[String, V], Map[String, DynamoValue]] { m =>
-      m.foldLeft[Either[DynamoReadError, Map[String, V]]](Right(Map.empty)) {
-        case (x @ Left(_), _)    => x
-        case (Right(m), (k, dv)) => f.read(dv).map(v => m + (k -> v))
-      }
-    }(_.mapValues(f.write))(javaMapFormat)
+    xmap[Map[String, V], DynamoObject](_.toMap[V])(m => DynamoObject(m.toSeq:_*))(javaMapFormat)
 
   /**
     * {{{
@@ -483,13 +484,13 @@ object DynamoFormat extends EnumDynamoFormat {
     * >>> DynamoFormat[Option[Long]].read(DynamoValue.nil)
     * Right(None)
     *
-    * >>> DynamoFormat[Option[Long]].write(None).isNil
+    * >>> DynamoFormat[Option[Long]].write(None).isNull
     * true
     * }}}
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
     final def read(av: DynamoValue) =
-      if (av.isNil)
+      if (av.isNull)
         Right(None)
       else
         f.read(av).map(Some(_))
