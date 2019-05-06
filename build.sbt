@@ -2,11 +2,11 @@ scalaVersion in ThisBuild := "2.12.8"
 crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "1.6.0"
-val catsEffectVersion = "1.2.0"
+val catsEffectVersion = "1.3.0"
 val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
-val zioVersion = "0.6.3"
+val zioVersion = "1.0-RC4"
 
 val commonSettings = Seq(
   scalacOptions := Seq(
@@ -73,7 +73,7 @@ lazy val formats = (project in file("formats"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "com.chuusai" %% "shapeless" % "2.3.3",
-      "com.github.mpilquist" %% "simulacrum" % "0.15.0",
+      "com.github.mpilquist" %% "simulacrum" % "0.16.0",
       "org.typelevel" %% "cats-core" % catsVersion,
       "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
       "org.scalatest" %% "scalatest" % "3.0.7" % Test
@@ -92,7 +92,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit" %% "refined" % "0.9.4",
+      "eu.timepit" %% "refined" % "0.9.5",
       "org.scalatest" %% "scalatest" % "3.0.7" % Test
     )
   )
@@ -109,9 +109,9 @@ lazy val scanamo = (project in file("scanamo"))
       awsDynamoDB,
       "com.chuusai" %% "shapeless" % "2.3.3",
       "org.typelevel" %% "cats-free" % catsVersion,
-      "com.github.mpilquist" %% "simulacrum" % "0.15.0",
+      "com.github.mpilquist" %% "simulacrum" % "0.16.0",
       // Use Joda for custom conversion example
-      "org.joda" % "joda-convert" % "2.2.0" % Provided,
+      "org.joda" % "joda-convert" % "2.2.1" % Provided,
       "joda-time" % "joda-time" % "2.10.1" % Test,
       "org.scalatest" %% "scalatest" % "3.0.7" % Test,
       "org.scalacheck" %% "scalacheck" % "1.14.0" % Test
@@ -227,7 +227,7 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda" % "joda-convert" % "2.2.0" % Provided,
+      "org.joda" % "joda-convert" % "2.2.1" % Provided,
       "joda-time" % "joda-time" % "2.10.1",
       "org.scalatest" %% "scalatest" % "3.0.7" % Test,
       "org.scalacheck" %% "scalacheck" % "1.13.5" % Test,

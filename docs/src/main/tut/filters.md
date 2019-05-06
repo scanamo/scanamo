@@ -44,4 +44,4 @@ LocalDynamoDB.withTable(client)("Station")('line -> S, 'name -> S) {
 }
 ```
 
-More examples can be found in the [Table ScalaDoc](/latest/api/com/gu/scanamo/Table.html#filter[C](condition:C)(implicitevidence$3:org.scanamo.query.ConditionExpression[C]):org.scanamo.TableWithOptions[V]).
+More examples can be found in the [Table ScalaDoc](/latest/api/org/scanamo/Table.html#filter[C](condition:C)(implicitevidence$3:org.scanamo.query.ConditionExpression[C]):org.scanamo.TableWithOptions[V]).
