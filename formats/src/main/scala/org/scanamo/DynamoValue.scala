@@ -24,52 +24,52 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
 
   final def isBoolean: Boolean = self match {
     case _: DynBool => true
-    case _ => false
+    case _          => false
   }
 
   final def isNumber: Boolean = self match {
     case _: DynNum => true
-    case _ => false
+    case _         => false
   }
 
   final def isString: Boolean = self match {
     case _: DynString => true
-    case _ => false
+    case _            => false
   }
 
   final def isByteBuffer: Boolean = self match {
     case _: DynByte => true
-    case _ => false
+    case _          => false
   }
 
   final def isObject: Boolean = self match {
     case _: DynObject => true
-    case _ => false
+    case _            => false
   }
 
   final def isArray: Boolean = self match {
-    case x: DynArray => x.isAttributeValueArray
-    case _ => false
+    case DynArray(x) => x.isAttributeValueArray
+    case _           => false
   }
 
   final def isNumArray: Boolean = self match {
-    case x: DynArray => x.isNumArray
-    case _ => false
+    case DynArray(x) => x.isNumArray
+    case _           => false
   }
 
   final def isStringArray: Boolean = self match {
-    case x: DynArray => x.isStringArray
-    case _ => false
+    case DynArray(x) => x.isStringArray
+    case _           => false
   }
 
   final def isByteButterArray: Boolean = self match {
-    case x: DynArray => x.isByteButterArray
-    case _ => false
+    case DynArray(x) => x.isByteBufferArray
+    case _           => false
   }
 
   final def asNull: Option[Unit] = self match {
     case DynNull => Some(())
-    case _ => None
+    case _       => None
   }
 
   final def asBoolean: Option[Boolean] = self match {
@@ -99,12 +99,12 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
 
   final def asObject: Option[DynamoObject] = self match {
     case DynObject(as) => Some(as)
-    case _          => None
+    case _             => None
   }
 
   final def withNull(f: => DynamoValue): DynamoValue = self match {
     case DynNull => f
-    case _ => self
+    case _       => self
   }
 
   final def withBoolean(f: Boolean => DynamoValue): DynamoValue = self match {
@@ -134,7 +134,7 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
 
   final def withObject(f: DynamoObject => DynamoValue): DynamoValue = self match {
     case DynObject(as) => f(as)
-    case _          => self
+    case _             => self
   }
 
   // def <>(that: DynamoValue): DynamoValue = self match {
@@ -199,12 +199,12 @@ object DynamoValue {
   final def number[N: Numeric](n: N): DynamoValue = DynNum(n.toString)
   final def string(s: String): DynamoValue = DynString(s)
   final def byteBuffer(b: ByteBuffer): DynamoValue = DynByte(b)
-  final def array(as: DynamoValue*): DynamoValue = DynArray(as.toList)
+  final def array(as: DynamoValue*): DynamoValue = DynArray(DynamoArray(as: _*))
   final def map(as: (String, DynamoValue)*): DynamoValue = DynObject(DynamoObject(as.toMap))
-  final def map(as: Map[String, DynamoValue]): DynamoValue = DynObject(as)
-  final def numbers[N: Numeric](ns: N*): DynamoValue = DynNumArray(ns.toList.map(_.toString))
-  final def strings(ss: String*): DynamoValue = DynStringArray(ss.toList)
-  final def byteBuffers(bs: ByteBuffer*): DynamoValue = DynByteArray(bs.toList)
+  final def map(as: Map[String, DynamoValue]): DynamoValue = DynObject(DynamoObject(as))
+  final def numbers[N: Numeric](ns: N*): DynamoValue = DynArray(DynamoArray.numbers(ns: _*))
+  final def strings(ss: String*): DynamoValue = DynArray(DynamoArray.strings(ss: _*))
+  final def byteBuffers(bs: ByteBuffer*): DynamoValue = DynArray(DynamoArray.byteBuffers(bs: _*))
 
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
     if ((av eq null) || av.isNULL)

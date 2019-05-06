@@ -1,6 +1,6 @@
 package org.scanamo
 
-import cats.data.{ Validated, ValidatedNel }
+import cats.data.{Validated, ValidatedNel}
 import cats.syntax.either._
 import org.scanamo.error._
 import org.scanamo.export.Exported
@@ -34,13 +34,13 @@ trait DerivedDynamoFormat {
   ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
     new ValidConstructedDynamoFormat[FieldType[K, V] :: T] {
       private final val fieldName = fieldWitness.value.name
-      
+
       final def read(av: DynamoObject) = {
         val valueOrError: Either[(String, DynamoReadError), V] =
           av(fieldName).map(headFormat.value.read) orElse
-          headFormat.value.default.map(Either.right) getOrElse
-          Either.left(MissingProperty) leftMap
-          ((fieldName, _))
+            headFormat.value.default.map(Either.right) getOrElse
+            Either.left(MissingProperty) leftMap
+            ((fieldName, _))
 
         val head = valueOrError.toValidatedNel.map(field[K](_))
         val tail = tailFormat.value.read(av)
@@ -72,9 +72,10 @@ trait DerivedDynamoFormat {
       private final val fieldName = fieldWitness.value.name
 
       final def read(av: DynamoObject) =
-        av(fieldName).fold[ValidatedPropertiesError[FieldType[K, V] :+: T]](tailFormat.read(av).map(Inr(_))) { nestedAv =>
-          val value = headFormat.value.read(nestedAv).toValidatedNel
-          value.map(v => Inl(field[K](v))).leftMap(_.map((fieldName, _)))
+        av(fieldName).fold[ValidatedPropertiesError[FieldType[K, V] :+: T]](tailFormat.read(av).map(Inr(_))) {
+          nestedAv =>
+            val value = headFormat.value.read(nestedAv).toValidatedNel
+            value.map(v => Inl(field[K](v))).leftMap(_.map((fieldName, _)))
         }
 
       final def write(field: FieldType[K, V] :+: T) = field match {
@@ -91,8 +92,10 @@ trait DerivedDynamoFormat {
   ): Exported[DynamoFormat[T]] =
     Exported(
       new DynamoFormat[T] {
-        final def read(av: DynamoValue) = 
-          av.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", av)))(formatR.value.read(_).map(gen.from).toEither.leftMap(InvalidPropertiesError(_)))
+        final def read(av: DynamoValue) =
+          av.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", av)))(
+            formatR.value.read(_).map(gen.from).toEither.leftMap(InvalidPropertiesError(_))
+          )
         final def write(t: T): DynamoValue =
           formatR.value.write(gen.to(t)).toDynamoValue
       }
@@ -104,9 +107,11 @@ trait DerivedDynamoFormat {
   ): Exported[DynamoFormat[T]] =
     Exported(
       new DynamoFormat[T] {
-        final def read(av: DynamoValue) = 
-          av.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", av)))(formatR.value.read(_).map(gen.from).toEither.leftMap(InvalidPropertiesError(_)))
-        final def write(t: T): DynamoValue = 
+        final def read(av: DynamoValue) =
+          av.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", av)))(
+            formatR.value.read(_).map(gen.from).toEither.leftMap(InvalidPropertiesError(_))
+          )
+        final def write(t: T): DynamoValue =
           formatR.value.write(gen.to(t)).toDynamoValue
       }
     )

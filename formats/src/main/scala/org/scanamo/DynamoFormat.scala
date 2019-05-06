@@ -188,11 +188,12 @@ object DynamoFormat extends EnumDynamoFormat {
   implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.boolean, "BOOL")
 
   private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] = new DynamoFormat[N] {
-    final def read(av: DynamoValue) = for {
-      ns <- Either.fromOption(av.asNumber, NoPropertyOfType("N", av))
-      transform = coerceNumber(f)
-      n <- transform(ns)
-    } yield n
+    final def read(av: DynamoValue) =
+      for {
+        ns <- Either.fromOption(av.asNumber, NoPropertyOfType("N", av))
+        transform = coerceNumber(f)
+        n <- transform(ns)
+      } yield n
 
     final def write(n: N) = DynamoValue.number(n)
   }
@@ -285,7 +286,8 @@ object DynamoFormat extends EnumDynamoFormat {
   implicit val uuidFormat: DynamoFormat[UUID] =
     coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
 
-  implicit val javaListFormat: DynamoFormat[List[DynamoValue]] = attribute(_.asArray.flatMap(_.asArray), l => DynamoValue.array(l: _*), "L")
+  implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
+    attribute(_.asArray.flatMap(_.asArray), l => DynamoValue.array(l: _*), "L")
 
   /**
     * {{{
@@ -473,7 +475,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    xmap[Map[String, V], DynamoObject](_.toMap[V])(m => DynamoObject(m.toSeq:_*))(javaMapFormat)
+    xmap[Map[String, V], DynamoObject](_.toMap[V])(m => DynamoObject(m.toSeq: _*))(javaMapFormat)
 
   /**
     * {{{

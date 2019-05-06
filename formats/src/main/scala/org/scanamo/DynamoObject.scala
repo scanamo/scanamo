@@ -8,39 +8,40 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   import DynamoObject._
 
   final def apply(key: String): Option[AttributeValue] = self match {
-    case Strict(xs) => Option(xs.get(key))
-    case Pure(xs) => xs.get(key).map(_.toAttributeValue)
+    case Strict(xs)     => Option(xs.get(key))
+    case Pure(xs)       => xs.get(key).map(_.toAttributeValue)
     case Concat(xs, ys) => xs(key) orElse ys(key)
   }
 
   final def size: Int = self match {
-    case Strict(xs) => xs.size
-    case Pure(xs) => xs.size
+    case Strict(xs)     => xs.size
+    case Pure(xs)       => xs.size
     case Concat(xs, ys) => xs.size + ys.size
   }
 
   final def isEmpty: Boolean = self match {
-    case Strict(xs) => xs.isEmpty
-    case Pure(xs) => xs.isEmpty
+    case Strict(xs)     => xs.isEmpty
+    case Pure(xs)       => xs.isEmpty
     case Concat(xs, ys) => xs.isEmpty && ys.isEmpty
   }
 
   final def nonEmpty: Boolean = !isEmpty
 
   final def contains(key: String): Boolean = self match {
-    case Strict(xs) => xs.containsKey(key)
-    case Pure(xs) => xs.contains(key)
+    case Strict(xs)     => xs.containsKey(key)
+    case Pure(xs)       => xs.contains(key)
     case Concat(xs, ys) => xs.contains(key) || ys.contains(key)
   }
 
   final def keys: Iterable[String] = self match {
-    case Strict(xs) => new Iterable[String] {
-      final val iterator = new Iterator[String] {
-        private[this] val underlying = xs.keySet.iterator
-        final def hasNext = underlying.hasNext
-        final def next = underlying.next
+    case Strict(xs) =>
+      new Iterable[String] {
+        final val iterator = new Iterator[String] {
+          private[this] val underlying = xs.keySet.iterator
+          final def hasNext = underlying.hasNext
+          final def next = underlying.next
+        }
       }
-    }
 
     case Pure(xs) => xs.keys
 
@@ -48,20 +49,21 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   final def values: Iterable[DynamoValue] = self match {
-    case Strict(xs) => new Iterable[DynamoValue] {
-      final val iterator = new Iterator[DynamoValue] {
-        private[this] val underlying = xs.values.iterator
-        final def hasNext = underlying.hasNext
-        final def next = DynamoValue.fromAttributeValue(underlying.next)
+    case Strict(xs) =>
+      new Iterable[DynamoValue] {
+        final val iterator = new Iterator[DynamoValue] {
+          private[this] val underlying = xs.values.iterator
+          final def hasNext = underlying.hasNext
+          final def next = DynamoValue.fromAttributeValue(underlying.next)
+        }
       }
-    }
-    case Pure(xs) => xs.values
+    case Pure(xs)       => xs.values
     case Concat(xs, ys) => xs.values ++ ys.values
   }
 
   final def toJavaMap: JMap[String, AttributeValue] = self match {
-    case Strict(xs) => xs
-    case Pure(xs) => unsafeToMap(xs)
+    case Strict(xs)     => xs
+    case Pure(xs)       => unsafeToMap(xs)
     case Concat(xs, ys) => unsafeMerge(xs.toJavaMap, ys.toJavaMap)
   }
 
@@ -69,22 +71,29 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
 
   final def toAttributeValue: AttributeValue = new AttributeValue().withM(toJavaMap)
 
-  final def toMap[V](implicit D: DynamoFormat[V]) = self match {
-    case Strict(xs) => xs.entrySet.stream.reduce[Either[DynamoReadError, Map[String, V]]](
-      Right(Map.empty),
-      (xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x),
-      (xs0, ys0) => for { xs <- xs0; ys <- ys0 } yield xs ++ ys
-    )    
-    case Pure(xs) => xs.foldLeft[Either[DynamoReadError, Map[String, V]]](Right(Map.empty)){
-      case (e @ Left(_), _) => e
-      case (Right(m), (k, x)) => D.read(x).map(x => m + (k -> x))
-    }
-    case Concat(xs, ys) => ???
+  final def toMap[V](implicit D: DynamoFormat[V]): Either[DynamoReadError, Map[String, V]] = self match {
+    case Strict(xs) =>
+      xs.entrySet.stream.reduce[Either[DynamoReadError, Map[String, V]]](
+        Right(Map.empty),
+        (xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x),
+        (xs0, ys0) => for { xs <- xs0; ys <- ys0 } yield xs ++ ys
+      )
+    case Pure(xs) =>
+      xs.foldLeft[Either[DynamoReadError, Map[String, V]]](Right(Map.empty)) {
+        case (e @ Left(_), _)   => e
+        case (Right(m), (k, x)) => D.read(x).map(x => m + (k -> x))
+      }
+    case Concat(xs0, ys0) => for { xs <- xs0.toMap; ys <- ys0.toMap } yield xs ++ ys
   }
 
   final def toExpressionAttributeValues: JMap[String, AttributeValue] = self match {
-    case Strict(xs) => unsafeToJMap { m => xs.entrySet.stream.forEach({x => m.put(":" ++ x.getKey, x.getValue); ()}) }
-    case Pure(xs) => unsafeToJMap(m => xs foreach { case (k, x) => m.put(":" ++ k, x.toAttributeValue) })
+    case Strict(xs) =>
+      unsafeToJMap { m =>
+        xs.entrySet.stream.forEach({ x =>
+          m.put(":" ++ x.getKey, x.getValue); ()
+        })
+      }
+    case Pure(xs)       => unsafeToJMap(m => xs foreach { case (k, x) => m.put(":" ++ k, x.toAttributeValue) })
     case Concat(xs, ys) => unsafeMerge(xs.toExpressionAttributeValues, ys.toExpressionAttributeValues)
   }
 
@@ -99,7 +108,8 @@ object DynamoObject {
   def apply(xs: JMap[String, AttributeValue]): DynamoObject = Strict(xs)
   def apply(xs: (String, DynamoValue)*): DynamoObject = apply(xs.toMap)
   def apply(xs: Map[String, DynamoValue]): DynamoObject = Pure(xs)
-  def apply[A](xs: (String, A)*)(implicit D: DynamoFormat[A]): DynamoObject = apply(xs.foldLeft(Map.empty[String, DynamoValue]) { case (m, (k, x)) => m + (k -> D.write(x)) })
+  def apply[A](xs: (String, A)*)(implicit D: DynamoFormat[A]): DynamoObject =
+    apply(xs.foldLeft(Map.empty[String, DynamoValue]) { case (m, (k, x)) => m + (k -> D.write(x)) })
 
   val empty: DynamoObject = Pure(Map.empty)
 
@@ -113,14 +123,14 @@ object DynamoObject {
 
   private[DynamoObject] def unsafeToJMap(f: JMap[String, AttributeValue] => Unit): JMap[String, AttributeValue] = {
     val m = new java.util.HashMap[String, AttributeValue]
-    f(m) 
+    f(m)
     m
   }
 
   private[DynamoObject] def unsafeMerge[K, V](xs: JMap[K, V], ys: JMap[K, V]): JMap[K, V] =
     ys.entrySet.stream.reduce[JMap[K, V]](
       xs,
-      (acc, x) => { 
+      (acc, x) => {
         acc.put(x.getKey, x.getValue)
         acc
       },
