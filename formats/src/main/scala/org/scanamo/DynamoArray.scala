@@ -64,7 +64,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       Some(
         xs0.stream.reduce[List[DynamoValue]](
           Nil,
-          (xs, x) => DynamoValue.fromAttributeValue(x) :: xs,
+          (xs, x) => xs :+ DynamoValue.fromAttributeValue(x),
           _ ++ _
         )
       )
@@ -78,7 +78,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asStringArray: Option[List[String]] = self match {
-    case StrictS(xs) => Some(xs.stream.reduce[List[String]](Nil, (xs, x) => x :: xs, _ ++ _))
+    case StrictS(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
     case PureS(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
       for {
@@ -89,7 +89,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asNumArray: Option[List[String]] = self match {
-    case StrictN(xs) => Some(xs.stream.reduce[List[String]](Nil, (xs, x) => x :: xs, _ ++ _))
+    case StrictN(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
     case PureN(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
       for {
@@ -100,7 +100,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asByteBufferArray: Option[List[ByteBuffer]] = self match {
-    case StrictB(xs) => Some(xs.stream.reduce[List[ByteBuffer]](Nil, (xs, x) => x :: xs, _ ++ _))
+    case StrictB(xs) => Some(xs.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
     case PureB(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
       for {

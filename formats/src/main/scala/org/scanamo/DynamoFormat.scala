@@ -59,7 +59,7 @@ import scala.reflect.ClassTag
   * >>> case class Developer(name: String, age: String, problems: Int)
   * >>> val invalid = DynamoFormat[Farmer].read(DynamoFormat[Developer].write(Developer("Alice", "none of your business", 99)))
   * >>> invalid
-  * Left(InvalidPropertiesError(NonEmptyList(PropertyReadError(age,NoPropertyOfType(N,DynString(none of your business))), PropertyReadError(farm,MissingProperty))))
+  * Left(InvalidPropertiesError(NonEmptyList((age,NoPropertyOfType(N,DynString(none of your business))), (farm,MissingProperty))))
   *
   * >>> invalid.leftMap(cats.Show[error.DynamoReadError].show)
   * Left('age': not of type: 'N' was 'DynString(none of your business)', 'farm': missing)
