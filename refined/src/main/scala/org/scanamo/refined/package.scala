@@ -3,7 +3,6 @@ package org.scanamo
 import cats.syntax.either._
 
 import org.scanamo.error.{DynamoReadError, TypeCoercionError}
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
 import eu.timepit.refined.api.{RefType, Validate}
 
@@ -16,15 +15,15 @@ package object refined {
     validate: Validate[T, P]
   ): DynamoFormat[F[T, P]] = new DynamoFormat[F[T, P]] {
 
-    override def default: Option[F[T, P]] =
+    override final val default: Option[F[T, P]] =
       baseFormat.default.flatMap(refType.refine[P](_).toOption)
 
-    def read(av: AttributeValue): Either[DynamoReadError, F[T, P]] =
+    final def read(av: DynamoValue): Either[DynamoReadError, F[T, P]] =
       baseFormat.read(av).flatMap { v =>
         refType.refine[P](v).leftMap(desc => TypeCoercionError(new Exception(desc)))
       }
 
-    def write(v: F[T, P]): AttributeValue =
+    final def write(v: F[T, P]): DynamoValue =
       baseFormat.write(refType.unwrap(v))
 
   }
