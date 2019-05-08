@@ -65,7 +65,7 @@ object ScanamoOps {
     override def handleErrorWith[A](fa: ScanamoOps[A])(f: Throwable => ScanamoOps[A]): ScanamoOps[A] =
       fa.resume match {
         case Left(Fail(t)) => f(t)
-        case Left(_)  => f(new Throwable("Unexpected exception"))
+        case Left(op)  => Free.roll(op)
         case Right(a) => Monad[ScanamoOps].pure(a)
     }
 
