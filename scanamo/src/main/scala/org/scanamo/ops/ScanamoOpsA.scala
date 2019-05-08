@@ -76,6 +76,6 @@ object ScanamoOps {
         case Right(b) => pure(b)
 
       })
-    override def pure[A](a: A): ScanamoOps[A] = Monad[ScanamoOps].pure(a)
+    override def pure[A](a: A): ScanamoOps[A] = Free.pure(a)
   }
 }

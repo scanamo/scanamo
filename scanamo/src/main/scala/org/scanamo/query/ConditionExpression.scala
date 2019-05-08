@@ -1,6 +1,7 @@
 package org.scanamo.query
 
 import cats.Monad
+import cats.free.Free
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.DynamoFormat
 import org.scanamo.error.{ConditionNotMet, ScanamoError}
@@ -45,7 +46,7 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
       .flatMap(
         _.fold(
           _ match {
-            case t: ConditionalCheckFailedException => Monad[ScanamoOps].pure(Left(ConditionNotMet(t)))
+            case t: ConditionalCheckFailedException => Free.pure(Left(ConditionNotMet(t)))
             case e => raiseError(e)
           },
           r => Monad[ScanamoOps].pure(format.read(new AttributeValue().withM(r.getAttributes)))
