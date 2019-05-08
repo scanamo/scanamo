@@ -1,5 +1,6 @@
 package org.scanamo.ops
 
+import cats.free.Free
 import cats.{Functor, Monad, MonadError}
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.ops.ScanamoOpsA.ScanamoResult
@@ -41,7 +42,7 @@ object ScanamoOps {
     req: ScanamoUpdateRequest
   ): ScanamoOps[ScanamoResult[UpdateItemResult]] =
     liftF[ScanamoOpsA, ScanamoResult[UpdateItemResult]](Update(req, identity))
-//TODO: Does there need to be a fail lift?
+  def fail(t: Throwable): Free[ScanamoOpsA, Nothing] = liftF[ScanamoOpsA, Nothing](Fail(t))
 
   implicit val functionScanamoOps = new Functor[ScanamoOpsA] {
     override def map[A, B](fa: ScanamoOpsA[A])(f: A => B): ScanamoOpsA[B] = fa match {
