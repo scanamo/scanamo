@@ -1,27 +1,26 @@
 package org.scanamo.request
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import org.scanamo.EvaluationKey
+import org.scanamo.{DynamoObject, DynamoValue}
 import org.scanamo.query.{Condition, Query}
 
 case class ScanamoPutRequest(
   tableName: String,
-  item: AttributeValue,
+  item: DynamoValue,
   condition: Option[RequestCondition]
 )
 
 case class ScanamoDeleteRequest(
   tableName: String,
-  key: Map[String, AttributeValue],
+  key: DynamoObject,
   condition: Option[RequestCondition]
 )
 
 case class ScanamoUpdateRequest(
   tableName: String,
-  key: Map[String, AttributeValue],
+  key: DynamoObject,
   updateExpression: String,
   attributeNames: Map[String, String],
-  attributeValues: Map[String, AttributeValue],
+  dynamoValues: DynamoObject,
   condition: Option[RequestCondition]
 )
 
@@ -40,16 +39,17 @@ case class ScanamoQueryRequest(
 
 case class ScanamoQueryOptions(
   consistent: Boolean,
+  ascending: Boolean,
   limit: Option[Int],
-  exclusiveStartKey: Option[EvaluationKey],
+  exclusiveStartKey: Option[DynamoObject],
   filter: Option[Condition[_]]
 )
 object ScanamoQueryOptions {
-  val default = ScanamoQueryOptions(false, None, None, None)
+  val default = ScanamoQueryOptions(false, true, None, None, None)
 }
 
 case class RequestCondition(
   expression: String,
   attributeNames: Map[String, String],
-  attributeValues: Option[Map[String, AttributeValue]]
+  dynamoValues: Option[DynamoObject]
 )

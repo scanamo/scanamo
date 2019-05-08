@@ -11,6 +11,7 @@ import org.scanamo.request._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
+import org.scanamo.DynamoObject
 
 /**
   * Interpreters to take the operations defined with Scanamo and execute them
@@ -139,14 +140,16 @@ private[ops] object JavaRequests {
       .of(
         queryRefinement(_.index)(_.withIndexName(_)),
         queryRefinement(_.options.limit)(_.withLimit(_)),
-        queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k)),
+        queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.toJavaMap)),
         queryRefinement(_.options.filter)((r, f) => {
           val requestCondition = f.apply
-          val filteredRequest = r
-            .withFilterExpression(requestCondition.expression)
-            .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
-          requestCondition.attributeValues
-            .fold(filteredRequest)(avs => filteredRequest.withExpressionAttributeValues(avs.asJava))
+          requestCondition.dynamoValues
+            .filter(_.nonEmpty)
+            .flatMap(_.toExpressionAttributeValues)
+            .foldLeft(
+              r.withFilterExpression(requestCondition.expression)
+                .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
+            )(_ withExpressionAttributeValues _)
         })
       )
       .reduceLeft(_.compose(_))(
@@ -156,73 +159,92 @@ private[ops] object JavaRequests {
 
   def query(req: ScanamoQueryRequest): QueryRequest = {
     def queryRefinement[T](
-      o: ScanamoQueryRequest => Option[T]
-    )(rt: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr =>
-      o(req).foldLeft(qr)(rt)
+      f: ScanamoQueryRequest => Option[T]
+    )(g: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr =>
+      f(req).foldLeft(qr)(g)
     }
 
-    NonEmptyList
+    val queryCondition: RequestCondition = req.query.apply
+    val requestCondition: Option[RequestCondition] = req.options.filter.map(_.apply)
+
+    val request = NonEmptyList
       .of(
-        queryRefinement(_.index)(_.withIndexName(_)),
-        queryRefinement(_.options.limit)(_.withLimit(_)),
-        queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k)),
-        queryRefinement(_.options.filter)((r, f) => {
-          val requestCondition = f.apply
-          r.withFilterExpression(requestCondition.expression)
-            .withExpressionAttributeNames(
-              (r.getExpressionAttributeNames.asScala ++ requestCondition.attributeNames).asJava
-            )
-            .withExpressionAttributeValues(
-              (r.getExpressionAttributeValues.asScala ++ requestCondition.attributeValues.getOrElse(Map.empty)).asJava
-            )
-        })
+        queryRefinement(_.index)(_ withIndexName _),
+        queryRefinement(_.options.limit)(_ withLimit _),
+        queryRefinement(_.options.exclusiveStartKey.map(_.toJavaMap))(_ withExclusiveStartKey _)
       )
-      .reduceLeft(_.compose(_))(
-        req.query(new QueryRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent))
+      .reduceLeft(_ compose _)(
+        new QueryRequest()
+          .withTableName(req.tableName)
+          .withConsistentRead(req.options.consistent)
+          .withScanIndexForward(req.options.ascending)
+          .withKeyConditionExpression(queryCondition.expression)
       )
+
+    requestCondition.fold {
+      val requestWithCondition = request.withExpressionAttributeNames(queryCondition.attributeNames.asJava)
+      queryCondition.dynamoValues
+        .filter(_.nonEmpty)
+        .flatMap(_.toExpressionAttributeValues)
+        .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
+    } { condition =>
+      val requestWithCondition = request
+        .withFilterExpression(condition.expression)
+        .withExpressionAttributeNames((queryCondition.attributeNames ++ condition.attributeNames).asJava)
+      val attributeValues = for {
+        queryValues <- queryCondition.dynamoValues orElse Some(DynamoObject.empty)
+        filterValues <- condition.dynamoValues orElse Some(DynamoObject.empty)
+      } yield queryValues <> filterValues
+
+      attributeValues
+        .flatMap(_.toExpressionAttributeValues)
+        .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
+    }
   }
 
-  def put(req: ScanamoPutRequest): PutItemRequest =
-    req.condition.foldLeft(
-      new PutItemRequest()
-        .withTableName(req.tableName)
-        .withItem(req.item.getM)
-        .withReturnValues(ReturnValue.ALL_OLD)
-    )(
-      (r, c) =>
-        c.attributeValues.foldLeft(
-          r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
-        )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
-    )
+  def put(req: ScanamoPutRequest): PutItemRequest = {
+    val request = new PutItemRequest()
+      .withTableName(req.tableName)
+      .withItem(req.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
+      .withReturnValues(ReturnValue.ALL_OLD)
 
-  def delete(req: ScanamoDeleteRequest): DeleteItemRequest =
-    req.condition.foldLeft(
-      new DeleteItemRequest().withTableName(req.tableName).withKey(req.key.asJava)
-    )(
-      (r, c) =>
-        c.attributeValues.foldLeft(
-          r.withConditionExpression(c.expression).withExpressionAttributeNames(c.attributeNames.asJava)
-        )((cond, values) => cond.withExpressionAttributeValues(values.asJava))
-    )
+    req.condition.fold(request) { condition =>
+      val requestWithCondition = request
+        .withConditionExpression(condition.expression)
+        .withExpressionAttributeNames(condition.attributeNames.asJava)
+
+      condition.dynamoValues
+        .flatMap(_.toExpressionAttributeValues)
+        .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
+    }
+  }
+
+  def delete(req: ScanamoDeleteRequest): DeleteItemRequest = {
+    val request = new DeleteItemRequest().withTableName(req.tableName).withKey(req.key.toJavaMap)
+    req.condition.fold(request) { condition =>
+      val requestWithCondition = request
+        .withConditionExpression(condition.expression)
+        .withExpressionAttributeNames(condition.attributeNames.asJava)
+
+      condition.dynamoValues
+        .flatMap(_.toExpressionAttributeValues)
+        .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
+    }
+  }
 
   def update(req: ScanamoUpdateRequest): UpdateItemRequest = {
-    val reqWithoutValues = req.condition.foldLeft(
-      new UpdateItemRequest()
-        .withTableName(req.tableName)
-        .withKey(req.key.asJava)
-        .withUpdateExpression(req.updateExpression)
-        .withExpressionAttributeNames(req.attributeNames.asJava)
-        .withReturnValues(ReturnValue.ALL_NEW)
-    )(
-      (r, c) =>
-        c.attributeValues.foldLeft(
-          r.withConditionExpression(c.expression)
-            .withExpressionAttributeNames((c.attributeNames ++ req.attributeNames).asJava)
-        )((cond, values) => cond.withExpressionAttributeValues((values ++ req.attributeValues).asJava))
-    )
+    val attributeNames: Map[String, String] = req.condition.map(_.attributeNames).foldLeft(req.attributeNames)(_ ++ _)
+    val attributeValues: DynamoObject = req.condition.flatMap(_.dynamoValues).foldLeft(req.dynamoValues)(_ <> _)
+    val request = new UpdateItemRequest()
+      .withTableName(req.tableName)
+      .withKey(req.key.toJavaMap)
+      .withUpdateExpression(req.updateExpression)
+      .withReturnValues(ReturnValue.ALL_NEW)
+      .withExpressionAttributeNames(attributeNames.asJava)
 
-    val attributeValues = req.condition.flatMap(_.attributeValues).foldLeft(req.attributeValues)(_ ++ _)
-    if (attributeValues.isEmpty) reqWithoutValues
-    else reqWithoutValues.withExpressionAttributeValues(attributeValues.asJava)
+    val requestWithCondition =
+      req.condition.fold(request)(condition => request.withConditionExpression(condition.expression))
+
+    attributeValues.toExpressionAttributeValues.foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
   }
 }

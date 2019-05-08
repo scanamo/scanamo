@@ -51,7 +51,10 @@ trait DerivedDynamoFormat {
       final def write(t: FieldType[K, V] :: T) = {
         val tailValue = tailFormat.value.write(t.tail)
         val av = headFormat.value.write(t.head)
-        DynamoObject.singleton(fieldName, av) <> tailValue
+        if (av.isNull)
+          tailValue
+        else
+          DynamoObject.singleton(fieldName, av) <> tailValue
       }
     }
 

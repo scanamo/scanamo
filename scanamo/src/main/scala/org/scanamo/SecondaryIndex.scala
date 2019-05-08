@@ -5,7 +5,6 @@ import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query.{Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition}
 import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
-import scala.collection.JavaConverters._
 
 /**
   * Represents a secondary index on a DynamoDB table.
@@ -96,8 +95,8 @@ sealed abstract class SecondaryIndex[V] {
     * ...       Transport("Underground", "Central", "Red"),
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
-    * ...     somethingBeginningWithBl <- transport.index(i).limit(1).query(
-    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")).descending
+    * ...     somethingBeginningWithBl <- transport.index(i).limit(1).descending.query(
+    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl"))
     * ...     )
     * ...   } yield somethingBeginningWithBl.toList
     * ...   Scanamo.exec(client)(operations)
@@ -141,6 +140,8 @@ sealed abstract class SecondaryIndex[V] {
     */
   def filter[C: ConditionExpression](condition: C): SecondaryIndex[V]
 
+  def descending: SecondaryIndex[V]
+
   def from[K: UniqueKeyCondition](key: UniqueKey[K]): SecondaryIndex[V]
 }
 
@@ -151,11 +152,13 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
 ) extends SecondaryIndex[V] {
   def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
-    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava)))
+    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
   def filter[C: ConditionExpression](condition: C) =
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
+  def descending: SecondaryIndexWithOptions[V] =
+    copy(queryOptions = queryOptions.copy(ascending = false))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def query(query: Query[_]) =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)

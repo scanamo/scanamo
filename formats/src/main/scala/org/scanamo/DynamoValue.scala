@@ -209,7 +209,7 @@ object DynamoValue {
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
     if ((av eq null) || av.isNULL)
       DynNull
-    else if (av.isBOOL)
+    else if (av.getBOOL ne null)
       DynBool(av.getBOOL)
     else if (av.getN ne null)
       DynNum(av.getN)
