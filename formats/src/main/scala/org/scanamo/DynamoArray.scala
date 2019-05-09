@@ -4,8 +4,7 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
 import java.util.stream.Collectors
 import java.{util => ju}
-import cats.Applicative
-import cats.syntax.applicative._
+import org.scanamo.internal._
 
 sealed abstract class DynamoArray extends Product with Serializable { self =>
   import DynamoArray._
@@ -75,13 +74,13 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   def toJavaCollection: ju.List[AttributeValue] = self match {
     case Empty          => new java.util.LinkedList[AttributeValue]()
     case Strict(xs)     => xs
-    case StrictS(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withS(_)).collect(Collectors.toList())
-    case StrictN(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withN(_)).collect(Collectors.toList())
-    case StrictB(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withB(_)).collect(Collectors.toList())
+    case StrictS(xs)    => xs.stream.map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withS(_))).collect(Collectors.toList())
+    case StrictN(xs)    => xs.stream.map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withN(_))).collect(Collectors.toList())
+    case StrictB(xs)    => xs.stream.map[AttributeValue](jfun[ByteBuffer, AttributeValue](new AttributeValue().withB(_))).collect(Collectors.toList())
     case Pure(xs)       => unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)
-    case PureS(xs)      => unsafeToList(xs, new AttributeValue().withS(_))
-    case PureN(xs)      => unsafeToList(xs, new AttributeValue().withN(_))
-    case PureB(xs)      => unsafeToList(xs, new AttributeValue().withB(_))
+    case PureS(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withS(_))
+    case PureN(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withN(_))
+    case PureB(xs)      => unsafeToList[ByteBuffer, AttributeValue](xs, new AttributeValue().withB(_))
     case Concat(xs, ys) => unsafeMerge(xs.toJavaCollection, ys.toJavaCollection)
   }
 
@@ -117,8 +116,8 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       Some(
         xs0.stream.reduce[List[DynamoValue]](
           Nil,
-          (xs, x) => xs :+ DynamoValue.fromAttributeValue(x),
-          _ ++ _
+          jfun2[List[DynamoValue], AttributeValue, List[DynamoValue]]((xs, x) => xs :+ DynamoValue.fromAttributeValue(x)),
+          concatDynamoValues
         )
       )
     case Pure(xs) => Some(xs)
@@ -132,7 +131,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
 
   def asStringArray: Option[List[String]] = self match {
     case Empty       => Some(List.empty)
-    case StrictS(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+    case StrictS(xs) => Some(xs.stream.reduce[List[String]](Nil, prependString, concatStrings))
     case PureS(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
       for {
@@ -144,7 +143,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
 
   def asNumArray: Option[List[String]] = self match {
     case Empty       => Some(List.empty)
-    case StrictN(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+    case StrictN(xs) => Some(xs.stream.reduce[List[String]](Nil, prependString, concatStrings))
     case PureN(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
       for {
@@ -156,7 +155,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
 
   def asByteBufferArray: Option[List[ByteBuffer]] = self match {
     case Empty       => Some(List.empty)
-    case StrictB(xs) => Some(xs.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
+    case StrictB(xs) => Some(xs.stream.reduce[List[ByteBuffer]](Nil, prependByteBuffer, concatByteBuffers))
     case PureB(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
       for {

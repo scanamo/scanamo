@@ -350,7 +350,7 @@ object DynamoFormat extends EnumDynamoFormat {
         else
           DynamoValue.numbers(t.toSeq: _*)
 
-      override final val default = Some(Set.empty)
+      override final val default = Some(Set.empty[T])
     }
 
   /**
@@ -462,7 +462,7 @@ object DynamoFormat extends EnumDynamoFormat {
         else
           DynamoValue.strings(t.toSeq: _*)
 
-      override final val default = Some(Set.empty)
+      override final val default = Some(Set.empty[String])
     }
 
   private val javaMapFormat: DynamoFormat[DynamoObject] =

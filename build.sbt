@@ -9,6 +9,9 @@ val shimsVersion = "1.7.0"
 val zioVersion = "1.0-RC4"
 
 val commonSettings = Seq(
+  javacOptions ++= Seq(
+    "-target:jvm-1.8"
+  ),
   scalacOptions := Seq(
     "-deprecation",
     "-encoding",
