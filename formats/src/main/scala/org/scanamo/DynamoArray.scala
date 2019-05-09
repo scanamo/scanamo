@@ -95,7 +95,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asArray: Option[List[DynamoValue]] = self match {
-    case Empty => None
+    case Empty => Some(List.empty)
     case Strict(xs0) =>
       Some(
         xs0.stream.reduce[List[DynamoValue]](
@@ -114,7 +114,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asStringArray: Option[List[String]] = self match {
-    case Empty       => None
+    case Empty       => Some(List.empty)
     case StrictS(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
     case PureS(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
@@ -126,7 +126,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asNumArray: Option[List[String]] = self match {
-    case Empty       => None
+    case Empty       => Some(List.empty)
     case StrictN(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
     case PureN(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
@@ -138,7 +138,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asByteBufferArray: Option[List[ByteBuffer]] = self match {
-    case Empty       => None
+    case Empty       => Some(List.empty)
     case StrictB(xs) => Some(xs.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
     case PureB(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
