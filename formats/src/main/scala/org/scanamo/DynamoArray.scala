@@ -10,15 +10,15 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   import DynamoArray._
 
   def apply(i: Int): Option[DynamoValue] = self match {
-    case Empty => None
-    case Strict(xs) => Option(xs.get(i)).map(DynamoValue.fromAttributeValue)
+    case Empty       => None
+    case Strict(xs)  => Option(xs.get(i)).map(DynamoValue.fromAttributeValue)
     case StrictS(xs) => Option(xs.get(i)).map(DynamoValue.string)
     case StrictN(xs) => Option(xs.get(i)).map(DynamoValue.unsafeNumber)
     case StrictB(xs) => Option(xs.get(i)).map(DynamoValue.byteBuffer)
-    case Pure(xs) => xs.drop(i).headOption
-    case PureS(xs) => xs.drop(1).headOption.map(DynamoValue.string)
-    case PureN(xs) => xs.drop(i).headOption.map(DynamoValue.unsafeNumber)
-    case PureB(xs) => xs.drop(i).headOption.map(DynamoValue.byteBuffer)
+    case Pure(xs)    => xs.drop(i).headOption
+    case PureS(xs)   => xs.drop(1).headOption.map(DynamoValue.string)
+    case PureN(xs)   => xs.drop(i).headOption.map(DynamoValue.unsafeNumber)
+    case PureB(xs)   => xs.drop(i).headOption.map(DynamoValue.byteBuffer)
     case Concat(xs, ys) =>
       val s = xs.size
       if (s > i) xs(i) else ys(i - s)
@@ -72,11 +72,20 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def toJavaCollection: ju.List[AttributeValue] = self match {
-    case Empty          => new java.util.LinkedList[AttributeValue]()
-    case Strict(xs)     => xs
-    case StrictS(xs)    => xs.stream.map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withS(_))).collect(Collectors.toList())
-    case StrictN(xs)    => xs.stream.map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withN(_))).collect(Collectors.toList())
-    case StrictB(xs)    => xs.stream.map[AttributeValue](jfun[ByteBuffer, AttributeValue](new AttributeValue().withB(_))).collect(Collectors.toList())
+    case Empty      => new java.util.LinkedList[AttributeValue]()
+    case Strict(xs) => xs
+    case StrictS(xs) =>
+      xs.stream
+        .map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withS(_)))
+        .collect(Collectors.toList())
+    case StrictN(xs) =>
+      xs.stream
+        .map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withN(_)))
+        .collect(Collectors.toList())
+    case StrictB(xs) =>
+      xs.stream
+        .map[AttributeValue](jfun[ByteBuffer, AttributeValue](new AttributeValue().withB(_)))
+        .collect(Collectors.toList())
     case Pure(xs)       => unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)
     case PureS(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withS(_))
     case PureN(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withN(_))
@@ -116,7 +125,9 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       Some(
         xs0.stream.reduce[List[DynamoValue]](
           Nil,
-          jfun2[List[DynamoValue], AttributeValue, List[DynamoValue]]((xs, x) => xs :+ DynamoValue.fromAttributeValue(x)),
+          jfun2[List[DynamoValue], AttributeValue, List[DynamoValue]](
+            (xs, x) => xs :+ DynamoValue.fromAttributeValue(x)
+          ),
           concatDynamoValues
         )
       )

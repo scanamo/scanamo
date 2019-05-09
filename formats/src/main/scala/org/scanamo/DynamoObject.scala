@@ -2,7 +2,7 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.util.{Map => JMap, HashMap}
-import org.scanamo.error.{ DynamoReadError, MissingProperty }
+import org.scanamo.error.{DynamoReadError, MissingProperty}
 import org.scanamo.internal._
 import cats.syntax.either._
 
@@ -16,7 +16,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     case Concat(xs, ys) => xs(key) orElse ys(key)
   }
 
-  final def := (key: String): Either[DynamoReadError, DynamoValue] = self match {
+  final def :=(key: String): Either[DynamoReadError, DynamoValue] = self match {
     case Empty          => Left(MissingProperty)
     case Strict(xs)     => Either.fromOption(Option(xs.get(key)).map(DynamoValue.fromAttributeValue), MissingProperty)
     case Pure(xs)       => Either.fromOption(xs.get(key), MissingProperty)
@@ -99,7 +99,10 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     case Strict(xs) =>
       xs.entrySet.stream.reduce[Either[DynamoReadError, Map[String, V]]](
         Right(Map.empty),
-        jfun2[Either[DynamoReadError, Map[String, V]], JMap.Entry[String, AttributeValue], Either[DynamoReadError, Map[String, V]]]((xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x)),
+        jfun2[Either[DynamoReadError, Map[String, V]], JMap.Entry[String, AttributeValue], Either[
+          DynamoReadError,
+          Map[String, V]
+        ]]((xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x)),
         jbiop[Either[DynamoReadError, Map[String, V]]]((xs0, ys0) => for { xs <- xs0; ys <- ys0 } yield xs ++ ys)
       )
     case Pure(xs) =>
@@ -114,7 +117,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     case Empty => None
     case Strict(xs) =>
       Some(unsafeTransform { m =>
-        xs.entrySet.stream.forEach(jcon[JMap.Entry[String, AttributeValue]]{ x =>
+        xs.entrySet.stream.forEach(jcon[JMap.Entry[String, AttributeValue]] { x =>
           m.put(":" ++ x.getKey, x.getValue); ()
         })
       })
@@ -159,7 +162,9 @@ object DynamoObject {
   private[DynamoObject] def unsafeToScalaMap(m: JMap[String, AttributeValue]): Map[String, AttributeValue] =
     m.entrySet.stream.reduce[Map[String, AttributeValue]](
       Map.empty,
-      jfun2[Map[String, AttributeValue], JMap.Entry[String, AttributeValue], Map[String, AttributeValue]]{(n, e) => n + (e.getKey -> e.getValue)},
+      jfun2[Map[String, AttributeValue], JMap.Entry[String, AttributeValue], Map[String, AttributeValue]] { (n, e) =>
+        n + (e.getKey -> e.getValue)
+      },
       jbiop[Map[String, AttributeValue]](_ ++ _)
     )
 
