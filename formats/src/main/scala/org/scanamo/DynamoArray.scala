@@ -8,7 +8,41 @@ import java.util.stream.Collectors
 sealed abstract class DynamoArray extends Product with Serializable { self =>
   import DynamoArray._
 
+  def size: Int = self match {
+    case Empty          => 0
+    case Strict(xs)     => xs.size
+    case StrictN(xs)    => xs.size
+    case StrictS(xs)    => xs.size
+    case StrictB(xs)    => xs.size
+    case Pure(xs)       => xs.size
+    case PureN(xs)      => xs.size
+    case PureS(xs)      => xs.size
+    case PureB(xs)      => xs.size
+    case Concat(xs, ys) => xs.size + ys.size
+  }
+
+  def isEmpty: Boolean = self match {
+    case Empty => true
+    case _     => false
+  }
+
+  def nonEmpty: Boolean = !isEmpty
+
+  def contains(dv: DynamoValue): Boolean = self match {
+    case Empty          => false
+    case Strict(xs)     => xs.contains(dv.toAttributeValue)
+    case Pure(xs)       => xs.contains(dv)
+    case StrictS(xs)    => dv.asString.map(xs.contains(_)).getOrElse(false)
+    case PureS(xs)      => dv.asString.map(xs.contains(_)).getOrElse(false)
+    case StrictN(xs)    => dv.asNumber.map(xs.contains(_)).getOrElse(false)
+    case PureN(xs)      => dv.asNumber.map(xs.contains(_)).getOrElse(false)
+    case StrictB(xs)    => dv.asByteBuffer.map(xs.contains(_)).getOrElse(false)
+    case PureB(xs)      => dv.asByteBuffer.map(xs.contains(_)).getOrElse(false)
+    case Concat(xs, ys) => xs.contains(dv) || ys.contains(dv)
+  }
+
   def toAttributeValue: AttributeValue = self match {
+    case Empty       => DynamoValue.Null
     case Strict(xs)  => new AttributeValue().withL(xs)
     case StrictS(xs) => new AttributeValue().withSS(xs)
     case StrictN(xs) => new AttributeValue().withNS(xs)
@@ -22,6 +56,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def toJavaCollection: Collection[AttributeValue] = self match {
+    case Empty          => new java.util.LinkedList[AttributeValue]()
     case Strict(xs)     => xs
     case StrictS(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withS(_)).collect(Collectors.toList())
     case StrictN(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withN(_)).collect(Collectors.toList())
@@ -60,6 +95,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asArray: Option[List[DynamoValue]] = self match {
+    case Empty => None
     case Strict(xs0) =>
       Some(
         xs0.stream.reduce[List[DynamoValue]](
@@ -78,6 +114,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asStringArray: Option[List[String]] = self match {
+    case Empty       => None
     case StrictS(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
     case PureS(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
@@ -89,6 +126,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asNumArray: Option[List[String]] = self match {
+    case Empty       => None
     case StrictN(xs) => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
     case PureN(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
@@ -100,6 +138,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   }
 
   def asByteBufferArray: Option[List[ByteBuffer]] = self match {
+    case Empty       => None
     case StrictB(xs) => Some(xs.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
     case PureB(xs)   => Some(xs)
     case Concat(xs0, ys0) =>
@@ -110,10 +149,18 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
     case _ => None
   }
 
-  def <>(that: DynamoArray): DynamoArray = DynamoArray.Concat(self, that)
+  def <>(that: DynamoArray): DynamoArray = self match {
+    case Empty => that
+    case _ =>
+      that match {
+        case Empty => self
+        case _     => DynamoArray.Concat(self, that)
+      }
+  }
 }
 
 object DynamoArray {
+  private[DynamoArray] case object Empty extends DynamoArray
   private[DynamoArray] final case class Strict(xs: Collection[AttributeValue]) extends DynamoArray
   private[DynamoArray] final case class StrictS(xs: Collection[String]) extends DynamoArray
   private[DynamoArray] final case class StrictN(xs: Collection[String]) extends DynamoArray
@@ -135,12 +182,12 @@ object DynamoArray {
     l
   }
 
-  def apply(xs: Collection[AttributeValue]): DynamoArray = Strict(xs)
-  def apply(xs: DynamoValue*): DynamoArray = Pure(xs.toList)
-  def strings(xs: Collection[String]): DynamoArray = StrictS(xs)
-  def strings(xs: String*): DynamoArray = PureS(xs.toList)
-  def numbers(xs: Collection[String]): DynamoArray = StrictN(xs)
-  def numbers[N: Numeric](xs: N*): DynamoArray = PureN(xs.toList.map(_.toString))
-  def byteBuffers(xs: Collection[ByteBuffer]): DynamoArray = StrictB(xs)
-  def byteBuffers(xs: ByteBuffer*): DynamoArray = PureB(xs.toList)
+  def apply(xs: Collection[AttributeValue]): DynamoArray = if (xs.isEmpty) Empty else Strict(xs)
+  def apply(xs: DynamoValue*): DynamoArray = if (xs.isEmpty) Empty else Pure(xs.toList)
+  def strings(xs: Collection[String]): DynamoArray = if (xs.isEmpty) Empty else StrictS(xs)
+  def strings(xs: String*): DynamoArray = if (xs.isEmpty) Empty else PureS(xs.toList)
+  def numbers(xs: Collection[String]): DynamoArray = if (xs.isEmpty) Empty else StrictN(xs)
+  def numbers[N: Numeric](xs: N*): DynamoArray = if (xs.isEmpty) Empty else PureN(xs.toList.map(_.toString))
+  def byteBuffers(xs: Collection[ByteBuffer]): DynamoArray = if (xs.isEmpty) Empty else StrictB(xs)
+  def byteBuffers(xs: ByteBuffer*): DynamoArray = if (xs.isEmpty) Empty else PureB(xs.toList)
 }
