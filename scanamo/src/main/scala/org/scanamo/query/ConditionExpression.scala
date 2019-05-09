@@ -32,6 +32,7 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
           update.expression,
           update.attributeNames,
           DynamoObject(update.dynamoValues),
+          update.addEmptyList,
           Some(state.apply(t))
         )
       )

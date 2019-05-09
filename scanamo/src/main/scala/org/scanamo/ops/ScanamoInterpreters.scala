@@ -11,7 +11,7 @@ import org.scanamo.request._
 
 import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.util.{Failure, Success}
-import org.scanamo.DynamoObject
+import org.scanamo.{DynamoObject, DynamoValue}
 
 /**
   * Interpreters to take the operations defined with Scanamo and execute them
@@ -245,6 +245,11 @@ private[ops] object JavaRequests {
     val requestWithCondition =
       req.condition.fold(request)(condition => request.withConditionExpression(condition.expression))
 
-    attributeValues.toExpressionAttributeValues.foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
+    attributeValues.toExpressionAttributeValues.fold(requestWithCondition) { avs =>
+      if (req.addEmptyList) {
+        avs.put(":emptyList", DynamoValue.EmptyList)
+      }
+      requestWithCondition withExpressionAttributeValues avs
+    }
   }
 }

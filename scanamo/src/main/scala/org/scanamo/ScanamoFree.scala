@@ -112,6 +112,7 @@ object ScanamoFree {
           update.expression,
           update.attributeNames,
           DynamoObject(update.dynamoValues),
+          update.addEmptyList,
           None
         )
       )

@@ -21,6 +21,7 @@ case class ScanamoUpdateRequest(
   updateExpression: String,
   attributeNames: Map[String, String],
   dynamoValues: DynamoObject,
+  addEmptyList: Boolean,
   condition: Option[RequestCondition]
 )
 
