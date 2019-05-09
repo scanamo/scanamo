@@ -31,7 +31,9 @@ object ScanamoFree {
         val map = buildMap[T, WriteRequest](
           tableName,
           batch,
-          item => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap))
+          item =>
+            new WriteRequest()
+              .withPutRequest(new PutRequest().withItem(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap))
         )
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }

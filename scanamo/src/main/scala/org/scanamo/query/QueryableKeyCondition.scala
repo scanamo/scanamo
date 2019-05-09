@@ -18,14 +18,14 @@ object QueryableKeyCondition {
       )
   }
 
-  implicit def hashAndRangeQueryCondition[H, R](implicit H: DynamoFormat[H], R: DynamoFormat[R]) =
+  implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat] =
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
       final def apply(t: AndQueryCondition[H, R]) =
         RequestCondition(
           s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}",
           Map("#K" -> t.hashCondition.key.name) ++ t.rangeCondition.key.attributeNames("#R"),
           Some(
-            DynamoObject.singleton(t.hashCondition.key.name, H.write(t.hashCondition.v)) <> DynamoObject(
+            DynamoObject(t.hashCondition.key.name -> t.hashCondition.v) <> DynamoObject(
               t.rangeCondition.attributes.toSeq: _*
             )
           )

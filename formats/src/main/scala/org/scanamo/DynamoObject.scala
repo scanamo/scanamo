@@ -139,6 +139,7 @@ object DynamoObject {
   val empty: DynamoObject = Empty
 
   def singleton(key: String, x: DynamoValue): DynamoObject = Pure(Map(key -> x))
+  def fromIteralble(xs: Iterable[(String, DynamoValue)]): DynamoObject = apply(xs.toMap)
 
   private[DynamoObject] def unsafeToJavaMap(m: Map[String, AttributeValue]): JMap[String, AttributeValue] = {
     val n = new HashMap[String, AttributeValue]

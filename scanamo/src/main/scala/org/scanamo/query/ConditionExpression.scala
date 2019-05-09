@@ -61,7 +61,7 @@ object ConditionExpression {
       RequestCondition(
         s"#${attributeName.placeholder(prefix)} = :conditionAttributeValue",
         attributeName.attributeNames(s"#$prefix"),
-        Some(DynamoObject.singleton("conditionAttributeValue", DynamoFormat[V].write(pair._2)))
+        Some(DynamoObject("conditionAttributeValue" -> pair._2))
       )
     }
   }
@@ -71,13 +71,13 @@ object ConditionExpression {
       attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))
   }
 
-  implicit def attributeValueInCondition[V](implicit D: DynamoFormat[V]) =
+  implicit def attributeValueInCondition[V: DynamoFormat] =
     new ConditionExpression[(AttributeName, Set[V])] {
       val prefix = "inCondition"
       override def apply(pair: (AttributeName, Set[V])): RequestCondition = {
         val attributeName = pair._1
         val attributeValues = pair._2.zipWithIndex.foldLeft(DynamoObject.empty) {
-          case (m, (v, i)) => m <> DynamoObject.singleton(s"conditionAttributeValue$i", D.write(v))
+          case (m, (v, i)) => m <> DynamoObject(s"conditionAttributeValue$i" -> v)
         }
         RequestCondition(
           s"""#${attributeName
@@ -113,7 +113,7 @@ object ConditionExpression {
       RequestCondition(
         s"begins_with(#${b.key.placeholder(prefix)}, :conditionAttributeValue)",
         b.key.attributeNames(s"#$prefix"),
-        Some(DynamoObject.singleton("conditionAttributeValue", DynamoFormat[V].write(b.v)))
+        Some(DynamoObject("conditionAttributeValue" -> b.v))
       )
   }
 
@@ -124,19 +124,21 @@ object ConditionExpression {
         s"#${b.key.placeholder(prefix)} BETWEEN :lower and :upper",
         b.key.attributeNames(s"#$prefix"),
         Some(
-          DynamoObject.singleton("lower", DynamoFormat[V].write(b.bounds.lowerBound.v)) <>
-            DynamoObject.singleton("upper", DynamoFormat[V].write(b.bounds.upperBound.v))
+          DynamoObject(
+            "lower" -> b.bounds.lowerBound.v,
+            "upper" -> b.bounds.upperBound.v
+          )
         )
       )
   }
 
-  implicit def keyIsCondition[V](implicit D: DynamoFormat[V]) = new ConditionExpression[KeyIs[V]] {
+  implicit def keyIsCondition[V: DynamoFormat] = new ConditionExpression[KeyIs[V]] {
     val prefix = "keyIs"
     override def apply(k: KeyIs[V]): RequestCondition =
       RequestCondition(
         s"#${k.key.placeholder(prefix)} ${k.operator.op} :conditionAttributeValue",
         k.key.attributeNames(s"#$prefix"),
-        Some(DynamoObject.singleton("conditionAttributeValue", D.write(k.v)))
+        Some(DynamoObject("conditionAttributeValue" -> k.v))
       )
   }
 
