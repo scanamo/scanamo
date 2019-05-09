@@ -8,7 +8,8 @@ import shapeless._
 import shapeless.labelled._
 
 trait DerivedDynamoFormat {
-  type ValidatedPropertiesError[T] = ValidatedNel[(String, DynamoReadError), T]
+  type FieldName = String
+  type ValidatedPropertiesError[T] = ValidatedNel[(FieldName, DynamoReadError), T]
   type NotSymbol[T] = |¬|[Symbol]#λ[T]
 
   trait ConstructedDynamoFormat[T] {
@@ -36,7 +37,7 @@ trait DerivedDynamoFormat {
       private final val fieldName = fieldWitness.value.name
 
       final def read(av: DynamoObject) = {
-        val valueOrError: Either[(String, DynamoReadError), V] =
+        val valueOrError: Either[(FieldName, DynamoReadError), V] =
           av(fieldName).map(headFormat.value.read) orElse
             headFormat.value.default.map(Either.right) getOrElse
             Either.left(MissingProperty) leftMap
