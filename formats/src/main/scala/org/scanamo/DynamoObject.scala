@@ -3,6 +3,8 @@ package org.scanamo
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.util.{Map => JMap, HashMap}
 import org.scanamo.error.DynamoReadError
+import org.scanamo.error.MissingProperty
+import cats.syntax.either._
 
 sealed abstract class DynamoObject extends Product with Serializable { self =>
   import DynamoObject._
@@ -12,6 +14,13 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     case Strict(xs)     => Option(xs.get(key)).map(DynamoValue.fromAttributeValue)
     case Pure(xs)       => xs.get(key)
     case Concat(xs, ys) => xs(key) orElse ys(key)
+  }
+
+  final def := (key: String): Either[DynamoReadError, DynamoValue] = self match {
+    case Empty          => Left(MissingProperty)
+    case Strict(xs)     => Either.fromOption(Option(xs.get(key)).map(DynamoValue.fromAttributeValue), MissingProperty)
+    case Pure(xs)       => Either.fromOption(xs.get(key), MissingProperty)
+    case Concat(xs, ys) => (xs := key) orElse (ys := key)
   }
 
   final def size: Int = self match {

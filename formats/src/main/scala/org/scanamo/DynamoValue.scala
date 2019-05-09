@@ -2,6 +2,7 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
+import org.scanamo.error.DynamoReadError
 
 sealed abstract class DynamoValue extends Product with Serializable { self =>
   import DynamoValue._
@@ -102,6 +103,8 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     case _             => None
   }
 
+  final def as[A](implicit A: DynamoFormat[A]): Either[DynamoReadError, A] = A.read(self)
+
   final def withNull(f: => DynamoValue): DynamoValue = self match {
     case DynNull => f
     case _       => self
@@ -174,6 +177,8 @@ object DynamoValue {
   final def numbers[N: Numeric](ns: N*): DynamoValue = DynArray(DynamoArray.numbers(ns: _*))
   final def strings(ss: String*): DynamoValue = DynArray(DynamoArray.strings(ss: _*))
   final def byteBuffers(bs: ByteBuffer*): DynamoValue = DynArray(DynamoArray.byteBuffers(bs: _*))
+
+  private[scanamo] def unsafeNumber(n: String): DynamoValue = DynNum(n)
 
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
     if ((av eq null) || av.isNULL)
