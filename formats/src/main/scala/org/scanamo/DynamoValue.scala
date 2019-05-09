@@ -136,38 +136,6 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     case DynObject(as) => f(as)
     case _             => self
   }
-
-  // def <>(that: DynamoValue): DynamoValue = self match {
-  //   case DynNull => that
-  //   case DynArray(as) =>
-  //     that match {
-  //       case DynArray(bs) => DynArray(as ++ bs)
-  //       case DynNull      => self
-  //       case a            => DynArray(as :+ a)
-  //     }
-  //   case a @ DynObject(as) =>
-  //     that match {
-  //       case DynObject(bs)   => DynObject(as ++ bs)
-  //       case DynNull      => self
-  //       case DynArray(bs) => DynArray(a :: bs)
-  //       case b            => DynArray(a :: b :: Nil)
-  //     }
-  //   case a =>
-  //     that match {
-  //       case DynArray(as) => DynArray(a :: as)
-  //       case DynNull      => self
-  //       case b            => DynArray(a :: b :: Nil)
-  //     }
-  // }
-
-  // def ::(that: DynamoValue)(implicit ev: self.type =:= DynArray): DynamoValue =
-  //   DynArray(that :: self.as)
-
-  // def :+(that: DynamoValue)(implicit ev: self.type =:= DynArray): DynamoValue =
-  //   DynArray(self.as :+ that)
-
-  // def +(that: (String, DynamoValue))(implicit ev: self.type =:= DynObject): DynamoValue =
-  //   DynObject(self.as + that)
 }
 
 object DynamoValue {

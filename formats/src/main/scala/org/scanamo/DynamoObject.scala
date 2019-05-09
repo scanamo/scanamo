@@ -79,13 +79,11 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
 
   final def toDynamoValue: DynamoValue = DynamoValue.fromDynamoObject(self)
 
-  final def toAttributeValue: AttributeValue = {
-    val av = new AttributeValue()
+  final def toAttributeValue: AttributeValue =
     self match {
-      case Empty => av.withNULL(true)
-      case _ => av.withM(toJavaMap)
+      case Empty => DynamoValue.Null
+      case _     => new AttributeValue().withM(toJavaMap)
     }
-  }
 
   final def toMap[V](implicit D: DynamoFormat[V]): Either[DynamoReadError, Map[String, V]] = self match {
     case Empty => Right(Map.empty)

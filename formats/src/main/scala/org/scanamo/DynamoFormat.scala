@@ -16,7 +16,7 @@ import scala.reflect.ClassTag
 
 /**
   * Type class for defining serialisation to and from
-  * DynamoDB's `DynamoValue`
+  * DynamoDB's `AttributeValue`
   *
   * {{{
   * >>> val listOptionFormat = DynamoFormat[List[Option[Int]]]
@@ -82,17 +82,15 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat extends EnumDynamoFormat {
-  import DynamoValue._
-
   private def attribute[T](
     decode: DynamoValue => Option[T],
     encode: T => DynamoValue,
     propertyType: String
   ): DynamoFormat[T] =
     new DynamoFormat[T] {
-      override def read(av: DynamoValue): Either[DynamoReadError, T] =
+      final def read(av: DynamoValue): Either[DynamoReadError, T] =
         Either.fromOption(decode(av), NoPropertyOfType(propertyType, av))
-      override def write(t: T): DynamoValue = encode(t)
+      final def write(t: T): DynamoValue = encode(t)
     }
 
   /**
@@ -174,7 +172,7 @@ object DynamoFormat extends EnumDynamoFormat {
         av.asString.fold[Either[DynamoReadError, String]](Left(NoPropertyOfType("S", av)))(Right(_))
 
     final def write(s: String): DynamoValue = s match {
-      case "" => nil
+      case "" => DynamoValue.nil
       case _  => DynamoValue.string(s)
     }
   }
@@ -327,7 +325,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    xmap[Array[T], List[DynamoValue]](_.toList.traverse(f.read).map(_.toArray))(
+    xmap[Array[T], List[DynamoValue]](_.traverse(f.read).map(_.toArray))(
       _.map(f.write).toList
     )(javaListFormat)
 
