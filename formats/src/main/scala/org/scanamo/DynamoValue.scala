@@ -139,9 +139,10 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
 }
 
 object DynamoValue {
-  private[scanamo] val Null = new AttributeValue().withNULL(true)
-  private[scanamo] val True = new AttributeValue().withBOOL(true)
-  private[scanamo] val False = new AttributeValue().withBOOL(false)
+  private[scanamo] val Null: AttributeValue = new AttributeValue().withNULL(true)
+  private[scanamo] val True: AttributeValue = new AttributeValue().withBOOL(true)
+  private[scanamo] val False: AttributeValue = new AttributeValue().withBOOL(false)
+  private[scanamo] val EmptyList: AttributeValue = new AttributeValue().withL()
 
   private[DynamoValue] def collection[A](
     xs: Iterable[A],
