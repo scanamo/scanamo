@@ -285,7 +285,10 @@ object DynamoFormat extends EnumDynamoFormat {
     coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
-    attribute(_.asArray.flatMap(_.asArray), l => DynamoValue.array(l: _*), "L")
+    attribute({ dv =>
+      if (dv.isNull) Some(List.empty)
+      else dv.asArray.flatMap(_.asArray)
+    }, l => DynamoValue.array(l: _*), "L")
 
   /**
     * {{{
