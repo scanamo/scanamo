@@ -39,19 +39,19 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
     case AndUpdate(l, r)              => l.unprefixedAttributeNames ++ r.unprefixedAttributeNames
   }
 
-  final def dynamoValues: Map[String, DynamoValue] = unprefixedDynamoObject ++ constantValue.toMap
+  final def dynamoValues: Map[String, DynamoValue] = unprefixedDynamoValues ++ constantValue.toMap
 
   final def attributeValues: Map[String, AttributeValue] = dynamoValues.mapValues(_.toAttributeValue)
 
-  final def unprefixedDynamoObject: Map[String, DynamoValue] = self match {
+  final def unprefixedDynamoValues: Map[String, DynamoValue] = self match {
     case SimpleUpdateExpression(leaf) => leaf.dynamoValue.toMap
     case AndUpdate(l, r) =>
-      UpdateExpression.prefixKeys(l.unprefixedDynamoObject, "l_") ++ UpdateExpression
-        .prefixKeys(r.unprefixedDynamoObject, "r_")
+      UpdateExpression.prefixKeys(l.unprefixedDynamoValues, "l_") ++ UpdateExpression
+        .prefixKeys(r.unprefixedDynamoValues, "r_")
   }
 
   final def unprefixedAttributeValues: Map[String, AttributeValue] =
-    unprefixedDynamoObject.mapValues(_.toAttributeValue)
+    unprefixedDynamoValues.mapValues(_.toAttributeValue)
 }
 
 private[scanamo] final case class SimpleUpdateExpression(leaf: LeafUpdateExpression) extends UpdateExpression
