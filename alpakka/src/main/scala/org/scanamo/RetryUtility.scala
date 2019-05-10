@@ -35,7 +35,10 @@ object RetryUtility {
     private def waitForMillis(millis: Long) = {
         val promise = Promise[Long]
         scheduler.schedule(new Runnable {
-            override def run() = promise.success(millis)
+            override def run() : Unit = {
+                promise.success(millis)
+                ()
+            }
         }, millis, TimeUnit.MILLISECONDS)
         promise.future
     }
