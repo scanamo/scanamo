@@ -107,6 +107,7 @@ import cats.data.NonEmptyList
 import cats.implicits._
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.error.DynamoReadError
+import org.scanamo.update.UpdateExpression
 
 LocalDynamoDB.createTable(client)("favourites")('name -> S)
 case class Favourites(name: String, colour: String, number: Long)
@@ -116,12 +117,12 @@ Scanamo.exec(client)(favouritesTable.put(Favourites("Alice", "Blue", 42L)))
 
 case class FavouriteUpdate(name: String, colour: Option[String], number: Option[Long])
 def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadError, Favourites]]] = {
-  val updates = List(
+  val updates: List[UpdateExpression] = List(
     fu.colour.map(c => set('colour -> c)), 
     fu.number.map(n => set('number -> n))
-  )
-  NonEmptyList.fromList(updates.flatten).map(ups =>
-    favouritesTable.update('name -> fu.name, ups.reduce)
+  ).flatten
+  NonEmptyList.fromList(updates).map(ups =>
+    favouritesTable.update('name -> fu.name, ups.reduce[UpdateExpression](_ and _))
   )
 }
 ```

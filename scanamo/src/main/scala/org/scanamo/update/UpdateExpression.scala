@@ -52,6 +52,8 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
 
   final def unprefixedAttributeValues: Map[String, AttributeValue] =
     unprefixedDynamoValues.mapValues(_.toAttributeValue)
+
+  final def and(that: UpdateExpression): UpdateExpression = AndUpdate(self, that)
 }
 
 private[scanamo] final case class SimpleUpdate(leaf: LeafUpdateExpression) extends UpdateExpression
