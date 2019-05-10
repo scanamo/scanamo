@@ -12,7 +12,7 @@ import scala.concurrent.{ExecutionContext, Future}
 object ScanamoAlpakka {
   import cats.instances.future._
 
-  def exec[A](client: DynamoClient)(op: ScanamoOps[A])(implicit ec: ExecutionContext): Future[A] =
-    op.foldMap(AlpakkaInterpreter.future(client)(ec))
+  def exec[A](client: DynamoClient)(op: ScanamoOps[A])(implicit ec: ExecutionContext, retrySettings : RetrySettings): Future[A] =
+    op.foldMap(AlpakkaInterpreter.future(client)(ec, retrySettings))
 
 }
