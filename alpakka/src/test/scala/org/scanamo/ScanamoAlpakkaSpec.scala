@@ -18,6 +18,7 @@ import cats.implicits._
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
   implicit val system = ActorSystem("scanamo-alpakka")
+  implicit val retrySettings : RetrySettings = RetrySettings()
 
   override protected def afterAll(): Unit = {
     system.terminate()
