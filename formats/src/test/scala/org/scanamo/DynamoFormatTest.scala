@@ -23,8 +23,8 @@ class DynamoFormatTest extends FunSpec with Matchers with ScalaCheckDrivenProper
         forAll(gen) { a: A =>
           val person = Person("bob", a)
           client.putItem(t, format.write(person).toAttributeValue.getM)
-          val resp = client.getItem(t, Map("name" -> new AttributeValue().withS("bob")).asJava)
-          format.read(DynamoValue.fromAttributeValue(new AttributeValue().withM(resp.getItem))) shouldBe Right(person)
+          val resp = client.getItem(t, DynamoObject("name" -> "bob").toJavaMap)
+          format.read(DynamoObject(resp.getItem).toDynamoValue) shouldBe Right(person)
         }
       }
     }

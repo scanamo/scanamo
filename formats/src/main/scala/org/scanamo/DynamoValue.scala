@@ -181,7 +181,7 @@ object DynamoValue {
   private[scanamo] def unsafeNumber(n: String): DynamoValue = DynNum(n)
 
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
-    if ((av eq null) || av.isNULL)
+   if (!(av.isNULL eq null) && av.isNULL)
       DynNull
     else if (av.getBOOL ne null)
       DynBool(av.getBOOL)
