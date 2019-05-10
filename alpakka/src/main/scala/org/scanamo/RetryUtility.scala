@@ -20,7 +20,7 @@ object RetryUtility {
                 val retries = retrySettings.retries
                 val initialDelay = retrySettings.initialDelay.toMillis
                 val factor = retrySettings.factor
-                if (retries > 0){
+                if (retries > 0) {
                     for {
                         _ <- waitForMillis(initialDelay)
                         newRetrySetting = RetrySettings((initialDelay * factor).millis, factor, retries - 1)
