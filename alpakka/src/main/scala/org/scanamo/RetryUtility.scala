@@ -24,8 +24,8 @@ object RetryUtility {
                     for {
                         _ <- waitForMillis(initialDelay)
                         newRetrySetting = RetrySettings((initialDelay * factor).millis, factor, retries - 1)
-                        res <- retryWithBackOff(op, newRetrySetting)
-                    } yield res
+                        response <- retryWithBackOff(op, newRetrySetting)
+                    } yield response
                 else Future.failed(exception)
             }
         }
@@ -35,9 +35,7 @@ object RetryUtility {
     private def waitForMillis(millis: Long): Future[Long] = {
         val promise = Promise[Long]
         scheduler.schedule(new Runnable {
-            override def run(): Unit = {
-                promise.success(millis)
-            }
+            override def run() = promise.success(millis)
         }, millis, TimeUnit.MILLISECONDS)
 
         promise.future
