@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 object RetryUtility {
 
     def retryWithBackOff[T](op : => Future[T],
-                            retrySettings : RetrySettings)(implicit executionContext : ExecutionContext) : Future[T] = {
+                            retrySettings : RetrySettings)(implicit executionContext : ExecutionContext) : Future[T] =
         op.recoverWith {
             case exception @ (_ : InternalServerErrorException |
                               _ : ItemCollectionSizeLimitExceededException |
@@ -20,19 +20,15 @@ object RetryUtility {
                 val retries = retrySettings.retries
                 val initialDelay = retrySettings.initialDelay.toMillis
                 val factor = retrySettings.factor
-                if (retries > 0) {
+                if (retries > 0)
                     for {
                         _ <- waitForMillis(initialDelay)
                         newRetrySetting = RetrySettings((initialDelay * factor).millis, factor, retries - 1)
                         res <- retryWithBackOff(op, newRetrySetting)
                     } yield res
-                }
-                else {
-                    Future.failed(exception)
-                }
+                else Future.failed(exception)
             }
         }
-    }
 
     private final val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
