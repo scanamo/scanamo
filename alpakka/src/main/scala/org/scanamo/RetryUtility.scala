@@ -32,12 +32,11 @@ object RetryUtility {
 
     private final val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
 
-    private def waitForMillis(millis: Long): Future[Long] = {
+    private def waitForMillis(millis: Long) = {
         val promise = Promise[Long]
         scheduler.schedule(new Runnable {
             override def run() = promise.success(millis)
         }, millis, TimeUnit.MILLISECONDS)
-
         promise.future
     }
 }
