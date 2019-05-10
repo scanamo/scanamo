@@ -2,17 +2,17 @@ package org.scanamo.ops
 
 import akka.stream.alpakka.dynamodb.AwsOp
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import cats.~>
 import cats.syntax.either._
+import cats.~>
 import com.amazonaws.services.dynamodbv2.model._
-import org.scanamo.RetrySettings
-import org.scanamo.RetryUtility
+import org.scanamo.{RetrySettings, RetryUtility}
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 object AlpakkaInterpreter {
 
-  def future(client: DynamoClient)(implicit executor: ExecutionContext, retrySettings : RetrySettings): ScanamoOpsA ~> Future =
+  def future(client: DynamoClient)(implicit executor: ExecutionContext,
+                                   retrySettings: RetrySettings): ScanamoOpsA ~> Future =
     new (ScanamoOpsA ~> Future) {
       import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
 
@@ -27,19 +27,19 @@ object AlpakkaInterpreter {
           case BatchWrite(req) => executeSingleRequest(client, req)
           case BatchGet(req)   => executeSingleRequest(client, req)
           case ConditionalDelete(req) =>
-              executeSingleRequest(client, JavaRequests.delete(req))
+            executeSingleRequest(client, JavaRequests.delete(req))
               .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalPut(req) =>
-              executeSingleRequest(client, JavaRequests.put(req))
+            executeSingleRequest(client, JavaRequests.put(req))
               .map(Either.right[ConditionalCheckFailedException, PutItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalUpdate(req) =>
-              executeSingleRequest(client, JavaRequests.update(req))
+            executeSingleRequest(client, JavaRequests.update(req))
               .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
@@ -47,9 +47,10 @@ object AlpakkaInterpreter {
         }
     }
 
-    private def executeSingleRequest(client: DynamoClient, op: AwsOp)(implicit executor: ExecutionContext, retrySettings : RetrySettings) = {
-        def future() = client.single(op)
-        RetryUtility
-            .retryWithBackOff(future(), retrySettings)
-    }
+  private def executeSingleRequest(client: DynamoClient, op: AwsOp)(implicit executor: ExecutionContext,
+                                                                    retrySettings: RetrySettings) = {
+    def future() = client.single(op)
+    RetryUtility
+      .retryWithBackOff(future(), retrySettings)
+  }
 }
