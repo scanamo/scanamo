@@ -16,6 +16,6 @@ object DefaultRetryPolicy {
         retryPolicy match {
             case Linear(initialDelay, retries, scheduler) => Exponential(initialDelay, 1, retries, scheduler)
             case exponential @ Exponential(_, _, _, _) => exponential
-            case Default => defaultFixed
+            case _ @ DefaultRetry => defaultFixed
         }
 }

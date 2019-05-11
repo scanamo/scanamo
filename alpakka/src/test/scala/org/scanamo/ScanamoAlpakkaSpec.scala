@@ -14,12 +14,12 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Seconds, Span }
 import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
 import cats.implicits._
-import org.scanamo.ops.retrypolicy.Default
+import org.scanamo.ops.retrypolicy.DefaultRetry
 
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
   implicit val system = ActorSystem("scanamo-alpakka")
-  implicit val retryPolicy = Default
+  implicit val retryPolicy = DefaultRetry
 
   override protected def afterAll(): Unit = {
     system.terminate()
