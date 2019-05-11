@@ -19,7 +19,7 @@ import org.scanamo.ops.retrypolicy.Default
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
   implicit val system = ActorSystem("scanamo-alpakka")
-  implicit val retrySettings = Default
+  implicit val retryPolicy = Default
 
   override protected def afterAll(): Unit = {
     system.terminate()

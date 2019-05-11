@@ -38,6 +38,4 @@ object RetryUtility {
     }, millis, TimeUnit.MILLISECONDS)
     promise.future
   }
-
-
 }

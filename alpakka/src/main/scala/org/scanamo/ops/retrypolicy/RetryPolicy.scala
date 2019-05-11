@@ -13,4 +13,4 @@ case class Linear(initialDelay : FiniteDuration, retries : Int, scheduler : Sche
     require(retries > 0)
 }
 
-case object Default extends RetryPolicy
+case object DefaultRetry extends RetryPolicy

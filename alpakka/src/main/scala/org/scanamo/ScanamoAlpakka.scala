@@ -18,7 +18,6 @@ object ScanamoAlpakka {
   def exec[A](client: DynamoClient)(op: ScanamoOps[A])(implicit ec: ExecutionContext, retrySettings : RetryPolicy): Future[A] =
     op.foldMap(AlpakkaInterpreter.future(client, retrySettings)(ec))
 
-  def singleRequest(client: DynamoClient, op: AwsOp)(implicit ec: ExecutionContext, retrySettings: RetryPolicy) =
+  def singleRequest(client: DynamoClient, op: AwsOp)(implicit ec: ExecutionContext, retrySettings: RetryPolicy) : Future[AwsOp#B] =
     AlpakkaInterpreter.executeSingleRequest(client, op, retrySettings)(ec)
-
 }
