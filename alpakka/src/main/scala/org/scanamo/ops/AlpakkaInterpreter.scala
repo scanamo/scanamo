@@ -7,51 +7,62 @@ import cats.~>
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.ops.retrypolicy._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
+import scala.concurrent.Future
 
 object AlpakkaInterpreter {
 
-  def future(client: DynamoClient,
-             retryPolicy: RetryPolicy)(implicit executor: ExecutionContext): ScanamoOpsA ~> Future =
+  def future(client: DynamoClient, retryPolicy: RetryPolicy)(
+    implicit ec: ExecutionContext
+  ): ScanamoOpsA ~> Future =
     new (ScanamoOpsA ~> Future) {
       import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
+      implicit final val retry: RetryPolicy = retryPolicy
 
       override def apply[A](ops: ScanamoOpsA[A]) =
         ops match {
-          case Put(req)        => executeSingleRequest(client, JavaRequests.put(req), retryPolicy)
-          case Get(req)        => executeSingleRequest(client, req, retryPolicy)
-          case Delete(req)     => executeSingleRequest(client, JavaRequests.delete(req), retryPolicy)
-          case Scan(req)       => executeSingleRequest(client, JavaRequests.scan(req), retryPolicy)
-          case Query(req)      => executeSingleRequest(client, JavaRequests.query(req), retryPolicy)
-          case Update(req)     => executeSingleRequest(client, JavaRequests.update(req), retryPolicy)
-          case BatchWrite(req) => executeSingleRequest(client, req, retryPolicy)
-          case BatchGet(req)   => executeSingleRequest(client, req, retryPolicy)
+          case Put(req) => executeSingleRequest(client, JavaRequests.put(req))
+          case Get(req) => executeSingleRequest(client, req)
+          case Delete(req) =>
+            executeSingleRequest(client, JavaRequests.delete(req))
+          case Scan(req) => executeSingleRequest(client, JavaRequests.scan(req))
+          case Query(req) =>
+            executeSingleRequest(client, JavaRequests.query(req))
+          case Update(req) =>
+            executeSingleRequest(client, JavaRequests.update(req))
+          case BatchWrite(req) => executeSingleRequest(client, req)
+          case BatchGet(req)   => executeSingleRequest(client, req)
           case ConditionalDelete(req) =>
-            executeSingleRequest(client, JavaRequests.delete(req), retryPolicy)
-              .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
+            executeSingleRequest(client, JavaRequests.delete(req))
+              .map(
+                Either.right[ConditionalCheckFailedException, DeleteItemResult]
+              )
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalPut(req) =>
-            executeSingleRequest(client, JavaRequests.put(req), retryPolicy)
+            executeSingleRequest(client, JavaRequests.put(req))
               .map(Either.right[ConditionalCheckFailedException, PutItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalUpdate(req) =>
-            executeSingleRequest(client, JavaRequests.update(req), retryPolicy)
-              .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
+            executeSingleRequest(client, JavaRequests.update(req))
+              .map(
+                Either.right[ConditionalCheckFailedException, UpdateItemResult]
+              )
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
         }
     }
 
-  def executeSingleRequest(client: DynamoClient,
-                           op: AwsOp,
-                           retryPolicy: RetryPolicy)(implicit executor: ExecutionContext): Future[AwsOp#B] = {
-    def future() = client.single(op)
-    val exponentialRetryPolicy = DefaultRetryPolicy.getPolicy(retryPolicy)
-    RetryUtility.retryWithBackOff(future(), exponentialRetryPolicy)
+  private def executeSingleRequest(
+    dynamoClient: DynamoClient,
+    op: AwsOp
+  )(implicit ec: ExecutionContext, retryPolicy: RetryPolicy) = {
+    val selectedRetryPolicy = DefaultRetryPolicy.getPolicy(retryPolicy)
+    def future() = dynamoClient.single(op)
+    RetryUtility.retryWithBackOff(future, selectedRetryPolicy)
   }
 }

@@ -8,8 +8,9 @@ import scala.concurrent.duration._
 
 object RetryUtility {
 
-  def retryWithBackOff[T](op: => Future[T],
-                          retryPolicy: Linear)(implicit executionContext: ExecutionContext): Future[T] =
+  def retryWithBackOff[T](op: => Future[T], retryPolicy: Linear)(
+    implicit executionContext: ExecutionContext
+  ): Future[T] =
     op.recoverWith {
       case exception @ (_: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException |
           _: LimitExceededException | _: ProvisionedThroughputExceededException | _: RequestLimitExceededException) =>
