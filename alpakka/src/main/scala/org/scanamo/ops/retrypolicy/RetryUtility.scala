@@ -9,18 +9,18 @@ import scala.concurrent.duration._
 object RetryUtility {
 
   def retryWithBackOff[T](op: => Future[T],
-                          retryPolicy: Exponential)(implicit executionContext: ExecutionContext): Future[T] =
+                          retryPolicy: Linear)(implicit executionContext: ExecutionContext): Future[T] =
     op.recoverWith {
       case exception @ (_: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException |
           _: LimitExceededException | _: ProvisionedThroughputExceededException | _: RequestLimitExceededException) =>
-          val retries = retryPolicy.retries
-          val scheduler = retryPolicy.scheduler
-          val initialDelay = retryPolicy.initialDelay.toMillis
-          val factor = retryPolicy.factor
+        val retries = retryPolicy.retries
+        val scheduler = retryPolicy.scheduler
+        val initialDelay = retryPolicy.initialDelay.toMillis
+        val factor = retryPolicy.factor
         if (retries > 0) {
           for {
             _ <- waitForMillis(initialDelay, scheduler)
-            newRetrySetting = Exponential((initialDelay * factor).millis, factor, retries - 1, scheduler)
+            newRetrySetting = Linear((initialDelay * factor).millis, factor, retries - 1, scheduler)
             response <- retryWithBackOff(op, newRetrySetting)
           } yield response
         } else {
