@@ -4,15 +4,15 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.alpakka.dynamodb.impl.DynamoSettings
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
+import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
-import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
+import org.scalatest.time.{Millis, Seconds, Span}
+import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
 import cats.implicits._
 import org.scanamo.ops.retrypolicy.DefaultRetry
 
@@ -20,18 +20,12 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   implicit val system = ActorSystem("scanamo-alpakka")
   implicit val retryPolicy = DefaultRetry
-
-  override protected def afterAll(): Unit = {
-    system.terminate()
-    super.afterAll()
-  }
+  val client = LocalDynamoDB.client()
 
   implicit val materializer = ActorMaterializer.create(system)
   implicit val executor = system.dispatcher
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
-
-  val client = LocalDynamoDB.client()
   val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
   val alpakkaClient = DynamoClient(
     DynamoSettings(
@@ -42,6 +36,11 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       credentialsProvider = dummyCreds
     )
   )
+
+  override protected def afterAll(): Unit = {
+    system.terminate()
+    super.afterAll()
+  }
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
