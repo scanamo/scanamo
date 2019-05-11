@@ -5,15 +5,14 @@ import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import cats.syntax.either._
 import cats.~>
 import com.amazonaws.services.dynamodbv2.model._
-import org.scanamo.ops.retrypolicy.DefaultRetryPolicy
-import org.scanamo.ops.retrypolicy.RetryPolicy
-import org.scanamo.ops.retrypolicy.RetryUtility
+import org.scanamo.ops.retrypolicy._
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.{ExecutionContext, Future}
 
 object AlpakkaInterpreter {
 
-  def future(client: DynamoClient, retryPolicy: RetryPolicy)(implicit executor: ExecutionContext): ScanamoOpsA ~> Future =
+  def future(client: DynamoClient,
+             retryPolicy: RetryPolicy)(implicit executor: ExecutionContext): ScanamoOpsA ~> Future =
     new (ScanamoOpsA ~> Future) {
       import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
 
@@ -48,7 +47,9 @@ object AlpakkaInterpreter {
         }
     }
 
-  def executeSingleRequest(client: DynamoClient, op: AwsOp, retryPolicy: RetryPolicy)(implicit executor: ExecutionContext) = {
+  def executeSingleRequest(client: DynamoClient,
+                           op: AwsOp,
+                           retryPolicy: RetryPolicy)(implicit executor: ExecutionContext): Future[AwsOp#B] = {
     def future() = client.single(op)
     val exponentialRetryPolicy = DefaultRetryPolicy.getPolicy(retryPolicy)
     RetryUtility.retryWithBackOff(future(), exponentialRetryPolicy)
