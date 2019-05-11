@@ -1,28 +1,26 @@
-package org.scanamo
+package org.scanamo.ops.retrypolicy
 
-import java.util.concurrent._
-
+import java.util.concurrent.ScheduledExecutorService
+import java.util.concurrent.TimeUnit
 import com.amazonaws.services.dynamodbv2.model._
-
+import scala.concurrent._
 import scala.concurrent.duration._
-import scala.concurrent.{Future, Promise, _}
 
 object RetryUtility {
 
-  private final val scheduler: ScheduledExecutorService = Executors.newScheduledThreadPool(1)
-
   def retryWithBackOff[T](op: => Future[T],
-                          retrySettings: RetrySettings)(implicit executionContext: ExecutionContext): Future[T] =
+                          retryPolicy: Exponential)(implicit executionContext: ExecutionContext): Future[T] =
     op.recoverWith {
       case exception @ (_: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException |
           _: LimitExceededException | _: ProvisionedThroughputExceededException | _: RequestLimitExceededException) =>
-        val retries = retrySettings.retries
-        val initialDelay = retrySettings.initialDelay.toMillis
-        val factor = retrySettings.factor
+          val retries = retryPolicy.retries
+          val scheduler = retryPolicy.scheduler
+          val initialDelay = retryPolicy.initialDelay.toMillis
+          val factor = retryPolicy.factor
         if (retries > 0) {
           for {
-            _ <- waitForMillis(initialDelay)
-            newRetrySetting = RetrySettings((initialDelay * factor).millis, factor, retries - 1)
+            _ <- waitForMillis(initialDelay, scheduler)
+            newRetrySetting = Exponential((initialDelay * factor).millis, factor, retries - 1, scheduler)
             response <- retryWithBackOff(op, newRetrySetting)
           } yield response
         } else {
@@ -30,14 +28,16 @@ object RetryUtility {
         }
     }
 
-  private def waitForMillis(millis: Long) = {
+  private def waitForMillis(millis: Long, scheduler: ScheduledExecutorService) = {
     val promise = Promise[Long]
     scheduler.schedule(new Runnable {
-      override def run(): Unit = {
+      override def run() = {
         promise.success(millis)
         ()
       }
     }, millis, TimeUnit.MILLISECONDS)
     promise.future
   }
+
+
 }
