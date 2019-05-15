@@ -14,12 +14,10 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
 import cats.implicits._
-import org.scanamo.ops.retrypolicy.DefaultRetry
 
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
   implicit val system = ActorSystem("scanamo-alpakka")
-  implicit val retryPolicy = DefaultRetry
   val client = LocalDynamoDB.client()
 
   implicit val materializer = ActorMaterializer.create(system)

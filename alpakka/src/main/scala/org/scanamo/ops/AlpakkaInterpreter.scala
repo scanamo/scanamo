@@ -1,5 +1,7 @@
 package org.scanamo.ops
 
+import java.util.concurrent.ScheduledExecutorService
+
 import akka.stream.alpakka.dynamodb.AwsOp
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import cats.syntax.either._
@@ -13,27 +15,27 @@ import scala.concurrent.Future
 object AlpakkaInterpreter {
 
   def future(client: DynamoClient, retryPolicy: RetryPolicy)(
-    implicit ec: ExecutionContext
+    implicit ec: ExecutionContext,
+    scheduler: ScheduledExecutorService
   ): ScanamoOpsA ~> Future =
     new (ScanamoOpsA ~> Future) {
       import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
-      implicit final val retry: RetryPolicy = retryPolicy
 
       override def apply[A](ops: ScanamoOpsA[A]) =
         ops match {
-          case Put(req) => executeSingleRequest(client, JavaRequests.put(req))
-          case Get(req) => executeSingleRequest(client, req)
+          case Put(req) => executeSingleRequest(client, JavaRequests.put(req), retryPolicy)
+          case Get(req) => executeSingleRequest(client, req, retryPolicy)
           case Delete(req) =>
-            executeSingleRequest(client, JavaRequests.delete(req))
-          case Scan(req) => executeSingleRequest(client, JavaRequests.scan(req))
+            executeSingleRequest(client, JavaRequests.delete(req), retryPolicy)
+          case Scan(req) => executeSingleRequest(client, JavaRequests.scan(req), retryPolicy)
           case Query(req) =>
-            executeSingleRequest(client, JavaRequests.query(req))
+            executeSingleRequest(client, JavaRequests.query(req), retryPolicy)
           case Update(req) =>
-            executeSingleRequest(client, JavaRequests.update(req))
-          case BatchWrite(req) => executeSingleRequest(client, req)
-          case BatchGet(req)   => executeSingleRequest(client, req)
+            executeSingleRequest(client, JavaRequests.update(req), retryPolicy)
+          case BatchWrite(req) => executeSingleRequest(client, req, retryPolicy)
+          case BatchGet(req)   => executeSingleRequest(client, req, retryPolicy)
           case ConditionalDelete(req) =>
-            executeSingleRequest(client, JavaRequests.delete(req))
+            executeSingleRequest(client, JavaRequests.delete(req), retryPolicy)
               .map(
                 Either.right[ConditionalCheckFailedException, DeleteItemResult]
               )
@@ -41,13 +43,13 @@ object AlpakkaInterpreter {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalPut(req) =>
-            executeSingleRequest(client, JavaRequests.put(req))
+            executeSingleRequest(client, JavaRequests.put(req), retryPolicy)
               .map(Either.right[ConditionalCheckFailedException, PutItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalUpdate(req) =>
-            executeSingleRequest(client, JavaRequests.update(req))
+            executeSingleRequest(client, JavaRequests.update(req), retryPolicy)
               .map(
                 Either.right[ConditionalCheckFailedException, UpdateItemResult]
               )
@@ -59,10 +61,10 @@ object AlpakkaInterpreter {
 
   private def executeSingleRequest(
     dynamoClient: DynamoClient,
-    op: AwsOp
-  )(implicit ec: ExecutionContext, retryPolicy: RetryPolicy) = {
-    val selectedRetryPolicy = DefaultRetryPolicy.getPolicy(retryPolicy)
+    op: AwsOp,
+    retryPolicy: RetryPolicy
+  )(implicit ec: ExecutionContext, scheduler: ScheduledExecutorService) = {
     def future() = dynamoClient.single(op)
-    RetryUtility.retryWithBackOff(future, selectedRetryPolicy)
+    RetryUtility.retryWithBackOff(future, retryPolicy)
   }
 }

@@ -1,9 +1,12 @@
 package org.scanamo
 
+import java.util.concurrent.ScheduledExecutorService
+
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import org.scanamo.ops.retrypolicy.RetryPolicy
 import org.scanamo.ops.AlpakkaInterpreter
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.retrypolicy.DefaultRetryPolicy
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
@@ -18,6 +21,9 @@ object ScanamoAlpakka {
 
   def exec[A](
     client: DynamoClient
-  )(op: ScanamoOps[A])(implicit ec: ExecutionContext, retrySettings: RetryPolicy): Future[A] =
-    op.foldMap(AlpakkaInterpreter.future(client, retrySettings)(ec))
+  )(op: ScanamoOps[A], retrySettings: RetryPolicy = DefaultRetryPolicy.defaultPolicy)(
+    implicit ec: ExecutionContext,
+    scheduler: ScheduledExecutorService = DefaultRetryPolicy.defaultScheduler
+  ): Future[A] =
+    op.foldMap(AlpakkaInterpreter.future(client, retrySettings)(ec, scheduler))
 }
