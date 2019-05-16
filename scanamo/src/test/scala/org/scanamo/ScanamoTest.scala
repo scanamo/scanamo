@@ -1,5 +1,6 @@
 package org.scanamo
 
+import cats.ApplicativeError
 import cats.implicits._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
@@ -7,11 +8,13 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.ScanamoOps
+import org.scanamo.error.{DynamoDBException, DynamoReadError}
+import org.scanamo.ops.{Fail, ScanamoOps}
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
+import cats.syntax.applicativeError._
+import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 
 class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
 
@@ -550,6 +553,47 @@ class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
       Scanamo.exec(client)(ops) should equal(
         List(Right(Gremlin(1, false)))
       )
+    }
+  }
+
+  it("should return MissingKeyError when queried field is not a key") {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
+      val x = implicitly[ApplicativeError[ScanamoOps, Throwable]]
+
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+      val farm = Farm(List("dog"))
+
+      val farmers = Table[Farmer](t)
+
+      val defaultFarmer = Farmer("name", 0, Farm(List.empty))
+
+      val result = for {
+        _ <- farmers.put(Farmer("Maggot", 75L, farm))
+        r<- x.recover(farmers.get('farm -> farm)){case e: AmazonDynamoDBException => Some(Right(defaultFarmer))}
+      } yield r
+
+      Scanamo.exec(client)(result).get.get should equal(defaultFarmer)
+
+    }
+  }
+
+  it("should return MissingKeyError when queried field does not exist") {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('age -> N) { (t, i) =>
+      case class Farm(asyncAnimals: List[String])
+      case class Farmer(name: String, age: Long, farm: Farm)
+      val farm = Farm(List("dog"))
+
+      val farmers = Table[Farmer](t)
+
+      val defaultFarmer = Farmer("name", 0, Farm(List.empty))
+
+      val result = for {
+        _ <- farmers.put(Farmer("Maggot", 75L, farm))
+        r<- farmers.get('DoesNotExist -> farm).recover{case e: AmazonDynamoDBException => Some(Right(defaultFarmer))}
+      } yield r
+
+      Scanamo.exec(client)(result).get.get should equal(defaultFarmer)
     }
   }
 }

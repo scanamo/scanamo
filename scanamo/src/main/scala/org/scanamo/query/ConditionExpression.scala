@@ -1,16 +1,16 @@
-package org.scanamo.query
+package org.scanamo
+package query
 
 import cats.Monad
 import cats.free.Free
 import com.amazonaws.services.dynamodbv2.model._
-import org.scanamo.DynamoFormat
 import org.scanamo.error.{ConditionNotMet, ScanamoError}
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
 import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import org.scanamo.ops.ScanamoOpsA.ScanamoResult
-import org.scanamo.ops.ScanamoOps.monadErrorScanamoOps._
+import cats.syntax.applicativeError._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T],
@@ -47,7 +47,7 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
         _.fold(
           _ match {
             case t: ConditionalCheckFailedException => Free.pure(Left(ConditionNotMet(t)))
-            case e => raiseError(e)
+            case e => e.raiseError
           },
           r => Monad[ScanamoOps].pure(format.read(new AttributeValue().withM(r.getAttributes)))
         )

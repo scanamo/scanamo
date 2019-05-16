@@ -1,10 +1,11 @@
 package org
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import org.scanamo.ops.ScanamoOpsInstances
 import org.scanamo.query._
 import org.scanamo.update._
 
-package object scanamo {
+package object scanamo extends ScanamoOpsInstances{
 
   type EvaluationKey = java.util.Map[String, AttributeValue]
 
