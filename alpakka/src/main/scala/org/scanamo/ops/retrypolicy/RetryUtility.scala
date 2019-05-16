@@ -32,7 +32,10 @@ object RetryUtility {
       ()
     } { scheduler =>
       scheduler.schedule(new Runnable {
-        override def run(): Unit = promise.success(millis)
+        override def run(): Unit = {
+          promise.success(millis)
+          ()
+        }
       }, millis, TimeUnit.MILLISECONDS)
       ()
     }
