@@ -1,7 +1,5 @@
 package org.scanamo.ops
 
-import java.util.concurrent.ScheduledExecutorService
-
 import akka.stream.alpakka.dynamodb.AwsOp
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import cats.syntax.either._
@@ -13,10 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 object AlpakkaInterpreter {
 
-  def future(client: DynamoClient, retryPolicy: RetryPolicy)(
-    implicit ec: ExecutionContext,
-    scheduler: ScheduledExecutorService
-  ): ScanamoOpsA ~> Future =
+  def future(client: DynamoClient, retryPolicy: RetryPolicy)(implicit ec: ExecutionContext): ScanamoOpsA ~> Future =
     new (ScanamoOpsA ~> Future) {
       import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
 
@@ -55,8 +50,8 @@ object AlpakkaInterpreter {
     dynamoClient: DynamoClient,
     op: AwsOp,
     retryPolicy: RetryPolicy
-  )(implicit ec: ExecutionContext, scheduler: ScheduledExecutorService) = {
+  )(implicit ec: ExecutionContext) = {
     def future() = dynamoClient.single(op)
-    RetryUtility.retryWithBackOff(future(), retryPolicy)
+    RetryUtility.retry(future(), retryPolicy)
   }
 }

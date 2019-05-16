@@ -8,10 +8,7 @@ import scala.concurrent._
 
 object RetryUtility {
 
-  def retryWithBackOff[T](op: => Future[T], retryPolicy: RetryPolicy)(
-    implicit executionContext: ExecutionContext,
-    scheduler: ScheduledExecutorService
-  ): Future[T] =
+  def retry[T](op: => Future[T], retryPolicy: RetryPolicy)(implicit ec: ExecutionContext): Future[T] =
     op.recoverWith {
       case exception @ (_: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException |
           _: LimitExceededException | _: ProvisionedThroughputExceededException | _: RequestLimitExceededException) =>
@@ -19,23 +16,26 @@ object RetryUtility {
 
         if (!retryPolicy.done) {
           for {
-            _ <- waitForMillis(delay, scheduler)
-            response <- retryWithBackOff(op, retryPolicy.update)
+            _ <- waitForMillis(delay, retryPolicy.maybeScheduler)
+            response <- retry(op, retryPolicy.update)
           } yield response
         } else {
           Future.failed(exception)
         }
     }
 
-  private def waitForMillis(millis: Long, scheduler: ScheduledExecutorService) = {
+  private def waitForMillis(millis: Long, maybeScheduler: Option[ScheduledExecutorService]) = {
     val promise = Promise[Long]
 
-    scheduler.schedule(new Runnable {
-      override def run(): Unit = {
-        promise.success(millis)
-        ()
-      }
-    }, millis, TimeUnit.MILLISECONDS)
+    maybeScheduler.fold {
+      promise.success(millis)
+      ()
+    } { scheduler =>
+      scheduler.schedule(new Runnable {
+        override def run(): Unit = promise.success(millis)
+      }, millis, TimeUnit.MILLISECONDS)
+      ()
+    }
 
     promise.future
   }
