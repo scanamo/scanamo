@@ -10,8 +10,8 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
     case Linear(_, numberOfRetries, _)      => numberOfRetries < 1
     case Exponential(_, numberOfRetries, _) => numberOfRetries < 1
     case Max(0)                             => true
-    case And(x, y)                          => x.done && y.done
-    case Or(x, y)                           => x.done || y.done
+    case And(firstPolicy, secondPolicy)     => firstPolicy.done && secondPolicy.done
+    case Or(firstPolicy, secondPolicy)      => firstPolicy.done || secondPolicy.done
     case Never                              => true
     case _                                  => false
   }
@@ -22,9 +22,9 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
     case Exponential(delay, _, factor) =>
       val retryDelay = delay.toMillis
       retryDelay * Math.pow(retryDelay.toDouble, factor).toLong
-    case And(x, y) => Math.max(x.delay, y.delay)
-    case Or(x, y)  => Math.min(x.delay, y.delay)
-    case _         => 0
+    case And(firstPolicy, secondPolicy) => Math.max(firstPolicy.delay, secondPolicy.delay)
+    case Or(firstPolicy, secondPolicy)  => Math.min(firstPolicy.delay, secondPolicy.delay)
+    case _                              => 0
   }
 
   final def update: RetryPolicy = self match {
@@ -32,8 +32,8 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
     case policy @ Linear(_, retries, _)      => policy.copy(numberOfRetries = retries - 1)
     case policy @ Exponential(_, retries, _) => policy.copy(numberOfRetries = retries - 1)
     case Max(retries)                        => Max(retries - 1)
-    case And(x, y)                           => And(x.update, y.update)
-    case Or(x, y)                            => Or(x.update, y.update)
+    case And(firstPolicy, secondPolicy)      => And(firstPolicy.update, secondPolicy.update)
+    case Or(firstPolicy, secondPolicy)       => Or(firstPolicy.update, secondPolicy.update)
     case retryPolicy                         => retryPolicy
   }
 
@@ -46,8 +46,8 @@ object RetryPolicy {
   final case class Linear(retryDelay: FiniteDuration, numberOfRetries: Int, factor: Double) extends RetryPolicy
   final case class Exponential(retryDelay: FiniteDuration, numberOfRetries: Int, factor: Double) extends RetryPolicy
   final case class Max(numberOfRetries: Int) extends RetryPolicy
-  final case class And(x: RetryPolicy, y: RetryPolicy) extends RetryPolicy
-  final case class Or(x: RetryPolicy, y: RetryPolicy) extends RetryPolicy
+  final case class And(firstPolicy: RetryPolicy, secondPolicy: RetryPolicy) extends RetryPolicy
+  final case class Or(firstPolicy: RetryPolicy, secondPolicy: RetryPolicy) extends RetryPolicy
   final case object Always extends RetryPolicy
   final case object Never extends RetryPolicy
 }
