@@ -57,6 +57,6 @@ object AlpakkaInterpreter {
     retryPolicy: RetryPolicy
   )(implicit ec: ExecutionContext, scheduler: ScheduledExecutorService) = {
     def future() = dynamoClient.single(op)
-    RetryUtility.retryWithBackOff(future, retryPolicy)
+    RetryUtility.retryWithBackOff(future(), retryPolicy)
   }
 }
