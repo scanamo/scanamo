@@ -3,13 +3,10 @@ package org.scanamo
 import java.util.concurrent.ScheduledExecutorService
 
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import org.scanamo.ops.retrypolicy.RetryPolicy
-import org.scanamo.ops.AlpakkaInterpreter
-import org.scanamo.ops.ScanamoOps
-import org.scanamo.ops.retrypolicy.DefaultRetryPolicy
+import org.scanamo.ops.retrypolicy.{DefaultRetryPolicy, RetryPolicy}
+import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
 
-import scala.concurrent.ExecutionContext
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
@@ -19,7 +16,7 @@ import scala.concurrent.Future
 object ScanamoAlpakka {
   import cats.instances.future._
 
-  //TODO: Remove to forcefully add the new thread pool even if their retry policy does not involve schedulers
+  // TODO: Remove to forcefully add the new thread pool even if their retry policy does not involve schedulers
   def exec[A](
     client: DynamoClient
   )(op: ScanamoOps[A], retrySettings: RetryPolicy = DefaultRetryPolicy.defaultPolicy)(

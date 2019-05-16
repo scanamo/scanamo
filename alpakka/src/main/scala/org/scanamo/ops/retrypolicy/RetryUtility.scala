@@ -1,7 +1,6 @@
 package org.scanamo.ops.retrypolicy
 
-import java.util.concurrent.ScheduledExecutorService
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.{ScheduledExecutorService, TimeUnit}
 
 import com.amazonaws.services.dynamodbv2.model._
 
@@ -30,7 +29,7 @@ object RetryUtility {
   private def waitForMillis(millis: Long, scheduler: ScheduledExecutorService) = {
     val promise = Promise[Long]
     scheduler.schedule(new Runnable {
-      override def run() = {
+      override def run(): Unit = {
         promise.success(millis)
         ()
       }
