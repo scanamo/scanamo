@@ -16,6 +16,7 @@ object RetryUtility {
       case exception @ (_: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException |
           _: LimitExceededException | _: ProvisionedThroughputExceededException | _: RequestLimitExceededException) =>
         val delay = retryPolicy.delay
+
         if (!retryPolicy.done) {
           for {
             _ <- waitForMillis(delay, scheduler)
@@ -28,12 +29,14 @@ object RetryUtility {
 
   private def waitForMillis(millis: Long, scheduler: ScheduledExecutorService) = {
     val promise = Promise[Long]
+
     scheduler.schedule(new Runnable {
       override def run(): Unit = {
         promise.success(millis)
         ()
       }
     }, millis, TimeUnit.MILLISECONDS)
+
     promise.future
   }
 }
