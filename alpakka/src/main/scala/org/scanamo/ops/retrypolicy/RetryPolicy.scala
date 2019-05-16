@@ -17,10 +17,10 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
   }
 
   final def done: Boolean = self match {
-    case Constant(_, numberOfRetries)       => numberOfRetries < 1
-    case Linear(_, numberOfRetries, _)      => numberOfRetries < 1
-    case Exponential(_, numberOfRetries, _) => numberOfRetries < 1
-    case Max(0)                             => true
+    case Constant(_, numberOfRetries)       => numberOfRetries <= 1
+    case Linear(_, numberOfRetries, _)      => numberOfRetries <= 1
+    case Exponential(_, numberOfRetries, _) => numberOfRetries <= 1
+    case Max(1)                             => true
     case And(thisPolicy, thatPolicy)        => thisPolicy.done && thatPolicy.done
     case Or(thisPolicy, thatPolicy)         => thisPolicy.done || thatPolicy.done
     case Never                              => true
