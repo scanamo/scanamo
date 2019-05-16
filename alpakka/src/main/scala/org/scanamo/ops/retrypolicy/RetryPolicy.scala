@@ -3,7 +3,7 @@ package org.scanamo.ops.retrypolicy
 import org.scanamo.ops.retrypolicy.RetryPolicy._
 import scala.concurrent.duration._
 
-sealed trait RetryPolicy { self =>
+sealed abstract class RetryPolicy extends Product with Serializable { self =>
   final val done: Boolean = self match {
     case Constant(_, numberOfRetries)       => numberOfRetries < 1
     case Linear(_, numberOfRetries, _)      => numberOfRetries < 1
@@ -11,6 +11,7 @@ sealed trait RetryPolicy { self =>
     case Max(0)                             => true
     case And(x, y)                          => x.done && y.done
     case Or(x, y)                           => x.done || y.done
+    case Never                              => true
     case _                                  => false
   }
 
@@ -32,7 +33,11 @@ sealed trait RetryPolicy { self =>
     case Max(retries)                        => Max(retries - 1)
     case And(x, y)                           => And(x.update, y.update)
     case Or(x, y)                            => Or(x.update, y.update)
+    case retryPolicy                         => retryPolicy
   }
+
+  final def &&(that: RetryPolicy): RetryPolicy = And(self, that)
+  final def ||(that: RetryPolicy): RetryPolicy = Or(self, that)
 }
 
 object RetryPolicy {
@@ -42,4 +47,6 @@ object RetryPolicy {
   final case class Max(numberOfRetries: Int) extends RetryPolicy
   final case class And(x: RetryPolicy, y: RetryPolicy) extends RetryPolicy
   final case class Or(x: RetryPolicy, y: RetryPolicy) extends RetryPolicy
+  final case object Always extends RetryPolicy
+  final case object Never extends RetryPolicy
 }

@@ -13,12 +13,13 @@ import scala.concurrent.Future
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
-  * [[https://github.com/akka/alpakka Alpakka]] client
+  * [[https://github.com/akka/alpakka Alpakka]] client,
   * and an implicit [[scala.concurrent.ExecutionContext]] and returns a [[scala.concurrent.Future]]
   */
 object ScanamoAlpakka {
   import cats.instances.future._
 
+  //TODO: Remove to forcefully add the new thread pool even if their retry policy does not involve schedulers
   def exec[A](
     client: DynamoClient
   )(op: ScanamoOps[A], retrySettings: RetryPolicy = DefaultRetryPolicy.defaultPolicy)(
