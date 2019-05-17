@@ -17,18 +17,12 @@ import cats.implicits._
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
 
   implicit val system = ActorSystem("scanamo-alpakka")
-
-  override protected def afterAll(): Unit = {
-    system.terminate()
-    super.afterAll()
-  }
+  val client = LocalDynamoDB.client()
 
   implicit val materializer = ActorMaterializer.create(system)
   implicit val executor = system.dispatcher
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
-
-  val client = LocalDynamoDB.client()
   val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
   val alpakkaClient = DynamoClient(
     DynamoSettings(region = "", host = "localhost")
@@ -36,6 +30,11 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       .withParallelism(2)
       .withCredentialsProvider(dummyCreds)
   )
+
+  override protected def afterAll(): Unit = {
+    system.terminate()
+    super.afterAll()
+  }
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
