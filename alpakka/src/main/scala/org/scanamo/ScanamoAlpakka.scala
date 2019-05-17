@@ -14,8 +14,9 @@ import scala.concurrent.{ExecutionContext, Future}
 object ScanamoAlpakka {
   import cats.instances.future._
 
-  def exec[A](client: DynamoClient)(op: ScanamoOps[A],
-                                    retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3))(
+  def exec[A](
+    client: DynamoClient
+  )(op: ScanamoOps[A], retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3))(
     implicit ec: ExecutionContext
   ): Future[A] =
     op.foldMap(AlpakkaInterpreter.future(client, retrySettings)(ec))

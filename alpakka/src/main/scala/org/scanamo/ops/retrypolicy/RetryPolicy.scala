@@ -58,14 +58,18 @@ object RetryPolicy {
     implicit val scheduler: S
   ) extends RetryPolicy
 
-  final case class Linear[S <: ScheduledExecutorService](retryDelay: FiniteDuration,
-                                                         numberOfRetries: Int,
-                                                         factor: Double)(implicit val scheduler: S)
+  final case class Linear[S <: ScheduledExecutorService](
+    retryDelay: FiniteDuration,
+    numberOfRetries: Int,
+    factor: Double
+  )(implicit val scheduler: S)
       extends RetryPolicy
 
-  final case class Exponential[S <: ScheduledExecutorService](retryDelay: FiniteDuration,
-                                                              numberOfRetries: Int,
-                                                              factor: Double)(implicit val scheduler: S)
+  final case class Exponential[S <: ScheduledExecutorService](
+    retryDelay: FiniteDuration,
+    numberOfRetries: Int,
+    factor: Double
+  )(implicit val scheduler: S)
       extends RetryPolicy
 
   final case class Max(numberOfRetries: Int) extends RetryPolicy
