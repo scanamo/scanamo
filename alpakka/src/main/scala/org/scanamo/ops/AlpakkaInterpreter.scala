@@ -1,45 +1,47 @@
 package org.scanamo.ops
 
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import cats.~>
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model._
 
-import scala.concurrent.{ExecutionContext, Future}
+import akka.stream.alpakka.dynamodb.{ AwsOp, AwsPagedOp, DynamoClient, DynamoAttributes }
+import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
+import akka.stream.scaladsl.Source
+import akka.NotUsed
 
 object AlpakkaInterpreter {
 
-  def future(client: DynamoClient)(implicit executor: ExecutionContext): ScanamoOpsA ~> Future =
-    new (ScanamoOpsA ~> Future) {
-      import akka.stream.alpakka.dynamodb.scaladsl.DynamoImplicits._
+  type Alpakka[A] = Source[A, NotUsed]
+
+  def future(client: DynamoClient): ScanamoOpsA ~> Alpakka =
+    new (ScanamoOpsA ~> Alpakka) {
+      private final def run(op: AwsOp): Alpakka[op.B] =
+        DynamoDb.source(op).withAttributes(DynamoAttributes.client(client))
 
       override def apply[A](ops: ScanamoOpsA[A]) =
         ops match {
-          case Put(req)        => client.single(JavaRequests.put(req))
-          case Get(req)        => client.single(req)
-          case Delete(req)     => client.single(JavaRequests.delete(req))
-          case Scan(req)       => client.single(JavaRequests.scan(req))
-          case Query(req)      => client.single(JavaRequests.query(req))
-          case Update(req)     => client.single(JavaRequests.update(req))
-          case BatchWrite(req) => client.single(req)
-          case BatchGet(req)   => client.single(req)
+          case Put(req)        => run(JavaRequests.put(req))
+          case Get(req)        => run(req)
+          case Delete(req)     => run(JavaRequests.delete(req))
+          case Scan(req)       => run(AwsPagedOp.create(JavaRequests.scan(req)))
+          case Query(req)      => run(AwsPagedOp.create(JavaRequests.query(req)))
+          case Update(req)     => run(JavaRequests.update(req))
+          case BatchWrite(req) => run(req)
+          case BatchGet(req)   => run(req)
           case ConditionalDelete(req) =>
-            client
-              .single(JavaRequests.delete(req))
+            run(JavaRequests.delete(req))
               .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalPut(req) =>
-            client
-              .single(JavaRequests.put(req))
+            run(JavaRequests.put(req))
               .map(Either.right[ConditionalCheckFailedException, PutItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
               }
           case ConditionalUpdate(req) =>
-            client
-              .single(JavaRequests.update(req))
+            run(JavaRequests.update(req))
               .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
               .recover {
                 case e: ConditionalCheckFailedException => Either.left(e)
