@@ -19,11 +19,11 @@ object ScanamoAlpakka extends AlpakkaInstances {
 private[scanamo] trait AlpakkaInstances {
   implicit def monad: Monad[Source[?, NotUsed]] = new Monad[Source[?, NotUsed]] {
     def pure[A](x: A): Source[A, NotUsed] = Source.single(x)
-    
+
     def flatMap[A, B](fa: Source[A, NotUsed])(f: A => Source[B, NotUsed]): Source[B, NotUsed] = fa.flatMapConcat(f)
 
     def tailRecM[A, B](a: A)(f: A => Source[Either[A, B], NotUsed]): Source[B, NotUsed] = f(a).flatMapConcat {
-      case Left(a) => tailRecM(a)(f)
+      case Left(a)  => tailRecM(a)(f)
       case Right(b) => Source.single(b)
     }
   }

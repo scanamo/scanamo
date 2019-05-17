@@ -4,7 +4,7 @@ import cats.~>
 import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model._
 
-import akka.stream.alpakka.dynamodb.{ AwsOp, AwsPagedOp, DynamoClient, DynamoAttributes }
+import akka.stream.alpakka.dynamodb.{AwsOp, AwsPagedOp, DynamoAttributes, DynamoClient}
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
 import akka.stream.scaladsl.Source
 import akka.NotUsed
