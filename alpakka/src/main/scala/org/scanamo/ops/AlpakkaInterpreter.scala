@@ -10,7 +10,7 @@ import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
 import akka.stream.scaladsl.Source
 import akka.NotUsed
 
-object AlpakkaInterpreter {
+object AlpakkaInterpreter extends WithRetry {
 
   type Alpakka[A] = Source[A, NotUsed]
 
