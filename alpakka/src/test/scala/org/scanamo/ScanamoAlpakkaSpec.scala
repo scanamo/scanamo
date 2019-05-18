@@ -35,7 +35,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     )
   )
 
-  val scanamo = new ScanamoAlpakka(alpakkaClient)
+  val scanamo = ScanamoAlpakka(alpakkaClient)
 
   override protected def afterAll(): Unit = {
     system.terminate()

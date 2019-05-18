@@ -7,10 +7,13 @@ import org.scanamo.ops._
 import scalaz.zio.interop.catz._
 import scalaz.zio.IO
 
-class ScanamoZio(client: AmazonDynamoDBAsync) {
+class ScanamoZio private (client: AmazonDynamoDBAsync) {
   private final val interpreter: ScanamoOpsA ~> IO[AmazonDynamoDBException, ?] =
     new ZioInterpreter(client)
 
-  def exec[A](op: ScanamoOps[A]): IO[AmazonDynamoDBException, A] =
-    op.foldMap(interpreter)
+  final def exec[A](op: ScanamoOps[A]): IO[AmazonDynamoDBException, A] = op.foldMap(interpreter)
+}
+
+object ScanamoZio {
+  def apply(client: AmazonDynamoDBAsync): ScanamoZio = new ScanamoZio(client)
 }

@@ -16,7 +16,7 @@ import org.scanamo.auto._
 class scanamoSpec extends FunSpec with Matchers {
 
   val client = LocalDynamoDB.client()
-  val scanamo = new ScanamoCats[IO](client)
+  val scanamo = ScanamoCats[IO](client)
   import scala.concurrent.ExecutionContext.Implicits.global
 
   it("should put asynchronously") {

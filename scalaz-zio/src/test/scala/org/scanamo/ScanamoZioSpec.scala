@@ -16,7 +16,7 @@ import scalaz.zio.{DefaultRuntime, IO}
 class ScanamoZioSpec extends FunSpec with Matchers {
 
   val client = LocalDynamoDB.client()
-  val zio = new ScanamoZio(client)
+  val zio = ScanamoZio(client)
   val RTS = new DefaultRuntime {}
 
   import RTS._

@@ -16,7 +16,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   import scala.concurrent.ExecutionContext.Implicits.global
 
   val client = LocalDynamoDB.client()
-  val scanamo = new ScanamoAsync(client)
+  val scanamo = ScanamoAsync(client)
 
   override protected def afterAll(): Unit = {
     client.shutdown()

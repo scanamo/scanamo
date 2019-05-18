@@ -16,7 +16,7 @@ import org.scanamo.auto._
 class ScanamoTest extends org.scalatest.FunSpec with org.scalatest.Matchers {
 
   val client = LocalDynamoDB.client()
-  val scanamo = new Scanamo(client)
+  val scanamo = Scanamo(client)
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>

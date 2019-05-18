@@ -11,14 +11,18 @@ import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
   * [[https://github.com/akka/alpakka Alpakka]] client,
   * and an implicit [[scala.concurrent.ExecutionContext]] and returns a [[scala.concurrent.Future]]
   */
-class ScanamoAlpakka(
-  client: DynamoClient,
-  retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3)
-)(implicit ec: ExecutionContext) {
+class ScanamoAlpakka private (client: DynamoClient, retrySettings: RetryPolicy)(implicit ec: ExecutionContext) {
   import cats.instances.future._
 
   private final val interpreter = new AlpakkaInterpreter(client, retrySettings)
 
   def exec[A](op: ScanamoOps[A]): Future[A] =
     op.foldMap(interpreter)
+}
+
+object ScanamoAlpakka {
+  def apply(
+    client: DynamoClient,
+    retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3)
+  )(implicit ec: ExecutionContext): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings)
 }

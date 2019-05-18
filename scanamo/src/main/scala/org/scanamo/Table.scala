@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
   * >>> case class Transport(mode: String, line: String)
   *
   * >>> val client = LocalDynamoDB.client()
-  * >>> val scanamo = new Scanamo(client)
+  * >>> val scanamo = Scanamo(client)
   * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
   *
   * >>> LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
@@ -56,7 +56,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.auto._
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     *
     * >>> val dataSet = Set(
     * ...   Farmer("Patty", 200L, Farm(List("unicorn"))),
@@ -83,7 +83,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Transport(mode: String, line: String, colour: String)
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
@@ -135,7 +135,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Forecast(location: String, weather: String)
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)('location -> S) { t =>
@@ -292,7 +292,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Transport(mode: String, line: String)
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)('mode -> S, 'line -> S) { t =>
@@ -324,7 +324,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     * >>> val (get, scan, query) = LocalDynamoDB.withRandomTable(client)('country -> S, 'name -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
@@ -362,7 +362,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.query._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     *
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
     * ...   val farmersTable = Table[Farmer](t)
@@ -520,7 +520,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.query._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     *
     * >>> case class Bear(name: String, favouriteFood: String)
     *
@@ -571,7 +571,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Bear(name: String, favouriteFood: String)
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)('name -> S) { t =>
@@ -600,7 +600,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Transport(mode: String, line: String)
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     *
     * >>> import collection.JavaConverters._
     * >>> import cats.implicits._
@@ -638,7 +638,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Transport(mode: String, line: String)
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     *
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
@@ -672,7 +672,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Transport(mode: String, line: String)
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     *
     * >>> import collection.JavaConverters._
     * >>> import cats.implicits._
@@ -713,7 +713,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._

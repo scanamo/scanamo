@@ -8,7 +8,7 @@ import org.scanamo.ops._
   *
   * To avoid blocking, use [[org.scanamo.ScanamoAsync]]
   */
-class Scanamo(client: AmazonDynamoDB) {
+class Scanamo private (client: AmazonDynamoDB) {
 
   private final val interpreter = new ScanamoSyncInterpreter(client)
 
@@ -23,7 +23,7 @@ class Scanamo(client: AmazonDynamoDB) {
     * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
-    * >>> val scanamo = new Scanamo(client)
+    * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
@@ -40,5 +40,9 @@ class Scanamo(client: AmazonDynamoDB) {
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
     */
-  def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
+  final def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
+}
+
+object Scanamo {
+  def apply(client: AmazonDynamoDB): Scanamo = new Scanamo(client)
 }

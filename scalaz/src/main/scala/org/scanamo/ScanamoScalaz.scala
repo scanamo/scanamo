@@ -9,6 +9,10 @@ class ScanamoScalaz(client: AmazonDynamoDBAsync) {
 
   private final val interpreter = new ScalazInterpreter(client)
 
-  def exec[A](op: ScanamoOps[A]): Task[A] = op.asScalaz.foldMap(interpreter)
+  final def exec[A](op: ScanamoOps[A]): Task[A] = op.asScalaz.foldMap(interpreter)
 
+}
+
+object ScanamoScalaz {
+  def apply(client: AmazonDynamoDBAsync): ScanamoScalaz = new ScanamoScalaz(client)
 }

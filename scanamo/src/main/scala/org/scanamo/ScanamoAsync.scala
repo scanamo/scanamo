@@ -11,7 +11,7 @@ import scala.concurrent.{ExecutionContext, Future}
   * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
   * java.util.concurrent.ExecutorService to make calls asynchronously
   */
-class ScanamoAsync(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) {
+class ScanamoAsync private (client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) {
   import cats.instances.future._
 
   private final val interpreter = new ScanamoAsyncInterpreter(client)
@@ -20,7 +20,10 @@ class ScanamoAsync(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) {
     * Execute the operations built with [[org.scanamo.Table]], using the client
     * provided asynchronously
     */
-  def exec[A](op: ScanamoOps[A]): Future[A] =
-    op.foldMap(interpreter)
+  final def exec[A](op: ScanamoOps[A]): Future[A] = op.foldMap(interpreter)
 
+}
+
+object ScanamoAsync {
+  def apply(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext): ScanamoAsync = new ScanamoAsync(client)
 }

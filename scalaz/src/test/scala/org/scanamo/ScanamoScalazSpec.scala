@@ -16,7 +16,7 @@ import shims._
 class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll with RTS {
 
   val client = LocalDynamoDB.client()
-  val scanamo = new ScanamoScalaz(client)
+  val scanamo = ScanamoScalaz(client)
 
   override protected def afterAll(): Unit = {
     client.shutdown()
