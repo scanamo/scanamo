@@ -74,6 +74,7 @@ import org.scanamo.auto._
 case class Foo(dateTime: DateTime)
 
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("foo")('dateTime -> S)
 ```
@@ -89,7 +90,7 @@ val operations = for {
   results     <- fooTable.scan()
 } yield results
 
-Scanamo.exec(client)(operations).toList
+scanamo.exec(operations).toList
 ```
 
 ### Formats for Refined Types
@@ -132,7 +133,7 @@ val operations = for {
   results <- customerTable.scan()
 } yield results
 
-Scanamo.exec(client)(operations).toList
+scanamo.exec(operations).toList
 ```
 
 ### Derived Formats

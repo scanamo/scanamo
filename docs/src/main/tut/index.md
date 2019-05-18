@@ -33,6 +33,7 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
  
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")('name -> S)
 
@@ -44,8 +45,8 @@ we can simply `put` and `get` items from Dynamo, without boilerplate or reflecti
 ```tut:book
 val table = Table[Farmer]("farmer")
 
-Scanamo.exec(client)(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
-Scanamo.exec(client)(table.get('name -> "McDonald"))
+scanamo.exec(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
+scanamo.exec(table.get('name -> "McDonald"))
 ```
 
 Scanamo supports most other DynamoDB [operations](operations.html), beyond
