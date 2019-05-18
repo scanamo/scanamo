@@ -25,10 +25,10 @@ class ScanamoFreeTest extends FunSuite with Matchers {
 
 class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpreter.CountingState) {
   def apply[A](op: ScanamoOpsA[A]): RequestCountingInterpreter.CountingState[A] = op match {
-    case Put(_) => ???
-    case ConditionalPut(_) => ???
-    case Get(_) => ???
-    case Delete(_) => ???
+    case Put(_)               => ???
+    case ConditionalPut(_)    => ???
+    case Get(_)               => ???
+    case Delete(_)            => ???
     case ConditionalDelete(_) => ???
     case Scan(req) =>
       State(
@@ -50,9 +50,9 @@ class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpre
           else
             counter -> new QueryResult().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
       )
-    case BatchWrite(_) => ???
-    case BatchGet(_) => ???
-    case Update(_) => ???
+    case BatchWrite(_)        => ???
+    case BatchGet(_)          => ???
+    case Update(_)            => ???
     case ConditionalUpdate(_) => ???
   }
 }

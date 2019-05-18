@@ -181,7 +181,7 @@ object ConditionExpression {
 
     val mergedExpressionAttributeValues = lValues match {
       case Some(m) => Some(m ++ rValues.getOrElse(Map.empty))
-      case _ => rValues
+      case _       => rValues
     }
 
     val lConditionExpression =

@@ -31,7 +31,7 @@ object DynamoReadError {
     case InvalidPropertiesError(problems) =>
       problems.toList.map(p => s"'${p.name}': ${describe(p.problem)}").mkString(", ")
     case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
-    case TypeCoercionError(e) => s"could not be converted to desired type: $e"
-    case MissingProperty => "missing"
+    case TypeCoercionError(e)                   => s"could not be converted to desired type: $e"
+    case MissingProperty                        => "missing"
   }
 }

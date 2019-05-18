@@ -19,7 +19,7 @@ object ZioInterpreter {
             def onError(exception: Exception): Unit =
               exception match {
                 case e: AmazonDynamoDBException => cb(IO.fail(e))
-                case t => cb(IO.die(t))
+                case t                          => cb(IO.die(t))
               }
 
             def onSuccess(request: A, result: B): Unit =

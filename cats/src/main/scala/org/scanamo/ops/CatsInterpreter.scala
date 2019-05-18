@@ -33,7 +33,7 @@ object CatsInterpreter {
           _.fold(
             _ match {
               case e: ConditionalCheckFailedException => F.delay(Left(e))
-              case t => F.raiseError(t) // raise error as opposed to swallowing
+              case t                                  => F.raiseError(t) // raise error as opposed to swallowing
             },
             a => F.delay(Right(a))
           )
@@ -47,7 +47,7 @@ object CatsInterpreter {
           _.fold(
             _ match {
               case e: ConditionalCheckFailedException => F.delay(Left(e))
-              case t => F.raiseError(t) // raise error as opposed to swallowing
+              case t                                  => F.raiseError(t) // raise error as opposed to swallowing
             },
             a => F.delay(Right(a))
           )
@@ -77,7 +77,7 @@ object CatsInterpreter {
           _.fold(
             _ match {
               case e: ConditionalCheckFailedException => F.delay(Left(e))
-              case t => F.raiseError(t) // raise error as opposed to swallowing
+              case t                                  => F.raiseError(t) // raise error as opposed to swallowing
             },
             a => F.delay(Right(a))
           )

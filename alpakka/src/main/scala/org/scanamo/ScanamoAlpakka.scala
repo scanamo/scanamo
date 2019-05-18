@@ -34,7 +34,7 @@ private[scanamo] trait AlpakkaInstances {
       def tailRecM[A, B](a: A)(
         f: A => Source[Either[A, B], NotUsed]
       ): Source[B, NotUsed] = f(a).flatMapConcat {
-        case Left(a) => tailRecM(a)(f)
+        case Left(a)  => tailRecM(a)(f)
         case Right(b) => Source.single(b)
       }
     }
