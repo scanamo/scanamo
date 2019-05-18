@@ -3,10 +3,10 @@ package org.scanamo
 import java.util
 
 import cats.free.Free
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, QueryResult, ScanResult}
+import com.amazonaws.services.dynamodbv2.model.{ AttributeValue, QueryResult, ScanResult }
 import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.{ScanamoOps, ScanamoOpsA}
-import org.scanamo.request.{ScanamoQueryRequest, ScanamoScanRequest}
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA }
+import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
 
 import scala.collection.JavaConverters._
 
@@ -34,8 +34,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
         result <- lastKey
           .filterNot(_ => newLimit.exists(_ <= 0))
           .foldLeft(
-            Free
-              .pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[EvaluationKey])]((results, lastKey))
+            Free.pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[EvaluationKey])]((results, lastKey))
           )(
             (rs, k) =>
               for {

@@ -1,6 +1,6 @@
 package org.scanamo.Derivation
 
-import org.scanamo.{DerivedDynamoFormat, DynamoFormat}
+import org.scanamo.{ DerivedDynamoFormat, DynamoFormat }
 import org.scanamo.export.Exported
 
 trait SemiAutoDerivation extends DerivedDynamoFormat {

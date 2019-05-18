@@ -2,16 +2,16 @@ package org.scanamo
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.dynamodb.{DynamoClient, DynamoSettings}
-import com.amazonaws.auth.{AWSStaticCredentialsProvider, BasicAWSCredentials}
+import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
+import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{BeforeAndAfterAll, FunSpecLike, Matchers}
+import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
 import cats.implicits._
 
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
@@ -23,7 +23,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   implicit val executor = system.dispatcher
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
-  val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
+  val dummyCreds = new AWSStaticCredentialsProvider(
+    new BasicAWSCredentials("dummy", "credentials")
+  )
   val alpakkaClient = DynamoClient(
     DynamoSettings(region = "", host = "localhost")
       .withPort(8042)
@@ -167,14 +169,28 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
   it("should update asynchronously if a condition holds") {
     LocalDynamoDB.usingRandomTable(client)('location -> S) { t =>
-      case class Forecast(location: String, weather: String, equipment: Option[String])
+      case class Forecast(
+        location: String,
+        weather: String,
+        equipment: Option[String]
+      )
 
       val forecasts = Table[Forecast](t)
 
       val ops = for {
-        _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
+        _ <- forecasts.putAll(
+          Set(
+            Forecast("London", "Rain", None),
+            Forecast("Birmingham", "Sun", None)
+          )
+        )
         _ <- forecasts.given('weather -> "Rain").update('location -> "London", set('equipment -> Some("umbrella")))
-        _ <- forecasts.given('weather -> "Rain").update('location -> "Birmingham", set('equipment -> Some("umbrella")))
+        _ <- forecasts
+          .given('weather -> "Rain")
+          .update(
+            'location -> "Birmingham",
+            set('equipment -> Some("umbrella"))
+          )
         results <- forecasts.scan()
       } yield results
 
@@ -182,7 +198,10 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         .exec(alpakkaClient)(ops)
         .runForeach(
           _ should equal(
-            List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None)))
+            List(
+              Right(Forecast("London", "Rain", Some("umbrella"))),
+              Right(Forecast("Birmingham", "Sun", None))
+            )
           )
         )
     }
@@ -204,7 +223,10 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         .exec(alpakkaClient)(ops)
         .runForeach(
           _ should equal(
-            List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets")))
+            List(
+              Right(Bear("Pooh", "honey")),
+              Right(Bear("Yogi", "picnic baskets"))
+            )
           )
         )
     }
@@ -213,7 +235,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       case class Lemming(name: String, stuff: String)
       val lemmings = Table[Lemming](t)
       val ops = for {
-        _ <- lemmings.putAll(List.fill(100)(Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet)
+        _ <- lemmings.putAll(
+          List
+            .fill(100)(
+              Lemming(util.Random.nextString(500), util.Random.nextString(5000))
+            )
+            .toSet
+        )
         ls <- lemmings.scan
       } yield ls
 
@@ -238,7 +266,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)(
+      'alias -> S
+    ) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
@@ -259,7 +289,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("Paginate scanIndexWithLimit") {
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('alias -> S) { (t, i) =>
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)(
+      'alias -> S
+    ) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
@@ -276,7 +308,10 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         .exec(alpakkaClient)(ops)
         .runForeach(
           _ should equal(
-            List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
+            List(
+              Right(Bear("Yogi", "picnic baskets", Some("Kanga"))),
+              Right(Bear("Pooh", "honey", Some("Winnie")))
+            )
           )
         )
     }
@@ -301,7 +336,11 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         .runForeach(
           _ should equal(
             (
-              List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
+              List(
+                Right(Animal("Pig", 1)),
+                Right(Animal("Pig", 2)),
+                Right(Animal("Pig", 3))
+              ),
               List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
               List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
               List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
@@ -322,14 +361,19 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
             Transport("Underground", "Central")
           )
         )
-        ts <- transports.query('mode -> "Underground" and ('line beginsWith "C"))
+        ts <- transports.query(
+          'mode -> "Underground" and ('line beginsWith "C")
+        )
       } yield ts
 
       ScanamoAlpakka
         .exec(alpakkaClient)(ops)
         .runForeach(
           _ should equal(
-            List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle")))
+            List(
+              Right(Transport("Underground", "Central")),
+              Right(Transport("Underground", "Circle"))
+            )
           )
         )
     }
@@ -364,43 +408,53 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
   it("queries an index with a limit asynchronously") {
     case class Transport(mode: String, line: String, colour: String)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'line -> S)('mode -> S, 'colour -> S) {
-      (t, i) =>
-        val transports = Table[Transport](t)
-        val result = for {
-          _ <- transports.putAll(
-            Set(
-              Transport("Underground", "Circle", "Yellow"),
-              Transport("Underground", "Metropolitan", "Magenta"),
-              Transport("Underground", "Central", "Red"),
-              Transport("Underground", "Picadilly", "Blue"),
-              Transport("Underground", "Northern", "Black")
-            )
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
+      'mode -> S,
+      'line -> S
+    )('mode -> S, 'colour -> S) { (t, i) =>
+      val transports = Table[Transport](t)
+      val result = for {
+        _ <- transports.putAll(
+          Set(
+            Transport("Underground", "Circle", "Yellow"),
+            Transport("Underground", "Metropolitan", "Magenta"),
+            Transport("Underground", "Central", "Red"),
+            Transport("Underground", "Picadilly", "Blue"),
+            Transport("Underground", "Northern", "Black")
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              'mode -> "Underground" and ('colour beginsWith "Bl")
-            )
-        } yield rs
+        )
+        rs <- transports
+          .index(i)
+          .limit(1)
+          .query(
+            'mode -> "Underground" and ('colour beginsWith "Bl")
+          )
+      } yield rs
 
-        ScanamoAlpakka
-          .exec(alpakkaClient)(result)
-          .runForeach(
-            _ should equal(
-              List(Right(Transport("Underground", "Northern", "Black")))
-            )
+      ScanamoAlpakka
+        .exec(alpakkaClient)(result)
+        .runForeach(
+          _ should equal(
+            List(Right(Transport("Underground", "Northern", "Black")))
           )
+        )
     }
   }
 
   it("queries an index asynchronously with 'between' sort-key condition") {
     case class Station(mode: String, name: String, zone: Int)
 
-    def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
+    def deletaAllStations(
+      stationTable: Table[Station],
+      stations: Set[Station]
+    ) =
       stationTable.deleteAll(
-        UniqueKeys(MultipleKeyList(('mode, 'name), stations.map(station => (station.mode, station.name))))
+        UniqueKeys(
+          MultipleKeyList(
+            ('mode, 'name),
+            stations.map(station => (station.mode, station.name))
+          )
+        )
       )
 
     val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
@@ -408,16 +462,25 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('mode -> S, 'name -> S)('mode -> S, 'zone -> N) { (t, i) =>
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
+      'mode -> S,
+      'name -> S
+    )('mode -> S, 'zone -> N) { (t, i) =>
       val stationTable = Table[Station](t)
       val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
       val ops = for {
         _ <- stationTable.putAll(stations)
         ts1 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (2 and 4)))
-        ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+        ts2 <- for {
+          _ <- deletaAllStations(stationTable, stations);
+          ts <- stationTable.scan
+        } yield ts
         _ <- stationTable.putAll(Set(LiverpoolStreet))
         ts3 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (2 and 4)))
-        ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+        ts4 <- for {
+          _ <- deletaAllStations(stationTable, stations);
+          ts <- stationTable.scan
+        } yield ts
         _ <- stationTable.putAll(Set(CamdenTown))
         ts5 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (1 and 1)))
       } yield (ts1, ts2, ts3, ts4, ts5)
@@ -464,7 +527,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       val rabbits = Table[Rabbit](t)
       val result = for {
-        _ <- rabbits.putAll(List.fill(100)(Rabbit(util.Random.nextString(500))).toSet)
+        _ <- rabbits.putAll(
+          List.fill(100)(Rabbit(util.Random.nextString(500))).toSet
+        )
         rs <- rabbits.scan
       } yield rs
 
@@ -493,8 +558,14 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         .runForeach(
           _ should equal(
             (
-              Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))),
-              Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
+              Set(
+                Right(Farmer("Boggis", 43, Farm(List("chicken")))),
+                Right(Farmer("Bean", 55, Farm(List("turkey"))))
+              ),
+              Set(
+                Right(Farmer("Boggis", 43, Farm(List("chicken")))),
+                Right(Farmer("Bean", 55, Farm(List("turkey"))))
+              )
             )
           )
         )
@@ -506,14 +577,31 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
 
       ScanamoAlpakka
         .exec(alpakkaClient)(for {
-          _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
-          ds <- doctors.getAll(('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11))
+          _ <- doctors.putAll(
+            Set(
+              Doctor("McCoy", 9),
+              Doctor("Ecclestone", 10),
+              Doctor("Ecclestone", 11)
+            )
+          )
+          ds <- doctors.getAll(
+            ('actor and 'regeneration) -> Set(
+              "McCoy" -> 9,
+              "Ecclestone" -> 11
+            )
+          )
         } yield ds)
-        .runForeach(_ should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11)))))
+        .runForeach(
+          _ should equal(
+            Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11)))
+          )
+        )
     }
   }
 
-  it("should get multiple items asynchronously (automatically handling batching)") {
+  it(
+    "should get multiple items asynchronously (automatically handling batching)"
+  ) {
     LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
@@ -528,7 +616,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     }
   }
 
-  it("should get multiple items consistently asynchronously (automatically handling batching)") {
+  it(
+    "should get multiple items consistently asynchronously (automatically handling batching)"
+  ) {
     LocalDynamoDB.usingRandomTable(client)('id -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
@@ -550,8 +640,12 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
+        _ <- farmersTable.put(
+          Farmer("McDonald", 156L, Farm(List("sheep", "cow")))
+        )
+        result <- farmersTable.put(
+          Farmer("McDonald", 50L, Farm(List("chicken", "cow")))
+        )
       } yield result
 
       ScanamoAlpakka
@@ -571,7 +665,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.put(
+          Farmer("McDonald", 156L, Farm(List("sheep", "cow")))
+        )
       } yield result
 
       ScanamoAlpakka
@@ -592,7 +688,9 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        _ <- farmersTable.put(
+          Farmer("McDonald", 156L, Farm(List("sheep", "cow")))
+        )
         _ <- farmersTable.given('age -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
         _ <- farmersTable.given('age -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
@@ -616,9 +714,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
+        _ <- farmersTable.put(
+          Farmer("McDonald", 55, Farm(List("sheep", "cow")))
+        )
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
-        _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
+        _ <- farmersTable.put(
+          Farmer("Wade", 58, Farm(List("chicken", "sheep")))
+        )
         _ <- farmersTable.given('age between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
         _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get('name -> "Butch")

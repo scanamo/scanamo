@@ -29,31 +29,29 @@ object CatsInterpreter {
       case Put(req) =>
         eff(client.putItemAsync, JavaRequests.put(req))
       case ConditionalPut(req) =>
-        eff(client.putItemAsync, JavaRequests.put(req)).attempt
-          .flatMap(
-            _.fold(
-              _ match {
-                case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-              },
-              a => F.delay(Right(a))
-            )
+        eff(client.putItemAsync, JavaRequests.put(req)).attempt.flatMap(
+          _.fold(
+            _ match {
+              case e: ConditionalCheckFailedException => F.delay(Left(e))
+              case t => F.raiseError(t) // raise error as opposed to swallowing
+            },
+            a => F.delay(Right(a))
           )
+        )
       case Get(req) =>
         eff(client.getItemAsync, req)
       case Delete(req) =>
         eff(client.deleteItemAsync, JavaRequests.delete(req))
       case ConditionalDelete(req) =>
-        eff(client.deleteItemAsync, JavaRequests.delete(req)).attempt
-          .flatMap(
-            _.fold(
-              _ match {
-                case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-              },
-              a => F.delay(Right(a))
-            )
+        eff(client.deleteItemAsync, JavaRequests.delete(req)).attempt.flatMap(
+          _.fold(
+            _ match {
+              case e: ConditionalCheckFailedException => F.delay(Left(e))
+              case t => F.raiseError(t) // raise error as opposed to swallowing
+            },
+            a => F.delay(Right(a))
           )
+        )
       case Scan(req) =>
         eff(client.scanAsync, JavaRequests.scan(req))
       case Query(req) =>
@@ -75,16 +73,15 @@ object CatsInterpreter {
       case Update(req) =>
         eff(client.updateItemAsync, JavaRequests.update(req))
       case ConditionalUpdate(req) =>
-        eff(client.updateItemAsync, JavaRequests.update(req)).attempt
-          .flatMap(
-            _.fold(
-              _ match {
-                case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-              },
-              a => F.delay(Right(a))
-            )
+        eff(client.updateItemAsync, JavaRequests.update(req)).attempt.flatMap(
+          _.fold(
+            _ match {
+              case e: ConditionalCheckFailedException => F.delay(Left(e))
+              case t => F.raiseError(t) // raise error as opposed to swallowing
+            },
+            a => F.delay(Right(a))
           )
+        )
     }
   }
 }

@@ -1,8 +1,8 @@
 package org.scanamo.time
 
 import org.scanamo.DynamoFormat
-import java.time.{Instant, OffsetDateTime, ZonedDateTime}
-import java.time.format.{DateTimeFormatter, DateTimeParseException}
+import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
+import java.time.format.{ DateTimeFormatter, DateTimeParseException }
 
 object JavaTimeFormats {
 

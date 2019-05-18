@@ -5,12 +5,12 @@ import cats.data.NonEmptyList
 import cats.syntax.either._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
-import com.amazonaws.services.dynamodbv2.model.{UpdateItemResult, _}
+import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBAsync }
+import com.amazonaws.services.dynamodbv2.model.{ UpdateItemResult, _ }
 import org.scanamo.request._
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future, Promise }
+import scala.util.{ Failure, Success }
 
 /**
   * Interpreters to take the operations defined with Scanamo and execute them
@@ -184,10 +184,7 @@ private[ops] object JavaRequests {
 
   def put(req: ScanamoPutRequest): PutItemRequest =
     req.condition.foldLeft(
-      new PutItemRequest()
-        .withTableName(req.tableName)
-        .withItem(req.item.getM)
-        .withReturnValues(ReturnValue.ALL_OLD)
+      new PutItemRequest().withTableName(req.tableName).withItem(req.item.getM).withReturnValues(ReturnValue.ALL_OLD)
     )(
       (r, c) =>
         c.attributeValues.foldLeft(

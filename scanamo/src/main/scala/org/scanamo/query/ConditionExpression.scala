@@ -2,9 +2,9 @@ package org.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.DynamoFormat
-import org.scanamo.error.{ConditionNotMet, ScanamoError}
+import org.scanamo.error.{ ConditionNotMet, ScanamoError }
 import org.scanamo.ops.ScanamoOps
-import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
+import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import cats.syntax.either._
@@ -181,7 +181,7 @@ object ConditionExpression {
 
     val mergedExpressionAttributeValues = lValues match {
       case Some(m) => Some(m ++ rValues.getOrElse(Map.empty))
-      case _       => rValues
+      case _ => rValues
     }
 
     val lConditionExpression =
