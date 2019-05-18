@@ -20,8 +20,7 @@ object AlpakkaInterpreter extends WithRetry {
   ): ScanamoOpsA ~> Alpakka =
     new (ScanamoOpsA ~> Alpakka) {
       final private def run(op: AwsOp): Alpakka[op.B] =
-        // RetryUtility.retry(future(), retryPolicy)
-        DynamoDb.source(op).withAttributes(DynamoAttributes.client(client))
+        retry(DynamoDb.source(op).withAttributes(DynamoAttributes.client(client)), retryPolicy)
 
       override def apply[A](ops: ScanamoOpsA[A]) =
         ops match {
