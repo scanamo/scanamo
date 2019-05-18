@@ -24,6 +24,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> val scanamo = new Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._
@@ -37,7 +38,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...     _ <- table.put(Bear("Paddington", "marmalade sandwiches", Some("Mr Curry")))
     * ...     antagonisticBears <- table.index(i).scan()
     * ...   } yield antagonisticBears
-    * ...   Scanamo.exec(client)(ops)
+    * ...   scanamo.exec(ops)
     * ... }
     * List(Right(Bear(Paddington,marmalade sandwiches,Some(Mr Curry))), Right(Bear(Yogi,picnic baskets,Some(Ranger Smith))))
     * }}}
@@ -51,6 +52,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> val scanamo = new Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._
@@ -67,7 +69,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...     ))
     * ...     scalaMIT <- githubProjects.index(i).query('language -> "Scala" and ('license -> "MIT"))
     * ...   } yield scalaMIT.toList
-    * ...   Scanamo.exec(client)(operations)
+    * ...   scanamo.exec(operations)
     * ... }
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
@@ -81,6 +83,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> case class Transport(mode: String, line: String, colour: String)
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> val scanamo = new Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
@@ -100,7 +103,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       ('mode -> "Underground" and ('colour beginsWith "Bl")).descending
     * ...     )
     * ...   } yield somethingBeginningWithBl.toList
-    * ...   Scanamo.exec(client)(operations)
+    * ...   scanamo.exec(operations)
     * ... }
     * List(Right(Transport(Underground,Picadilly,Blue)))
     * }}}
@@ -115,6 +118,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> case class Transport(mode: String, line: String, colour: String)
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> val scanamo = new Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
@@ -134,7 +138,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...                                   .filter('line beginsWith ("C"))
     * ...                                   .query('mode -> "Underground")
     * ...   } yield somethingBeginningWithC.toList
-    * ...   Scanamo.exec(client)(operations)
+    * ...   scanamo.exec(operations)
     * ... }
     * List(Right(Transport(Underground,Central,Red)), Right(Transport(Underground,Circle,Yellow)))
     * }}}

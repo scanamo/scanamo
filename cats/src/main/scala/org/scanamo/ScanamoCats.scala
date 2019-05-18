@@ -4,9 +4,10 @@ import cats.effect.Async
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scanamo.ops.{CatsInterpreter, ScanamoOps}
 
-object ScanamoCats {
+class ScanamoCats[F[_]: Async](client: AmazonDynamoDBAsync) {
 
-  def exec[F[_]: Async, A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A]): F[A] =
-    op.foldMap(CatsInterpreter.effect(client))
+  private final val interpreter = new CatsInterpreter(client)
+
+  def exec[A](op: ScanamoOps[A]): F[A] = op.foldMap(interpreter)
 
 }
