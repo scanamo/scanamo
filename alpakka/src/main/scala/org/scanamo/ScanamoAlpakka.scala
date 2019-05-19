@@ -2,9 +2,9 @@ package org.scanamo
 
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
 import org.scanamo.ops.retrypolicy.RetryPolicy
-import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
+import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps }
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an

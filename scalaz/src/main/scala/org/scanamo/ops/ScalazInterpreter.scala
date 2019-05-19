@@ -1,12 +1,12 @@
 package org.scanamo.ops
 
-import java.util.concurrent.{Future => JFuture}
+import java.util.concurrent.{ Future => JFuture }
 
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model._
-import scalaz.ioeffect.{ExitResult, IO, Task}
+import scalaz.ioeffect.{ ExitResult, IO, Task }
 import scalaz.~>
 
 object ScalazInterpreter {

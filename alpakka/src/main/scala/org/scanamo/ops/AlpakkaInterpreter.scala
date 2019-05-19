@@ -7,7 +7,7 @@ import cats.~>
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.ops.retrypolicy._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 object AlpakkaInterpreter {
 

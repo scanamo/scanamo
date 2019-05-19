@@ -1,6 +1,6 @@
 package org.scanamo.ops.retrypolicy
 
-import java.util.concurrent.{ScheduledExecutorService, TimeUnit}
+import java.util.concurrent.{ ScheduledExecutorService, TimeUnit }
 
 import com.amazonaws.services.dynamodbv2.model._
 
