@@ -25,9 +25,9 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
   }
 
   final def update: RetryPolicy = self match {
-    case policy: Constant         => policy
-    case policy: Linear           => policy
-    case policy: Exponential      => policy
+    case policy: Constant            => policy
+    case policy: Linear              => policy
+    case policy: Exponential         => policy
     case Max(retries)                => Max(retries - 1)
     case And(thisPolicy, thatPolicy) => And(thisPolicy.update, thatPolicy.update)
     case Or(thisPolicy, thatPolicy)  => Or(thisPolicy.update, thatPolicy.update)

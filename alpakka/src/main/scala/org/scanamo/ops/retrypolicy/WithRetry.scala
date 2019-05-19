@@ -12,7 +12,7 @@ trait WithRetry {
 
   final def retry[T](op: => Source[T, NotUsed], retryPolicy: RetryPolicy): Source[T, NotUsed] =
     op.recoverWithRetries(
-      retryPolicy.retries, {
+      1, {
         case exception @ (_: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException |
             _: LimitExceededException | _: ProvisionedThroughputExceededException | _: RequestLimitExceededException) =>
           if (!retryPolicy.done) {
