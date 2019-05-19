@@ -1,10 +1,10 @@
 package org.scanamo
 
-import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
-import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
-import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import org.scanamo.query.{Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition}
+import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import scala.collection.JavaConverters._
 
 /**

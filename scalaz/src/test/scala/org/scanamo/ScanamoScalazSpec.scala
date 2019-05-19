@@ -1,7 +1,7 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import org.scalatest.{ BeforeAndAfterAll, FunSpec, Matchers }
+import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps

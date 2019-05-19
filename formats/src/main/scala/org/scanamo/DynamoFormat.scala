@@ -182,7 +182,7 @@ object DynamoFormat extends EnumDynamoFormat {
         Either.fromOption(Option(av.getS), NoPropertyOfType("S", av))
     def write(s: String): AttributeValue = s match {
       case "" => NullAv
-      case _ => new AttributeValue().withS(s)
+      case _  => new AttributeValue().withS(s)
     }
   }
 
@@ -348,7 +348,7 @@ object DynamoFormat extends EnumDynamoFormat {
       // Set types cannot be empty
       override def write(t: Set[T]): AttributeValue = t.toList match {
         case Nil => NullAv
-        case xs => new AttributeValue().withNS(xs.map(w).asJava)
+        case xs  => new AttributeValue().withNS(xs.map(w).asJava)
       }
       override val default: Option[Set[T]] = Some(Set.empty)
     }
@@ -466,7 +466,7 @@ object DynamoFormat extends EnumDynamoFormat {
       // Set types cannot be empty
       override def write(t: Set[String]): AttributeValue = t.toList match {
         case Nil => new AttributeValue().withNULL(true)
-        case xs => new AttributeValue().withSS(xs.asJava)
+        case xs  => new AttributeValue().withSS(xs.asJava)
       }
       override val default: Option[Set[String]] = Some(Set.empty)
     }
@@ -502,7 +502,10 @@ object DynamoFormat extends EnumDynamoFormat {
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
     def read(av: AttributeValue): Either[DynamoReadError, Option[T]] =
-      Option(av).filter(x => !Boolean.unbox(x.isNULL)).map(f.read(_).map(Some(_))).getOrElse(Right(Option.empty[T]))
+      Option(av)
+        .filter(x => !Boolean.unbox(x.isNULL))
+        .map(f.read(_).map(Some(_)))
+        .getOrElse(Right(Option.empty[T]))
 
     def write(t: Option[T]): AttributeValue = t.map(f.write).getOrElse(new AttributeValue().withNULL(true))
     override val default = Some(None)

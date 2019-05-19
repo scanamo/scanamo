@@ -1,11 +1,11 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{ BatchWriteItemResult, DeleteItemResult, QueryResult, ScanResult }
-import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import com.amazonaws.services.dynamodbv2.model.{BatchWriteItemResult, DeleteItemResult, QueryResult, ScanResult}
+import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
-import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import org.scanamo.update.UpdateExpression
 import scala.collection.JavaConverters._
 

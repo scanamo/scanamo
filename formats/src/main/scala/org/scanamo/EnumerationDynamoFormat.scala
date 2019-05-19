@@ -1,10 +1,10 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import org.scanamo.error.{ DynamoReadError, TypeCoercionError }
+import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 import org.scanamo.export.Exported
-import shapeless.labelled.{ field, FieldType }
-import shapeless.{ :+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness }
+import shapeless.labelled.{field, FieldType}
+import shapeless.{:+:, CNil, Coproduct, HNil, Inl, Inr, LabelledGeneric, Witness}
 
 abstract class EnumerationDynamoFormat[T] extends DynamoFormat[T]
 

@@ -1,7 +1,7 @@
 package org.scanamo.Derivation
 
 import org.scanamo.DynamoFormat
-import org.scalatest.{ FunSuite, Matchers }
+import org.scalatest.{FunSuite, Matchers}
 
 class SemiAutoDerivationTest extends FunSuite with Matchers {
 

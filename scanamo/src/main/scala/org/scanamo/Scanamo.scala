@@ -1,7 +1,7 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import org.scanamo.ops.{ ScanamoInterpreters, ScanamoOps }
+import org.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
 
 /**
   * Provides a simplified interface for reading and writing case classes to DynamoDB

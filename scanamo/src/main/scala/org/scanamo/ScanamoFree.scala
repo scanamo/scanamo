@@ -1,8 +1,8 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{ PutRequest, WriteRequest, _ }
-import java.util.{ List => JList, Map => JMap }
-import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
+import java.util.{List => JList, Map => JMap}
+import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
@@ -24,24 +24,30 @@ object ScanamoFree {
       .map(r => Option(r.getAttributes).filter(!_.isEmpty).map(read[T]))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.grouped(batchSize).toList.traverse { batch =>
-      val map = buildMap[T, WriteRequest](
-        tableName,
-        batch,
-        item => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(item).getM))
-      )
-      ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
-    }
+    items
+      .grouped(batchSize)
+      .toList
+      .traverse { batch =>
+        val map = buildMap[T, WriteRequest](
+          tableName,
+          batch,
+          item => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(item).getM))
+        )
+        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
+      }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.asAVMap.grouped(batchSize).toList.traverse { batch =>
-      val map = buildMap[Map[String, AttributeValue], WriteRequest](
-        tableName,
-        batch,
-        item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.asJava))
-      )
-      ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
-    }
+    items.asAVMap
+      .grouped(batchSize)
+      .toList
+      .traverse { batch =>
+        val map = buildMap[Map[String, AttributeValue], WriteRequest](
+          tableName,
+          batch,
+          item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.asJava))
+        )
+        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
+      }
 
   def get[T: DynamoFormat](
     tableName: String
@@ -126,11 +132,12 @@ object ScanamoFree {
     val map = emptyMap[String, JList[B]](1)
     map.put(
       tableName,
-      batch.foldLeft(emptyList[B](batch.size)) {
-        case (reqs, i) =>
-          reqs.add(f(i))
-          reqs
-      }
+      batch
+        .foldLeft(emptyList[B](batch.size)) {
+          case (reqs, i) =>
+            reqs.add(f(i))
+            reqs
+        }
     )
     map
   }

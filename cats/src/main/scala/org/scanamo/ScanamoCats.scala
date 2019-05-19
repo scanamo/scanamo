@@ -2,7 +2,7 @@ package org.scanamo
 
 import cats.effect.Async
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import org.scanamo.ops.{ CatsInterpreter, ScanamoOps }
+import org.scanamo.ops.{CatsInterpreter, ScanamoOps}
 
 object ScanamoCats {
 

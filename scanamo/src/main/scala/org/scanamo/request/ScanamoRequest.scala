@@ -2,7 +2,7 @@ package org.scanamo.request
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scanamo.EvaluationKey
-import org.scanamo.query.{ Condition, Query }
+import org.scanamo.query.{Condition, Query}
 
 case class ScanamoPutRequest(
   tableName: String,

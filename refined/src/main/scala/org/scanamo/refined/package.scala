@@ -2,10 +2,10 @@ package org.scanamo
 
 import cats.syntax.either._
 
-import org.scanamo.error.{ DynamoReadError, TypeCoercionError }
+import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
-import eu.timepit.refined.api.{ RefType, Validate }
+import eu.timepit.refined.api.{RefType, Validate}
 
 package object refined {
 
