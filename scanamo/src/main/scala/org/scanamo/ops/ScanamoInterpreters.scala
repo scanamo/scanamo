@@ -5,12 +5,12 @@ import cats.data.NonEmptyList
 import cats.syntax.either._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
-import com.amazonaws.services.dynamodbv2.model.{UpdateItemResult, _}
+import com.amazonaws.services.dynamodbv2.{ AmazonDynamoDB, AmazonDynamoDBAsync }
+import com.amazonaws.services.dynamodbv2.model.{ UpdateItemResult, _ }
 import org.scanamo.request._
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future, Promise }
+import scala.util.{ Failure, Success }
 
 /**
   * Interpreters to take the operations defined with Scanamo and execute them

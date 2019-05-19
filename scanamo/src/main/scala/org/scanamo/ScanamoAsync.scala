@@ -1,8 +1,8 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import org.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
-import scala.concurrent.{ExecutionContext, Future}
+import org.scanamo.ops.{ ScanamoInterpreters, ScanamoOps }
+import scala.concurrent.{ ExecutionContext, Future }
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an implicit

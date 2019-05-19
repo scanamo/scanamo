@@ -27,7 +27,7 @@ sealed trait UpdateExpression extends Product with Serializable {
   def unprefixedAttributeValues: Map[String, AttributeValue]
 }
 
-private[update] sealed trait LeafUpdateExpression {
+sealed private[update] trait LeafUpdateExpression {
   val updateType: UpdateType
   val attributeNames: Map[String, String]
   val attributeValue: Option[(String, AttributeValue)]
@@ -63,7 +63,7 @@ object UpdateExpression {
   }
 }
 
-private[update] sealed trait UpdateType { val op: String }
+sealed private[update] trait UpdateType { val op: String }
 private[update] case object SET extends UpdateType { override val op = "SET" }
 private[update] case object ADD extends UpdateType { override val op = "ADD" }
 private[update] case object DELETE extends UpdateType { override val op = "DELETE" }
