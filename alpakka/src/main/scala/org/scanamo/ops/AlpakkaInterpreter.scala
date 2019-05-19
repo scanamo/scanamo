@@ -24,14 +24,14 @@ object AlpakkaInterpreter extends WithRetry {
 
       override def apply[A](ops: ScanamoOpsA[A]) =
         ops match {
-          case Put(req)        => run(JavaRequests.put(req))
-          case Get(req)        => run(req)
-          case Delete(req)     => run(JavaRequests.delete(req))
-          case Scan(req)       => run(AwsPagedOp.create(JavaRequests.scan(req)))
-          case Query(req)      => run(AwsPagedOp.create(JavaRequests.query(req)))
-          case Update(req)     => run(JavaRequests.update(req))
+          case Put(req) => run(JavaRequests.put(req))
+          case Get(req) => run(req)
+          case Delete(req) => run(JavaRequests.delete(req))
+          case Scan(req) => run(AwsPagedOp.create(JavaRequests.scan(req)))
+          case Query(req) => run(AwsPagedOp.create(JavaRequests.query(req)))
+          case Update(req) => run(JavaRequests.update(req))
           case BatchWrite(req) => run(req)
-          case BatchGet(req)   => run(req)
+          case BatchGet(req) => run(req)
           case ConditionalDelete(req) =>
             run(JavaRequests.delete(req))
               .map(
