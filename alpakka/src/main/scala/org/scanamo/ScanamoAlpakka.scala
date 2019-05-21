@@ -1,22 +1,31 @@
 package org.scanamo
 
-import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
-import org.scanamo.ops.retrypolicy.RetryPolicy
-import akka.stream.scaladsl.Source
 import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
+import akka.stream.scaladsl.Source
 import cats.Monad
+import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
+import org.scanamo.ops.retrypolicy.RetryPolicy
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
   * [[https://github.com/akka/alpakka Alpakka]] client,
   * and an implicit [[scala.concurrent.ExecutionContext]] and returns a [[scala.concurrent.Future]]
   */
+class ScanamoAlpakka private (client: DynamoClient, retrySettings: RetryPolicy) {
+  import ScanamoAlpakka._
+  
+  private final val interpreter = new AlpakkaInterpreter(client, retrySettings)
+
+  def exec[A](op: ScanamoOps[A]): AlpakkaInterpreter.Alpakka[A] =
+    op.foldMap(interpreter)
+}
+
 object ScanamoAlpakka extends AlpakkaInstances {
-  def exec[A](
-    client: DynamoClient
-  )(op: ScanamoOps[A], retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3)): Source[A, NotUsed] =
-    op.foldMap(AlpakkaInterpreter.future(client, retrySettings))
+  def apply(
+    client: DynamoClient,
+    retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3)
+  ): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings)
 }
 
 private[scanamo] trait AlpakkaInstances {

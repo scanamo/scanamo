@@ -21,6 +21,7 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 
 case class Station(line: String, name: String, zone: Int)
 val stationTable = Table[Station]("Station")
@@ -40,7 +41,7 @@ LocalDynamoDB.withTable(client)("Station")('line -> S, 'name -> S) {
         .filter('zone < 8)
         .query('line -> "Metropolitan" and ('name beginsWith "C"))
   } yield filteredStations
-  Scanamo.exec(client)(ops)
+  scanamo.exec(ops)
 }
 ```
 

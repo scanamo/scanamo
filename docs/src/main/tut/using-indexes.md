@@ -21,6 +21,7 @@ val transport = Table[Transport]("transport")
 val colourIndex = transport.index("colour-index")
 
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 ```
 ```tut:book
@@ -32,6 +33,6 @@ LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")('
       Transport("Underground", "Central", "Red")))
     maroonLine <- colourIndex.query('colour -> "Maroon")
   } yield maroonLine.toList
-  Scanamo.exec(client)(operations)
+  scanamo.exec(operations)
 }
 ```

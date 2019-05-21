@@ -19,6 +19,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
  
 val client = LocalDynamoDB.client()
+val scanamo = ScanamoAsync(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("farm")('name -> S)
 
@@ -35,7 +36,7 @@ val ops = for {
 } yield bunce
 ```
 ```scala
-concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
+concurrent.Await.result(scanamo(ops), 5.seconds)
 ```
 
 Note that `AmazonDynamoDBAsyncClient` uses a thread pool internally.
@@ -77,6 +78,9 @@ val alpakkaClient = DynamoClient(
 
 // Use the non-Alpakka client to create the table for tests
 val client = LocalDynamoDB.client()
+
+val scanamo = ScanamoAlpakka(alpakkaClient)
+
 LocalDynamoDB.createTable(client)("nursery-farmers")('name -> S)
 
 case class Farm(animals: List[String])
@@ -92,7 +96,7 @@ val ops = for {
 } yield bunce
 
 // Use the Alpakka interpreter
-//concurrent.Await.result(ScanamoAlpakka.exec(alpakkaClient)(ops), 5.seconds)
+scanamo.exec(ops)
 
 system.terminate()
 ```
