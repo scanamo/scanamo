@@ -14,7 +14,7 @@ import org.scanamo.ops.retrypolicy.RetryPolicy
   */
 class ScanamoAlpakka private (client: DynamoClient, retrySettings: RetryPolicy) {
   import ScanamoAlpakka._
-  
+
   private final val interpreter = new AlpakkaInterpreter(client, retrySettings)
 
   def exec[A](op: ScanamoOps[A]): AlpakkaInterpreter.Alpakka[A] =
