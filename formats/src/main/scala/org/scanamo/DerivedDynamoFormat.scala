@@ -38,10 +38,11 @@ trait DerivedDynamoFormat {
 
       final def read(av: DynamoObject) = {
         val valueOrError: Either[(FieldName, DynamoReadError), V] =
-          av(fieldName).map(headFormat.value.read) orElse
-            headFormat.value.default.map(Either.right) getOrElse
-            Either.left(MissingProperty) leftMap
-            ((fieldName, _))
+          av(fieldName)
+            .map(headFormat.value.read)
+            .orElse(headFormat.value.default.map(Either.right))
+            .getOrElse(Either.left(MissingProperty))
+            .leftMap(((fieldName, _)))
 
         val head = valueOrError.toValidatedNel.map(field[K](_))
         val tail = tailFormat.value.read(av)
