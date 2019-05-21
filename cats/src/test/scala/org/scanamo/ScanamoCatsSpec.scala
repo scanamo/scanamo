@@ -13,7 +13,7 @@ import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
 
-class scanamoSpec extends FunSpec with Matchers {
+class ScanamoCatsSpec extends FunSpec with Matchers {
 
   val client = LocalDynamoDB.client()
   val scanamo = ScanamoCats[IO](client)
