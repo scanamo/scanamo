@@ -4,6 +4,8 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.util.{Map => JMap, HashMap}
 import org.scanamo.error.{DynamoReadError, MissingProperty}
 import cats.syntax.either._
+import cats.syntax.apply._
+import cats.instances.either._
 
 sealed abstract class DynamoObject extends Product with Serializable { self =>
   import DynamoObject._
@@ -99,14 +101,14 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
       xs.entrySet.stream.reduce[Either[DynamoReadError, Map[String, V]]](
         Right(Map.empty),
         (xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x),
-        (xs0, ys0) => for { xs <- xs0; ys <- ys0 } yield xs ++ ys
+        (xs0, ys0) => (xs0, ys0).mapN(_ ++ _)
       )
     case Pure(xs) =>
       xs.foldLeft[Either[DynamoReadError, Map[String, V]]](Right(Map.empty)) {
         case (e @ Left(_), _)   => e
         case (Right(m), (k, x)) => D.read(x).map(x => m + (k -> x))
       }
-    case Concat(xs0, ys0) => for { xs <- xs0.toMap; ys <- ys0.toMap } yield xs ++ ys
+    case Concat(xs0, ys0) => (xs0.toMap, ys0.toMap).mapN(_ ++ _)
   }
 
   def internalToMap: Map[String, DynamoValue]

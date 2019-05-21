@@ -3,6 +3,8 @@ package org.scanamo.ops
 import cats._
 import cats.data.NonEmptyList
 import cats.syntax.either._
+import cats.syntax.apply._
+import cats.instances.option._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.{AmazonDynamoDB, AmazonDynamoDBAsync}
@@ -191,10 +193,11 @@ private[ops] object JavaRequests {
       val requestWithCondition = request
         .withFilterExpression(condition.expression)
         .withExpressionAttributeNames((queryCondition.attributeNames ++ condition.attributeNames).asJava)
-      val attributeValues = for {
-        queryValues <- queryCondition.dynamoValues orElse Some(DynamoObject.empty)
-        filterValues <- condition.dynamoValues orElse Some(DynamoObject.empty)
-      } yield queryValues <> filterValues
+      val attributeValues =
+        (
+          queryCondition.dynamoValues orElse Some(DynamoObject.empty),
+          condition.dynamoValues orElse Some(DynamoObject.empty)
+        ).mapN(_ <> _)
 
       attributeValues
         .flatMap(_.toExpressionAttributeValues)

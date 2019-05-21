@@ -1,5 +1,7 @@
 package org.scanamo.query
 
+import cats.instances.option._
+import cats.syntax.apply._
 import org.scanamo.{DynamoFormat, DynamoObject}
 import simulacrum.typeclass
 
@@ -29,10 +31,7 @@ object UniqueKeyCondition {
         H.toDynamoObject(t.hashEquality) <> R.toDynamoObject(t.rangeEquality)
 
       final def fromDynamoObject(key: K, dvs: DynamoObject) =
-        for {
-          h <- H.fromDynamoObject(key._1, dvs)
-          r <- R.fromDynamoObject(key._2, dvs)
-        } yield AndEqualsCondition(h, r)
+        (H.fromDynamoObject(key._1, dvs), R.fromDynamoObject(key._2, dvs)).mapN(AndEqualsCondition(_, _))
 
       final def key(t: AndEqualsCondition[H, R]) = (H.key(t.hashEquality), R.key(t.rangeEquality))
     }
