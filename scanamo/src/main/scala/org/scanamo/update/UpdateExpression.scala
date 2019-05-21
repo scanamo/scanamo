@@ -142,7 +142,7 @@ private[update] sealed trait LeafUpdateExpression { self =>
 }
 
 private[update] object LeafUpdateExpression {
-  val emptyList: Option[(String, DynamoValue)] = Some("emptyList" -> DynamoValue.array())
+  val emptyList: Option[(String, DynamoValue)] = Some("emptyList" -> DynamoValue.EmptyList)
 }
 
 private[update] final case class LeafSetExpression(

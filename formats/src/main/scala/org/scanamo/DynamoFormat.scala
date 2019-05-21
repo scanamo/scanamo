@@ -105,7 +105,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *
     * >>> implicit val userIdFormat =
     * ...   DynamoFormat.iso[UserId, String](UserId.apply)(_.value)
-    * >>> DynamoFormat[UserId].read(DynamoValue.string("Eric"))
+    * >>> DynamoFormat[UserId].read(DynamoValue.fromString("Eric"))
     * Right(UserId(Eric))
     * }}}
     */
@@ -124,7 +124,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * ... )(
     * ...   _.withZone(DateTimeZone.UTC).getMillis
     * ... )
-    * >>> DynamoFormat[DateTime].read(DynamoValue.number(0L))
+    * >>> DynamoFormat[DateTime].read(DynamoValue.fromNumber(0L))
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
@@ -149,7 +149,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * >>> jodaStringFormat.read(jodaStringFormat.write(new LocalDate(2007, 8, 18)))
     * Right(2007-08-18)
     *
-    * >>> jodaStringFormat.read(DynamoValue.string("Togtogdenoggleplop"))
+    * >>> jodaStringFormat.read(DynamoValue.fromString("Togtogdenoggleplop"))
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
@@ -173,7 +173,7 @@ object DynamoFormat extends EnumDynamoFormat {
 
     final def write(s: String): DynamoValue = s match {
       case "" => DynamoValue.nil
-      case _  => DynamoValue.string(s)
+      case _  => DynamoValue.fromString(s)
     }
   }
 
@@ -183,7 +183,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == Right(b)
     * }}}
     */
-  implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.boolean, "BOOL")
+  implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.fromBoolean, "BOOL")
 
   private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] = new DynamoFormat[N] {
     final def read(av: DynamoValue) =
@@ -193,7 +193,7 @@ object DynamoFormat extends EnumDynamoFormat {
         n <- transform(ns)
       } yield n
 
-    final def write(n: N) = DynamoValue.number(n)
+    final def write(n: N) = DynamoValue.fromNumber(n)
   }
 
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
@@ -260,7 +260,7 @@ object DynamoFormat extends EnumDynamoFormat {
   implicit val byteFormat: DynamoFormat[Byte] = numFormat(_.toByte)
 
   // Since DynamoValue includes a ByteBuffer instance, creating byteArray format backed by ByteBuffer
-  implicit val byteBufferFormat: DynamoFormat[ByteBuffer] = attribute(_.asByteBuffer, DynamoValue.byteBuffer, "B")
+  implicit val byteBufferFormat: DynamoFormat[ByteBuffer] = attribute(_.asByteBuffer, DynamoValue.fromByteBuffer, "B")
 
   private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
     coerce[ByteBuffer, B, IllegalArgumentException](f)
@@ -288,7 +288,7 @@ object DynamoFormat extends EnumDynamoFormat {
     attribute({ dv =>
       if (dv.isNull) Some(List.empty)
       else dv.asArray.flatMap(_.asArray)
-    }, l => DynamoValue.array(l: _*), "L")
+    }, l => DynamoValue.fromValues(l: _*), "L")
 
   /**
     * {{{
@@ -348,7 +348,7 @@ object DynamoFormat extends EnumDynamoFormat {
         if (t.isEmpty)
           DynamoValue.nil
         else
-          DynamoValue.numbers(t.toSeq: _*)
+          DynamoValue.fromNumbers(t.toSeq: _*)
 
       override final val default = Some(Set.empty[T])
     }
@@ -359,7 +359,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Int]) =>
-    *     | val av = DynamoValue.numbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
     *     | DynamoFormat[Set[Int]].write(s) == av &&
     *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
     *
@@ -375,7 +375,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Long]) =>
-    *     | val av = DynamoValue.numbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
     *     | DynamoFormat[Set[Long]].write(s) == av &&
     *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
     *
@@ -391,7 +391,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Float]) =>
-    *     | val av = DynamoValue.numbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
     *     | DynamoFormat[Set[Float]].write(s) == av &&
     *     |   DynamoFormat[Set[Float]].read(av) == Right(s)
     *
@@ -407,7 +407,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Double]) =>
-    *     | val av = DynamoValue.numbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
     *     | DynamoFormat[Set[Double]].write(s) == av &&
     *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
     *
@@ -423,7 +423,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[BigDecimal]) =>
-    *     | val av = DynamoValue.numbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
     *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
     *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
     *
@@ -439,7 +439,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit val arbSet = Arbitrary(Gen.nonEmptyContainerOf[Set, String](Arbitrary.arbitrary[String]))
     *
     * prop> (s: Set[String]) =>
-    *     | val av = DynamoValue.strings(s.toList: _*)
+    *     | val av = DynamoValue.fromStrings(s.toList: _*)
     *     | DynamoFormat[Set[String]].write(s) == av &&
     *     |   DynamoFormat[Set[String]].read(av) == Right(s)
     *
@@ -460,7 +460,7 @@ object DynamoFormat extends EnumDynamoFormat {
         if (t.isEmpty)
           DynamoValue.nil
         else
-          DynamoValue.strings(t.toSeq: _*)
+          DynamoValue.fromStrings(t.toSeq: _*)
 
       override final val default = Some(Set.empty[String])
     }

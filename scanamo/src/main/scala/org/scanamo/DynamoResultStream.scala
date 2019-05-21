@@ -5,7 +5,6 @@ import com.amazonaws.services.dynamodbv2.model.{QueryResult, ScanResult}
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ScanamoOps, ScanamoOpsA}
 import org.scanamo.request.{ScanamoQueryRequest, ScanamoScanRequest}
-import org.scanamo.internal._
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
 
@@ -49,7 +48,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
 private[scanamo] object DynamoResultStream {
   object ScanResultStream extends DynamoResultStream[ScanamoScanRequest, ScanResult] {
     final def items(res: ScanResult) =
-      res.getItems.stream.reduce[List[DynamoObject]](Nil, prependDynamoObject, concatDynamoObjects)
+      res.getItems.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _)
     final def lastEvaluatedKey(res: ScanResult) = Option(res.getLastEvaluatedKey).map(DynamoObject(_))
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
@@ -64,7 +63,7 @@ private[scanamo] object DynamoResultStream {
 
   object QueryResultStream extends DynamoResultStream[ScanamoQueryRequest, QueryResult] {
     final def items(res: QueryResult) =
-      res.getItems.stream.reduce[List[DynamoObject]](Nil, prependDynamoObject, concatDynamoObjects)
+      res.getItems.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _)
     final def lastEvaluatedKey(res: QueryResult) = Option(res.getLastEvaluatedKey).map(DynamoObject(_))
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))

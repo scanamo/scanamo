@@ -7,6 +7,9 @@ import org.scanamo.error.DynamoReadError
 sealed abstract class DynamoValue extends Product with Serializable { self =>
   import DynamoValue._
 
+  /**
+    * Produces the `AttributeValue` isomorphic to this `DynamoValue`
+    */
   def toAttributeValue: AttributeValue = self match {
     case DynNull        => Null
     case DynBool(true)  => True
@@ -18,91 +21,121 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     case DynArray(as)   => as.toAttributeValue
   }
 
+  /**
+    * Checks whether this object represents the null object
+    */
   final def isNull: Boolean = self match {
     case DynNull => true
     case _       => false
   }
 
+  /**
+    * Checks whether this object represents a boolean
+    */
   final def isBoolean: Boolean = self match {
     case _: DynBool => true
     case _          => false
   }
 
+  /**
+    * Checks whether this object represents a number
+    */
   final def isNumber: Boolean = self match {
     case _: DynNum => true
     case _         => false
   }
 
+  /**
+    * Checks whether this object represents a string
+    */
   final def isString: Boolean = self match {
     case _: DynString => true
     case _            => false
   }
 
+  /**
+    * Checks whether this object represents a byte buffer
+    */
   final def isByteBuffer: Boolean = self match {
     case _: DynByte => true
     case _          => false
   }
 
+  /**
+    * Checks whether this object rerpresents a composite object
+    */
   final def isObject: Boolean = self match {
     case _: DynObject => true
     case _            => false
   }
 
+  /**
+    * Checks whether this object rerpresents an array
+    */
   final def isArray: Boolean = self match {
-    case DynArray(x) => x.isAttributeValueArray
+    case _: DynArray => true
     case _           => false
   }
 
-  final def isNumArray: Boolean = self match {
-    case DynArray(x) => x.isNumArray
-    case _           => false
-  }
-
-  final def isStringArray: Boolean = self match {
-    case DynArray(x) => x.isStringArray
-    case _           => false
-  }
-
-  final def isByteButterArray: Boolean = self match {
-    case DynArray(x) => x.isByteBufferArray
-    case _           => false
-  }
-
+  /**
+    * Produces `()` is this object is null
+    */
   final def asNull: Option[Unit] = self match {
     case DynNull => Some(())
     case _       => None
   }
 
+  /**
+    * Produces the underlying boolean, if applies
+    */
   final def asBoolean: Option[Boolean] = self match {
     case DynBool(b) => Some(b)
     case _          => None
   }
 
+  /**
+    * Produces the underlying string, if applies
+    */
   final def asString: Option[String] = self match {
     case DynString(s) => Some(s)
     case _            => None
   }
 
+  /**
+    * Produces the underlying number, if applies
+    */
   final def asNumber: Option[String] = self match {
     case DynNum(n) => Some(n)
     case _         => None
   }
 
+  /**
+    * Produces the underlying byte buffer, if applies
+    */
   final def asByteBuffer: Option[ByteBuffer] = self match {
     case DynByte(b) => Some(b)
     case _          => None
   }
 
+  /**
+    * Produces the underlying array, if applies
+    */
   final def asArray: Option[DynamoArray] = self match {
     case DynArray(as) => Some(as)
     case _            => None
   }
 
+  /**
+    * Produces the underlying object, if applies
+    */
   final def asObject: Option[DynamoObject] = self match {
     case DynObject(as) => Some(as)
     case _             => None
   }
 
+  /**
+    * Transforms into a value of type `A` for which there is a codec, if applies
+    */
   final def as[A](implicit A: DynamoFormat[A]): Either[DynamoReadError, A] = A.read(self)
 
   final def withNull(f: => DynamoValue): DynamoValue = self match {
@@ -145,16 +178,8 @@ object DynamoValue {
   private[scanamo] val Null: AttributeValue = new AttributeValue().withNULL(true)
   private[scanamo] val True: AttributeValue = new AttributeValue().withBOOL(true)
   private[scanamo] val False: AttributeValue = new AttributeValue().withBOOL(false)
-  private[scanamo] val EmptyList: AttributeValue = new AttributeValue().withL()
 
-  private[DynamoValue] def collection[A](
-    xs: Iterable[A],
-    f: (AttributeValue, java.util.Collection[A]) => AttributeValue
-  ) = {
-    val c = new java.util.Vector[A](xs.size, 0)
-    xs.zipWithIndex foreach { case (x, i) => c.add(i, x) }
-    f(new AttributeValue(), c)
-  }
+  private[scanamo] val EmptyList: DynamoValue = DynArray(DynamoArray.EmptyList)
 
   private[DynamoValue] case object DynNull extends DynamoValue
   private[DynamoValue] final case class DynBool(b: Boolean) extends DynamoValue
@@ -166,19 +191,17 @@ object DynamoValue {
 
   ////
   // Constructors
-  final val nil: DynamoValue = DynNull
-  final def boolean(b: Boolean): DynamoValue = DynBool(b)
-  final def number[N: Numeric](n: N): DynamoValue = DynNum(n.toString)
-  final def string(s: String): DynamoValue = DynString(s)
-  final def byteBuffer(b: ByteBuffer): DynamoValue = DynByte(b)
-  final def array(as: DynamoValue*): DynamoValue = DynArray(DynamoArray(as: _*))
-  final def map(as: (String, DynamoValue)*): DynamoValue = DynObject(DynamoObject(as.toMap))
-  final def map(as: Map[String, DynamoValue]): DynamoValue = DynObject(DynamoObject(as))
-  final def numbers[N: Numeric](ns: N*): DynamoValue = DynArray(DynamoArray.numbers(ns: _*))
-  final def strings(ss: String*): DynamoValue = DynArray(DynamoArray.strings(ss: _*))
-  final def byteBuffers(bs: ByteBuffer*): DynamoValue = DynArray(DynamoArray.byteBuffers(bs: _*))
-
-  private[scanamo] def unsafeNumber(n: String): DynamoValue = DynNum(n)
+  val nil: DynamoValue = DynNull
+  def fromBoolean(b: Boolean): DynamoValue = DynBool(b)
+  def fromNumber[N: Numeric](n: N): DynamoValue = DynNum(n.toString)
+  def fromString(s: String): DynamoValue = DynString(s)
+  def fromByteBuffer(b: ByteBuffer): DynamoValue = DynByte(b)
+  def fromValues(as: DynamoValue*): DynamoValue = DynArray(DynamoArray(as: _*))
+  def fromFields(as: (String, DynamoValue)*): DynamoValue = DynObject(DynamoObject(as.toMap))
+  def fromMap(as: Map[String, DynamoValue]): DynamoValue = DynObject(DynamoObject(as))
+  def fromNumbers[N: Numeric](ns: N*): DynamoValue = DynArray(DynamoArray.numbers(ns: _*))
+  def fromStrings(ss: String*): DynamoValue = DynArray(DynamoArray.strings(ss: _*))
+  def fromByteBuffers(bs: ByteBuffer*): DynamoValue = DynArray(DynamoArray.byteBuffers(bs: _*))
 
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
     if (!(av.isNULL eq null) && av.isNULL)
@@ -205,4 +228,6 @@ object DynamoValue {
   def fromDynamoObject(xs: DynamoObject): DynamoValue = DynObject(xs)
 
   def fromDynamoArray(xs: DynamoArray): DynamoValue = DynArray(xs)
+
+  private[scanamo] def unsafeFromNumber(n: String): DynamoValue = DynNum(n)
 }

@@ -1,7 +1,6 @@
 package org.scanamo
 
 import cats.implicits._
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{BeforeAndAfterAll, FunSpec, Matchers}
@@ -232,7 +231,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
         _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
-          res1 <- bears.index(i).limit(1).scan
+          _ <- bears.index(i).limit(1).scan
           res2 <- bears.index(i).limit(1).from('name -> "Graham" and ('alias -> "Guardianista")).scan
           res3 <- bears.index(i).limit(1).from('name -> "Yogi" and ('alias -> "Kanga")).scan
         } yield res2 ::: res3

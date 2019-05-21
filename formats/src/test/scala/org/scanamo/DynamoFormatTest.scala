@@ -1,9 +1,7 @@
 package org.scanamo
 
-import scala.collection.JavaConverters._
 import scala.reflect.runtime.universe._
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._

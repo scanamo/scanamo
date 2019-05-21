@@ -3,7 +3,6 @@ package org.scanamo
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.util.{Map => JMap, HashMap}
 import org.scanamo.error.{DynamoReadError, MissingProperty}
-import org.scanamo.internal._
 import cats.syntax.either._
 
 sealed abstract class DynamoObject extends Product with Serializable { self =>
@@ -99,11 +98,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     case Strict(xs) =>
       xs.entrySet.stream.reduce[Either[DynamoReadError, Map[String, V]]](
         Right(Map.empty),
-        jfun2[Either[DynamoReadError, Map[String, V]], JMap.Entry[String, AttributeValue], Either[
-          DynamoReadError,
-          Map[String, V]
-        ]]((xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x)),
-        jbiop[Either[DynamoReadError, Map[String, V]]]((xs0, ys0) => for { xs <- xs0; ys <- ys0 } yield xs ++ ys)
+        (xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x),
+        (xs0, ys0) => for { xs <- xs0; ys <- ys0 } yield xs ++ ys
       )
     case Pure(xs) =>
       xs.foldLeft[Either[DynamoReadError, Map[String, V]]](Right(Map.empty)) {
@@ -113,34 +109,45 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     case Concat(xs0, ys0) => for { xs <- xs0.toMap; ys <- ys0.toMap } yield xs ++ ys
   }
 
+  def internalToMap: Map[String, DynamoValue]
+
   final def toExpressionAttributeValues: Option[JMap[String, AttributeValue]] = self match {
     case Empty => None
     case Strict(xs) =>
       Some(unsafeTransform { m =>
-        xs.entrySet.stream.forEach(jcon[JMap.Entry[String, AttributeValue]] { x =>
+        xs.entrySet.stream.forEach { x =>
           m.put(":" ++ x.getKey, x.getValue); ()
-        })
+        }
       })
     case Pure(xs) => Some(unsafeTransform(m => xs foreach { case (k, x) => m.put(":" ++ k, x.toAttributeValue) }))
     case Concat(xs, ys) =>
       for { xss <- xs.toExpressionAttributeValues; yss <- ys.toExpressionAttributeValues } yield unsafeMerge(xss, yss)
   }
 
-  final def <>(that: DynamoObject): DynamoObject = self match {
-    case Empty => that
-    case _ =>
-      that match {
-        case Empty => self
-        case _     => Concat(self, that)
-      }
-  }
+  final def <>(that: DynamoObject): DynamoObject =
+    if (self.isEmpty) that
+    else if (that.isEmpty) self
+    else Concat(self, that)
+
+  override final def equals(that: Any): Boolean =
+    that.isInstanceOf[DynamoObject] && (internalToMap == that.asInstanceOf[DynamoObject].internalToMap)
+
+  override final def hashCode(): Int = internalToMap.hashCode
 }
 
 object DynamoObject {
-  case object Empty extends DynamoObject
-  final case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject
-  final case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject
-  final case class Concat(xs: DynamoObject, ys: DynamoObject) extends DynamoObject
+  private[DynamoObject] case object Empty extends DynamoObject {
+    final def internalToMap = Map.empty
+  }
+  private[DynamoObject] final case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
+    final def internalToMap = unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue)
+  }
+  private[DynamoObject] final case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject {
+    final def internalToMap = xs
+  }
+  private[DynamoObject] final case class Concat(xs: DynamoObject, ys: DynamoObject) extends DynamoObject {
+    final def internalToMap = xs.internalToMap ++ ys.internalToMap
+  }
 
   def apply(xs: JMap[String, AttributeValue]): DynamoObject = if (xs.isEmpty) Empty else Strict(xs)
   def apply(xs: (String, DynamoValue)*): DynamoObject = apply(xs.toMap)
@@ -151,22 +158,24 @@ object DynamoObject {
   val empty: DynamoObject = Empty
 
   def singleton(key: String, x: DynamoValue): DynamoObject = Pure(Map(key -> x))
-  def fromIteralble(xs: Iterable[(String, DynamoValue)]): DynamoObject = apply(xs.toMap)
+  def fromIterable(xs: Iterable[(String, DynamoValue)]): DynamoObject = apply(xs.toMap)
 
   private[DynamoObject] def unsafeToJavaMap(m: Map[String, AttributeValue]): JMap[String, AttributeValue] = {
-    val n = new HashMap[String, AttributeValue]
+    val n = new HashMap[String, AttributeValue](m.size, 1)
     m foreach { case (k, x) => n.put(k, x) }
     n
   }
 
-  private[DynamoObject] def unsafeToScalaMap(m: JMap[String, AttributeValue]): Map[String, AttributeValue] =
-    m.entrySet.stream.reduce[Map[String, AttributeValue]](
-      Map.empty,
-      jfun2[Map[String, AttributeValue], JMap.Entry[String, AttributeValue], Map[String, AttributeValue]] { (n, e) =>
-        n + (e.getKey -> e.getValue)
-      },
-      jbiop[Map[String, AttributeValue]](_ ++ _)
-    )
+  private[DynamoObject] def unsafeToScalaMap(m: JMap[String, AttributeValue]): Map[String, AttributeValue] = {
+    val builder = Map.newBuilder[String, AttributeValue]
+    builder.sizeHint(m.size)
+    val iterator = m.entrySet.iterator
+    while (iterator.hasNext) {
+      val e = iterator.next
+      builder += e.getKey -> e.getValue
+    }
+    builder.result()
+  }
 
   private[DynamoObject] def unsafeTransform(f: JMap[String, AttributeValue] => Unit): JMap[String, AttributeValue] = {
     val m = new java.util.HashMap[String, AttributeValue]
@@ -175,13 +184,9 @@ object DynamoObject {
   }
 
   private[DynamoObject] def unsafeMerge[K, V](xs: JMap[K, V], ys: JMap[K, V]): JMap[K, V] = {
-    val m = new java.util.HashMap[K, V]
-    xs.forEach(jcon2[K, V] { (k, v) =>
-      m.put(k, v); ()
-    })
-    ys.forEach(jcon2[K, V] { (k, v) =>
-      m.put(k, v); ()
-    })
+    val m = new java.util.HashMap[K, V](xs.size + ys.size)
+    m.putAll(xs)
+    m.putAll(ys)
     m
   }
 }

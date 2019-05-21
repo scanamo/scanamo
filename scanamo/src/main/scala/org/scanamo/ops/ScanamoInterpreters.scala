@@ -72,8 +72,8 @@ object ScanamoInterpreters {
     ): Future[T] = {
       val p = Promise[T]()
       val h = new AsyncHandler[X, T] {
-        def onError(exception: Exception) { p.complete(Failure(exception)); () }
-        def onSuccess(request: X, result: T) { p.complete(Success(result)); () }
+        def onError(exception: Exception): Unit = { p.complete(Failure(exception)); () }
+        def onSuccess(request: X, result: T): Unit = { p.complete(Success(result)); () }
       }
       call(req, h)
       p.future
@@ -247,7 +247,7 @@ private[ops] object JavaRequests {
 
     attributeValues.toExpressionAttributeValues.fold(requestWithCondition) { avs =>
       if (req.addEmptyList) {
-        avs.put(":emptyList", DynamoValue.EmptyList)
+        avs.put(":emptyList", DynamoValue.EmptyList.toAttributeValue)
       }
       requestWithCondition withExpressionAttributeValues avs
     }

@@ -46,7 +46,7 @@ trait EnumDynamoFormat extends LowPriorityDynamoFormat {
         else alternativeFormat.read(av).right.map(Inr(_))
 
       final def write(t: FieldType[K, V] :+: R): DynamoValue = t match {
-        case Inl(_) => DynamoValue.string(fieldWitness.value.name)
+        case Inl(_) => DynamoValue.fromString(fieldWitness.value.name)
         case Inr(r) => alternativeFormat.write(r)
       }
     }

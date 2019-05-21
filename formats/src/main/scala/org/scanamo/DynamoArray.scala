@@ -4,27 +4,28 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
 import java.util.stream.Collectors
 import java.{util => ju}
-import org.scanamo.internal._
 
 sealed abstract class DynamoArray extends Product with Serializable { self =>
   import DynamoArray._
 
-  def apply(i: Int): Option[DynamoValue] = self match {
+  protected def toList: List[DynamoValue]
+
+  final def apply(i: Int): Option[DynamoValue] = self match {
     case Empty       => None
     case Strict(xs)  => Option(xs.get(i)).map(DynamoValue.fromAttributeValue)
-    case StrictS(xs) => Option(xs.get(i)).map(DynamoValue.string)
-    case StrictN(xs) => Option(xs.get(i)).map(DynamoValue.unsafeNumber)
-    case StrictB(xs) => Option(xs.get(i)).map(DynamoValue.byteBuffer)
+    case StrictS(xs) => Option(xs.get(i)).map(DynamoValue.fromString)
+    case StrictN(xs) => Option(xs.get(i)).map(DynamoValue.unsafeFromNumber)
+    case StrictB(xs) => Option(xs.get(i)).map(DynamoValue.fromByteBuffer)
     case Pure(xs)    => xs.drop(i).headOption
-    case PureS(xs)   => xs.drop(1).headOption.map(DynamoValue.string)
-    case PureN(xs)   => xs.drop(i).headOption.map(DynamoValue.unsafeNumber)
-    case PureB(xs)   => xs.drop(i).headOption.map(DynamoValue.byteBuffer)
+    case PureS(xs)   => xs.drop(1).headOption.map(DynamoValue.fromString)
+    case PureN(xs)   => xs.drop(i).headOption.map(DynamoValue.unsafeFromNumber)
+    case PureB(xs)   => xs.drop(i).headOption.map(DynamoValue.fromByteBuffer)
     case Concat(xs, ys) =>
       val s = xs.size
       if (s > i) xs(i) else ys(i - s)
   }
 
-  def size: Int = self match {
+  final def size: Int = self match {
     case Empty          => 0
     case Strict(xs)     => xs.size
     case StrictN(xs)    => xs.size
@@ -37,14 +38,14 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
     case Concat(xs, ys) => xs.size + ys.size
   }
 
-  def isEmpty: Boolean = self match {
+  final def isEmpty: Boolean = self match {
     case Empty => true
     case _     => false
   }
 
-  def nonEmpty: Boolean = !isEmpty
+  final def nonEmpty: Boolean = !isEmpty
 
-  def contains(dv: DynamoValue): Boolean = self match {
+  final def contains(dv: DynamoValue): Boolean = self match {
     case Empty          => false
     case Strict(xs)     => xs.contains(dv.toAttributeValue)
     case Pure(xs)       => xs.contains(dv)
@@ -57,7 +58,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
     case Concat(xs, ys) => xs.contains(dv) || ys.contains(dv)
   }
 
-  def toAttributeValue: AttributeValue = self match {
+  final def toAttributeValue: AttributeValue = self match {
     case Empty       => DynamoValue.Null
     case Strict(xs)  => new AttributeValue().withL(xs)
     case StrictS(xs) => new AttributeValue().withSS(xs)
@@ -71,21 +72,12 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       new AttributeValue().withL(unsafeMerge[AttributeValue](xs.toJavaCollection, ys.toJavaCollection))
   }
 
-  def toJavaCollection: ju.List[AttributeValue] = self match {
-    case Empty      => new java.util.LinkedList[AttributeValue]()
-    case Strict(xs) => xs
-    case StrictS(xs) =>
-      xs.stream
-        .map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withS(_)))
-        .collect(Collectors.toList())
-    case StrictN(xs) =>
-      xs.stream
-        .map[AttributeValue](jfun[String, AttributeValue](new AttributeValue().withN(_)))
-        .collect(Collectors.toList())
-    case StrictB(xs) =>
-      xs.stream
-        .map[AttributeValue](jfun[ByteBuffer, AttributeValue](new AttributeValue().withB(_)))
-        .collect(Collectors.toList())
+  final def toJavaCollection: ju.List[AttributeValue] = self match {
+    case Empty          => new java.util.LinkedList[AttributeValue]()
+    case Strict(xs)     => xs
+    case StrictS(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withS(_)).collect(Collectors.toList())
+    case StrictN(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withN(_)).collect(Collectors.toList())
+    case StrictB(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withB(_)).collect(Collectors.toList())
     case Pure(xs)       => unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)
     case PureS(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withS(_))
     case PureN(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withN(_))
@@ -93,42 +85,40 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
     case Concat(xs, ys) => unsafeMerge(xs.toJavaCollection, ys.toJavaCollection)
   }
 
-  def toDynamoValue: DynamoValue = DynamoValue.fromDynamoArray(self)
+  final def toDynamoValue: DynamoValue = DynamoValue.fromDynamoArray(self)
 
-  def isAttributeValueArray: Boolean = self match {
+  final def isAttributeValueArray: Boolean = self match {
     case _: Strict | _: Pure => true
     case Concat(xs, ys)      => xs.isAttributeValueArray && ys.isAttributeValueArray
     case _                   => false
   }
 
-  def isStringArray: Boolean = self match {
+  final def isStringArray: Boolean = self match {
     case _: StrictS | _: PureS => true
     case Concat(xs, ys)        => xs.isStringArray && ys.isStringArray
     case _                     => false
   }
 
-  def isNumArray: Boolean = self match {
+  final def isNumArray: Boolean = self match {
     case _: StrictN | _: PureN => true
     case Concat(xs, ys)        => xs.isNumArray && ys.isNumArray
     case _                     => false
   }
 
-  def isByteBufferArray: Boolean = self match {
+  final def isByteBufferArray: Boolean = self match {
     case _: StrictB | _: PureB => true
     case Concat(xs, ys)        => xs.isByteBufferArray && ys.isByteBufferArray
     case _                     => false
   }
 
-  def asArray: Option[List[DynamoValue]] = self match {
+  final def asArray: Option[List[DynamoValue]] = self match {
     case Empty => Some(List.empty)
     case Strict(xs0) =>
       Some(
         xs0.stream.reduce[List[DynamoValue]](
           Nil,
-          jfun2[List[DynamoValue], AttributeValue, List[DynamoValue]](
-            (xs, x) => xs :+ DynamoValue.fromAttributeValue(x)
-          ),
-          concatDynamoValues
+          (xs, x) => xs :+ DynamoValue.fromAttributeValue(x),
+          _ ++ _
         )
       )
     case Pure(xs) => Some(xs)
@@ -140,63 +130,72 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
     case _ => None
   }
 
-  def asStringArray: Option[List[String]] = self match {
-    case Empty       => Some(List.empty)
-    case StrictS(xs) => Some(xs.stream.reduce[List[String]](Nil, prependString, concatStrings))
-    case PureS(xs)   => Some(xs)
-    case Concat(xs0, ys0) =>
-      for {
-        xs <- xs0.asStringArray
-        ys <- ys0.asStringArray
-      } yield xs ++ ys
-    case _ => None
+  final def asStringArray: Option[List[String]] = self match {
+    case Empty            => Some(List.empty)
+    case StrictS(xs)      => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+    case PureS(xs)        => Some(xs)
+    case Concat(xs0, ys0) => for { xs <- xs0.asStringArray; ys <- ys0.asStringArray } yield xs ++ ys
+    case _                => None
   }
 
-  def asNumArray: Option[List[String]] = self match {
-    case Empty       => Some(List.empty)
-    case StrictN(xs) => Some(xs.stream.reduce[List[String]](Nil, prependString, concatStrings))
-    case PureN(xs)   => Some(xs)
-    case Concat(xs0, ys0) =>
-      for {
-        xs <- xs0.asNumArray
-        ys <- ys0.asNumArray
-      } yield xs ++ ys
-    case _ => None
+  final def asNumArray: Option[List[String]] = self match {
+    case Empty            => Some(List.empty)
+    case StrictN(xs)      => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+    case PureN(xs)        => Some(xs)
+    case Concat(xs0, ys0) => for { xs <- xs0.asNumArray; ys <- ys0.asNumArray } yield xs ++ ys
+    case _                => None
   }
 
-  def asByteBufferArray: Option[List[ByteBuffer]] = self match {
-    case Empty       => Some(List.empty)
-    case StrictB(xs) => Some(xs.stream.reduce[List[ByteBuffer]](Nil, prependByteBuffer, concatByteBuffers))
-    case PureB(xs)   => Some(xs)
-    case Concat(xs0, ys0) =>
-      for {
-        xs <- xs0.asByteBufferArray
-        ys <- ys0.asByteBufferArray
-      } yield xs ++ ys
-    case _ => None
+  final def asByteBufferArray: Option[List[ByteBuffer]] = self match {
+    case Empty            => Some(List.empty)
+    case StrictB(xs)      => Some(xs.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
+    case PureB(xs)        => Some(xs)
+    case Concat(xs0, ys0) => for { xs <- xs0.asByteBufferArray; ys <- ys0.asByteBufferArray } yield xs ++ ys
+    case _                => None
   }
 
-  def <>(that: DynamoArray): DynamoArray = self match {
-    case Empty => that
-    case _ =>
-      that match {
-        case Empty => self
-        case _     => DynamoArray.Concat(self, that)
-      }
-  }
+  final def <>(that: DynamoArray): DynamoArray =
+    if (self.isEmpty) that
+    else if (that.isEmpty) self
+    else Concat(self, that)
+
+  override final def equals(that: Any): Boolean =
+    that.isInstanceOf[DynamoArray] && (toList == that.asInstanceOf[DynamoArray].toList)
+
+  override final def hashCode(): Int = toList.hashCode
 }
 
 object DynamoArray {
-  private[DynamoArray] case object Empty extends DynamoArray
-  private[DynamoArray] final case class Strict(xs: ju.List[AttributeValue]) extends DynamoArray
-  private[DynamoArray] final case class StrictS(xs: ju.List[String]) extends DynamoArray
-  private[DynamoArray] final case class StrictN(xs: ju.List[String]) extends DynamoArray
-  private[DynamoArray] final case class StrictB(xs: ju.List[ByteBuffer]) extends DynamoArray
-  private[DynamoArray] final case class Pure(xs: List[DynamoValue]) extends DynamoArray
-  private[DynamoArray] final case class PureS(xs: List[String]) extends DynamoArray
-  private[DynamoArray] final case class PureN(xs: List[String]) extends DynamoArray
-  private[DynamoArray] final case class PureB(xs: List[ByteBuffer]) extends DynamoArray
-  private[DynamoArray] final case class Concat(xs: DynamoArray, ys: DynamoArray) extends DynamoArray
+  private[DynamoArray] case object Empty extends DynamoArray {
+    final def toList: List[DynamoValue] = Nil
+  }
+  private[DynamoArray] final case class Strict(xs: ju.List[AttributeValue]) extends DynamoArray {
+    final def toList: List[DynamoValue] = unsafeToScalaList(xs, DynamoValue.fromAttributeValue)
+  }
+  private[DynamoArray] final case class StrictS(xs: ju.List[String]) extends DynamoArray {
+    final def toList: List[DynamoValue] = unsafeToScalaList(xs, DynamoValue.fromString)
+  }
+  private[DynamoArray] final case class StrictN(xs: ju.List[String]) extends DynamoArray {
+    final def toList: List[DynamoValue] = unsafeToScalaList(xs, DynamoValue.unsafeFromNumber)
+  }
+  private[DynamoArray] final case class StrictB(xs: ju.List[ByteBuffer]) extends DynamoArray {
+    final def toList: List[DynamoValue] = unsafeToScalaList(xs, DynamoValue.fromByteBuffer)
+  }
+  private[DynamoArray] final case class Pure(xs: List[DynamoValue]) extends DynamoArray {
+    final def toList: List[DynamoValue] = xs
+  }
+  private[DynamoArray] final case class PureS(xs: List[String]) extends DynamoArray {
+    final def toList: List[DynamoValue] = xs.map(DynamoValue.fromString)
+  }
+  private[DynamoArray] final case class PureN(xs: List[String]) extends DynamoArray {
+    final def toList: List[DynamoValue] = xs.map(DynamoValue.unsafeFromNumber)
+  }
+  private[DynamoArray] final case class PureB(xs: List[ByteBuffer]) extends DynamoArray {
+    final def toList: List[DynamoValue] = xs.map(DynamoValue.fromByteBuffer)
+  }
+  private[DynamoArray] final case class Concat(xs: DynamoArray, ys: DynamoArray) extends DynamoArray {
+    final def toList: List[DynamoValue] = xs.toList ++ ys.toList
+  }
 
   private[DynamoArray] def unsafeMerge[A](xs: ju.List[A], ys: ju.List[A]): ju.List[A] =
     java.util.stream.Stream.concat[A](xs.stream, ys.stream).collect(Collectors.toList())
@@ -209,6 +208,13 @@ object DynamoArray {
     l
   }
 
+  private[DynamoArray] def unsafeToScalaList[A, B](xs: ju.List[A], f: A => B): List[B] = {
+    val builder = List.newBuilder[B]
+    builder.sizeHint(xs.size)
+    xs.forEach(x => builder += f(x))
+    builder.result()
+  }
+
   def apply(xs: ju.List[AttributeValue]): DynamoArray = if (xs.isEmpty) Empty else Strict(xs)
   def apply(xs: DynamoValue*): DynamoArray = if (xs.isEmpty) Empty else Pure(xs.toList)
   def strings(xs: ju.List[String]): DynamoArray = if (xs.isEmpty) Empty else StrictS(xs)
@@ -217,4 +223,8 @@ object DynamoArray {
   def numbers[N: Numeric](xs: N*): DynamoArray = if (xs.isEmpty) Empty else PureN(xs.toList.map(_.toString))
   def byteBuffers(xs: ju.List[ByteBuffer]): DynamoArray = if (xs.isEmpty) Empty else StrictB(xs)
   def byteBuffers(xs: ByteBuffer*): DynamoArray = if (xs.isEmpty) Empty else PureB(xs.toList)
+
+  val empty: DynamoArray = Empty
+
+  private[scanamo] val EmptyList: DynamoArray = Pure(Nil)
 }
