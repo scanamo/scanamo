@@ -59,8 +59,7 @@ import org.scanamo._
 import org.scanamo.syntax._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import akka.stream.alpakka.dynamodb.impl.DynamoSettings
+import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import scala.concurrent.duration._
@@ -70,13 +69,10 @@ implicit val materializer = ActorMaterializer.create(system)
 implicit val executor = system.dispatcher
 
 val alpakkaClient = DynamoClient(
-    DynamoSettings(
-      region = "",
-      host = "localhost",
-      port = 8042,
-      parallelism = 2,
-      credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance
-    )
+    DynamoSettings(region = "", host = "localhost")
+      .withPort(8042)
+      .withParallelism(2)
+      .withCredentialsProvider(DefaultAWSCredentialsProviderChain.getInstance)
 )
 
 // Use the non-Alpakka client to create the table for tests
