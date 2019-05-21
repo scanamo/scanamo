@@ -123,33 +123,33 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
           _ ++ _
         )
       )
-    case Pure(xs)         => Some(xs)
-    case Concat(xs0, ys0) => (xs0.asArray, ys0.asArray).mapN(_ ++ _)
-    case _                => None
+    case Pure(xs)       => Some(xs)
+    case Concat(xs, ys) => (xs.asArray, ys.asArray).mapN(_ ++ _)
+    case _              => None
   }
 
   final def asStringArray: Option[List[String]] = self match {
-    case Empty            => Some(List.empty)
-    case StrictS(xs)      => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
-    case PureS(xs)        => Some(xs)
-    case Concat(xs0, ys0) => (xs0.asStringArray, ys0.asStringArray).mapN(_ ++ _)
-    case _                => None
+    case Empty          => Some(List.empty)
+    case StrictS(xs)    => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+    case PureS(xs)      => Some(xs)
+    case Concat(xs, ys) => (xs.asStringArray, ys.asStringArray).mapN(_ ++ _)
+    case _              => None
   }
 
   final def asNumArray: Option[List[String]] = self match {
-    case Empty            => Some(List.empty)
-    case StrictN(xs)      => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
-    case PureN(xs)        => Some(xs)
-    case Concat(xs0, ys0) => (xs0.asNumArray, ys0.asNumArray).mapN(_ ++ _)
-    case _                => None
+    case Empty          => Some(List.empty)
+    case StrictN(xs)    => Some(xs.stream.reduce[List[String]](Nil, _ :+ _, _ ++ _))
+    case PureN(xs)      => Some(xs)
+    case Concat(xs, ys) => (xs.asNumArray, ys.asNumArray).mapN(_ ++ _)
+    case _              => None
   }
 
   final def asByteBufferArray: Option[List[ByteBuffer]] = self match {
-    case Empty            => Some(List.empty)
-    case StrictB(xs)      => Some(xs.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
-    case PureB(xs)        => Some(xs)
-    case Concat(xs0, ys0) => (xs0.asByteBufferArray, ys0.asByteBufferArray).mapN(_ ++ _)
-    case _                => None
+    case Empty          => Some(List.empty)
+    case StrictB(xs)    => Some(xs.stream.reduce[List[ByteBuffer]](Nil, _ :+ _, _ ++ _))
+    case PureB(xs)      => Some(xs)
+    case Concat(xs, ys) => (xs.asByteBufferArray, ys.asByteBufferArray).mapN(_ ++ _)
+    case _              => None
   }
 
   final def <>(that: DynamoArray): DynamoArray =
