@@ -31,6 +31,7 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
 
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("muppets")('name -> S)
 
@@ -45,7 +46,7 @@ val operations = for {
   kermit <- muppets.get('name -> "Kermit")
 } yield kermit
      
-Scanamo.exec(client)(operations)
+scanamo.exec(operations)
 ```
 
 Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
@@ -59,6 +60,7 @@ import org.scanamo._
 import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("villains")('name -> S)
 
@@ -73,7 +75,7 @@ val operations = for {
   survivors <- villains.scan()
 } yield survivors
      
-Scanamo.exec(client)(operations)
+scanamo.exec(operations)
 ```
 
 ### Update
@@ -86,6 +88,7 @@ import org.scanamo._
 import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("teams")('name -> S)
 case class Team(name: String, goals: Int, scorers: List[String], mascot: Option[String])
@@ -97,7 +100,7 @@ val operations = for {
 } yield updated
 ```
 ```tut:book
-Scanamo.exec(client)(operations)
+scanamo.exec(operations)
 ```
 
 Which fields are updated can be based on incoming data:
@@ -112,7 +115,7 @@ LocalDynamoDB.createTable(client)("favourites")('name -> S)
 case class Favourites(name: String, colour: String, number: Long)
 val favouritesTable = Table[Favourites]("favourites")
 
-Scanamo.exec(client)(favouritesTable.put(Favourites("Alice", "Blue", 42L)))
+scanamo.exec(favouritesTable.put(Favourites("Alice", "Blue", 42L)))
 
 case class FavouriteUpdate(name: String, colour: Option[String], number: Option[Long])
 def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadError, Favourites]]] = {
@@ -132,7 +135,7 @@ val updates = List(
   FavouriteUpdate("Alice", None, None)
 )
 
-Scanamo.exec(client)(
+scanamo.exec(
   for {
     _ <- updates.flatMap(updateFavourite).sequence
     result <- favouritesTable.get('name -> "Alice")
@@ -154,6 +157,7 @@ import org.scanamo._
 import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("lines")('mode -> S, 'line -> S)
 
@@ -171,7 +175,7 @@ val operations = for {
   allLines <- transportTable.scan()
 } yield allLines.toList
 
-Scanamo.exec(client)(operations)
+scanamo.exec(operations)
 ```
 
 ### Query
@@ -183,6 +187,7 @@ import org.scanamo._
 import org.scanamo.syntax._
 
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
 
@@ -198,7 +203,7 @@ val operations = for {
 } yield tubesStartingWithC.toList
 ```
 ```tut:book
-Scanamo.exec(client)(operations)
+scanamo.exec(operations)
 ```
 
 

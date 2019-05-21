@@ -5,9 +5,14 @@ import org.scanamo.ops.{ScalazInterpreter, ScanamoOps}
 import scalaz.ioeffect.Task
 import shims._
 
+class ScanamoScalaz(client: AmazonDynamoDBAsync) {
+
+  private final val interpreter = new ScalazInterpreter(client)
+
+  final def exec[A](op: ScanamoOps[A]): Task[A] = op.asScalaz.foldMap(interpreter)
+
+}
+
 object ScanamoScalaz {
-
-  def exec[A](client: AmazonDynamoDBAsync)(op: ScanamoOps[A]): Task[A] =
-    op.asScalaz.foldMap(ScalazInterpreter.io(client))
-
+  def apply(client: AmazonDynamoDBAsync): ScanamoScalaz = new ScanamoScalaz(client)
 }

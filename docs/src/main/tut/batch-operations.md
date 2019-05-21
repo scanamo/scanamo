@@ -18,6 +18,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
  
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("lemmings")('role -> S)
 
@@ -34,7 +35,7 @@ val ops = for {
   _ <- lemmingsTable.deleteAll('role -> Set("Walker", "Blocker"))
   survivors <- lemmingsTable.scan()
 } yield (bLemmings, survivors)
-val (bLemmings, survivors) = Scanamo.exec(client)(ops)
+val (bLemmings, survivors) = scanamo.exec(ops)
 import cats.syntax.either._
 bLemmings.flatMap(_.toOption)
 survivors.flatMap(_.toOption)
