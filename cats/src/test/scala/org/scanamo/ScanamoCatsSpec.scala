@@ -2,9 +2,6 @@ package org.scanamo
 
 import cats.effect.IO
 import cats.implicits._
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.{FunSpec, Matchers}
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.error.DynamoReadError
@@ -16,7 +13,6 @@ import org.scanamo.auto._
 class ScanamoCatsSpec extends FunSpec with Matchers {
 
   val client = LocalDynamoDB.client()
-  import scala.concurrent.ExecutionContext.Implicits.global
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
@@ -238,7 +234,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
-          res1 <- bears.index(i).limit(1).scan
+          _ <- bears.index(i).limit(1).scan
           res2 <- bears.index(i).limit(1).from('name -> "Graham" and ('alias -> "Guardianista")).scan
           res3 <- bears.index(i).limit(1).from('name -> "Yogi" and ('alias -> "Kanga")).scan
         } yield res2 ::: res3
