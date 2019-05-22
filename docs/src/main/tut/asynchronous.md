@@ -19,6 +19,7 @@ import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
  
 val client = LocalDynamoDB.client()
+val scanamo = ScanamoAsync(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("farm")('name -> S)
 
@@ -35,7 +36,7 @@ val ops = for {
 } yield bunce
 ```
 ```scala
-concurrent.Await.result(ScanamoAsync.exec(client)(ops), 5.seconds)
+concurrent.Await.result(scanamo(ops), 5.seconds)
 ```
 
 Note that `AmazonDynamoDBAsyncClient` uses a thread pool internally.
@@ -59,8 +60,7 @@ import org.scanamo._
 import org.scanamo.syntax._
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.dynamodb.scaladsl.DynamoClient
-import akka.stream.alpakka.dynamodb.impl.DynamoSettings
+import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
 import scala.concurrent.duration._
@@ -70,17 +70,17 @@ implicit val materializer = ActorMaterializer.create(system)
 implicit val executor = system.dispatcher
 
 val alpakkaClient = DynamoClient(
-    DynamoSettings(
-      region = "",
-      host = "localhost",
-      port = 8042,
-      parallelism = 2,
-      credentialsProvider = DefaultAWSCredentialsProviderChain.getInstance
-    )
+    DynamoSettings(region = "", host = "localhost")
+      .withPort(8042)
+      .withParallelism(2)
+      .withCredentialsProvider(DefaultAWSCredentialsProviderChain.getInstance)
 )
 
 // Use the non-Alpakka client to create the table for tests
 val client = LocalDynamoDB.client()
+
+val scanamo = ScanamoAlpakka(alpakkaClient)
+
 LocalDynamoDB.createTable(client)("nursery-farmers")('name -> S)
 
 case class Farm(animals: List[String])
@@ -96,7 +96,7 @@ val ops = for {
 } yield bunce
 
 // Use the Alpakka interpreter
-//concurrent.Await.result(ScanamoAlpakka.exec(alpakkaClient)(ops), 5.seconds)
+scanamo.exec(ops)
 
 system.terminate()
 ```

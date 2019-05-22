@@ -16,6 +16,7 @@ import scalaz.zio.{ DefaultRuntime, IO }
 class ScanamoZioSpec extends FunSpec with Matchers {
 
   val client = LocalDynamoDB.client()
+  val zio = ScanamoZio(client)
   val RTS = new DefaultRuntime {}
 
   import RTS._
@@ -32,7 +33,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         f <- farmers.get('name -> "McDonald")
       } yield f
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal(
+      unsafeRun(zio.exec(result)) should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow")))))
       )
     }
@@ -51,7 +52,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         r2 <- farmers.get('name -> "Maggot")
       } yield (r1, r1 == r2)
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal(
+      unsafeRun(zio.exec(result)) should equal(
         (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
       )
     }
@@ -66,7 +67,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         e <- engines.get('name -> "Thomas" and 'number -> 1)
       } yield e
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal(Some(Right(Engine("Thomas", 1))))
+      unsafeRun(zio.exec(result)) should equal(Some(Right(Engine("Thomas", 1))))
     }
   }
 
@@ -80,7 +81,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         c <- cities.consistently.get('name -> "Nashville")
       } yield c
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal(Some(Right(City("Nashville", "US"))))
+      unsafeRun(zio.exec(result)) should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
@@ -91,7 +92,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
 
       val farmers = Table[Farmer](t)
 
-      unsafeRun(ScanamoZio.exec(client) {
+      unsafeRun(zio.exec {
         for {
           _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"))))
           _ <- farmers.delete('name -> "McGregor")
@@ -120,7 +121,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         fs <- farmers.scan
       } yield fs
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(List.empty)
+      unsafeRun(zio.exec(ops)) should equal(List.empty)
     }
   }
 
@@ -135,7 +136,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         fs <- forecasts.scan
       } yield fs
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(List(Right(Forecast("London", "Sun"))))
+      unsafeRun(zio.exec(ops)) should equal(List(Right(Forecast("London", "Sun"))))
     }
   }
 
@@ -152,7 +153,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         results <- forecasts.scan()
       } yield results
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+      unsafeRun(zio.exec(ops)) should equal(
         List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None)))
       )
     }
@@ -170,7 +171,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         bs <- bears.scan
       } yield bs
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+      unsafeRun(zio.exec(ops)) should equal(
         List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets")))
       )
     }
@@ -183,7 +184,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         ls <- lemmings.scan
       } yield ls
 
-      unsafeRun(ScanamoZio.exec(client)(ops)).size should equal(100)
+      unsafeRun(zio.exec(ops)).size should equal(100)
     }
   }
 
@@ -197,7 +198,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         _ <- bears.put(Bear("Yogi", "picnic baskets"))
         bs <- bears.limit(1).scan
       } yield bs
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(List(Right(Bear("Pooh", "honey"))))
+      unsafeRun(zio.exec(ops)) should equal(List(Right(Bear("Pooh", "honey"))))
     }
   }
 
@@ -212,7 +213,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- bears.index(i).limit(1).scan
       } yield bs
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+      unsafeRun(zio.exec(ops)) should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
     }
   }
 
@@ -232,7 +233,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         } yield res2 ::: res3
       } yield bs
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+      unsafeRun(zio.exec(ops)) should equal(
         List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
       )
     }
@@ -252,7 +253,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         r5 <- animals.query('species -> "Pig" and 'number >= 2)
       } yield (r1, r2, r3, r4, r5)
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+      unsafeRun(zio.exec(ops)) should equal(
         (
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
@@ -277,7 +278,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         ts <- transports.query('mode -> "Underground" and ('line beginsWith "C"))
       } yield ts
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+      unsafeRun(zio.exec(ops)) should equal(
         List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle")))
       )
     }
@@ -299,7 +300,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         rs <- transports.limit(1).query('mode -> "Underground" and ('line beginsWith "C"))
       } yield rs
 
-      unsafeRun(ScanamoZio.exec(client)(result)) should equal(List(Right(Transport("Underground", "Central"))))
+      unsafeRun(zio.exec(result)) should equal(List(Right(Transport("Underground", "Central"))))
     }
   }
 
@@ -327,7 +328,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
             )
         } yield rs
 
-        unsafeRun(ScanamoZio.exec(client)(result)) should equal(
+        unsafeRun(zio.exec(result)) should equal(
           List(Right(Transport("Underground", "Northern", "Black")))
         )
     }
@@ -360,7 +361,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         ts5 <- stationTable.index(i).query('mode -> "Underground" and ('zone between (1 and 1)))
       } yield (ts1, ts2, ts3, ts4, ts5)
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+      unsafeRun(zio.exec(ops)) should equal(
         (
           List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
           List.empty,
@@ -382,7 +383,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
         farmerWithNoAge <- farmersTable.filter(attributeNotExists('age)).query('firstName -> "Fred")
       } yield farmerWithNoAge
-      unsafeRun(ScanamoZio.exec(client)(farmerOps)) should equal(
+      unsafeRun(zio.exec(farmerOps)) should equal(
         List(Right(Farmer("Fred", "Perry", None)))
       )
     }
@@ -398,7 +399,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         rs <- rabbits.scan
       } yield rs
 
-      unsafeRun(ScanamoZio.exec(client)(result)).size should equal(100)
+      unsafeRun(zio.exec(result)).size should equal(100)
     }
   }
 
@@ -408,7 +409,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       case class Farmer(name: String, age: Long, farm: Farm)
       val farmers = Table[Farmer](t)
 
-      unsafeRun(ScanamoZio.exec(client)(for {
+      unsafeRun(zio.exec(for {
         _ <- farmers.putAll(
           Set(
             Farmer("Boggis", 43L, Farm(List("chicken"))),
@@ -430,7 +431,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       case class Doctor(actor: String, regeneration: Int)
       val doctors = Table[Doctor](t)
 
-      unsafeRun(ScanamoZio.exec(client)(for {
+      unsafeRun(zio.exec(for {
         _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
         ds <- doctors.getAll(('actor and 'regeneration) -> Set("McCoy" -> 9, "Ecclestone" -> 11))
       } yield ds)) should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
@@ -443,7 +444,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
 
-      unsafeRun(ScanamoZio.exec(client)(for {
+      unsafeRun(zio.exec(for {
         _ <- farmsTable.putAll(farms)
         fs <- farmsTable.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
       } yield fs)) should equal(farms.map(Right(_)))
@@ -456,7 +457,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
       val farmsTable = Table[Farm](t)
 
-      unsafeRun(ScanamoZio.exec(client)(for {
+      unsafeRun(zio.exec(for {
         _ <- farmsTable.putAll(farms)
         fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList('id, farms.map(_.id))))
       } yield fs)) should equal(farms.map(Right(_)))
@@ -474,7 +475,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
-      unsafeRun(ScanamoZio.exec(client)(farmerOps)) should equal(
+      unsafeRun(zio.exec(farmerOps)) should equal(
         Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
       )
     }
@@ -490,7 +491,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
-      unsafeRun(ScanamoZio.exec(client)(farmerOps)) should equal(
+      unsafeRun(zio.exec(farmerOps)) should equal(
         None
       )
     }
@@ -510,7 +511,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         farmerWithNewStock <- farmersTable.get('name -> "McDonald")
       } yield farmerWithNewStock
 
-      unsafeRun(ScanamoZio.exec(client)(farmerOps)) should equal(
+      unsafeRun(zio.exec(farmerOps)) should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken")))))
       )
     }
@@ -531,7 +532,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         _ <- farmersTable.given('age between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get('name -> "Butch")
       } yield farmerButch
-      unsafeRun(ScanamoZio.exec(client)(farmerOps)) should equal(
+      unsafeRun(zio.exec(farmerOps)) should equal(
         Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
       )
     }
@@ -550,7 +551,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
 
-      unsafeRun(ScanamoZio.exec(client)(ops)) should equal(
+      unsafeRun(zio.exec(ops)) should equal(
         List(Right(Gremlin(1, false)))
       )
     }
