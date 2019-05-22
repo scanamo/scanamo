@@ -7,7 +7,7 @@ import shims._
 
 class ScanamoScalaz(client: AmazonDynamoDBAsync) {
 
-  private final val interpreter = new ScalazInterpreter(client)
+  final private val interpreter = new ScalazInterpreter(client)
 
   final def exec[A](op: ScanamoOps[A]): Task[A] = op.asScalaz.foldMap(interpreter)
 

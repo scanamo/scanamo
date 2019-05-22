@@ -5,7 +5,7 @@ import cats.syntax.either._
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.ops.retrypolicy._
 
-import akka.stream.alpakka.dynamodb.{AwsOp, AwsPagedOp, DynamoAttributes, DynamoClient}
+import akka.stream.alpakka.dynamodb.{ AwsOp, AwsPagedOp, DynamoAttributes, DynamoClient }
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
 import akka.stream.scaladsl.Source
 import akka.NotUsed
@@ -14,7 +14,7 @@ private[scanamo] class AlpakkaInterpreter(client: DynamoClient, retryPolicy: Ret
     extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
     with WithRetry {
 
-  private final def run(op: AwsOp): AlpakkaInterpreter.Alpakka[op.B] =
+  final private def run(op: AwsOp): AlpakkaInterpreter.Alpakka[op.B] =
     retry(DynamoDb.source(op).withAttributes(DynamoAttributes.client(client)), retryPolicy)
 
   def apply[A](ops: ScanamoOpsA[A]) =

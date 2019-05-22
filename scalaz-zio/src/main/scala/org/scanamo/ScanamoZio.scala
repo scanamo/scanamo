@@ -8,7 +8,7 @@ import scalaz.zio.interop.catz._
 import scalaz.zio.IO
 
 class ScanamoZio private (client: AmazonDynamoDBAsync) {
-  private final val interpreter: ScanamoOpsA ~> IO[AmazonDynamoDBException, ?] =
+  final private val interpreter: ScanamoOpsA ~> IO[AmazonDynamoDBException, ?] =
     new ZioInterpreter(client)
 
   final def exec[A](op: ScanamoOps[A]): IO[AmazonDynamoDBException, A] = op.foldMap(interpreter)
