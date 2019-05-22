@@ -17,6 +17,7 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)
 ```
 ```tut:book
@@ -41,7 +42,7 @@ LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
       .update('number -> 3, set('friendly -> false))
     remainingGremlins <- gremlinsTable.scan()
   } yield (allGremlins, remainingGremlins)
-  Scanamo.exec(client)(ops)
+  scanamo.exec(ops)
 }
 ```
 

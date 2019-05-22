@@ -1,14 +1,16 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import org.scanamo.ops.{ScanamoInterpreters, ScanamoOps}
+import org.scanamo.ops._
 
 /**
   * Provides a simplified interface for reading and writing case classes to DynamoDB
   *
   * To avoid blocking, use [[org.scanamo.ScanamoAsync]]
   */
-object Scanamo {
+class Scanamo private (client: AmazonDynamoDB) {
+
+  private final val interpreter = new ScanamoSyncInterpreter(client)
 
   /**
     * Execute the operations built with [[org.scanamo.Table]], using the client
@@ -21,6 +23,7 @@ object Scanamo {
     * >>> val transport = Table[Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
+    * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
@@ -32,10 +35,14 @@ object Scanamo {
     * ...       Transport("Underground", "Central")))
     * ...     results <- transport.query('mode -> "Underground" and ('line beginsWith "C"))
     * ...   } yield results.toList
-    * ...   Scanamo.exec(client)(operations)
+    * ...   scanamo.exec(operations)
     * ... }
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
     */
-  def exec[A](client: AmazonDynamoDB)(op: ScanamoOps[A]): A = op.foldMap(ScanamoInterpreters.id(client))
+  final def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
+}
+
+object Scanamo {
+  def apply(client: AmazonDynamoDB): Scanamo = new Scanamo(client)
 }
