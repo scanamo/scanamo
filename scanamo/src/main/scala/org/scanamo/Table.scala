@@ -323,7 +323,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   import org.scanamo.auto._
     * ...   val cityTable = Table[City](t)
     * ...   val ops = for {
-    * ...     putRes <- cityTable.putAll(Set(
+    * ...     _ <- cityTable.putAll(Set(
     * ...       City("US", "Nashville"), City("IT", "Rome"), City("IT", "Siena"), City("TZ", "Dar es Salaam")))
     * ...     get <- cityTable.consistently.get('country -> "US" and 'name -> "Nashville")
     * ...     scan <- cityTable.consistently.scan()
@@ -509,7 +509,6 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
-    * >>> import org.scanamo.query._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     *
@@ -591,7 +590,6 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> val client = LocalDynamoDB.client()
     *
-    * >>> import collection.JavaConverters._
     * >>> import cats.implicits._
     * >>> import org.scanamo.error._
     * >>> import org.scanamo.ops._
@@ -661,7 +659,6 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> val client = LocalDynamoDB.client()
     *
-    * >>> import collection.JavaConverters._
     * >>> import cats.implicits._
     * >>> import org.scanamo.error._
     * >>> import org.scanamo.ops._

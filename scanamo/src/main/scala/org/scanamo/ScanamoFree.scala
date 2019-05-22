@@ -122,9 +122,6 @@ object ScanamoFree {
 
   /**
     * {{{
-    * prop> import collection.JavaConverters._
-    * prop> import com.amazonaws.services.dynamodbv2.model._
-    *
     * prop> (m: Map[String, Int]) =>
     *     |   ScanamoFree.read[Map[String, Int]](
     *     |     DynamoObject(m.mapValues(DynamoValue.fromNumber(_)))
