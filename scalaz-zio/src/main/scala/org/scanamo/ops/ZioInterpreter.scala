@@ -9,7 +9,7 @@ import scalaz.zio.IO
 
 private[scanamo] class ZioInterpreter(client: AmazonDynamoDBAsync)
     extends (ScanamoOpsA ~> IO[AmazonDynamoDBException, ?]) {
-  private final def eff[A <: AmazonWebServiceRequest, B](
+  final private def eff[A <: AmazonWebServiceRequest, B](
     f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
     req: A
   ): IO[AmazonDynamoDBException, B] =

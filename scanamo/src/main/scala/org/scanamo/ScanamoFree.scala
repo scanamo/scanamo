@@ -1,8 +1,8 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.{PutRequest, WriteRequest, _}
-import java.util.{List => JList, Map => JMap}
-import org.scanamo.DynamoResultStream.{QueryResultStream, ScanResultStream}
+import com.amazonaws.services.dynamodbv2.model.{ PutRequest, WriteRequest, _ }
+import java.util.{ List => JList, Map => JMap }
+import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._

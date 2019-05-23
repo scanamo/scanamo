@@ -36,17 +36,16 @@ object TimeGenerators {
       offsetS <- if (offsetH == 18 || offsetH == -18) Gen.const(0)
       else if (offsetH < 0) Gen.choose[Int](-59, -1)
       else Gen.choose(0, 59)
-    } yield
-      ZonedDateTime.of(
-        year,
-        month,
-        day,
-        hour,
-        minute,
-        second,
-        milli * 1000000,
-        ZoneOffset.ofHoursMinutesSeconds(offsetH, offsetM, offsetS)
-      )
+    } yield ZonedDateTime.of(
+      year,
+      month,
+      day,
+      hour,
+      minute,
+      second,
+      milli * 1000000,
+      ZoneOffset.ofHoursMinutesSeconds(offsetH, offsetM, offsetS)
+    )
   }
 
   implicit val instantAsLongArb: Arbitrary[Instant] = Arbitrary {

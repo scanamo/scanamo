@@ -2,8 +2,8 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.{ FunSpec, Matchers }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
@@ -11,7 +11,7 @@ import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
 import cats.implicits._
-import scalaz.zio.{DefaultRuntime, IO}
+import scalaz.zio.{ DefaultRuntime, IO }
 
 class ScanamoZioSpec extends FunSpec with Matchers {
 

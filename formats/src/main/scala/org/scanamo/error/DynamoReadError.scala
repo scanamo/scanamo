@@ -1,8 +1,8 @@
 package org.scanamo.error
 
 import cats.data.NonEmptyList
-import cats.{Semigroup, Show}
-import com.amazonaws.services.dynamodbv2.model.{AttributeValue, ConditionalCheckFailedException}
+import cats.{ Semigroup, Show }
+import com.amazonaws.services.dynamodbv2.model.{ AttributeValue, ConditionalCheckFailedException }
 
 sealed abstract class ScanamoError
 final case class ConditionNotMet(e: ConditionalCheckFailedException) extends ScanamoError

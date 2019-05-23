@@ -10,7 +10,7 @@ import org.scanamo.ops._
   */
 class Scanamo private (client: AmazonDynamoDB) {
 
-  private final val interpreter = new ScanamoSyncInterpreter(client)
+  final private val interpreter = new ScanamoSyncInterpreter(client)
 
   /**
     * Execute the operations built with [[org.scanamo.Table]], using the client

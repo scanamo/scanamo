@@ -1,6 +1,6 @@
 package org.scanamo.update
 
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.{ Arbitrary, Gen }
 import org.scalacheck.Arbitrary._
 import org.scanamo.syntax._
 import org.scanamo.DynamoFormat

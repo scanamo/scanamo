@@ -4,8 +4,8 @@ import cats.effect.IO
 import cats.implicits._
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{Millis, Seconds, Span}
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.{ FunSpec, Matchers }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.ScanamoOps
