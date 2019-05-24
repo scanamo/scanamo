@@ -132,7 +132,7 @@ package object ops {
 
       attributeValues.toExpressionAttributeValues.fold(requestWithCondition) { avs =>
         if (req.addEmptyList) {
-          avs.put(":emptyList", DynamoValue.EmptyList.toAttributeValue)
+          avs.put(":emptyList", DynamoValue.EmptyList)
         }
         requestWithCondition withExpressionAttributeValues avs
       }

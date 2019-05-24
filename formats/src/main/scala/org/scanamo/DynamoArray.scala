@@ -315,6 +315,4 @@ object DynamoArray {
    * The empty array
    */
   val empty: DynamoArray = Empty
-
-  private[scanamo] val EmptyList: DynamoArray = Pure(Nil)
 }

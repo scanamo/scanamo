@@ -26,7 +26,6 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('antagonist -> S) { (t, i) =>

@@ -202,8 +202,7 @@ object DynamoValue {
   private[scanamo] val Null: AttributeValue = new AttributeValue().withNULL(true)
   private[scanamo] val True: AttributeValue = new AttributeValue().withBOOL(true)
   private[scanamo] val False: AttributeValue = new AttributeValue().withBOOL(false)
-
-  private[scanamo] val EmptyList: DynamoValue = DynArray(DynamoArray.EmptyList)
+  private[scanamo] val EmptyList: AttributeValue = new AttributeValue().withL()
 
   private[DynamoValue] case object DynNull extends DynamoValue
   private[DynamoValue] final case class DynBool(b: Boolean) extends DynamoValue
