@@ -112,7 +112,7 @@ object DynamoFormat extends EnumDynamoFormat {
   def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     final def read(item: DynamoValue) = f.read(item).map(r)
     final def write(t: A) = f.write(w(t))
-    override final val default = f.default.map(r)
+    final override val default = f.default.map(r)
   }
 
   /**
@@ -131,7 +131,7 @@ object DynamoFormat extends EnumDynamoFormat {
   def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     final def read(item: DynamoValue) = f.read(item).flatMap(r)
     final def write(t: A) = f.write(w(t))
-    override final val default = f.default.flatMap(d => r(d).toOption)
+    final override val default = f.default.flatMap(d => r(d).toOption)
   }
 
   /**
@@ -163,7 +163,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val stringFormat: DynamoFormat[String] = new DynamoFormat[String] {
-    override final val default = Some("")
+    final override val default = Some("")
 
     final def read(av: DynamoValue) =
       if (av.isNull)
@@ -350,7 +350,7 @@ object DynamoFormat extends EnumDynamoFormat {
         else
           DynamoValue.fromNumbers(t)
 
-      override final val default = Some(Set.empty[T])
+      final override val default = Some(Set.empty[T])
     }
 
   /**
@@ -462,7 +462,7 @@ object DynamoFormat extends EnumDynamoFormat {
         else
           DynamoValue.fromStrings(t)
 
-      override final val default = Some(Set.empty[String])
+      final override val default = Some(Set.empty[String])
     }
 
   private val javaMapFormat: DynamoFormat[DynamoObject] =
@@ -500,7 +500,7 @@ object DynamoFormat extends EnumDynamoFormat {
 
     final def write(t: Option[T]): DynamoValue = t.fold(DynamoValue.nil)(f.write)
 
-    override final val default = Some(None)
+    final override val default = Some(None)
   }
 
   /**

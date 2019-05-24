@@ -1,6 +1,6 @@
 package org.scanamo
 
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{ FunSuite, Matchers }
 
 class EnumDynamoFormatTest extends FunSuite with Matchers {
 

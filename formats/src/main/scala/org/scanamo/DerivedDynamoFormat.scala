@@ -1,6 +1,6 @@
 package org.scanamo
 
-import cats.data.{Validated, ValidatedNel}
+import cats.data.{ Validated, ValidatedNel }
 import cats.syntax.either._
 import org.scanamo.error._
 import org.scanamo.export.Exported
@@ -34,7 +34,7 @@ trait DerivedDynamoFormat {
     fieldWitness: Witness.Aux[K]
   ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
     new ValidConstructedDynamoFormat[FieldType[K, V] :: T] {
-      private final val fieldName = fieldWitness.value.name
+      final private val fieldName = fieldWitness.value.name
 
       final def read(av: DynamoObject) = {
         val valueOrError: Either[(FieldName, DynamoReadError), V] =
@@ -74,7 +74,7 @@ trait DerivedDynamoFormat {
     fieldWitness: Witness.Aux[K]
   ): CoProductDynamoFormat[FieldType[K, V] :+: T] =
     new CoProductDynamoFormat[FieldType[K, V] :+: T] {
-      private final val fieldName = fieldWitness.value.name
+      final private val fieldName = fieldWitness.value.name
 
       final def read(av: DynamoObject) =
         av(fieldName).fold[ValidatedPropertiesError[FieldType[K, V] :+: T]](tailFormat.read(av).map(Inr(_))) {

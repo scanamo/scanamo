@@ -2,7 +2,7 @@ package org.scanamo
 
 import cats.implicits._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scalatest.{FunSpec, Matchers}
+import org.scalatest.{ FunSpec, Matchers }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._

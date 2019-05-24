@@ -2,7 +2,7 @@ package org.scanamo
 
 import cats.syntax.either._
 
-import org.scanamo.error.{DynamoReadError, TypeCoercionError}
+import org.scanamo.error.{ DynamoReadError, TypeCoercionError }
 
 import eu.timepit.refined.api.{ RefType, Validate }
 
@@ -15,7 +15,7 @@ package object refined {
     validate: Validate[T, P]
   ): DynamoFormat[F[T, P]] = new DynamoFormat[F[T, P]] {
 
-    override final val default: Option[F[T, P]] =
+    final override val default: Option[F[T, P]] =
       baseFormat.default.flatMap(refType.refine[P](_).toOption)
 
     final def read(av: DynamoValue): Either[DynamoReadError, F[T, P]] =

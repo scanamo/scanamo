@@ -2,7 +2,7 @@ package org.scanamo.update
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import cats.data.NonEmptyVector
-import org.scanamo.{DynamoFormat, DynamoValue}
+import org.scanamo.{ DynamoFormat, DynamoValue }
 import org.scanamo.query._
 import scala.collection.immutable.HashMap
 
@@ -56,8 +56,8 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
   final def and(that: UpdateExpression): UpdateExpression = AndUpdate(self, that)
 }
 
-private[scanamo] final case class SimpleUpdate(leaf: LeafUpdateExpression) extends UpdateExpression
-private[scanamo] final case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExpression
+final private[scanamo] case class SimpleUpdate(leaf: LeafUpdateExpression) extends UpdateExpression
+final private[scanamo] case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExpression
 
 object UpdateExpression {
   def prefixKeys[T](map: Map[String, T], prefix: String) = map.map {
@@ -92,7 +92,7 @@ private[update] case object ADD extends UpdateType { override val op = "ADD" }
 private[update] case object DELETE extends UpdateType { override val op = "DELETE" }
 private[update] case object REMOVE extends UpdateType { override val op = "REMOVE" }
 
-private[update] sealed trait LeafUpdateExpression { self =>
+sealed private[update] trait LeafUpdateExpression { self =>
   final val updateType: UpdateType = self match {
     case _: LeafAddExpression       => ADD
     case _: LeafAppendExpression    => SET
@@ -143,28 +143,28 @@ private[update] sealed trait LeafUpdateExpression { self =>
 
 private[update] object LeafUpdateExpression
 
-private[update] final case class LeafSetExpression(
+final private[update] case class LeafSetExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
   av: DynamoValue
 ) extends LeafUpdateExpression
 
-private[update] final case class LeafAppendExpression(
+final private[update] case class LeafAppendExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
   av: DynamoValue
 ) extends LeafUpdateExpression
 
-private[update] final case class LeafPrependExpression(
+final private[update] case class LeafPrependExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
   av: DynamoValue
 ) extends LeafUpdateExpression
 
-private[update] final case class LeafAddExpression(
+final private[update] case class LeafAddExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
@@ -176,19 +176,19 @@ Note the difference between DELETE and REMOVE:
  - DELETE is used to delete an element from a set
  - REMOVE is used to remove an attribute from an item
  */
-private[update] final case class LeafDeleteExpression(
+final private[update] case class LeafDeleteExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
   av: DynamoValue
 ) extends LeafUpdateExpression
 
-private[update] final case class LeafRemoveExpression(
+final private[update] case class LeafRemoveExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String]
 ) extends LeafUpdateExpression
 
-private[update] final case class LeafAttributeExpression(
+final private[update] case class LeafAttributeExpression(
   prefix: String,
   from: AttributeName,
   to: AttributeName

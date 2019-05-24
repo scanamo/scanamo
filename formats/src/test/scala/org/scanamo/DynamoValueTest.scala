@@ -43,7 +43,7 @@ private[scanamo] trait DynamoValueInstances extends DynamoObjectInstances with D
 
   val genStrings = arbitrary[List[String]].map(DynamoValue.fromStrings)
 
-  val genBuffers = arbitrary[List[Array[Byte]]].map(xs => DynamoValue.fromByteBuffers(xs.map(ByteBuffer.wrap))
+  val genBuffers = arbitrary[List[Array[Byte]]].map(xs => DynamoValue.fromByteBuffers(xs.map(ByteBuffer.wrap)))
 
   def fromSize(size: Int): Gen[DynamoValue] = size match {
     case 0 => genNull
@@ -51,8 +51,8 @@ private[scanamo] trait DynamoValueInstances extends DynamoObjectInstances with D
     case n =>
       Gen.oneOf(
         Gen.listOf(fromSize(n - 1)).map(xs => DynamoValue.fromValues(xs)),
-        for { xs <- Gen.listOf(fromSize(n - 1)); ks <- Gen.listOfN(xs.size, Gen.alphaNumStr) } yield
-          DynamoValue.fromFields((ks zip xs): _*)
+        for { xs <- Gen.listOf(fromSize(n - 1)); ks <- Gen.listOfN(xs.size, Gen.alphaNumStr) } yield DynamoValue
+          .fromFields((ks zip xs): _*)
       )
   }
 
@@ -67,13 +67,18 @@ private[scanamo] trait DynamoObjectInstances {
 
   private val genEmpty: Gen[DynamoObject] = Gen.const(DynamoObject.empty)
 
-  private val genLeaf: Gen[DynamoObject] = arbitrary[(String, Int)].map { case (k,v) => DynamoObject.singleton(k, DynamoValue.fromNumber(v)) }
+  private val genLeaf: Gen[DynamoObject] = arbitrary[(String, Int)].map {
+    case (k, v) => DynamoObject.singleton(k, DynamoValue.fromNumber(v))
+  }
 
-  private def genNode(size: Int): Gen[DynamoObject] = for {
-    m <- Gen.choose(0, size / 2)
-    xs <- Gen.containerOfN[List, (String, Int)](m, arbitrary[(String, Int)]).map(xs => DynamoObject(xs.toMap.mapValues(DynamoValue.fromNumber[Int])))
-  } yield xs
-  
+  private def genNode(size: Int): Gen[DynamoObject] =
+    for {
+      m <- Gen.choose(0, size / 2)
+      xs <- Gen
+        .containerOfN[List, (String, Int)](m, arbitrary[(String, Int)])
+        .map(xs => DynamoObject(xs.toMap.mapValues(DynamoValue.fromNumber[Int])))
+    } yield xs
+
   private def genObject(size: Int) = size match {
     case 0 => genEmpty
     case 1 => genLeaf
@@ -88,15 +93,15 @@ private[scanamo] trait DynamoArrayInstances {
 
   private val genEmpty: Gen[DynamoArray] = Gen.const(DynamoArray.empty)
 
-  private def genL(n: Int): Gen[DynamoArray] = Gen.listOfN(n, arbitrary[DynamoValue]).map(xs => DynamoArray(xs: _*))
+  private def genL(n: Int): Gen[DynamoArray] = Gen.listOfN(n, arbitrary[DynamoValue]).map(DynamoArray(_))
 
-  private def genSS(n: Int): Gen[DynamoArray] = Gen.listOfN(n, arbitrary[String]).map(xs => DynamoArray.strings(xs: _*))
+  private def genSS(n: Int): Gen[DynamoArray] = Gen.listOfN(n, arbitrary[String]).map(DynamoArray.strings(_))
 
   private def genNS(n: Int): Gen[DynamoArray] =
-    Gen.listOfN(n, arbitrary[BigDecimal]).map(xs => DynamoArray.numbers(xs: _*))
+    Gen.listOfN(n, arbitrary[BigDecimal]).map(DynamoArray.numbers(_))
 
   private def genBS(n: Int): Gen[DynamoArray] =
-    Gen.listOfN(n, arbitrary[Array[Byte]]).map(xs => DynamoArray.byteBuffers(xs.map(ByteBuffer.wrap): _*))
+    Gen.listOfN(n, arbitrary[Array[Byte]]).map(xs => DynamoArray.byteBuffers(xs.map(ByteBuffer.wrap)))
 
   def genArray(size: Int) = size match {
     case 0 => genEmpty

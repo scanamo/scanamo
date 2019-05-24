@@ -2,7 +2,7 @@ package org.scanamo.query
 
 import cats.instances.option._
 import cats.syntax.apply._
-import org.scanamo.{DynamoFormat, DynamoObject}
+import org.scanamo.{ DynamoFormat, DynamoObject }
 import simulacrum.typeclass
 
 @typeclass trait UniqueKeyCondition[T] {

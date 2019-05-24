@@ -1,6 +1,6 @@
 package org.scanamo.query
 
-import org.scanamo.{DynamoFormat, DynamoObject}
+import org.scanamo.{ DynamoFormat, DynamoObject }
 import org.scanamo.request.RequestCondition
 import simulacrum.typeclass
 

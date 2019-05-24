@@ -2,7 +2,6 @@ package org.scanamo.time
 
 import java.time._
 import org.scalacheck._
-import Gen._
 import Arbitrary.arbitrary
 
 object TimeGenerators {

@@ -1,24 +1,24 @@
 package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import java.util.{Map => JMap, HashMap}
+import java.util.{ Map => JMap, HashMap }
 import org.scanamo.error.DynamoReadError
 import cats.syntax.apply._
 import cats.instances.either._
 import cats.instances.option._
 
 /**
- * A `DynamoObject` is a map of strings to values that can be embedded into
- * an `AttributeValue`.
- */
+  * A `DynamoObject` is a map of strings to values that can be embedded into
+  * an `AttributeValue`.
+  */
 sealed abstract class DynamoObject extends Product with Serializable { self =>
   import DynamoObject._
 
   protected def internalToMap: Map[String, DynamoValue]
 
   /**
-   * Gets the value mapped to `key` if it exists
-   */
+    * Gets the value mapped to `key` if it exists
+    */
   final def apply(key: String): Option[DynamoValue] = self match {
     case Empty          => None
     case Strict(xs)     => Option(xs.get(key)).map(DynamoValue.fromAttributeValue)
@@ -27,8 +27,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Gets the size of the map
-   */
+    * Gets the size of the map
+    */
   final def size: Int = self match {
     case Empty          => 0
     case Strict(xs)     => xs.size
@@ -37,21 +37,21 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Checks if the map is empty
-   */
+    * Checks if the map is empty
+    */
   final def isEmpty: Boolean = self match {
     case Empty => true
     case _     => false
   }
 
   /**
-   * Chekcs if the map is not empty
-   */
+    * Chekcs if the map is not empty
+    */
   final def nonEmpty: Boolean = !isEmpty
 
   /**
-   * Checks if the map contains a certain `key`
-   */
+    * Checks if the map contains a certain `key`
+    */
   final def contains(key: String): Boolean = self match {
     case Empty          => false
     case Strict(xs)     => xs.containsKey(key)
@@ -60,8 +60,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Gets the list of keys in the map
-   */
+    * Gets the list of keys in the map
+    */
   final def keys: Iterable[String] = self match {
     case Empty => Iterable.empty[String]
     case Strict(xs) =>
@@ -77,8 +77,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Gets the list of values in the map
-   */
+    * Gets the list of values in the map
+    */
   final def values: Iterable[DynamoValue] = self match {
     case Empty => Iterable.empty[DynamoValue]
     case Strict(xs) =>
@@ -94,8 +94,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Transforms the map by assigning values to new keys
-   */
+    * Transforms the map by assigning values to new keys
+    */
   final def mapKeys(f: String => String): DynamoObject = self match {
     case Empty          => Empty
     case Strict(xs)     => Pure(unsafeToScalaMap(xs).map { case (k, v) => f(k) -> DynamoValue.fromAttributeValue(v) })
@@ -113,13 +113,13 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Make a value out of this map
-   */
+    * Make a value out of this map
+    */
   final def toDynamoValue: DynamoValue = DynamoValue.fromDynamoObject(self)
 
   /**
-   * Make an AWS SDK value out of this map
-   */
+    * Make an AWS SDK value out of this map
+    */
   // TODO: mark as private?
   final def toAttributeValue: AttributeValue =
     self match {
@@ -128,8 +128,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     }
 
   /**
-   * Builds a [[scala.collection.Map]] if this map is made entirely of values of type `V`
-   */
+    * Builds a [[scala.collection.Map]] if this map is made entirely of values of type `V`
+    */
   final def toMap[V](implicit D: DynamoFormat[V]): Either[DynamoReadError, Map[String, V]] = self match {
     case Empty => Right(Map.empty)
     case Strict(xs) =>
@@ -147,10 +147,10 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Builds a map where the keys are transformed to match the convention for
-   * expression attribute values in DynamoDB operations
-   * See [[https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeValues.html]]
-   */
+    * Builds a map where the keys are transformed to match the convention for
+    * expression attribute values in DynamoDB operations
+    * See [[https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeValues.html]]
+    */
   final def toExpressionAttributeValues: Option[JMap[String, AttributeValue]] = self match {
     case Empty => None
     case Strict(xs) =>
@@ -165,107 +165,107 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   /**
-   * Add an entry to the map or overwrites the existing value if there
-   */
+    * Add an entry to the map or overwrites the existing value if there
+    */
   final def add(key: String, value: DynamoValue): DynamoObject = self match {
-    case Empty => Pure(Map(key -> value))
-    case xs: Strict => Concat(singleton(key, value), xs)
-    case Pure(xs) => Pure(xs + (key -> value))
+    case Empty                            => Pure(Map(key -> value))
+    case xs: Strict                       => Concat(singleton(key, value), xs)
+    case Pure(xs)                         => Pure(xs + (key -> value))
     case o @ Concat(Strict(_), Strict(_)) => Concat(singleton(key, value), o)
-    case Concat(Strict(xs), ys) => Concat(Strict(xs), ys.add(key, value))
-    case Concat(xs, Strict(ys)) => Concat(xs.add(key, value), Strict(ys))
-    case Concat(xs, ys) => Concat(xs.add(key, value), ys)
+    case Concat(Strict(xs), ys)           => Concat(Strict(xs), ys.add(key, value))
+    case Concat(xs, Strict(ys))           => Concat(xs.add(key, value), Strict(ys))
+    case Concat(xs, ys)                   => Concat(xs.add(key, value), ys)
   }
 
   /**
-   * Remove an entry from the map if there
-   */
+    * Remove an entry from the map if there
+    */
   final def remove(key: String): DynamoObject = self match {
-    case Empty => Empty
-    case Strict(xs) => Pure((unsafeToScalaMap(xs) - key).mapValues(DynamoValue.fromAttributeValue))
-    case Pure(xs) => Pure(xs - key)
+    case Empty                              => Empty
+    case Strict(xs)                         => Pure((unsafeToScalaMap(xs) - key).mapValues(DynamoValue.fromAttributeValue))
+    case Pure(xs)                           => Pure(xs - key)
     case Concat(xs, ys) if xs.contains(key) => Concat(xs.remove(key), ys)
-    case Concat(xs, ys) => Concat(xs, ys.remove(key))
+    case Concat(xs, ys)                     => Concat(xs, ys.remove(key))
   }
 
   /**
-   * Operator alias for `add`
-   */
+    * Operator alias for `add`
+    */
   final def +(x: (String, DynamoValue)): DynamoObject = self.add(x._1, x._2)
 
   /**
-   * Operator alias for `remove`
-   */
+    * Operator alias for `remove`
+    */
   final def -(key: String): DynamoObject = self remove key
 
   /**
-   * Concatenates two maps
-   */
+    * Concatenates two maps
+    */
   final def concat(that: DynamoObject): DynamoObject =
     if (self.isEmpty) that
     else if (that.isEmpty) self
     else Concat(self, that)
 
   /**
-   * Operator alias for `concat`
-   */
+    * Operator alias for `concat`
+    */
   final def <>(that: DynamoObject): DynamoObject = self concat that
 
-  override final def equals(that: Any): Boolean =
+  final override def equals(that: Any): Boolean =
     that.isInstanceOf[DynamoObject] && (internalToMap == that.asInstanceOf[DynamoObject].internalToMap)
 
-  override final def hashCode(): Int = internalToMap.hashCode
+  final override def hashCode(): Int = internalToMap.hashCode
 }
 
 object DynamoObject {
   private[DynamoObject] case object Empty extends DynamoObject {
     final def internalToMap = Map.empty
   }
-  private[DynamoObject] final case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
+  final private[DynamoObject] case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
     final def internalToMap = unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue)
   }
-  private[DynamoObject] final case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject {
+  final private[DynamoObject] case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject {
     final def internalToMap = xs
   }
-  private[DynamoObject] final case class Concat(xs: DynamoObject, ys: DynamoObject) extends DynamoObject {
+  final private[DynamoObject] case class Concat(xs: DynamoObject, ys: DynamoObject) extends DynamoObject {
     final def internalToMap = xs.internalToMap ++ ys.internalToMap
   }
 
   /**
-   * Builds a map from a [[java.util.Map]] of attribute values
-   */
+    * Builds a map from a [[java.util.Map]] of attribute values
+    */
   def apply(xs: JMap[String, AttributeValue]): DynamoObject = if (xs.isEmpty) Empty else Strict(xs)
 
   /**
-   * Builds a map from an arbitrary number of `(String, DynamoValue)` pairs
-   */
+    * Builds a map from an arbitrary number of `(String, DynamoValue)` pairs
+    */
   def apply(xs: (String, DynamoValue)*): DynamoObject = apply(xs.toMap)
 
   /**
-   * Builds a map from a [[scala.collection.Map]] of values
-   */
+    * Builds a map from a [[scala.collection.Map]] of values
+    */
   def apply(xs: Map[String, DynamoValue]): DynamoObject = if (xs.isEmpty) Empty else Pure(xs)
 
   /**
-   * Builds a map from an arbitrary number of `(String, A)` pairs for any `A` that can be
-   * turned into a value
-   */
+    * Builds a map from an arbitrary number of `(String, A)` pairs for any `A` that can be
+    * turned into a value
+    */
   def apply[A](xs: (String, A)*)(implicit D: DynamoFormat[A]): DynamoObject =
     apply(xs.foldLeft(Map.empty[String, DynamoValue]) { case (m, (k, x)) => m + (k -> D.write(x)) })
 
   /**
-   * The empty map
-   */
+    * The empty map
+    */
   val empty: DynamoObject = Empty
 
   /**
-   * Builds a singleton map
-   */
+    * Builds a singleton map
+    */
   def singleton(key: String, x: DynamoValue): DynamoObject = Pure(Map(key -> x))
 
   /**
-   * Builds a map from an iterable collection of `(String, DynamoValue)` pairs
-   */
+    * Builds a map from an iterable collection of `(String, DynamoValue)` pairs
+    */
   def fromIterable(xs: Iterable[(String, DynamoValue)]): DynamoObject = apply(xs.toMap)
 
   private[DynamoObject] def unsafeToJavaMap(m: Map[String, AttributeValue]): JMap[String, AttributeValue] = {

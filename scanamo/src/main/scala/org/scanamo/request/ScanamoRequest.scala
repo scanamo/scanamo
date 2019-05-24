@@ -1,7 +1,7 @@
 package org.scanamo.request
 
-import org.scanamo.{DynamoObject, DynamoValue}
-import org.scanamo.query.{Condition, Query}
+import org.scanamo.{ DynamoObject, DynamoValue }
+import org.scanamo.query.{ Condition, Query }
 
 case class ScanamoPutRequest(
   tableName: String,
