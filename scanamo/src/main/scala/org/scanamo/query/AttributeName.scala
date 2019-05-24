@@ -3,7 +3,7 @@ package org.scanamo.query
 import org.scanamo.DynamoFormat
 import org.scanamo.syntax.Bounds
 
-private[scanamo] case class AttributeName(components: List[Symbol], index: Option[Int]) {
+case class AttributeName(components: List[Symbol], index: Option[Int]) {
   def placeholder(prefix: String): String =
     index.foldLeft(
       components.map(s => s"$prefix${s.name}").mkString(".#")

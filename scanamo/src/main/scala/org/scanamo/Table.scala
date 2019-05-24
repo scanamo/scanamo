@@ -7,7 +7,6 @@ import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 import org.scanamo.update.UpdateExpression
-import scala.collection.JavaConverters._
 
 /**
   * Represents a DynamoDB table that operations can be performed against
@@ -330,7 +329,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   import org.scanamo.auto._
     * ...   val cityTable = Table[City](t)
     * ...   val ops = for {
-    * ...     putRes <- cityTable.putAll(Set(
+    * ...     _ <- cityTable.putAll(Set(
     * ...       City("US", "Nashville"), City("IT", "Rome"), City("IT", "Siena"), City("TZ", "Dar es Salaam")))
     * ...     get <- cityTable.consistently.get('country -> "US" and 'name -> "Nashville")
     * ...     scan <- cityTable.consistently.scan()
@@ -517,7 +516,6 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
-    * >>> import org.scanamo.query._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
@@ -602,7 +600,6 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
     *
-    * >>> import collection.JavaConverters._
     * >>> import cats.implicits._
     * >>> import org.scanamo.error._
     * >>> import org.scanamo.ops._
@@ -621,7 +618,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     ))
     * ...     res <- table.limit(1).scan0
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]]]
-    * ...     lastKey = uniqueKeyCondition.fromAVMap(('mode, 'line), res.getLastEvaluatedKey.asScala.toMap)
+    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(('mode, 'line), DynamoObject(res.getLastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
@@ -674,7 +671,6 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
     *
-    * >>> import collection.JavaConverters._
     * >>> import cats.implicits._
     * >>> import org.scanamo.error._
     * >>> import org.scanamo.ops._
@@ -696,7 +692,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     ))
     * ...     res <- table.limit(1).query0('mode -> "Bus" and 'line -> "234")
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]]]
-    * ...     lastKey = uniqueKeyCondition.fromAVMap(('mode, 'line), res.getLastEvaluatedKey.asScala.toMap)
+    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(('mode, 'line), DynamoObject(res.getLastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
@@ -755,11 +751,16 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def filter[C: ConditionExpression](condition: C) =
     TableWithOptions(name, ScanamoQueryOptions.default).filter(Condition(condition))
+
+  def descending =
+    TableWithOptions(name, ScanamoQueryOptions.default).descending
 }
 
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {
   def limit(n: Int): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.limit(n)
+  def descending: TableWithOptions[V] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.descending
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
@@ -778,9 +779,11 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
 private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String, queryOptions: ScanamoQueryOptions) {
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
+  def descending: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(ascending = false))
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
-    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.asAVMap.asJava)))
-  def filter[T](c: Condition[T]): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(filter = Some(c)))
+    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
+  def filter[T](c: Condition[T]): TableWithOptions[V] =
+    copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)

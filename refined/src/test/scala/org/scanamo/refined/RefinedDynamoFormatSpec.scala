@@ -33,7 +33,7 @@ class RefinedDynamoFormatSpec extends FlatSpec with Matchers {
   }
 
   it should "write positive integers" in {
-    val expectedValue = new AttributeValue().withN("123")
+    val expectedValue = DynamoValue.fromNumber(123)
 
     val valueWritten = DynamoFormat[PosInt].write(123)
 

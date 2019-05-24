@@ -8,24 +8,56 @@ val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
 val zioVersion = "1.0-RC4"
 
+lazy val stdOptions = Seq(
+  "-deprecation",
+  "-encoding",
+  "UTF-8",
+  "-feature",
+  "-unchecked",
+  "-target:jvm-1.8"
+)
+
+lazy val std2xOptions = Seq(
+  "-Xfatal-warnings",
+  "-language:higherKinds",
+  "-language:existentials",
+  "-language:implicitConversions",
+  "-explaintypes",
+  "-Yrangepos",
+  "-Xfuture",
+  "-Xlint:_,-type-parameter-shadow",
+  "-Yno-adapted-args",
+  "-Ypartial-unification",
+  "-Ywarn-inaccessible",
+  "-Ywarn-infer-any",
+  "-Ywarn-nullary-override",
+  "-Ywarn-nullary-unit",
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard"
+)
+
+def extraOptions(scalaVersion: String) =
+  CrossVersion.partialVersion(scalaVersion) match {
+    case Some((2, 12)) =>
+      Seq(
+        "-opt-warnings",
+        "-Ywarn-extra-implicit",
+        "-Ywarn-unused:_,imports",
+        "-Ywarn-unused:imports",
+        "-opt:l:inline",
+        "-opt-inline-from:<source>"
+      ) ++ std2xOptions
+    case Some((2, 11)) =>
+      Seq(
+        "-Xexperimental",
+        "-Ywarn-unused-import"
+      ) ++ std2xOptions
+    case _ => Seq.empty
+  }
+
 val commonSettings = Seq(
-  scalacOptions := Seq(
-    "-deprecation",
-    "-encoding",
-    "UTF-8",
-    "-feature",
-    "-unchecked",
-    "-language:implicitConversions",
-    "-language:higherKinds",
-    "-language:existentials",
-    "-Xfatal-warnings",
-    "-Xlint:_",
-    "-Yno-adapted-args",
-    "-Ywarn-dead-code",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-value-discard",
-    "-Ypartial-unification"
-  ),
+  javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
+  scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   // for simulacrum
   addCompilerPlugin("org.scalamacros" % "paradise"        % "2.1.1" cross CrossVersion.full),
   addCompilerPlugin("org.spire-math"  %% "kind-projector" % "0.9.10"),

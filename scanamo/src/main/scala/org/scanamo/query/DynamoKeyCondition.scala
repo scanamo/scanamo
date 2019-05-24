@@ -8,8 +8,6 @@ case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
     AndEqualsCondition(this, equalsKeyCondition)
   def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
     AndQueryCondition(this, rangeKeyCondition)
-
-  def descending = Descending(this)
 }
 
 case class AndEqualsCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
@@ -17,14 +15,10 @@ case class AndEqualsCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
   rangeEquality: R
 )
 
-case class Descending[T: QueryableKeyCondition](queryCondition: T)
-
 case class AndQueryCondition[H: DynamoFormat, R: DynamoFormat](
   hashCondition: KeyEquals[H],
   rangeCondition: RangeKeyCondition[R]
-) {
-  def descending = Descending(this)
-}
+)
 
 sealed abstract class RangeKeyCondition[V: DynamoFormat] extends Product with Serializable {
   val key: AttributeName

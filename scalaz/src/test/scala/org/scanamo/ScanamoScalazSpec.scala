@@ -1,10 +1,7 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scalatest.{ BeforeAndAfterAll, FunSpec, Matchers }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
@@ -233,7 +230,7 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
         _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
-          res1 <- bears.index(i).limit(1).scan
+          _ <- bears.index(i).limit(1).scan
           res2 <- bears.index(i).limit(1).from('name -> "Graham" and ('alias -> "Guardianista")).scan
           res3 <- bears.index(i).limit(1).from('name -> "Yogi" and ('alias -> "Kanga")).scan
         } yield res2 ::: res3

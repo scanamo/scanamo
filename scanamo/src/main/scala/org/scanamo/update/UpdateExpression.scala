@@ -1,42 +1,69 @@
 package org.scanamo.update
 
-import cats.data.NonEmptyVector
-import cats.kernel.Semigroup
-import cats.kernel.instances.map._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import org.scanamo.DynamoFormat
+import cats.data.NonEmptyVector
+import org.scanamo.{ DynamoFormat, DynamoValue }
 import org.scanamo.query._
+import scala.collection.immutable.HashMap
 
-sealed trait UpdateExpression extends Product with Serializable {
-  def expression: String =
+sealed trait UpdateExpression extends Product with Serializable { self =>
+  final def expression: String =
     typeExpressions.map {
       case (t, e) =>
         s"${t.op} ${e.map(_.expression).toVector.mkString(", ")}"
     }.mkString(" ")
-  def typeExpressions: Map[UpdateType, NonEmptyVector[LeafUpdateExpression]]
-  def attributeNames: Map[String, String] =
+
+  final def typeExpressions: HashMap[UpdateType, NonEmptyVector[LeafUpdateExpression]] = self match {
+    case SimpleUpdate(leaf) => HashMap(leaf.updateType -> NonEmptyVector.of(leaf))
+    case AndUpdate(l, r) =>
+      val leftUpdates = l.typeExpressions.map { case (k, v)  => k -> v.map(_.prefixKeys("l_")) }
+      val rightUpdates = r.typeExpressions.map { case (k, v) => k -> v.map(_.prefixKeys("r_")) }
+
+      leftUpdates.merged(rightUpdates) {
+        case ((k, v1), (_, v2)) => k -> (v1 concatNev v2)
+      }
+  }
+
+  final def attributeNames: Map[String, String] =
     unprefixedAttributeNames.map {
       case (k, v) => (s"#$k", v)
     }
-  val constantValue: Option[(String, AttributeValue)]
-  def unprefixedAttributeNames: Map[String, String]
-  def attributeValues: Map[String, AttributeValue] =
-    (unprefixedAttributeValues ++ constantValue.toMap).map {
-      case (k, v) => (s":$k", v)
-    }
-  def unprefixedAttributeValues: Map[String, AttributeValue]
+
+  final def unprefixedAttributeNames: Map[String, String] = self match {
+    case SimpleUpdate(leaf) => leaf.attributeNames
+    case AndUpdate(l, r)    => l.unprefixedAttributeNames ++ r.unprefixedAttributeNames
+  }
+
+  final def dynamoValues: Map[String, DynamoValue] = unprefixedDynamoValues
+
+  final val addEmptyList: Boolean = self match {
+    case SimpleUpdate(leaf) => leaf.addEmptyList
+    case AndUpdate(l, r)    => l.addEmptyList || r.addEmptyList
+  }
+
+  final def attributeValues: Map[String, AttributeValue] = dynamoValues.mapValues(_.toAttributeValue)
+
+  final def unprefixedDynamoValues: Map[String, DynamoValue] = self match {
+    case SimpleUpdate(leaf) => leaf.dynamoValue.toMap
+    case AndUpdate(l, r) =>
+      UpdateExpression.prefixKeys(l.unprefixedDynamoValues, "l_") ++ UpdateExpression
+        .prefixKeys(r.unprefixedDynamoValues, "r_")
+  }
+
+  final def unprefixedAttributeValues: Map[String, AttributeValue] =
+    unprefixedDynamoValues.mapValues(_.toAttributeValue)
+
+  final def and(that: UpdateExpression): UpdateExpression = AndUpdate(self, that)
 }
 
-sealed private[update] trait LeafUpdateExpression {
-  val updateType: UpdateType
-  val attributeNames: Map[String, String]
-  val attributeValue: Option[(String, AttributeValue)]
-  val constantValue: Option[(String, AttributeValue)]
-  def expression: String
-  def prefixKeys(prefix: String): LeafUpdateExpression
-}
+final private[scanamo] case class SimpleUpdate(leaf: LeafUpdateExpression) extends UpdateExpression
+final private[scanamo] case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExpression
 
 object UpdateExpression {
+  def prefixKeys[T](map: Map[String, T], prefix: String) = map.map {
+    case (k, v) => (s"$prefix$k", v)
+  }
+
   def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     SetExpression(fieldValue._1, fieldValue._2)
   def setFromAttribute(fields: (AttributeName, AttributeName)): UpdateExpression = {
@@ -57,10 +84,6 @@ object UpdateExpression {
     DeleteExpression(fieldValue._1, fieldValue._2)
   def remove(field: AttributeName): UpdateExpression =
     RemoveExpression(field)
-
-  implicit object Semigroup extends Semigroup[UpdateExpression] {
-    override def combine(x: UpdateExpression, y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
-  }
 }
 
 sealed private[update] trait UpdateType { val op: String }
@@ -69,39 +92,114 @@ private[update] case object ADD extends UpdateType { override val op = "ADD" }
 private[update] case object DELETE extends UpdateType { override val op = "DELETE" }
 private[update] case object REMOVE extends UpdateType { override val op = "REMOVE" }
 
-private[update] case class SimpleUpdateExpression(leaf: LeafUpdateExpression) extends UpdateExpression {
-  override def typeExpressions: Map[UpdateType, NonEmptyVector[LeafUpdateExpression]] =
-    Map(leaf.updateType -> NonEmptyVector.of(leaf))
-  override def unprefixedAttributeNames: Map[String, String] =
-    leaf.attributeNames
-  override def unprefixedAttributeValues: Map[String, AttributeValue] =
-    leaf.attributeValue.toMap
-  override val constantValue: Option[(String, AttributeValue)] = leaf.constantValue
+sealed private[update] trait LeafUpdateExpression { self =>
+  final val updateType: UpdateType = self match {
+    case _: LeafAddExpression       => ADD
+    case _: LeafAppendExpression    => SET
+    case _: LeafDeleteExpression    => DELETE
+    case _: LeafPrependExpression   => SET
+    case _: LeafRemoveExpression    => REMOVE
+    case _: LeafSetExpression       => SET
+    case _: LeafAttributeExpression => SET
+  }
+
+  final val addEmptyList: Boolean = self match {
+    case _: LeafAppendExpression | _: LeafPrependExpression => true
+    case _                                                  => false
+  }
+
+  final val expression: String = self match {
+    case LeafAddExpression(namePlaceholder, _, valuePlaceholder, _)    => s"#$namePlaceholder :$valuePlaceholder"
+    case LeafDeleteExpression(namePlaceholder, _, valuePlaceholder, _) => s"#$namePlaceholder :$valuePlaceholder"
+    case LeafSetExpression(namePlaceholder, _, valuePlaceholder, _)    => s"#$namePlaceholder = :$valuePlaceholder"
+    case LeafAppendExpression(namePlaceholder, _, valuePlaceholder, _) =>
+      s"#$namePlaceholder = list_append(if_not_exists(#$namePlaceholder, :emptyList), :$valuePlaceholder)"
+    case LeafPrependExpression(namePlaceholder, _, valuePlaceholder, _) =>
+      s"#$namePlaceholder = list_append(:$valuePlaceholder, if_not_exists(#$namePlaceholder, :emptyList))"
+    case LeafRemoveExpression(namePlaceholder, _)  => s"#$namePlaceholder"
+    case LeafAttributeExpression(prefix, from, to) => s"#${to.placeholder(prefix)} = #${from.placeholder(prefix)}"
+  }
+
+  final def prefixKeys(prefix: String): LeafUpdateExpression = self match {
+    case x: LeafSetExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+    case x: LeafAppendExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+    case x: LeafPrependExpression => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+    case x: LeafAddExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+    case x: LeafDeleteExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+    case x                        => x
+  }
+
+  final val dynamoValue: Option[(String, DynamoValue)] = self match {
+    case LeafAddExpression(_, _, valuePlaceholder, av)     => Some(valuePlaceholder -> av)
+    case LeafAppendExpression(_, _, valuePlaceholder, av)  => Some(valuePlaceholder -> av)
+    case LeafDeleteExpression(_, _, valuePlaceholder, av)  => Some(valuePlaceholder -> av)
+    case LeafPrependExpression(_, _, valuePlaceholder, av) => Some(valuePlaceholder -> av)
+    case LeafSetExpression(_, _, valuePlaceholder, av)     => Some(valuePlaceholder -> av)
+    case _                                                 => None
+  }
+
+  def attributeNames: Map[String, String]
 }
 
-private[update] case class LeafSetExpression(
+private[update] object LeafUpdateExpression
+
+final private[update] case class LeafSetExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
-  av: AttributeValue
+  av: DynamoValue
+) extends LeafUpdateExpression
+
+final private[update] case class LeafAppendExpression(
+  namePlaceholder: String,
+  attributeNames: Map[String, String],
+  valuePlaceholder: String,
+  av: DynamoValue
+) extends LeafUpdateExpression
+
+final private[update] case class LeafPrependExpression(
+  namePlaceholder: String,
+  attributeNames: Map[String, String],
+  valuePlaceholder: String,
+  av: DynamoValue
+) extends LeafUpdateExpression
+
+final private[update] case class LeafAddExpression(
+  namePlaceholder: String,
+  attributeNames: Map[String, String],
+  valuePlaceholder: String,
+  av: DynamoValue
+) extends LeafUpdateExpression
+
+/*
+Note the difference between DELETE and REMOVE:
+ - DELETE is used to delete an element from a set
+ - REMOVE is used to remove an attribute from an item
+ */
+final private[update] case class LeafDeleteExpression(
+  namePlaceholder: String,
+  attributeNames: Map[String, String],
+  valuePlaceholder: String,
+  av: DynamoValue
+) extends LeafUpdateExpression
+
+final private[update] case class LeafRemoveExpression(
+  namePlaceholder: String,
+  attributeNames: Map[String, String]
+) extends LeafUpdateExpression
+
+final private[update] case class LeafAttributeExpression(
+  prefix: String,
+  from: AttributeName,
+  to: AttributeName
 ) extends LeafUpdateExpression {
-  override val updateType = SET
-  override val constantValue = None
-  override val attributeValue = Some(valuePlaceholder -> av)
-  override def expression: String = s"#$namePlaceholder = :$valuePlaceholder"
-  override def prefixKeys(prefix: String): LeafUpdateExpression =
-    LeafSetExpression(
-      namePlaceholder,
-      attributeNames,
-      s"$prefix$valuePlaceholder",
-      av
-    )
+  final val attributeNames = to.attributeNames(prefix) ++ from.attributeNames(prefix)
 }
 
 object SetExpression {
   private val prefix = "updateSet"
   def apply[V](field: AttributeName, value: V)(implicit format: DynamoFormat[V]): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafSetExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix),
@@ -110,42 +208,13 @@ object SetExpression {
       )
     )
   def fromAttribute(from: AttributeName, to: AttributeName): UpdateExpression =
-    SimpleUpdateExpression(new LeafUpdateExpression {
-      override def expression: String = s"#${to.placeholder(prefix)} = #${from.placeholder(prefix)}"
-
-      override def prefixKeys(prefix: String): LeafUpdateExpression = this
-
-      override val constantValue: Option[(String, AttributeValue)] = None
-      override val attributeNames: Map[String, String] = to.attributeNames(prefix) ++ from.attributeNames(prefix)
-      override val updateType: UpdateType = SET
-      override val attributeValue: Option[(String, AttributeValue)] = None
-    })
-}
-
-private[update] case class LeafAppendExpression(
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
-) extends LeafUpdateExpression {
-  override val updateType = SET
-  override val constantValue = Some("emptyList" -> new AttributeValue().withL())
-  override val attributeValue = Some(valuePlaceholder -> av)
-  override def expression: String =
-    s"#$namePlaceholder = list_append(if_not_exists(#$namePlaceholder, :emptyList), :$valuePlaceholder)"
-  override def prefixKeys(prefix: String): LeafUpdateExpression =
-    LeafAppendExpression(
-      namePlaceholder,
-      attributeNames,
-      s"$prefix$valuePlaceholder",
-      av
-    )
+    SimpleUpdate(LeafAttributeExpression(prefix, from, to))
 }
 
 object AppendExpression {
   private val prefix = "updateAppend"
   def apply[V](field: AttributeName, value: V)(implicit format: DynamoFormat[V]): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafAppendExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix),
@@ -155,30 +224,10 @@ object AppendExpression {
     )
 }
 
-private[update] case class LeafPrependExpression(
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
-) extends LeafUpdateExpression {
-  override val updateType = SET
-  override val constantValue = Some("emptyList" -> new AttributeValue().withL())
-  override val attributeValue = Some(valuePlaceholder -> av)
-  override def expression: String =
-    s"#$namePlaceholder = list_append(:$valuePlaceholder, if_not_exists(#$namePlaceholder, :emptyList))"
-  override def prefixKeys(prefix: String): LeafUpdateExpression =
-    LeafPrependExpression(
-      namePlaceholder,
-      attributeNames,
-      s"$prefix$valuePlaceholder",
-      av
-    )
-}
-
 object PrependExpression {
   private val prefix = "updatePrepend"
   def apply[V](field: AttributeName, value: V)(implicit format: DynamoFormat[V]): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafPrependExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix),
@@ -191,7 +240,7 @@ object PrependExpression {
 object AppendAllExpression {
   private val prefix = "updateAppendAll"
   def apply[V](field: AttributeName, value: List[V])(implicit format: DynamoFormat[V]): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafAppendExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix),
@@ -204,7 +253,7 @@ object AppendAllExpression {
 object PrependAllExpression {
   private val prefix = "updatePrependAll"
   def apply[V](field: AttributeName, value: List[V])(implicit format: DynamoFormat[V]): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafPrependExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix),
@@ -214,29 +263,10 @@ object PrependAllExpression {
     )
 }
 
-private[update] case class LeafAddExpression(
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
-) extends LeafUpdateExpression {
-  override val updateType = ADD
-  override val constantValue = None
-  override val attributeValue = Some(valuePlaceholder -> av)
-  override def expression: String = s"#$namePlaceholder :$valuePlaceholder"
-  override def prefixKeys(prefix: String): LeafUpdateExpression =
-    LeafAddExpression(
-      namePlaceholder,
-      attributeNames,
-      s"$prefix$valuePlaceholder",
-      av
-    )
-}
-
 object AddExpression {
   private val prefix = "updateSet"
   def apply[V](field: AttributeName, value: V)(implicit format: DynamoFormat[V]): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafAddExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix),
@@ -246,34 +276,10 @@ object AddExpression {
     )
 }
 
-/*
-Note the difference between DELETE and REMOVE:
- - DELETE is used to delete an element from a set
- - REMOVE is used to remove an attribute from an item
- */
-private[update] case class LeafDeleteExpression(
-  namePlaceholder: String,
-  attributeNames: Map[String, String],
-  valuePlaceholder: String,
-  av: AttributeValue
-) extends LeafUpdateExpression {
-  override val updateType = DELETE
-  override val constantValue = None
-  override val attributeValue = Some(valuePlaceholder -> av)
-  override def expression: String = s"#$namePlaceholder :$valuePlaceholder"
-  override def prefixKeys(prefix: String): LeafUpdateExpression =
-    LeafDeleteExpression(
-      namePlaceholder,
-      attributeNames,
-      s"$prefix$valuePlaceholder",
-      av
-    )
-}
-
 object DeleteExpression {
   private val prefix = "updateDelete"
   def apply[V](field: AttributeName, value: V)(implicit format: DynamoFormat[V]): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafDeleteExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix),
@@ -283,52 +289,13 @@ object DeleteExpression {
     )
 }
 
-private[update] case class LeafRemoveExpression(
-  namePlaceholder: String,
-  attributeNames: Map[String, String]
-) extends LeafUpdateExpression {
-  override val updateType = REMOVE
-  override val constantValue = None
-  override val attributeValue = None
-  override def expression: String = s"#$namePlaceholder"
-  override def prefixKeys(prefix: String): LeafUpdateExpression =
-    LeafRemoveExpression(
-      namePlaceholder,
-      attributeNames
-    )
-}
-
 object RemoveExpression {
   private val prefix = "updateRemove"
   def apply(field: AttributeName): UpdateExpression =
-    SimpleUpdateExpression(
+    SimpleUpdate(
       LeafRemoveExpression(
         field.placeholder(prefix),
         field.attributeNames(prefix)
       )
     )
-}
-
-case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExpression {
-
-  def prefixKeys[T](map: Map[String, T], prefix: String) = map.map {
-    case (k, v) => (s"$prefix$k", v)
-  }
-
-  private val semigroup = Semigroup[Map[UpdateType, NonEmptyVector[LeafUpdateExpression]]]
-
-  override def typeExpressions: Map[UpdateType, NonEmptyVector[LeafUpdateExpression]] = {
-    val leftUpdates = l.typeExpressions.mapValues(_.map(_.prefixKeys("l_")))
-    val rightUpdates = r.typeExpressions.mapValues(_.map(_.prefixKeys("r_")))
-
-    semigroup.combine(leftUpdates, rightUpdates)
-  }
-
-  override val constantValue: Option[(String, AttributeValue)] = l.constantValue.orElse(r.constantValue)
-
-  override def unprefixedAttributeNames: Map[String, String] =
-    l.unprefixedAttributeNames ++ r.unprefixedAttributeNames
-
-  override def unprefixedAttributeValues: Map[String, AttributeValue] =
-    prefixKeys(l.unprefixedAttributeValues, "l_") ++ prefixKeys(r.unprefixedAttributeValues, "r_")
 }

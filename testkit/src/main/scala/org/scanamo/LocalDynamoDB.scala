@@ -76,7 +76,7 @@ object LocalDynamoDB {
         createTable(client)(tableName)(attributeDefinitions: _*)
         created = true
       } catch {
-        case e: ResourceInUseException =>
+        case _: ResourceInUseException =>
       }
     }
 
@@ -145,7 +145,7 @@ object LocalDynamoDB {
         )
         created = true
       } catch {
-        case t: ResourceInUseException =>
+        case _: ResourceInUseException =>
       }
     }
 

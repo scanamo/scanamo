@@ -5,7 +5,6 @@ import akka.stream.ActorMaterializer
 import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
@@ -266,7 +265,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
-          res1 <- bears.index(i).limit(1).scan
+          _ <- bears.index(i).limit(1).scan
           res2 <- bears.index(i).limit(1).from('name -> "Graham" and ('alias -> "Guardianista")).scan
           res3 <- bears.index(i).limit(1).from('name -> "Yogi" and ('alias -> "Kanga")).scan
         } yield res2 ::: res3

@@ -1,70 +1,56 @@
 package org.scanamo.query
 
-import com.amazonaws.services.dynamodbv2.model.QueryRequest
-import org.scanamo.DynamoFormat
+import org.scanamo.{ DynamoFormat, DynamoObject }
+import org.scanamo.request.RequestCondition
 import simulacrum.typeclass
 
-import collection.JavaConverters._
-
 @typeclass trait QueryableKeyCondition[T] {
-  def apply(t: T)(req: QueryRequest): QueryRequest
+  def apply(t: T): RequestCondition
 }
 
 object QueryableKeyCondition {
   implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[KeyEquals[V]] {
-    override def apply(t: KeyEquals[V])(req: QueryRequest): QueryRequest =
-      req
-        .withKeyConditionExpression(s"#K = :${t.key.name}")
-        .withExpressionAttributeNames(Map("#K" -> t.key.name).asJava)
-        .withExpressionAttributeValues(Map(s":${t.key.name}" -> DynamoFormat[V].write(t.v)).asJava)
+    final def apply(t: KeyEquals[V]) =
+      RequestCondition(
+        s"#K = :${t.key.name}",
+        Map("#K" -> t.key.name),
+        Some(DynamoObject(t.key.name -> t.v))
+      )
   }
 
   implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat] =
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
-      override def apply(t: AndQueryCondition[H, R])(req: QueryRequest): QueryRequest =
-        req
-          .withKeyConditionExpression(
-            s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}"
+      final def apply(t: AndQueryCondition[H, R]) =
+        RequestCondition(
+          s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}",
+          Map("#K" -> t.hashCondition.key.name) ++ t.rangeCondition.key.attributeNames("#R"),
+          Some(
+            DynamoObject(t.hashCondition.key.name -> t.hashCondition.v) <> DynamoObject(
+              t.rangeCondition.attributes.toSeq: _*
+            )
           )
-          .withExpressionAttributeNames(
-            (Map("#K" -> t.hashCondition.key.name) ++ t.rangeCondition.key.attributeNames("#R")).asJava
-          )
-          .withExpressionAttributeValues(
-            (
-              t.rangeCondition.attributes.map { attrib =>
-                s":${attrib._1}" -> DynamoFormat[R].write(attrib._2)
-              } + (s":${t.hashCondition.key.name}" -> DynamoFormat[H].write(t.hashCondition.v))
-            ).asJava
-          )
+        )
     }
 
-  implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition] =
+  implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
+    implicit HR: UniqueKeyCondition[AndEqualsCondition[H, R]]
+  ) =
     new QueryableKeyCondition[AndEqualsCondition[H, R]] {
-      override def apply(t: AndEqualsCondition[H, R])(req: QueryRequest): QueryRequest = {
-        val m = UniqueKeyCondition[AndEqualsCondition[H, R]].asAVMap(t)
-        val charWithKey = m.keySet.toList.zipWithIndex.map {
+      final def apply(t: AndEqualsCondition[H, R]) = {
+        val m: DynamoObject = HR.toDynamoObject(t)
+        val charWithKey: Iterable[(String, String)] = m.keys.zipWithIndex map {
           case (k, v) => (s"#${('A'.toInt + v).toChar}", k)
         }
 
-        req
-          .withKeyConditionExpression(
-            charWithKey.map { case (char, key) => s"$char = :$key" }.mkString(" AND ")
-          )
-          .withExpressionAttributeNames(charWithKey.toMap.asJava)
-          .withExpressionAttributeValues(
-            (m.map { case (k, v) => s":$k" -> v }).asJava
-          )
+        RequestCondition(
+          charWithKey.map { case (char, key) => s"$char = :$key" }.mkString(" AND "),
+          charWithKey.toMap,
+          Some(m)
+        )
       }
-    }
-
-  implicit def descendingQueryCondition[T](implicit condition: QueryableKeyCondition[T]) =
-    new QueryableKeyCondition[Descending[T]] {
-      override def apply(t: Descending[T])(req: QueryRequest): QueryRequest =
-        condition.apply(t.queryCondition)(req).withScanIndexForward(false)
     }
 }
 
 case class Query[T](t: T)(implicit qkc: QueryableKeyCondition[T]) {
-  def apply(req: QueryRequest): QueryRequest =
-    qkc.apply(t)(req)
+  def apply: RequestCondition = qkc.apply(t)
 }
