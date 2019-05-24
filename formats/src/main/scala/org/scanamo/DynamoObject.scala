@@ -135,13 +135,13 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     case Strict(xs) =>
       xs.entrySet.stream.reduce[Either[DynamoReadError, Map[String, V]]](
         Right(Map.empty),
-        (xs0, e) => for { xs <- xs0; x <- D.read(e.getValue) } yield xs + (e.getKey -> x),
+        (xs0, e) => (xs0, D.read(e.getValue)).mapN((xs, x) => xs + (e.getKey -> x)),
         (xs0, ys0) => (xs0, ys0).mapN(_ ++ _)
       )
     case Pure(xs) =>
       xs.foldLeft[Either[DynamoReadError, Map[String, V]]](Right(Map.empty)) {
         case (e @ Left(_), _)   => e
-        case (Right(m), (k, x)) => D.read(x).map(x => m + (k -> x))
+        case (Right(m), (k, x)) => D.read(x).right.map(x => m + (k -> x))
       }
     case Concat(xs0, ys0) => (xs0.toMap, ys0.toMap).mapN(_ ++ _)
   }
