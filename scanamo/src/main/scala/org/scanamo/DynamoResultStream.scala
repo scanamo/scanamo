@@ -3,8 +3,8 @@ package org.scanamo
 import cats.free.Free
 import com.amazonaws.services.dynamodbv2.model.{QueryResult, ScanResult}
 import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.{ScanamoOps, ScanamoOpsA}
-import org.scanamo.request.{ScanamoQueryRequest, ScanamoScanRequest}
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA }
+import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
 

@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.Source
 import cats.Monad
-import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
+import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps }
 import org.scanamo.ops.retrypolicy.RetryPolicy
 
 /**
@@ -15,7 +15,7 @@ import org.scanamo.ops.retrypolicy.RetryPolicy
 class ScanamoAlpakka private (client: DynamoClient, retrySettings: RetryPolicy) {
   import ScanamoAlpakka._
 
-  private final val interpreter = new AlpakkaInterpreter(client, retrySettings)
+  final private val interpreter = new AlpakkaInterpreter(client, retrySettings)
 
   def exec[A](op: ScanamoOps[A]): AlpakkaInterpreter.Alpakka[A] =
     op.foldMap(interpreter)

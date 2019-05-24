@@ -4,7 +4,7 @@ import cats.syntax.either._
 
 import org.scanamo.error.{DynamoReadError, TypeCoercionError}
 
-import eu.timepit.refined.api.{RefType, Validate}
+import eu.timepit.refined.api.{ RefType, Validate }
 
 package object refined {
 

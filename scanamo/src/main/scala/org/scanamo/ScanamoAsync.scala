@@ -2,7 +2,7 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scanamo.ops._
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.{ ExecutionContext, Future }
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an implicit
@@ -14,7 +14,7 @@ import scala.concurrent.{ExecutionContext, Future}
 class ScanamoAsync private (client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) {
   import cats.instances.future._
 
-  private final val interpreter = new ScanamoAsyncInterpreter(client)
+  final private val interpreter = new ScanamoAsyncInterpreter(client)
 
   /**
     * Execute the operations built with [[org.scanamo.Table]], using the client

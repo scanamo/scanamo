@@ -4,7 +4,7 @@ import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.{DynamoFormat, DynamoObject}
 import org.scanamo.error.{ConditionNotMet, ScanamoError}
 import org.scanamo.ops.ScanamoOps
-import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
+import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import cats.syntax.either._

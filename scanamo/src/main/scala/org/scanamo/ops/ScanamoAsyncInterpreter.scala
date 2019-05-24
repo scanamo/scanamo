@@ -7,8 +7,8 @@ import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model._
 
-import scala.concurrent.{ExecutionContext, Future, Promise}
-import scala.util.{Failure, Success}
+import scala.concurrent.{ ExecutionContext, Future, Promise }
+import scala.util.{ Failure, Success }
 
 /*
  * Interpret Scanamo operations into a `Future` using the AmazonDynamoDBAsync client
@@ -17,7 +17,7 @@ import scala.util.{Failure, Success}
 class ScanamoAsyncInterpreter(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext)
     extends (ScanamoOpsA ~> Future) {
 
-  private final def futureOf[X <: AmazonWebServiceRequest, T](
+  final private def futureOf[X <: AmazonWebServiceRequest, T](
     call: (X, AsyncHandler[X, T]) => java.util.concurrent.Future[T],
     req: X
   ): Future[T] = {

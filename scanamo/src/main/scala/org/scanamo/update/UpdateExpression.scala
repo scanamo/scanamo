@@ -86,7 +86,7 @@ object UpdateExpression {
     RemoveExpression(field)
 }
 
-private[update] sealed trait UpdateType { val op: String }
+sealed private[update] trait UpdateType { val op: String }
 private[update] case object SET extends UpdateType { override val op = "SET" }
 private[update] case object ADD extends UpdateType { override val op = "ADD" }
 private[update] case object DELETE extends UpdateType { override val op = "DELETE" }
