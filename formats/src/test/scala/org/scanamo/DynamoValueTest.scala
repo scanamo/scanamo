@@ -43,14 +43,14 @@ private[scanamo] trait DynamoValueInstances extends DynamoObjectInstances with D
 
   val genStrings = arbitrary[List[String]].map(DynamoValue.fromStrings)
 
-  val genBuffers = arbitrary[List[Array[Byte]]].map(xs => DynamoValue.fromByteBuffers(xs.map(ByteBuffer.wrap): _*))
+  val genBuffers = arbitrary[List[Array[Byte]]].map(xs => DynamoValue.fromByteBuffers(xs.map(ByteBuffer.wrap))
 
   def fromSize(size: Int): Gen[DynamoValue] = size match {
     case 0 => genNull
     case 1 => Gen.oneOf(genNumber, genString, genBuffer)
     case n =>
       Gen.oneOf(
-        Gen.listOf(fromSize(n - 1)).map(xs => DynamoValue.fromValues(xs: _*)),
+        Gen.listOf(fromSize(n - 1)).map(xs => DynamoValue.fromValues(xs)),
         for { xs <- Gen.listOf(fromSize(n - 1)); ks <- Gen.listOfN(xs.size, Gen.alphaNumStr) } yield
           DynamoValue.fromFields((ks zip xs): _*)
       )

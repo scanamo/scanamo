@@ -288,7 +288,7 @@ object DynamoFormat extends EnumDynamoFormat {
     attribute({ dv =>
       if (dv.isNull) Some(List.empty)
       else dv.asArray.flatMap(_.asArray)
-    }, l => DynamoValue.fromValues(l: _*), "L")
+    }, l => DynamoValue.fromValues(l), "L")
 
   /**
     * {{{
@@ -339,7 +339,7 @@ object DynamoFormat extends EnumDynamoFormat {
           Right(Set.empty[T])
         else
           for {
-            ns <- Either.fromOption(av.asArray.flatMap(_.asNumArray), NoPropertyOfType("NS", av))
+            ns <- Either.fromOption(av.asArray.flatMap(_.asNumericArray), NoPropertyOfType("NS", av))
             set <- ns.traverse(r)
           } yield set.toSet
 
@@ -348,7 +348,7 @@ object DynamoFormat extends EnumDynamoFormat {
         if (t.isEmpty)
           DynamoValue.nil
         else
-          DynamoValue.fromNumbers(t.toSeq: _*)
+          DynamoValue.fromNumbers(t)
 
       override final val default = Some(Set.empty[T])
     }
@@ -359,7 +359,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Int]) =>
-    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s)
     *     | DynamoFormat[Set[Int]].write(s) == av &&
     *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
     *
@@ -375,7 +375,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Long]) =>
-    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s)
     *     | DynamoFormat[Set[Long]].write(s) == av &&
     *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
     *
@@ -391,7 +391,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Float]) =>
-    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s)
     *     | DynamoFormat[Set[Float]].write(s) == av &&
     *     |   DynamoFormat[Set[Float]].read(av) == Right(s)
     *
@@ -407,7 +407,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[Double]) =>
-    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s)
     *     | DynamoFormat[Set[Double]].write(s) == av &&
     *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
     *
@@ -423,7 +423,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
     *
     * prop> (s: Set[BigDecimal]) =>
-    *     | val av = DynamoValue.fromNumbers(s.toList: _*)
+    *     | val av = DynamoValue.fromNumbers(s)
     *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
     *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
     *
@@ -439,7 +439,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * prop> implicit val arbSet = Arbitrary(Gen.nonEmptyContainerOf[Set, String](Arbitrary.arbitrary[String]))
     *
     * prop> (s: Set[String]) =>
-    *     | val av = DynamoValue.fromStrings(s.toList: _*)
+    *     | val av = DynamoValue.fromStrings(s)
     *     | DynamoFormat[Set[String]].write(s) == av &&
     *     |   DynamoFormat[Set[String]].read(av) == Right(s)
     *
@@ -460,7 +460,7 @@ object DynamoFormat extends EnumDynamoFormat {
         if (t.isEmpty)
           DynamoValue.nil
         else
-          DynamoValue.fromStrings(t.toSeq: _*)
+          DynamoValue.fromStrings(t)
 
       override final val default = Some(Set.empty[String])
     }

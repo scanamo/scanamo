@@ -4,6 +4,9 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
 import org.scanamo.error.DynamoReadError
 
+/**
+ * A `DynamoValue` is a pure representation of an `AttributeValue` from the AWS SDK.
+ */
 sealed abstract class DynamoValue extends Product with Serializable { self =>
   import DynamoValue._
 
@@ -138,36 +141,57 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     */
   final def as[A](implicit A: DynamoFormat[A]): Either[DynamoReadError, A] = A.read(self)
 
+  /**
+   * Transforms into a new value if this one is null
+   */
   final def withNull(f: => DynamoValue): DynamoValue = self match {
     case DynNull => f
     case _       => self
   }
 
+  /**
+   * Transforms into a new value if this one is a boolean
+   */
   final def withBoolean(f: Boolean => DynamoValue): DynamoValue = self match {
     case DynBool(b) => f(b)
     case _          => self
   }
 
+  /**
+   * Transforms into a new value if this one is a string
+   */
   final def withString(f: String => DynamoValue): DynamoValue = self match {
     case DynString(s) => f(s)
     case _            => self
   }
 
+  /**
+   * Transforms into a new value if this one is a number
+   */
   final def withNumber(f: String => DynamoValue): DynamoValue = self match {
     case DynNum(n) => f(n)
     case _         => self
   }
 
+  /**
+   * Transforms into a new value if this one is a byte buffer
+   */
   final def withByteBuffer(f: ByteBuffer => DynamoValue): DynamoValue = self match {
     case DynByte(b) => f(b)
     case _          => self
   }
 
+  /**
+   * Transforms into a new value if this one is an array
+   */
   final def withArray(f: DynamoArray => DynamoValue): DynamoValue = self match {
     case DynArray(as) => f(as)
     case _            => self
   }
 
+  /**
+   * Transforms into a new value if this one is a map
+   */
   final def withObject(f: DynamoObject => DynamoValue): DynamoValue = self match {
     case DynObject(as) => f(as)
     case _             => self
@@ -189,20 +213,64 @@ object DynamoValue {
   private[DynamoValue] final case class DynArray(as: DynamoArray) extends DynamoValue
   private[DynamoValue] final case class DynObject(as: DynamoObject) extends DynamoValue
 
-  ////
-  // Constructors
+  /**
+   * The `null` value
+   */
   val nil: DynamoValue = DynNull
-  def fromBoolean(b: Boolean): DynamoValue = DynBool(b)
-  def fromNumber[N: Numeric](n: N): DynamoValue = DynNum(n.toString)
-  def fromString(s: String): DynamoValue = DynString(s)
-  def fromByteBuffer(b: ByteBuffer): DynamoValue = DynByte(b)
-  def fromValues(as: DynamoValue*): DynamoValue = DynArray(DynamoArray(as: _*))
-  def fromFields(as: (String, DynamoValue)*): DynamoValue = DynObject(DynamoObject(as.toMap))
-  def fromMap(as: Map[String, DynamoValue]): DynamoValue = DynObject(DynamoObject(as))
-  def fromNumbers[N: Numeric](ns: N*): DynamoValue = DynArray(DynamoArray.numbers(ns: _*))
-  def fromStrings(ss: String*): DynamoValue = DynArray(DynamoArray.strings(ss: _*))
-  def fromByteBuffers(bs: ByteBuffer*): DynamoValue = DynArray(DynamoArray.byteBuffers(bs: _*))
 
+  /**
+   * Creates a boolean value
+   */
+  def fromBoolean(b: Boolean): DynamoValue = DynBool(b)
+
+  /**
+   * Creates a numeric value
+   */
+  def fromNumber[N: Numeric](n: N): DynamoValue = DynNum(n.toString)
+
+  /**
+   * Creates a string value
+   */
+  def fromString(s: String): DynamoValue = DynString(s)
+
+  /**
+   * Creates a byte buffer value
+   */
+  def fromByteBuffer(b: ByteBuffer): DynamoValue = DynByte(b)
+
+  /**
+   * Creates an array of values
+   */
+  def fromValues(as: Iterable[DynamoValue]): DynamoValue = DynArray(DynamoArray(as))
+
+  /**
+   * Creates aa map of values
+   */
+  def fromFields(as: (String, DynamoValue)*): DynamoValue = DynObject(DynamoObject(as.toMap))
+
+  /**
+   * Builds a map of values from an actual `Map`
+   */
+  def fromMap(as: Map[String, DynamoValue]): DynamoValue = DynObject(DynamoObject(as))
+
+  /**
+   * Creates an array of numbers
+   */
+  def fromNumbers[N: Numeric](ns: Iterable[N]): DynamoValue = DynArray(DynamoArray.numbers(ns))
+
+  /**
+   * Creates an array of strings
+   */
+  def fromStrings(ss: Iterable[String]): DynamoValue = DynArray(DynamoArray.strings(ss))
+
+  /**
+   * Creates an array of byte buffers
+   */
+  def fromByteBuffers(bs: Iterable[ByteBuffer]): DynamoValue = DynArray(DynamoArray.byteBuffers(bs))
+
+  /**
+   * Creats a pure value from an `AttributeValue`
+   */
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
     if (!(av.isNULL eq null) && av.isNULL)
       DynNull
@@ -215,7 +283,7 @@ object DynamoValue {
     else if (av.getB ne null)
       DynByte(av.getB)
     else if (av.getNS ne null)
-      DynArray(DynamoArray.numbers(av.getNS))
+      DynArray(DynamoArray.unsafeNumbers(av.getNS))
     else if (av.getBS ne null)
       DynArray(DynamoArray.byteBuffers(av.getBS))
     else if (av.getSS ne null)
@@ -225,8 +293,14 @@ object DynamoValue {
     else
       DynObject(DynamoObject(av.getM))
 
+  /**
+   * Creates a map from a [[DynamoObject]]
+   */
   def fromDynamoObject(xs: DynamoObject): DynamoValue = DynObject(xs)
 
+  /**
+   * Creates an array from a [[DynamoArray]]
+   */
   def fromDynamoArray(xs: DynamoArray): DynamoValue = DynArray(xs)
 
   private[scanamo] def unsafeFromNumber(n: String): DynamoValue = DynNum(n)
