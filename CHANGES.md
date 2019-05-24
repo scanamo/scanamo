@@ -1,4 +1,16 @@
-## Version 1.0.0-M7
+## Version 1.0.0-M10
+
+- https://github.com/scanamo/scanamo/pull/295 Add missing floatFormat and floatSetFormat to DynamoFormat (@shtukas)
+- https://github.com/scanamo/scanamo/pull/365 Return a Left of MissingKeyValue if the key provided is not the primary key (@susiecoleman)
+- https://github.com/scanamo/scanamo/pull/367 Write empty strings as null (@regiskuckaertz)
+- https://github.com/scanamo/scanamo/pull/377 Add startDynamodbLocal sbt task information to CONTRIBUTING.md (@kiranbayram)
+- https://github.com/scanamo/scanamo/pull/381 Fix links in doc pages (@kiranbayram)
+- https://github.com/scanamo/scanamo/pull/400 Manual derivation with `DynamoValue` (@regiskuckaertz)
+- https://github.com/scanamo/scanamo/pull/402 Add retry mechanism for AlpakkaScanamo (@AyushTiwary)
+- https://github.com/scanamo/scanamo/pull/405 Upgrade to alpakka v1.0.1 (@regiskuckaertz)
+- https://github.com/scanamo/scanamo/pull/406 Breaking: Refactor Scanamo clients as classes (@regiskuckaertz) 
+
+## Version 1.0.0-M9
 
 In this release, new effect modules have been added for cats-effect, scalaz and scalaz-zio 🎉
 
