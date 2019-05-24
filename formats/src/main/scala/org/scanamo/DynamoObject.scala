@@ -232,7 +232,7 @@ object DynamoObject {
   }
 
   /**
-    * Builds a map from a [[java.util.Map]] of attribute values
+    * Builds a map from a Java Map of attribute values
     */
   def apply(xs: JMap[String, AttributeValue]): DynamoObject = if (xs.isEmpty) Empty else Strict(xs)
 
