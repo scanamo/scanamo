@@ -1,12 +1,11 @@
 ---
 layout: docs
 title: Filters
-position: 4
 ---
 
 ## Filters
 
-[Scans](operations.html#scan) and [Queries](operations.html#query) can be 
+[Scans](operations.md#scan) and [Queries](operations.md#query) can be 
 filtered within Dynamo, preventing the memory, network and marshalling 
 overhead of filtering on the client.
  

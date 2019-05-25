@@ -1,7 +1,6 @@
 ---
 layout: docs
 title: Operations 
-position: 1
 ---
 
 ## Operations
@@ -17,8 +16,8 @@ Scanamo supports all the DynamoDB operations that interact with individual items
  * [Query](#query) for retrieving all elements with a given hash-key and a range key that matches
  some criteria
  
-Scanamo also supports [batched operations](batch-operations.html), [conditional operations](conditional-operations.html) 
-and queries against [secondary indexes](using-indexes.html).
+Scanamo also supports [batched operations](batch-operations.md), [conditional operations](conditional-operations.md) 
+and queries against [secondary indexes](using-indexes.md).
  
 ### Put and Get
 

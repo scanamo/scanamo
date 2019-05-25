@@ -1,7 +1,6 @@
 ---
 layout: docs
 title: DynamoFormat
-position:  6
 ---
 
 ## DynamoFormat

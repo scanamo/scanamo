@@ -1,7 +1,6 @@
 ---
 layout: docs
 title: Asynchronous Requests
-position: 7
 ---
 
 ## Asynchronous requests
