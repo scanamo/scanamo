@@ -1,0 +1,61 @@
+/* A couple of useful variables */
+:root {
+    --pre-margin: 3rem 0;
+}
+
+body {
+    font-family: Georgia, sans-serif;
+    line-height: 1.5;
+    color: #333;
+}
+
+p {
+    margin: 0.75rem 0 1.5rem 0;
+}
+
+table {
+    margin: 0 0 1.5rem;
+}
+
+pre {
+    margin: var(--pre-margin);
+    background: none;
+    border-width: 1px 0;
+    border-style: solid;
+    border-color: rgba(0, 0, 0, .1); 
+}
+
+#page-content-wrapper section pre {
+    background: none;
+    margin: var(--pre-margin);
+}
+
+#content a {
+    color: #951c55;
+    border-bottom: 0.0625rem solid #dcdcdc;
+}
+#content a:hover {
+    border-bottom: 0.0625rem solid #6e99b3;
+    text-decoration: none;
+}
+
+#content code {
+    background-color: transparent;
+    padding: 0;
+}
+
+#content code.hljs, #page-content-wrapper section pre .hljs {
+    padding: 0.5rem 1rem;
+}
+
+#page-content-wrapper section {
+    margin: 1px 0 0 0;
+}
+
+#page-content-wrapper .nav a {
+    padding: 30px 15px;
+}
+
+.jumbotron {
+    background-image: none;
+}
