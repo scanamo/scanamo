@@ -1,3 +1,5 @@
+import explicitdeps.ExplicitDepsPlugin.autoImport.moduleFilterRemoveValue
+
 scalaVersion in ThisBuild := "2.12.8"
 crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
@@ -89,7 +91,7 @@ lazy val root = (project in file("."))
     stopDynamoDBLocal / aggregate := false
   )
 
-addCommandAlias("tut", "docs/tut")
+addCommandAlias("fmt", "all scalafmtSbt scalafmt test:scalafmt")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
@@ -268,20 +270,28 @@ lazy val joda = (project in file("joda"))
   )
   .dependsOn(formats)
 
-lazy val docs = (project in file("docs"))
+lazy val docs = project
+  .in(file("scanamo-docs"))
   .settings(
-    commonSettings,
-    micrositeSettings,
     noPublishSettings,
-    includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
-    ghpagesNoJekyll := false,
-    git.remoteRepo := "git@github.com:scanamo/scanamo.git",
-    makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
-    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
-    siteSubdirName in ScalaUnidoc := "latest/api"
+    moduleName := "scanamo-docs",
+    unusedCompileDependenciesFilter -= moduleFilter("org.scalameta", "mdoc"),
+    scalacOptions -= "-Yno-imports",
+    scalacOptions -= "-Xfatal-warnings",
+    scalacOptions ~= { _ filterNot (_ startsWith "-Ywarn") },
+    scalacOptions ~= { _ filterNot (_ startsWith "-Xlint") },
+    libraryDependencies ++= Seq(
+      "com.github.ghik"     %% "silencer-lib"             % "1.3.3"  % "provided",
+      "commons-io"          % "commons-io"                % "2.6"    % "provided",
+      "org.jsoup"           % "jsoup"                     % "1.12.1" % "provided"
+    )
   )
-  .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
-  .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
+  .dependsOn(
+    scanamo % "compile->test",
+    alpakka % "compile",
+    refined % "compile"
+  )
+  .enablePlugins(MdocPlugin, DocusaurusPlugin)
 
 val publishingSettings = Seq(
   organization := "org.scanamo",
