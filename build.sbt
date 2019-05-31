@@ -4,7 +4,7 @@ scalaVersion in ThisBuild := "2.12.8"
 crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "1.6.0"
-val catsEffectVersion = "1.3.0"
+val catsEffectVersion = "1.3.1"
 val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
@@ -126,7 +126,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.5",
+      "eu.timepit"    %% "refined"   % "0.9.6",
       "org.scalatest" %% "scalatest" % "3.0.7" % Test
     )
   )
@@ -228,7 +228,7 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.0.1",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.0.2",
       "org.scalatest"      %% "scalatest"                    % "3.0.7" % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.13.5" % Test
     ),
