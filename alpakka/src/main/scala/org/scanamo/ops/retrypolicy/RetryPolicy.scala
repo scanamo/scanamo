@@ -3,6 +3,7 @@ package org.scanamo.ops.retrypolicy
 import org.scanamo.ops.retrypolicy.RetryPolicy._
 
 import scala.concurrent.duration.FiniteDuration
+import scala.util.Random
 
 sealed abstract class RetryPolicy extends Product with Serializable { self =>
   final def done: Boolean = self match {
@@ -14,11 +15,16 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
   }
 
   final def delay: Long = self match {
-    case Constant(retryDelay)       => retryDelay.toMillis
-    case Linear(retryDelay, factor) => retryDelay.toMillis * factor.toLong
+    case Constant(retryDelay) =>
+      val currentRetryDelay = retryDelay.toMillis
+      getDelayWithJitter(currentRetryDelay)
+    case Linear(retryDelay, factor) =>
+      val currentRetryDelay = retryDelay.toMillis * factor.toLong
+      getDelayWithJitter(currentRetryDelay)
     case Exponential(retryDelay, factor) =>
       val delayMillis = retryDelay.toMillis
-      delayMillis * Math.pow(delayMillis.toDouble, factor).toLong
+      val currentRetryDelay = delayMillis * Math.pow(delayMillis.toDouble, factor).toLong
+      getDelayWithJitter(currentRetryDelay)
     case And(thisPolicy, thatPolicy) => Math.max(thisPolicy.delay, thatPolicy.delay)
     case Or(thisPolicy, thatPolicy)  => Math.min(thisPolicy.delay, thatPolicy.delay)
     case _                           => 0
@@ -40,6 +46,11 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
 
   final def &&(that: RetryPolicy): RetryPolicy = And(self, that)
   final def ||(that: RetryPolicy): RetryPolicy = Or(self, that)
+
+  final private def getDelayWithJitter(delayInMillis: Long) = {
+    val maxJitter = Math.ceil(delayInMillis * 0.2).toInt
+    delayInMillis + Random.nextInt(maxJitter)
+  }
 }
 
 object RetryPolicy {
