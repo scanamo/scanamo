@@ -1,11 +1,15 @@
 package org.scanamo
 
 import akka.NotUsed
+import akka.stream.Materializer
 import akka.stream.alpakka.dynamodb.DynamoClient
-import akka.stream.scaladsl.Source
+import akka.stream.scaladsl.{Sink, Source}
 import cats.Monad
-import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps }
+import org.scanamo.ops.AlpakkaInterpreter.Alpakka
+import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
 import org.scanamo.ops.retrypolicy.RetryPolicy
+
+import scala.concurrent.Future
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
@@ -17,7 +21,13 @@ class ScanamoAlpakka private (client: DynamoClient, retrySettings: RetryPolicy) 
 
   final private val interpreter = new AlpakkaInterpreter(client, retrySettings)
 
-  def exec[A](op: ScanamoOps[A]): AlpakkaInterpreter.Alpakka[A] =
+  def exec[A](op: ScanamoOps[A]): Alpakka[A] =
+    run(op)
+
+  def exec[A](op: ScanamoOps[A]): Future[A] =
+    run(op).runWith(Sink.head[A])(client.materializer)
+
+  private def run[A](op: ScanamoOps[A]): Alpakka[A] =
     op.foldMap(interpreter)
 }
 
