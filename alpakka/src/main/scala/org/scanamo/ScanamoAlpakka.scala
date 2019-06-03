@@ -1,7 +1,6 @@
 package org.scanamo
 
 import akka.NotUsed
-import akka.stream.Materializer
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.{ Sink, Source }
 import cats.Monad
@@ -24,7 +23,7 @@ class ScanamoAlpakka private (client: DynamoClient, retrySettings: RetryPolicy) 
   def exec[A](op: ScanamoOps[A]): Alpakka[A] =
     run(op)
 
-  def exec[A](op: ScanamoOps[A]): Future[A] =
+  def execFuture[A](op: ScanamoOps[A]): Future[A] =
     run(op).runWith(Sink.head[A])(client.materializer)
 
   private def run[A](op: ScanamoOps[A]): Alpakka[A] =
