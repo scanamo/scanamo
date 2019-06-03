@@ -3,10 +3,10 @@ package org.scanamo
 import akka.NotUsed
 import akka.stream.Materializer
 import akka.stream.alpakka.dynamodb.DynamoClient
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.{ Sink, Source }
 import cats.Monad
 import org.scanamo.ops.AlpakkaInterpreter.Alpakka
-import org.scanamo.ops.{AlpakkaInterpreter, ScanamoOps}
+import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps }
 import org.scanamo.ops.retrypolicy.RetryPolicy
 
 import scala.concurrent.Future
