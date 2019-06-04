@@ -47,32 +47,34 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
 
 private[scanamo] object DynamoResultStream {
   object ScanResultStream extends DynamoResultStream[ScanamoScanRequest, ScanResult] {
-    final def items(res: ScanResult) =
+    final def items(res: ScanResult): List[DynamoObject] =
       res.getItems.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
-    final def lastEvaluatedKey(res: ScanResult) = Option(res.getLastEvaluatedKey).map(DynamoObject(_))
-    final def withExclusiveStartKey(key: DynamoObject) =
+    final def lastEvaluatedKey(res: ScanResult): Option[DynamoObject] =
+      Option(res.getLastEvaluatedKey).map(DynamoObject(_))
+    final def withExclusiveStartKey(key: DynamoObject): ScanamoScanRequest => ScanamoScanRequest =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
-    final def withLimit(limit: Int) =
+    final def withLimit(limit: Int): ScanamoScanRequest => ScanamoScanRequest =
       req => req.copy(options = req.options.copy(limit = Some(limit)))
 
-    final def exec(req: ScanamoScanRequest) = ScanamoOps.scan(req)
+    final def exec(req: ScanamoScanRequest): ScanamoOps[ScanResult] = ScanamoOps.scan(req)
 
-    final def limit(req: ScanamoScanRequest) = req.options.limit
-    final def startKey(req: ScanamoScanRequest) = req.options.exclusiveStartKey
+    final def limit(req: ScanamoScanRequest): Option[Int] = req.options.limit
+    final def startKey(req: ScanamoScanRequest): Option[DynamoObject] = req.options.exclusiveStartKey
   }
 
   object QueryResultStream extends DynamoResultStream[ScanamoQueryRequest, QueryResult] {
-    final def items(res: QueryResult) =
+    final def items(res: QueryResult): List[DynamoObject] =
       res.getItems.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
-    final def lastEvaluatedKey(res: QueryResult) = Option(res.getLastEvaluatedKey).map(DynamoObject(_))
-    final def withExclusiveStartKey(key: DynamoObject) =
+    final def lastEvaluatedKey(res: QueryResult): Option[DynamoObject] =
+      Option(res.getLastEvaluatedKey).map(DynamoObject(_))
+    final def withExclusiveStartKey(key: DynamoObject): ScanamoQueryRequest => ScanamoQueryRequest =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
-    final def withLimit(limit: Int) =
+    final def withLimit(limit: Int): ScanamoQueryRequest => ScanamoQueryRequest =
       req => req.copy(options = req.options.copy(limit = Some(limit)))
 
-    final def exec(req: ScanamoQueryRequest) = ScanamoOps.query(req)
+    final def exec(req: ScanamoQueryRequest): ScanamoOps[QueryResult] = ScanamoOps.query(req)
 
-    final def limit(req: ScanamoQueryRequest) = req.options.limit
-    final def startKey(req: ScanamoQueryRequest) = req.options.exclusiveStartKey
+    final def limit(req: ScanamoQueryRequest): Option[Int] = req.options.limit
+    final def startKey(req: ScanamoQueryRequest): Option[DynamoObject] = req.options.exclusiveStartKey
   }
 }
