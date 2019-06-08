@@ -275,7 +275,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val things = Table[Thing](t)
     * ...   val operations = for {
     * ...     _ <- things.put(Thing("a1", 3, None))
-    * ...     updated <- things.update("id" -> "a1", set("optional" -> "mandatory"))
+    * ...     updated <- things.update("id" -> "a1", set("optional", "mandatory"))
     * ...   } yield updated
     * ...   scanamo.exec(operations)
     * ... }
@@ -431,8 +431,8 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val compoundTable = Table[Compound](t)
     * ...   val ops = for {
     * ...     _ <- compoundTable.putAll(Set(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
-    * ...     _ <- compoundTable.given(attributeExists("maybe") and "a" -> "alpha").put(Compound("alpha", Some(2)))
-    * ...     _ <- compoundTable.given(attributeExists("maybe") and "a" -> "beta").put(Compound("beta", Some(3)))
+    * ...     _ <- compoundTable.given(Condition(attributeExists("maybe")) and "a" -> "alpha").put(Compound("alpha", Some(2)))
+    * ...     _ <- compoundTable.given(Condition(attributeExists("maybe")) and "a" -> "beta").put(Compound("beta", Some(3)))
     * ...     _ <- compoundTable.given(Condition("a" -> "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
     * ...     compounds <- compoundTable.scan()
     * ...   } yield compounds

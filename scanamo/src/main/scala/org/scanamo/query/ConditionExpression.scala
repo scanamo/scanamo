@@ -209,8 +209,8 @@ case class AndCondition[L: ConditionExpression, R: ConditionExpression](l: L, r:
 
 case class OrCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: R)
 
-case class Condition[T: ConditionExpression](t: T) {
-  def apply = implicitly[ConditionExpression[T]].apply(t)
+case class Condition[T](t: T)(implicit T: ConditionExpression[T]) {
+  def apply = T.apply(t)
   def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
   def or[Y: ConditionExpression](other: Y) = OrCondition(t, other)
 }

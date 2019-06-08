@@ -11,7 +11,7 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
 
   def leaf: Gen[UpdateExpression] =
     for {
-      s <- arbString
+      s <- arbitrary[String]
       i <- arbitrary[Int]
       si <- arbitrary[Set[Int]]
       l <- arbitrary[List[String]]
