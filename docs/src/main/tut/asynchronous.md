@@ -21,7 +21,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 val client = LocalDynamoDB.client()
 val scanamo = ScanamoAsync(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("farm")('name -> S)
+LocalDynamoDB.createTable(client)("farm")("name" -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
@@ -32,7 +32,7 @@ val ops = for {
     Farmer("Bunce", 52L, Farm(List("goose"))),
     Farmer("Bean", 55L, Farm(List("turkey")))
   ))
-  bunce <- farmTable.get('name -> "Bunce")
+  bunce <- farmTable.get("name" -> "Bunce")
 } yield bunce
 ```
 ```scala
@@ -81,7 +81,7 @@ val client = LocalDynamoDB.client()
 
 val scanamo = ScanamoAlpakka(alpakkaClient)
 
-LocalDynamoDB.createTable(client)("nursery-farmers")('name -> S)
+LocalDynamoDB.createTable(client)("nursery-farmers")("name" -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
@@ -92,7 +92,7 @@ val ops = for {
     Farmer("Bunce", 52L, Farm(List("goose"))),
     Farmer("Bean", 55L, Farm(List("turkey")))
   ))
-  bunce <- farmTable.get('name -> "Bunce")
+  bunce <- farmTable.get("name" -> "Bunce")
 } yield bunce
 
 // Use the Alpakka interpreter
