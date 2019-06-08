@@ -14,10 +14,10 @@ import simulacrum.typeclass
 
 object UniqueKeyCondition {
   implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]) = new UniqueKeyCondition[KeyEquals[V]] {
-    type K = Symbol
-    final def toDynamoObject(t: KeyEquals[V]) = DynamoObject(t.key.name -> t.v)
+    type K = String
+    final def toDynamoObject(t: KeyEquals[V]) = DynamoObject(t.key -> t.v)
     final def fromDynamoObject(key: K, dvs: DynamoObject) =
-      dvs(key.name).flatMap(V.read(_).fold(_ => None, v => Some(KeyEquals(key, v))))
+      dvs(key).flatMap(V.read(_).fold(_ => None, v => Some(KeyEquals(key, v))))
     final def key(t: KeyEquals[V]) = t.key
   }
 
@@ -48,7 +48,7 @@ case class UniqueKey[T](t: T)(implicit T: UniqueKeyCondition[T]) {
 object UniqueKeyConditions {
   implicit def keyList[V: DynamoFormat] = new UniqueKeyConditions[KeyList[V]] {
     final def toDynamoObject(kl: KeyList[V]) =
-      kl.values.map(v => DynamoObject(kl.key.name -> v))
+      kl.values.map(v => DynamoObject(kl.key -> v))
   }
 
   implicit def multipleKeyList[H: DynamoFormat, R: DynamoFormat] =
@@ -57,7 +57,7 @@ object UniqueKeyConditions {
         val (hashKey, rangeKey) = mkl.keys
         mkl.values.map {
           case (h, r) =>
-            DynamoObject(hashKey.name -> h) <> DynamoObject(rangeKey.name -> r)
+            DynamoObject(hashKey -> h) <> DynamoObject(rangeKey -> r)
         }
       }
     }
@@ -67,5 +67,5 @@ case class UniqueKeys[T](t: T)(implicit K: UniqueKeyConditions[T]) {
   def toDynamoObject: Set[DynamoObject] = K.toDynamoObject(t)
 }
 
-case class KeyList[T: DynamoFormat](key: Symbol, values: Set[T])
-case class MultipleKeyList[H: DynamoFormat, R: DynamoFormat](keys: (Symbol, Symbol), values: Set[(H, R)])
+case class KeyList[T: DynamoFormat](key: String, values: Set[T])
+case class MultipleKeyList[H: DynamoFormat, R: DynamoFormat](keys: (String, String), values: Set[(H, R)])

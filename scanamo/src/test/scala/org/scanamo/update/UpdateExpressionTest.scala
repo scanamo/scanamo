@@ -7,11 +7,11 @@ import org.scanamo.DynamoFormat
 
 class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matchers with org.scalatest.prop.Checkers {
 
-  implicit lazy val arbSymbol: Arbitrary[Symbol] = Arbitrary(Gen.alphaNumStr.map(Symbol(_)))
+  implicit lazy val arbString: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
   def leaf: Gen[UpdateExpression] =
     for {
-      s <- arbitrary[Symbol]
+      s <- arbString
       i <- arbitrary[Int]
       si <- arbitrary[Set[Int]]
       l <- arbitrary[List[String]]
@@ -61,14 +61,14 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
   }
 
   it("append/prepend should wrap scalar values in a list") {
-    check { (s: Symbol, v: String) =>
+    check { (s: String, v: String) =>
       append(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
       prepend(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
     }
   }
 
   it("appendAll/prependAll should take the value as a list") {
-    check { (s: Symbol, l: List[String]) =>
+    check { (s: String, l: List[String]) =>
       appendAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
       prependAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
     }
