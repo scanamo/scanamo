@@ -148,7 +148,9 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts.given("weather" -> "Rain").update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <- forecasts
+          .given("weather" -> "Rain")
+          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -350,29 +352,30 @@ class ScanamoScalazSpec extends FunSpec with Matchers with BeforeAndAfterAll wit
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "name" -> S)("mode" -> S, "zone" -> N) { (t, i) =>
-      val stationTable = Table[Station](t)
-      val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
-      val ops = for {
-        _ <- stationTable.putAll(stations)
-        ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
-        ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
-        _ <- stationTable.putAll(Set(LiverpoolStreet))
-        ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
-        ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
-        _ <- stationTable.putAll(Set(CamdenTown))
-        ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (1 and 1)))
-      } yield (ts1, ts2, ts3, ts4, ts5)
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "name" -> S)("mode" -> S, "zone" -> N) {
+      (t, i) =>
+        val stationTable = Table[Station](t)
+        val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
+        val ops = for {
+          _ <- stationTable.putAll(stations)
+          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+          _ <- stationTable.putAll(Set(LiverpoolStreet))
+          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+          _ <- stationTable.putAll(Set(CamdenTown))
+          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (1 and 1)))
+        } yield (ts1, ts2, ts3, ts4, ts5)
 
-      unsafePerformIO(scanamo.exec(ops)) should equal(
-        (
-          List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
-          List.empty,
-          List.empty,
-          List.empty,
-          List.empty
+        unsafePerformIO(scanamo.exec(ops)) should equal(
+          (
+            List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
+            List.empty,
+            List.empty,
+            List.empty,
+            List.empty
+          )
         )
-      )
     }
   }
 
