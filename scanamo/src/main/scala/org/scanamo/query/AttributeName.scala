@@ -3,29 +3,36 @@ package org.scanamo.query
 import org.scanamo.DynamoFormat
 import org.scanamo.syntax.Bounds
 
-case class AttributeName(components: List[Symbol], index: Option[Int]) {
-  def placeholder(prefix: String): String =
-    index.foldLeft(
-      components.map(s => s"$prefix${s.name}").mkString(".#")
-    )(
-      (p, i) => s"$p[$i]"
-    )
+sealed abstract class AttributeName extends Product with Serializable { self =>
 
-  def attributeNames(prefix: String): Map[String, String] =
-    Map(components.map(s => s"$prefix${s.name}" -> s.name): _*)
+  final def placeholder(prefix: String): String = self match {
+    case AttributeName.TopLevel(x)       => prefix ++ x
+    case AttributeName.ListElement(a, i) => a.placeholder(prefix) ++ s"[$i]"
+    case AttributeName.MapElement(a, x)  => a.placeholder(prefix) ++ ".#" ++ prefix ++ x
+  }
 
-  def \(component: Symbol) = copy(components = components :+ component)
+  final def attributeNames(prefix: String): Map[String, String] = self match {
+    case AttributeName.TopLevel(x)       => Map((prefix ++ x) -> x)
+    case AttributeName.ListElement(a, _) => a.attributeNames(prefix)
+    case AttributeName.MapElement(a, x)  => a.attributeNames(prefix) ++ Map((prefix ++ x) -> x)
+  }
 
-  def apply(index: Int): AttributeName = copy(index = Some(index))
+  final def \(component: Symbol) = AttributeName.MapElement(self, component.name)
 
-  def <[V: DynamoFormat](v: V) = KeyIs(this, LT, v)
-  def >[V: DynamoFormat](v: V) = KeyIs(this, GT, v)
-  def <=[V: DynamoFormat](v: V) = KeyIs(this, LTE, v)
-  def >=[V: DynamoFormat](v: V) = KeyIs(this, GTE, v)
-  def beginsWith[V: DynamoFormat](v: V) = BeginsWith(this, v)
-  def between[V: DynamoFormat](bounds: Bounds[V]) = Between(this, bounds)
+  final def !(index: Int) = AttributeName.ListElement(self, index)
+
+  final def <[V: DynamoFormat](v: V) = KeyIs(self, LT, v)
+  final def >[V: DynamoFormat](v: V) = KeyIs(self, GT, v)
+  final def <=[V: DynamoFormat](v: V) = KeyIs(self, LTE, v)
+  final def >=[V: DynamoFormat](v: V) = KeyIs(self, GTE, v)
+  final def beginsWith[V: DynamoFormat](v: V) = BeginsWith(self, v)
+  final def between[V: DynamoFormat](bounds: Bounds[V]) = Between(self, bounds)
 }
 
 object AttributeName {
-  def of(s: Symbol): AttributeName = AttributeName(List(s), None)
+  def of(s: Symbol): AttributeName = TopLevel(s.name)
+
+  final case class TopLevel private[AttributeName] (x: String) extends AttributeName
+  final case class ListElement private[AttributeName] (a: AttributeName, i: Int) extends AttributeName
+  final case class MapElement private[AttributeName] (a: AttributeName, x: String) extends AttributeName
 }

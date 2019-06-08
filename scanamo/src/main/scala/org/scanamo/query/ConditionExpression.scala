@@ -54,9 +54,9 @@ object ConditionExpression {
       attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))
   }
 
-  implicit def attributeValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(AttributeName, V)] {
+  implicit def attributeValueEqualsCondition[K <: AttributeName, V: DynamoFormat] = new ConditionExpression[(K, V)] {
     val prefix = "equalsCondition"
-    override def apply(pair: (AttributeName, V)): RequestCondition = {
+    override def apply(pair: (K, V)): RequestCondition = {
       val attributeName = pair._1
       RequestCondition(
         s"#${attributeName.placeholder(prefix)} = :conditionAttributeValue",
@@ -71,10 +71,10 @@ object ConditionExpression {
       attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))
   }
 
-  implicit def attributeValueInCondition[V: DynamoFormat] =
-    new ConditionExpression[(AttributeName, Set[V])] {
+  implicit def attributeValueInCondition[K <: AttributeName, V: DynamoFormat] =
+    new ConditionExpression[(K, Set[V])] {
       val prefix = "inCondition"
-      override def apply(pair: (AttributeName, Set[V])): RequestCondition = {
+      override def apply(pair: (K, Set[V])): RequestCondition = {
         val attributeName = pair._1
         val attributeValues = pair._2.zipWithIndex.foldLeft(DynamoObject.empty) {
           case (m, (v, i)) => m <> DynamoObject(s"conditionAttributeValue$i" -> v)

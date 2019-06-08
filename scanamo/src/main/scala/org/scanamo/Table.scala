@@ -257,7 +257,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val operations = for {
     * ...     _ <- outers.put(Outer(id, Middle("x", 1L, Inner("alpha"), List(1, 2))))
     * ...     updatedOuter <- outers.update('id -> id,
-    * ...       set('middle \ 'inner \ 'session -> "beta") and add(('middle \ 'list)(1) ->  1)
+    * ...       set('middle \ 'inner \ 'session -> "beta") and add(('middle \ 'list ! 1) ->  1)
     * ...     )
     * ...   } yield updatedOuter
     * ...   scanamo.exec(operations)
