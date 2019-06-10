@@ -49,8 +49,8 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
 }
 
 object ConditionExpression {
-  implicit def symbolValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, V)] {
-    override def apply(pair: (Symbol, V)): RequestCondition =
+  implicit def stringValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(String, V)] {
+    override def apply(pair: (String, V)): RequestCondition =
       attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))
   }
 
@@ -66,8 +66,8 @@ object ConditionExpression {
     }
   }
 
-  implicit def symbolValueInCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, Set[V])] {
-    override def apply(pair: (Symbol, Set[V])): RequestCondition =
+  implicit def stringValueInCondition[V: DynamoFormat] = new ConditionExpression[(String, Set[V])] {
+    override def apply(pair: (String, Set[V])): RequestCondition =
       attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))
   }
 
@@ -209,8 +209,8 @@ case class AndCondition[L: ConditionExpression, R: ConditionExpression](l: L, r:
 
 case class OrCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: R)
 
-case class Condition[T: ConditionExpression](t: T) {
-  def apply = implicitly[ConditionExpression[T]].apply(t)
+case class Condition[T](t: T)(implicit T: ConditionExpression[T]) {
+  def apply = T.apply(t)
   def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
   def or[Y: ConditionExpression](other: Y) = OrCondition(t, other)
 }

@@ -20,7 +20,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("lemmings")('role -> S)
+LocalDynamoDB.createTable(client)("lemmings")("role" -> S)
 
 case class Lemming(role: String, number: Long)
 ```
@@ -31,8 +31,8 @@ val ops = for {
   _ <- lemmingsTable.putAll(Set(
     Lemming("Walker", 99), Lemming("Blocker", 42), Lemming("Builder", 180)
   ))
-  bLemmings <- lemmingsTable.getAll('role -> Set("Blocker", "Builder"))
-  _ <- lemmingsTable.deleteAll('role -> Set("Walker", "Blocker"))
+  bLemmings <- lemmingsTable.getAll("role" -> Set("Blocker", "Builder"))
+  _ <- lemmingsTable.deleteAll("role" -> Set("Walker", "Blocker"))
   survivors <- lemmingsTable.scan()
 } yield (bLemmings, survivors)
 val (bLemmings, survivors) = scanamo.exec(ops)

@@ -76,7 +76,7 @@ case class Foo(dateTime: DateTime)
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("foo")('dateTime -> S)
+LocalDynamoDB.createTable(client)("foo")("dateTime" -> S)
 ```
 ```tut:book
 implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
@@ -121,7 +121,7 @@ type PosInt = Int Refined Positive
 
 case class Customer(age: PosInt)
 
-LocalDynamoDB.createTable(client)("Customer")('age -> N)
+LocalDynamoDB.createTable(client)("Customer")("age" -> N)
 ```
 
 You just now use it like if the type `PosInt` was natively supported by `scanamo`:

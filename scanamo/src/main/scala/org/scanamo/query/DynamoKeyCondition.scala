@@ -3,7 +3,7 @@ package org.scanamo.query
 import org.scanamo.DynamoFormat
 import org.scanamo.syntax.Bounds
 
-case class KeyEquals[V: DynamoFormat](key: Symbol, v: V) {
+case class KeyEquals[V: DynamoFormat](key: AttributeName, v: V) {
   def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]) =
     AndEqualsCondition(this, equalsKeyCondition)
   def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =

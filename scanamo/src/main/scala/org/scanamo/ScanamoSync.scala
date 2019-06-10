@@ -26,14 +26,14 @@ class Scanamo private (client: AmazonDynamoDB) {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> LocalDynamoDB.withTable(client)("transport")('mode -> S, 'line -> S) {
+    * >>> LocalDynamoDB.withTable(client)("transport")("mode" -> S, "line" -> S) {
     * ...   import org.scanamo.syntax._
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle"),
     * ...       Transport("Underground", "Metropolitan"),
     * ...       Transport("Underground", "Central")))
-    * ...     results <- transport.query('mode -> "Underground" and ('line beginsWith "C"))
+    * ...     results <- transport.query("mode" -> "Underground" and ("line" beginsWith "C"))
     * ...   } yield results.toList
     * ...   scanamo.exec(operations)
     * ... }

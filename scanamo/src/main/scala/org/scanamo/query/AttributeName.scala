@@ -17,7 +17,7 @@ sealed abstract class AttributeName extends Product with Serializable { self =>
     case AttributeName.MapElement(a, x)  => a.attributeNames(prefix) ++ Map((prefix ++ x) -> x)
   }
 
-  final def \(component: Symbol) = AttributeName.MapElement(self, component.name)
+  final def \(component: String) = AttributeName.MapElement(self, component)
 
   final def !(index: Int) = AttributeName.ListElement(self, index)
 
@@ -30,7 +30,7 @@ sealed abstract class AttributeName extends Product with Serializable { self =>
 }
 
 object AttributeName {
-  def of(s: Symbol): AttributeName = TopLevel(s.name)
+  def of(s: String): AttributeName = TopLevel(s)
 
   final case class TopLevel private[AttributeName] (x: String) extends AttributeName
   final case class ListElement private[AttributeName] (a: AttributeName, i: Int) extends AttributeName
