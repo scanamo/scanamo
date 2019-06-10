@@ -15,7 +15,7 @@ class DynamoFormatTest extends FunSpec with Matchers with ScalaCheckDrivenProper
     val typeLabel = typeTag[A].tpe.toString
     it(s"should write and then read a $typeLabel from dynamo") {
       val client = LocalDynamoDB.client()
-      LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
         final case class Person(name: String, item: A)
         val format = DynamoFormat[Person]
         forAll(gen) { a: A =>

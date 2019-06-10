@@ -22,24 +22,24 @@ case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)
 ```
 ```tut:book
 val gremlinsTable = Table[Gremlin]("gremlins")
-LocalDynamoDB.withTable(client)("gremlins")('number -> N) {
+LocalDynamoDB.withTable(client)("gremlins")("number" -> N) {
   val ops = for {
     _ <- gremlinsTable.putAll(
       Set(Gremlin(1, "Gizmo", false, true), Gremlin(2, "George", true, false)))
     // Only `put` Gremlins if not already one with the same number
-    _ <- gremlinsTable.given(not(attributeExists('number)))
+    _ <- gremlinsTable.given(not(attributeExists("number")))
       .put(Gremlin(2, "Stripe", false, true))
-    _ <- gremlinsTable.given(not(attributeExists('number)))
+    _ <- gremlinsTable.given(not(attributeExists("number")))
       .put(Gremlin(3, "Greta", true, true))
     allGremlins <- gremlinsTable.scan()  
-    _ <- gremlinsTable.given('wet -> true)
-      .delete('number -> 1)
-    _ <- gremlinsTable.given('wet -> true)
-      .delete('number -> 2)
-    _ <- gremlinsTable.given('wet -> true)
-      .update('number -> 1, set('friendly -> false))
-    _ <- gremlinsTable.given('wet -> true)
-      .update('number -> 3, set('friendly -> false))
+    _ <- gremlinsTable.given("wet" -> true)
+      .delete("number" -> 1)
+    _ <- gremlinsTable.given("wet" -> true)
+      .delete("number" -> 2)
+    _ <- gremlinsTable.given("wet" -> true)
+      .update("number" -> 1, set("friendly" -> false))
+    _ <- gremlinsTable.given("wet" -> true)
+      .update("number" -> 3, set("friendly" -> false))
     remainingGremlins <- gremlinsTable.scan()
   } yield (allGremlins, remainingGremlins)
   scanamo.exec(ops)
