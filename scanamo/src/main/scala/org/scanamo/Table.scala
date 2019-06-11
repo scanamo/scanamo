@@ -587,6 +587,11 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
+  final def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanToPaged(Int.MaxValue)
+
+  def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    ScanamoFree.scanTo[M, V](name, pageSize)
+
   /**
     * Scans the table and returns the raw DynamoDB result. Sometimes, one might want to
     * access metadata returned in the `ScanResult` object, such as the last evaluated
@@ -657,6 +662,13 @@ case class Table[V: DynamoFormat](name: String) {
     * }}}
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
+
+  final def queryTo[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    queryToPaged(query, Int.MaxValue)
+
+  def queryToPaged[M[_]: Alternative](query: Query[_],
+                                      pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    ScanamoFree.queryTo[M, V](name)(query, pageSize)
 
   /**
     * Queries the table and returns the raw DynamoDB result. Sometimes, one might want to
@@ -765,10 +777,17 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
-  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scan()
+  def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    scanToPaged(Int.MaxValue)
+  def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scanToPaged[M](pageSize)
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.query(query)
+  def queryTo[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    queryToPaged(query, Int.MaxValue)
+  def queryToPaged[M[_]: Alternative](query: Query[_],
+                                      pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.queryToPaged(query, pageSize)
 
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
     ScanamoFree.get[V](tableName)(key, true)
@@ -787,10 +806,19 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
+  def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    scanToPaged(Int.MaxValue)
+  def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, None, queryOptions), pageSize)
   def scan0: ScanamoOps[ScanResult] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
+  def queryTo[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    queryToPaged(query, Int.MaxValue)
+  def queryToPaged[M[_]: Alternative](query: Query[_],
+                                      pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, None, query, queryOptions), pageSize)
   def query0(query: Query[_]): ScanamoOps[QueryResult] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, queryOptions))
 }

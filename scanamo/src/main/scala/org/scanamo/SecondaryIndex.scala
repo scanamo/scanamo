@@ -1,8 +1,9 @@
 package org.scanamo
 
+import cats.Alternative
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 
@@ -41,7 +42,10 @@ sealed abstract class SecondaryIndex[V] {
     * List(Right(Bear(Paddington,marmalade sandwiches,Some(Mr Curry))), Right(Bear(Yogi,picnic baskets,Some(Ranger Smith))))
     * }}}
     */
-  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  final def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanToPaged(Int.MaxValue)
+
+  def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
     * Run a query against keys in a secondary index
@@ -73,6 +77,11 @@ sealed abstract class SecondaryIndex[V] {
     * }}}
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  final def queryTo[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    queryToPaged(query, Int.MaxValue)
+
+  def queryToPaged[M[_]: Alternative](query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
@@ -162,7 +171,10 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
   def descending: SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
-  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
+  def scanToPaged[M[_]: Alternative](pageSize: Int) =
+    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
+  def queryToPaged[M[_]: Alternative](query: Query[_], pageSize: Int) =
+    QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }
