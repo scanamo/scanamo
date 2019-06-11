@@ -1,12 +1,14 @@
 package org.scanamo
 
-import cats.{ ~>, Monad }
+import cats.arrow.FunctionK
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import org.scanamo.ops.{ ScalazInterpreter, ScanamoOps }
+import org.scanamo.ops.{ ScalazInterpreter, ScanamoOps, ScanamoOpsT }
+import scalaz.{ ~>, Monad }
 import scalaz.ioeffect.Task
 import shims._
 
 class ScanamoScalaz(client: AmazonDynamoDBAsync) {
+  import ScanamoScalaz._
 
   final private val interpreter = new ScalazInterpreter(client)
 
@@ -17,5 +19,9 @@ class ScanamoScalaz(client: AmazonDynamoDBAsync) {
 }
 
 object ScanamoScalaz {
+  implicit def natToNat[F[_], G[_]](f: F ~> G): FunctionK[F, G] = new FunctionK[F, G] {
+    def apply[A](a: F[A]): G[A] = f(a)
+  }
+
   def apply(client: AmazonDynamoDBAsync): ScanamoScalaz = new ScanamoScalaz(client)
 }

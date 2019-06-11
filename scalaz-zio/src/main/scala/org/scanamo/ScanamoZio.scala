@@ -1,6 +1,6 @@
 package org.scanamo
 
-import cats.~>
+import cats.{ ~>, Monad }
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import org.scanamo.ops._

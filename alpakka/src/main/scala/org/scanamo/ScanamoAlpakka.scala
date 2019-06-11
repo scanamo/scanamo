@@ -5,7 +5,7 @@ import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.{ Sink, Source }
 import org.scanamo.ops.AlpakkaInterpreter.Alpakka
-import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps }
+import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps, ScanamoOpsT }
 import org.scanamo.ops.retrypolicy.RetryPolicy
 
 import scala.concurrent.Future
