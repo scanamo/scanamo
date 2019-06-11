@@ -235,7 +235,7 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should stream full table scan") {
     import cats.{ ~>, Id }
-    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       case class Item(name: String)
 
       val list = List(
