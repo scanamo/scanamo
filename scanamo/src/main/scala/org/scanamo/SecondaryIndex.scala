@@ -29,7 +29,7 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> import org.scanamo.auto._
     *
-    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('antagonist -> S) { (t, i) =>
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("antagonist" -> S) { (t, i) =>
     * ...   val table = Table[Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey", None))
@@ -61,7 +61,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
     *
-    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('organisation -> S, 'repository -> S)('language -> S, 'license -> S) { (t, i) =>
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("organisation" -> S, "repository" -> S)("language" -> S, "license" -> S) { (t, i) =>
     * ...   val githubProjects = Table[GithubProject](t)
     * ...   val operations = for {
     * ...     _ <- githubProjects.putAll(Set(
@@ -70,7 +70,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
     * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
     * ...     ))
-    * ...     scalaMIT <- githubProjects.index(i).query('language -> "Scala" and ('license -> "MIT"))
+    * ...     scalaMIT <- githubProjects.index(i).query("language" -> "Scala" and ("license" -> "MIT"))
     * ...   } yield scalaMIT.toList
     * ...   scanamo.exec(operations)
     * ... }
@@ -97,7 +97,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
-    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S
     * ... ) { (t, i) =>
     * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
@@ -108,7 +108,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
     * ...     somethingBeginningWithBl <- transport.index(i).limit(1).descending.query(
-    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl"))
+    * ...       ("mode" -> "Underground" and ("colour" beginsWith "Bl"))
     * ...     )
     * ...   } yield somethingBeginningWithBl.toList
     * ...   scanamo.exec(operations)
@@ -132,7 +132,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
-    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S
     * ... ) { (t, i) =>
     * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
@@ -143,8 +143,8 @@ sealed abstract class SecondaryIndex[V] {
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
     * ...     somethingBeginningWithC <- transport.index(i)
-    * ...                                   .filter('line beginsWith ("C"))
-    * ...                                   .query('mode -> "Underground")
+    * ...                                   .filter("line" beginsWith ("C"))
+    * ...                                   .query("mode" -> "Underground")
     * ...   } yield somethingBeginningWithC.toList
     * ...   scanamo.exec(operations)
     * ... }

@@ -29,7 +29,7 @@ scala> import org.scanamo.auto._
  
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")('name -> S)
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")("name" -> S)
 
 scala> case class Farm(animals: List[String])
 scala> case class Farmer(name: String, age: Long, farm: Farm)
@@ -40,7 +40,7 @@ scala> val ops = for {
      |       Farmer("McDonald", 156L, Farm(List("sheep", "cow"))),
      |       Farmer("Boggis", 43L, Farm(List("chicken")))
      |     ))
-     |   mcdonald <- table.get('name -> "McDonald")
+     |   mcdonald <- table.get("name" -> "McDonald")
      | } yield mcdonald
 scala> Scanamo.exec(client)(ops)
 res1: Option[Either[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
