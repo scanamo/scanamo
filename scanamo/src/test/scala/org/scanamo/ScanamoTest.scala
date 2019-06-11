@@ -231,6 +231,35 @@ class ScanamoTest extends FunSpec with Matchers {
     }
   }
 
+  it("should stream full table scan") {
+    import cats.{ Id, ~> }
+    LocalDynamoDB.usingRandomTable(client)('name -> S) { t =>
+      case class Item(name: String)
+
+      val list = List(
+        Item("item #1"),
+        Item("item #2"),
+        Item("item #3"),
+        Item("item #4"),
+        Item("item #5"),
+        Item("item #6")
+      )
+      val expected = list.map(i => List(Right(i)))
+
+      val items = Table[Item](t)
+      val ops = for {
+        _ <- items.putAll(list.toSet).toFreeT[Stream]
+        list <- items.scanToPaged[Stream](1)
+      } yield list
+
+      val f = new (Id ~> Stream) {
+        override def apply[A](a: Id[A]): Stream[A] = Stream(a)
+      }
+
+      scanamo.execT(f)(ops) should contain theSameElementsAs expected
+    }
+  }
+
   it("should query asynchronously") {
     LocalDynamoDB.usingRandomTable(client)('species -> S, 'number -> N) { t =>
       case class Animal(species: String, number: Int)
