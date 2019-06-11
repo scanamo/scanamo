@@ -12,6 +12,9 @@ class ScanamoZio private (client: AmazonDynamoDBAsync) {
     new ZioInterpreter(client)
 
   final def exec[A](op: ScanamoOps[A]): IO[AmazonDynamoDBException, A] = op.foldMap(interpreter)
+
+  final def execT[M[_]: Monad, A](hoist: IO[AmazonDynamoDBException, ?] ~> M)(op: ScanamoOpsT[M, A]): M[A] =
+    op.foldMap(interpreter andThen hoist)
 }
 
 object ScanamoZio {

@@ -1,5 +1,6 @@
 package org.scanamo
 
+import cats.{ ~>, Id, Monad }
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
 import org.scanamo.ops._
 
@@ -41,6 +42,9 @@ class Scanamo private (client: AmazonDynamoDB) {
     * }}}
     */
   final def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
+
+  final def execT[M[_]: Monad, A](hoist: Id ~> M)(op: ScanamoOpsT[M, A]): M[A] =
+    op.foldMap(interpreter andThen hoist)
 }
 
 object Scanamo {
