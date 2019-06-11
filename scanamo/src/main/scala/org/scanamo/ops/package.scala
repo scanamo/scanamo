@@ -1,7 +1,8 @@
 package org.scanamo
 
-import cats.free.Free
 import cats.data.NonEmptyList
+import cats.free.Free
+import cats.free.FreeT
 import cats.instances.option._
 import cats.syntax.apply._
 import com.amazonaws.services.dynamodbv2.model._
@@ -9,6 +10,7 @@ import org.scanamo.request._
 
 package object ops {
   type ScanamoOps[A] = Free[ScanamoOpsA, A]
+  type ScanamoOpsT[M[_], A] = FreeT[ScanamoOpsA, M, A]
 
   private[ops] object JavaRequests {
     import collection.JavaConverters._
