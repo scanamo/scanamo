@@ -778,6 +778,8 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
+  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scan()
   def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     scanToPaged(Int.MaxValue)
   def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
