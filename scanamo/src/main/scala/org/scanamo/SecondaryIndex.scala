@@ -42,6 +42,8 @@ sealed abstract class SecondaryIndex[V] {
     * List(Right(Bear(Paddington,marmalade sandwiches,Some(Mr Curry))), Right(Bear(Yogi,picnic baskets,Some(Ranger Smith))))
     * }}}
     */
+  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
+
   final def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanToPaged(Int.MaxValue)
 
   def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
@@ -170,6 +172,7 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
   def descending: SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
+  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def scanToPaged[M[_]: Alternative](pageSize: Int) =
     ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
