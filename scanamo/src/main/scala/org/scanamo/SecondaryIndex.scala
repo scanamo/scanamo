@@ -42,7 +42,6 @@ sealed abstract class SecondaryIndex[V] {
     * List(Right(Bear(Paddington,marmalade sandwiches,Some(Mr Curry))), Right(Bear(Yogi,picnic baskets,Some(Ranger Smith))))
     * }}}
     */
-
   final def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanToPaged(Int.MaxValue)
 
   def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
