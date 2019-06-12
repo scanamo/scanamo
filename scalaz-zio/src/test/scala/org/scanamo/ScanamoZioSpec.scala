@@ -201,7 +201,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
   }
 
   it("should stream full table scan") {
-    import scalaz.zio.stream.{Stream, Sink}
+    import scalaz.zio.stream.{ Sink, Stream }
     import org.scanamo.error.DynamoReadError
     import ScanamoZio._
 

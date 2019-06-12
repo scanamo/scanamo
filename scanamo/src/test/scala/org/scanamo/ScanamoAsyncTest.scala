@@ -255,16 +255,19 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       def combineK[A](x: SFuture[A], y: SFuture[A]): SFuture[A] = Apply[Future].map2(x, y)(_ ++ _)
 
       def empty[A]: SFuture[A] = Future.successful(Stream.empty)
-      
-      def flatMap[A, B](fa: SFuture[A])(f: A => SFuture[B]): SFuture[B] = fa flatMap { as => Future.traverse(as)(f) } map (_.flatten)
 
-      def tailRecM[A, B](a: A)(f: A => SFuture[Either[A,B]]): SFuture[B] = f(a) flatMap { eas =>
+      def flatMap[A, B](fa: SFuture[A])(f: A => SFuture[B]): SFuture[B] =
+        fa flatMap { as =>
+          Future.traverse(as)(f)
+        } map (_.flatten)
+
+      def tailRecM[A, B](a: A)(f: A => SFuture[Either[A, B]]): SFuture[B] = f(a) flatMap { eas =>
         Future.traverse(eas) {
-          case Left(a) => tailRecM(a)(f)
+          case Left(a)  => tailRecM(a)(f)
           case Right(b) => Future.successful(Stream(b))
         } map (_.flatten)
       }
-      
+
       def pure[A](x: A): SFuture[A] = Future.successful(Stream(x))
     }
 

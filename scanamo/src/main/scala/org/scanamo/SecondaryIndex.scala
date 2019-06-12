@@ -45,22 +45,22 @@ sealed abstract class SecondaryIndex[V] {
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
 
   /**
-   * Performs a scan with the ability to introduce effects into the computation. This is
-   * useful for huge tables when you don't want to load the whole of it in memory, but 
-   * scan it page by page.
-   * 
-   * To control how many maximum items to load at once, use [[scanToPaged]]
-   */
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page.
+    *
+    * To control how many maximum items to load at once, use [[scanToPaged]]
+    */
   final def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanToPaged(Int.MaxValue)
 
   /**
-   * Performs a scan with the ability to introduce effects into the computation. This is
-   * useful for huge tables when you don't want to load the whole of it in memory, but 
-   * scan it page by page, with a maximum of `pageSize` items per page..
-   * 
-   * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
-   * upper bound.
-   */
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page, with a maximum of `pageSize` items per page..
+    *
+    * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
+    * upper bound.
+    */
   def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
@@ -95,23 +95,23 @@ sealed abstract class SecondaryIndex[V] {
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
 
   /**
-   * Performs a query with the ability to introduce effects into the computation. This is
-   * useful for huge tables when you don't want to load the whole of it in memory, but 
-   * scan it page by page.
-   * 
-   * To control how many maximum items to load at once, use [[queryToPaged]]
-   */
+    * Performs a query with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page.
+    *
+    * To control how many maximum items to load at once, use [[queryToPaged]]
+    */
   final def queryTo[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryToPaged(query, Int.MaxValue)
 
   /**
-   * Performs a scan with the ability to introduce effects into the computation. This is
-   * useful for huge tables when you don't want to load the whole of it in memory, but 
-   * scan it page by page, with a maximum of `pageSize` items per page.
-   * 
-   * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
-   * upper bound.
-   */
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page, with a maximum of `pageSize` items per page.
+    *
+    * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
+    * upper bound.
+    */
   def queryToPaged[M[_]: Alternative](query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
