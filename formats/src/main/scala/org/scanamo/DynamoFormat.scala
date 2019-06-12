@@ -85,6 +85,16 @@ object DynamoFormat extends EnumDynamoFormat {
   private val _optIdentity: Option[Any] => Option[Any] = identity[Option[Any]]
 
   private def optIdentity[A, B] = _optIdentity.asInstanceOf[Option[A] => Option[B]]
+
+  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
+    coerce[String, N, NumberFormatException](f)
+
+  private def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
+    a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
+
+  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
+    coerce[ByteBuffer, B, IllegalArgumentException](f)
+
   private def attribute[T](
     decode: DynamoValue => Option[T],
     encode: T => DynamoValue,
@@ -203,12 +213,6 @@ object DynamoFormat extends EnumDynamoFormat {
     final def write(n: N) = DynamoValue.fromNumber(n)
   }
 
-  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
-    coerce[String, N, NumberFormatException](f)
-
-  private def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
-    a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
-
   /**
     * {{{
     * prop> (l: Long) =>
@@ -268,9 +272,6 @@ object DynamoFormat extends EnumDynamoFormat {
 
   // Since DynamoValue includes a ByteBuffer instance, creating byteArray format backed by ByteBuffer
   implicit val byteBufferFormat: DynamoFormat[ByteBuffer] = attribute(_.asByteBuffer, DynamoValue.fromByteBuffer, "B")
-
-  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
-    coerce[ByteBuffer, B, IllegalArgumentException](f)
 
   /**
     * {{{
