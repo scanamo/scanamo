@@ -7,6 +7,7 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
 import cats.implicits._
 import scalaz.zio.DefaultRuntime
+import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 
 class ScanamoZioSpec extends FunSpec with Matchers {
 
@@ -196,6 +197,36 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         bs <- bears.limit(1).scan
       } yield bs
       unsafeRun(zio.exec(ops)) should equal(List(Right(Bear("Pooh", "honey"))))
+    }
+  }
+
+  it("should stream full table scan") {
+    import scalaz.zio.stream.{Stream, Sink}
+    import org.scanamo.error.DynamoReadError
+    import ScanamoZio._
+
+    type SIO[A] = Stream[AmazonDynamoDBException, A]
+
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      case class Item(name: String)
+
+      val list = List(
+        Item("item #1"),
+        Item("item #2"),
+        Item("item #3"),
+        Item("item #4"),
+        Item("item #5"),
+        Item("item #6")
+      )
+      val expected = list.map(i => List(Right(i)))
+
+      val items = Table[Item](t)
+      val ops = for {
+        _ <- items.putAll(list.toSet).toFreeT[SIO]
+        list <- items.scanToPaged[SIO](1)
+      } yield list
+
+      unsafeRun(zio.execT(ScanamoZio.IoToStream)(ops).run(Sink.collect[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
     }
   }
 

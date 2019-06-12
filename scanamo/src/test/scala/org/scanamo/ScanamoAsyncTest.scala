@@ -244,6 +244,57 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     }
   }
 
+  it("should stream full table scan") {
+    import cats.{ ~>, Alternative, Apply, Monad, MonoidK }
+    import cats.instances.future._
+    import scala.concurrent.Future
+
+    type SFuture[A] = Future[Stream[A]]
+
+    implicit val applicative = new Alternative[SFuture] with MonoidK[SFuture] with Monad[SFuture] {
+      def combineK[A](x: SFuture[A], y: SFuture[A]): SFuture[A] = Apply[Future].map2(x, y)(_ ++ _)
+
+      def empty[A]: SFuture[A] = Future.successful(Stream.empty)
+      
+      def flatMap[A, B](fa: SFuture[A])(f: A => SFuture[B]): SFuture[B] = fa flatMap { as => Future.traverse(as)(f) } map (_.flatten)
+
+      def tailRecM[A, B](a: A)(f: A => SFuture[Either[A,B]]): SFuture[B] = f(a) flatMap { eas =>
+        Future.traverse(eas) {
+          case Left(a) => tailRecM(a)(f)
+          case Right(b) => Future.successful(Stream(b))
+        } map (_.flatten)
+      }
+      
+      def pure[A](x: A): SFuture[A] = Future.successful(Stream(x))
+    }
+
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      case class Item(name: String)
+
+      val list = List(
+        Item("item #1"),
+        Item("item #2"),
+        Item("item #3"),
+        Item("item #4"),
+        Item("item #5"),
+        Item("item #6")
+      )
+      val expected = list.map(i => List(Right(i)))
+
+      val items = Table[Item](t)
+      val ops = for {
+        _ <- items.putAll(list.toSet).toFreeT[SFuture]
+        list <- items.scanToPaged[SFuture](1)
+      } yield list
+
+      val f = new (Future ~> SFuture) {
+        override def apply[A](a: Future[A]): SFuture[A] = a.map(Stream(_))
+      }
+
+      scanamo.execT(f)(ops).futureValue should contain theSameElementsAs expected
+    }
+  }
+
   it("should query asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("species" -> S, "number" -> N) { t =>
       case class Animal(species: String, number: Int)
