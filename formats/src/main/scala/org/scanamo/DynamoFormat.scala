@@ -164,8 +164,10 @@ object DynamoFormat extends EnumDynamoFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A,
-                                                                        xdefault: Option[Option[A]] = None)(write: A => B) =
+  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](
+    read: B => A,
+    xdefault: Option[Option[A]] = None
+  )(write: A => B) =
     xmap(coerce[B, A, T](read), xdefault)(write)
 
   /**
