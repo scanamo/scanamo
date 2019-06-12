@@ -22,7 +22,7 @@ object JodaFormats {
     */
   implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
     DateTime.parse(_),
-    _ => None
+    Some(None)
   )(
     _.toString
   )
@@ -39,7 +39,7 @@ object JodaFormats {
     */
   implicit val jodaEpochSecondsFormat = DynamoFormat.coercedXmap[DateTime, Long, IllegalArgumentException](
     new DateTime(_),
-    _ => None
+    Some(None)
   )(
     _.getMillis()
   )

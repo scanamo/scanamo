@@ -82,10 +82,6 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat extends EnumDynamoFormat {
-  private val _optIdentity: Option[Any] => Option[Any] = identity[Option[Any]]
-
-  private def optIdentity[A, B] = _optIdentity.asInstanceOf[Option[A] => Option[B]]
-
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
 
@@ -141,12 +137,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A], rdefault: Option[B] => Option[A] = optIdentity[B, A])(
+  def xmap[A, B](r: B => Either[DynamoReadError, A], xdefault: Option[Option[A]] = None)(
     w: A => B
   )(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     final def read(item: DynamoValue) = f.read(item).flatMap(r)
     final def write(t: A) = f.write(w(t))
-    final override val default = f.default.flatMap(d => r(d).toOption) orElse rdefault(f.default)
+    final override val default = xdefault.fold(f.default.flatMap(d => r(d).toOption))(identity)
   }
 
   /**
@@ -169,9 +165,8 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A,
-                                                                        rdefault: Option[B] => Option[A] =
-                                                                          optIdentity[B, A])(write: A => B) =
-    xmap(coerce[B, A, T](read), rdefault)(write)
+                                                                        xdefault: Option[Option[A]] = None)(write: A => B) =
+    xmap(coerce[B, A, T](read), xdefault)(write)
 
   /**
     * {{{
@@ -290,7 +285,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val uuidFormat: DynamoFormat[UUID] =
-    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, _ => None)(_.toString)
+    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, Some(None))(_.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
     attribute({ dv =>
