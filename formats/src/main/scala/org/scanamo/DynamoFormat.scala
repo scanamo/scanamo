@@ -82,6 +82,9 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat extends EnumDynamoFormat {
+  private val _optIdentity: Option[Any] => Option[Any] = identity[Option[Any]]
+
+  private def optIdentity[A, B] = _optIdentity.asInstanceOf[Option[A] => Option[B]]
   private def attribute[T](
     decode: DynamoValue => Option[T],
     encode: T => DynamoValue,
@@ -128,10 +131,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+  def xmap[A, B](r: B => Either[DynamoReadError, A], rdefault: Option[B] => Option[A] = optIdentity[B, A])(
+    w: A => B
+  )(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     final def read(item: DynamoValue) = f.read(item).flatMap(r)
     final def write(t: A) = f.write(w(t))
-    final override val default = f.default.flatMap(d => r(d).toOption)
+    final override val default = f.default.flatMap(d => r(d).toOption) orElse rdefault(f.default)
   }
 
   /**
@@ -153,8 +158,10 @@ object DynamoFormat extends EnumDynamoFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A)(write: A => B) =
-    xmap(coerce[B, A, T](read))(write)
+  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A,
+                                                                        rdefault: Option[B] => Option[A] =
+                                                                          optIdentity[B, A])(write: A => B) =
+    xmap(coerce[B, A, T](read), rdefault)(write)
 
   /**
     * {{{
@@ -282,7 +289,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val uuidFormat: DynamoFormat[UUID] =
-    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
+    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, _ => None)(_.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
     attribute({ dv =>
