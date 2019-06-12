@@ -118,11 +118,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(UserId(Eric))
     * }}}
     */
-  def iso[A, B](r: B => A, xdefault: Option[Option[A]] = None)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
-    final def read(item: DynamoValue) = f.read(item).map(r)
-    final def write(t: A) = f.write(w(t))
-    final override val default = xdefault.fold(f.default.map(r))(identity)
-  }
+  def iso[A, B](r: B => A, xdefault: Option[Option[A]] = None)(w: A => B)(implicit f: DynamoFormat[B]) =
+    new DynamoFormat[A] {
+      final def read(item: DynamoValue) = f.read(item).map(r)
+      final def write(t: A) = f.write(w(t))
+      final override val default = xdefault.fold(f.default.map(r))(identity)
+    }
 
   /**
     * {{{
