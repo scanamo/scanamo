@@ -44,4 +44,10 @@ class DynamoFormatTest extends FunSpec with Matchers with ScalaCheckDrivenProper
   testReadWrite[Set[String]](Gen.containerOf[Set, String](nonEmptyStringGen))
   testReadWrite[Option[String]](Gen.option(nonEmptyStringGen))
   testReadWrite[Option[Int]]()
+  testReadWrite[Map[String, Long]](Gen.mapOf[String, Long] {
+    for {
+      key <- nonEmptyStringGen
+      value <- Arbitrary.arbitrary[Long]
+    } yield key -> value
+  })
 }

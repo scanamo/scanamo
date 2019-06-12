@@ -120,12 +120,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   /**
     * Make an AWS SDK value out of this map
     */
-  // TODO: mark as private?
-  final def toAttributeValue: AttributeValue =
-    self match {
-      case Empty => DynamoValue.Null
-      case _     => new AttributeValue().withM(toJavaMap)
-    }
+  final def toAttributeValue: AttributeValue = new AttributeValue().withM(toJavaMap)
 
   /**
     * Builds a [[scala.collection.Map]] if this map is made entirely of values of type `V`
