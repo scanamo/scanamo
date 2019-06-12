@@ -588,8 +588,23 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
+  /**
+   * Performs a scan with the ability to introduce effects into the computation. This is
+   * useful for huge tables when you don't want to load the whole of it in memory, but 
+   * scan it page by page.
+   * 
+   * To control how many maximum items to load at once, use [[scanToPaged]]
+   */
   final def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanToPaged(Int.MaxValue)
 
+  /**
+   * Performs a scan with the ability to introduce effects into the computation. This is
+   * useful for huge tables when you don't want to load the whole of it in memory, but 
+   * scan it page by page, with a maximum of `pageSize` items per page..
+   * 
+   * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
+   * upper bound.
+   */
   def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanTo[M, V](name, pageSize)
 
@@ -664,9 +679,24 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
+  /**
+   * Performs a query with the ability to introduce effects into the computation. This is
+   * useful for huge tables when you don't want to load the whole of it in memory, but 
+   * scan it page by page.
+   * 
+   * To control how many maximum items to load at once, use [[queryToPaged]]
+   */
   final def queryTo[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryToPaged(query, Int.MaxValue)
 
+  /**
+   * Performs a scan with the ability to introduce effects into the computation. This is
+   * useful for huge tables when you don't want to load the whole of it in memory, but 
+   * scan it page by page, with a maximum of `pageSize` items per page.
+   * 
+   * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
+   * upper bound.
+   */
   def queryToPaged[M[_]: Alternative](query: Query[_],
                                       pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.queryTo[M, V](name)(query, pageSize)
