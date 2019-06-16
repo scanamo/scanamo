@@ -118,11 +118,11 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(UserId(Eric))
     * }}}
     */
-  def iso[A, B](r: B => A, xdefault: Option[Option[A]] = None)(w: A => B)(implicit f: DynamoFormat[B]) =
+  def iso[A, B](r: B => A, xdefault: DynamoDefault[A] = DynamoDefault.NoDef)(w: A => B)(implicit f: DynamoFormat[B]) =
     new DynamoFormat[A] {
       final def read(item: DynamoValue) = f.read(item).map(r)
       final def write(t: A) = f.write(w(t))
-      final override val default = xdefault.fold(f.default.map(r))(identity)
+      final override val default = xdefault orElse f.default.map(r)
     }
 
   /**
@@ -138,12 +138,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A], xdefault: Option[Option[A]] = None)(
+  def xmap[A, B](r: B => Either[DynamoReadError, A], xdefault: DynamoDefault[A] = DynamoDefault.NoDef)(
     w: A => B
   )(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     final def read(item: DynamoValue) = f.read(item).flatMap(r)
     final def write(t: A) = f.write(w(t))
-    final override val default = xdefault.fold(f.default.flatMap(d => r(d).toOption))(identity)
+    final override val default = xdefault orElse f.default.flatMap(r(_).toOption)
   }
 
   /**
@@ -167,7 +167,7 @@ object DynamoFormat extends EnumDynamoFormat {
     */
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](
     read: B => A,
-    xdefault: Option[Option[A]] = None
+    xdefault: DynamoDefault[A] = DynamoDefault.NoDef
   )(write: A => B) =
     xmap(coerce[B, A, T](read), xdefault)(write)
 
@@ -288,7 +288,7 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val uuidFormat: DynamoFormat[UUID] =
-    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, Some(None))(_.toString)
+    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
     attribute({ dv =>
