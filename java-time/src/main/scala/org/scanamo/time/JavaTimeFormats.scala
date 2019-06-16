@@ -17,7 +17,7 @@ object JavaTimeFormats {
     *  }}}
     */
   implicit val instantAsLongFormat =
-    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x), Some(None))(
+    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x))(
       x => x.toEpochMilli
     )
 
@@ -32,8 +32,7 @@ object JavaTimeFormats {
     *  }}}
     */
   implicit val offsetDateTimeFormat = DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
-    OffsetDateTime.parse,
-    Some(None)
+    OffsetDateTime.parse
   )(
     _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
   )
