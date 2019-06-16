@@ -7,6 +7,8 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
 import cats.implicits._
 import zio.DefaultRuntime
+import zio.stream.{ Sink, Stream }
+import org.scanamo.error.DynamoReadError
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 
 class ScanamoZioSpec extends FunSpec with Matchers {
@@ -201,8 +203,6 @@ class ScanamoZioSpec extends FunSpec with Matchers {
   }
 
   it("should stream full table scan") {
-    import zio.stream.{ Sink, Stream }
-    import org.scanamo.error.DynamoReadError
     import ScanamoZio._
 
     type SIO[A] = Stream[AmazonDynamoDBException, A]
@@ -226,7 +226,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         list <- items.scanToPaged[SIO](1)
       } yield list
 
-      unsafeRun(zio.execT(ScanamoZio.IoToStream)(ops).run(Sink.collect[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
+      unsafeRun(zio.execT(ScanamoZio.IoToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
     }
   }
 
