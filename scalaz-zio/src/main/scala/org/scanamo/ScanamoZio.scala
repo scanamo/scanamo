@@ -4,9 +4,9 @@ import cats.{ ~>, Alternative, Monad }
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import org.scanamo.ops._
-import scalaz.zio.IO
-import scalaz.zio.interop.catz._
-import scalaz.zio.stream.Stream
+import zio.IO
+import zio.interop.catz._
+import zio.stream.{ Stream, ZStream }
 
 class ScanamoZio private (client: AmazonDynamoDBAsync) {
   final private val interpreter: ScanamoOpsA ~> IO[AmazonDynamoDBException, ?] =
@@ -39,6 +39,6 @@ object ScanamoZio {
 
   val IoToStream: IO[AmazonDynamoDBException, ?] ~> Stream[AmazonDynamoDBException, ?] =
     new (IO[AmazonDynamoDBException, ?] ~> Stream[AmazonDynamoDBException, ?]) {
-      def apply[A](fa: IO[AmazonDynamoDBException, A]): Stream[AmazonDynamoDBException, A] = Stream.fromEffect(fa)
+      def apply[A](fa: IO[AmazonDynamoDBException, A]): Stream[AmazonDynamoDBException, A] = ZStream.fromEffect(fa)
     }
 }
