@@ -50,11 +50,11 @@ class Scanamo private (client: AmazonDynamoDB) {
 object Scanamo {
   def apply(client: AmazonDynamoDB): Scanamo = new Scanamo(client)
 
-  val IdToList: Id ~> List = new (Id ~> List) {
+  val ToList: Id ~> List = new (Id ~> List) {
     def apply[A](fa: Id[A]): List[A] = fa :: Nil
   }
 
-  val IdToStream: Id ~> Stream = new (Id ~> Stream) {
+  val ToStream: Id ~> Stream = new (Id ~> Stream) {
     def apply[A](fa: Id[A]): Stream[A] = Stream(fa)
   }
 }

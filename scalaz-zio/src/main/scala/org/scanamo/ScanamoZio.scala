@@ -37,7 +37,7 @@ object ScanamoZio {
 
   def apply(client: AmazonDynamoDBAsync): ScanamoZio = new ScanamoZio(client)
 
-  val IoToStream: IO[AmazonDynamoDBException, ?] ~> Stream[AmazonDynamoDBException, ?] =
+  val ToStream: IO[AmazonDynamoDBException, ?] ~> Stream[AmazonDynamoDBException, ?] =
     new (IO[AmazonDynamoDBException, ?] ~> Stream[AmazonDynamoDBException, ?]) {
       def apply[A](fa: IO[AmazonDynamoDBException, A]): Stream[AmazonDynamoDBException, A] = ZStream.fromEffect(fa)
     }
