@@ -6,7 +6,7 @@ import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.auto._
 import cats.implicits._
-import scalaz.zio.DefaultRuntime
+import zio.DefaultRuntime
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 
 class ScanamoZioSpec extends FunSpec with Matchers {
@@ -201,7 +201,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
   }
 
   it("should stream full table scan") {
-    import scalaz.zio.stream.{ Sink, Stream }
+    import zio.stream.{ Sink, Stream }
     import org.scanamo.error.DynamoReadError
     import ScanamoZio._
 
