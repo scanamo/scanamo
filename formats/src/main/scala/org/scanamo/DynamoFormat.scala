@@ -82,6 +82,15 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat extends EnumDynamoFormat {
+  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
+    coerce[String, N, NumberFormatException](f)
+
+  private def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
+    a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
+
+  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
+    coerce[ByteBuffer, B, IllegalArgumentException](f)
+
   private def attribute[T](
     decode: DynamoValue => Option[T],
     encode: T => DynamoValue,
@@ -109,11 +118,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(UserId(Eric))
     * }}}
     */
-  def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
-    final def read(item: DynamoValue) = f.read(item).map(r)
-    final def write(t: A) = f.write(w(t))
-    final override val default = f.default.map(r)
-  }
+  def iso[A, B](r: B => A, xdefault: DynamoDefault[A] = DynamoDefault.NoDef)(w: A => B)(implicit f: DynamoFormat[B]) =
+    new DynamoFormat[A] {
+      final def read(item: DynamoValue) = f.read(item).map(r)
+      final def write(t: A) = f.write(w(t))
+      final override val default = xdefault orElse f.default.map(r)
+    }
 
   /**
     * {{{
@@ -128,10 +138,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+  def xmap[A, B](r: B => Either[DynamoReadError, A], xdefault: DynamoDefault[A] = DynamoDefault.NoDef)(
+    w: A => B
+  )(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     final def read(item: DynamoValue) = f.read(item).flatMap(r)
     final def write(t: A) = f.write(w(t))
-    final override val default = f.default.flatMap(d => r(d).toOption)
+    final override val default = xdefault orElse f.default.flatMap(r(_).toOption)
   }
 
   /**
@@ -153,8 +165,11 @@ object DynamoFormat extends EnumDynamoFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A)(write: A => B) =
-    xmap(coerce[B, A, T](read))(write)
+  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](
+    read: B => A,
+    xdefault: DynamoDefault[A] = DynamoDefault.NoDef
+  )(write: A => B) =
+    xmap(coerce[B, A, T](read), xdefault)(write)
 
   /**
     * {{{
@@ -195,12 +210,6 @@ object DynamoFormat extends EnumDynamoFormat {
 
     final def write(n: N) = DynamoValue.fromNumber(n)
   }
-
-  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
-    coerce[String, N, NumberFormatException](f)
-
-  private def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
-    a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
 
   /**
     * {{{
@@ -261,9 +270,6 @@ object DynamoFormat extends EnumDynamoFormat {
 
   // Since DynamoValue includes a ByteBuffer instance, creating byteArray format backed by ByteBuffer
   implicit val byteBufferFormat: DynamoFormat[ByteBuffer] = attribute(_.asByteBuffer, DynamoValue.fromByteBuffer, "B")
-
-  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
-    coerce[ByteBuffer, B, IllegalArgumentException](f)
 
   /**
     * {{{
