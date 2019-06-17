@@ -28,7 +28,7 @@ import org.scanamo.auto._
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
 
-val table = Table[Farmer]("farmer")
+val table = Table[Simple, String, Farmer]("farmer")
 table.putAll(
     Set(
         Farmer("McDonald", 156L, Farm(List("sheep", "cow"))),
@@ -84,7 +84,7 @@ implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, Illeg
 )(
   _.toString
 )
-val fooTable = Table[Foo]("foo")
+val fooTable = Table[Simple, DateTime, Foo]("foo")
 val operations = for {
   _           <- fooTable.put(Foo(new DateTime(0)))
   results     <- fooTable.scan()

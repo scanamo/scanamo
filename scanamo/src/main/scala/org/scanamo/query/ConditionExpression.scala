@@ -1,7 +1,7 @@
 package org.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model._
-import org.scanamo.{ DynamoFormat, DynamoObject }
+import org.scanamo.{ DynamoFormat, DynamoObject, Key, KeyType }
 import org.scanamo.error.{ ConditionNotMet, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
@@ -9,7 +9,7 @@ import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
 import cats.syntax.either._
 
-case class ConditionalOperation[V, T](tableName: String, t: T)(
+case class ConditionalOperation[KT <: KeyType, K, V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T],
   format: DynamoFormat[V]
 ) {
@@ -18,12 +18,12 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
       ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)))
     )
 
-  def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
+  def delete(key: Key[KT, K]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
     ScanamoOps.conditionalDelete(
       ScanamoDeleteRequest(tableName = tableName, key = key.toDynamoObject, Some(state.apply(t)))
     )
 
-  def update(key: UniqueKey[_], update: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] =
+  def update(key: Key[KT, K], update: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] =
     ScanamoOps
       .conditionalUpdate(
         ScanamoUpdateRequest(

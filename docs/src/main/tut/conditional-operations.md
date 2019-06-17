@@ -21,7 +21,7 @@ val scanamo = Scanamo(client)
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)
 ```
 ```tut:book
-val gremlinsTable = Table[Gremlin]("gremlins")
+val gremlinsTable = Table[Simple, Int, Gremlin]("gremlins")
 LocalDynamoDB.withTable(client)("gremlins")("number" -> N) {
   val ops = for {
     _ <- gremlinsTable.putAll(

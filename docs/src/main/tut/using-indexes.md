@@ -17,7 +17,7 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
 
 case class Transport(mode: String, line: String, colour: String)
-val transport = Table[Transport]("transport")
+val transport = Table[Composite, (String, String), Transport]("transport")
 val colourIndex = transport.index("colour-index")
 
 val client = LocalDynamoDB.client()

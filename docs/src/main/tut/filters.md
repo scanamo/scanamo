@@ -24,7 +24,7 @@ val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 
 case class Station(line: String, name: String, zone: Int)
-val stationTable = Table[Station]("Station")
+val stationTable = Table[Composite, (String, String), Station]("Station")
 ```
 ```tut:book
 LocalDynamoDB.withTable(client)("Station")("line" -> S, "name" -> S) {

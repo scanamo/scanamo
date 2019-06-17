@@ -27,7 +27,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      val farmers = Table[Farmer](t)
+      val farmers = Table[Simple, String, Farmer](t)
 
       val result = for {
         _ <- farmers.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
@@ -45,27 +45,26 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      val farmers = Table[Farmer](t)
+      val farmers = Table[Simple, String, Farmer](t)
 
       val result = for {
         _ <- farmers.put(Farmer("Maggot", 75L, Farm(List("dog"))))
-        r1 <- farmers.get(UniqueKey(KeyEquals("name", "Maggot")))
-        r2 <- farmers.get("name" -> "Maggot")
-      } yield (r1, r1 == r2)
+        r <- farmers.get("name" -> "Maggot")
+      } yield r
 
       scanamo.exec(result).futureValue should equal(
-        (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
+        Some(Right(Farmer("Maggot", 75, Farm(List("dog")))))
       )
     }
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S, "number" -> N) { t =>
       case class Engine(name: String, number: Int)
 
-      val engines = Table[Engine](t)
+      val engines = Table[Composite, (String, Int), Engine](t)
 
       val result = for {
         _ <- engines.put(Engine("Thomas", 1))
-        e <- engines.get("name" -> "Thomas" and "number" -> 1)
+        e <- engines.get("name" -> "Thomas" && "number" -> 1)
       } yield e
 
       scanamo.exec(result).futureValue should equal(Some(Right(Engine("Thomas", 1))))
@@ -75,7 +74,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   it("should get consistently asynchronously") {
     case class City(name: String, country: String)
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val cities = Table[City](t)
+      val cities = Table[Simple, String, City](t)
 
       val result = for {
         _ <- cities.put(City("Nashville", "US"))
@@ -91,7 +90,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      val farmers = Table[Farmer](t)
+      val farmers = Table[Simple, String, Farmer](t)
 
       scanamo.exec {
         for {
@@ -108,7 +107,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       case class Farm(asyncAnimals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
 
-      val farmers = Table[Farmer](t)
+      val farmers = Table[Simple, String, Farmer](t)
 
       val dataSet = Set(
         Farmer("Patty", 200L, Farm(List("unicorn"))),
@@ -130,7 +129,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
       case class Forecast(location: String, weather: String)
 
-      val forecasts = Table[Forecast](t)
+      val forecasts = Table[Simple, String, Forecast](t)
       val ops = for {
         _ <- forecasts.put(Forecast("London", "Rain"))
         _ <- forecasts.update("location" -> "London", set("weather" -> "Sun"))
@@ -145,7 +144,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
       case class Forecast(location: String, weather: String, equipment: Option[String])
 
-      val forecasts = Table[Forecast](t)
+      val forecasts = Table[Simple, String, Forecast](t)
 
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
@@ -166,7 +165,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       case class Bear(name: String, favouriteFood: String)
 
-      val bears = Table[Bear](t)
+      val bears = Table[Simple, String, Bear](t)
 
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey"))
@@ -181,7 +180,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       case class Lemming(name: String, stuff: String)
-      val lemmings = Table[Lemming](t)
+      val lemmings = Table[Simple, String, Lemming](t)
       val ops = for {
         _ <- lemmings.putAll(List.fill(100)(Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet)
         ls <- lemmings.scan
@@ -195,7 +194,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Bear(name: String, favouriteFood: String)
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val bears = Table[Bear](t)
+      val bears = Table[Simple, String, Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey"))
         _ <- bears.put(Bear("Yogi", "picnic baskets"))
@@ -209,7 +208,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("alias" -> S) { (t, i) =>
-      val bears = Table[Bear](t)
+      val bears = Table[Simple, String, Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
         _ <- bears.put(Bear("Yogi", "picnic baskets", None))
@@ -226,15 +225,15 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Bear(name: String, favouriteFood: String, alias: Option[String])
 
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("alias" -> S) { (t, i) =>
-      val bears = Table[Bear](t)
+      val bears = Table[Simple, String, Bear](t)
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
         _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
           _ <- bears.index(i).limit(1).scan
-          res2 <- bears.index(i).limit(1).from("name" -> "Graham" and ("alias" -> "Guardianista")).scan
-          res3 <- bears.index(i).limit(1).from("name" -> "Yogi" and ("alias" -> "Kanga")).scan
+          res2 <- bears.index(i).limit(1).from("name" -> "Graham" && "alias" -> "Guardianista").scan
+          res3 <- bears.index(i).limit(1).from("name" -> "Yogi" && "alias" -> "Kanga").scan
         } yield res2 ::: res3
       } yield bs
 
@@ -247,7 +246,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   it("should query asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("species" -> S, "number" -> N) { t =>
       case class Animal(species: String, number: Int)
-      val animals = Table[Animal](t)
+      val animals = Table[Composite, (String, Int), Animal](t)
       val ops = for {
         _ <- animals.put(Animal("Wolf", 1))
         _ <- (1 to 3).toList.traverse(i => animals.put(Animal("Pig", i)))
@@ -271,7 +270,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     LocalDynamoDB.usingRandomTable(client)("mode" -> S, "line" -> S) { t =>
       case class Transport(mode: String, line: String)
-      val transports = Table[Transport](t)
+      val transports = Table[Composite, (String, String), Transport](t)
       val ops = for {
         _ <- transports.putAll(
           Set(
@@ -293,7 +292,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Transport(mode: String, line: String)
 
     LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
-      val transports = Table[Transport](t)
+      val transports = Table[Composite, (String, String), Transport](t)
       val result = for {
         _ <- transports.putAll(
           Set(
@@ -314,7 +313,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("mode" -> S, "colour" -> S) {
       (t, i) =>
-        val transports = Table[Transport](t)
+        val transports = Table[Composite, (String, String), Transport](t)
         val result = for {
           _ <- transports.putAll(
             Set(
@@ -342,9 +341,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   it("queries an index asynchronously with `between` sort-key condition") {
     case class Station(mode: String, name: String, zone: Int)
 
-    def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
+    def deletaAllStations(stationTable: Table[Composite, (String, String), Station], stations: Set[Station]) =
       stationTable.deleteAll(
-        UniqueKeys(MultipleKeyList(("mode", "name"), stations.map(station => (station.mode, station.name))))
+        stations.map(station => "mode" -> station.mode && "name" -> station.name)
       )
 
     val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
@@ -354,7 +353,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "name" -> S)("mode" -> S, "zone" -> N) {
       (t, i) =>
-        val stationTable = Table[Station](t)
+        val stationTable = Table[Composite, (String, String), Station](t)
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
@@ -383,7 +382,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Farmer(firstName: String, surname: String, age: Option[Int])
 
     LocalDynamoDB.usingRandomTable(client)("firstName" -> S, "surname" -> S) { t =>
-      val farmersTable = Table[Farmer](t)
+      val farmersTable = Table[Simple, String, Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("Fred", "Perry", None))
         _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
@@ -399,7 +398,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Rabbit(name: String)
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val rabbits = Table[Rabbit](t)
+      val rabbits = Table[Simple, String, Rabbit](t)
       val result = for {
         _ <- rabbits.putAll(List.fill(100)(Rabbit(util.Random.nextString(500))).toSet)
         rs <- rabbits.scan
@@ -413,7 +412,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       case class Farm(animals: List[String])
       case class Farmer(name: String, age: Long, farm: Farm)
-      val farmers = Table[Farmer](t)
+      val farmers = Table[Simple, String, Farmer](t)
 
       scanamo
         .exec(for {
@@ -424,7 +423,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
               Farmer("Bean", 55L, Farm(List("turkey")))
             )
           )
-          fs1 <- farmers.getAll(UniqueKeys(KeyList("name", Set("Boggis", "Bean"))))
+          fs1 <- farmers.getAll(List("name" -> "Boggis", "name" -> "Bean"))
           fs2 <- farmers.getAll("name" -> Set("Boggis", "Bean"))
         } yield (fs1, fs2))
         .futureValue should equal(
@@ -437,12 +436,12 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
 
     LocalDynamoDB.usingRandomTable(client)("actor" -> S, "regeneration" -> N) { t =>
       case class Doctor(actor: String, regeneration: Int)
-      val doctors = Table[Doctor](t)
+      val doctors = Table[Composite, (String, Int), Doctor](t)
 
       scanamo
         .exec(for {
           _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
-          ds <- doctors.getAll(("actor" and "regeneration") -> Set("McCoy" -> 9, "Ecclestone" -> 11))
+          ds <- doctors.getAll(List("actor" -> "McCoy" && "regeneration" -> 9, "actor" -> "Ecclestone"  && "regeneration" -> 11))
         } yield ds)
         .futureValue should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
     }
@@ -452,12 +451,12 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     LocalDynamoDB.usingRandomTable(client)("id" -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
-      val farmsTable = Table[Farm](t)
+      val farmsTable = Table[Simple, Int, Farm](t)
 
       scanamo
         .exec(for {
           _ <- farmsTable.putAll(farms)
-          fs <- farmsTable.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
+          fs <- farmsTable.getAll(farms.map(f => Key("id", f.id)))
         } yield fs)
         .futureValue should equal(farms.map(Right(_)))
     }
@@ -467,12 +466,12 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     LocalDynamoDB.usingRandomTable(client)("id" -> N) { t =>
       case class Farm(id: Int, name: String)
       val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
-      val farmsTable = Table[Farm](t)
+      val farmsTable = Table[Simple, Int, Farm](t)
 
       scanamo
         .exec(for {
           _ <- farmsTable.putAll(farms)
-          fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
+          fs <- farmsTable.consistently.getAll(farms.map(f => Key("id", f.id)))
         } yield fs)
         .futureValue should equal(farms.map(Right(_)))
     }
@@ -483,7 +482,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Farmer(name: String, age: Long, farm: Farm)
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val farmersTable = Table[Farmer](t)
+      val farmersTable = Table[Simple, String, Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
         result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
@@ -500,7 +499,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Farmer(name: String, age: Long, farm: Farm)
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val farmersTable = Table[Farmer](t)
+      val farmersTable = Table[Simple, String, Farmer](t)
       val farmerOps = for {
         result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
@@ -516,7 +515,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Farmer(name: String, age: Long, farm: Farm)
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val farmersTable = Table[Farmer](t)
+      val farmersTable = Table[Simple, String, Farmer](t)
 
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
@@ -536,7 +535,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Farmer(name: String, age: Long, farm: Farm)
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val farmersTable = Table[Farmer](t)
+      val farmersTable = Table[Simple, String, Farmer](t)
 
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
@@ -556,7 +555,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
     case class Gremlin(number: Int, wet: Boolean)
 
     LocalDynamoDB.usingRandomTable(client)("number" -> N) { t =>
-      val gremlinsTable = Table[Gremlin](t)
+      val gremlinsTable = Table[Simple, Int, Gremlin](t)
 
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false), Gremlin(2, true)))

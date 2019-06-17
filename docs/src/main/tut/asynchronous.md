@@ -25,7 +25,7 @@ LocalDynamoDB.createTable(client)("farm")("name" -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
-val farmTable = Table[Farmer]("farm")
+val farmTable = Table[Simple, String, Farmer]("farm")
 val ops = for {
   _ <- farmTable.putAll(Set(
     Farmer("Boggis", 43L, Farm(List("chicken"))),
@@ -85,7 +85,7 @@ LocalDynamoDB.createTable(client)("nursery-farmers")("name" -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
-val farmTable = Table[Farmer]("farm")
+val farmTable = Table[Simple, String, Farmer]("farm")
 val ops = for {
   _ <- farmTable.putAll(Set(
     Farmer("Boggis", 43L, Farm(List("chicken"))),

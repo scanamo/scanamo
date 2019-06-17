@@ -12,16 +12,14 @@ package object scanamo {
 
     case class HashAndRangeKeyNames(hash: AttributeName, range: AttributeName)
 
-    implicit def stringTupleToUniqueKey[V: DynamoFormat](pair: (String, V)) =
-      UniqueKey(KeyEquals(AttributeName.of(pair._1), pair._2))
+    implicit def stringTupleToKey[V: DynamoFormat](pair: (String, V)): Key[Simple, V] =
+      Key(AttributeName.of(pair._1), pair._2)
 
-    implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)) =
+    implicit def stringListTupleToKeys[V: DynamoFormat](pair: (String, Iterable[V])): List[Key[Simple, V]] =
+      pair._2.foldLeft[List[Key[Simple, V]]](Nil)((acc, v) => (pair._1 -> v) :: acc)
+
+    implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)): KeyEquals[V] =
       KeyEquals(AttributeName.of(pair._1), pair._2)
-
-    implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
-
-    implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])) =
-      UniqueKeys(KeyList(AttributeName.of(pair._1), pair._2))
 
     implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])) =
       UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
@@ -34,7 +32,7 @@ package object scanamo {
     case class Bounds[V: DynamoFormat](lowerBound: Bound[V], upperBound: Bound[V])
 
     implicit class Bound[V: DynamoFormat](val v: V) {
-      def and(upperBound: V) = Bounds(Bound(v), Bound(upperBound))
+      def and(upperBound: V): Bounds[V] = Bounds(Bound(v), Bound(upperBound))
     }
 
     def attributeExists(string: String) = AttributeExists(AttributeName.of(string))

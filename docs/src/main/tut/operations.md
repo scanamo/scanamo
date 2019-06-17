@@ -165,7 +165,7 @@ LocalDynamoDB.createTable(client)("lines")("mode" -> S, "line" -> S)
 case class Transport(mode: String, line: String)
 ```
 ```tut:book
-val transportTable = Table[Transport]("lines")
+val transportTable = Table[Composite, (String, String), Transport]("lines")
 val operations = for {
   _ <- transportTable.putAll(Set(
     Transport("Underground", "Circle"),
@@ -193,7 +193,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("transports")("mode" -> S, "line" -> S)
 
 case class Transport(mode: String, line: String)
-val transportTable = Table[Transport]("transports")
+val transportTable = Table[Composite, (String, String), Transport]("transports")
 val operations = for {
   _ <- transportTable.putAll(Set(
     Transport("Underground", "Circle"),

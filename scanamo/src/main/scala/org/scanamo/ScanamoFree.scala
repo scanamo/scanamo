@@ -38,8 +38,9 @@ object ScanamoFree {
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
 
-  def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
-    items.toDynamoObject
+  def deleteAll[KT <: KeyType, K](tableName: String)(items: Iterable[Key[KT, K]]): ScanamoOps[List[BatchWriteItemResult]] =
+    items
+      .map(_.toDynamoObject)
       .grouped(batchSize)
       .toList
       .traverse { batch =>
@@ -51,9 +52,9 @@ object ScanamoFree {
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
 
-  def get[T: DynamoFormat](
+  def get[KT <: KeyType, K, T: DynamoFormat](
     tableName: String
-  )(key: UniqueKey[_], consistent: Boolean): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  )(key: Key[KT, K], consistent: Boolean): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     ScanamoOps
       .get(
         new GetItemRequest()
@@ -63,10 +64,11 @@ object ScanamoFree {
       )
       .map(res => Option(res.getItem).map(m => read[T](DynamoObject(m))))
 
-  def getAll[T: DynamoFormat](
+  def getAll[KT <: KeyType, K, T: DynamoFormat](
     tableName: String
-  )(keys: UniqueKeys[_], consistent: Boolean): ScanamoOps[Set[Either[DynamoReadError, T]]] =
-    keys.toDynamoObject
+  )(keys: Iterable[Key[KT, K]], consistent: Boolean): ScanamoOps[Set[Either[DynamoReadError, T]]] =
+    keys
+      .map(_.toDynamoObject)
       .grouped(batchGetSize)
       .toList
       .traverse { batch =>
@@ -88,7 +90,7 @@ object ScanamoFree {
       .map(_.flatMap(_.getResponses.get(tableName).asScala.map(m => read[T](DynamoObject(m)))))
       .map(_.toSet)
 
-  def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
+  def delete[KT <: KeyType, K](tableName: String)(key: Key[KT, K]): ScanamoOps[DeleteItemResult] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None))
 
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
@@ -103,9 +105,9 @@ object ScanamoFree {
   def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResult] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
 
-  def update[T: DynamoFormat](
+  def update[KT <: KeyType, K, T: DynamoFormat](
     tableName: String
-  )(key: UniqueKey[_])(update: UpdateExpression): ScanamoOps[Either[DynamoReadError, T]] =
+  )(key: Key[KT, K])(update: UpdateExpression): ScanamoOps[Either[DynamoReadError, T]] =
     ScanamoOps
       .update(
         ScanamoUpdateRequest(
