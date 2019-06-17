@@ -226,7 +226,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
         list <- items.scanToPaged[SIO](1)
       } yield list
 
-      unsafeRun(zio.execT(ScanamoZio.IoToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
+      unsafeRun(zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
     }
   }
 
