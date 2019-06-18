@@ -251,7 +251,7 @@ class ScanamoTest extends FunSpec with Matchers {
       val items = Table[Item](t)
       val ops = for {
         _ <- items.putAll(list.toSet).toFreeT[Stream]
-        list <- items.scanToPaged[Stream](1)
+        list <- items.scanPaginatedM[Stream](1)
       } yield list
 
       val f = new (Id ~> Stream) {

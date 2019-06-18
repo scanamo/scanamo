@@ -287,7 +287,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
       val items = Table[Item](t)
       val ops = for {
         _ <- items.putAll(list.toSet).toFreeT[SFuture]
-        list <- items.scanToPaged[SFuture](1)
+        list <- items.scanPaginatedM[SFuture](1)
       } yield list
 
       val f = new (Future ~> SFuture) {

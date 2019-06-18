@@ -49,9 +49,9 @@ sealed abstract class SecondaryIndex[V] {
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page.
     *
-    * To control how many maximum items to load at once, use [[scanToPaged]]
+    * To control how many maximum items to load at once, use [[scanPaginatedM]]
     */
-  final def scanTo[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanToPaged(Int.MaxValue)
+  final def scanM[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
 
   /**
     * Performs a scan with the ability to introduce effects into the computation. This is
@@ -61,7 +61,7 @@ sealed abstract class SecondaryIndex[V] {
     * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
     * upper bound.
     */
-  def scanToPaged[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
+  def scanPaginatedM[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
     * Run a query against keys in a secondary index
@@ -99,10 +99,10 @@ sealed abstract class SecondaryIndex[V] {
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page.
     *
-    * To control how many maximum items to load at once, use [[queryToPaged]]
+    * To control how many maximum items to load at once, use [[queryPaginatedM]]
     */
-  final def queryTo[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
-    queryToPaged(query, Int.MaxValue)
+  final def queryM[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    queryPaginatedM(query, Int.MaxValue)
 
   /**
     * Performs a scan with the ability to introduce effects into the computation. This is
@@ -112,7 +112,7 @@ sealed abstract class SecondaryIndex[V] {
     * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
     * upper bound.
     */
-  def queryToPaged[M[_]: Alternative](query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
+  def queryPaginatedM[M[_]: Alternative](query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
@@ -203,10 +203,10 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   def descending: SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
-  def scanToPaged[M[_]: Alternative](pageSize: Int) =
+  def scanPaginatedM[M[_]: Alternative](pageSize: Int) =
     ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
-  def queryToPaged[M[_]: Alternative](query: Query[_], pageSize: Int) =
+  def queryPaginatedM[M[_]: Alternative](query: Query[_], pageSize: Int) =
     QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }

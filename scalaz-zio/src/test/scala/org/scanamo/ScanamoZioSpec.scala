@@ -223,7 +223,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       val items = Table[Item](t)
       val ops = for {
         _ <- items.putAll(list.toSet).toFreeT[SIO]
-        list <- items.scanToPaged[SIO](1)
+        list <- items.scanPaginatedM[SIO](1)
       } yield list
 
       unsafeRun(zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
