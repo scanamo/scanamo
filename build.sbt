@@ -6,7 +6,7 @@ val catsEffectVersion = "1.3.1"
 val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
-val zioVersion = "1.0.0-RC8-4"
+val zioVersion = "1.0.0-RC8-6"
 
 lazy val stdOptions = Seq(
   "-deprecation",
