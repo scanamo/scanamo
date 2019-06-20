@@ -5,7 +5,7 @@ addSbtPlugin("com.github.tkawachi" % "sbt-doctest" % "0.9.4")
 resolvers += "jgit-repo" at "http://download.eclipse.org/jgit/maven"
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages"    % "0.6.3")
 addSbtPlugin("com.typesafe.sbt" % "sbt-site"       % "1.4.0")
-addSbtPlugin("com.47deg"        % "sbt-microsites" % "0.7.23")
+addSbtPlugin("com.47deg"        % "sbt-microsites" % "0.7.27")
 addSbtPlugin("org.tpolecat"     % "tut-plugin"     % "0.6.12")
 addSbtPlugin("com.eed3si9n"     % "sbt-unidoc"     % "0.4.2")
 addSbtPlugin("com.geirsson"     % "sbt-ci-release" % "1.2.6")
