@@ -245,13 +245,13 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   }
 
   it("should stream full table scan") {
-    import cats.{ ~>, Alternative, Apply, Monad, MonoidK }
+    import cats.{ ~>, Apply, Monad, MonoidK }
     import cats.instances.future._
     import scala.concurrent.Future
 
     type SFuture[A] = Future[Stream[A]]
 
-    implicit val applicative = new Alternative[SFuture] with MonoidK[SFuture] with Monad[SFuture] {
+    implicit val applicative = new MonoidK[SFuture] with Monad[SFuture] {
       def combineK[A](x: SFuture[A], y: SFuture[A]): SFuture[A] = Apply[Future].map2(x, y)(_ ++ _)
 
       def empty[A]: SFuture[A] = Future.successful(Stream.empty)

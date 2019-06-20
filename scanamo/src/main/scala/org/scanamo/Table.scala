@@ -1,6 +1,6 @@
 package org.scanamo
 
-import cats.Alternative
+import cats.{ Monad, MonoidK }
 import com.amazonaws.services.dynamodbv2.model.{ BatchWriteItemResult, DeleteItemResult, QueryResult, ScanResult }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.error.DynamoReadError
@@ -595,7 +595,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * To control how many maximum items to load at once, use [[scanPaginatedM]]
     */
-  final def scanM[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
+  final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
 
   /**
     * Performs a scan with the ability to introduce effects into the computation. This is
@@ -605,7 +605,7 @@ case class Table[V: DynamoFormat](name: String) {
     * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
     * upper bound.
     */
-  def scanPaginatedM[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanM[M, V](name, pageSize)
 
   /**
@@ -686,7 +686,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * To control how many maximum items to load at once, use [[queryPaginatedM]]
     */
-  final def queryM[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryPaginatedM(query, Int.MaxValue)
 
   /**
@@ -697,8 +697,8 @@ case class Table[V: DynamoFormat](name: String) {
     * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
     * upper bound.
     */
-  def queryPaginatedM[M[_]: Alternative](query: Query[_],
-                                      pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
+                                            pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.queryM[M, V](name)(query, pageSize)
 
   /**
@@ -810,16 +810,16 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scan()
-  def scanM[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     scanPaginatedM(Int.MaxValue)
-  def scanPaginatedM[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scanPaginatedM[M](pageSize)
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.query(query)
-  def queryM[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryPaginatedM(query, Int.MaxValue)
-  def queryPaginatedM[M[_]: Alternative](query: Query[_],
-                                      pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
+                                            pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.queryPaginatedM(query, pageSize)
 
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
@@ -839,18 +839,18 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
     ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
-  def scanM[M[_]: Alternative]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     scanPaginatedM(Int.MaxValue)
-  def scanPaginatedM[M[_]: Alternative](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, None, queryOptions), pageSize)
   def scan0: ScanamoOps[ScanResult] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
-  def queryM[M[_]: Alternative](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryPaginatedM(query, Int.MaxValue)
-  def queryPaginatedM[M[_]: Alternative](query: Query[_],
-                                      pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
+                                            pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, None, query, queryOptions), pageSize)
   def query0(query: Query[_]): ScanamoOps[QueryResult] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, queryOptions))

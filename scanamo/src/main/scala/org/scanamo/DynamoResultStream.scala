@@ -1,7 +1,7 @@
 package org.scanamo
 
-import cats.Alternative
-import cats.Alternative.ops._
+import cats.{ Monad, MonoidK }
+import cats.MonoidK.ops._
 import cats.free.{ Free, FreeT }
 import cats.syntax.semigroupk._
 import com.amazonaws.services.dynamodbv2.model.{ QueryResult, ScanResult }
@@ -47,10 +47,10 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
     streamMore(req)
   }
 
-  def streamTo[M[_], T: DynamoFormat](
+  def streamTo[M[_]: Monad, T: DynamoFormat](
     req: Req,
     pageSize: Int
-  )(implicit M: Alternative[M]): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] = {
+  )(implicit M: MonoidK[M]): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] = {
     def streamMore(req: Req, l: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
       exec(withLimit(l)(req)).toFreeT[M].flatMap { res =>
         val results = items(res).map(ScanamoFree.read[T])

@@ -1,6 +1,6 @@
 package org.scanamo
 
-import cats.{ ~>, Alternative, Monad }
+import cats.{ ~>, Monad, MonoidK }
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import org.scanamo.ops._
@@ -19,7 +19,7 @@ class ScanamoZio private (client: AmazonDynamoDBAsync) {
 }
 
 object ScanamoZio {
-  implicit def streamInstances[E] = new Monad[Stream[E, ?]] with Alternative[Stream[E, ?]] {
+  implicit def streamInstances[E] = new Monad[Stream[E, ?]] with MonoidK[Stream[E, ?]] {
     def combineK[A](x: Stream[E, A], y: Stream[E, A]): Stream[E, A] =
       x ++ y
 

@@ -25,7 +25,7 @@ object ScanamoCats {
       def apply[A](fa: F[A]): Iterant[F, A] = Iterant.liftF(fa)
     }
 
-  def toStream[F[_]: Async]: F ~> Stream[F, ?] =
+  def ToStream[F[_]: Async]: F ~> Stream[F, ?] =
     new (F ~> Stream[F, ?]) {
       def apply[A](fa: F[A]): Stream[F, A] = Stream.eval(fa)
     }
