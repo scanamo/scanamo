@@ -57,9 +57,9 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
         if (results.isEmpty)
           FreeT.liftT(M.empty)
         else {
-          val l1 = limit(req).map(_ - results.length).fold(pageSize)(Math.min(pageSize, _))
+          val l1 = limit(req).fold(pageSize)(l => Math.min(pageSize, l - results.length))
           lastEvaluatedKey(res)
-            .filterNot(_.isEmpty || l1 <= 0)
+            .filterNot(_ => l1 <= 0)
             .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Either[DynamoReadError, T]]](results))(
               (res, k) => res <+> streamMore(withExclusiveStartKey(k)(req), l1)
             )
