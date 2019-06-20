@@ -1,8 +1,9 @@
 package org.scanamo
 
+import cats.{ Monad, MonoidK }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 
@@ -44,6 +45,25 @@ sealed abstract class SecondaryIndex[V] {
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
 
   /**
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page.
+    *
+    * To control how many maximum items to load at once, use [[scanPaginatedM]]
+    */
+  final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
+
+  /**
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page, with a maximum of `pageSize` items per page..
+    *
+    * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
+    * upper bound.
+    */
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
+
+  /**
     * Run a query against keys in a secondary index
     *
     * {{{
@@ -73,6 +93,27 @@ sealed abstract class SecondaryIndex[V] {
     * }}}
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  /**
+    * Performs a query with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page.
+    *
+    * To control how many maximum items to load at once, use [[queryPaginatedM]]
+    */
+  final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    queryPaginatedM(query, Int.MaxValue)
+
+  /**
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page, with a maximum of `pageSize` items per page.
+    *
+    * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
+    * upper bound.
+    */
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
+                                            pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
@@ -163,6 +204,10 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   def descending: SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int) =
+    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int) =
+    QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }

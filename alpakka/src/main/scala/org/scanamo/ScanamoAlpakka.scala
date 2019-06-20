@@ -1,11 +1,11 @@
 package org.scanamo
 
+import cats.{ ~>, Monad }
 import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.{ Sink, Source }
-import cats.Monad
 import org.scanamo.ops.AlpakkaInterpreter.Alpakka
-import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps }
+import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps, ScanamoOpsT }
 import org.scanamo.ops.retrypolicy.RetryPolicy
 
 import scala.concurrent.Future
@@ -24,6 +24,9 @@ class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy) {
 
   def exec[A](op: ScanamoOps[A]): Alpakka[A] =
     run(op)
+
+  final def execT[M[_]: Monad, A](hoist: Alpakka ~> M)(op: ScanamoOpsT[M, A]): M[A] =
+    op.foldMap(interpreter andThen hoist)
 
   def execFuture[A](op: ScanamoOps[A]): Future[A] =
     run(op).runWith(Sink.head[A])(client.materializer)

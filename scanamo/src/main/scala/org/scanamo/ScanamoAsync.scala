@@ -1,5 +1,7 @@
 package org.scanamo
 
+import cats.Monad
+import cats.~>
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import org.scanamo.ops._
 import scala.concurrent.{ ExecutionContext, Future }
@@ -22,6 +24,8 @@ class ScanamoAsync private (client: AmazonDynamoDBAsync)(implicit ec: ExecutionC
     */
   final def exec[A](op: ScanamoOps[A]): Future[A] = op.foldMap(interpreter)
 
+  final def execT[M[_]: Monad, A](hoist: Future ~> M)(op: ScanamoOpsT[M, A]): M[A] =
+    op.foldMap(interpreter andThen hoist)
 }
 
 object ScanamoAsync {

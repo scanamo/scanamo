@@ -1,12 +1,12 @@
 scalaVersion in ThisBuild := "2.12.8"
 crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
-val catsVersion = "1.6.1"
+val catsVersion = "2.0.0-M3"
 val catsEffectVersion = "1.3.1"
 val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
-val zioVersion = "1.0-RC4"
+val zioVersion = "1.0.0-RC8-4"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -171,6 +171,10 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % catsVersion,
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
+      "io.monix"       %% "monix"       % "3.0.0-RC2" % Provided,
+      "co.fs2"         %% "fs2-core"    % "1.0.4" % Provided,
+      "io.monix"       %% "monix"       % "3.0.0-RC2" % Test,
+      "co.fs2"         %% "fs2-core"    % "1.0.4" % Test,
       "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
     ),
@@ -204,12 +208,13 @@ lazy val zio = (project in file("scalaz-zio"))
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-core"               % catsVersion,
-      "org.typelevel"  %% "cats-effect"             % catsEffectVersion,
-      "org.scalaz"     %% "scalaz-zio"              % zioVersion,
-      "org.scalaz"     %% "scalaz-zio-interop-cats" % zioVersion,
-      "org.scalatest"  %% "scalatest"               % "3.0.8" % Test,
-      "org.scalacheck" %% "scalacheck"              % "1.14.0" % Test
+      "org.typelevel"  %% "cats-core"        % catsVersion,
+      "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
+      "dev.zio"        %% "zio"              % zioVersion,
+      "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
+      "dev.zio"        %% "zio-interop-cats" % zioVersion,
+      "org.scalatest"  %% "scalatest"        % "3.0.8" % Test,
+      "org.scalacheck" %% "scalacheck"       % "1.14.0" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
