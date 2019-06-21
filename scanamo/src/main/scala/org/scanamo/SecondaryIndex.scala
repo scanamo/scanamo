@@ -29,7 +29,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("antagonist" -> S) { (t, i) =>
-    * ...   val table = Table[Simple, String, Bear](t)
+    * ...   val table = Table[String, Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey", None))
     * ...     _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
@@ -57,7 +57,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("organisation" -> S, "repository" -> S)("language" -> S, "license" -> S) { (t, i) =>
-    * ...   val githubProjects = Table[Composite, (String, String), GithubProject](t)
+    * ...   val githubProjects = Table[String, String, GithubProject](t)
     * ...   val operations = for {
     * ...     _ <- githubProjects.putAll(Set(
     * ...       GithubProject("typelevel", "cats", "Scala", "MIT"),
@@ -89,7 +89,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S
     * ... ) { (t, i) =>
-    * ...   val transport = Table[Composite, (String, String), Transport](t)
+    * ...   val transport = Table[String, String, Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),
@@ -124,7 +124,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S
     * ... ) { (t, i) =>
-    * ...   val transport = Table[Composite, (String, String), Transport](t)
+    * ...   val transport = Table[String, String, Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),

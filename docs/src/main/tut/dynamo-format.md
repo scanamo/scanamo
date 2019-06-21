@@ -28,7 +28,7 @@ import org.scanamo.auto._
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
 
-val table = Table[Simple, String, Farmer]("farmer")
+val table = Table[String, Farmer]("farmer")
 table.putAll(
     Set(
         Farmer("McDonald", 156L, Farm(List("sheep", "cow"))),

@@ -21,7 +21,7 @@ import org.scanamo.update.UpdateExpression
   * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
   * ...   import org.scanamo.syntax._
   * ...   import org.scanamo.auto._
-  * ...   val transport = Table[Composite, (String, String), Transport](t)
+  * ...   val transport = Table[String, String, Transport](t)
   * ...   val operations = for {
   * ...     _ <- transport.putAll(Set(
   * ...       Transport("Underground", "Circle"),
@@ -34,7 +34,7 @@ import org.scanamo.update.UpdateExpression
   * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
   * }}}
   */
-case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
+class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
 
   def put(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.put(name)(v)
   def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.putAll(name)(vs)
@@ -62,7 +62,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * ...   Farmer("Ted", 40L, Farm(List("T-Rex"))),
     * ...   Farmer("Jack", 2L, Farm(List("velociraptor"))))
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
-    * ...   val farm = Table[Simple, String, Farmer](t)
+    * ...   val farm = Table[String, Farmer](t)
     * ...   val operations = for {
     * ...     _       <- farm.putAll(dataSet)
     * ...     _       <- farm.deleteAll("name" -> dataSet.map(_.name))
@@ -89,7 +89,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("colour" -> S) { (t, i) =>
-    * ...   val transport = Table[Composite, (String, String), Transport](t)
+    * ...   val transport = Table[String, String, Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle", "Yellow"),
@@ -108,7 +108,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("organisation" -> S, "repository" -> S)("language" -> S, "license" -> S) { (t, i) =>
-    * ...   val githubProjects = Table[Composite, (String, String), GithubProject](t)
+    * ...   val githubProjects = Table[String, String, GithubProject](t)
     * ...   val operations = for {
     * ...     _ <- githubProjects.putAll(Set(
     * ...       GithubProject("typelevel", "cats", "Scala", "MIT"),
@@ -141,7 +141,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("location" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val forecast = Table[Simple, String, Forecast](t)
+    * ...   val forecast = Table[String, Forecast](t)
     * ...   val operations = for {
     * ...     _ <- forecast.put(Forecast("London", "Rain"))
     * ...     updated <- forecast.update("location" -> "London", set("weather" -> "Sun"))
@@ -159,7 +159,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val characters = Table[Simple, String, Character](t)
+    * ...   val characters = Table[String, Character](t)
     * ...   val operations = for {
     * ...     _ <- characters.put(Character("The Doctor", List("Ecclestone", "Tennant", "Smith")))
     * ...     _ <- characters.update("name" -> "The Doctor", append("actors" -> "Capaldi"))
@@ -177,7 +177,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val characters = Table[Simple, String, Character](t)
+    * ...   val characters = Table[String, Character](t)
     * ...   val operations = for {
     * ...     _ <- characters.update("name" -> "James Bond", append("actors" -> "Craig"))
     * ...     results <- characters.query("name" -> "James Bond")
@@ -195,7 +195,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("kind" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val fruits = Table[Simple, String, Fruit](t)
+    * ...   val fruits = Table[String, Fruit](t)
     * ...   val operations = for {
     * ...     _ <- fruits.put(Fruit("watermelon", List("USA")))
     * ...     _ <- fruits.update("kind" -> "watermelon", appendAll("sources" -> List("China", "Turkey")))
@@ -214,7 +214,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val foos = Table[Simple, String, Foo](t)
+    * ...   val foos = Table[String, Foo](t)
     * ...   val operations = for {
     * ...     _ <- foos.put(Foo("x", 0, List("First")))
     * ...     updated <- foos.update("name" -> "x",
@@ -232,7 +232,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val bars = Table[Simple, String, Bar](t)
+    * ...   val bars = Table[String, Bar](t)
     * ...   val operations = for {
     * ...     _ <- bars.put(Bar("x", 1L, Set("First")))
     * ...     _ <- bars.update("name" -> "x",
@@ -253,8 +253,10 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("id" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val outers = Table[Simple, java.util.UUID, Outer](t)
-    * ...   val id = java.util.UUID.fromString("a8345373-9a93-43be-9bcd-e3682c9197f4")
+    * ...   import java.util.UUID
+    * ...   implicit val UUIDSimpleKey = new IsSimpleKey[UUID] {}
+    * ...   val outers = Table[UUID, Outer](t)
+    * ...   val id = UUID.fromString("a8345373-9a93-43be-9bcd-e3682c9197f4")
     * ...   val operations = for {
     * ...     _ <- outers.put(Outer(id, Middle("x", 1L, Inner("alpha"), List(1, 2))))
     * ...     updatedOuter <- outers.update("id" -> id,
@@ -273,7 +275,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("id" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val things = Table[Simple, String, Thing](t)
+    * ...   val things = Table[String, Thing](t)
     * ...   val operations = for {
     * ...     _ <- things.put(Thing("a1", 3, None))
     * ...     updated <- things.update("id" -> "a1", set("optional", "mandatory"))
@@ -298,7 +300,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val transport = Table[Composite, (String, String), Transport](t)
+    * ...   val transport = Table[String, String, Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
     * ...       Transport("Underground", "Circle"),
@@ -328,7 +330,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> val (get, scan, query) = LocalDynamoDB.withRandomTable(client)("country" -> S, "name" -> S) { t =>
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
-    * ...   val cityTable = Table[Composite, (String, String), City](t)
+    * ...   val cityTable = Table[String, String, City](t)
     * ...   val ops = for {
     * ...     _ <- cityTable.putAll(Set(
     * ...       City("US", "Nashville"), City("IT", "Rome"), City("IT", "Siena"), City("TZ", "Dar es Salaam")))
@@ -365,7 +367,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> val scanamo = Scanamo(client)
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
-    * ...   val farmersTable = Table[Simple, String, Farmer](t)
+    * ...   val farmersTable = Table[String, Farmer](t)
     * ...   val farmerOps = for {
     * ...     _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
     * ...     _ <- farmersTable.given("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
@@ -378,7 +380,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     *
     * >>> case class Letter(roman: String, greek: String)
     * >>> LocalDynamoDB.withRandomTable(client)("roman" -> S) { t =>
-    * ...   val lettersTable = Table[Simple, String, Letter](t)
+    * ...   val lettersTable = Table[String, Letter](t)
     * ...   val ops = for {
     * ...     _ <- lettersTable.putAll(Set(Letter("a", "alpha"), Letter("b", "beta"), Letter("c", "gammon")))
     * ...     _ <- lettersTable.given("greek" beginsWith "ale").put(Letter("a", "aleph"))
@@ -392,7 +394,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import cats.implicits._
     * >>> case class Turnip(size: Int, description: Option[String])
     * >>> LocalDynamoDB.withRandomTable(client)("size" -> N) { t =>
-    * ...   val turnipsTable = Table[Simple, Int, Turnip](t)
+    * ...   val turnipsTable = Table[Int, Turnip](t)
     * ...   val ops = for {
     * ...     _ <- turnipsTable.putAll(Set(Turnip(1, None), Turnip(1000, None)))
     * ...     initialTurnips <- turnipsTable.scan()
@@ -410,7 +412,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Thing(a: String, maybe: Option[Int])
     * >>> LocalDynamoDB.withRandomTable(client)("a" -> S) { t =>
-    * ...   val thingTable = Table[Simple, String, Thing](t)
+    * ...   val thingTable = Table[String, Thing](t)
     * ...   val ops = for {
     * ...     _ <- thingTable.putAll(Set(Thing("a", None), Thing("b", Some(1)), Thing("c", None)))
     * ...     _ <- thingTable.given(attributeExists("maybe")).put(Thing("a", Some(2)))
@@ -429,7 +431,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Compound(a: String, maybe: Option[Int])
     * >>> LocalDynamoDB.withRandomTable(client)("a" -> S) { t =>
-    * ...   val compoundTable = Table[Simple, String, Compound](t)
+    * ...   val compoundTable = Table[String, Compound](t)
     * ...   val ops = for {
     * ...     _ <- compoundTable.putAll(Set(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
     * ...     _ <- compoundTable.given(Condition(attributeExists("maybe")) and "a" -> "alpha").put(Compound("alpha", Some(2)))
@@ -447,7 +449,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Choice(number: Int, description: String)
     * >>> LocalDynamoDB.withRandomTable(client)("number" -> N) { t =>
-    * ...   val choicesTable = Table[Simple, Int, Choice](t)
+    * ...   val choicesTable = Table[Int, Choice](t)
     * ...   val ops = for {
     * ...     _ <- choicesTable.putAll(Set(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
     * ...     _ <- choicesTable.given(Condition("description" -> "cake") or Condition("description" -> "death")).put(Choice(1, "victoria sponge"))
@@ -464,7 +466,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Gremlin(number: Int, wet: Boolean, friendly: Boolean)
     * >>> LocalDynamoDB.withRandomTable(client)("number" -> N) { t =>
-    * ...   val gremlinsTable = Table[Simple, Int, Gremlin](t)
+    * ...   val gremlinsTable = Table[Int, Gremlin](t)
     * ...   val ops = for {
     * ...     _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, false)))
     * ...     _ <- gremlinsTable.given("wet" -> true).delete("number" -> 1)
@@ -480,7 +482,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> LocalDynamoDB.withRandomTable(client)("number" -> N) { t =>
-    * ...   val gremlinsTable = Table[Simple, Int, Gremlin](t)
+    * ...   val gremlinsTable = Table[Int, Gremlin](t)
     * ...   val ops = for {
     * ...     _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, true)))
     * ...     _ <- gremlinsTable.given("wet" -> true).update("number" -> 1, set("friendly" -> false))
@@ -496,7 +498,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
-    * ...   val smallscaleFarmersTable = Table[Simple, String, Farmer](t)
+    * ...   val smallscaleFarmersTable = Table[String, Farmer](t)
     * ...   val farmerOps = for {
     * ...     _ <- smallscaleFarmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
     * ...     _ <- smallscaleFarmersTable.given("farm" \ "hectares" < 40L).put(Farmer("McDonald", 156L, Farm(List("gerbil", "hamster"), 20)))
@@ -525,7 +527,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> case class Bear(name: String, favouriteFood: String)
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
-    * ...   val table = Table[Simple, String, Bear](t)
+    * ...   val table = Table[String, Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey"))
     * ...     _ <- table.put(Bear("Baloo", "ants"))
@@ -543,7 +545,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> case class Event(`type`: String, tag: String, count: Int)
     *
     * >>> LocalDynamoDB.withRandomTable(client)("type" -> S, "tag" -> S) { t =>
-    * ...   val table = Table[Composite, (String, String), Event](t)
+    * ...   val table = Table[String, String, Event](t)
     * ...   val ops = for {
     * ...     _ <- table.putAll(Set(
     * ...            Event("click", "paid", 600),
@@ -576,7 +578,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.auto._
-    * ...   val table = Table[Simple, String, Bear](t)
+    * ...   val table = Table[String, Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey"))
     * ...     _ <- table.put(Bear("Yogi", "picnic baskets"))
@@ -611,7 +613,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
-    * ...   val table = Table[Composite, (String, String), Transport](t)
+    * ...   val table = Table[String, String, Transport](t)
     * ...   val ops = for {
     * ...     _ <- table.putAll(Set(
     * ...       Transport("Underground", "Circle"),
@@ -643,7 +645,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
-    * ...   val table = Table[Composite, (String, String), Transport](t)
+    * ...   val table = Table[String, String, Transport](t)
     * ...   val ops = for {
     * ...     _ <- table.putAll(Set(
     * ...       Transport("Underground", "Circle"),
@@ -681,7 +683,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
-    * ...   val table = Table[Composite, (String, String), Transport](t)
+    * ...   val table = Table[String, String, Transport](t)
     * ...   val ops = for {
     * ...     _ <- table.putAll(Set(
     * ...       Transport("Underground", "Circle"),
@@ -716,7 +718,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
-    * ...   val table = Table[Simple, String, Bear](t)
+    * ...   val table = Table[String, Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey", None))
     * ...     _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
@@ -733,7 +735,7 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("line" -> S, "name" -> S) { t =>
-    * ...   val stationTable = Table[Composite, (String, String), Station](t)
+    * ...   val stationTable = Table[String, String, Station](t)
     * ...   val ops = for {
     * ...     _ <- stationTable.putAll(Set(
     * ...       Station("Metropolitan", "Chalfont & Latimer", 8),
@@ -754,6 +756,14 @@ case class Table[KT <: KeyType, K, V: DynamoFormat](name: String) {
 
   def descending: TableWithOptions[KT, K, V] =
     TableWithOptions(name, ScanamoQueryOptions.default).descending
+}
+
+object Table {
+  def apply[K: IsSimpleKey, V: DynamoFormat](tableName: String): Table[Simple, K, V] =
+    new Table[Simple, K, V](tableName)
+
+  def apply[PK: IsSimpleKey, SK: IsSimpleKey, V: DynamoFormat](tableName: String): Table[Composite, (PK, SK), V] =
+    new Table[Composite, (PK, SK), V](tableName)
 }
 
 private[scanamo] case class ConsistentlyReadTable[KT <: KeyType, K, V: DynamoFormat](tableName: String) {

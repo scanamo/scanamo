@@ -38,7 +38,9 @@ object ScanamoFree {
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
 
-  def deleteAll[KT <: KeyType, K](tableName: String)(items: Iterable[Key[KT, K]]): ScanamoOps[List[BatchWriteItemResult]] =
+  def deleteAll[KT <: KeyType, K](
+    tableName: String
+  )(items: Iterable[Key[KT, K]]): ScanamoOps[List[BatchWriteItemResult]] =
     items
       .map(_.toDynamoObject)
       .grouped(batchSize)

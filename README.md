@@ -33,7 +33,7 @@ scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")("nam
 
 scala> case class Farm(animals: List[String])
 scala> case class Farmer(name: String, age: Long, farm: Farm)
-scala> val table = Table[Simple, String, Farmer]("farmer")
+scala> val table = Table[String, Farmer]("farmer")
 
 scala> val ops = for {
      |   _ <- table.putAll(Set(

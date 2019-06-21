@@ -20,7 +20,7 @@ class Scanamo private (client: AmazonDynamoDB) {
     * >>> import org.scanamo.auto._
     *
     * >>> case class Transport(mode: String, line: String)
-    * >>> val transport = Table[Composite, (String, String), Transport]("transport")
+    * >>> val transport = Table[String, String, Transport]("transport")
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)

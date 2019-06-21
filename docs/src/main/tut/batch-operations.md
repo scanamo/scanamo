@@ -26,7 +26,7 @@ case class Lemming(role: String, number: Long)
 ```
 
 ```tut:book
-val lemmingsTable = Table[Simple, String, Lemming]("lemmings")
+val lemmingsTable = Table[String, Lemming]("lemmings")
 val ops = for {
   _ <- lemmingsTable.putAll(Set(
     Lemming("Walker", 99), Lemming("Blocker", 42), Lemming("Builder", 180)

@@ -11,25 +11,31 @@ sealed trait Composite extends KeyType
 sealed abstract class Key[KT <: KeyType, +A] extends Product with Serializable { self =>
   def toDynamoObject: DynamoObject
 
-  final def &&[A1 >: A: DynamoFormat, B: DynamoFormat](that: Key[Simple, B])(implicit ev: Key[KT, A] <:< Key[Simple, A1]): Key[Composite, (A1, B)] =
+  final def &&[A1 >: A: DynamoFormat, B: DynamoFormat](
+    that: Key[Simple, B]
+  )(implicit ev: Key[KT, A] <:< Key[Simple, A1]): Key[Composite, (A1, B)] =
     Key.And(ev(self), that)
 }
 
 object Key {
-  final case class Equals[A](k: AttributeName, v: A)(implicit D: DynamoFormat[A]) extends Key[Simple, A] {
+  final private case class Equals[A](k: AttributeName, v: A)(implicit D: DynamoFormat[A]) extends Key[Simple, A] {
     final def toDynamoObject: DynamoObject = DynamoObject(k.toString -> v)
   }
 
-  final case class And[A: DynamoFormat, B: DynamoFormat](p: Key[Simple, A], s: Key[Simple, B]) extends Key[Composite, (A, B)] {
+  final private case class And[A: DynamoFormat, B: DynamoFormat](p: Key[Simple, A], s: Key[Simple, B])
+      extends Key[Composite, (A, B)] {
     final def toDynamoObject: DynamoObject = p.toDynamoObject <> s.toDynamoObject
   }
 
-  def apply[A: DynamoFormat](k: AttributeName, v: A): Key[Simple, A] = Equals(k, v)
+  def apply[A: DynamoFormat: IsSimpleKey](k: AttributeName, v: A): Key[Simple, A] = Equals(k, v)
 
-  def fromDynamoObject[A: DynamoFormat](key: AttributeName, obj: DynamoObject): Option[Key[Simple, A]] = 
+  def fromDynamoObject[A: DynamoFormat: IsSimpleKey](key: AttributeName, obj: DynamoObject): Option[Key[Simple, A]] =
     obj(key.toString).flatMap(_.as[A].toOption).map(Key(key, _))
 
-  def fromDynamoObject[A: DynamoFormat, B: DynamoFormat](keys: (AttributeName, AttributeName), obj: DynamoObject): Option[Key[Composite, (A, B)]] =
+  def fromDynamoObject[A: DynamoFormat: IsSimpleKey, B: DynamoFormat: IsSimpleKey](
+    keys: (AttributeName, AttributeName),
+    obj: DynamoObject
+  ): Option[Key[Composite, (A, B)]] =
     (
       obj(keys._1.toString).flatMap(_.as[A].toOption),
       obj(keys._2.toString).flatMap(_.as[B].toOption)

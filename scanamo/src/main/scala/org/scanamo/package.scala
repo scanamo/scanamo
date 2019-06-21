@@ -12,10 +12,12 @@ package object scanamo {
 
     case class HashAndRangeKeyNames(hash: AttributeName, range: AttributeName)
 
-    implicit def stringTupleToKey[V: DynamoFormat](pair: (String, V)): Key[Simple, V] =
+    implicit def stringTupleToKey[V: DynamoFormat: IsSimpleKey](pair: (String, V)): Key[Simple, V] =
       Key(AttributeName.of(pair._1), pair._2)
 
-    implicit def stringListTupleToKeys[V: DynamoFormat](pair: (String, Iterable[V])): List[Key[Simple, V]] =
+    implicit def stringListTupleToKeys[V: DynamoFormat: IsSimpleKey](
+      pair: (String, Iterable[V])
+    ): List[Key[Simple, V]] =
       pair._2.foldLeft[List[Key[Simple, V]]](Nil)((acc, v) => (pair._1 -> v) :: acc)
 
     implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)): KeyEquals[V] =

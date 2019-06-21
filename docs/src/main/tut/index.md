@@ -43,7 +43,7 @@ case class Farmer(name: String, age: Long, farm: Farm)
 we can simply `put` and `get` items from Dynamo, without boilerplate or reflection
 
 ```tut:book
-val table = Table[Simple, String, Farmer]("farmer")
+val table = Table[String, Farmer]("farmer")
 
 scanamo.exec(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
 scanamo.exec(table.get("name" -> "McDonald"))
