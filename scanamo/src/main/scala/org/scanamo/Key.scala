@@ -27,12 +27,12 @@ object Key {
     final def toDynamoObject: DynamoObject = p.toDynamoObject <> s.toDynamoObject
   }
 
-  def apply[A: DynamoFormat: IsSimpleKey](k: AttributeName, v: A): Key[Simple, A] = Equals(k, v)
+  def apply[A: DynamoFormat: SimpleKey](k: AttributeName, v: A): Key[Simple, A] = Equals(k, v)
 
-  def fromDynamoObject[A: DynamoFormat: IsSimpleKey](key: AttributeName, obj: DynamoObject): Option[Key[Simple, A]] =
+  def fromDynamoObject[A: DynamoFormat: SimpleKey](key: AttributeName, obj: DynamoObject): Option[Key[Simple, A]] =
     obj(key.toString).flatMap(_.as[A].toOption).map(Key(key, _))
 
-  def fromDynamoObject[A: DynamoFormat: IsSimpleKey, B: DynamoFormat: IsSimpleKey](
+  def fromDynamoObject[A: DynamoFormat: SimpleKey, B: DynamoFormat: SimpleKey](
     keys: (AttributeName, AttributeName),
     obj: DynamoObject
   ): Option[Key[Composite, (A, B)]] =

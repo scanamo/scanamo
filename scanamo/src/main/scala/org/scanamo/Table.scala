@@ -123,7 +123,10 @@ class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
     */
-  def index[KTI <: KeyType, KI](indexName: String): SecondaryIndex[KTI, KI, V] =
+  def index[KI: SimpleKey](indexName: String): SecondaryIndex[Simple, KI, V] =
+    SecondaryIndexWithOptions(name, indexName, ScanamoQueryOptions.default)
+
+  def index[KPI: SimpleKey, KSI: SimpleKey](indexName: String): SecondaryIndex[Composite, (KPI, KSI), V] =
     SecondaryIndexWithOptions(name, indexName, ScanamoQueryOptions.default)
 
   /**
@@ -254,7 +257,7 @@ class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
     * ...   import org.scanamo.syntax._
     * ...   import org.scanamo.auto._
     * ...   import java.util.UUID
-    * ...   implicit val UUIDSimpleKey = new IsSimpleKey[UUID] {}
+    * ...   implicit val UUIDSimpleKey = new SimpleKey[UUID] {}
     * ...   val outers = Table[UUID, Outer](t)
     * ...   val id = UUID.fromString("a8345373-9a93-43be-9bcd-e3682c9197f4")
     * ...   val operations = for {
@@ -759,10 +762,10 @@ class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
 }
 
 object Table {
-  def apply[K: IsSimpleKey, V: DynamoFormat](tableName: String): Table[Simple, K, V] =
+  def apply[K: SimpleKey, V: DynamoFormat](tableName: String): Table[Simple, K, V] =
     new Table[Simple, K, V](tableName)
 
-  def apply[PK: IsSimpleKey, SK: IsSimpleKey, V: DynamoFormat](tableName: String): Table[Composite, (PK, SK), V] =
+  def apply[PK: SimpleKey, SK: SimpleKey, V: DynamoFormat](tableName: String): Table[Composite, (PK, SK), V] =
     new Table[Composite, (PK, SK), V](tableName)
 }
 
