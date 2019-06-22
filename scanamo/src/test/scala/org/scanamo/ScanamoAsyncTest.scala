@@ -212,7 +212,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
         _ <- bears.put(Bear("Yogi", "picnic baskets", None))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
-        bs <- bears.index(i).limit(1).scan
+        bs <- bears.index[String](i).limit(1).scan
       } yield bs
       scanamo.exec(ops).futureValue should equal(
         List(Right(Bear("Graham", "quinoa", Some("Guardianista"))))
@@ -230,9 +230,9 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
         _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
-          _ <- bears.index(i).limit(1).scan
-          res2 <- bears.index(i).limit(1).from("name" -> "Graham" && "alias" -> "Guardianista").scan
-          res3 <- bears.index(i).limit(1).from("name" -> "Yogi" && "alias" -> "Kanga").scan
+          _ <- bears.index[String](i).limit(1).scan
+          res2 <- bears.index[String](i).limit(1).from("name" -> "Graham" && "alias" -> "Guardianista").scan
+          res3 <- bears.index[String](i).limit(1).from("name" -> "Yogi" && "alias" -> "Kanga").scan
         } yield res2 ::: res3
       } yield bs
 
@@ -324,7 +324,7 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
             )
           )
           rs <- transports
-            .index(i)
+            .index[String, String](i)
             .limit(1)
             .query(
               "mode" -> "Underground" and ("colour" beginsWith "Bl")
@@ -340,7 +340,8 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
   it("queries an index asynchronously with `between` sort-key condition") {
     case class Station(mode: String, name: String, zone: Int)
 
-    def deletaAllStations(stationTable: Table[Composite, (String, String), Station], stations: Set[Station]) =
+    def deletaAllStations(stationTable: Table[PartitionType with SortType, (String, String), Station],
+                          stations: Set[Station]) =
       stationTable.deleteAll(
         stations.map(station => "mode" -> station.mode && "name" -> station.name)
       )
@@ -356,13 +357,13 @@ class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
-          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts1 <- stationTable.index[String, Int](i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
           ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
-          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts3 <- stationTable.index[String, Int](i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
           ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
-          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (1 and 1)))
+          ts5 <- stationTable.index[String, Int](i).query("mode" -> "Underground" and ("zone" between (1 and 1)))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
         scanamo.exec(ops).futureValue should equal(

@@ -77,7 +77,7 @@ class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
     ScanamoFree.deleteAll(name)(items)
 
   /**
-    * A secondary index on the table which can be scanned, or queried against
+    * A _local_ secondary index on the table which can be scanned, or queried against.
     *
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
@@ -95,16 +95,34 @@ class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
     * ...       Transport("Underground", "Circle", "Yellow"),
     * ...       Transport("Underground", "Metropolitan", "Magenta"),
     * ...       Transport("Underground", "Central", "Red")))
-    * ...     MagentaLine <- transport.index(i).query("colour" -> "Magenta")
+    * ...     MagentaLine <- transport.index[String, String](i).query("colour" -> "Magenta")
     * ...   } yield MagentaLine.toList
     * ...   scanamo.exec(operations)
     * ... }
     * List(Right(Transport(Underground,Metropolitan,Magenta)))
     * }}}
-    *
+    */
+  def index[KP, KI: SimpleKey](indexName: String)(implicit
+                                                  ev1: KT =:= PartitionType with SortType,
+                                                  ev2: K <:< (KP, _)): SecondaryIndex[KP, KI, V] =
+    SecondaryIndexWithOptions[KP, KI, V](name, indexName, ScanamoQueryOptions.default)
+
+  /**
+    * When the table has a simple key, you need only supply the type of the sort key that goes along
+    * the secondary index.
+    */
+  def index[KI: SimpleKey](indexName: String)(implicit ev: KT =:= PartitionType): SecondaryIndex[K, KI, V] =
+    SecondaryIndexWithOptions[K, KI, V](name, indexName, ScanamoQueryOptions.default)
+
+  /**
+    * A _global_ secondary index on the table which can be scanned, or queried against.
     * {{{
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
     *
+    * >>> val client = LocalDynamoDB.client()
+    * >>> val scanamo = Scanamo(client)
+    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("organisation" -> S, "repository" -> S)("language" -> S, "license" -> S) { (t, i) =>
@@ -116,18 +134,15 @@ class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
     * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
     * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
     * ...     ))
-    * ...     scalaMIT <- githubProjects.index(i).query("language" -> "Scala" and ("license" -> "MIT"))
+    * ...     scalaMIT <- githubProjects.globalIndex[String, String](i).query("language" -> "Scala" and ("license" -> "MIT"))
     * ...   } yield scalaMIT.toList
     * ...   scanamo.exec(operations)
     * ... }
     * List(Right(GithubProject(typelevel,cats,Scala,MIT)), Right(GithubProject(tpolecat,tut,Scala,MIT)), Right(GithubProject(localytics,sbt-dynamodb,Scala,MIT)))
     * }}}
     */
-  def index[KI: SimpleKey](indexName: String): SecondaryIndex[Simple, KI, V] =
-    SecondaryIndexWithOptions(name, indexName, ScanamoQueryOptions.default)
-
-  def index[KPI: SimpleKey, KSI: SimpleKey](indexName: String): SecondaryIndex[Composite, (KPI, KSI), V] =
-    SecondaryIndexWithOptions(name, indexName, ScanamoQueryOptions.default)
+  def globalIndex[KPI: SimpleKey, KSI: SimpleKey](indexName: String): SecondaryIndex[KPI, KSI, V] =
+    SecondaryIndexWithOptions[KPI, KSI, V](name, indexName, ScanamoQueryOptions.default)
 
   /**
     * Updates an attribute that is not part of the key and returns the updated row
@@ -762,11 +777,13 @@ class Table[KT <: KeyType, K, V: DynamoFormat] private (name: String) {
 }
 
 object Table {
-  def apply[K: SimpleKey, V: DynamoFormat](tableName: String): Table[Simple, K, V] =
-    new Table[Simple, K, V](tableName)
+  def apply[K: SimpleKey, V: DynamoFormat](tableName: String): Table[PartitionType, K, V] =
+    new Table[PartitionType, K, V](tableName)
 
-  def apply[PK: SimpleKey, SK: SimpleKey, V: DynamoFormat](tableName: String): Table[Composite, (PK, SK), V] =
-    new Table[Composite, (PK, SK), V](tableName)
+  def apply[PK: SimpleKey, SK: SimpleKey, V: DynamoFormat](
+    tableName: String
+  ): Table[PartitionType with SortType, (PK, SK), V] =
+    new Table[PartitionType with SortType, (PK, SK), V](tableName)
 }
 
 private[scanamo] case class ConsistentlyReadTable[KT <: KeyType, K, V: DynamoFormat](tableName: String) {

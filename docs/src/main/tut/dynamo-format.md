@@ -84,7 +84,7 @@ implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, Illeg
 )(
   _.toString
 )
-val fooTable = Table[Simple, DateTime, Foo]("foo")
+val fooTable = Table[PartitionType, DateTime, Foo]("foo")
 val operations = for {
   _           <- fooTable.put(Foo(new DateTime(0)))
   results     <- fooTable.scan()

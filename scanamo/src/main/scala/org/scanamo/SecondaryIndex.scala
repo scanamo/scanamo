@@ -11,7 +11,7 @@ import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoSc
   *
   * Can be constructed via the [[org.scanamo.Table#index index]] method on [[org.scanamo.Table Table]]
   */
-sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
+sealed abstract class SecondaryIndex[KP, KS, V] {
 
   /**
     * Scan a secondary index
@@ -34,7 +34,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * ...     _ <- table.put(Bear("Pooh", "honey", None))
     * ...     _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
     * ...     _ <- table.put(Bear("Paddington", "marmalade sandwiches", Some("Mr Curry")))
-    * ...     antagonisticBears <- table.index(i).scan()
+    * ...     antagonisticBears <- table.index[String](i).scan()
     * ...   } yield antagonisticBears
     * ...   scanamo.exec(ops)
     * ... }
@@ -65,7 +65,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
     * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
     * ...     ))
-    * ...     scalaMIT <- githubProjects.index(i).query("language" -> "Scala" and ("license" -> "MIT"))
+    * ...     scalaMIT <- githubProjects.index[String, String](i).query("language" -> "Scala" and ("license" -> "MIT"))
     * ...   } yield scalaMIT.toList
     * ...   scanamo.exec(operations)
     * ... }
@@ -97,7 +97,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * ...       Transport("Underground", "Central", "Red"),
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
-    * ...     somethingBeginningWithBl <- transport.index(i).limit(1).descending.query(
+    * ...     somethingBeginningWithBl <- transport.index[String, String](i).limit(1).descending.query(
     * ...       ("mode" -> "Underground" and ("colour" beginsWith "Bl"))
     * ...     )
     * ...   } yield somethingBeginningWithBl.toList
@@ -106,7 +106,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * List(Right(Transport(Underground,Picadilly,Blue)))
     * }}}
     */
-  def limit(n: Int): SecondaryIndex[KT, K, V]
+  def limit(n: Int): SecondaryIndex[KP, KS, V]
 
   /**
     * Filter the results of `scan` or `query` within DynamoDB
@@ -132,7 +132,7 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * ...       Transport("Underground", "Central", "Red"),
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
-    * ...     somethingBeginningWithC <- transport.index(i)
+    * ...     somethingBeginningWithC <- transport.index[String, String](i)
     * ...                                   .filter("line" beginsWith ("C"))
     * ...                                   .query("mode" -> "Underground")
     * ...   } yield somethingBeginningWithC.toList
@@ -141,26 +141,26 @@ sealed abstract class SecondaryIndex[KT <: KeyType, K, V] {
     * List(Right(Transport(Underground,Central,Red)), Right(Transport(Underground,Circle,Yellow)))
     * }}}
     */
-  def filter[C: ConditionExpression](condition: C): SecondaryIndex[KT, K, V]
+  def filter[C: ConditionExpression](condition: C): SecondaryIndex[KP, KS, V]
 
-  def descending: SecondaryIndex[KT, K, V]
+  def descending: SecondaryIndex[KP, KS, V]
 
-  def from(key: Key[KT, K]): SecondaryIndex[KT, K, V]
+  def from(key: Key[PartitionType with SortType, (KP, KS)]): SecondaryIndex[KP, KS, V]
 }
 
-private[scanamo] case class SecondaryIndexWithOptions[KT <: KeyType, K, V: DynamoFormat](
+private[scanamo] case class SecondaryIndexWithOptions[KP, KS, V: DynamoFormat](
   tableName: String,
   indexName: String,
   queryOptions: ScanamoQueryOptions
-) extends SecondaryIndex[KT, K, V] {
-  def limit(n: Int): SecondaryIndexWithOptions[KT, K, V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
-  def from(key: Key[KT, K]): SecondaryIndexWithOptions[KT, K, V] =
+) extends SecondaryIndex[KP, KS, V] {
+  def limit(n: Int): SecondaryIndexWithOptions[KP, KS, V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
+  def from(key: Key[PartitionType with SortType, (KP, KS)]): SecondaryIndexWithOptions[KP, KS, V] =
     copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
-  def filter[C: ConditionExpression](condition: C): SecondaryIndexWithOptions[KT, K, V] =
-    SecondaryIndexWithOptions[KT, K, V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
-  def filter[T](c: Condition[T]): SecondaryIndexWithOptions[KT, K, V] =
+  def filter[C: ConditionExpression](condition: C): SecondaryIndexWithOptions[KP, KS, V] =
+    SecondaryIndexWithOptions[KP, KS, V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
+  def filter[T](c: Condition[T]): SecondaryIndexWithOptions[KP, KS, V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
-  def descending: SecondaryIndexWithOptions[KT, K, V] =
+  def descending: SecondaryIndexWithOptions[KP, KS, V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def query(query: Query[_]) =
