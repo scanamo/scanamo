@@ -13,7 +13,7 @@ import scala.concurrent.Future
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
   * [[https://github.com/akka/alpakka Alpakka]] client and a [[org.scanamo.ops.retrypolicy.RetryPolicy]].
-  * `retryPolicy` defaults to [[org.scanamo.ops.retrypolicy.RetryPolicy.Max]] with maximum 3 retries if not explicitly
+  * `retryPolicy` defaults to [[org.scanamo.ops.retrypolicy.RetryPolicy.max]] with maximum 3 retries if not explicitly
   * provided. Moreover, the interface returns either a [[scala.concurrent.Future]] or [[akka.stream.scaladsl.Source]]
   * based on the kind of execution used.
   */
@@ -38,7 +38,7 @@ class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy) {
 object ScanamoAlpakka extends AlpakkaInstances {
   def apply(
     client: DynamoClient,
-    retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3)
+    retrySettings: RetryPolicy = RetryPolicy.max(3)
   ): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings)
 }
 
