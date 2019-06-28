@@ -36,9 +36,9 @@ class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetr
     val minDelay = tries * delay.toMillis
     val start = System.currentTimeMillis()
     val future = testcase(policy)
-    future transform { _ =>
+    future map { _ =>
       val stop = System.currentTimeMillis()
-      Success(assert(stop - start > minDelay))
+      assert(stop - start > minDelay)
     }
   }
 
