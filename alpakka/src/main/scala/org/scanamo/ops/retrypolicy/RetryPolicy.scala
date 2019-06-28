@@ -16,16 +16,10 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
     case Constant(retryDelay)               => retryDelay
     case Linear(retryDelay, n)              => retryDelay * n.toDouble
     case Exponential(retryDelay, factor, n) => retryDelay * Math.pow(factor, n.toDouble)
-    case And(thisPolicy, thatPolicy) =>
-      val d1 = thisPolicy.delay
-      val d2 = thatPolicy.delay
-      if (d1 >= d2) d1 else d2
-    case Or(thisPolicy, thatPolicy) =>
-      val d1 = thisPolicy.delay
-      val d2 = thatPolicy.delay
-      if (d1 <= d2) d1 else d2
-    case Never => Duration.Inf
-    case _     => Duration.Zero
+    case And(thisPolicy, thatPolicy)        => thisPolicy.delay.max(thatPolicy.delay)
+    case Or(thisPolicy, thatPolicy)         => thisPolicy.delay.min(thatPolicy.delay)
+    case Never                              => Duration.Inf
+    case _                                  => Duration.Zero
   }
 
   final def update: RetryPolicy = self match {

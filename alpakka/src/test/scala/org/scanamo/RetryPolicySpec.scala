@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 import scala.util.control.NonFatal
 import scala.util.Success
 
-class ScanamoIssue extends AsyncFreeSpec with BeforeAndAfterAll with WithRetry {
+class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetry {
 
   implicit val actorSystem: ActorSystem = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
