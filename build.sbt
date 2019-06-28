@@ -3,7 +3,7 @@ crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "2.0.0-M4"
 val catsEffectVersion = "1.3.1"
-val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
+val scalazVersion = "7.2.28" // Bump as needed for io-effect compat
 val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
 val zioVersion = "1.0.0-RC8-12"
