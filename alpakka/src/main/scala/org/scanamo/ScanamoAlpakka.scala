@@ -35,7 +35,7 @@ class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy) {
 object ScanamoAlpakka extends AlpakkaInstances {
   def apply(
     client: DynamoClient,
-    retrySettings: RetryPolicy = RetryPolicy.Max(numberOfRetries = 3)
+    retrySettings: RetryPolicy = RetryPolicy.max(3)
   ): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings)
 }
 

@@ -43,12 +43,13 @@ class ScanamoIssue extends AsyncFreeSpec with BeforeAndAfterAll with WithRetry {
   }
 
   "Retry Policies should terminate" - {
-    "Plain maximum" in testcase(RetryPolicy.Max(tries))
-    "Constant delay AND maximum" in testcaseWithDelay(RetryPolicy.Max(tries) && RetryPolicy.Constant(delay))
-    "Linear delay AND maximum" in testcaseWithDelay(RetryPolicy.Max(tries) && RetryPolicy.Linear(delay, factor))
-    "Exponential delay AND maximum" in testcase(RetryPolicy.Max(tries) && RetryPolicy.Exponential(delay, factor))
-    // "Constant delay OR maximum" in testcaseWithDelay(RetryPolicy.Max(tries) || RetryPolicy.Max(tries * 2) && RetryPolicy.Constant(delay))
-    // "Linear delay OR maximum" in testcaseWithDelay(RetryPolicy.Max(tries) || RetryPolicy.Max(tries * 2) && RetryPolicy.Linear(delay, factor))
-    // "Exponential delay OR maximum" in testcase(RetryPolicy.Max(tries) || RetryPolicy.Max(tries * 2) && RetryPolicy.Exponential(delay, factor))
+    import RetryPolicy._
+
+    "Plain maximum" in testcase(max(tries))
+    "Constant delay AND maximum" in testcaseWithDelay(max(tries) && fixed(delay))
+    "Linear delay AND maximum" in testcaseWithDelay(max(tries) && linear(delay))
+    "Exponential delay AND maximum" in testcase(max(tries) && exponential(delay, factor))
+    "Constant delay OR linear delay" in testcaseWithDelay(max(tries) && (fixed(delay) || linear(delay)))
+    "Constant delay OR exponential delay" in testcaseWithDelay(max(tries) && (fixed(delay) || exponential(delay)))
   }
 }
