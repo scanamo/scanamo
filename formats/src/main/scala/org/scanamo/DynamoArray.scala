@@ -83,7 +83,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
     */
   // TODO mark as private?
   final def toAttributeValue: AttributeValue = self match {
-    case Empty       => DynamoValue.Null
+    case Empty       => new AttributeValue().withL()
     case Strict(xs)  => new AttributeValue().withL(xs)
     case StrictS(xs) => new AttributeValue().withSS(xs)
     case StrictN(xs) => new AttributeValue().withNS(xs)
