@@ -3,8 +3,6 @@ crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "2.0.0-M4"
 val catsEffectVersion = "1.3.1"
-val scalazVersion = "7.2.28" // Bump as needed for io-effect compat
-val scalazIOEffectVersion = "2.10.1"
 val shimsVersion = "1.7.0"
 val zioVersion = "1.0.0-RC8-12"
 
@@ -79,7 +77,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda, zio)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, catsEffect, javaTime, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -177,24 +175,6 @@ lazy val catsEffect = (project in file("cats"))
       "co.fs2"         %% "fs2-core"    % "1.0.5" % Test,
       "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
-    ),
-    fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings"
-  )
-  .dependsOn(formats, scanamo, testkit % "test->test")
-
-lazy val scalaz = (project in file("scalaz"))
-  .settings(
-    name := "scanamo-scalaz",
-    commonSettings,
-    publishingSettings,
-    libraryDependencies ++= List(
-      awsDynamoDB,
-      "com.codecommit" %% "shims"           % shimsVersion,
-      "org.scalaz"     %% "scalaz-core"     % scalazVersion,
-      "org.scalaz"     %% "scalaz-ioeffect" % scalazIOEffectVersion,
-      "org.scalatest"  %% "scalatest"       % "3.0.8" % Test,
-      "org.scalacheck" %% "scalacheck"      % "1.14.0" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
