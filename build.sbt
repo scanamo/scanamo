@@ -3,7 +3,6 @@ crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "2.0.0-M4"
 val catsEffectVersion = "1.3.1"
-val shimsVersion = "1.7.0"
 val zioVersion = "1.0.0-RC8-12"
 
 lazy val stdOptions = Seq(
