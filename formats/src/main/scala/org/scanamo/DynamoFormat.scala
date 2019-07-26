@@ -471,6 +471,16 @@ object DynamoFormat extends EnumDynamoFormat {
       final override val default = Some(Set.empty[String])
     }
 
+  /**
+    * {{{
+    * prop> (s: Set[Boolean]) =>
+    *     | DynamoFormat[Set[Boolean]].read(DynamoFormat[Set[Boolean]].write(s)) ==
+    *     |   Right(s)
+    * }}}
+    */
+  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] =
+    iso[Set[T], List[T]](_.toSet, DynamoDefault.SomeDef(Set.empty))(_.toList)
+
   private val javaMapFormat: DynamoFormat[DynamoObject] =
     attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
 
