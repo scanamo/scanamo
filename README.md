@@ -12,7 +12,7 @@ Installation
 ------------
 
 ```scala
-libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M9"
+libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M10"
 ```
 
 Scanamo is published for Scala 2.12 and Scala 2.11
@@ -29,7 +29,7 @@ scala> import org.scanamo.auto._
  
 scala> val client = LocalDynamoDB.client()
 scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")('name -> S)
+scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")("name" -> S)
 
 scala> case class Farm(animals: List[String])
 scala> case class Farmer(name: String, age: Long, farm: Farm)
@@ -40,7 +40,7 @@ scala> val ops = for {
      |       Farmer("McDonald", 156L, Farm(List("sheep", "cow"))),
      |       Farmer("Boggis", 43L, Farm(List("chicken")))
      |     ))
-     |   mcdonald <- table.get('name -> "McDonald")
+     |   mcdonald <- table.get("name" -> "McDonald")
      | } yield mcdonald
 scala> Scanamo.exec(client)(ops)
 res1: Option[Either[error.DynamoReadError, Farmer]] = Some(Right(Farmer(McDonald,156,Farm(List(sheep, cow)))))
@@ -59,16 +59,16 @@ Unless required by applicable law or agreed to in writing, software distributed 
 language governing permissions and limitations under the License.
 
 
-[Link-Codecov]: https://coveralls.io/github/guardian/scanamo?branch=master "Codecov"
+[Link-Codecov]: https://coveralls.io/github/scanamo/scanamo?branch=master "Codecov"
 [Link-IsItMaintained]: https://isitmaintained.com/project/scanamo/scanamo "Average time to resolve an issue"
 [Link-Scaladex]: https://index.scala-lang.org/search?q=dependencies:scanamo/scanamo "Scaladex"
-[Link-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.12 "Maven Releases"
+[Link-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/org.scanamo/scanamo_2.12 "Maven Releases"
 [Link-Travis]: https://travis-ci.org/scanamo/scanamo "Travis CI"
-[Link-Gitter]: https://gitter.im/guardian/scanamo "Gitter chat"
+[Link-Gitter]: https://gitter.im/scanamo/scanamo "Gitter chat"
 
-[Badge-Codecov]: https://coveralls.io/repos/github/guardian/scanamo/badge.svg?branch=master "Codecov"
+[Badge-Codecov]: https://coveralls.io/repos/github/scanamo/scanamo/badge.svg?branch=master "Codecov"
 [Badge-IsItMaintained]: http://isitmaintained.com/badge/resolution/scanamo/scanamo.svg "Average time to resolve an issue"
 [Badge-Scaladex]: https://index.scala-lang.org/count.svg?q=dependencies:scanamo/scanamo&subject=scaladex "Scaladex"
-[Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg "Maven Releases"
+[Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/org.scanamo/scanamo_2.11/badge.svg "Maven Releases"
 [Badge-Travis]: https://travis-ci.org/scanamo/scanamo.svg?branch=master "Travis CI"
-[Badge-Gitter]: https://badges.gitter.im/guardian/scanamo.svg "Gitter chat"
+[Badge-Gitter]: https://badges.gitter.im/scanamo/scanamo.svg "Gitter chat"

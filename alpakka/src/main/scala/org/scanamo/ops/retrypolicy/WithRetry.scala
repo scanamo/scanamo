@@ -15,8 +15,11 @@ trait WithRetry {
       1, {
         case exception @ (_: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException |
             _: LimitExceededException | _: ProvisionedThroughputExceededException | _: RequestLimitExceededException) =>
-          if (!retryPolicy.done) {
-            retry(op, retryPolicy.update).delay(FiniteDuration(retryPolicy.delay, TimeUnit.MILLISECONDS))
+          if (retryPolicy.continue) {
+            Source
+              .single(())
+              .delay(FiniteDuration(retryPolicy.delay.toMillis, TimeUnit.MILLISECONDS))
+              .flatMapConcat(_ => retry(op, retryPolicy.update))
           } else {
             Source.failed(exception)
           }

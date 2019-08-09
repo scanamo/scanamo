@@ -1,12 +1,9 @@
 scalaVersion in ThisBuild := "2.12.8"
 crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
-val catsVersion = "1.6.0"
-val catsEffectVersion = "1.3.1"
-val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
-val scalazIOEffectVersion = "2.10.1"
-val shimsVersion = "1.7.0"
-val zioVersion = "1.0-RC4"
+val catsVersion = "2.0.0-RC1"
+val catsEffectVersion = "1.4.0"
+val zioVersion = "1.0.0-RC8-12"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -60,7 +57,7 @@ val commonSettings = Seq(
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   // for simulacrum
   addCompilerPlugin("org.scalamacros" % "paradise"        % "2.1.1" cross CrossVersion.full),
-  addCompilerPlugin("org.spire-math"  %% "kind-projector" % "0.9.10"),
+  addCompilerPlugin("org.typelevel"   %% "kind-projector" % "0.10.3"),
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
@@ -79,7 +76,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda, zio)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, catsEffect, javaTime, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -105,10 +102,10 @@ lazy val formats = (project in file("formats"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "com.chuusai"          %% "shapeless"  % "2.3.3",
-      "com.github.mpilquist" %% "simulacrum" % "0.18.0",
+      "com.github.mpilquist" %% "simulacrum" % "0.19.0",
       "org.typelevel"        %% "cats-core"  % catsVersion,
       "org.scalacheck"       %% "scalacheck" % "1.14.0" % Test,
-      "org.scalatest"        %% "scalatest"  % "3.0.7" % Test
+      "org.scalatest"        %% "scalatest"  % "3.0.8" % Test
     ),
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,
@@ -124,8 +121,8 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.7",
-      "org.scalatest" %% "scalatest" % "3.0.7" % Test
+      "eu.timepit"    %% "refined"   % "0.9.9",
+      "org.scalatest" %% "scalatest" % "3.0.8" % Test
     )
   )
   .dependsOn(formats)
@@ -141,11 +138,11 @@ lazy val scanamo = (project in file("scanamo"))
       awsDynamoDB,
       "com.chuusai"          %% "shapeless"  % "2.3.3",
       "org.typelevel"        %% "cats-free"  % catsVersion,
-      "com.github.mpilquist" %% "simulacrum" % "0.18.0",
+      "com.github.mpilquist" %% "simulacrum" % "0.19.0",
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
-      "joda-time"      % "joda-time"    % "2.10.2" % Test,
-      "org.scalatest"  %% "scalatest"   % "3.0.7"  % Test,
+      "joda-time"      % "joda-time"    % "2.10.3" % Test,
+      "org.scalatest"  %% "scalatest"   % "3.0.8"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
     )
   )
@@ -171,26 +168,12 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % catsVersion,
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
-      "org.scalatest"  %% "scalatest"   % "3.0.7" % Test,
+      "io.monix"       %% "monix"       % "3.0.0-RC2" % Provided,
+      "co.fs2"         %% "fs2-core"    % "1.0.5" % Provided,
+      "io.monix"       %% "monix"       % "3.0.0-RC2" % Test,
+      "co.fs2"         %% "fs2-core"    % "1.0.5" % Test,
+      "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
-    ),
-    fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings"
-  )
-  .dependsOn(formats, scanamo, testkit % "test->test")
-
-lazy val scalaz = (project in file("scalaz"))
-  .settings(
-    name := "scanamo-scalaz",
-    commonSettings,
-    publishingSettings,
-    libraryDependencies ++= List(
-      awsDynamoDB,
-      "com.codecommit" %% "shims"           % shimsVersion,
-      "org.scalaz"     %% "scalaz-core"     % scalazVersion,
-      "org.scalaz"     %% "scalaz-ioeffect" % scalazIOEffectVersion,
-      "org.scalatest"  %% "scalatest"       % "3.0.7" % Test,
-      "org.scalacheck" %% "scalacheck"      % "1.14.0" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -204,12 +187,13 @@ lazy val zio = (project in file("scalaz-zio"))
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-core"               % catsVersion,
-      "org.typelevel"  %% "cats-effect"             % catsEffectVersion,
-      "org.scalaz"     %% "scalaz-zio"              % zioVersion,
-      "org.scalaz"     %% "scalaz-zio-interop-cats" % zioVersion,
-      "org.scalatest"  %% "scalatest"               % "3.0.7" % Test,
-      "org.scalacheck" %% "scalacheck"              % "1.14.0" % Test
+      "org.typelevel"  %% "cats-core"        % catsVersion,
+      "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
+      "dev.zio"        %% "zio"              % zioVersion,
+      "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
+      "dev.zio"        %% "zio-interop-cats" % zioVersion,
+      "org.scalatest"  %% "scalatest"        % "3.0.8" % Test,
+      "org.scalacheck" %% "scalacheck"       % "1.14.0" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -226,8 +210,8 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.0.2",
-      "org.scalatest"      %% "scalatest"                    % "3.0.7" % Test,
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.1.1",
+      "org.scalatest"      %% "scalatest"                    % "3.0.8" % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.13.5" % Test
     ),
     fork in Test := true,
@@ -244,7 +228,7 @@ lazy val javaTime = (project in file("java-time"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.scalatest"  %% "scalatest"                   % "3.0.7"  % Test,
+      "org.scalatest"  %% "scalatest"                   % "3.0.8"  % Test,
       "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
       "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.5"  % Test
     )
@@ -260,8 +244,8 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"       % "joda-convert"                 % "2.2.1" % Provided,
-      "joda-time"      % "joda-time"                    % "2.10.2",
-      "org.scalatest"  %% "scalatest"                   % "3.0.7" % Test,
+      "joda-time"      % "joda-time"                    % "2.10.3",
+      "org.scalatest"  %% "scalatest"                   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
       "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
     )

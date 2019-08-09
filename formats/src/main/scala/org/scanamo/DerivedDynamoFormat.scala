@@ -10,7 +10,6 @@ import shapeless.labelled._
 trait DerivedDynamoFormat {
   type FieldName = String
   type ValidatedPropertiesError[T] = ValidatedNel[(FieldName, DynamoReadError), T]
-  type NotSymbol[T] = |¬|[Symbol]#λ[T]
 
   trait ConstructedDynamoFormat[T] {
     def read(av: DynamoObject): ValidatedPropertiesError[T]
@@ -91,7 +90,7 @@ trait DerivedDynamoFormat {
       }
     }
 
-  implicit def genericProduct[T: NotSymbol, R](
+  implicit def genericProduct[T, R](
     implicit gen: LabelledGeneric.Aux[T, R],
     formatR: Lazy[ValidConstructedDynamoFormat[R]]
   ): Exported[DynamoFormat[T]] =

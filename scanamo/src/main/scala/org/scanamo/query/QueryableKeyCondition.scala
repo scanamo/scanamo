@@ -12,9 +12,9 @@ object QueryableKeyCondition {
   implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[KeyEquals[V]] {
     final def apply(t: KeyEquals[V]) =
       RequestCondition(
-        s"#K = :${t.key.name}",
-        Map("#K" -> t.key.name),
-        Some(DynamoObject(t.key.name -> t.v))
+        s"#K = :${t.key.placeholder("")}",
+        Map("#K" -> t.key.placeholder("")),
+        Some(DynamoObject(t.key.placeholder("") -> t.v))
       )
   }
 
@@ -22,10 +22,10 @@ object QueryableKeyCondition {
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
       final def apply(t: AndQueryCondition[H, R]) =
         RequestCondition(
-          s"#K = :${t.hashCondition.key.name} AND ${t.rangeCondition.keyConditionExpression("R")}",
-          Map("#K" -> t.hashCondition.key.name) ++ t.rangeCondition.key.attributeNames("#R"),
+          s"#K = :${t.hashCondition.key.placeholder("")} AND ${t.rangeCondition.keyConditionExpression("R")}",
+          Map("#K" -> t.hashCondition.key.placeholder("")) ++ t.rangeCondition.key.attributeNames("#R"),
           Some(
-            DynamoObject(t.hashCondition.key.name -> t.hashCondition.v) <> DynamoObject(
+            DynamoObject(t.hashCondition.key.placeholder("") -> t.hashCondition.v) <> DynamoObject(
               t.rangeCondition.attributes.toSeq: _*
             )
           )

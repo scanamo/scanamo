@@ -27,7 +27,7 @@ case class Station(line: String, name: String, zone: Int)
 val stationTable = Table[Station]("Station")
 ```
 ```tut:book
-LocalDynamoDB.withTable(client)("Station")('line -> S, 'name -> S) {
+LocalDynamoDB.withTable(client)("Station")("line" -> S, "name" -> S) {
   val ops = for {
     _ <- stationTable.putAll(Set(
       Station("Metropolitan", "Chalfont & Latimer", 8),
@@ -38,8 +38,8 @@ LocalDynamoDB.withTable(client)("Station")('line -> S, 'name -> S) {
     ))
     filteredStations <- 
       stationTable
-        .filter('zone < 8)
-        .query('line -> "Metropolitan" and ('name beginsWith "C"))
+        .filter("zone" < 8)
+        .query("line" -> "Metropolitan" and ("name" beginsWith "C"))
   } yield filteredStations
   scanamo.exec(ops)
 }

@@ -33,7 +33,7 @@ import org.scanamo.auto._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("muppets")('name -> S)
+LocalDynamoDB.createTable(client)("muppets")("name" -> S)
 
 case class Muppet(name: String, species: String)
 ```
@@ -43,7 +43,7 @@ val operations = for {
   _ <- muppets.put(Muppet("Kermit", "Frog"))
   _ <- muppets.put(Muppet("Cookie Monster", "Monster"))
   _ <- muppets.put(Muppet("Miss Piggy", "Pig"))
-  kermit <- muppets.get('name -> "Kermit")
+  kermit <- muppets.get("name" -> "Kermit")
 } yield kermit
      
 scanamo.exec(operations)
@@ -53,7 +53,7 @@ Note that when using `Table` no operations are actually executed against DynamoD
 
 ### Delete
 
-To remove an item in it's entirety, we can use delete:
+To remove an item in its entirety, we can use delete:
 
 ```tut:silent
 import org.scanamo._
@@ -62,7 +62,7 @@ import org.scanamo.syntax._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("villains")('name -> S)
+LocalDynamoDB.createTable(client)("villains")("name" -> S)
 
 case class Villain(name: String, catchphrase: String)
 ```
@@ -71,7 +71,7 @@ val villains = Table[Villain]("villains")
 val operations = for {
   _ <- villains.put(Villain("Dalek", "EXTERMINATE!"))
   _ <- villains.put(Villain("Cyberman", "DELETE"))
-  _ <- villains.delete('name -> "Cyberman")
+  _ <- villains.delete("name" -> "Cyberman")
   survivors <- villains.scan()
 } yield survivors
      
@@ -80,7 +80,7 @@ scanamo.exec(operations)
 
 ### Update
 
-If you want to change some of the fields of an item, that don't form part of it's key,
+If you want to change some of the fields of an item, that don't form part of its key,
  without replacing the item entirely, you can use the `update` operation:
 
 ```tut:silent
@@ -90,13 +90,13 @@ import org.scanamo.syntax._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("teams")('name -> S)
+LocalDynamoDB.createTable(client)("teams")("name" -> S)
 case class Team(name: String, goals: Int, scorers: List[String], mascot: Option[String])
 val teamTable = Table[Team]("teams")
 val operations = for {
   _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
-  updated <- teamTable.update('name -> "Watford", 
-    set('goals -> 2) and append('scorers -> "Barnes") and remove('mascot))
+  updated <- teamTable.update("name" -> "Watford", 
+    set("goals" -> 2) and append("scorers" -> "Barnes") and remove("mascot"))
 } yield updated
 ```
 ```tut:book
@@ -112,7 +112,7 @@ import org.scanamo.ops.ScanamoOps
 import org.scanamo.error.DynamoReadError
 import org.scanamo.update.UpdateExpression
 
-LocalDynamoDB.createTable(client)("favourites")('name -> S)
+LocalDynamoDB.createTable(client)("favourites")("name" -> S)
 case class Favourites(name: String, colour: String, number: Long)
 val favouritesTable = Table[Favourites]("favourites")
 
@@ -121,11 +121,11 @@ scanamo.exec(favouritesTable.put(Favourites("Alice", "Blue", 42L)))
 case class FavouriteUpdate(name: String, colour: Option[String], number: Option[Long])
 def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadError, Favourites]]] = {
   val updates: List[UpdateExpression] = List(
-    fu.colour.map(c => set('colour -> c)), 
-    fu.number.map(n => set('number -> n))
+    fu.colour.map(c => set("colour" -> c)), 
+    fu.number.map(n => set("number" -> n))
   ).flatten
   NonEmptyList.fromList(updates).map(ups =>
-    favouritesTable.update('name -> fu.name, ups.reduce[UpdateExpression](_ and _))
+    favouritesTable.update("name" -> fu.name, ups.reduce[UpdateExpression](_ and _))
   )
 }
 ```
@@ -139,7 +139,7 @@ val updates = List(
 scanamo.exec(
   for {
     _ <- updates.flatMap(updateFavourite).sequence
-    result <- favouritesTable.get('name -> "Alice")
+    result <- favouritesTable.get("name" -> "Alice")
   } yield result
 )
 
@@ -160,7 +160,7 @@ import org.scanamo.syntax._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("lines")('mode -> S, 'line -> S)
+LocalDynamoDB.createTable(client)("lines")("mode" -> S, "line" -> S)
 
 case class Transport(mode: String, line: String)
 ```
@@ -190,7 +190,7 @@ import org.scanamo.syntax._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("transports")('mode -> S, 'line -> S)
+LocalDynamoDB.createTable(client)("transports")("mode" -> S, "line" -> S)
 
 case class Transport(mode: String, line: String)
 val transportTable = Table[Transport]("transports")
@@ -200,7 +200,7 @@ val operations = for {
     Transport("Underground", "Metropolitan"),
     Transport("Underground", "Central")
   ))
-  tubesStartingWithC <- transportTable.query('mode -> "Underground" and ('line beginsWith "C"))
+  tubesStartingWithC <- transportTable.query("mode" -> "Underground" and ("line" beginsWith "C"))
 } yield tubesStartingWithC.toList
 ```
 ```tut:book

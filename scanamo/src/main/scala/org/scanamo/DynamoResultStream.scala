@@ -1,9 +1,12 @@
 package org.scanamo
 
-import cats.free.Free
+import cats.{ Monad, MonoidK }
+import cats.MonoidK.ops._
+import cats.free.{ Free, FreeT }
+import cats.syntax.semigroupk._
 import com.amazonaws.services.dynamodbv2.model.{ QueryResult, ScanResult }
 import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA }
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA, ScanamoOpsT }
 import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
@@ -42,6 +45,27 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
           )
       } yield result
     streamMore(req)
+  }
+
+  def streamTo[M[_]: Monad, T: DynamoFormat](
+    req: Req,
+    pageSize: Int
+  )(implicit M: MonoidK[M]): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] = {
+    def streamMore(req: Req, l: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+      exec(withLimit(l)(req)).toFreeT[M].flatMap { res =>
+        val results = items(res).map(ScanamoFree.read[T])
+        if (results.isEmpty)
+          FreeT.liftT(M.empty)
+        else {
+          val l1 = limit(req).fold(pageSize)(l => Math.min(pageSize, l - results.length))
+          lastEvaluatedKey(res)
+            .filterNot(_ => l1 <= 0)
+            .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Either[DynamoReadError, T]]](results))(
+              (res, k) => res <+> streamMore(withExclusiveStartKey(k)(req), l1)
+            )
+        }
+      }
+    streamMore(req, limit(req).fold(pageSize)(Math.min(_, pageSize)))
   }
 }
 

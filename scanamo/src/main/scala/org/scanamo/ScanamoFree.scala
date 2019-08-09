@@ -1,10 +1,11 @@
 package org.scanamo
 
+import cats.{ Monad, MonoidK }
 import com.amazonaws.services.dynamodbv2.model.{ PutRequest, WriteRequest, _ }
 import java.util.{ List => JList, Map => JMap }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
 import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
@@ -94,11 +95,20 @@ object ScanamoFree {
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)
 
+  def scanM[M[_]: Monad: MonoidK, T: DynamoFormat](tableName: String,
+                                                   pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+    ScanResultStream.streamTo[M, T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default), pageSize)
+
   def scan0[T: DynamoFormat](tableName: String): ScanamoOps[ScanResult] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default))
 
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
     QueryResultStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default)).map(_._1)
+
+  def queryM[M[_]: Monad: MonoidK, T: DynamoFormat](
+    tableName: String
+  )(query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+    QueryResultStream.streamTo[M, T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default), pageSize)
 
   def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResult] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
