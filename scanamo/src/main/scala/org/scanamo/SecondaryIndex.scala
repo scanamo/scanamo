@@ -270,12 +270,12 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def scan0(): ScanamoOps[ScanResult] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int) =
+    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
   def query0(query: Query[_]): ScanamoOps[QueryResult] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
-  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int) =
-    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int) =
     QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }
