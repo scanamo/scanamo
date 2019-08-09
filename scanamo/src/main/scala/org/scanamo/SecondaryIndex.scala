@@ -81,7 +81,6 @@ sealed abstract class SecondaryIndex[V] {
     *
     * To control how many maximum items to load at once, use [[scanPaginatedM]]
     */
-
   final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
 
   /**
