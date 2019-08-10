@@ -13,7 +13,7 @@ private[scanamo] class ZioInterpreter(client: AmazonDynamoDBAsync)
     f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
     req: A
   ): IO[AmazonDynamoDBException, B] =
-    IO.effectAsync[Any, AmazonDynamoDBException, B] { cb =>
+    IO.effectAsync[AmazonDynamoDBException, B] { cb =>
       val handler = new AsyncHandler[A, B] {
         def onError(exception: Exception): Unit =
           exception match {
