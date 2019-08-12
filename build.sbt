@@ -3,7 +3,7 @@ crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
 val catsVersion = "2.0.0-RC1"
 val catsEffectVersion = "1.4.0"
-val zioVersion = "1.0.0-RC8-12"
+val zioVersion = "1.0.0-RC11-1"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -76,7 +76,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, catsEffect, javaTime, joda, zio)
+  .aggregate(formats, scanamo, testkit, alpakka, refined, catsEffect, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -180,9 +180,9 @@ lazy val catsEffect = (project in file("cats"))
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
 
-lazy val zio = (project in file("scalaz-zio"))
+lazy val zio = (project in file("zio"))
   .settings(
-    name := "scanamo-scalaz-zio",
+    name := "scanamo-zio",
     commonSettings,
     publishingSettings,
     libraryDependencies ++= List(
@@ -191,7 +191,7 @@ lazy val zio = (project in file("scalaz-zio"))
       "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % zioVersion,
+      "dev.zio"        %% "zio-interop-cats" % "2.0.0.0-RC1",
       "org.scalatest"  %% "scalatest"        % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"       % "1.14.0" % Test
     ),
@@ -219,21 +219,6 @@ lazy val alpakka = (project in file("alpakka"))
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
   .dependsOn(formats, scanamo, testkit % "test->test")
-
-lazy val javaTime = (project in file("java-time"))
-  .settings(
-    commonSettings,
-    publishingSettings,
-    name := "scanamo-time"
-  )
-  .settings(
-    libraryDependencies ++= List(
-      "org.scalatest"  %% "scalatest"                   % "3.0.8"  % Test,
-      "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
-      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.5"  % Test
-    )
-  )
-  .dependsOn(formats)
 
 lazy val joda = (project in file("joda"))
   .settings(
