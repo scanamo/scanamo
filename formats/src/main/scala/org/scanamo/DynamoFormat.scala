@@ -532,7 +532,7 @@ object DynamoFormat extends EnumDynamoFormat {
     def write(t: Some[T]): DynamoValue = f.write(t.get)
   }
 
-    /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
+  /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
     *  {{{
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import java.time.Instant
@@ -541,7 +541,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
     *  }}}
     */
-    implicit val instantAsLongFormat =
+  implicit val instantAsLongFormat =
     DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x))(
       x => x.toEpochMilli
     )
