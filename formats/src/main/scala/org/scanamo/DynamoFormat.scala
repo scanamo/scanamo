@@ -536,8 +536,8 @@ object DynamoFormat extends EnumDynamoFormat {
     *  {{{
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import java.time.Instant
-    *  prop> import org.scanamo.time.JavaTimeFormats.instantAsLongFormat
-    *  prop> import org.scanamo.time.TimeGenerators.instantAsLongArb
+    *  prop> import org.scanamo.JavaTimeFormats.instantAsLongFormat
+    *  prop> import org.scanamo.TimeGenerators.instantAsLongArb
     *  prop> (x: Instant) =>
     *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
     *  }}}
@@ -551,8 +551,8 @@ object DynamoFormat extends EnumDynamoFormat {
     *  {{{
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import java.time.OffsetDateTime
-    *  prop> import org.scanamo.time.JavaTimeFormats.offsetDateTimeFormat
-    *  prop> import org.scanamo.time.TimeGenerators.offsetDateTimeArb
+    *  prop> import org.scanamo.JavaTimeFormats.offsetDateTimeFormat
+    *  prop> import org.scanamo.TimeGenerators.offsetDateTimeArb
     *  prop> (x: OffsetDateTime) =>
     *      | DynamoFormat[OffsetDateTime].read(DynamoFormat[OffsetDateTime].write(x)) == Right(x)
     *  }}}
