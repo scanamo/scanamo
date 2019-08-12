@@ -536,7 +536,6 @@ object DynamoFormat extends EnumDynamoFormat {
     *  {{{
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import java.time.Instant
-    *  prop> import org.scanamo.JavaTimeFormats.instantAsLongFormat
     *  prop> import org.scanamo.TimeGenerators.instantAsLongArb
     *  prop> (x: Instant) =>
     *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
@@ -551,7 +550,6 @@ object DynamoFormat extends EnumDynamoFormat {
     *  {{{
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import java.time.OffsetDateTime
-    *  prop> import org.scanamo.JavaTimeFormats.offsetDateTimeFormat
     *  prop> import org.scanamo.TimeGenerators.offsetDateTimeArb
     *  prop> (x: OffsetDateTime) =>
     *      | DynamoFormat[OffsetDateTime].read(DynamoFormat[OffsetDateTime].write(x)) == Right(x)
@@ -567,8 +565,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *  {{{
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import java.time.ZonedDateTime
-    *  prop> import org.scanamo.time.JavaTimeFormats.zonedDateTimeFormat
-    *  prop> import org.scanamo.time.TimeGenerators.zonedDateTimeArb
+    *  prop> import org.scanamo.TimeGenerators.zonedDateTimeArb
     *  prop> (x: ZonedDateTime) =>
     *      | DynamoFormat[ZonedDateTime].read(DynamoFormat[ZonedDateTime].write(x)) == Right(x)
     *  }}}
