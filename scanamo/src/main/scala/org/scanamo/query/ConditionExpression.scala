@@ -6,7 +6,6 @@ import org.scanamo.error.{ ConditionNotMet, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
-import simulacrum.typeclass
 import cats.syntax.either._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
@@ -44,7 +43,7 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
       )
 }
 
-@typeclass trait ConditionExpression[T] {
+trait ConditionExpression[T] {
   def apply(t: T): RequestCondition
 }
 

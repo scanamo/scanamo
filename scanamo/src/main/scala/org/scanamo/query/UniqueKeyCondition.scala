@@ -3,9 +3,8 @@ package org.scanamo.query
 import cats.instances.option._
 import cats.syntax.apply._
 import org.scanamo.{ DynamoFormat, DynamoObject }
-import simulacrum.typeclass
 
-@typeclass trait UniqueKeyCondition[T] {
+trait UniqueKeyCondition[T] {
   type K
   def toDynamoObject(t: T): DynamoObject
   def fromDynamoObject(key: K, dvs: DynamoObject): Option[T]
@@ -13,6 +12,8 @@ import simulacrum.typeclass
 }
 
 object UniqueKeyCondition {
+  def apply[T](implicit U: UniqueKeyCondition[T]): UniqueKeyCondition[T] = U
+  
   implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]) = new UniqueKeyCondition[KeyEquals[V]] {
     type K = AttributeName
     final def toDynamoObject(t: KeyEquals[V]) = DynamoObject(t.key.placeholder("") -> t.v)
@@ -42,7 +43,7 @@ case class UniqueKey[T](t: T)(implicit T: UniqueKeyCondition[T]) {
   def toDynamoObject: DynamoObject = T.toDynamoObject(t)
 }
 
-@typeclass trait UniqueKeyConditions[T] {
+trait UniqueKeyConditions[T] {
   def toDynamoObject(t: T): Set[DynamoObject]
 }
 
