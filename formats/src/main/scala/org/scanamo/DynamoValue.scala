@@ -141,6 +141,11 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     */
   final def as[A](implicit A: DynamoFormat[A]): Either[DynamoReadError, A] = A.read(self)
 
+  final def orElse(that: DynamoValue): DynamoValue = self match {
+    case DynNull => that
+    case _       => self
+  }
+
   /**
     * Transforms into a new value if this one is null
     */

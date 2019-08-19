@@ -15,9 +15,6 @@ package object refined {
     validate: Validate[T, P]
   ): DynamoFormat[F[T, P]] = new DynamoFormat[F[T, P]] {
 
-    final override val default: Option[F[T, P]] =
-      baseFormat.default.flatMap(refType.refine[P](_).toOption)
-
     final def read(av: DynamoValue): Either[DynamoReadError, F[T, P]] =
       baseFormat.read(av).flatMap { v =>
         refType.refine[P](v).leftMap(desc => TypeCoercionError(new Exception(desc)))
