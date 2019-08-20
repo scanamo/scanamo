@@ -48,6 +48,8 @@ trait ConditionExpression[T] {
 }
 
 object ConditionExpression {
+  def apply[T](implicit C: ConditionExpression[T]): ConditionExpression[T] = C
+
   implicit def stringValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(String, V)] {
     override def apply(pair: (String, V)): RequestCondition =
       attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))

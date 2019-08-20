@@ -8,6 +8,8 @@ trait QueryableKeyCondition[T] {
 }
 
 object QueryableKeyCondition {
+  def apply[T](implicit Q: QueryableKeyCondition[T]): QueryableKeyCondition[T] = Q
+
   implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[KeyEquals[V]] {
     final def apply(t: KeyEquals[V]) =
       RequestCondition(
