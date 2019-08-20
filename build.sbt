@@ -55,7 +55,7 @@ def extraOptions(scalaVersion: String) =
 val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-  addCompilerPlugin("org.typelevel"   %% "kind-projector" % "0.10.3"),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
@@ -99,10 +99,10 @@ lazy val formats = (project in file("formats"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "com.chuusai"          %% "shapeless"  % "2.3.3",
-      "org.typelevel"        %% "cats-core"  % catsVersion,
-      "org.scalacheck"       %% "scalacheck" % "1.14.0" % Test,
-      "org.scalatest"        %% "scalatest"  % "3.0.8" % Test
+      "com.chuusai"    %% "shapeless"  % "2.3.3",
+      "org.typelevel"  %% "cats-core"  % catsVersion,
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
+      "org.scalatest"  %% "scalatest"  % "3.0.8" % Test
     ),
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,
@@ -133,8 +133,8 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "com.chuusai"          %% "shapeless"  % "2.3.3",
-      "org.typelevel"        %% "cats-free"  % catsVersion,
+      "com.chuusai"   %% "shapeless" % "2.3.3",
+      "org.typelevel" %% "cats-free" % catsVersion,
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"      % "joda-time"    % "2.10.3" % Test,
