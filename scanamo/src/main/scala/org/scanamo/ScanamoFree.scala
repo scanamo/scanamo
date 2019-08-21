@@ -11,35 +11,49 @@ import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
 
 object ScanamoFree {
-
+  
   import cats.instances.list._
+  import cats.syntax.functor._
+  import cats.syntax.applicative._
   import cats.syntax.traverse._
   import collection.JavaConverters._
 
   private val batchSize = 25
   private val batchGetSize = 100
 
-  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Unit] =
     ScanamoOps
-      .put(ScanamoPutRequest(tableName, f.write(item), None))
+      .put(ScanamoPutRequest(tableName, f.write(item), None, Return.Nothing))
+      .void
+
+  def putAndReturn[T](tableName: String)(ret: Return, item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+    ScanamoOps
+      .put(ScanamoPutRequest(tableName, f.write(item), None, ret))
       .map(r => Option(r.getAttributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
 
-  def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[List[BatchWriteItemResult]] =
-    items
-      .grouped(batchSize)
-      .toList
-      .traverse { batch =>
-        val map = buildMap[T, WriteRequest](
-          tableName,
-          batch,
-          item =>
-            new WriteRequest()
-              .withPutRequest(new PutRequest().withItem(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap))
-        )
-        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
-      }
+  def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[Unit] = {
+    def loop(items: List[JMap[String, JList[WriteRequest]]]): ScanamoOps[Unit] = items match {
+      case Nil => ().pure[ScanamoOps]
+      case map :: rest => 
+        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map)).flatMap { resp =>
+          val unprocessed = resp.getUnprocessedItems
+          loop(if (unprocessed.isEmpty) rest else unprocessed :: rest)
+        }
+    }
 
-  def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
+    val batches = items.grouped(batchSize).map { batch =>
+      buildMap[T, WriteRequest](
+        tableName,
+        batch,
+        item => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap))      
+      )
+    }
+    .toList
+    
+    loop(batches)
+  }
+
+  def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[Unit] =
     items.toDynamoObject
       .grouped(batchSize)
       .toList
@@ -51,6 +65,8 @@ object ScanamoFree {
         )
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
+      // can't believe cats doesn't provide a version of traverse that doesn't accumulate the result
+      .void
 
   def get[T: DynamoFormat](
     tableName: String
@@ -89,8 +105,8 @@ object ScanamoFree {
       .map(_.flatMap(_.getResponses.get(tableName).asScala.map(m => read[T](DynamoObject(m)))))
       .map(_.toSet)
 
-  def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] =
-    ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None))
+  def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[Unit] =
+    ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None)).void
 
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)

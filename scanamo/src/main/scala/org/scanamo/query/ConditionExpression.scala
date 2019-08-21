@@ -1,27 +1,59 @@
 package org.scanamo.query
 
-import com.amazonaws.services.dynamodbv2.model._
-import org.scanamo.{ DynamoFormat, DynamoObject }
+import org.scanamo.{ DynamoFormat, DynamoObject, Return }
 import org.scanamo.error.{ ConditionNotMet, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
 import simulacrum.typeclass
+import cats.instances.either._
+import cats.instances.option._
 import cats.syntax.either._
+import cats.syntax.functor._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T],
   format: DynamoFormat[V]
 ) {
-  def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
-    ScanamoOps.conditionalPut(
-      ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)))
-    )
+  def put(item: V): ScanamoOps[Either[ScanamoError, Unit]] =
+    ScanamoOps
+      .conditionalPut(
+        ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), Return.Nothing)
+      )
+      .map(_.leftMap(ConditionNotMet(_)))
+      .map(_.void)
 
-  def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
-    ScanamoOps.conditionalDelete(
-      ScanamoDeleteRequest(tableName = tableName, key = key.toDynamoObject, Some(state.apply(t)))
-    )
+  def putAndReturn(ret: Return)(item: V): ScanamoOps[Option[Either[ScanamoError, V]]] = {
+    import cats.data.EitherT
+
+    ScanamoOps
+      .conditionalPut(
+        ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), ret)
+      )
+      .map(
+        either =>
+          EitherT
+            .fromEither[Option](either)
+            .leftMap(ConditionNotMet(_))
+            .flatMap(
+              putItemResult =>
+                EitherT[Option, ScanamoError, V](
+                  Option(putItemResult.getAttributes)
+                    .filterNot(_.isEmpty)
+                    .map(DynamoObject(_).toDynamoValue)
+                    .map(format.read)
+                )
+            )
+            .value
+      )
+  }
+
+  def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
+    ScanamoOps
+      .conditionalDelete(
+        ScanamoDeleteRequest(tableName = tableName, key = key.toDynamoObject, Some(state.apply(t)))
+      )
+      .map(_.leftMap(ConditionNotMet(_)).void)
 
   def update(key: UniqueKey[_], update: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] =
     ScanamoOps
@@ -37,10 +69,8 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
         )
       )
       .map(
-        either =>
-          either
-            .leftMap[ScanamoError](ConditionNotMet(_))
-            .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
+        _.leftMap(ConditionNotMet(_))
+          .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
       )
 }
 

@@ -93,7 +93,7 @@ package object ops {
       val request = new PutItemRequest()
         .withTableName(req.tableName)
         .withItem(req.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
-        .withReturnValues(ReturnValue.ALL_OLD)
+        .withReturnValues(req.ret.asDynamoValue)
 
       req.condition.fold(request) { condition =>
         val requestWithCondition = request

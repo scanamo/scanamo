@@ -564,12 +564,11 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
   it("should return old item after put asynchronously") {
     case class Farm(animals: List[String])
     case class Farmer(name: String, age: Long, farm: Farm)
-
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
+        result <- farmersTable.putAndReturn(Return.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
       scanamo.exec[Option[Either[DynamoReadError, Farmer]]](farmerOps).unsafeRunSync should equal(
@@ -585,7 +584,7 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.putAndReturn(Return.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
       scanamo.exec[Option[Either[DynamoReadError, Farmer]]](farmerOps).unsafeRunSync should equal(
