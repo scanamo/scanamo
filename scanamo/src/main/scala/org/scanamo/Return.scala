@@ -6,7 +6,7 @@ sealed abstract class Return extends Product with Serializable { self =>
   import Return._
 
   final def asDynamoValue: ReturnValue = self match {
-    case Nothing => ReturnValue.NONE
+    case Nothing  => ReturnValue.NONE
     case OldValue => ReturnValue.ALL_OLD
     case NewValue => ReturnValue.ALL_NEW
   }

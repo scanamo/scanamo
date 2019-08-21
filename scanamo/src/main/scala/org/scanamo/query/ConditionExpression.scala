@@ -1,5 +1,6 @@
 package org.scanamo.query
 
+import com.amazonaws.services.dynamodbv2.model.{ ConditionalCheckFailedException, PutItemResult }
 import org.scanamo.{ DynamoFormat, DynamoObject, Return }
 import org.scanamo.error.{ ConditionNotMet, ScanamoError }
 import org.scanamo.ops.ScanamoOps
@@ -16,20 +17,12 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
   format: DynamoFormat[V]
 ) {
   def put(item: V): ScanamoOps[Either[ScanamoError, Unit]] =
-    ScanamoOps
-      .conditionalPut(
-        ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), Return.Nothing)
-      )
-      .map(_.leftMap(ConditionNotMet(_)))
-      .map(_.void)
+    nativePut(Return.Nothing, item).map(_.leftMap(ConditionNotMet(_)).void)
 
   def putAndReturn(ret: Return)(item: V): ScanamoOps[Option[Either[ScanamoError, V]]] = {
     import cats.data.EitherT
 
-    ScanamoOps
-      .conditionalPut(
-        ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), ret)
-      )
+    nativePut(ret, item)
       .map(
         either =>
           EitherT
@@ -47,6 +40,9 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
             .value
       )
   }
+
+  private def nativePut(ret: Return, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
+    ScanamoOps.conditionalPut(ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), ret))
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
     ScanamoOps

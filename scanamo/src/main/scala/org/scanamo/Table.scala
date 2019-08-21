@@ -39,7 +39,8 @@ case class Table[V: DynamoFormat](name: String) {
 
   def put(v: V): ScanamoOps[Unit] = ScanamoFree.put(name)(v)
 
-  def putAndReturn(ret: Return)(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.putAndReturn(name)(ret, v)
+  def putAndReturn(ret: Return)(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] =
+    ScanamoFree.putAndReturn(name)(ret, v)
 
   def putAll(vs: Set[V]): ScanamoOps[Unit] = ScanamoFree.putAll(name)(vs)
 
@@ -47,7 +48,7 @@ case class Table[V: DynamoFormat](name: String) {
 
   def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
     ScanamoFree.getAll[V](name)(keys, false)
-    
+
   def delete(key: UniqueKey[_]): ScanamoOps[Unit] = ScanamoFree.delete(name)(key)
 
   /**

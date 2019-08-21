@@ -1,7 +1,7 @@
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
-import com.amazonaws.services.dynamodbv2.model.{ PutRequest, WriteRequest, _ }
+import com.amazonaws.services.dynamodbv2.model._
 import java.util.{ List => JList, Map => JMap }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.error.DynamoReadError
@@ -11,7 +11,7 @@ import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
 
 object ScanamoFree {
-  
+
   import cats.instances.list._
   import cats.syntax.functor._
   import cats.syntax.applicative._
@@ -21,35 +21,42 @@ object ScanamoFree {
   private val batchSize = 25
   private val batchGetSize = 100
 
-  def put[T](tableName: String)(item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Unit] =
-    ScanamoOps
-      .put(ScanamoPutRequest(tableName, f.write(item), None, Return.Nothing))
-      .void
+  def put[T: DynamoFormat](tableName: String)(item: T): ScanamoOps[Unit] =
+    nativePut(tableName, Return.Nothing, item).void
 
-  def putAndReturn[T](tableName: String)(ret: Return, item: T)(implicit f: DynamoFormat[T]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
-    ScanamoOps
-      .put(ScanamoPutRequest(tableName, f.write(item), None, ret))
+  def putAndReturn[T: DynamoFormat](tableName: String)(ret: Return,
+                                                       item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+    nativePut(tableName, ret, item)
       .map(r => Option(r.getAttributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
+
+  private def nativePut[T](tableName: String, ret: Return, item: T)(
+    implicit f: DynamoFormat[T]
+  ): ScanamoOps[PutItemResult] =
+    ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None, ret))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[Unit] = {
     def loop(items: List[JMap[String, JList[WriteRequest]]]): ScanamoOps[Unit] = items match {
       case Nil => ().pure[ScanamoOps]
-      case map :: rest => 
+      case map :: rest =>
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map)).flatMap { resp =>
           val unprocessed = resp.getUnprocessedItems
           loop(if (unprocessed.isEmpty) rest else unprocessed :: rest)
         }
     }
 
-    val batches = items.grouped(batchSize).map { batch =>
-      buildMap[T, WriteRequest](
-        tableName,
-        batch,
-        item => new WriteRequest().withPutRequest(new PutRequest().withItem(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap))      
-      )
-    }
-    .toList
-    
+    val batches = items
+      .grouped(batchSize)
+      .map { batch =>
+        buildMap[T, WriteRequest](
+          tableName,
+          batch,
+          item =>
+            new WriteRequest()
+              .withPutRequest(new PutRequest().withItem(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap))
+        )
+      }
+      .toList
+
     loop(batches)
   }
 
