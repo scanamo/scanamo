@@ -232,7 +232,7 @@ lazy val joda = (project in file("joda"))
       "joda-time"      % "joda-time"                    % "2.10.3",
       "org.scalatest"  %% "scalatest"                   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
-      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
+      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.6" % Test
     )
   )
   .dependsOn(formats)
