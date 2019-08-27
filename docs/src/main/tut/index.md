@@ -22,7 +22,7 @@ Note: the `LocalDynamoDB` object is provided by the `scanamo-testkit` package.
 Scanamo is published for Scala 2.11 and 2.12 to Maven Central, so just add the following to your `build.sbt`:
 
 ```scala
-libraryDependencies += "com.gu" %% "scanamo" % "1.0.0-M8"
+libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M10"
 ```
 
 then, given a table and some case classes
