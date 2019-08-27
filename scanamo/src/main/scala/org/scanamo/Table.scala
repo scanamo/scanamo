@@ -638,7 +638,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...       Transport("Underground", "Central")
     * ...     ))
     * ...     res <- table.limit(1).scan0
-    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]]]
+    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
     * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.getLastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
@@ -734,7 +734,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...       Transport("Bus", "234")
     * ...     ))
     * ...     res <- table.limit(1).query0("mode" -> "Bus" and "line" -> "234")
-    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]]]
+    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
     * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.getLastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
