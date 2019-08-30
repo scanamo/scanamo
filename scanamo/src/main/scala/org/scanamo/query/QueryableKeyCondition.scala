@@ -2,13 +2,14 @@ package org.scanamo.query
 
 import org.scanamo.{ DynamoFormat, DynamoObject }
 import org.scanamo.request.RequestCondition
-import simulacrum.typeclass
 
-@typeclass trait QueryableKeyCondition[T] {
+trait QueryableKeyCondition[T] {
   def apply(t: T): RequestCondition
 }
 
 object QueryableKeyCondition {
+  def apply[T](implicit Q: QueryableKeyCondition[T]): QueryableKeyCondition[T] = Q
+
   implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[KeyEquals[V]] {
     final def apply(t: KeyEquals[V]) =
       RequestCondition(

@@ -12,7 +12,6 @@ import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import org.scanamo.error._
-import simulacrum.typeclass
 
 import scala.reflect.ClassTag
 
@@ -76,7 +75,7 @@ import scala.reflect.ClassTag
   *
   * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.iso]]
   */
-@typeclass trait DynamoFormat[T] {
+trait DynamoFormat[T] {
   def read(av: DynamoValue): Either[DynamoReadError, T]
   def read(av: AttributeValue): Either[DynamoReadError, T] = read(DynamoValue.fromAttributeValue(av))
   def write(t: T): DynamoValue
@@ -84,6 +83,8 @@ import scala.reflect.ClassTag
 }
 
 object DynamoFormat extends EnumDynamoFormat {
+  def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
+
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
 

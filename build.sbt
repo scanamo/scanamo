@@ -1,7 +1,7 @@
 scalaVersion in ThisBuild := "2.12.8"
 crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
 
-val catsVersion = "2.0.0-RC1"
+val catsVersion = "2.0.0-RC2"
 val catsEffectVersion = "1.4.0"
 val zioVersion = "1.0.0-RC11-1"
 
@@ -55,9 +55,7 @@ def extraOptions(scalaVersion: String) =
 val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-  // for simulacrum
-  addCompilerPlugin("org.scalamacros" % "paradise"        % "2.1.1" cross CrossVersion.full),
-  addCompilerPlugin("org.typelevel"   %% "kind-projector" % "0.10.3"),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
@@ -101,11 +99,10 @@ lazy val formats = (project in file("formats"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "com.chuusai"          %% "shapeless"  % "2.3.3",
-      "com.github.mpilquist" %% "simulacrum" % "0.19.0",
-      "org.typelevel"        %% "cats-core"  % catsVersion,
-      "org.scalacheck"       %% "scalacheck" % "1.14.0" % Test,
-      "org.scalatest"        %% "scalatest"  % "3.0.8" % Test
+      "com.chuusai"    %% "shapeless"  % "2.3.3",
+      "org.typelevel"  %% "cats-core"  % catsVersion,
+      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
+      "org.scalatest"  %% "scalatest"  % "3.0.8" % Test
     ),
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,
@@ -136,9 +133,8 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "com.chuusai"          %% "shapeless"  % "2.3.3",
-      "org.typelevel"        %% "cats-free"  % catsVersion,
-      "com.github.mpilquist" %% "simulacrum" % "0.19.0",
+      "com.chuusai"   %% "shapeless" % "2.3.3",
+      "org.typelevel" %% "cats-free" % catsVersion,
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"      % "joda-time"    % "2.10.3" % Test,
@@ -232,7 +228,7 @@ lazy val joda = (project in file("joda"))
       "joda-time"      % "joda-time"                    % "2.10.3",
       "org.scalatest"  %% "scalatest"                   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
-      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
+      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.6" % Test
     )
   )
   .dependsOn(formats)
