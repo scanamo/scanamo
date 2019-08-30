@@ -28,12 +28,13 @@ trait DerivedDynamoFormat {
 
   implicit def hcons[K <: Symbol, V, T <: HList](
     implicit
-    headFormat: DynamoFormat[V],
-    tailFormat: Lazy[ConstructedDynamoFormat[T]],
+    headFormat0: Lazy[DynamoFormat[V]],
+    tailFormat: ConstructedDynamoFormat[T],
     fieldWitness: Witness.Aux[K]
   ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
     new ValidConstructedDynamoFormat[FieldType[K, V] :: T] {
       private[this] val fieldName = fieldWitness.value.name
+      private[this] val headFormat = headFormat0.value
 
       final def read(av: DynamoObject): ValidatedPropertiesError[FieldType[K, V] :: T] = {
         val head = av(fieldName)
@@ -65,12 +66,13 @@ trait DerivedDynamoFormat {
 
   implicit def coproduct[K <: Symbol, V, T <: Coproduct](
     implicit
-    headFormat: DynamoFormat[V],
+    headFormat0: Lazy[DynamoFormat[V]],
     tailFormat: CoProductDynamoFormat[T],
     fieldWitness: Witness.Aux[K]
   ): CoProductDynamoFormat[FieldType[K, V] :+: T] =
     new CoProductDynamoFormat[FieldType[K, V] :+: T] {
       private[this] val fieldName = fieldWitness.value.name
+      private[this] val headFormat = headFormat0.value
 
       final def read(av: DynamoObject) =
         av(fieldName).fold[ValidatedPropertiesError[FieldType[K, V] :+: T]](tailFormat.read(av).map(Inr(_))) { value =>
