@@ -42,13 +42,13 @@ trait DerivedDynamoFormat {
           .leftMap(fieldName -> _)
           .toValidatedNel
           .map(field[K](_))
-        val tail = tailFormat.value.read(av)
+        val tail = tailFormat.read(av)
 
         cats.Apply[ValidatedPropertiesError].map2(head, tail)(_ :: _)
       }
 
       final def write(t: FieldType[K, V] :: T) = {
-        val tailValue = tailFormat.value.write(t.tail)
+        val tailValue = tailFormat.write(t.tail)
         val av = headFormat.write(t.head)
         if (av.isNull)
           tailValue
