@@ -28,30 +28,28 @@ trait DerivedDynamoFormat {
 
   implicit def hcons[K <: Symbol, V, T <: HList](
     implicit
-    headFormat: Lazy[DynamoFormat[V]],
-    tailFormat: Lazy[ConstructedDynamoFormat[T]],
+    headFormat0: Lazy[DynamoFormat[V]],
+    tailFormat: ConstructedDynamoFormat[T],
     fieldWitness: Witness.Aux[K]
   ): ValidConstructedDynamoFormat[FieldType[K, V] :: T] =
     new ValidConstructedDynamoFormat[FieldType[K, V] :: T] {
-      final private val fieldName = fieldWitness.value.name
+      private[this] val fieldName = fieldWitness.value.name
+      private[this] val headFormat = headFormat0.value
 
-      final def read(av: DynamoObject) = {
-        val valueOrError: Either[(FieldName, DynamoReadError), V] =
-          av(fieldName)
-            .map(headFormat.value.read)
-            .orElse(headFormat.value.default.map(Either.right))
-            .getOrElse(Either.left(MissingProperty))
-            .leftMap(((fieldName, _)))
-
-        val head = valueOrError.toValidatedNel.map(field[K](_))
-        val tail = tailFormat.value.read(av)
+      final def read(av: DynamoObject): ValidatedPropertiesError[FieldType[K, V] :: T] = {
+        val head = av(fieldName)
+          .fold(headFormat.read(DynamoValue.nil).leftMap[DynamoReadError](_ => MissingProperty))(headFormat.read(_))
+          .leftMap(fieldName -> _)
+          .toValidatedNel
+          .map(field[K](_))
+        val tail = tailFormat.read(av)
 
         cats.Apply[ValidatedPropertiesError].map2(head, tail)(_ :: _)
       }
 
       final def write(t: FieldType[K, V] :: T) = {
-        val tailValue = tailFormat.value.write(t.tail)
-        val av = headFormat.value.write(t.head)
+        val tailValue = tailFormat.write(t.tail)
+        val av = headFormat.write(t.head)
         if (av.isNull)
           tailValue
         else
@@ -68,23 +66,26 @@ trait DerivedDynamoFormat {
 
   implicit def coproduct[K <: Symbol, V, T <: Coproduct](
     implicit
-    headFormat: Lazy[DynamoFormat[V]],
+    headFormat0: Lazy[DynamoFormat[V]],
     tailFormat: CoProductDynamoFormat[T],
     fieldWitness: Witness.Aux[K]
   ): CoProductDynamoFormat[FieldType[K, V] :+: T] =
     new CoProductDynamoFormat[FieldType[K, V] :+: T] {
-      final private val fieldName = fieldWitness.value.name
+      private[this] val fieldName = fieldWitness.value.name
+      private[this] val headFormat = headFormat0.value
 
       final def read(av: DynamoObject) =
-        av(fieldName).fold[ValidatedPropertiesError[FieldType[K, V] :+: T]](tailFormat.read(av).map(Inr(_))) {
-          nestedAv =>
-            val value = headFormat.value.read(nestedAv).toValidatedNel
-            value.map(v => Inl(field[K](v))).leftMap(_.map((fieldName, _)))
+        av(fieldName).fold[ValidatedPropertiesError[FieldType[K, V] :+: T]](tailFormat.read(av).map(Inr(_))) { value =>
+          headFormat
+            .read(value)
+            .leftMap(fieldName -> _)
+            .toValidatedNel
+            .map(v => Inl(field[K](v)))
         }
 
       final def write(field: FieldType[K, V] :+: T) = field match {
         case Inl(h) =>
-          DynamoObject.singleton(fieldName, headFormat.value.write(h))
+          DynamoObject.singleton(fieldName, headFormat.write(h))
         case Inr(t) =>
           tailFormat.write(t)
       }
@@ -97,7 +98,7 @@ trait DerivedDynamoFormat {
     Exported(
       new DynamoFormat[T] {
         final def read(av: DynamoValue) =
-          av.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", av)))(
+          av.asObject.fold(Either.left[DynamoReadError, T](NoPropertyOfType("M", av)))(
             formatR.value.read(_).map(gen.from).toEither.leftMap(InvalidPropertiesError(_))
           )
         final def write(t: T): DynamoValue =
@@ -112,7 +113,7 @@ trait DerivedDynamoFormat {
     Exported(
       new DynamoFormat[T] {
         final def read(av: DynamoValue) =
-          av.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", av)))(
+          av.asObject.fold(Either.left[DynamoReadError, T](NoPropertyOfType("M", av)))(
             formatR.value.read(_).map(gen.from).toEither.leftMap(InvalidPropertiesError(_))
           )
         final def write(t: T): DynamoValue =

@@ -66,20 +66,12 @@ import scala.reflect.ClassTag
   * Left('age': not of type: 'N' was 'DynString(none of your business)', 'farm': missing)
   * }}}
   *
-  * Optional properties are defaulted to None
-  * {{{
-  * >>> case class LargelyOptional(a: Option[String], b: Option[String])
-  * >>> DynamoFormat[LargelyOptional].read(DynamoFormat[Map[String, String]].write(Map("b" -> "X")))
-  * Right(LargelyOptional(None,Some(X)))
-  * }}}
-  *
   * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.iso]]
   */
 trait DynamoFormat[T] {
   def read(av: DynamoValue): Either[DynamoReadError, T]
   def read(av: AttributeValue): Either[DynamoReadError, T] = read(DynamoValue.fromAttributeValue(av))
   def write(t: T): DynamoValue
-  def default: Option[T] = None
 }
 
 object DynamoFormat extends EnumDynamoFormat {
@@ -121,11 +113,10 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(UserId(Eric))
     * }}}
     */
-  def iso[A, B](r: B => A, xdefault: DynamoDefault[A] = DynamoDefault.NoDef)(w: A => B)(implicit f: DynamoFormat[B]) =
+  def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) =
     new DynamoFormat[A] {
       final def read(item: DynamoValue) = f.read(item).map(r)
       final def write(t: A) = f.write(w(t))
-      final override val default = xdefault orElse f.default.map(r)
     }
 
   /**
@@ -141,12 +132,9 @@ object DynamoFormat extends EnumDynamoFormat {
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A], xdefault: DynamoDefault[A] = DynamoDefault.NoDef)(
-    w: A => B
-  )(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
+  def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]) = new DynamoFormat[A] {
     final def read(item: DynamoValue) = f.read(item).flatMap(r)
     final def write(t: A) = f.write(w(t))
-    final override val default = xdefault orElse f.default.flatMap(r(_).toOption)
   }
 
   /**
@@ -168,11 +156,8 @@ object DynamoFormat extends EnumDynamoFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](
-    read: B => A,
-    xdefault: DynamoDefault[A] = DynamoDefault.NoDef
-  )(write: A => B) =
-    xmap(coerce[B, A, T](read), xdefault)(write)
+  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A)(write: A => B) =
+    xmap(coerce[B, A, T](read))(write)
 
   /**
     * {{{
@@ -181,8 +166,6 @@ object DynamoFormat extends EnumDynamoFormat {
     * }}}
     */
   implicit val stringFormat: DynamoFormat[String] = new DynamoFormat[String] {
-    final override val default = Some("")
-
     final def read(av: DynamoValue) =
       if (av.isNull)
         Right("")
@@ -358,8 +341,6 @@ object DynamoFormat extends EnumDynamoFormat {
           DynamoValue.nil
         else
           DynamoValue.fromNumbers(t)
-
-      final override val default = Some(Set.empty[T])
     }
 
   /**
@@ -470,8 +451,6 @@ object DynamoFormat extends EnumDynamoFormat {
           DynamoValue.nil
         else
           DynamoValue.fromStrings(t)
-
-      final override val default = Some(Set.empty[String])
     }
 
   /**
@@ -481,8 +460,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   Right(s)
     * }}}
     */
-  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] =
-    iso[Set[T], List[T]](_.toSet, DynamoDefault.SomeDef(Set.empty))(_.toList)
+  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = iso[Set[T], List[T]](_.toSet)(_.toList)
 
   private val javaMapFormat: DynamoFormat[DynamoObject] =
     attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
@@ -518,8 +496,6 @@ object DynamoFormat extends EnumDynamoFormat {
         f.read(av).map(Some(_))
 
     final def write(t: Option[T]): DynamoValue = t.fold(DynamoValue.nil)(f.write)
-
-    final override val default = Some(None)
   }
 
   /**
