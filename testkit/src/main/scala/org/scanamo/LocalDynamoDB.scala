@@ -9,11 +9,11 @@ import com.amazonaws.services.dynamodbv2.model._
 import scala.collection.JavaConverters._
 
 object LocalDynamoDB {
-  def client(): AmazonDynamoDBAsync =
+  def client(port: Int = 8042): AmazonDynamoDBAsync =
     AmazonDynamoDBAsyncClient
       .asyncBuilder()
       .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials")))
-      .withEndpointConfiguration(new EndpointConfiguration("http://localhost:8042", ""))
+      .withEndpointConfiguration(new EndpointConfiguration(s"http://localhost:$port", ""))
       .withClientConfiguration(new ClientConfiguration().withClientExecutionTimeout(50000).withRequestTimeout(5000))
       .build()
 
