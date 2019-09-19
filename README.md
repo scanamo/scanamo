@@ -1,6 +1,6 @@
-| CI | Coverage | Release | Issues | Users | Chat |
-| --- | --- | --- | --- | --- | --- |
-| [![Build Status][Badge-Travis]][Link-Travis] | [![Coverage Status][Badge-Codecov]][Link-Codecov] | [![Release Artifacts][Badge-MavenReleases]][Link-MavenReleases] | [![Average time to resolve an issue][Badge-IsItMaintained]][Link-IsItMaintained] | [![Scaladex dependencies badge][Badge-Scaladex]][Link-Scaladex] | [![Gitter][Badge-Gitter]][Link-Gitter] |
+| CI | Release | Issues | Users | Chat |
+| --- | --- | --- | --- | --- |
+| [![Build Status][Badge-Travis]][Link-Travis] | [![Release Artifacts][Badge-MavenReleases]][Link-MavenReleases] | [![Average time to resolve an issue][Badge-IsItMaintained]][Link-IsItMaintained] | [![Scaladex dependencies badge][Badge-Scaladex]][Link-Scaladex] | [![Gitter][Badge-Gitter]][Link-Gitter] |
 
 Scanamo is a library to make using [DynamoDB](https://aws.amazon.com/documentation/dynamodb/) with Scala 
 simpler and less error-prone.
@@ -59,14 +59,12 @@ Unless required by applicable law or agreed to in writing, software distributed 
 language governing permissions and limitations under the License.
 
 
-[Link-Codecov]: https://coveralls.io/github/scanamo/scanamo?branch=master "Codecov"
 [Link-IsItMaintained]: https://isitmaintained.com/project/scanamo/scanamo "Average time to resolve an issue"
 [Link-Scaladex]: https://index.scala-lang.org/search?q=dependencies:scanamo/scanamo "Scaladex"
 [Link-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/org.scanamo/scanamo_2.12 "Maven Releases"
 [Link-Travis]: https://travis-ci.org/scanamo/scanamo "Travis CI"
 [Link-Gitter]: https://gitter.im/scanamo/scanamo "Gitter chat"
 
-[Badge-Codecov]: https://coveralls.io/repos/github/scanamo/scanamo/badge.svg?branch=master "Codecov"
 [Badge-IsItMaintained]: http://isitmaintained.com/badge/resolution/scanamo/scanamo.svg "Average time to resolve an issue"
 [Badge-Scaladex]: https://index.scala-lang.org/count.svg?q=dependencies:scanamo/scanamo&subject=scaladex "Scaladex"
 [Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/org.scanamo/scanamo_2.11/badge.svg "Maven Releases"
