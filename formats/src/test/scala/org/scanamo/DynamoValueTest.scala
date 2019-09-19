@@ -76,7 +76,7 @@ private[scanamo] trait DynamoObjectInstances {
       m <- Gen.choose(0, size / 2)
       xs <- Gen
         .containerOfN[List, (String, Int)](m, arbitrary[(String, Int)])
-        .map(xs => DynamoObject(xs.toMap.mapValues(DynamoValue.fromNumber[Int])))
+        .map(xs => DynamoObject(xs.toMap.mapValues(DynamoValue.fromNumber[Int]).toMap))
     } yield xs
 
   private def genObject(size: Int) = size match {

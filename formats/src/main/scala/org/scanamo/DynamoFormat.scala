@@ -315,8 +315,8 @@ object DynamoFormat extends EnumDynamoFormat {
   /**
     * {{{
     * prop> (a: Array[String]) =>
-    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).deep ==
-    *     |   a.deep
+    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).toList ==
+    *     |   a.toList
     * }}}
     */
   implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =

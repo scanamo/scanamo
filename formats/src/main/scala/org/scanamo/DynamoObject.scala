@@ -108,7 +108,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   final def toJavaMap: JMap[String, AttributeValue] = self match {
     case Empty          => unsafeToJavaMap(Map.empty)
     case Strict(xs)     => xs
-    case Pure(xs)       => unsafeToJavaMap(xs.mapValues(_.toAttributeValue))
+    case Pure(xs)       => unsafeToJavaMap(xs.mapValues(_.toAttributeValue).toMap)
     case Concat(xs, ys) => unsafeMerge(xs.toJavaMap, ys.toJavaMap)
   }
 
@@ -177,7 +177,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     */
   final def remove(key: String): DynamoObject = self match {
     case Empty                              => Empty
-    case Strict(xs)                         => Pure((unsafeToScalaMap(xs) - key).mapValues(DynamoValue.fromAttributeValue))
+    case Strict(xs)                         => Pure((unsafeToScalaMap(xs) - key).mapValues(DynamoValue.fromAttributeValue).toMap)
     case Pure(xs)                           => Pure(xs - key)
     case Concat(xs, ys) if xs.contains(key) => Concat(xs.remove(key), ys)
     case Concat(xs, ys)                     => Concat(xs, ys.remove(key))
@@ -217,7 +217,7 @@ object DynamoObject {
     final def internalToMap = Map.empty
   }
   final private[DynamoObject] case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
-    final def internalToMap = unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue)
+    final def internalToMap = unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue).toMap
   }
   final private[DynamoObject] case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject {
     final def internalToMap = xs

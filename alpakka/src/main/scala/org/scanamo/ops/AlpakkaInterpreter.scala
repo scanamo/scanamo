@@ -2,7 +2,7 @@ package org.scanamo.ops
 
 import cats.~>
 import cats.syntax.either._
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
 import org.scanamo.ops.retrypolicy._
 
 import akka.stream.alpakka.dynamodb.{ AwsOp, AwsPagedOp, DynamoAttributes, DynamoClient }

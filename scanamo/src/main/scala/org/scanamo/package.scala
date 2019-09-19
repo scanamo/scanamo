@@ -2,6 +2,7 @@ package org
 
 import org.scanamo.query._
 import org.scanamo.update._
+import scala.language.implicitConversions
 
 package object scanamo {
 
