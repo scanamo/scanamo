@@ -16,7 +16,7 @@ object JodaFormats {
     *  }}}
     */
   implicit val jodaInstantAsLongFormat =
-    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x))(
+    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_))(
       x => x.getMillis
     )
 
