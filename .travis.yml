@@ -1,6 +1,6 @@
 language: scala
 scala:
-- 2.12.8
+- 2.13.1
 jdk:
 - openjdk8
 sudo: false
@@ -33,7 +33,7 @@ jobs:
       script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck
     - &test
       stage: test
-      name: "Test for 2.12"
+      name: "Test for $TRAVIS_SCALA_VERSION"
       script: sbt ++$TRAVIS_SCALA_VERSION coverage startDynamodbLocal test dynamodbLocalTestCleanup stopDynamodbLocal
       after_success: bash <(curl -s https://codecov.io/bash)
     - &microsite
@@ -47,5 +47,7 @@ jobs:
 
     # Cross-build
     - <<: *test
-      scala: 2.11.12
-      name: "Test for 2.11"
+      scala: 
+        - 2.11.12
+        - 2.12.10
+      name: "Tests for 2.12 and 2.11"

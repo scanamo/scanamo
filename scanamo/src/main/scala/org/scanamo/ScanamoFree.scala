@@ -134,7 +134,7 @@ object ScanamoFree {
     * {{{
     * prop> (m: Map[String, Int]) =>
     *     |   ScanamoFree.read[Map[String, Int]](
-    *     |     DynamoObject(m.mapValues(DynamoValue.fromNumber(_)))
+    *     |     DynamoObject(m.mapValues(DynamoValue.fromNumber(_)).toMap)
     *     |   ) == Right(m)
     * }}}
     */

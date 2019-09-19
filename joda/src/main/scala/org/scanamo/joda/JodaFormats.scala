@@ -13,7 +13,7 @@ object JodaFormats {
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import org.joda.time.DateTime
     *  prop> import org.joda.time.chrono.ISOChronology
-    *  prop> import com.fortysevendeg.scalacheck.datetime.joda.ArbitraryJoda._
+    *  prop> import org.scanamo.joda.TimeGenerators._
     *  prop> import org.scanamo.joda.JodaFormats.jodaStringFormat
     *  prop> (dt: DateTime) =>
     *      | val dtBasic = dt.withChronology(ISOChronology.getInstanceUTC())
@@ -30,7 +30,7 @@ object JodaFormats {
     *  {{{
     *  prop> import org.scanamo.DynamoFormat
     *  prop> import org.joda.time.DateTime
-    *  prop> import com.fortysevendeg.scalacheck.datetime.joda.ArbitraryJoda._
+    *  prop> import org.scanamo.joda.TimeGenerators._
     *  prop> import org.scanamo.joda.JodaFormats.jodaEpochSecondsFormat
     *  prop> (dt: DateTime) =>
     *      | DynamoFormat[DateTime].read(DynamoFormat[DateTime].write(dt)) == Right(dt)

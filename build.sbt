@@ -1,5 +1,5 @@
-scalaVersion in ThisBuild := "2.12.8"
-crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
+scalaVersion in ThisBuild := "2.13.1"
+crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.10", scalaVersion.value)
 
 val catsVersion = "2.0.0"
 val catsEffectVersion = "2.0.0"
@@ -101,7 +101,7 @@ lazy val formats = (project in file("formats"))
       awsDynamoDB,
       "com.chuusai"    %% "shapeless"  % "2.3.3",
       "org.typelevel"  %% "cats-core"  % catsVersion,
-      "org.scalacheck" %% "scalacheck" % "1.14.0" % Test,
+      "org.scalacheck" %% "scalacheck" % "1.14.1" % Test,
       "org.scalatest"  %% "scalatest"  % "3.0.8" % Test
     ),
     doctestMarkdownEnabled := true,
@@ -139,7 +139,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"      % "joda-time"    % "2.10.3" % Test,
       "org.scalatest"  %% "scalatest"   % "3.0.8"  % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
+      "org.scalacheck" %% "scalacheck"  % "1.14.1" % Test
     )
   )
   .dependsOn(formats, testkit % "test->test")
@@ -169,7 +169,7 @@ lazy val catsEffect = (project in file("cats"))
       "io.monix"       %% "monix"       % "3.0.0" % Test,
       "co.fs2"         %% "fs2-core"    % "2.0.0" % Test,
       "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
+      "org.scalacheck" %% "scalacheck"  % "1.14.1" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -189,7 +189,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "2.0.0.0-RC3",
       "org.scalatest"  %% "scalatest"        % "3.0.8" % Test,
-      "org.scalacheck" %% "scalacheck"       % "1.14.0" % Test
+      "org.scalacheck" %% "scalacheck"       % "1.14.1" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -208,7 +208,7 @@ lazy val alpakka = (project in file("alpakka"))
       "org.typelevel"      %% "cats-free"                    % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.1.1",
       "org.scalatest"      %% "scalatest"                    % "3.0.8" % Test,
-      "org.scalacheck"     %% "scalacheck"                   % "1.13.5" % Test
+      "org.scalacheck"     %% "scalacheck"                   % "1.14.1" % Test
     ),
     fork in Test := true,
     // unidoc can work out links to other project, but scalac can't
@@ -227,8 +227,7 @@ lazy val joda = (project in file("joda"))
       "org.joda"       % "joda-convert"                 % "2.2.1" % Provided,
       "joda-time"      % "joda-time"                    % "2.10.3",
       "org.scalatest"  %% "scalatest"                   % "3.0.8" % Test,
-      "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
-      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.6" % Test
+      "org.scalacheck" %% "scalacheck"                  % "1.14.1" % Test
     )
   )
   .dependsOn(formats)

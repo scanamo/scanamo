@@ -6,7 +6,7 @@ import cats.~>
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 
 class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
 
