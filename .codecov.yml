@@ -1,0 +1,116 @@
+comment: off		
+ coverage:		
+   status:		
+     project:		
+       default: off		
+     scanamo:		
+         flags: scanamo		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     formats:		
+         flags: formats		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     joda:		
+         flags: joda		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     java-time:		
+         flags: java-time		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     alpakka:		
+         flags: alpakka		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     cats:		
+         flags: cats		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     scalaz:		
+         flags: scalaz		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     scalaz-zio:		
+         flags: scalaz-zio		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     refined:		
+         flags: refined		
+         target: auto		
+         threshold: 100		
+         base: auto		
+     patch:		
+       default: off		
+       scanamo:		
+         flags: scanamo		
+         threshold: 100		
+         base: auto		
+       formats:		
+         flags: formats		
+         threshold: 100		
+         base: auto		
+       joda:		
+         flags: joda		
+         threshold: 100		
+         base: auto		
+       java-time:		
+         flags: java-time		
+         threshold: 100		
+         base: auto		
+       alpakka:		
+         flags: alpakka		
+         threshold: 100		
+         base: auto		
+       cats:		
+         flags: cats		
+         threshold: 100		
+         base: auto		
+       scalaz:		
+         flags: scalaz		
+         threshold: 100		
+         base: auto		
+       scalaz-zio:		
+         flags: scalaz-zio		
+         threshold: 100		
+         base: auto		
+       refined:		
+         flags: refined		
+         threshold: 100		
+         base: auto		
+ flags:		
+   alpakka:		
+     paths:		
+       - alpakka/		
+   cats:		
+     paths:		
+       - cats/		
+   formats:		
+     paths:		
+       - formats/		
+   java-time:		
+     paths:		
+       - java-time/		
+   joda:		
+     paths:		
+       - joda/		
+   refined:		
+     paths:		
+       - refined/		
+   scalaz:		
+     paths:		
+       - scalaz/		
+   scalaz-zio:		
+     paths:		
+       - scalaz-zio/		
+   scanamo:		
+     paths:		
+       - scanamo/
