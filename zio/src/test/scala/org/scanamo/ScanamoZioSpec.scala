@@ -501,7 +501,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        result <- farmersTable.putAndReturn(Return.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
       unsafeRun(zio.exec(farmerOps)) should equal(
@@ -517,7 +517,7 @@ class ScanamoZioSpec extends FunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        result <- farmersTable.putAndReturn(Return.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
       unsafeRun(zio.exec(farmerOps)) should equal(

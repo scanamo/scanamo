@@ -1,19 +1,20 @@
 package org.scanamo.request
 
-import org.scanamo.{ DynamoObject, DynamoValue, Return }
+import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
 import org.scanamo.query.{ Condition, Query }
 
 case class ScanamoPutRequest(
   tableName: String,
   item: DynamoValue,
   condition: Option[RequestCondition],
-  ret: Return
+  ret: PutReturn
 )
 
 case class ScanamoDeleteRequest(
   tableName: String,
   key: DynamoObject,
-  condition: Option[RequestCondition]
+  condition: Option[RequestCondition],
+  ret: DeleteReturn
 )
 
 case class ScanamoUpdateRequest(

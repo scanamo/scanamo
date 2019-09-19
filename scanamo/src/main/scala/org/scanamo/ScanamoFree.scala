@@ -22,14 +22,14 @@ object ScanamoFree {
   private val batchGetSize = 100
 
   def put[T: DynamoFormat](tableName: String)(item: T): ScanamoOps[Unit] =
-    nativePut(tableName, Return.Nothing, item).void
+    nativePut(tableName, PutReturn.Nothing, item).void
 
-  def putAndReturn[T: DynamoFormat](tableName: String)(ret: Return,
+  def putAndReturn[T: DynamoFormat](tableName: String)(ret: PutReturn,
                                                        item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     nativePut(tableName, ret, item)
       .map(r => Option(r.getAttributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
 
-  private def nativePut[T](tableName: String, ret: Return, item: T)(
+  private def nativePut[T](tableName: String, ret: PutReturn, item: T)(
     implicit f: DynamoFormat[T]
   ): ScanamoOps[PutItemResult] =
     ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None, ret))
@@ -113,7 +113,16 @@ object ScanamoFree {
       .map(_.toSet)
 
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[Unit] =
-    ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None)).void
+    nativeDelete(tableName, key, DeleteReturn.Nothing).void
+
+  def deleteAndReturn[T: DynamoFormat](
+    tableName: String
+  )(ret: DeleteReturn, key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+    nativeDelete(tableName, key, ret)
+      .map(r => Option(r.getAttributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
+
+  def nativeDelete(tableName: String, key: UniqueKey[_], ret: DeleteReturn): ScanamoOps[DeleteItemResult] =
+    ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None, ret))
 
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
     ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)
