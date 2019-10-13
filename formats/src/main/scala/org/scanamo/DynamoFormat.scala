@@ -554,3 +554,9 @@ object DynamoFormat extends EnumDynamoFormat {
   )
 
 }
+
+private[scanamo] trait LowPriorityFormats {
+
+  implicit final def exportedFormat[A](implicit E: ExportedDynamoFormat[A]): DynamoFormat[A] = E.instance
+
+}
