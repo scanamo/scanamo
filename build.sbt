@@ -99,7 +99,7 @@ lazy val formats = (project in file("formats"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "com.chuusai"    %% "shapeless"  % "2.3.3",
+      "com.propensive" %% "magnolia"   % "0.11.0",
       "org.typelevel"  %% "cats-core"  % catsVersion,
       "org.scalacheck" %% "scalacheck" % "1.14.2" % Test,
       "org.scalatest"  %% "scalatest"  % "3.0.8" % Test
@@ -133,7 +133,6 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "com.chuusai"   %% "shapeless" % "2.3.3",
       "org.typelevel" %% "cats-free" % catsVersion,
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,

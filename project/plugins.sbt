@@ -1,7 +1,5 @@
 addSbtPlugin("com.localytics" % "sbt-dynamodb" % "2.0.3")
-
 addSbtPlugin("com.github.tkawachi" % "sbt-doctest" % "0.9.5")
-
 addSbtPlugin("com.typesafe.sbt" % "sbt-ghpages"    % "0.6.3")
 addSbtPlugin("com.typesafe.sbt" % "sbt-site"       % "1.4.0")
 addSbtPlugin("com.47deg"        % "sbt-microsites" % "0.9.7")
