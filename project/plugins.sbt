@@ -10,3 +10,5 @@ addSbtPlugin("com.eed3si9n"     % "sbt-unidoc"     % "0.4.2")
 addSbtPlugin("com.geirsson"     % "sbt-ci-release" % "1.4.31")
 addSbtPlugin("org.scoverage"    % "sbt-scoverage"  % "1.6.0")
 addSbtPlugin("org.scalameta"    % "sbt-scalafmt"   % "2.0.7")
+
+addSbtPlugin("ch.epfl.lamp" % "sbt-dotty" % "0.3.4")

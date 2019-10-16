@@ -55,6 +55,7 @@ def extraOptions(scalaVersion: String) =
 val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
+  scalacOptions ++= { if (isDotty.value) Seq("-language:Scala2") else Nil },
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
@@ -104,6 +105,7 @@ lazy val formats = (project in file("formats"))
       "org.scalacheck" %% "scalacheck" % "1.14.2" % Test,
       "org.scalatest"  %% "scalatest"  % "3.0.8" % Test
     ),
+    libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value)),
     doctestMarkdownEnabled := true,
     doctestDecodeHtmlEntities := true,
     doctestTestFramework := DoctestTestFramework.ScalaTest
@@ -120,7 +122,8 @@ lazy val refined = (project in file("refined"))
     libraryDependencies ++= Seq(
       "eu.timepit"    %% "refined"   % "0.9.10",
       "org.scalatest" %% "scalatest" % "3.0.8" % Test
-    )
+    ),
+    libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value))
   )
   .dependsOn(formats)
 
@@ -140,7 +143,8 @@ lazy val scanamo = (project in file("scanamo"))
       "joda-time"      % "joda-time"    % "2.10.4" % Test,
       "org.scalatest"  %% "scalatest"   % "3.0.8"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
-    )
+    ),
+    libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value))
   )
   .dependsOn(formats, testkit % "test->test")
 
@@ -171,6 +175,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
     ),
+    libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value)),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
@@ -191,6 +196,7 @@ lazy val zio = (project in file("zio"))
       "org.scalatest"  %% "scalatest"        % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"       % "1.14.2" % Test
     ),
+    libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value)),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
@@ -210,6 +216,7 @@ lazy val alpakka = (project in file("alpakka"))
       "org.scalatest"      %% "scalatest"                    % "3.0.8" % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.14.2" % Test
     ),
+    libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value)),
     fork in Test := true,
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -228,7 +235,8 @@ lazy val joda = (project in file("joda"))
       "joda-time"      % "joda-time"    % "2.10.4",
       "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
-    )
+    ),
+    libraryDependencies := libraryDependencies.value.map(_.withDottyCompat(scalaVersion.value))
   )
   .dependsOn(formats)
 
