@@ -5,7 +5,7 @@ import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 
-import org.scanamo.error.TypeCoercionError
+import org.scanamo.TypeCoercionError
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
 import org.scalatest.{ FlatSpec, Matchers }

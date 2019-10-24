@@ -112,7 +112,7 @@ object DynamoFormat extends LowPriorityFormats {
     * Right(UserId(Eric))
     * }}}
     */
-  def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) =
+  def iso[A, B](r: B => A, w: A => B)(implicit f: DynamoFormat[B]) =
     new DynamoFormat[A] {
       final def read(item: DynamoValue) = f.read(item).map(r)
       final def write(t: A) = f.write(w(t))
@@ -459,7 +459,7 @@ object DynamoFormat extends LowPriorityFormats {
     *     |   Right(s)
     * }}}
     */
-  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = iso[Set[T], List[T]](_.toSet)(_.toList)
+  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = iso[Set[T], List[T]](_.toSet, _.toList)
 
   private val javaMapFormat: DynamoFormat[DynamoObject] =
     attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
