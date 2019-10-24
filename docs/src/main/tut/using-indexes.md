@@ -14,7 +14,7 @@ with only a hash key on the `colour` attribute:
 ```tut:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 case class Transport(mode: String, line: String, colour: String)
 val transport = Table[Transport]("transport")

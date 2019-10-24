@@ -6,7 +6,7 @@ import org.scalatest.{ FunSpec, Matchers }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 class ScanamoTest extends FunSpec with Matchers {
 

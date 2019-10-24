@@ -18,7 +18,7 @@ class Scanamo private (client: AmazonDynamoDB) {
     * provided synchronously
     *
     * {{{
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> case class Transport(mode: String, line: String)
     * >>> val transport = Table[Transport]("transport")

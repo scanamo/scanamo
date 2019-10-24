@@ -28,7 +28,7 @@ Dynamo and subsequently retrieving them:
 ```tut:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
@@ -109,7 +109,7 @@ Which fields are updated can be based on incoming data:
 import cats.data.NonEmptyList
 import cats.implicits._
 import org.scanamo.ops.ScanamoOps
-import org.scanamo.error.DynamoReadError
+import org.scanamo.DynamoReadError
 import org.scanamo.update.UpdateExpression
 
 LocalDynamoDB.createTable(client)("favourites")("name" -> S)
@@ -146,7 +146,7 @@ scanamo.exec(
 ```
 
 Further examples, showcasing different types of update can be found in the 
-[scaladoc for the `update` method on `Table`](/latest/api/org/scanamo/Table.html#update(key:org.scanamo.query.UniqueKey[_],expression:org.scanamo.update.UpdateExpression):org.scanamo.ops.ScanamoOps[Either[org.scanamo.error.DynamoReadError,V]])
+[scaladoc for the `update` method on `Table`](/latest/api/org/scanamo/Table.html#update(key:org.scanamo.query.UniqueKey[_],expression:org.scanamo.update.UpdateExpression):org.scanamo.ops.ScanamoOps[Either[org.scanamo.DynamoReadError,V]])
 
 ### Scan
 

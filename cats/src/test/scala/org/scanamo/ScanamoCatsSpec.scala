@@ -4,11 +4,11 @@ import cats.effect.IO
 import cats.implicits._
 import org.scalatest.{ FunSpec, Matchers }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scanamo.error.DynamoReadError
+import org.scanamo.DynamoReadError
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 class ScanamoCatsSpec extends FunSpec with Matchers {
 
@@ -322,11 +322,11 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
       scanamo
         .exec[
           (
-            List[Either[org.scanamo.error.DynamoReadError, Animal]],
-            List[Either[org.scanamo.error.DynamoReadError, Animal]],
-            List[Either[org.scanamo.error.DynamoReadError, Animal]],
-            List[Either[org.scanamo.error.DynamoReadError, Animal]],
-            List[Either[org.scanamo.error.DynamoReadError, Animal]]
+            List[Either[org.scanamo.DynamoReadError, Animal]],
+            List[Either[org.scanamo.DynamoReadError, Animal]],
+            List[Either[org.scanamo.DynamoReadError, Animal]],
+            List[Either[org.scanamo.DynamoReadError, Animal]],
+            List[Either[org.scanamo.DynamoReadError, Animal]]
           )
         ](ops)
         .unsafeRunSync should equal(
@@ -443,11 +443,11 @@ class ScanamoCatsSpec extends FunSpec with Matchers {
         scanamo
           .exec[
             (
-              List[Either[org.scanamo.error.DynamoReadError, Station]],
-              List[Either[org.scanamo.error.DynamoReadError, Station]],
-              List[Either[org.scanamo.error.DynamoReadError, Station]],
-              List[Either[org.scanamo.error.DynamoReadError, Station]],
-              List[Either[org.scanamo.error.DynamoReadError, Station]]
+              List[Either[org.scanamo.DynamoReadError, Station]],
+              List[Either[org.scanamo.DynamoReadError, Station]],
+              List[Either[org.scanamo.DynamoReadError, Station]],
+              List[Either[org.scanamo.DynamoReadError, Station]],
+              List[Either[org.scanamo.DynamoReadError, Station]]
             )
           ](ops)
           .unsafeRunSync should equal(
