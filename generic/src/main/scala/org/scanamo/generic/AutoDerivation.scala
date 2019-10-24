@@ -1,5 +1,6 @@
 package org.scanamo.generic
 
+import org.scanamo.{ Exported, ExportedDynamoFormat }
 import magnolia.Magnolia
 import org.scanamo.DynamoFormat
 

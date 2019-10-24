@@ -4,7 +4,6 @@ import cats.{ Monad, MonoidK }
 import com.amazonaws.services.dynamodbv2.model.{ PutRequest, WriteRequest, _ }
 import java.util.{ List => JList, Map => JMap }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
-import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
 import org.scanamo.request._
