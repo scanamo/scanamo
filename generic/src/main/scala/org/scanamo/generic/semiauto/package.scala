@@ -1,6 +1,4 @@
-package org.scanamo
-
-import org.scanamo.Derivation.SemiAutoDerivation
+package org.scanamo.generic
 
 /**
   * Semi-automatic format derivation.
@@ -11,12 +9,12 @@ import org.scanamo.Derivation.SemiAutoDerivation
   * Typical usage will look like the following:
   *
   * {{{
-  * import org.scanamo.semiauto._
+  * import org.scanamo.generic.semiauto._
   *
   * case class Bear(name: String, favouriteFood: String)
   * object Bear {
-  *   implicit val formatBear: DynamoFormat[Bear] = deriveDynamoFormat[Bear]
+  *   implicit val formatBear: DynamoFormat[Bear] = deriveDynamoFormat
   * }
   * }}}
   */
-package object semiauto extends SemiAutoDerivation
+package object semiauto extends SemiautoDerivation

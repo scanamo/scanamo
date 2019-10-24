@@ -74,7 +74,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, catsEffect, joda, zio)
+  .aggregate(scanamo, generic, testkit, alpakka, refined, catsEffect, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -90,11 +90,11 @@ addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
 val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.504"
 
-lazy val formats = (project in file("formats"))
+lazy val generic = (project in file("generic"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-formats"
+    name := "scanamo-generic"
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -108,7 +108,7 @@ lazy val formats = (project in file("formats"))
     doctestDecodeHtmlEntities := true,
     doctestTestFramework := DoctestTestFramework.ScalaTest
   )
-  .dependsOn(testkit % "test->test")
+  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -122,7 +122,7 @@ lazy val refined = (project in file("refined"))
       "org.scalatest" %% "scalatest" % "3.0.8" % Test
     )
   )
-  .dependsOn(formats)
+  .dependsOn(scanamo)
 
 lazy val scanamo = (project in file("scanamo"))
   .settings(
@@ -141,7 +141,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
     )
   )
-  .dependsOn(formats, testkit % "test->test")
+  .dependsOn(testkit % "test->test")
 
 lazy val testkit = (project in file("testkit"))
   .settings(
@@ -173,7 +173,7 @@ lazy val catsEffect = (project in file("cats"))
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
-  .dependsOn(formats, scanamo, testkit % "test->test")
+  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val zio = (project in file("zio"))
   .settings(
@@ -193,7 +193,7 @@ lazy val zio = (project in file("zio"))
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
-  .dependsOn(formats, scanamo, testkit % "test->test")
+  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val alpakka = (project in file("alpakka"))
   .settings(
@@ -213,7 +213,7 @@ lazy val alpakka = (project in file("alpakka"))
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
-  .dependsOn(formats, scanamo, testkit % "test->test")
+  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val joda = (project in file("joda"))
   .settings(
@@ -229,7 +229,7 @@ lazy val joda = (project in file("joda"))
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
     )
   )
-  .dependsOn(formats)
+  .dependsOn(scanamo)
 
 lazy val docs = (project in file("docs"))
   .settings(
@@ -269,9 +269,7 @@ val publishingSettings = Seq(
 )
 
 lazy val noPublishSettings = Seq(
-  publish := {},
-  publishLocal := {},
-  publishArtifact := false
+  publish / skip := true
 )
 
 val micrositeSettings = Seq(
