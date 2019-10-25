@@ -8,6 +8,7 @@ import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.fixtures._
+import org.scanamo.generic.auto._
 
 class ScanamoCatsSpec extends FunSpec with Matchers {
 

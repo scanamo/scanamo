@@ -7,8 +7,8 @@ import org.scalatest.{ BeforeAndAfterAll, FunSpec, Matchers }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
-import org.scanamo.DynamoFormat._
 import org.scanamo.fixtures._
+import org.scanamo.generic.auto._
 
 class ScanamoAsyncTest extends FunSpec with Matchers with BeforeAndAfterAll with ScalaFutures {
   implicit val defaultPatience =
