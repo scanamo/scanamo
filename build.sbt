@@ -74,7 +74,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(scanamo, generic, testkit, alpakka, refined, catsEffect, joda, zio)
+  .aggregate(scanamo, testkit, alpakka, refined, catsEffect, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -89,26 +89,6 @@ addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
 val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.504"
-
-lazy val generic = (project in file("generic"))
-  .settings(
-    commonSettings,
-    publishingSettings,
-    name := "scanamo-generic"
-  )
-  .settings(
-    libraryDependencies ++= Seq(
-      awsDynamoDB,
-      "com.propensive" %% "magnolia"   % "0.11.0",
-      "org.typelevel"  %% "cats-core"  % catsVersion,
-      "org.scalacheck" %% "scalacheck" % "1.14.2" % Test,
-      "org.scalatest"  %% "scalatest"  % "3.0.8" % Test
-    ),
-    doctestMarkdownEnabled := true,
-    doctestDecodeHtmlEntities := true,
-    doctestTestFramework := DoctestTestFramework.ScalaTest
-  )
-  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -133,7 +113,8 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.typelevel" %% "cats-free" % catsVersion,
+      "org.typelevel"  %% "cats-free" % catsVersion,
+      "com.propensive" %% "magnolia"  % "0.11.0",
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"      % "joda-time"    % "2.10.4" % Test,

@@ -30,9 +30,9 @@ private[scanamo] trait Derivation {
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField(o: DynamoObject, param: Param[Typeclass, T]): Valid[param.PType] =
       o(param.label)
-        .fold[Either[DynamoReadError, param.PType]](Left(MissingProperty)) { dv =>
-          unbuild(param.typeclass).read(dv)
-        }
+        .fold[Either[DynamoReadError, param.PType]](
+          unbuild(param.typeclass).read(DynamoValue.nil).leftMap(_ => MissingProperty)
+        )(unbuild(param.typeclass).read(_))
         .leftMap(e => NonEmptyChain.one(param.label -> e))
 
     def decode(o: DynamoObject): Either[DynamoReadError, T] =
@@ -63,8 +63,10 @@ private[scanamo] trait Derivation {
             .fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", dv)))(decode)
 
         def write(t: T): DynamoValue =
-          DynamoValue.fromFields(cc.parameters.map { p =>
-            p.label -> unbuild(p.typeclass).write(p.dereference(t))
+          DynamoValue.fromFields(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) {
+            case (xs, p) =>
+              val v = unbuild(p.typeclass).write(p.dereference(t))
+              if (v.isNull) xs else (p.label -> v) :: xs
           }: _*)
       })
 

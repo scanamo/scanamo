@@ -61,7 +61,7 @@ import scala.reflect.ClassTag
   * >>> invalid
   * Left(InvalidPropertiesError(NonEmptyList((age,NoPropertyOfType(N,DynString(none of your business))), (farm,MissingProperty))))
   *
-  * >>> invalid.leftMap(cats.Show[error.DynamoReadError].show)
+  * >>> invalid.leftMap(cats.Show[DynamoReadError].show)
   * Left('age': not of type: 'N' was 'DynString(none of your business)', 'farm': missing)
   * }}}
   *
@@ -78,7 +78,7 @@ object DynamoFormat extends LowPriorityFormats {
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
     new DynamoFormat[T] {
-      def read(av: DynamoValue): Either[DynamoReadError,T] = r(av)
+      def read(av: DynamoValue): Either[DynamoReadError, T] = r(av)
       def write(t: T): DynamoValue = w(t)
     }
 
@@ -98,7 +98,7 @@ object DynamoFormat extends LowPriorityFormats {
 
     def build[T](r: DynamoObject => Either[DynamoReadError, T], w: T => DynamoObject): ObjectFormat[T] =
       new ObjectFormat[T] {
-        def readObject(o: DynamoObject): Either[DynamoReadError,T] = r(o)
+        def readObject(o: DynamoObject): Either[DynamoReadError, T] = r(o)
         def writeObject(t: T): DynamoObject = w(t)
       }
   }
@@ -134,7 +134,7 @@ object DynamoFormat extends LowPriorityFormats {
     * >>> case class UserId(value: String)
     *
     * >>> implicit val userIdFormat =
-    * ...   DynamoFormat.iso[UserId, String](UserId.apply)(_.value)
+    * ...   DynamoFormat.iso[UserId, String](UserId.apply, _.value)
     * >>> DynamoFormat[UserId].read(DynamoValue.fromString("Eric"))
     * Right(UserId(Eric))
     * }}}
