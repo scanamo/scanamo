@@ -76,6 +76,33 @@ trait DynamoFormat[T] {
 object DynamoFormat extends LowPriorityFormats {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
+  def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
+    new DynamoFormat[T] {
+      def read(av: DynamoValue): Either[DynamoReadError,T] = r(av)
+      def write(t: T): DynamoValue = w(t)
+    }
+
+  trait ObjectFormat[T] extends DynamoFormat[T] {
+    def readObject(o: DynamoObject): Either[DynamoReadError, T]
+    def writeObject(t: T): DynamoObject
+
+    def read(dv: DynamoValue): Either[DynamoReadError, T] =
+      dv.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", dv)))(readObject)
+
+    def write(t: T): DynamoValue =
+      writeObject(t).toDynamoValue
+  }
+
+  object ObjectFormat {
+    def apply[T](implicit T: ObjectFormat[T]): ObjectFormat[T] = T
+
+    def build[T](r: DynamoObject => Either[DynamoReadError, T], w: T => DynamoObject): ObjectFormat[T] =
+      new ObjectFormat[T] {
+        def readObject(o: DynamoObject): Either[DynamoReadError,T] = r(o)
+        def writeObject(t: T): DynamoObject = w(t)
+      }
+  }
+
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
 
