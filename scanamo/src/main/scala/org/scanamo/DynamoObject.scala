@@ -228,7 +228,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
         case Empty :: xs =>
           parTraverseWithKey_(xs, r)
         case Strict(ys) :: xs =>
-          val r2 = ys.entrySet.stream.reduce(
+          val r2 = ys.entrySet.stream.reduce[F.F[M]](
             r,
             (fm: F.F[M], kv: JMap.Entry[String, AttributeValue]) =>
               F.apply.map2(fm, F.parallel(f(kv.getKey, DynamoValue.fromAttributeValue(kv.getValue))))(c),
@@ -269,7 +269,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
         case Nil         => r
         case Empty :: xs => traverseWithKey_(xs, r)
         case Strict(ys) :: xs =>
-          val r2 = ys.entrySet.stream.reduce(
+          val r2 = ys.entrySet.stream.reduce[M](
             r,
             (m, kv) => c(m, f(kv.getKey, DynamoValue.fromAttributeValue(kv.getValue))),
             (x, y) => c(x, y)
