@@ -22,12 +22,14 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   /**
     * Gets the value mapped to `key` if it exists
     */
-  final def apply(key: String): Option[DynamoValue] = self match {
-    case Empty          => None
-    case Strict(xs)     => Option(xs.get(key)).map(DynamoValue.fromAttributeValue)
-    case Pure(xs)       => xs.get(key)
+  final def apply(key: String): DynamoValue = self match {
+    case Empty          => DynamoValue.nil
+    case Strict(xs)     => val x = xs.get(key); if (x eq null) DynamoValue.nil else DynamoValue.fromAttributeValue(x)
+    case Pure(xs)       => xs.get(key).getOrElse(DynamoValue.nil)
     case Concat(xs, ys) => xs(key) orElse ys(key)
   }
+
+  final def get[A: DynamoFormat](key: String): Either[DynamoReadError, A] = apply(key).as[A]
 
   /**
     * Gets the size of the map
