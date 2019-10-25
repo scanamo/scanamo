@@ -114,7 +114,7 @@ lazy val scanamo = (project in file("scanamo"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"  %% "cats-free" % catsVersion,
-      "com.propensive" %% "magnolia"  % "0.11.0",
+      "com.propensive" %% "magnolia"  % "0.10.0",
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"      % "joda-time"    % "2.10.5" % Test,
