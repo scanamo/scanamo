@@ -16,4 +16,3 @@ case class Rabbit(name: String)
 case class Station(mode: String, name: String, zone: Int)
 case class Transport(mode: String, line: String, colour: String)
 case class Worker(firstName: String, surname: String, age: Option[Int])
-
