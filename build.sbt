@@ -90,12 +90,12 @@ addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
 val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.504"
 
-def customDeps(scalaVersion: String) = 
+def customDeps(scalaVersion: String) =
   CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2, 11)) => 
-      Seq("com.propensive" %% "magnolia"  % "0.10.0")
+    case Some((2, 11)) =>
+      Seq("com.propensive" %% "magnolia" % "0.10.0")
     case _ =>
-      Seq("com.propensive" %% "magnolia"  % "0.11.0")
+      Seq("com.propensive" %% "magnolia" % "0.11.0")
   }
 
 lazy val refined = (project in file("refined"))
@@ -121,7 +121,7 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-free" % catsVersion,
+      "org.typelevel" %% "cats-free" % catsVersion,
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"      % "joda-time"    % "2.10.5" % Test,
