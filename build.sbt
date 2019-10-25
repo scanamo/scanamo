@@ -3,7 +3,7 @@ crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.10", "2.13.1")
 
 val catsVersion = "2.0.0"
 val catsEffectVersion = "2.0.0"
-val zioVersion = "1.0.0-RC14"
+val zioVersion = "1.0.0-RC15"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -117,7 +117,7 @@ lazy val scanamo = (project in file("scanamo"))
       "com.propensive" %% "magnolia"  % "0.11.0",
       // Use Joda for custom conversion example
       "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
-      "joda-time"      % "joda-time"    % "2.10.4" % Test,
+      "joda-time"      % "joda-time"    % "2.10.5" % Test,
       "org.scalatest"  %% "scalatest"   % "3.0.8"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
     )
@@ -205,7 +205,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"       % "joda-convert" % "2.2.1" % Provided,
-      "joda-time"      % "joda-time"    % "2.10.4",
+      "joda-time"      % "joda-time"    % "2.10.5",
       "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
     )
