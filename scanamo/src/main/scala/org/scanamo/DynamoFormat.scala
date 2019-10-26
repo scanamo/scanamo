@@ -44,11 +44,13 @@ import scala.reflect.ClassTag
   * >>> case object Aardvark extends Animal
   * >>> case object Zebra extends Animal
   * >>> case class Pet(name: String, animal: Animal)
+  * >>> val pet1 = Pet("Amy", Aardvark)
+  * >>> val pet2 = Pet("Zebediah", Zebra)
   * >>> val petF = DynamoFormat[Pet]
-  * >>> petF.read(petF.write(Pet("Amy", Aardvark)))
+  * >>> petF.read(petF.write(pet1))
   * Right(Pet(Amy,Aardvark))
   *
-  * >>> petF.read(petF.write(Pet("Zebediah", Zebra)))
+  * >>> petF.read(petF.write(pet2))
   * Right(Pet(Zebediah,Zebra))
   * }}}
   *
