@@ -57,13 +57,11 @@ private[scanamo] trait Derivation {
         def write(t: T): DynamoValue = _cachedAttribute
       })
     else
-      build(new DynamoFormat[T] {
-        def read(dv: DynamoValue): Either[DynamoReadError, T] =
-          dv.asObject
-            .fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", dv)))(decode)
+      build(new DynamoFormat.ObjectFormat[T] {
+        def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
 
-        def write(t: T): DynamoValue =
-          DynamoValue.fromFields(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) {
+        def writeObject(t: T): DynamoObject =
+          DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) {
             case (xs, p) =>
               val v = unbuild(p.typeclass).write(p.dereference(t))
               if (v.isNull) xs else (p.label -> v) :: xs
@@ -83,13 +81,11 @@ private[scanamo] trait Derivation {
         value <- o("value")
       } yield unbuild(subtype.typeclass).read(value)).getOrElse(Left(NoPropertyOfType("M", DynamoValue.nil)))
 
-    build(new DynamoFormat[T] {
-      def read(dv: DynamoValue): Either[DynamoReadError, T] =
-        dv.asObject
-          .fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", dv)))(decode)
+    build(new DynamoFormat.ObjectFormat[T] {
+      def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
 
-      def write(t: T): DynamoValue = st.dispatch(t) { subtype =>
-        DynamoValue.fromFields(
+      def writeObject(t: T): DynamoObject = st.dispatch(t) { subtype =>
+        DynamoObject(
           "tag" -> DynamoValue.fromString(subtype.typeName.short),
           "value" -> unbuild(subtype.typeclass).write(subtype.cast(t))
         )
