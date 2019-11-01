@@ -10,11 +10,11 @@ trait SemiautoDerivation extends Derivation {
 
   type Typeclass[A] = HiddenDynamoFormat[A]
 
-  protected def build[A](df: DynamoFormat[A]): Typeclass[A] = Hidden(df)
+  final protected def build[A](df: DynamoFormat[A]): Typeclass[A] = Hidden(df)
 
-  protected def unbuild[A](tc: Typeclass[A]): DynamoFormat[A] = tc.instance
+  final protected def unbuild[A](tc: Typeclass[A]): DynamoFormat[A] = tc.instance
 
-  implicit def hiddenDynamoFormat[A]: HiddenDynamoFormat[A] = macro Magnolia.gen[A]
+  final implicit def hiddenDynamoFormat[A]: HiddenDynamoFormat[A] = macro Magnolia.gen[A]
 
   final def deriveDynamoFormat[A](implicit S: HiddenDynamoFormat[A]): DynamoFormat[A] = S.instance
 
