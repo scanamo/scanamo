@@ -6,7 +6,6 @@ import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.forAll
 
 class DynamoObjectTest extends Properties("DynamoValue") with DynamoValueInstances {
-
   ////
   // Monoid laws
 
@@ -21,7 +20,6 @@ class DynamoObjectTest extends Properties("DynamoValue") with DynamoValueInstanc
   property("associativity") = forAll { (x: DynamoObject, y: DynamoObject, z: DynamoObject) =>
     (x <> y) <> z == x <> (y <> z)
   }
-
 }
 
 private[scanamo] trait DynamoValueInstances extends DynamoObjectInstances with DynamoArrayInstances {
@@ -59,7 +57,6 @@ private[scanamo] trait DynamoValueInstances extends DynamoObjectInstances with D
   val genDV: Gen[DynamoValue] = Gen.sized(fromSize)
 
   implicit val arbDynamoValue: Arbitrary[DynamoValue] = Arbitrary(genDV)
-
 }
 
 private[scanamo] trait DynamoObjectInstances {

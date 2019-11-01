@@ -552,5 +552,4 @@ object DynamoFormat extends EnumDynamoFormat {
   )(
     _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
   )
-
 }

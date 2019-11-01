@@ -20,7 +20,6 @@ final case class ConditionalUpdate(req: ScanamoUpdateRequest)
     extends ScanamoOpsA[Either[ConditionalCheckFailedException, UpdateItemResult]]
 
 object ScanamoOps {
-
   import cats.free.Free.liftF
 
   def put(req: ScanamoPutRequest): ScanamoOps[PutItemResult] = liftF[ScanamoOpsA, PutItemResult](Put(req))

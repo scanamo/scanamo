@@ -9,7 +9,6 @@ import akka.NotUsed
 import scala.concurrent.duration.FiniteDuration
 
 trait WithRetry {
-
   final def retry[T](op: => Source[T, NotUsed], retryPolicy: RetryPolicy): Source[T, NotUsed] =
     op.recoverWithRetries(
       1, {

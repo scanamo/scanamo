@@ -9,7 +9,6 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scanamo.auto._
 
 class DynamoFormatTest extends FunSpec with Matchers with ScalaCheckDrivenPropertyChecks {
-
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
   def testReadWrite[A: DynamoFormat: TypeTag](gen: Gen[A]): Unit = {
     val typeLabel = typeTag[A].tpe.toString

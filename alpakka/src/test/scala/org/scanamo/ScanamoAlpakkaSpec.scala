@@ -14,7 +14,6 @@ import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
 import cats.implicits._
 
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
-
   implicit val system = ActorSystem("scanamo-alpakka")
   val client = LocalDynamoDB.client()
 

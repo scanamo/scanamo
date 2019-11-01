@@ -9,7 +9,6 @@ class UpdateExpressionTest
     extends org.scalatest.FunSpec
     with org.scalatest.Matchers
     with org.scalatestplus.scalacheck.Checkers {
-
   implicit lazy val arbString: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
   def leaf: Gen[UpdateExpression] =
