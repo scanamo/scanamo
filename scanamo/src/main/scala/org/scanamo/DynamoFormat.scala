@@ -84,14 +84,20 @@ object DynamoFormat extends LowPriorityFormats {
       def write(t: T): DynamoValue = w(t)
     }
 
+  /**
+   * DynamoFormats for object-like structures
+   * 
+   * @note All data types used as the carrier type in [[Table]] operations
+   * should derive an instance from this class
+   */
   trait ObjectFormat[T] extends DynamoFormat[T] {
     def readObject(o: DynamoObject): Either[DynamoReadError, T]
     def writeObject(t: T): DynamoObject
 
-    def read(dv: DynamoValue): Either[DynamoReadError, T] =
+    final def read(dv: DynamoValue): Either[DynamoReadError, T] =
       dv.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", dv)))(readObject)
 
-    def write(t: T): DynamoValue =
+    final def write(t: T): DynamoValue =
       writeObject(t).toDynamoValue
   }
 

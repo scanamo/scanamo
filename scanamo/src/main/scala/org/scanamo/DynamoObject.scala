@@ -212,12 +212,21 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     */
   final def <>(that: DynamoObject): DynamoObject = self concat that
 
+  /**
+    * Traverse the object in parallel fashion and build up monoidal structure
+    */
   final def parTraverse[F[_]: Parallel, M: Monoid](f: DynamoValue => F[M]): F[M] =
     parTraverseWith(f)(Monoid[M].empty)(_ |+| _)
 
+  /**
+    * Traverse the object in parallel foshiono and build up a result out of each value
+    */
   final def parTraverseWith[F[_]: Parallel, M](f: DynamoValue => F[M])(z: M)(c: (M, M) => M): F[M] =
     parTraverseWithKey((_, dv) => f(dv))(z)(c)
 
+  /**
+    * Traverse the object in parallel fashion and build up a result out of each value and its label
+    */
   final def parTraverseWithKey[F[_], M](
     f: (String, DynamoValue) => F[M]
   )(z: M)(c: (M, M) => M)(implicit F: Parallel[F]): F[M] = {
