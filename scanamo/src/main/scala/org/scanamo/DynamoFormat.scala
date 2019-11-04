@@ -85,11 +85,11 @@ object DynamoFormat extends LowPriorityFormats {
     }
 
   /**
-   * DynamoFormats for object-like structures
-   * 
-   * @note All data types used as the carrier type in [[Table]] operations
-   * should derive an instance from this class
-   */
+    * DynamoFormats for object-like structures
+    *
+    * @note All data types used as the carrier type in [[Table]] operations
+    * should derive an instance from this class
+    */
   trait ObjectFormat[T] extends DynamoFormat[T] {
     def readObject(o: DynamoObject): Either[DynamoReadError, T]
     def writeObject(t: T): DynamoObject
