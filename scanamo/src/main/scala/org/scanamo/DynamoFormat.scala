@@ -586,7 +586,6 @@ object DynamoFormat extends LowPriorityFormats {
   )(
     _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
   )
-
 }
 
 private[scanamo] trait LowPriorityFormats {

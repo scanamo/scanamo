@@ -16,7 +16,6 @@ import scala.util.{ Failure, Success }
  */
 class ScanamoAsyncInterpreter(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext)
     extends (ScanamoOpsA ~> Future) {
-
   final private def futureOf[X <: AmazonWebServiceRequest, T](
     call: (X, AsyncHandler[X, T]) => java.util.concurrent.Future[T],
     req: X

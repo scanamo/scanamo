@@ -4,7 +4,6 @@ import org.scalatest.{ FunSuite, Matchers }
 import org.scanamo.generic.auto._
 
 class EnumDynamoFormatTest extends FunSuite with Matchers {
-
   test("automatic derivation for case object should only work if treating it as an enum") {
     val expected = DynamoValue.fromFields(
       "tag" -> DynamoValue.fromString("First"),

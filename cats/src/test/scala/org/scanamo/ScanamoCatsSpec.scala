@@ -11,7 +11,6 @@ import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
 
 class ScanamoCatsSpec extends FunSpec with Matchers {
-
   val client = LocalDynamoDB.client()
   val scanamo = ScanamoCats[IO](client)
 

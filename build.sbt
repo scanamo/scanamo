@@ -3,7 +3,7 @@ crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.10", "2.13.1")
 
 val catsVersion = "2.0.0"
 val catsEffectVersion = "2.0.0"
-val zioVersion = "1.0.0-RC15"
+val zioVersion = "1.0.0-RC16"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -152,9 +152,9 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
       "io.monix"       %% "monix"       % "3.0.0" % Provided,
-      "co.fs2"         %% "fs2-core"    % "2.0.1" % Provided,
+      "co.fs2"         %% "fs2-core"    % "2.1.0" % Provided,
       "io.monix"       %% "monix"       % "3.0.0" % Test,
-      "co.fs2"         %% "fs2-core"    % "2.0.1" % Test,
+      "co.fs2"         %% "fs2-core"    % "2.1.0" % Test,
       "org.scalatest"  %% "scalatest"   % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
     ),
@@ -174,7 +174,7 @@ lazy val zio = (project in file("zio"))
       "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "2.0.0.0-RC5",
+      "dev.zio"        %% "zio-interop-cats" % "2.0.0.0-RC7",
       "org.scalatest"  %% "scalatest"        % "3.0.8" % Test,
       "org.scalacheck" %% "scalacheck"       % "1.14.2" % Test
     ),

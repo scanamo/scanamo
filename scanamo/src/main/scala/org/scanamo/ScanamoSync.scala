@@ -10,7 +10,6 @@ import org.scanamo.ops._
   * To avoid blocking, use [[org.scanamo.ScanamoAsync]]
   */
 class Scanamo private (client: AmazonDynamoDB) {
-
   final private val interpreter = new ScanamoSyncInterpreter(client)
 
   /**

@@ -11,7 +11,6 @@ import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import org.scalatest.{ FlatSpec, Matchers }
 
 class RefinedDynamoFormatSpec extends FlatSpec with Matchers {
-
   type PosInt = Int Refined Positive
 
   "DynamoFormat[PosInt]" should "read a positive integer value" in {
@@ -39,5 +38,4 @@ class RefinedDynamoFormatSpec extends FlatSpec with Matchers {
 
     valueWritten shouldBe expectedValue
   }
-
 }

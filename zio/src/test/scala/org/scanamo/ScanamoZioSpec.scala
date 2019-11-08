@@ -13,7 +13,6 @@ import zio.stream.{ Sink, Stream }
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 
 class ScanamoZioSpec extends FunSpec with Matchers {
-
   val client = LocalDynamoDB.client()
   val zio = ScanamoZio(client)
   val RTS = new DefaultRuntime {}

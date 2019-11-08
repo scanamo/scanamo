@@ -9,7 +9,6 @@ import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA, ScanamoOpsT }
 import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
-
   def limit(req: Req): Option[Int]
   def startKey(req: Req): Option[DynamoObject]
   def items(res: Res): List[DynamoObject]
@@ -22,7 +21,6 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
     withExclusiveStartKey(lastEvaluatedKey).andThen(limit.map(withLimit).getOrElse(identity[Req](_)))
 
   def stream[T: DynamoFormat](req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[DynamoObject])] = {
-
     def streamMore(req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[DynamoObject])] =
       for {
         res <- exec(req)

@@ -13,7 +13,6 @@ import akka.NotUsed
 private[scanamo] class AlpakkaInterpreter(client: DynamoClient, retryPolicy: RetryPolicy)
     extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
     with WithRetry {
-
   final private def run(op: AwsOp): AlpakkaInterpreter.Alpakka[op.B] =
     retry(DynamoDb.source(op).withAttributes(DynamoAttributes.client(client)), retryPolicy)
 
