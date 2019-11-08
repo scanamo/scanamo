@@ -9,7 +9,6 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
 import com.amazonaws.services.dynamodbv2.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 
 class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
-
   final private def eff[A <: AmazonWebServiceRequest, B](
     f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
     req: A

@@ -4,7 +4,6 @@ import org.scanamo.DynamoFormat
 import org.scalatest.{ FunSuite, Matchers }
 
 class SemiAutoDerivationTest extends FunSuite with Matchers {
-
   test("Derivation should fail if no derived format or automatic derivation") {
     """write(Person("Alice", 65))""" shouldNot compile
   }

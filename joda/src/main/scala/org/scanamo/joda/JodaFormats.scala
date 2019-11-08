@@ -4,7 +4,6 @@ import org.scanamo.DynamoFormat
 import org.joda.time.{ DateTime, Instant }
 
 object JodaFormats {
-
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
     *  {{{
     *  prop> import org.joda.time.Instant
