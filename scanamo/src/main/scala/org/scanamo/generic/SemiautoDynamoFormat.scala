@@ -7,7 +7,6 @@ import scala.language.experimental.macros
 final private case class Hidden[A](instance: A) extends AnyVal
 
 trait SemiautoDerivation extends Derivation {
-
   type Typeclass[A] = HiddenDynamoFormat[A]
 
   final protected def build[A](df: DynamoFormat[A]): Typeclass[A] = Hidden(df)
@@ -17,5 +16,4 @@ trait SemiautoDerivation extends Derivation {
   final implicit def hiddenDynamoFormat[A]: HiddenDynamoFormat[A] = macro Magnolia.gen[A]
 
   final def deriveDynamoFormat[A](implicit S: HiddenDynamoFormat[A]): DynamoFormat[A] = S.instance
-
 }

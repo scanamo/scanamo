@@ -67,7 +67,6 @@ private[scanamo] trait Derivation {
               if (v.isNull) xs else (p.label -> v) :: xs
           }: _*)
       })
-
   }
 
   // Derivation for ADTs, they are encoded as an object of two properties:
@@ -92,5 +91,4 @@ private[scanamo] trait Derivation {
       }
     })
   }
-
 }
