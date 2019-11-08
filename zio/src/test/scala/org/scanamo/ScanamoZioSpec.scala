@@ -7,6 +7,7 @@ import org.scanamo.syntax._
 import org.scanamo.auto._
 import cats.implicits._
 import zio.DefaultRuntime
+import zio.stream.interop.catz._
 import zio.stream.{ Sink, Stream }
 import org.scanamo.error.DynamoReadError
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
@@ -202,8 +203,6 @@ class ScanamoZioSpec extends FunSpec with Matchers {
   }
 
   it("should stream full table scan") {
-    import ScanamoZio._
-
     type SIO[A] = Stream[AmazonDynamoDBException, A]
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
