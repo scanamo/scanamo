@@ -75,19 +75,15 @@ private[scanamo] trait Derivation {
   def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] = {
     def decode(o: DynamoObject): Either[DynamoReadError, T] =
       (for {
-        tag <- o("tag").flatMap(_.asString)
-        subtype <- st.subtypes.find(_.typeName.short == tag)
-        value <- o("value")
+        subtype <- st.subtypes.find(sub => o.contains(sub.typeName.short))
+        value <- o(subtype.typeName.short)
       } yield unbuild(subtype.typeclass).read(value)).getOrElse(Left(NoPropertyOfType("M", DynamoValue.nil)))
 
     build(new DynamoFormat.ObjectFormat[T] {
       def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
 
       def writeObject(t: T): DynamoObject = st.dispatch(t) { subtype =>
-        DynamoObject(
-          "tag" -> DynamoValue.fromString(subtype.typeName.short),
-          "value" -> unbuild(subtype.typeclass).write(subtype.cast(t))
-        )
+        DynamoObject.singleton(subtype.typeName.short, unbuild(subtype.typeclass).write(subtype.cast(t)))
       }
     })
   }
