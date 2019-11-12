@@ -27,21 +27,20 @@ private[scanamo] trait Derivation {
 
   // Derivation for case classes: generates an encoding that is isomorphic to the
   // isomorphic n-tuple for type `T`. For case objects, they are encoded as strings.
+  // 1. we look up the class field in the object
+  // 2. if not found, we check if the field has a default value
+  // 3. if not, we try to decode a null value and see if the formatter produces something
+  //    if yes, we just produce that value as a success
+  // 4. otherwise, we decode the found value
+  // 5. finally, we wrap errors in [[cats.data.NonEmptyChain]] so multiple decoding errors can
+  //    be accumulated
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField(o: DynamoObject, param: Param[Typeclass, T]): Valid[param.PType] =
       o(param.label)
-        .fold[Either[DynamoReadError, param.PType]](
-          unbuild(param.typeclass).read(DynamoValue.nil).leftMap(_ => MissingProperty)
-        )(unbuild(param.typeclass).read(_))
+        .fold[Either[DynamoReadError, param.PType]] {
+          param.default.fold(unbuild(param.typeclass).read(DynamoValue.nil).leftMap(_ => MissingProperty))(Right(_))
+        }(unbuild(param.typeclass).read(_))
         .leftMap(e => NonEmptyChain.one(param.label -> e))
-
-    def decode(o: DynamoObject): Either[DynamoReadError, T] =
-      cc.parameters.toList
-        .parTraverse(p => decodeField(o, p))
-        .bimap(
-          es => InvalidPropertiesError(es.toNonEmptyList),
-          xs => cc.rawConstruct(xs)
-        )
 
     // case objects are inlined as strings
     if (cc.isObject)
@@ -58,7 +57,13 @@ private[scanamo] trait Derivation {
       })
     else
       build(new DynamoFormat.ObjectFormat[T] {
-        def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
+        def readObject(o: DynamoObject): Either[DynamoReadError, T] =
+          cc.parameters.toList
+            .parTraverse(decodeField(o, _))
+            .bimap(
+              es => InvalidPropertiesError(es.toNonEmptyList),
+              xs => cc.rawConstruct(xs)
+            )
 
         def writeObject(t: T): DynamoObject =
           DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) {
@@ -69,9 +74,7 @@ private[scanamo] trait Derivation {
       })
   }
 
-  // Derivation for ADTs, they are encoded as an object of two properties:
-  //   - `tag`: the name of the case class/object within the ADT
-  //   - `value`: the encoded value for that particular case class/object
+  // Derivation for ADTs, they are encoded as an object of one property, the key being the case name
   def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] = {
     def decode(o: DynamoObject): Either[DynamoReadError, T] =
       (for {
