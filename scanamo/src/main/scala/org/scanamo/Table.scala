@@ -3,7 +3,6 @@ package org.scanamo
 import cats.{ Monad, MonoidK }
 import com.amazonaws.services.dynamodbv2.model.{ BatchWriteItemResult, DeleteItemResult, QueryResult, ScanResult }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
-import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
@@ -21,7 +20,7 @@ import org.scanamo.update.UpdateExpression
   *
   * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
   * ...   import org.scanamo.syntax._
-  * ...   import org.scanamo.auto._
+  * ...   import org.scanamo.generic.auto._
   * ...   val transport = Table[Transport](t)
   * ...   val operations = for {
   * ...     _ <- transport.putAll(Set(
@@ -52,7 +51,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
@@ -85,7 +84,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("colour" -> S) { (t, i) =>
     * ...   val transport = Table[Transport](t)
@@ -104,7 +103,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
     *
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("organisation" -> S, "repository" -> S)("language" -> S, "license" -> S) { (t, i) =>
     * ...   val githubProjects = Table[GithubProject](t)
@@ -139,7 +138,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("location" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val forecast = Table[Forecast](t)
     * ...   val operations = for {
     * ...     _ <- forecast.put(Forecast("London", "Rain"))
@@ -157,7 +156,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val characters = Table[Character](t)
     * ...   val operations = for {
     * ...     _ <- characters.put(Character("The Doctor", List("Ecclestone", "Tennant", "Smith")))
@@ -175,7 +174,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val characters = Table[Character](t)
     * ...   val operations = for {
     * ...     _ <- characters.update("name" -> "James Bond", append("actors" -> "Craig"))
@@ -193,7 +192,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("kind" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val fruits = Table[Fruit](t)
     * ...   val operations = for {
     * ...     _ <- fruits.put(Fruit("watermelon", List("USA")))
@@ -212,7 +211,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val foos = Table[Foo](t)
     * ...   val operations = for {
     * ...     _ <- foos.put(Foo("x", 0, List("First")))
@@ -230,7 +229,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val bars = Table[Bar](t)
     * ...   val operations = for {
     * ...     _ <- bars.put(Bar("x", 1L, Set("First")))
@@ -251,7 +250,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("id" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val outers = Table[Outer](t)
     * ...   val id = java.util.UUID.fromString("a8345373-9a93-43be-9bcd-e3682c9197f4")
     * ...   val operations = for {
@@ -271,7 +270,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("id" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val things = Table[Thing](t)
     * ...   val operations = for {
     * ...     _ <- things.put(Thing("a1", 3, None))
@@ -296,7 +295,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
     * ...     _ <- transport.putAll(Set(
@@ -326,7 +325,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val scanamo = Scanamo(client)
     * >>> val (get, scan, query) = LocalDynamoDB.withRandomTable(client)("country" -> S, "name" -> S) { t =>
     * ...   import org.scanamo.syntax._
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo.generic.auto._
     * ...   val cityTable = Table[City](t)
     * ...   val ops = for {
     * ...     _ <- cityTable.putAll(Set(
@@ -357,7 +356,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     * >>> import org.scanamo.query._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
@@ -515,7 +514,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * {{{
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
@@ -573,7 +572,8 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
-    * ...   import org.scanamo.auto._
+    * ...   import org.scanamo._
+    * ...   import org.scanamo.generic.auto._
     * ...   val table = Table[Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey"))
@@ -621,10 +621,10 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import cats.implicits._
-    * >>> import org.scanamo.error._
+    * >>> import org.scanamo._
     * >>> import org.scanamo.ops._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     * >>> import org.scanamo.query._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
@@ -658,7 +658,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
@@ -714,10 +714,10 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import cats.implicits._
-    * >>> import org.scanamo.error._
+    * >>> import org.scanamo._
     * >>> import org.scanamo.ops._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     * >>> import org.scanamo.query._
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
@@ -755,7 +755,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   val table = Table[Bear](t)

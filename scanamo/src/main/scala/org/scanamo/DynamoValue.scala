@@ -2,7 +2,6 @@ package org.scanamo
 
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
-import org.scanamo.error.DynamoReadError
 
 /**
   * A `DynamoValue` is a pure representation of an `AttributeValue` from the AWS SDK.

@@ -1,9 +1,8 @@
-package org.scanamo.error
+package org.scanamo
 
 import cats.data.NonEmptyList
 import cats.Show
 import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException
-import org.scanamo.DynamoValue
 
 sealed abstract class ScanamoError
 final case class ConditionNotMet(e: ConditionalCheckFailedException) extends ScanamoError

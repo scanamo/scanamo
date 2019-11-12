@@ -166,7 +166,22 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       )
     case Pure(xs)       => Some(xs)
     case Concat(xs, ys) => (xs.asArray, ys.asArray).mapN(_ ++ _)
-    case _              => None
+    case StrictS(xs) =>
+      Some(xs.stream.map[DynamoValue](DynamoValue.fromString(_)).reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _).reverse)
+    case PureS(xs) => Some(xs.map(DynamoValue.fromString))
+    case StrictN(xs) =>
+      Some(
+        xs.stream
+          .map[DynamoValue](DynamoValue.unsafeFromNumber(_))
+          .reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _)
+          .reverse
+      )
+    case PureN(xs) => Some(xs.map(DynamoValue.unsafeFromNumber))
+    case StrictB(xs) =>
+      Some(
+        xs.stream.map[DynamoValue](DynamoValue.fromByteBuffer(_)).reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _).reverse
+      )
+    case PureB(xs) => Some(xs.map(DynamoValue.fromByteBuffer))
   }
 
   /**

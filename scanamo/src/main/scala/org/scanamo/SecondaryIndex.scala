@@ -2,7 +2,6 @@ package org.scanamo
 
 import cats.{ Monad, MonoidK }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
-import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
@@ -26,7 +25,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("antagonist" -> S) { (t, i) =>
     * ...   val table = Table[Bear](t)
@@ -73,7 +72,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("organisation" -> S, "repository" -> S)("language" -> S, "license" -> S) { (t, i) =>
     * ...   val githubProjects = Table[GithubProject](t)
@@ -124,7 +123,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S
@@ -159,7 +158,7 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
     * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S

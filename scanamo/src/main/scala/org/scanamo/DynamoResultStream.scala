@@ -5,7 +5,6 @@ import cats.MonoidK.ops._
 import cats.free.{ Free, FreeT }
 import cats.syntax.semigroupk._
 import com.amazonaws.services.dynamodbv2.model.{ QueryResult, ScanResult }
-import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA, ScanamoOpsT }
 import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
 

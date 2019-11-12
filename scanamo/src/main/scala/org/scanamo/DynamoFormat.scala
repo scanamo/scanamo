@@ -11,7 +11,6 @@ import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
-import org.scanamo.error._
 
 import scala.reflect.ClassTag
 
@@ -29,7 +28,7 @@ import scala.reflect.ClassTag
   * }}}
   *
   * {{{
-  * >>> import org.scanamo.auto._
+  * >>> import org.scanamo.generic.auto._
   * >>>
   * >>> case class Farm(animals: List[String])
   * >>> case class Farmer(name: String, age: Long, farm: Farm)
@@ -45,11 +44,13 @@ import scala.reflect.ClassTag
   * >>> case object Aardvark extends Animal
   * >>> case object Zebra extends Animal
   * >>> case class Pet(name: String, animal: Animal)
+  * >>> val pet1 = Pet("Amy", Aardvark)
+  * >>> val pet2 = Pet("Zebediah", Zebra)
   * >>> val petF = DynamoFormat[Pet]
-  * >>> petF.read(petF.write(Pet("Amy", Aardvark)))
+  * >>> petF.read(petF.write(pet1))
   * Right(Pet(Amy,Aardvark))
   *
-  * >>> petF.read(petF.write(Pet("Zebediah", Zebra)))
+  * >>> petF.read(petF.write(pet2))
   * Right(Pet(Zebediah,Zebra))
   * }}}
   *
@@ -62,7 +63,7 @@ import scala.reflect.ClassTag
   * >>> invalid
   * Left(InvalidPropertiesError(NonEmptyList((age,NoPropertyOfType(N,DynString(none of your business))), (farm,MissingProperty))))
   *
-  * >>> invalid.leftMap(cats.Show[error.DynamoReadError].show)
+  * >>> invalid.leftMap(cats.Show[DynamoReadError].show)
   * Left('age': not of type: 'N' was 'DynString(none of your business)', 'farm': missing)
   * }}}
   *
@@ -74,8 +75,41 @@ trait DynamoFormat[T] {
   def write(t: T): DynamoValue
 }
 
-object DynamoFormat extends EnumDynamoFormat {
+object DynamoFormat extends LowPriorityFormats {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
+
+  def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
+    new DynamoFormat[T] {
+      def read(av: DynamoValue): Either[DynamoReadError, T] = r(av)
+      def write(t: T): DynamoValue = w(t)
+    }
+
+  /**
+    * DynamoFormats for object-like structures
+    *
+    * @note All data types used as the carrier type in [[Table]] operations
+    * should derive an instance from this class
+    */
+  trait ObjectFormat[T] extends DynamoFormat[T] {
+    def readObject(o: DynamoObject): Either[DynamoReadError, T]
+    def writeObject(t: T): DynamoObject
+
+    final def read(dv: DynamoValue): Either[DynamoReadError, T] =
+      dv.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", dv)))(readObject)
+
+    final def write(t: T): DynamoValue =
+      writeObject(t).toDynamoValue
+  }
+
+  object ObjectFormat {
+    def apply[T](implicit T: ObjectFormat[T]): ObjectFormat[T] = T
+
+    def build[T](r: DynamoObject => Either[DynamoReadError, T], w: T => DynamoObject): ObjectFormat[T] =
+      new ObjectFormat[T] {
+        def readObject(o: DynamoObject): Either[DynamoReadError, T] = r(o)
+        def writeObject(t: T): DynamoObject = w(t)
+      }
+  }
 
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
     coerce[String, N, NumberFormatException](f)
@@ -108,12 +142,12 @@ object DynamoFormat extends EnumDynamoFormat {
     * >>> case class UserId(value: String)
     *
     * >>> implicit val userIdFormat =
-    * ...   DynamoFormat.iso[UserId, String](UserId.apply)(_.value)
+    * ...   DynamoFormat.iso[UserId, String](UserId.apply, _.value)
     * >>> DynamoFormat[UserId].read(DynamoValue.fromString("Eric"))
     * Right(UserId(Eric))
     * }}}
     */
-  def iso[A, B](r: B => A)(w: A => B)(implicit f: DynamoFormat[B]) =
+  def iso[A, B](r: B => A, w: A => B)(implicit f: DynamoFormat[B]) =
     new DynamoFormat[A] {
       final def read(item: DynamoValue) = f.read(item).map(r)
       final def write(t: A) = f.write(w(t))
@@ -460,7 +494,7 @@ object DynamoFormat extends EnumDynamoFormat {
     *     |   Right(s)
     * }}}
     */
-  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = iso[Set[T], List[T]](_.toSet)(_.toList)
+  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = iso[Set[T], List[T]](_.toSet, _.toList)
 
   private val javaMapFormat: DynamoFormat[DynamoObject] =
     attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
@@ -552,4 +586,8 @@ object DynamoFormat extends EnumDynamoFormat {
   )(
     _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
   )
+}
+
+private[scanamo] trait LowPriorityFormats {
+  implicit final def exportedFormat[A](implicit E: generic.ExportedDynamoFormat[A]): DynamoFormat[A] = E.instance
 }

@@ -1,11 +1,14 @@
 package org.scanamo
 
+import cats.Parallel
+import cats.kernel.Monoid
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.util.{ Map => JMap, HashMap }
-import org.scanamo.error.DynamoReadError
 import cats.syntax.apply._
+import cats.syntax.semigroup._
 import cats.instances.either._
 import cats.instances.option._
+import scala.annotation.tailrec
 
 /**
   * A `DynamoObject` is a map of strings to values that can be embedded into
@@ -21,10 +24,13 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     */
   final def apply(key: String): Option[DynamoValue] = self match {
     case Empty          => None
-    case Strict(xs)     => Option(xs.get(key)).map(DynamoValue.fromAttributeValue)
+    case Strict(xs)     => val x = xs.get(key); if (x eq null) None else Some(DynamoValue.fromAttributeValue(x))
     case Pure(xs)       => xs.get(key)
     case Concat(xs, ys) => xs(key) orElse ys(key)
   }
+
+  final def get[A: DynamoFormat](key: String): Either[DynamoReadError, A] =
+    apply(key).getOrElse(DynamoValue.nil).as[A]
 
   /**
     * Gets the size of the map
@@ -205,6 +211,88 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     * Operator alias for `concat`
     */
   final def <>(that: DynamoObject): DynamoObject = self concat that
+
+  /**
+    * Traverse the object in parallel fashion and build up monoidal structure
+    */
+  final def parTraverse[F[_]: Parallel, M: Monoid](f: DynamoValue => F[M]): F[M] =
+    parTraverseWith(f)(Monoid[M].empty)(_ |+| _)
+
+  /**
+    * Traverse the object in parallel foshiono and build up a result out of each value
+    */
+  final def parTraverseWith[F[_]: Parallel, M](f: DynamoValue => F[M])(z: M)(c: (M, M) => M): F[M] =
+    parTraverseWithKey((_, dv) => f(dv))(z)(c)
+
+  /**
+    * Traverse the object in parallel fashion and build up a result out of each value and its label
+    */
+  final def parTraverseWithKey[F[_], M](
+    f: (String, DynamoValue) => F[M]
+  )(z: M)(c: (M, M) => M)(implicit F: Parallel[F]): F[M] = {
+    @tailrec def parTraverseWithKey_(xs: List[DynamoObject], r: F.F[M]): F.F[M] =
+      xs match {
+        case Nil =>
+          r
+        case Empty :: xs =>
+          parTraverseWithKey_(xs, r)
+        case Strict(ys) :: xs =>
+          val r2 = ys.entrySet.stream.reduce[F.F[M]](
+            r,
+            (fm: F.F[M], kv: JMap.Entry[String, AttributeValue]) =>
+              F.apply.map2(fm, F.parallel(f(kv.getKey, DynamoValue.fromAttributeValue(kv.getValue))))(c),
+            (x: F.F[M], y: F.F[M]) => F.apply.map2(x, y)(c)
+          )
+          parTraverseWithKey_(xs, r2)
+        case Pure(ys) :: xs =>
+          val r2 = ys.foldLeft(r) {
+            case (fm, (k, dv)) =>
+              F.apply.map2(fm, F.parallel(f(k, dv)))(c)
+          }
+          parTraverseWithKey_(xs, r2)
+        case Concat(ys1, ys2) :: xs =>
+          parTraverseWithKey_(ys1 :: ys2 :: xs, r)
+      }
+
+    F.sequential(parTraverseWithKey_(List(self), F.applicative.pure(z)))
+  }
+
+  /**
+    * Traverse the object into a monoidal structure
+    */
+  final def traverse[M: Monoid](f: DynamoValue => M): M =
+    traverseWith(f)(Monoid[M].empty)(_ |+| _)
+
+  /**
+    * Traverse the object and build up a result out of each value
+    */
+  final def traverseWith[M](f: DynamoValue => M)(z: M)(c: (M, M) => M): M =
+    traverseWithKey((_, dv) => f(dv))(z)(c)
+
+  /**
+    * Traverse the object and build up a result out of each value and its label
+    */
+  final def traverseWithKey[M](f: (String, DynamoValue) => M)(z: M)(c: (M, M) => M): M = {
+    @tailrec def traverseWithKey_(xs: List[DynamoObject], r: M): M =
+      xs match {
+        case Nil         => r
+        case Empty :: xs => traverseWithKey_(xs, r)
+        case Strict(ys) :: xs =>
+          val r2 = ys.entrySet.stream.reduce[M](
+            r,
+            (m, kv) => c(m, f(kv.getKey, DynamoValue.fromAttributeValue(kv.getValue))),
+            (x, y) => c(x, y)
+          )
+          traverseWithKey_(xs, r2)
+        case Pure(ys) :: xs =>
+          val r2 = ys.foldLeft(z) { case (m, (k, dv)) => c(m, f(k, dv)) }
+          traverseWithKey_(xs, r2)
+        case Concat(ys1, ys2) :: xs =>
+          traverseWithKey_(ys1 :: ys2 :: xs, r)
+      }
+
+    traverseWithKey_(List(self), z)
+  }
 
   final override def equals(that: Any): Boolean =
     that.isInstanceOf[DynamoObject] && (internalToMap == that.asInstanceOf[DynamoObject].internalToMap)

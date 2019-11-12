@@ -6,7 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest._
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 class DynamoFormatTest extends FunSpec with Matchers with ScalaCheckDrivenPropertyChecks {
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
