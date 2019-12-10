@@ -48,17 +48,17 @@ class UpdateExpressionTest
 
   it("should have all value placeholders in the expression") {
     check { (ue: UpdateExpression) =>
-      ue.attributeValues.keys.forall(s => {
+      ue.attributeValues.keys.forall { s =>
         ue.expression.contains(s)
-      })
+      }
     }
   }
 
   it("should have all name placeholders in the expression") {
     check { (ue: UpdateExpression) =>
-      ue.attributeNames.keys.forall(s => {
+      ue.attributeNames.keys.forall { s =>
         ue.expression.contains(s)
-      })
+      }
     }
   }
 
