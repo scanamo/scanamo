@@ -84,5 +84,6 @@ class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) e
             a => F.delay(Right(a))
           )
         )
+    case TransactWriteItems(req)  => eff(client.transactWriteItemsAsync _, req)
   }
 }
