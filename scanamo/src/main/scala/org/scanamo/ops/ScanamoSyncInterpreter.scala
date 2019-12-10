@@ -43,6 +43,6 @@ class ScanamoSyncInterpreter(client: AmazonDynamoDB) extends (ScanamoOpsA ~> Id)
       Either.catchOnly[ConditionalCheckFailedException] {
         client.updateItem(JavaRequests.update(req))
       }
-    case TransactWriteItems(req) =>   client.transactWriteItems(req)
+    case TransactWriteItems(req) => client.transactWriteItems(req)
   }
 }

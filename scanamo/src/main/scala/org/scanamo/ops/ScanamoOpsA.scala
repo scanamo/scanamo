@@ -46,6 +46,6 @@ object ScanamoOps {
   ): ScanamoOps[Either[ConditionalCheckFailedException, UpdateItemResult]] =
     liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, UpdateItemResult]](ConditionalUpdate(req))
 
-  def transactWriteItems (req : TransactWriteItemsRequest): ScanamoOps[TransactWriteItemsResult] =
+  def transactWriteItems(req: TransactWriteItemsRequest): ScanamoOps[TransactWriteItemsResult] =
     liftF[ScanamoOpsA, TransactWriteItemsResult](TransactWriteItems(req))
 }
