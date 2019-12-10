@@ -12,6 +12,7 @@ import zio.DefaultRuntime
 import zio.stream.interop.catz._
 import zio.stream.{ Sink, Stream }
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
+import org.scanamo.ops.ScanamoOps
 
 class ScanamoZioSpec extends FunSpec with Matchers {
   val client = LocalDynamoDB.client()
@@ -521,6 +522,40 @@ class ScanamoZioSpec extends FunSpec with Matchers {
       unsafeRun(zio.exec(ops)) should equal(
         List(Right(Gremlin(1, false)))
       )
+    }
+  }
+
+  it("transact table write items") {
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      val itemsTable = Table[Item](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
+        _ <- itemsTable.transactWriteToTable(Item("one") :: Item("two") :: Nil)
+        items <- itemsTable.scan()
+      } yield items
+
+      unsafeRun(zio.exec(ops)) should equal(
+        List(Right(Item("one")), Right(Item("two")))
+      )
+    }
+  }
+
+  it("transact write items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("name" -> S) { t2 =>
+        val itemsTable1 = Table[Item](t1)
+        val itemsTable2 = Table[Item](t2)
+
+        val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
+          _ <- ScanamoFree.transactWrite((t1 -> Item("one")) :: (t2 -> Item("two")) :: Nil)
+          items1 <- itemsTable1.scan()
+          items2 <- itemsTable2.scan()
+        } yield items1 ::: items2
+
+        unsafeRun(zio.exec(ops)) should equal(
+          List(Right(Item("one")), Right(Item("two")))
+        )
+      }
     }
   }
 }
