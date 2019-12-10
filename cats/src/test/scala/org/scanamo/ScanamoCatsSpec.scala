@@ -2,7 +2,8 @@ package org.scanamo
 
 import cats.effect.IO
 import cats.implicits._
-import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
@@ -10,7 +11,7 @@ import org.scanamo.syntax._
 import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
 
-class ScanamoCatsSpec extends FunSpec with Matchers {
+class ScanamoCatsSpec extends AnyFunSpec with Matchers {
   val client = LocalDynamoDB.client()
   val scanamo = ScanamoCats[IO](client)
 
