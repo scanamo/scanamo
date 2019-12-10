@@ -4,6 +4,7 @@ import org.scanamo.DynamoFormat
 import org.joda.time.{ DateTime, Instant }
 
 object JodaFormats {
+
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
     *  {{{
     *  prop> import org.joda.time.Instant
@@ -15,9 +16,7 @@ object JodaFormats {
     *  }}}
     */
   implicit val jodaInstantAsLongFormat =
-    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_))(
-      x => x.getMillis
-    )
+    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_))(x => x.getMillis)
 
   /**
     *  Convenient, readable format for Joda DateTime, but requires that all dates serialised

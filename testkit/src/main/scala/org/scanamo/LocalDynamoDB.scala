@@ -56,12 +56,13 @@ object LocalDynamoDB {
     thunk: => T
   ): T = {
     createTable(client)(tableName)(attributeDefinitions: _*)
-    val res = try {
-      thunk
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 
@@ -80,12 +81,13 @@ object LocalDynamoDB {
       }
     }
 
-    val res = try {
-      thunk(tableName)
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk(tableName)
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 
@@ -115,12 +117,13 @@ object LocalDynamoDB {
       primaryIndexAttributes.toList,
       secondaryIndexAttributes.toList
     )
-    val res = try {
-      thunk
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 
@@ -149,12 +152,13 @@ object LocalDynamoDB {
       }
     }
 
-    val res = try {
-      thunk(tableName, indexName)
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk(tableName, indexName)
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 
