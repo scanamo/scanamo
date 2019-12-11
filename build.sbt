@@ -280,5 +280,6 @@ val micrositeSettings = Seq(
     "gray-light" -> "#E3E2E3",
     "gray-lighter" -> "#F4F3F4",
     "white-color" -> "#FFFFFF"
-  )
+  ),
+  micrositeCompilingDocsTool := WithMdoc
 )
