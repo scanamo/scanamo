@@ -7,10 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import org.scanamo.syntax._
 import org.scanamo.DynamoFormat
 
-class UpdateExpressionTest
-    extends AnyFunSpec
-    with Matchers
-    with org.scalatestplus.scalacheck.Checkers {
+class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestplus.scalacheck.Checkers {
   implicit lazy val arbString: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
   def leaf: Gen[UpdateExpression] =
