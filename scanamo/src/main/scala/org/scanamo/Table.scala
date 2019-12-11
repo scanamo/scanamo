@@ -803,8 +803,8 @@ case class Table[V: DynamoFormat](name: String) {
   def descending =
     TableWithOptions(name, ScanamoQueryOptions.default).descending
 
-  def transactWriteToTable(vs: List[V]): ScanamoOps[TransactWriteItemsResult] =
-    ScanamoFree.transactWriteToTable(name)(vs)
+  def transactPutAll(vs: List[V]): ScanamoOps[TransactWriteItemsResult] =
+    ScanamoFree.transactPutAllTable(name)(vs)
 }
 
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {

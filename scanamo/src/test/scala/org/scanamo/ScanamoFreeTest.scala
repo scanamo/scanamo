@@ -50,11 +50,11 @@ class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpre
           else
             counter -> new QueryResult().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
       )
-    case BatchWrite(_)         => ???
-    case BatchGet(_)           => ???
-    case Update(_)             => ???
-    case ConditionalUpdate(_)  => ???
-    case TransactWriteItems(_) => ???
+    case BatchWrite(_)        => ???
+    case BatchGet(_)          => ???
+    case Update(_)            => ???
+    case ConditionalUpdate(_) => ???
+    case TransactPutAll(_)    => ???
   }
 }
 

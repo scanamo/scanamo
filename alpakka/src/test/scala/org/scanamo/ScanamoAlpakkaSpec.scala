@@ -605,7 +605,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       val itemsTable = Table[Item](t)
 
       val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
-        _ <- itemsTable.transactWriteToTable(Item("one") :: Item("two") :: Nil)
+        _ <- itemsTable.transactPutAll(Item("one") :: Item("two") :: Nil)
         items <- itemsTable.scan()
       } yield items
 
@@ -626,7 +626,7 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         val itemsTable2 = Table[Item](t2)
 
         val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
-          _ <- ScanamoFree.transactWrite((t1 -> Item("one")) :: (t2 -> Item("two")) :: Nil)
+          _ <- ScanamoFree.transactPutAll((t1 -> Item("one")) :: (t2 -> Item("two")) :: Nil)
           items1 <- itemsTable1.scan()
           items2 <- itemsTable2.scan()
         } yield items1 ::: items2

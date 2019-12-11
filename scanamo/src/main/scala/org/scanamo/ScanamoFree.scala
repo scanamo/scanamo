@@ -37,12 +37,12 @@ object ScanamoFree {
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
 
-  def transactWriteToTable[T](
+  def transactPutAllTable[T](
     tableName: String
   )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] =
-    transactWrite(List.fill(items.size)(tableName).zip(items))
+    transactPutAll(items.map(tableName -> _))
 
-  def transactWrite[T](
+  def transactPutAll[T](
     tableAndItems: List[(String, T)]
   )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] = {
     val dItems = tableAndItems.map {
@@ -52,7 +52,7 @@ object ScanamoFree {
             new Put().withItem(f.write(itm).asObject.getOrElse(DynamoObject.empty).toJavaMap).withTableName(tableName)
           )
     }
-    ScanamoOps.transactWriteItems(new TransactWriteItemsRequest().withTransactItems(dItems.asJava))
+    ScanamoOps.transactPutAll(new TransactWriteItemsRequest().withTransactItems(dItems.asJava))
   }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
