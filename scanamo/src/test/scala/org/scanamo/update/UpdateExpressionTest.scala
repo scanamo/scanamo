@@ -2,13 +2,12 @@ package org.scanamo.update
 
 import org.scalacheck.{ Arbitrary, Gen }
 import org.scalacheck.Arbitrary._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scanamo.syntax._
 import org.scanamo.DynamoFormat
 
-class UpdateExpressionTest
-    extends org.scalatest.FunSpec
-    with org.scalatest.Matchers
-    with org.scalatestplus.scalacheck.Checkers {
+class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestplus.scalacheck.Checkers {
   implicit lazy val arbString: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
   def leaf: Gen[UpdateExpression] =
@@ -48,17 +47,17 @@ class UpdateExpressionTest
 
   it("should have all value placeholders in the expression") {
     check { (ue: UpdateExpression) =>
-      ue.attributeValues.keys.forall(s => {
+      ue.attributeValues.keys.forall { s =>
         ue.expression.contains(s)
-      })
+      }
     }
   }
 
   it("should have all name placeholders in the expression") {
     check { (ue: UpdateExpression) =>
-      ue.attributeNames.keys.forall(s => {
+      ue.attributeNames.keys.forall { s =>
         ue.expression.contains(s)
-      })
+      }
     }
   }
 

@@ -7,9 +7,7 @@ case class AttributeName(components: List[String], index: Option[Int]) {
   def placeholder(prefix: String): String =
     index.foldLeft(
       components.map(s => s"$prefix$s").mkString(".#")
-    )(
-      (p, i) => s"$p[$i]"
-    )
+    )((p, i) => s"$p[$i]")
 
   def attributeNames(prefix: String): Map[String, String] =
     Map(components.map(s => s"$prefix$s" -> s): _*)

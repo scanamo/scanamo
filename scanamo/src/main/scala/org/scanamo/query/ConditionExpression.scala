@@ -35,11 +35,10 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
           Some(state.apply(t))
         )
       )
-      .map(
-        either =>
-          either
-            .leftMap[ScanamoError](ConditionNotMet(_))
-            .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
+      .map(either =>
+        either
+          .leftMap[ScanamoError](ConditionNotMet(_))
+          .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
       )
 }
 

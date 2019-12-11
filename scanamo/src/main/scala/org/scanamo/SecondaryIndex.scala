@@ -12,6 +12,7 @@ import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoSc
   * Can be constructed via the [[org.scanamo.Table#index index]] method on [[org.scanamo.Table Table]]
   */
 sealed abstract class SecondaryIndex[V] {
+
   /**
     * Scan a secondary index
     *

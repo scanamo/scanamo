@@ -1,6 +1,7 @@
 package org.scanamo
 
-import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.fixtures._
@@ -14,7 +15,7 @@ import zio.stream.{ Sink, Stream }
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
 import org.scanamo.ops.ScanamoOps
 
-class ScanamoZioSpec extends FunSpec with Matchers {
+class ScanamoZioSpec extends AnyFunSpec with Matchers {
   val client = LocalDynamoDB.client()
   val zio = ScanamoZio(client)
   val RTS = new DefaultRuntime {}
