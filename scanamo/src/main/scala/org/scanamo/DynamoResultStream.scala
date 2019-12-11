@@ -32,13 +32,12 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
           .foldLeft(
             Free
               .pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[DynamoObject])]((results, lastKey))
-          )(
-            (rs, k) =>
-              for {
-                results <- rs
-                newReq = prepare(newLimit, k)(req)
-                more <- streamMore(newReq)
-              } yield (results._1 ::: more._1, more._2)
+          )((rs, k) =>
+            for {
+              results <- rs
+              newReq = prepare(newLimit, k)(req)
+              more <- streamMore(newReq)
+            } yield (results._1 ::: more._1, more._2)
           )
       } yield result
     streamMore(req)
@@ -57,8 +56,8 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
           val l1 = limit(req).fold(pageSize)(l => Math.min(pageSize, l - results.length))
           lastEvaluatedKey(res)
             .filterNot(_ => l1 <= 0)
-            .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Either[DynamoReadError, T]]](results))(
-              (res, k) => res <+> streamMore(withExclusiveStartKey(k)(req), l1)
+            .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Either[DynamoReadError, T]]](results))((res, k) =>
+              res <+> streamMore(withExclusiveStartKey(k)(req), l1)
             )
         }
       }
