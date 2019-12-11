@@ -4,11 +4,12 @@ import scala.reflect.runtime.universe._
 
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scalacheck._
-import org.scalatest._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scanamo.generic.auto._
 
-class DynamoFormatTest extends FunSpec with Matchers with ScalaCheckDrivenPropertyChecks {
+class DynamoFormatTest extends AnyFunSpec with Matchers with ScalaCheckDrivenPropertyChecks {
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result
   def testReadWrite[A: DynamoFormat: TypeTag](gen: Gen[A]): Unit = {
     val typeLabel = typeTag[A].tpe.toString

@@ -2,13 +2,12 @@ package org.scanamo.update
 
 import org.scalacheck.{ Arbitrary, Gen }
 import org.scalacheck.Arbitrary._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scanamo.syntax._
 import org.scanamo.DynamoFormat
 
-class UpdateExpressionTest
-    extends org.scalatest.FunSpec
-    with org.scalatest.Matchers
-    with org.scalatestplus.scalacheck.Checkers {
+class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestplus.scalacheck.Checkers {
   implicit lazy val arbString: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
   def leaf: Gen[UpdateExpression] =
