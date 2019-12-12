@@ -1,7 +1,13 @@
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
-import com.amazonaws.services.dynamodbv2.model.{ BatchWriteItemResult, DeleteItemResult, QueryResult, ScanResult }
+import com.amazonaws.services.dynamodbv2.model.{
+  BatchWriteItemResult,
+  DeleteItemResult,
+  QueryResult,
+  ScanResult,
+  TransactWriteItemsResult
+}
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
@@ -796,6 +802,9 @@ case class Table[V: DynamoFormat](name: String) {
 
   def descending =
     TableWithOptions(name, ScanamoQueryOptions.default).descending
+
+  def transactPutAll(vs: List[V]): ScanamoOps[TransactWriteItemsResult] =
+    ScanamoFree.transactPutAllTable(name)(vs)
 }
 
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {
