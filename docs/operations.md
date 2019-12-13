@@ -25,7 +25,7 @@ and queries against [secondary indexes](using-indexes.html).
 Often when using DynamoDB, the primary use case is simply putting objects into 
 Dynamo and subsequently retrieving them:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -37,7 +37,7 @@ LocalDynamoDB.createTable(client)("muppets")("name" -> S)
 
 case class Muppet(name: String, species: String)
 ```
-```tut:book
+```scala mdoc
 val muppets = Table[Muppet]("muppets")
 val operations = for {
   _ <- muppets.put(Muppet("Kermit", "Frog"))
@@ -55,7 +55,7 @@ Note that when using `Table` no operations are actually executed against DynamoD
 
 To remove an item in its entirety, we can use delete:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 
@@ -66,7 +66,7 @@ LocalDynamoDB.createTable(client)("villains")("name" -> S)
 
 case class Villain(name: String, catchphrase: String)
 ```
-```tut:book
+```scala mdoc
 val villains = Table[Villain]("villains")
 val operations = for {
   _ <- villains.put(Villain("Dalek", "EXTERMINATE!"))
@@ -83,7 +83,7 @@ scanamo.exec(operations)
 If you want to change some of the fields of an item, that don't form part of its key,
  without replacing the item entirely, you can use the `update` operation:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 
@@ -99,13 +99,13 @@ val operations = for {
     set("goals" -> 2) and append("scorers" -> "Barnes") and remove("mascot"))
 } yield updated
 ```
-```tut:book
+```scala mdoc
 scanamo.exec(operations)
 ```
 
 Which fields are updated can be based on incoming data:
 
-```tut:silent
+```scala mdoc:silent
 import cats.data.NonEmptyList
 import cats.implicits._
 import org.scanamo.ops.ScanamoOps
@@ -129,7 +129,7 @@ def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadErr
   )
 }
 ```
-```tut:book
+```scala mdoc
 val updates = List(
   FavouriteUpdate("Alice", Some("Aquamarine"), Some(93L)),
   FavouriteUpdate("Alice", Some("Red"), None),
@@ -153,7 +153,7 @@ Further examples, showcasing different types of update can be found in the
 If you want to go through all elements of a table, or index, Scanamo 
 supports scanning it:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 
@@ -164,7 +164,7 @@ LocalDynamoDB.createTable(client)("lines")("mode" -> S, "line" -> S)
 
 case class Transport(mode: String, line: String)
 ```
-```tut:book
+```scala mdoc
 val transportTable = Table[Transport]("lines")
 val operations = for {
   _ <- transportTable.putAll(Set(
@@ -183,7 +183,7 @@ scanamo.exec(operations)
 
 Scanamo can be used to perform most queries that can be made against DynamoDB
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 
@@ -203,7 +203,7 @@ val operations = for {
   tubesStartingWithC <- transportTable.query("mode" -> "Underground" and ("line" beginsWith "C"))
 } yield tubesStartingWithC.toList
 ```
-```tut:book
+```scala mdoc
 scanamo.exec(operations)
 ```
 

@@ -15,7 +15,7 @@ in Dynamo. Even though a filter may lead to a small number of results being
 returned, it could still exhaust the provisioned capacity or force the 
 provisioned capacity to autoscale up to an expensive level.
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -26,7 +26,7 @@ val scanamo = Scanamo(client)
 case class Station(line: String, name: String, zone: Int)
 val stationTable = Table[Station]("Station")
 ```
-```tut:book
+```scala mdoc
 LocalDynamoDB.withTable(client)("Station")("line" -> S, "name" -> S) {
   val ops = for {
     _ <- stationTable.putAll(Set(

@@ -20,7 +20,7 @@ sealed trait families where all the contained types have a defined or derivable
 
 Scanamo can automatically derive `DynamoFormat` for case classes (as long as all its members can also be derived). Ex:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -42,7 +42,7 @@ table.putAll(
 Scanamo offers a convenient way (semi-automoatic) to derive `DynamoFormat` in your code. 
 Ex:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.semiauto._
@@ -64,7 +64,7 @@ to translate between the type and one Scanamo does already know about.
 
 For example, to store Joda `DateTime` objects as ISO `String`s in Dynamo:
 
-```tut:silent
+```scala mdoc:silent
 import org.joda.time._
 
 import org.scanamo._
@@ -78,7 +78,7 @@ val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("foo")("dateTime" -> S)
 ```
-```tut:book
+```scala mdoc
 implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
   DateTime.parse(_).withZone(DateTimeZone.UTC)
 )(
@@ -108,7 +108,7 @@ libraryDependencies += "com.gu" %% "scanamo-refined" % "x.y.z"
 
 And then import the support for refined types and define your model:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.refined._
 import org.scanamo.generic.auto._
@@ -126,7 +126,7 @@ LocalDynamoDB.createTable(client)("Customer")("age" -> N)
 
 You just now use it like if the type `PosInt` was natively supported by `scanamo`:
 
-```tut:book
+```scala mdoc
 val customerTable = Table[Customer]("Customer")
 val operations = for {
   _       <- customerTable.put(Customer(67))
@@ -140,7 +140,7 @@ scanamo.exec(operations).toList
 
 Scanamo uses [shapeless](https://github.com/milessabin/shapeless) and implicit derivation to automatically derive [`DynamoFormat`](latest/api/org/scanamo/DynamoFormat)s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of `id` and sort key `seqNo`):
 
-```tut:silent
+```scala mdoc:silent
 import java.util.UUID
 
 import org.scanamo._
@@ -161,7 +161,7 @@ val create = EventEnvelope(id, 0, Create("Something"))
 val delete = EventEnvelope(id, 1, Delete("Oops"))
 ```
 
-```tut:book
+```scala mdoc
 val attributeValue = DynamoFormat[EventEnvelope].write(create)
 
 val dynamoRecord = DynamoFormat[EventEnvelope].read(attributeValue)
@@ -171,7 +171,7 @@ If you look carefully at the attribute value (pretty-printed below) then you can
 
 Here is the pretty-printed attribute value that Scanamo generates:
 
-```
+```json
 {
   M: {
     seqNo={

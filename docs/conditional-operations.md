@@ -11,7 +11,7 @@ Modifying operations ([Put](operations.html#put-and-get), [Delete](operations.ht
 only have an effect if some state of the DynamoDB table is true at the time of 
 execution.
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -20,7 +20,7 @@ val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)
 ```
-```tut:book
+```scala mdoc
 val gremlinsTable = Table[Gremlin]("gremlins")
 LocalDynamoDB.withTable(client)("gremlins")("number" -> N) {
   val ops = for {

@@ -11,7 +11,7 @@ In the following example, we create and use a table called `transport` with a ha
 of `mode` and range key of `line` and a global secondary called `colour-index` 
 with only a hash key on the `colour` attribute:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -24,7 +24,7 @@ val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 ```
-```tut:book
+```scala mdoc
 LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")("mode" -> S, "line" -> S)("colour" -> S) {
   val operations = for {
     _ <- transport.putAll(Set(

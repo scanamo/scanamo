@@ -10,7 +10,7 @@ Whilst for simplicity most examples in these documents are based on synchronous
 requests to DynamoDB, Scanamo supports making the requests asynchronously with
 a client that implements the `AmazonDynamoDBAsync` interface:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -35,7 +35,7 @@ val ops = for {
   bunce <- farmTable.get("name" -> "Bunce")
 } yield bunce
 ```
-```scala
+```scala mdoc
 concurrent.Await.result(scanamo(ops), 5.seconds)
 ```
 
@@ -55,7 +55,7 @@ Using the Alpakka client means you need an `ActorSystem` and an
 `ActorMaterializer` in order to make use of the streaming infrastructure
 that the Alpakka interpreter uses behind the scenes:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import akka.actor.ActorSystem

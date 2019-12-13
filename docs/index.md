@@ -21,13 +21,13 @@ Note: the `LocalDynamoDB` object is provided by the `scanamo-testkit` package.
 
 Scanamo is published for Scala 2.11 and 2.12 to Maven Central, so just add the following to your `build.sbt`:
 
-```scala
+```sbt
 libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M10"
 ```
 
 then, given a table and some case classes
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -42,7 +42,7 @@ case class Farmer(name: String, age: Long, farm: Farm)
 ```
 we can simply `put` and `get` items from Dynamo, without boilerplate or reflection
 
-```tut:book
+```scala mdoc
 val table = Table[Farmer]("farmer")
 
 scanamo.exec(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))

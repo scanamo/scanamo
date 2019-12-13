@@ -25,7 +25,7 @@ LocalDynamoDB.createTable(client)("lemmings")("role" -> S)
 case class Lemming(role: String, number: Long)
 ```
 
-```tut:book
+```scala mdoc
 val lemmingsTable = Table[Lemming]("lemmings")
 val ops = for {
   _ <- lemmingsTable.putAll(Set(
