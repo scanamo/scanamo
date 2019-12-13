@@ -127,7 +127,7 @@ lazy val scanamo = (project in file("scanamo"))
       "joda-time"         % "joda-time"                 % "2.10.5" % Test,
       "org.scalatest"     %% "scalatest"                % "3.1.0" % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2",
-      "org.scalacheck"    %% "scalacheck"               % "1.14.2" % Test
+      "org.scalacheck"    %% "scalacheck"               % "1.14.3" % Test
     ) ++ customDeps(scalaVersion.value)
   )
   .dependsOn(testkit % "test->test")
@@ -157,7 +157,7 @@ lazy val catsEffect = (project in file("cats"))
       "io.monix"       %% "monix"       % "3.1.0" % Test,
       "co.fs2"         %% "fs2-core"    % "2.1.0" % Test,
       "org.scalatest"  %% "scalatest"   % "3.1.0" % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
+      "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -177,7 +177,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "2.0.0.0-RC10",
       "org.scalatest"  %% "scalatest"        % "3.1.0" % Test,
-      "org.scalacheck" %% "scalacheck"       % "1.14.2" % Test
+      "org.scalacheck" %% "scalacheck"       % "1.14.3" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
@@ -196,7 +196,7 @@ lazy val alpakka = (project in file("alpakka"))
       "org.typelevel"      %% "cats-free"                    % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.1.2",
       "org.scalatest"      %% "scalatest"                    % "3.1.0" % Test,
-      "org.scalacheck"     %% "scalacheck"                   % "1.14.2" % Test
+      "org.scalacheck"     %% "scalacheck"                   % "1.14.3" % Test
     ),
     fork in Test := true,
     // unidoc can work out links to other project, but scalac can't
@@ -215,7 +215,7 @@ lazy val joda = (project in file("joda"))
       "org.joda"       % "joda-convert" % "2.2.1" % Provided,
       "joda-time"      % "joda-time"    % "2.10.5",
       "org.scalatest"  %% "scalatest"   % "3.1.0" % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.14.2" % Test
+      "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     )
   )
   .dependsOn(scanamo)
