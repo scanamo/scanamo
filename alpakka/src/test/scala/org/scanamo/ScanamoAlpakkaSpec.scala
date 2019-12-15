@@ -13,6 +13,7 @@ import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Seconds, Span }
 import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
 import cats.implicits._
+import org.scanamo.ops.ScanamoOps
 
 class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
   implicit val system = ActorSystem("scanamo-alpakka")
@@ -596,6 +597,48 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
             List(Right(Gremlin(1, false)))
           )
         )
+    }
+  }
+
+  it("transact table write items") {
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      val itemsTable = Table[Item](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
+        _ <- itemsTable.transactPutAll(Item("one") :: Item("two") :: Nil)
+        items <- itemsTable.scan()
+      } yield items
+
+      scanamo
+        .exec[List[Either[DynamoReadError, Item]]](ops)
+        .runForeach(
+          _ should equal(
+            List(Right(Item("one")), Right(Item("two")))
+          )
+        )
+    }
+  }
+
+  it("transact write items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("name" -> S) { t2 =>
+        val itemsTable1 = Table[Item](t1)
+        val itemsTable2 = Table[Item](t2)
+
+        val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
+          _ <- ScanamoFree.transactPutAll((t1 -> Item("one")) :: (t2 -> Item("two")) :: Nil)
+          items1 <- itemsTable1.scan()
+          items2 <- itemsTable2.scan()
+        } yield items1 ::: items2
+
+        scanamo
+          .exec[List[Either[DynamoReadError, Item]]](ops)
+          .runForeach(
+            _ should equal(
+              List(Right(Item("one")), Right(Item("two")))
+            )
+          )
+      }
     }
   }
 }

@@ -37,6 +37,24 @@ object ScanamoFree {
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
 
+  def transactPutAllTable[T](
+    tableName: String
+  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] =
+    transactPutAll(items.map(tableName -> _))
+
+  def transactPutAll[T](
+    tableAndItems: List[(String, T)]
+  )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] = {
+    val dItems = tableAndItems.map {
+      case (tableName, itm) =>
+        new TransactWriteItem()
+          .withPut(
+            new Put().withItem(f.write(itm).asObject.getOrElse(DynamoObject.empty).toJavaMap).withTableName(tableName)
+          )
+    }
+    ScanamoOps.transactPutAll(new TransactWriteItemsRequest().withTransactItems(dItems.asJava))
+  }
+
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
     items.toDynamoObject
       .grouped(batchSize)
