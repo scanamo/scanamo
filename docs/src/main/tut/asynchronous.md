@@ -13,7 +13,7 @@ a client that implements the `AmazonDynamoDBAsync` interface:
 ```tut:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global

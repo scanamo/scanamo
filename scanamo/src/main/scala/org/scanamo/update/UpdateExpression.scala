@@ -41,7 +41,7 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
     case AndUpdate(l, r)    => l.addEmptyList || r.addEmptyList
   }
 
-  final def attributeValues: Map[String, AttributeValue] = dynamoValues.mapValues(_.toAttributeValue)
+  final def attributeValues: Map[String, AttributeValue] = dynamoValues.mapValues(_.toAttributeValue).toMap
 
   final def unprefixedDynamoValues: Map[String, DynamoValue] = self match {
     case SimpleUpdate(leaf) => leaf.dynamoValue.toMap
@@ -51,7 +51,7 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
   }
 
   final def unprefixedAttributeValues: Map[String, AttributeValue] =
-    unprefixedDynamoValues.mapValues(_.toAttributeValue)
+    unprefixedDynamoValues.mapValues(_.toAttributeValue).toMap
 
   final def and(that: UpdateExpression): UpdateExpression = AndUpdate(self, that)
 }

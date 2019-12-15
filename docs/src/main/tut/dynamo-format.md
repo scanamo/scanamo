@@ -23,7 +23,7 @@ Scanamo can automatically derive `DynamoFormat` for case classes (as long as all
 ```tut:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
@@ -45,7 +45,7 @@ Ex:
 ```tut:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.semiauto._
+import org.scanamo.generic.semiauto._
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
@@ -58,7 +58,7 @@ implicit val formatFarmer: DynamoFormat[Farmer] = deriveDynamoFormat
 
 It's also possible to define a serialisation format for types which Scanamo
 doesn't already support and can't derive. Normally this involves using the
-[xmap](latest/api/org/scanamo/DynamoFormat$.html#xmap[A,B](r:B=>Either[org.scanamo.error.DynamoReadError,A])(w:A=>B)(implicitf:org.scanamo.DynamoFormat[B]):org.scanamo.DynamoFormat[A])
+[xmap](latest/api/org/scanamo/DynamoFormat$.html#xmap[A,B](r:B=>Either[org.scanamo.DynamoReadError,A])(w:A=>B)(implicitf:org.scanamo.DynamoFormat[B]):org.scanamo.DynamoFormat[A])
 or [coercedXmap](latest/api/org/scanamo/DynamoFormat$.html#coercedXmap[A,B,T>:Null<:Throwable](read:B=>A)(write:A=>B)(implicitf:org.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):org.scanamo.DynamoFormat[A])
 to translate between the type and one Scanamo does already know about.
 
@@ -69,7 +69,7 @@ import org.joda.time._
 
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 case class Foo(dateTime: DateTime)
 
@@ -111,7 +111,7 @@ And then import the support for refined types and define your model:
 ```tut:silent
 import org.scanamo._
 import org.scanamo.refined._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
@@ -145,7 +145,7 @@ import java.util.UUID
 
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 
 // Sealed trait family for events.
 sealed trait Event

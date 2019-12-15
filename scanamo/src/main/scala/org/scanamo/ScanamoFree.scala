@@ -4,14 +4,12 @@ import cats.{ Monad, MonoidK }
 import com.amazonaws.services.dynamodbv2.model._
 import java.util.{ List => JList, Map => JMap }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
-import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
 import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
 
 object ScanamoFree {
-
   import cats.instances.list._
   import cats.syntax.functor._
   import cats.syntax.applicative._
@@ -58,6 +56,24 @@ object ScanamoFree {
       .toList
 
     loop(batches)
+  }
+
+  def transactPutAllTable[T](
+    tableName: String
+  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] =
+    transactPutAll(items.map(tableName -> _))
+
+  def transactPutAll[T](
+    tableAndItems: List[(String, T)]
+  )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] = {
+    val dItems = tableAndItems.map {
+      case (tableName, itm) =>
+        new TransactWriteItem()
+          .withPut(
+            new Put().withItem(f.write(itm).asObject.getOrElse(DynamoObject.empty).toJavaMap).withTableName(tableName)
+          )
+    }
+    ScanamoOps.transactPutAll(new TransactWriteItemsRequest().withTransactItems(dItems.asJava))
   }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[Unit] =
@@ -166,7 +182,7 @@ object ScanamoFree {
     * {{{
     * prop> (m: Map[String, Int]) =>
     *     |   ScanamoFree.read[Map[String, Int]](
-    *     |     DynamoObject(m.mapValues(DynamoValue.fromNumber(_)))
+    *     |     DynamoObject(m.mapValues(DynamoValue.fromNumber(_)).toMap)
     *     |   ) == Right(m)
     * }}}
     */

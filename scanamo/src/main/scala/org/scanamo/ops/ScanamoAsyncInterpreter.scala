@@ -5,7 +5,7 @@ import cats.syntax.either._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
 
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.util.{ Failure, Success }
@@ -16,7 +16,6 @@ import scala.util.{ Failure, Success }
  */
 class ScanamoAsyncInterpreter(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext)
     extends (ScanamoOpsA ~> Future) {
-
   final private def futureOf[X <: AmazonWebServiceRequest, T](
     call: (X, AsyncHandler[X, T]) => java.util.concurrent.Future[T],
     req: X
@@ -73,5 +72,6 @@ class ScanamoAsyncInterpreter(client: AmazonDynamoDBAsync)(implicit ec: Executio
         .recover {
           case e: ConditionalCheckFailedException => Either.left(e)
         }
+    case TransactPutAll(req) => futureOf(client.transactWriteItemsAsync _, req)
   }
 }

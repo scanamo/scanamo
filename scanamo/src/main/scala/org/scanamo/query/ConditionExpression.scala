@@ -6,8 +6,7 @@ import com.amazonaws.services.dynamodbv2.model.{
   DeleteItemResult,
   PutItemResult
 }
-import org.scanamo.{ DeleteReturn, DynamoFormat, DynamoObject, PutReturn }
-import org.scanamo.error.{ ConditionNotMet, ScanamoError }
+import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, PutReturn, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
@@ -51,14 +50,13 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(
     EitherT
       .fromEither[Option](either)
       .leftMap(ConditionNotMet(_))
-      .flatMap(
-        deleteItemResult =>
-          EitherT[Option, ScanamoError, V](
-            Option(attrs(deleteItemResult))
-              .filterNot(_.isEmpty)
-              .map(DynamoObject(_).toDynamoValue)
-              .map(format.read)
-          )
+      .flatMap(deleteItemResult =>
+        EitherT[Option, ScanamoError, V](
+          Option(attrs(deleteItemResult))
+            .filterNot(_.isEmpty)
+            .map(DynamoObject(_).toDynamoValue)
+            .map(format.read)
+        )
       )
       .value
   }

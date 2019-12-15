@@ -27,7 +27,7 @@ package object ops {
           queryRefinement(_.index)(_.withIndexName(_)),
           queryRefinement(_.options.limit)(_.withLimit(_)),
           queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.toJavaMap)),
-          queryRefinement(_.options.filter)((r, f) => {
+          queryRefinement(_.options.filter) { (r, f) =>
             val requestCondition = f.apply
             requestCondition.dynamoValues
               .filter(_.nonEmpty)
@@ -36,7 +36,7 @@ package object ops {
                 r.withFilterExpression(requestCondition.expression)
                   .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
               )(_ withExpressionAttributeValues _)
-          })
+          }
         )
         .reduceLeft(_.compose(_))(
           new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)
@@ -140,5 +140,4 @@ package object ops {
       }
     }
   }
-
 }

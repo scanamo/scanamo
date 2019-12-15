@@ -18,7 +18,7 @@ provisioned capacity to autoscale up to an expensive level.
 ```tut:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)

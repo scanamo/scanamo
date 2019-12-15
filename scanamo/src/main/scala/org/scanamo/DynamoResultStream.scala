@@ -5,12 +5,10 @@ import cats.MonoidK.ops._
 import cats.free.{ Free, FreeT }
 import cats.syntax.semigroupk._
 import com.amazonaws.services.dynamodbv2.model.{ QueryResult, ScanResult }
-import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA, ScanamoOpsT }
 import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
-
   def limit(req: Req): Option[Int]
   def startKey(req: Req): Option[DynamoObject]
   def items(res: Res): List[DynamoObject]
@@ -23,7 +21,6 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
     withExclusiveStartKey(lastEvaluatedKey).andThen(limit.map(withLimit).getOrElse(identity[Req](_)))
 
   def stream[T: DynamoFormat](req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[DynamoObject])] = {
-
     def streamMore(req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[DynamoObject])] =
       for {
         res <- exec(req)
@@ -35,13 +32,12 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
           .foldLeft(
             Free
               .pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[DynamoObject])]((results, lastKey))
-          )(
-            (rs, k) =>
-              for {
-                results <- rs
-                newReq = prepare(newLimit, k)(req)
-                more <- streamMore(newReq)
-              } yield (results._1 ::: more._1, more._2)
+          )((rs, k) =>
+            for {
+              results <- rs
+              newReq = prepare(newLimit, k)(req)
+              more <- streamMore(newReq)
+            } yield (results._1 ::: more._1, more._2)
           )
       } yield result
     streamMore(req)
@@ -60,8 +56,8 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
           val l1 = limit(req).fold(pageSize)(l => Math.min(pageSize, l - results.length))
           lastEvaluatedKey(res)
             .filterNot(_ => l1 <= 0)
-            .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Either[DynamoReadError, T]]](results))(
-              (res, k) => res <+> streamMore(withExclusiveStartKey(k)(req), l1)
+            .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Either[DynamoReadError, T]]](results))((res, k) =>
+              res <+> streamMore(withExclusiveStartKey(k)(req), l1)
             )
         }
       }

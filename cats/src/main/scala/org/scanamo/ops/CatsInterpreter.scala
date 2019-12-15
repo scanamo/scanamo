@@ -6,10 +6,9 @@ import cats.~>
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 
 class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
-
   final private def eff[A <: AmazonWebServiceRequest, B](
     f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
     req: A
@@ -85,5 +84,6 @@ class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) e
             a => F.delay(Right(a))
           )
         )
+    case TransactPutAll(req) => eff(client.transactWriteItemsAsync _, req)
   }
 }

@@ -2,9 +2,9 @@ package org
 
 import org.scanamo.query._
 import org.scanamo.update._
+import scala.language.implicitConversions
 
 package object scanamo {
-
   object syntax {
     implicit class AttributeNameKeyCondition(s: String) {
       def and(other: String) = HashAndRangeKeyNames(AttributeName.of(s), AttributeName.of(other))

@@ -8,7 +8,6 @@ import monix.tail.Iterant
 import org.scanamo.ops.{ CatsInterpreter, ScanamoOps, ScanamoOpsT }
 
 class ScanamoCats[F[_]: Async](client: AmazonDynamoDBAsync) {
-
   final private val interpreter = new CatsInterpreter(client)
 
   final def exec[A](op: ScanamoOps[A]): F[A] = op.foldMap(interpreter)

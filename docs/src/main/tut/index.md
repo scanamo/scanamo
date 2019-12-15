@@ -30,7 +30,7 @@ then, given a table and some case classes
 ```tut:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.generic.auto._
  
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)

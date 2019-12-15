@@ -20,7 +20,7 @@ object UniqueKeyCondition {
     type K = AttributeName
     final def toDynamoObject(t: KeyEquals[V]): DynamoObject = DynamoObject(t.key.placeholder("") -> t.v)
     final def fromDynamoObject(key: K, dvs: DynamoObject): Option[KeyEquals[V]] =
-      dvs(key.placeholder("")).flatMap(V.read(_).right.toOption).map(KeyEquals(key, _))
+      dvs(key.placeholder("")).flatMap(V.read(_).right.toOption.map(KeyEquals(key, _)))
     final def key(t: KeyEquals[V]): K = t.key
   }
 

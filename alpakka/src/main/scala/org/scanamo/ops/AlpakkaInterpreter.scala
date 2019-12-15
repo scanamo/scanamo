@@ -2,7 +2,7 @@ package org.scanamo.ops
 
 import cats.~>
 import cats.syntax.either._
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
 import org.scanamo.ops.retrypolicy._
 
 import akka.stream.alpakka.dynamodb.{ AwsOp, AwsPagedOp, DynamoAttributes, DynamoClient }
@@ -13,7 +13,6 @@ import akka.NotUsed
 private[scanamo] class AlpakkaInterpreter(client: DynamoClient, retryPolicy: RetryPolicy)
     extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
     with WithRetry {
-
   final private def run(op: AwsOp): AlpakkaInterpreter.Alpakka[op.B] =
     retry(DynamoDb.source(op).withAttributes(DynamoAttributes.client(client)), retryPolicy)
 
@@ -45,6 +44,7 @@ private[scanamo] class AlpakkaInterpreter(client: DynamoClient, retryPolicy: Ret
           .recover {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
+      case TransactPutAll(req) => run(req)
     }
 }
 

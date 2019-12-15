@@ -10,10 +10,8 @@ import org.scanamo.ops.retrypolicy.{ RetryPolicy, WithRetry }
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
 import scala.util.control.NonFatal
-import scala.util.Success
 
 class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetry {
-
   implicit val actorSystem: ActorSystem = ActorSystem()
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
