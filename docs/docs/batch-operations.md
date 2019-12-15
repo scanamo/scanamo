@@ -9,17 +9,15 @@ position: 2
 Many operations against Dynamo can be performed in batches. Scanamo
 has support for putting, getting and deleting in batches
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-
-import scala.concurrent.duration._
-import scala.concurrent.ExecutionContext.Implicits.global
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
  
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
 LocalDynamoDB.createTable(client)("lemmings")("role" -> S)
 
 case class Lemming(role: String, number: Long)
@@ -36,7 +34,10 @@ val ops = for {
   survivors <- lemmingsTable.scan()
 } yield (bLemmings, survivors)
 val (bLemmings, survivors) = scanamo.exec(ops)
-import cats.syntax.either._
 bLemmings.flatMap(_.toOption)
 survivors.flatMap(_.toOption)
+```
+
+```scala mdoc:invisible
+LocalDynamoDB.deleteTable(client)("lemmings")
 ```

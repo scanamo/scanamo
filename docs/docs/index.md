@@ -31,10 +31,10 @@ then, given a table and some case classes
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
  
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")("name" -> S)
 
 case class Farm(animals: List[String])
@@ -49,11 +49,11 @@ scanamo.exec(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
 scanamo.exec(table.get("name" -> "McDonald"))
 ```
 
-Scanamo supports most other DynamoDB [operations](operations.html), beyond
+Scanamo supports most other DynamoDB [operations](operations.md), beyond
 the basic `Put` and `Get`.
 
 The translation between Dynamo items and Scala types is handled by a type class
-called [DynamoFormat](dynamo-format.html).
+called [DynamoFormat](dynamo-format.md).
 
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 
@@ -71,3 +71,7 @@ Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/
 [Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg "Maven Releases"
 [Badge-Travis]: https://travis-ci.org/scanamo/scanamo.svg?branch=master "Travis CI"
 [Badge-Gitter]: https://badges.gitter.im/guardian/scanamo.svg "Gitter chat"
+
+```scala mdoc:invisible
+LocalDynamoDB.deleteTable(client)("farmer")
+```

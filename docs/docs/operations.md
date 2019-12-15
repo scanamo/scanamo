@@ -17,8 +17,8 @@ Scanamo supports all the DynamoDB operations that interact with individual items
  * [Query](#query) for retrieving all elements with a given hash-key and a range key that matches
  some criteria
  
-Scanamo also supports [batched operations](batch-operations.html), [conditional operations](conditional-operations.html) 
-and queries against [secondary indexes](using-indexes.html).
+Scanamo also supports [batched operations](batch-operations.md), [conditional operations](conditional-operations.md) 
+and queries against [secondary indexes](using-indexes.md).
  
 ### Put and Get
 
@@ -29,24 +29,24 @@ Dynamo and subsequently retrieving them:
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 LocalDynamoDB.createTable(client)("muppets")("name" -> S)
 
 case class Muppet(name: String, species: String)
 ```
 ```scala mdoc
 val muppets = Table[Muppet]("muppets")
-val operations = for {
-  _ <- muppets.put(Muppet("Kermit", "Frog"))
-  _ <- muppets.put(Muppet("Cookie Monster", "Monster"))
-  _ <- muppets.put(Muppet("Miss Piggy", "Pig"))
-  kermit <- muppets.get("name" -> "Kermit")
-} yield kermit
-     
-scanamo.exec(operations)
+scanamo.exec {
+  for {
+    _ <- muppets.put(Muppet("Kermit", "Frog"))
+    _ <- muppets.put(Muppet("Cookie Monster", "Monster"))
+    _ <- muppets.put(Muppet("Miss Piggy", "Pig"))
+    kermit <- muppets.get("name" -> "Kermit")
+  } yield kermit
+}
 ```
 
 Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
@@ -58,24 +58,22 @@ To remove an item in its entirety, we can use delete:
 ```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
-
-val client = LocalDynamoDB.client()
-val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
 LocalDynamoDB.createTable(client)("villains")("name" -> S)
 
 case class Villain(name: String, catchphrase: String)
 ```
 ```scala mdoc
 val villains = Table[Villain]("villains")
-val operations = for {
-  _ <- villains.put(Villain("Dalek", "EXTERMINATE!"))
-  _ <- villains.put(Villain("Cyberman", "DELETE"))
-  _ <- villains.delete("name" -> "Cyberman")
-  survivors <- villains.scan()
-} yield survivors
-     
-scanamo.exec(operations)
+scanamo.exec {
+  for {
+    _ <- villains.put(Villain("Dalek", "EXTERMINATE!"))
+    _ <- villains.put(Villain("Cyberman", "DELETE"))
+    _ <- villains.delete("name" -> "Cyberman")
+    survivors <- villains.scan()
+  } yield survivors
+}
 ```
 
 ### Update
@@ -86,39 +84,44 @@ If you want to change some of the fields of an item, that don't form part of its
 ```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
-
-val client = LocalDynamoDB.client()
-val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
 LocalDynamoDB.createTable(client)("teams")("name" -> S)
+
 case class Team(name: String, goals: Int, scorers: List[String], mascot: Option[String])
-val teamTable = Table[Team]("teams")
-val operations = for {
-  _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
-  updated <- teamTable.update("name" -> "Watford", 
-    set("goals" -> 2) and append("scorers" -> "Barnes") and remove("mascot"))
-} yield updated
 ```
+
 ```scala mdoc
-scanamo.exec(operations)
+val teamTable = Table[Team]("teams")
+scanamo.exec {
+  for {
+    _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
+    updated <- teamTable.update("name" -> "Watford", 
+      set("goals" -> 2) and append("scorers" -> "Barnes") and remove("mascot"))
+  } yield updated
+}
 ```
 
 Which fields are updated can be based on incoming data:
 
 ```scala mdoc:silent
 import cats.data.NonEmptyList
-import cats.implicits._
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.DynamoReadError
 import org.scanamo.update.UpdateExpression
 
 LocalDynamoDB.createTable(client)("favourites")("name" -> S)
+
 case class Favourites(name: String, colour: String, number: Long)
+```
+
+```scala mdoc
 val favouritesTable = Table[Favourites]("favourites")
 
 scanamo.exec(favouritesTable.put(Favourites("Alice", "Blue", 42L)))
 
 case class FavouriteUpdate(name: String, colour: Option[String], number: Option[Long])
+
 def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadError, Favourites]]] = {
   val updates: List[UpdateExpression] = List(
     fu.colour.map(c => set("colour" -> c)), 
@@ -130,6 +133,8 @@ def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadErr
 }
 ```
 ```scala mdoc
+import cats.implicits._
+
 val updates = List(
   FavouriteUpdate("Alice", Some("Aquamarine"), Some(93L)),
   FavouriteUpdate("Alice", Some("Red"), None),
@@ -145,8 +150,7 @@ scanamo.exec(
 
 ```
 
-Further examples, showcasing different types of update can be found in the 
-[scaladoc for the `update` method on `Table`](/latest/api/org/scanamo/Table.html#update(key:org.scanamo.query.UniqueKey[_],expression:org.scanamo.update.UpdateExpression):org.scanamo.ops.ScanamoOps[Either[org.scanamo.DynamoReadError,V]])
+Further examples, showcasing different types of update can be found in the scaladoc for the `update` method on `Table`.
 
 ### Scan
 
@@ -155,11 +159,8 @@ supports scanning it:
 
 ```scala mdoc:silent
 import org.scanamo._
-import org.scanamo.syntax._
-
-val client = LocalDynamoDB.client()
-val scanamo = Scanamo(client)
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
 LocalDynamoDB.createTable(client)("lines")("mode" -> S, "line" -> S)
 
 case class Transport(mode: String, line: String)
@@ -183,28 +184,24 @@ scanamo.exec(operations)
 
 Scanamo can be used to perform most queries that can be made against DynamoDB
 
-```scala mdoc:silent
-import org.scanamo._
-import org.scanamo.syntax._
-
-val client = LocalDynamoDB.client()
-val scanamo = Scanamo(client)
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-LocalDynamoDB.createTable(client)("transports")("mode" -> S, "line" -> S)
-
-case class Transport(mode: String, line: String)
-val transportTable = Table[Transport]("transports")
-val operations = for {
-  _ <- transportTable.putAll(Set(
-    Transport("Underground", "Circle"),
-    Transport("Underground", "Metropolitan"),
-    Transport("Underground", "Central")
-  ))
-  tubesStartingWithC <- transportTable.query("mode" -> "Underground" and ("line" beginsWith "C"))
-} yield tubesStartingWithC.toList
-```
 ```scala mdoc
-scanamo.exec(operations)
+scanamo.exec {
+  for {
+    _ <- transportTable.putAll(Set(
+      Transport("Underground", "Circle"),
+      Transport("Underground", "Metropolitan"),
+      Transport("Underground", "Central")
+    ))
+    tubesStartingWithC <- transportTable.query("mode" -> "Underground" and ("line" beginsWith "C"))
+  } yield tubesStartingWithC.toList
+}
 ```
 
 
+```scala mdoc:invisible
+LocalDynamoDB.deleteTable(client)("muppets")
+LocalDynamoDB.deleteTable(client)("villains")
+LocalDynamoDB.deleteTable(client)("teams")
+LocalDynamoDB.deleteTable(client)("favourites")
+LocalDynamoDB.deleteTable(client)("lines")
+```

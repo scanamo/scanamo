@@ -22,7 +22,6 @@ Scanamo can automatically derive `DynamoFormat` for case classes (as long as all
 
 ```scala mdoc:silent
 import org.scanamo._
-import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 
 case class Farm(animals: List[String])
@@ -44,13 +43,9 @@ Ex:
 
 ```scala mdoc:silent
 import org.scanamo._
-import org.scanamo.syntax._
 import org.scanamo.generic.semiauto._
 
-case class Farm(animals: List[String])
-case class Farmer(name: String, age: Long, farm: Farm)
-
-implicit val formatFarm: DynamoFormat[Farm] = deriveDynamoFormat[Farm]
+implicit val formatFarm: DynamoFormat[Farm] = deriveDynamoFormat
 implicit val formatFarmer: DynamoFormat[Farmer] = deriveDynamoFormat
 ```
 
@@ -66,31 +61,31 @@ For example, to store Joda `DateTime` objects as ISO `String`s in Dynamo:
 
 ```scala mdoc:silent
 import org.joda.time._
-
 import org.scanamo._
-import org.scanamo.syntax._
-import org.scanamo.generic.auto._
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 
 case class Foo(dateTime: DateTime)
 
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
 LocalDynamoDB.createTable(client)("foo")("dateTime" -> S)
 ```
 ```scala mdoc
+import org.scanamo.generic.auto._
+
 implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
   DateTime.parse(_).withZone(DateTimeZone.UTC)
 )(
   _.toString
 )
 val fooTable = Table[Foo]("foo")
-val operations = for {
-  _           <- fooTable.put(Foo(new DateTime(0)))
-  results     <- fooTable.scan()
-} yield results
-
-scanamo.exec(operations).toList
+scanamo.exec {
+  for {
+    _           <- fooTable.put(Foo(new DateTime(0)))
+    results     <- fooTable.scan()
+  } yield results
+}.toList
 ```
 
 ### Formats for Refined Types
@@ -110,8 +105,6 @@ And then import the support for refined types and define your model:
 
 ```scala mdoc:silent
 import org.scanamo._
-import org.scanamo.refined._
-import org.scanamo.generic.auto._
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
@@ -127,25 +120,26 @@ LocalDynamoDB.createTable(client)("Customer")("age" -> N)
 You just now use it like if the type `PosInt` was natively supported by `scanamo`:
 
 ```scala mdoc
-val customerTable = Table[Customer]("Customer")
-val operations = for {
-  _       <- customerTable.put(Customer(67))
-  results <- customerTable.scan()
-} yield results
+import org.scanamo.refined._
+import org.scanamo.generic.auto._
 
-scanamo.exec(operations).toList
+val customerTable = Table[Customer]("Customer")
+scanamo.exec {
+  for {
+    _       <- customerTable.put(Customer(67))
+    results <- customerTable.scan()
+  } yield results
+}.toList
 ```
 
 ### Derived Formats
 
-Scanamo uses [shapeless](https://github.com/milessabin/shapeless) and implicit derivation to automatically derive [`DynamoFormat`](latest/api/org/scanamo/DynamoFormat)s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of `id` and sort key `seqNo`):
+Scanamo uses [magnolia](https://magnolia.work/opensource/magnolia) and implicit derivation to automatically derive `DynamoFormat`s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of `id` and sort key `seqNo`):
 
 ```scala mdoc:silent
 import java.util.UUID
 
 import org.scanamo._
-import org.scanamo.syntax._
-import org.scanamo.generic.auto._
 
 // Sealed trait family for events.
 sealed trait Event
@@ -162,6 +156,9 @@ val delete = EventEnvelope(id, 1, Delete("Oops"))
 ```
 
 ```scala mdoc
+import org.scanamo._
+import org.scanamo.generic.auto._
+
 val attributeValue = DynamoFormat[EventEnvelope].write(create)
 
 val dynamoRecord = DynamoFormat[EventEnvelope].read(attributeValue)
@@ -193,4 +190,8 @@ Here is the pretty-printed attribute value that Scanamo generates:
     }
   },
 }
+```
+
+```scala mdoc:invisible
+LocalDynamoDB.deleteTable(client)("foo")
 ```
