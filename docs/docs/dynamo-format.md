@@ -6,15 +6,11 @@ position:  6
 
 ## DynamoFormat
 
-Scanamo uses the [`DynamoFormat`](latest/api/org/scanamo/DynamoFormat.html)
-type class to define how to read and write different types to DynamoDB.
+Scanamo uses the [DynamoFormat] type class to define how to read and write different types to DynamoDB.
 
-Many common types have a `DynamoFormat` provided by Scanamo. For a full list see
-of those supported, you can look at the [companion object](latest/api/org/scanamo/DynamoFormat$.html).
+Many common types have a `DynamoFormat` provided by Scanamo. For a full list see of those supported, you can look at the companion object.
 
-Scanamo also supports automatically deriving formats for case classes and
-sealed trait families where all the contained types have a defined or derivable
-`DynamoFormat`.
+Scanamo also supports automatically deriving formats for case classes and sealed trait families where all the contained types have a defined or derivable `DynamoFormat`.
 
 ### Automatic Derivation
 
@@ -41,9 +37,12 @@ table.putAll(
 Scanamo offers a convenient way (semi-automoatic) to derive `DynamoFormat` in your code. 
 Ex:
 
-```scala mdoc:silent
+```scala mdoc:silent:reset
 import org.scanamo._
 import org.scanamo.generic.semiauto._
+
+case class Farm(animals: List[String])
+case class Farmer(name: String, age: Long, farm: Farm)
 
 implicit val formatFarm: DynamoFormat[Farm] = deriveDynamoFormat
 implicit val formatFarmer: DynamoFormat[Farmer] = deriveDynamoFormat
@@ -51,17 +50,14 @@ implicit val formatFarmer: DynamoFormat[Farmer] = deriveDynamoFormat
 
 ### Custom Formats
 
-It's also possible to define a serialisation format for types which Scanamo
-doesn't already support and can't derive. Normally this involves using the
-[xmap](latest/api/org/scanamo/DynamoFormat$.html#xmap[A,B](r:B=>Either[org.scanamo.DynamoReadError,A])(w:A=>B)(implicitf:org.scanamo.DynamoFormat[B]):org.scanamo.DynamoFormat[A])
-or [coercedXmap](latest/api/org/scanamo/DynamoFormat$.html#coercedXmap[A,B,T>:Null<:Throwable](read:B=>A)(write:A=>B)(implicitf:org.scanamo.DynamoFormat[B],implicitT:scala.reflect.ClassTag[T],implicitNT:cats.NotNull[T]):org.scanamo.DynamoFormat[A])
-to translate between the type and one Scanamo does already know about.
+It's also possible to define a serialisation format for types which Scanamo doesn't already support and can't derive. Normally this involves using the `DynamoFormat.xmap` or `DynamoFormat.coercedXmap` to translate between the type and one Scanamo does already know about.
 
 For example, to store Joda `DateTime` objects as ISO `String`s in Dynamo:
 
-```scala mdoc:silent
+```scala mdoc:reset
 import org.joda.time._
 import org.scanamo._
+import org.scanamo.generic.auto._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 
 case class Foo(dateTime: DateTime)
@@ -70,16 +66,15 @@ val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 
 LocalDynamoDB.createTable(client)("foo")("dateTime" -> S)
-```
-```scala mdoc
-import org.scanamo.generic.auto._
 
 implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
   DateTime.parse(_).withZone(DateTimeZone.UTC)
 )(
   _.toString
 )
+
 val fooTable = Table[Foo]("foo")
+
 scanamo.exec {
   for {
     _           <- fooTable.put(Foo(new DateTime(0)))
@@ -103,12 +98,16 @@ libraryDependencies += "com.gu" %% "scanamo-refined" % "x.y.z"
 
 And then import the support for refined types and define your model:
 
-```scala mdoc:silent
+```scala mdoc:silent:reset
 import org.scanamo._
 import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric._
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
+val client = LocalDynamoDB.client()
+val scanamo = Scanamo(client)
 
 type PosInt = Int Refined Positive
 
@@ -132,11 +131,15 @@ scanamo.exec {
 }.toList
 ```
 
+```scala mdoc:invisible
+LocalDynamoDB.deleteTable(client)("foo")
+```
+
 ### Derived Formats
 
 Scanamo uses [magnolia](https://magnolia.work/opensource/magnolia) and implicit derivation to automatically derive `DynamoFormat`s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of `id` and sort key `seqNo`):
 
-```scala mdoc:silent
+```scala mdoc:silent:reset
 import java.util.UUID
 
 import org.scanamo._
@@ -190,8 +193,4 @@ Here is the pretty-printed attribute value that Scanamo generates:
     }
   },
 }
-```
-
-```scala mdoc:invisible
-LocalDynamoDB.deleteTable(client)("foo")
 ```
