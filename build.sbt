@@ -53,6 +53,11 @@ def extraOptions(scalaVersion: String) =
   }
 
 val commonSettings = Seq(
+  organization := "org.scanamo",
+  organizationName := "Scanamo",
+  startYear := Some(2019),
+  homepage := Some(url("http://www.scanamo.org/")),
+  licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
@@ -235,9 +240,6 @@ lazy val docs = (project in file("docs"))
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
-  organization := "org.scanamo",
-  homepage := Some(url("http://www.scanamo.org/")),
-  licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
   publishArtifact in Test := false,
   scmInfo := Some(
     ScmInfo(
