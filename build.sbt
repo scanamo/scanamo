@@ -284,5 +284,7 @@ val micrositeSettings = Seq(
     "gray-lighter" -> "#F4F3F4",
     "white-color" -> "#FFFFFF"
   ),
-  micrositeCompilingDocsTool := WithMdoc
+  micrositeCompilingDocsTool := WithMdoc,
+  micrositePushSiteWith := GitHub4s,
+  micrositeGithubToken := getEnvVar("GITHUB_TOKEN")
 )

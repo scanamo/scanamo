@@ -18,7 +18,6 @@ before_cache:
   - find $HOME/.sbt -name "*.lock" -type f -delete -print
   - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete -print
 before_install:
-  - openssl aes-256-cbc -K $encrypted_a88e56528334_key -iv $encrypted_a88e56528334_iv -in travis-deploy-key.enc -out travis-deploy-key -d
   - git fetch --tags
   - export PATH=${PATH}:./vendor/bundle
 after_success:
