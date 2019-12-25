@@ -1,9 +1,10 @@
+version: ~> 1.0
 language: scala
+os: linux
 scala:
 - 2.12.10
 jdk:
 - openjdk8
-sudo: false
 install:
   - rvm use 2.6.0 --install --fuzzy
   - gem update --system
@@ -21,8 +22,7 @@ before_install:
   - git fetch --tags
   - export PATH=${PATH}:./vendor/bundle
 after_success:
-  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then bash
-  scripts/publishMicrosite.sh; fi
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then bash scripts/publishMicrosite.sh; fi
 stages:
   - name: test
   - name: microsite
@@ -51,7 +51,10 @@ jobs:
 
     # Cross-build
     - <<: *test
-      scala: 
-        - 2.11.12
-        - 2.13.1
-      name: "Tests for 2.13 and 2.11"
+      scala: 2.11.12
+      name: "Tests 2.11"
+
+    # Cross-build
+    - <<: *test
+      scala: 2.13.1
+      name: "Tests for 2.13"
