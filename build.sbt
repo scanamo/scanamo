@@ -286,5 +286,5 @@ val micrositeSettings = Seq(
   ),
   micrositeCompilingDocsTool := WithMdoc,
   micrositePushSiteWith := GitHub4s,
-  micrositeGithubToken := getEnvVar("GITHUB_TOKEN")
+  micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
 )
