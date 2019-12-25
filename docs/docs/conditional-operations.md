@@ -6,12 +6,9 @@ position: 3
 
 ## Conditional Operations
 
-Modifying operations ([Put](operations.html#put-and-get), [Delete](operations.html#delete),
-[Update](operations.html#update)) can be performed conditionally, so that they
-only have an effect if some state of the DynamoDB table is true at the time of 
-execution.
+Modifying operations ([Put](operations.md#put-and-get), [Delete](operations.md#delete), [Update](operations.md#update)) can be performed conditionally, so that they only have an effect if some state of the DynamoDB table is true at the time of execution.
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -20,7 +17,7 @@ val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)
 ```
-```tut:book
+```scala mdoc
 val gremlinsTable = Table[Gremlin]("gremlins")
 LocalDynamoDB.withTable(client)("gremlins")("number" -> N) {
   val ops = for {
@@ -46,4 +43,4 @@ LocalDynamoDB.withTable(client)("gremlins")("number" -> N) {
 }
 ```
 
-More examples can be found in the [Table ScalaDoc](/latest/api/org/scanamo/Table.html#given[T](condition:T)(implicitevidence$2:org.scanamo.query.ConditionExpression[T]):org.scanamo.query.ConditionalOperation[V,T]).
+More examples can be found in the `Table` scaladoc.

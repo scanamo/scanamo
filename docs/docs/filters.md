@@ -6,16 +6,12 @@ position: 4
 
 ## Filters
 
-[Scans](operations.html#scan) and [Queries](operations.html#query) can be 
-filtered within Dynamo, preventing the memory, network and marshalling 
-overhead of filtering on the client.
+[Scans](operations.md#scan) and [Queries](operations.md#query) can be filtered within Dynamo, preventing the memory, network and marshalling overhead of filtering on the client.
  
-Note that these filters do *not* reduce the [consumed capacity](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ProvisionedThroughput.html) 
-in Dynamo. Even though a filter may lead to a small number of results being
-returned, it could still exhaust the provisioned capacity or force the 
-provisioned capacity to autoscale up to an expensive level.
+Note that these filters do *not* reduce the [consumed capacity](http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ProvisionedThroughput.html) in Dynamo. Even though a filter may lead to a small number of results being
+returned, it could still exhaust the provisioned capacity or force the provisioned capacity to autoscale up to an expensive level.
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
@@ -26,7 +22,7 @@ val scanamo = Scanamo(client)
 case class Station(line: String, name: String, zone: Int)
 val stationTable = Table[Station]("Station")
 ```
-```tut:book
+```scala mdoc
 LocalDynamoDB.withTable(client)("Station")("line" -> S, "name" -> S) {
   val ops = for {
     _ <- stationTable.putAll(Set(
@@ -45,4 +41,4 @@ LocalDynamoDB.withTable(client)("Station")("line" -> S, "name" -> S) {
 }
 ```
 
-More examples can be found in the [Table ScalaDoc](/latest/api/org/scanamo/Table.html#filter[C](condition:C)(implicitevidence$3:org.scanamo.query.ConditionExpression[C]):org.scanamo.TableWithOptions[V]).
+More examples can be found in the `Table` scaladoc.

@@ -84,7 +84,6 @@ lazy val root = (project in file("."))
     stopDynamoDBLocal / aggregate := false
   )
 
-addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
@@ -262,15 +261,19 @@ lazy val noPublishSettings = Seq(
 )
 
 val micrositeSettings = Seq(
+  micrositeUrl := "https://www.scanamo.org",
   micrositeName := "Scanamo",
   micrositeDescription := "Scanamo: simpler DynamoDB access for Scala",
   micrositeAuthor := "Scanamo Contributors",
   micrositeGithubOwner := "scanamo",
   micrositeGithubRepo := "scanamo",
-  micrositeBaseUrl := "",
   micrositeDocumentationUrl := "/latest/api",
-  micrositeHighlightTheme := "color-brewer",
+  micrositeDocumentationLabelDescription := "API",
+  micrositeHighlightTheme := "monokai",
+  micrositeHighlightLanguages ++= Seq("sbt"),
   micrositeGitterChannel := false,
+  micrositeShareOnSocial := false,
+  micrositeTheme := "pattern",
   micrositePalette := Map(
     "brand-primary" -> "#951c55",
     "brand-secondary" -> "#005689",
@@ -280,5 +283,6 @@ val micrositeSettings = Seq(
     "gray-light" -> "#E3E2E3",
     "gray-lighter" -> "#F4F3F4",
     "white-color" -> "#FFFFFF"
-  )
+  ),
+  micrositeCompilingDocsTool := WithMdoc
 )

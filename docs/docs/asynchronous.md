@@ -10,22 +10,24 @@ Whilst for simplicity most examples in these documents are based on synchronous
 requests to DynamoDB, Scanamo supports making the requests asynchronously with
 a client that implements the `AmazonDynamoDBAsync` interface:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
-import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-
+import org.scanamo.syntax._
+import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import scala.concurrent.duration._
 import scala.concurrent.ExecutionContext.Implicits.global
  
 val client = LocalDynamoDB.client()
 val scanamo = ScanamoAsync(client)
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+
 LocalDynamoDB.createTable(client)("farm")("name" -> S)
 
 case class Farm(animals: List[String])
 case class Farmer(name: String, age: Long, farm: Farm)
+
 val farmTable = Table[Farmer]("farm")
+
 val ops = for {
   _ <- farmTable.putAll(Set(
     Farmer("Boggis", 43L, Farm(List("chicken"))),
@@ -35,8 +37,8 @@ val ops = for {
   bunce <- farmTable.get("name" -> "Bunce")
 } yield bunce
 ```
-```scala
-concurrent.Await.result(scanamo(ops), 5.seconds)
+```scala mdoc
+concurrent.Await.result(scanamo.exec(ops), 5.seconds)
 ```
 
 Note that `AmazonDynamoDBAsyncClient` uses a thread pool internally.
@@ -55,7 +57,7 @@ Using the Alpakka client means you need an `ActorSystem` and an
 `ActorMaterializer` in order to make use of the streaming infrastructure
 that the Alpakka interpreter uses behind the scenes:
 
-```tut:silent
+```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import akka.actor.ActorSystem
@@ -63,7 +65,6 @@ import akka.stream.ActorMaterializer
 import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
-import scala.concurrent.duration._
 
 implicit val system = ActorSystem("scanamo-alpakka")
 implicit val materializer = ActorMaterializer.create(system)
@@ -76,27 +77,20 @@ val alpakkaClient = DynamoClient(
       .withCredentialsProvider(DefaultAWSCredentialsProviderChain.getInstance)
 )
 
-// Use the non-Alpakka client to create the table for tests
-val client = LocalDynamoDB.client()
-
-val scanamo = ScanamoAlpakka(alpakkaClient)
+val scanamoAlpakka = ScanamoAlpakka(alpakkaClient)
 
 LocalDynamoDB.createTable(client)("nursery-farmers")("name" -> S)
 
-case class Farm(animals: List[String])
-case class Farmer(name: String, age: Long, farm: Farm)
-val farmTable = Table[Farmer]("farm")
-val ops = for {
-  _ <- farmTable.putAll(Set(
-    Farmer("Boggis", 43L, Farm(List("chicken"))),
-    Farmer("Bunce", 52L, Farm(List("goose"))),
-    Farmer("Bean", 55L, Farm(List("turkey")))
-  ))
-  bunce <- farmTable.get("name" -> "Bunce")
-} yield bunce
-
-// Use the Alpakka interpreter
-scanamo.exec(ops)
+scanamoAlpakka.exec {
+  for {
+    _ <- farmTable.putAll(Set(
+      Farmer("Boggis", 43L, Farm(List("chicken"))),
+      Farmer("Bunce", 52L, Farm(List("goose"))),
+      Farmer("Bean", 55L, Farm(List("turkey")))
+    ))
+    bunce <- farmTable.get("name" -> "Bunce")
+  } yield bunce
+}
 
 system.terminate()
 ```
@@ -105,4 +99,9 @@ In order to use the Alpakka interpreter, you need to import the `scanamo-alpakka
 ```sbt
 val scanamoV = "<latest scanamo version>"
 libraryDependencies += "com.gu" %% "scanamo-alpakka" % scanamoV
+```
+
+```scala mdoc:invisible
+LocalDynamoDB.deleteTable(client)("farm")
+LocalDynamoDB.deleteTable(client)("nursery-farmers")
 ```
