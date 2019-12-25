@@ -146,11 +146,11 @@ import org.scanamo._
 
 // Sealed trait family for events.
 sealed trait Event
-final case class Create(name: String) extends Event
-final case class Delete(reason: String) extends Event
+case class Create(name: String) extends Event
+case class Delete(reason: String) extends Event
 
 // An event envelope that wraps events.
-final case class EventEnvelope(id: UUID, seqNo: Int, event: Event)
+case class EventEnvelope(id: UUID, seqNo: Int, event: Event)
 
 // Example instantiations.
 val id = UUID.fromString("9e5fd6e9-65ef-472c-ad89-e5fe658f14c6")
