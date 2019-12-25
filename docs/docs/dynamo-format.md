@@ -6,7 +6,7 @@ position:  6
 
 ## DynamoFormat
 
-Scanamo uses the [DynamoFormat] type class to define how to read and write different types to DynamoDB.
+Scanamo uses the `DynamoFormat` type class to define how to read and write different types to DynamoDB.
 
 Many common types have a `DynamoFormat` provided by Scanamo. For a full list see of those supported, you can look at the companion object.
 
@@ -34,7 +34,7 @@ table.putAll(
 
 ### Semi-automatic Derivation
 
-Scanamo offers a convenient way (semi-automoatic) to derive `DynamoFormat` in your code. 
+Scanamo offers a convenient way (semi-automatic) to derive `DynamoFormat` in your code. 
 Ex:
 
 ```scala mdoc:silent:reset
@@ -173,24 +173,24 @@ Here is the pretty-printed attribute value that Scanamo generates:
 
 ```json
 {
-  M: {
-    seqNo={
-      N: 0,
+  "M": {
+    "seqNo": {
+      "N": 0
     },
-    id={
-      S: 9e5fd6e9-65ef-472c-ad89-e5fe658f14c6,
+    "id": {
+      "S": "9e5fd6e9-65ef-472c-ad89-e5fe658f14c6"
     },
-    event={
-      M: {
-        Create={
-          M: {
-            name={
-              S: Something,
+    "event": {
+      "M": {
+        "Create": {
+          "M": {
+            "name":{
+              "S": "Something"
             }
-          },
+          }
         }
-      },
+      }
     }
-  },
+  }
 }
 ```
