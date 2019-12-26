@@ -53,6 +53,11 @@ def extraOptions(scalaVersion: String) =
   }
 
 val commonSettings = Seq(
+  organization := "org.scanamo",
+  organizationName := "Scanamo",
+  startYear := Some(2019),
+  homepage := Some(url("http://www.scanamo.org/")),
+  licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
@@ -224,20 +229,16 @@ lazy val docs = (project in file("docs"))
     commonSettings,
     micrositeSettings,
     noPublishSettings,
-    includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
-    makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
-    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
-    siteSubdirName in ScalaUnidoc := "latest/api"
+    mdocVariables := Map(
+      "VERSION" -> version.value
+    )
   )
-  .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
+  .enablePlugins(MicrositesPlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
-  organization := "org.scanamo",
-  homepage := Some(url("http://www.scanamo.org/")),
-  licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
   publishArtifact in Test := false,
   scmInfo := Some(
     ScmInfo(
@@ -273,7 +274,6 @@ val micrositeSettings = Seq(
   micrositeHighlightLanguages ++= Seq("sbt"),
   micrositeGitterChannel := false,
   micrositeShareOnSocial := false,
-  micrositeTheme := "pattern",
   micrositePalette := Map(
     "brand-primary" -> "#951c55",
     "brand-secondary" -> "#005689",
@@ -284,5 +284,7 @@ val micrositeSettings = Seq(
     "gray-lighter" -> "#F4F3F4",
     "white-color" -> "#FFFFFF"
   ),
-  micrositeCompilingDocsTool := WithMdoc
+  micrositeCompilingDocsTool := WithMdoc,
+  micrositePushSiteWith := GitHub4s,
+  micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
 )

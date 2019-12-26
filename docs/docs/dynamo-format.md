@@ -133,6 +133,7 @@ scanamo.exec {
 
 ```scala mdoc:invisible
 LocalDynamoDB.deleteTable(client)("foo")
+LocalDynamoDB.deleteTable(client)("Customer")
 ```
 
 ### Derived Formats
