@@ -229,14 +229,13 @@ lazy val docs = (project in file("docs"))
     commonSettings,
     micrositeSettings,
     noPublishSettings,
-    includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
-    makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
-    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
-    siteSubdirName in ScalaUnidoc := "latest/api"
+    mdocVariables := Map(
+      "VERSION" -> version.value
+    )
   )
-  .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
+  .enablePlugins(MicrositesPlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
@@ -275,7 +274,6 @@ val micrositeSettings = Seq(
   micrositeHighlightLanguages ++= Seq("sbt"),
   micrositeGitterChannel := false,
   micrositeShareOnSocial := false,
-  micrositeTheme := "pattern",
   micrositePalette := Map(
     "brand-primary" -> "#951c55",
     "brand-secondary" -> "#005689",
