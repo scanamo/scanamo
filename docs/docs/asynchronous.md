@@ -6,11 +6,9 @@ position: 7
 
 ## Asynchronous requests
  
-Whilst for simplicity most examples in these documents are based on synchronous
-requests to DynamoDB, Scanamo supports making the requests asynchronously with
-a client that implements the `AmazonDynamoDBAsync` interface:
+Whilst for simplicity most examples in these documents are based on synchronous requests to DynamoDB, Scanamo supports making the requests asynchronously with a client that implements the `AmazonDynamoDBAsync` interface:
 
-```scala mdoc:silent
+```scala
 import org.scanamo._
 import org.scanamo.generic.auto._
 import org.scanamo.syntax._
@@ -36,52 +34,55 @@ val ops = for {
   ))
   bunce <- farmTable.get("name" -> "Bunce")
 } yield bunce
-```
-```scala mdoc
+
 concurrent.Await.result(scanamo.exec(ops), 5.seconds)
+```
+
+```scala mdoc:invisible
+LocalDynamoDB.deleteTable(client)("farm")
 ```
 
 Note that `AmazonDynamoDBAsyncClient` uses a thread pool internally.
 
 ## Asynchronous and Non-blocking requests
-The `AmazonDynamoDBAsyncClient` is not *truly* asynchronous as it relies on 
-Java Futures which block as soon as you try to access the value within them. 
-Underneath the hood, they make use of a thread pool to perform a blocking call
-when making the HTTP request to DynamoDB. There is a possibility that you may
-not be able to reach your provisioned throughput because you have exhausted 
-the thread pool to make HTTP requests. Until Amazon switches to a truly 
-non-blocking implementation (backed by Netty), we have an Akka Streams based
-interpreter which is a truly non-blocking HTTP client. Scanamo supports 
-making non-blocking asynchronous HTTP requests with the Alpakka interpreter. 
-Using the Alpakka client means you need an `ActorSystem` and an 
-`ActorMaterializer` in order to make use of the streaming infrastructure
-that the Alpakka interpreter uses behind the scenes:
 
-```scala mdoc:silent
+The `AmazonDynamoDBAsyncClient` is not *truly* asynchronous as it relies on  Java Futures which block as soon as you try to access the value within them.  Underneath the hood, they make use of a thread pool to perform a blocking call when making the HTTP request to DynamoDB. There is a possibility that you may not be able to reach your provisioned throughput because you have exhausted the thread pool to make HTTP requests. Until Amazon switches to a truly non-blocking implementation (backed by Netty), we have an Akka Streams based interpreter which is a truly non-blocking HTTP client. Scanamo supports making non-blocking asynchronous HTTP requests with the Alpakka interpreter. Using the Alpakka client means you need an `ActorSystem` and an `ActorMaterializer` in order to make use of the streaming infrastructure that the Alpakka interpreter uses behind the scenes:
+
+```scala
 import org.scanamo._
 import org.scanamo.syntax._
+import org.scanamo.generic.auto._
 import akka.actor.ActorSystem
-import akka.stream.ActorMaterializer
+import akka.stream._
+import akka.stream.scaladsl._
 import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain
+import scala.concurrent.duration._
 
 implicit val system = ActorSystem("scanamo-alpakka")
 implicit val materializer = ActorMaterializer.create(system)
 implicit val executor = system.dispatcher
 
+case class Farm(animals: List[String])
+case class Farmer(name: String, age: Long, farm: Farm)
+
+val client = LocalDynamoDB.client()
+
 val alpakkaClient = DynamoClient(
     DynamoSettings(region = "", host = "localhost")
       .withPort(8042)
-      .withParallelism(2)
+      .withParallelism(1)
+      .withTls(false)
       .withCredentialsProvider(DefaultAWSCredentialsProviderChain.getInstance)
 )
 
-val scanamoAlpakka = ScanamoAlpakka(alpakkaClient)
+LocalDynamoDB.createTable(client)("farmer")("name" -> S)
 
-LocalDynamoDB.createTable(client)("nursery-farmers")("name" -> S)
+val scanamo = ScanamoAlpakka(alpakkaClient)
+val farmTable = Table[Farmer]("farmer")
 
-scanamoAlpakka.exec {
+val ops =
   for {
     _ <- farmTable.putAll(Set(
       Farmer("Boggis", 43L, Farm(List("chicken"))),
@@ -90,18 +91,17 @@ scanamoAlpakka.exec {
     ))
     bunce <- farmTable.get("name" -> "Bunce")
   } yield bunce
-}
 
-system.terminate()
+concurrent.Await.result(scanamo.exec(ops).runWith(Sink.head), 5.seconds)
 ```
 
 In order to use the Alpakka interpreter, you need to import the `scanamo-alpakka` library dependency
+
 ```sbt
-val scanamoV = "<latest scanamo version>"
-libraryDependencies += "com.gu" %% "scanamo-alpakka" % scanamoV
+libraryDependencies += "com.gu" %% "scanamo-alpakka" % "@VERSION@"
 ```
 
 ```scala mdoc:invisible
-LocalDynamoDB.deleteTable(client)("farm")
-LocalDynamoDB.deleteTable(client)("nursery-farmers")
+system.terminate()
+LocalDynamoDB.deleteTable(client)("farmer")
 ```
