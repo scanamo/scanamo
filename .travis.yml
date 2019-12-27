@@ -38,7 +38,6 @@ jobs:
       stage: test
       name: "Tests for Scala 2.12"
       script: sbt ++$TRAVIS_SCALA_VERSION startDynamodbLocal test dynamodbLocalTestCleanup stopDynamodbLocal
-      after_success: bash <(curl -s https://codecov.io/bash)
     - &microsite
       stage: microsite
       name: "Generate microsite"
