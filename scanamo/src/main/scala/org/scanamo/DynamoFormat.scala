@@ -538,7 +538,7 @@ object DynamoFormat extends LowPriorityFormats {
     * true
     * }}}
     */
-  implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
+  implicit def optionFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Option[T]] = new DynamoFormat[Option[T]] {
     final def read(av: DynamoValue) =
       if (av.isNull)
         Right(None)
@@ -552,7 +552,7 @@ object DynamoFormat extends LowPriorityFormats {
     * This ensures that if, for instance, you specify an update with Some(5) rather
     * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
     */
-  implicit def someFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Some[T]] {
+  implicit def someFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Some[T]] = new DynamoFormat[Some[T]] {
     def read(av: DynamoValue): Either[DynamoReadError, Some[T]] =
       Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
 
@@ -568,7 +568,7 @@ object DynamoFormat extends LowPriorityFormats {
     *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
     *  }}}
     */
-  implicit val instantAsLongFormat =
+  implicit val instantAsLongFormat: DynamoFormat[Instant] =
     DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x))(x => x.toEpochMilli)
 
   /**  Format for dealing with date-times with an offset from UTC.
@@ -580,7 +580,7 @@ object DynamoFormat extends LowPriorityFormats {
     *      | DynamoFormat[OffsetDateTime].read(DynamoFormat[OffsetDateTime].write(x)) == Right(x)
     *  }}}
     */
-  implicit val offsetDateTimeFormat = DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
+  implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] = DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
     OffsetDateTime.parse
   )(
     _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
@@ -595,7 +595,7 @@ object DynamoFormat extends LowPriorityFormats {
     *      | DynamoFormat[ZonedDateTime].read(DynamoFormat[ZonedDateTime].write(x)) == Right(x)
     *  }}}
     */
-  implicit val zonedDateTimeFormat = DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
+  implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] = DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
     ZonedDateTime.parse
   )(
     _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)

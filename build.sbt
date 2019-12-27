@@ -60,7 +60,7 @@ val commonSettings = Seq(
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-  scalacOptions ++= { if (isDotty.value) Seq("-language:Scala2") else Nil },
+  scalacOptions ++= { if (isDotty.value) Seq("-language:Scala2", "-language:implicitConversions") else Nil },
   libraryDependencies ++= {
     if (isDotty.value) Seq() else Seq(compilerPlugin("org.typelevel"   % "kind-projector"  % "0.11.0") cross CrossVersion.full)
   },
