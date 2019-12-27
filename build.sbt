@@ -62,7 +62,8 @@ val commonSettings = Seq(
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   scalacOptions ++= { if (isDotty.value) Seq("-language:Scala2", "-language:implicitConversions") else Nil },
   libraryDependencies ++= {
-    if (isDotty.value) Seq() else Seq(compilerPlugin("org.typelevel"   % "kind-projector"  % "0.11.0") cross CrossVersion.full)
+    if (isDotty.value) Seq()
+    else Seq(compilerPlugin("org.typelevel" % "kind-projector" % "0.11.0") cross CrossVersion.full)
   },
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270

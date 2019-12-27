@@ -39,7 +39,9 @@ package object scanamo {
     implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])): UniqueKeys[KeyList[V]] =
       UniqueKeys(KeyList(AttributeName.of(pair._1), pair._2))
 
-    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])): UniqueKeys[MultipleKeyList[H, R]] =
+    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](
+      pair: (HashAndRangeKeyNames, Set[(H, R)])
+    ): UniqueKeys[MultipleKeyList[H, R]] =
       UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
 
     implicit def stringTupleToQuery[V: DynamoFormat](pair: (String, V)): Query[KeyEquals[V]] =

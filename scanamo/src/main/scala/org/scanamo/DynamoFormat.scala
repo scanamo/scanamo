@@ -580,11 +580,12 @@ object DynamoFormat extends LowPriorityFormats {
     *      | DynamoFormat[OffsetDateTime].read(DynamoFormat[OffsetDateTime].write(x)) == Right(x)
     *  }}}
     */
-  implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] = DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
-    OffsetDateTime.parse
-  )(
-    _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-  )
+  implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] =
+    DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
+      OffsetDateTime.parse
+    )(
+      _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    )
 
   /**  Format for dealing with date-times with a time zone in the ISO-8601 calendar system.
     *  {{{
@@ -595,11 +596,12 @@ object DynamoFormat extends LowPriorityFormats {
     *      | DynamoFormat[ZonedDateTime].read(DynamoFormat[ZonedDateTime].write(x)) == Right(x)
     *  }}}
     */
-  implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] = DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
-    ZonedDateTime.parse
-  )(
-    _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
-  )
+  implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] =
+    DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
+      ZonedDateTime.parse
+    )(
+      _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
+    )
 }
 
 private[scanamo] trait LowPriorityFormats {

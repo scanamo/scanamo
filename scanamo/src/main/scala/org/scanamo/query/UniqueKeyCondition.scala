@@ -32,13 +32,14 @@ object UniqueKeyCondition {
 
   def apply[T, K](implicit U: UniqueKeyCondition.Aux[T, K]): UniqueKeyCondition.Aux[T, K] = U
 
-  implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]): UniqueKeyCondition[KeyEquals[V]] = new UniqueKeyCondition[KeyEquals[V]] {
-    type K = AttributeName
-    final def toDynamoObject(t: KeyEquals[V]): DynamoObject = DynamoObject(t.key.placeholder("") -> t.v)
-    final def fromDynamoObject(key: K, dvs: DynamoObject): Option[KeyEquals[V]] =
-      dvs(key.placeholder("")).flatMap(V.read(_).right.toOption.map(KeyEquals(key, _)))
-    final def key(t: KeyEquals[V]): K = t.key
-  }
+  implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]): UniqueKeyCondition[KeyEquals[V]] =
+    new UniqueKeyCondition[KeyEquals[V]] {
+      type K = AttributeName
+      final def toDynamoObject(t: KeyEquals[V]): DynamoObject = DynamoObject(t.key.placeholder("") -> t.v)
+      final def fromDynamoObject(key: K, dvs: DynamoObject): Option[KeyEquals[V]] =
+        dvs(key.placeholder("")).flatMap(V.read(_).right.toOption.map(KeyEquals(key, _)))
+      final def key(t: KeyEquals[V]): K = t.key
+    }
 
   implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition, KH, KR](
     implicit H: UniqueKeyCondition.Aux[H, KH],
