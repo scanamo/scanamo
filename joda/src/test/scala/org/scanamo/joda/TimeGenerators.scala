@@ -23,5 +23,4 @@ object TimeGenerators {
       l <- arbitrary[Long]
     } yield Instant.ofEpochMilli(l)
   }
-
 }

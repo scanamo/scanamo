@@ -1,8 +1,24 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.{ DynamoFormat, DynamoObject }
-import org.scanamo.error.{ ConditionNotMet, ScanamoError }
+import org.scanamo.{ ConditionNotMet, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
@@ -35,11 +51,10 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
           Some(state.apply(t))
         )
       )
-      .map(
-        either =>
-          either
-            .leftMap[ScanamoError](ConditionNotMet(_))
-            .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
+      .map(either =>
+        either
+          .leftMap[ScanamoError](ConditionNotMet(_))
+          .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
       )
 }
 
