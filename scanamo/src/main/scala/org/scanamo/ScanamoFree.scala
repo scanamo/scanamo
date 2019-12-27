@@ -1,17 +1,31 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
 import com.amazonaws.services.dynamodbv2.model.{ PutRequest, WriteRequest, _ }
 import java.util.{ List => JList, Map => JMap }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
-import org.scanamo.error.DynamoReadError
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
 import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
 
 object ScanamoFree {
-
   import cats.instances.list._
   import cats.syntax.traverse._
   import collection.JavaConverters._
@@ -38,6 +52,24 @@ object ScanamoFree {
         )
         ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
       }
+
+  def transactPutAllTable[T](
+    tableName: String
+  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] =
+    transactPutAll(items.map(tableName -> _))
+
+  def transactPutAll[T](
+    tableAndItems: List[(String, T)]
+  )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] = {
+    val dItems = tableAndItems.map {
+      case (tableName, itm) =>
+        new TransactWriteItem()
+          .withPut(
+            new Put().withItem(f.write(itm).asObject.getOrElse(DynamoObject.empty).toJavaMap).withTableName(tableName)
+          )
+    }
+    ScanamoOps.transactPutAll(new TransactWriteItemsRequest().withTransactItems(dItems.asJava))
+  }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] =
     items.toDynamoObject

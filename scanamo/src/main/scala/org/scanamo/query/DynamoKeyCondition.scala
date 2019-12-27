@@ -1,12 +1,28 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo.query
 
 import org.scanamo.DynamoFormat
 import org.scanamo.syntax.Bounds
 
 case class KeyEquals[V: DynamoFormat](key: AttributeName, v: V) {
-  def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]) =
+  def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]): AndEqualsCondition[KeyEquals[V], KeyEquals[R]] =
     AndEqualsCondition(this, equalsKeyCondition)
-  def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
+  def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]): AndQueryCondition[V, R] =
     AndQueryCondition(this, rangeKeyCondition)
 }
 
@@ -27,10 +43,10 @@ sealed abstract class RangeKeyCondition[V: DynamoFormat] extends Product with Se
 }
 
 sealed abstract class DynamoOperator(val op: String) extends Product with Serializable
-final case object LT extends DynamoOperator("<")
-final case object LTE extends DynamoOperator("<=")
-final case object GT extends DynamoOperator(">")
-final case object GTE extends DynamoOperator(">=")
+case object LT extends DynamoOperator("<")
+case object LTE extends DynamoOperator("<=")
+case object GT extends DynamoOperator(">")
+case object GTE extends DynamoOperator(">=")
 
 final case class KeyIs[V: DynamoFormat](key: AttributeName, operator: DynamoOperator, v: V)
     extends RangeKeyCondition[V] {
