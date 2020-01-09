@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sbt: org.tpolecat:tut-core_2.12:0.6.13:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/tpolecat/maven/org/tpolecat/tut-core_2.12/0.6.13/tut-core_2.12-0.6.13.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/tpolecat/maven/org/tpolecat/tut-core_2.12/0.6.13/tut-core_2.12-0.6.13-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/dl.bintray.com/tpolecat/maven/org/tpolecat/tut-core_2.12/0.6.13/tut-core_2.12-0.6.13-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

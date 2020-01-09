@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sbt: dev.zio:zio-streams_2.12:1.0.0-RC17:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/dev/zio/zio-streams_2.12/1.0.0-RC17/zio-streams_2.12-1.0.0-RC17.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/dev/zio/zio-streams_2.12/1.0.0-RC17/zio-streams_2.12-1.0.0-RC17-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/dev/zio/zio-streams_2.12/1.0.0-RC17/zio-streams_2.12-1.0.0-RC17-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

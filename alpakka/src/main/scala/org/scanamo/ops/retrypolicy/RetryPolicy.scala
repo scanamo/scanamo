@@ -20,6 +20,8 @@ import org.scanamo.ops.retrypolicy.RetryPolicy._
 
 import scala.concurrent.duration.Duration
 
+import scala.util.Random
+
 sealed abstract class RetryPolicy extends Product with Serializable { self =>
   final def continue: Boolean = self match {
     case Max(0) | Never              => false
@@ -27,15 +29,21 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
     case Or(thisPolicy, thatPolicy)  => thisPolicy.continue || thatPolicy.continue
     case _                           => true
   }
-
-  final def delay: Duration = self match {
-    case Constant(retryDelay)               => retryDelay
-    case Linear(retryDelay, n)              => retryDelay * n.toDouble
-    case Exponential(retryDelay, factor, n) => retryDelay * Math.pow(factor, n.toDouble)
-    case And(thisPolicy, thatPolicy)        => thisPolicy.delay.max(thatPolicy.delay)
-    case Or(thisPolicy, thatPolicy)         => thisPolicy.delay.min(thatPolicy.delay)
-    case Never                              => Duration.Inf
-    case _                                  => Duration.Zero
+  
+  final def delay: Long = self match {
+    case Constant(retryDelay) =>
+      val currentRetryDelay = retryDelay.toMillis
+      getDelayWithJitter(currentRetryDelay)
+    case Linear(retryDelay, factor) =>
+      val currentRetryDelay = retryDelay.toMillis * factor.toLong
+      getDelayWithJitter(currentRetryDelay)
+    case Exponential(retryDelay, factor, _) =>
+      val delayMillis = retryDelay.toMillis
+      val currentRetryDelay = delayMillis * Math.pow(delayMillis.toDouble, factor).toLong
+      getDelayWithJitter(currentRetryDelay)
+    case And(thisPolicy, thatPolicy) => Math.max(thisPolicy.delay, thatPolicy.delay)
+    case Or(thisPolicy, thatPolicy)  => Math.min(thisPolicy.delay, thatPolicy.delay)
+    case _                           => 0
   }
 
   final def update: RetryPolicy = self match {
@@ -49,6 +57,11 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
 
   final def &&(that: RetryPolicy): RetryPolicy = And(self, that)
   final def ||(that: RetryPolicy): RetryPolicy = Or(self, that)
+
+  final private def getDelayWithJitter(delayInMillis: Long) = {
+    val maxJitter = Math.ceil(delayInMillis * 0.2).toInt
+    delayInMillis + Random.nextInt(maxJitter)
+  }
 }
 
 object RetryPolicy {

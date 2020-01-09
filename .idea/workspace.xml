@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="bdd87f00-4451-4c5e-97bc-c70792e344eb" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/alpakka/src/main/scala/org/scanamo/ops/retrypolicy/RetryPolicy.scala" beforeDir="false" afterPath="$PROJECT_DIR$/alpakka/src/main/scala/org/scanamo/ops/retrypolicy/RetryPolicy.scala" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CodeStyleSettingsInfer">
+    <option name="done" value="true" />
+  </component>
+  <component name="ExternalProjectsData">
+    <projectState path="$PROJECT_DIR$">
+      <ProjectState />
+    </projectState>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="ProjectCodeStyleSettingsMigration">
+    <option name="version" value="1" />
+  </component>
+  <component name="ProjectId" id="1W9E7n21CkZD9lz5bPaLATyGu6n" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="abbreviatePackageNames" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+  </component>
+  <component name="SbtLocalSettings">
+    <option name="availableProjects">
+      <map>
+        <entry>
+          <key>
+            <ExternalProjectPojo>
+              <option name="name" value="root" />
+              <option name="path" value="$PROJECT_DIR$" />
+            </ExternalProjectPojo>
+          </key>
+          <value>
+            <list>
+              <ExternalProjectPojo>
+                <option name="name" value="catsEffect [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/cats" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="refined [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/refined" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="zio [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/zio" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="testkit [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/testkit" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="root [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="alpakka [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/alpakka" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="joda [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/joda" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="scanamo [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/scanamo" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="docs [file:/home/knoldus/Documents/project/open-source/]" />
+                <option name="path" value="$PROJECT_DIR$/docs" />
+              </ExternalProjectPojo>
+              <ExternalProjectPojo>
+                <option name="name" value="root-build" />
+                <option name="path" value="$PROJECT_DIR$/project" />
+              </ExternalProjectPojo>
+            </list>
+          </value>
+        </entry>
+      </map>
+    </option>
+    <option name="modificationStamps">
+      <map>
+        <entry key="$PROJECT_DIR$/build.sbt" value="4091129530" />
+        <entry key="$PROJECT_DIR$/project/build.properties" value="2912332145" />
+        <entry key="$PROJECT_DIR$/project/plugins.sbt" value="2033407765" />
+      </map>
+    </option>
+    <option name="projectSyncType">
+      <map>
+        <entry key="$USER_HOME$/Downloads/activator-akka-scala-guice/activator-akka-scala-guice" value="PREVIEW" />
+        <entry key="$USER_HOME$/Downloads/blog-keycloak-master/keycloak-akka-http" value="PREVIEW" />
+        <entry key="$USER_HOME$/workspace/alpakka" value="PREVIEW" />
+        <entry key="C:/samples/coding-challenge-harmeet-singh" value="PREVIEW" />
+      </map>
+    </option>
+  </component>
+  <component name="ServiceViewManager">
+    <option name="viewStates">
+      <list>
+        <serviceView>
+          <treeState>
+            <expand />
+            <select />
+          </treeState>
+        </serviceView>
+      </list>
+    </option>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="bdd87f00-4451-4c5e-97bc-c70792e344eb" name="Default Changelist" comment="" />
+      <created>1578553245164</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1578553245164</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1466" y="100" width="1720" height="882" key="DiffContextDialog" timestamp="1578554612222">
+      <screen x="1366" y="0" width="1920" height="1080" />
+    </state>
+    <state x="1466" y="100" width="1720" height="882" key="DiffContextDialog/0.27.1366.694/1366.0.1920.1080@1366.0.1920.1080" timestamp="1578554612222" />
+    <state x="1770" y="247" width="1092" height="585" key="MergeDialog" timestamp="1578556730843">
+      <screen x="1366" y="0" width="1920" height="1080" />
+    </state>
+    <state x="1770" y="247" width="1092" height="585" key="MergeDialog/0.27.1366.694/1366.0.1920.1080@1366.0.1920.1080" timestamp="1578556730843" />
+    <state x="2031" y="257" width="580" height="564" key="MultipleFileMergeDialog" timestamp="1578556732356">
+      <screen x="1366" y="0" width="1920" height="1080" />
+    </state>
+    <state x="2031" y="257" width="580" height="564" key="MultipleFileMergeDialog/0.27.1366.694/1366.0.1920.1080@1366.0.1920.1080" timestamp="1578556732356" />
+  </component>
+</project>

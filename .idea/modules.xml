@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/docs.iml" filepath="$PROJECT_DIR$/.idea/modules/docs.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/root.iml" filepath="$PROJECT_DIR$/.idea/modules/root.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/root-build.iml" filepath="$PROJECT_DIR$/.idea/modules/root-build.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scanamo.iml" filepath="$PROJECT_DIR$/.idea/modules/scanamo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scanamo-alpakka.iml" filepath="$PROJECT_DIR$/.idea/modules/scanamo-alpakka.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scanamo-cats-effect.iml" filepath="$PROJECT_DIR$/.idea/modules/scanamo-cats-effect.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scanamo-joda.iml" filepath="$PROJECT_DIR$/.idea/modules/scanamo-joda.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scanamo-refined.iml" filepath="$PROJECT_DIR$/.idea/modules/scanamo-refined.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scanamo-testkit.iml" filepath="$PROJECT_DIR$/.idea/modules/scanamo-testkit.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/scanamo-zio.iml" filepath="$PROJECT_DIR$/.idea/modules/scanamo-zio.iml" />
+    </modules>
+  </component>
+</project>

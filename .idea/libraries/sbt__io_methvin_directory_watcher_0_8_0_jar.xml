@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sbt: io.methvin:directory-watcher:0.8.0:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/io/methvin/directory-watcher/0.8.0/directory-watcher-0.8.0.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/io/methvin/directory-watcher/0.8.0/directory-watcher-0.8.0-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/io/methvin/directory-watcher/0.8.0/directory-watcher-0.8.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

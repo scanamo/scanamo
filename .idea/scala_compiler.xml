@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <profile name="sbt 1" modules="open-source_756" />
+    <profile name="sbt 2" modules="docs,root,scanamo,scanamo-alpakka,scanamo-cats-effect,scanamo-joda,scanamo-refined,scanamo-testkit,scanamo-zio">
+      <option name="implicitConversions" value="true" />
+      <option name="higherKinds" value="true" />
+      <option name="existentials" value="true" />
+      <option name="deprecationWarnings" value="true" />
+      <option name="uncheckedWarnings" value="true" />
+      <option name="featureWarnings" value="true" />
+      <option name="explainTypeErrors" value="true" />
+      <parameters>
+        <parameter value="-encoding" />
+        <parameter value="UTF-8" />
+        <parameter value="-target:jvm-1.8" />
+        <parameter value="-opt-warnings" />
+        <parameter value="-Ywarn-extra-implicit" />
+        <parameter value="-Ywarn-unused:_,imports" />
+        <parameter value="-Ywarn-unused:imports" />
+        <parameter value="-opt:l:inline" />
+        <parameter value="-opt-inline-from:&lt;source&gt;" />
+        <parameter value="-Xfatal-warnings" />
+        <parameter value="-Yrangepos" />
+        <parameter value="-Xfuture" />
+        <parameter value="-Xlint:_,-type-parameter-shadow" />
+        <parameter value="-Yno-adapted-args" />
+        <parameter value="-Ypartial-unification" />
+        <parameter value="-Ywarn-inaccessible" />
+        <parameter value="-Ywarn-infer-any" />
+        <parameter value="-Ywarn-nullary-override" />
+        <parameter value="-Ywarn-nullary-unit" />
+        <parameter value="-Ywarn-numeric-widen" />
+        <parameter value="-Ywarn-value-discard" />
+      </parameters>
+      <plugins>
+        <plugin path="$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/typelevel/kind-projector_2.12/0.10.3/kind-projector_2.12-0.10.3.jar" />
+      </plugins>
+    </profile>
+  </component>
+</project>

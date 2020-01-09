@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="sbt: org.jboss.xnio:xnio-api:3.6.5.Final:jar">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jboss/xnio/xnio-api/3.6.5.Final/xnio-api-3.6.5.Final.jar!/" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jboss/xnio/xnio-api/3.6.5.Final/xnio-api-3.6.5.Final-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.cache/coursier/v1/https/repo1.maven.org/maven2/org/jboss/xnio/xnio-api/3.6.5.Final/xnio-api-3.6.5.Final-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>
