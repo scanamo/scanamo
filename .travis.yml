@@ -1,14 +1,15 @@
+version: ~> 1.0
 language: scala
+os: linux
 scala:
-- 2.12.8
+- 2.12.10
 jdk:
 - openjdk8
-sudo: false
 install:
-  - rvm use 2.3.8 --install --fuzzy
+  - rvm use 2.6.0 --install --fuzzy
   - gem update --system
   - gem install sass
-  - gem install jekyll -v 3.2.1
+  - gem install jekyll -v 4.0.0
 cache:
   directories:
   - $HOME/.sbt
@@ -19,6 +20,8 @@ before_cache:
 before_install:
   - git fetch --tags
   - export PATH=${PATH}:./vendor/bundle
+after_success:
+  - if [ "$TRAVIS_BRANCH" = "master" -a "$TRAVIS_PULL_REQUEST" = "false" ]; then bash scripts/publishMicrosite.sh; fi
 stages:
   - name: test
   - name: microsite
@@ -33,7 +36,7 @@ jobs:
       script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck
     - &test
       stage: test
-      name: "Test for 2.12"
+      name: "Tests for 2.12"
       script: sbt ++$TRAVIS_SCALA_VERSION coverage startDynamodbLocal test dynamodbLocalTestCleanup stopDynamodbLocal
       after_success: bash <(curl -s https://codecov.io/bash)
     - &microsite
@@ -48,4 +51,9 @@ jobs:
     # Cross-build
     - <<: *test
       scala: 2.11.12
-      name: "Test for 2.11"
+      name: "Tests for 2.11"
+
+    # Cross-build
+    - <<: *test
+      scala: 2.13.1
+      name: "Tests for 2.13"

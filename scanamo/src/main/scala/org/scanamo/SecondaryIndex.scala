@@ -1,8 +1,24 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo
 
+import cats.{ Monad, MonoidK }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
-import org.scanamo.error.DynamoReadError
-import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 
@@ -26,9 +42,9 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
-    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('name -> S)('antagonist -> S) { (t, i) =>
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("antagonist" -> S) { (t, i) =>
     * ...   val table = Table[Bear](t)
     * ...   val ops = for {
     * ...     _ <- table.put(Bear("Pooh", "honey", None))
@@ -44,6 +60,25 @@ sealed abstract class SecondaryIndex[V] {
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
 
   /**
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page.
+    *
+    * To control how many maximum items to load at once, use [[scanPaginatedM]]
+    */
+  final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
+
+  /**
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page, with a maximum of `pageSize` items per page..
+    *
+    * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
+    * upper bound.
+    */
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
+
+  /**
     * Run a query against keys in a secondary index
     *
     * {{{
@@ -54,9 +89,9 @@ sealed abstract class SecondaryIndex[V] {
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
-    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)('organisation -> S, 'repository -> S)('language -> S, 'license -> S) { (t, i) =>
+    * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("organisation" -> S, "repository" -> S)("language" -> S, "license" -> S) { (t, i) =>
     * ...   val githubProjects = Table[GithubProject](t)
     * ...   val operations = for {
     * ...     _ <- githubProjects.putAll(Set(
@@ -65,7 +100,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       GithubProject("tpolecat", "tut", "Scala", "MIT"),
     * ...       GithubProject("guardian", "scanamo", "Scala", "Apache 2")
     * ...     ))
-    * ...     scalaMIT <- githubProjects.index(i).query('language -> "Scala" and ('license -> "MIT"))
+    * ...     scalaMIT <- githubProjects.index(i).query("language" -> "Scala" and ("license" -> "MIT"))
     * ...   } yield scalaMIT.toList
     * ...   scanamo.exec(operations)
     * ... }
@@ -73,6 +108,27 @@ sealed abstract class SecondaryIndex[V] {
     * }}}
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  /**
+    * Performs a query with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page.
+    *
+    * To control how many maximum items to load at once, use [[queryPaginatedM]]
+    */
+  final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+    queryPaginatedM(query, Int.MaxValue)
+
+  /**
+    * Performs a scan with the ability to introduce effects into the computation. This is
+    * useful for huge tables when you don't want to load the whole of it in memory, but
+    * scan it page by page, with a maximum of `pageSize` items per page.
+    *
+    * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
+    * upper bound.
+    */
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
+                                            pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
@@ -84,10 +140,10 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
-    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S
     * ... ) { (t, i) =>
     * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
@@ -98,7 +154,7 @@ sealed abstract class SecondaryIndex[V] {
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
     * ...     somethingBeginningWithBl <- transport.index(i).limit(1).descending.query(
-    * ...       ('mode -> "Underground" and ('colour beginsWith "Bl"))
+    * ...       ("mode" -> "Underground" and ("colour" beginsWith "Bl"))
     * ...     )
     * ...   } yield somethingBeginningWithBl.toList
     * ...   scanamo.exec(operations)
@@ -119,10 +175,10 @@ sealed abstract class SecondaryIndex[V] {
     * >>> val scanamo = Scanamo(client)
     * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.auto._
+    * >>> import org.scanamo.generic.auto._
     *
     * >>> LocalDynamoDB.withRandomTableWithSecondaryIndex(client)(
-    * ...   'mode -> S, 'line -> S)('mode -> S, 'colour -> S
+    * ...   "mode" -> S, "line" -> S)("mode" -> S, "colour" -> S
     * ... ) { (t, i) =>
     * ...   val transport = Table[Transport](t)
     * ...   val operations = for {
@@ -133,8 +189,8 @@ sealed abstract class SecondaryIndex[V] {
     * ...       Transport("Underground", "Picadilly", "Blue"),
     * ...       Transport("Underground", "Northern", "Black")))
     * ...     somethingBeginningWithC <- transport.index(i)
-    * ...                                   .filter('line beginsWith ("C"))
-    * ...                                   .query('mode -> "Underground")
+    * ...                                   .filter("line" beginsWith ("C"))
+    * ...                                   .query("mode" -> "Underground")
     * ...   } yield somethingBeginningWithC.toList
     * ...   scanamo.exec(operations)
     * ... }
@@ -163,6 +219,10 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   def descending: SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
   def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int) =
+    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
     QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int) =
+    QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }

@@ -1,12 +1,27 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo.query
 
 import com.amazonaws.services.dynamodbv2.model._
 import org.scanamo.{ DynamoFormat, DynamoObject }
-import org.scanamo.error.{ ConditionNotMet, ScanamoError }
+import org.scanamo.{ ConditionNotMet, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
-import simulacrum.typeclass
 import cats.syntax.either._
 
 case class ConditionalOperation[V, T](tableName: String, t: T)(
@@ -36,21 +51,22 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
           Some(state.apply(t))
         )
       )
-      .map(
-        either =>
-          either
-            .leftMap[ScanamoError](ConditionNotMet(_))
-            .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
+      .map(either =>
+        either
+          .leftMap[ScanamoError](ConditionNotMet(_))
+          .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
       )
 }
 
-@typeclass trait ConditionExpression[T] {
+trait ConditionExpression[T] {
   def apply(t: T): RequestCondition
 }
 
 object ConditionExpression {
-  implicit def symbolValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, V)] {
-    override def apply(pair: (Symbol, V)): RequestCondition =
+  def apply[T](implicit C: ConditionExpression[T]): ConditionExpression[T] = C
+
+  implicit def stringValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(String, V)] {
+    override def apply(pair: (String, V)): RequestCondition =
       attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))
   }
 
@@ -66,8 +82,8 @@ object ConditionExpression {
     }
   }
 
-  implicit def symbolValueInCondition[V: DynamoFormat] = new ConditionExpression[(Symbol, Set[V])] {
-    override def apply(pair: (Symbol, Set[V])): RequestCondition =
+  implicit def stringValueInCondition[V: DynamoFormat] = new ConditionExpression[(String, Set[V])] {
+    override def apply(pair: (String, Set[V])): RequestCondition =
       attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))
   }
 
@@ -209,8 +225,8 @@ case class AndCondition[L: ConditionExpression, R: ConditionExpression](l: L, r:
 
 case class OrCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: R)
 
-case class Condition[T: ConditionExpression](t: T) {
-  def apply = implicitly[ConditionExpression[T]].apply(t)
+case class Condition[T](t: T)(implicit T: ConditionExpression[T]) {
+  def apply = T.apply(t)
   def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
   def or[Y: ConditionExpression](other: Y) = OrCondition(t, other)
 }

@@ -1,7 +1,24 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo
 
-import cats.free.Free
 import cats.data.NonEmptyList
+import cats.free.Free
+import cats.free.FreeT
 import cats.instances.option._
 import cats.syntax.apply._
 import com.amazonaws.services.dynamodbv2.model._
@@ -9,6 +26,7 @@ import org.scanamo.request._
 
 package object ops {
   type ScanamoOps[A] = Free[ScanamoOpsA, A]
+  type ScanamoOpsT[M[_], A] = FreeT[ScanamoOpsA, M, A]
 
   private[ops] object JavaRequests {
     import collection.JavaConverters._
@@ -25,7 +43,7 @@ package object ops {
           queryRefinement(_.index)(_.withIndexName(_)),
           queryRefinement(_.options.limit)(_.withLimit(_)),
           queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.toJavaMap)),
-          queryRefinement(_.options.filter)((r, f) => {
+          queryRefinement(_.options.filter) { (r, f) =>
             val requestCondition = f.apply
             requestCondition.dynamoValues
               .filter(_.nonEmpty)
@@ -34,7 +52,7 @@ package object ops {
                 r.withFilterExpression(requestCondition.expression)
                   .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
               )(_ withExpressionAttributeValues _)
-          })
+          }
         )
         .reduceLeft(_.compose(_))(
           new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)
@@ -138,5 +156,4 @@ package object ops {
       }
     }
   }
-
 }

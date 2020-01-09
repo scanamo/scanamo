@@ -2,16 +2,17 @@ package org.scanamo.update
 
 import org.scalacheck.{ Arbitrary, Gen }
 import org.scalacheck.Arbitrary._
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import org.scanamo.syntax._
 import org.scanamo.DynamoFormat
 
-class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matchers with org.scalatest.prop.Checkers {
-
-  implicit lazy val arbSymbol: Arbitrary[Symbol] = Arbitrary(Gen.alphaNumStr.map(Symbol(_)))
+class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestplus.scalacheck.Checkers {
+  implicit lazy val arbString: Arbitrary[String] = Arbitrary(Gen.alphaNumStr)
 
   def leaf: Gen[UpdateExpression] =
     for {
-      s <- arbitrary[Symbol]
+      s <- arbitrary[String]
       i <- arbitrary[Int]
       si <- arbitrary[Set[Int]]
       l <- arbitrary[List[String]]
@@ -46,29 +47,29 @@ class UpdateExpressionTest extends org.scalatest.FunSpec with org.scalatest.Matc
 
   it("should have all value placeholders in the expression") {
     check { (ue: UpdateExpression) =>
-      ue.attributeValues.keys.forall(s => {
+      ue.attributeValues.keys.forall { s =>
         ue.expression.contains(s)
-      })
+      }
     }
   }
 
   it("should have all name placeholders in the expression") {
     check { (ue: UpdateExpression) =>
-      ue.attributeNames.keys.forall(s => {
+      ue.attributeNames.keys.forall { s =>
         ue.expression.contains(s)
-      })
+      }
     }
   }
 
   it("append/prepend should wrap scalar values in a list") {
-    check { (s: Symbol, v: String) =>
+    check { (s: String, v: String) =>
       append(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
       prepend(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
     }
   }
 
   it("appendAll/prependAll should take the value as a list") {
-    check { (s: Symbol, l: List[String]) =>
+    check { (s: String, l: List[String]) =>
       appendAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
       prependAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
     }
