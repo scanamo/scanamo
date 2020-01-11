@@ -17,13 +17,7 @@
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
-import com.amazonaws.services.dynamodbv2.model.{
-  BatchWriteItemResult,
-  DeleteItemResult,
-  QueryResult,
-  ScanResult,
-  TransactWriteItemsResult
-}
+import com.amazonaws.services.dynamodbv2.model.{ QueryResult, ScanResult, TransactWriteItemsResult }
 import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
@@ -57,12 +51,23 @@ import org.scanamo.update.UpdateExpression
   * }}}
   */
 case class Table[V: DynamoFormat](name: String) {
-  def put(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.put(name)(v)
-  def putAll(vs: Set[V]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.putAll(name)(vs)
+
+  def put(v: V): ScanamoOps[Unit] = ScanamoFree.put(name)(v)
+
+  def putAndReturn(ret: PutReturn)(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] =
+    ScanamoFree.putAndReturn(name)(ret, v)
+
+  def putAll(vs: Set[V]): ScanamoOps[Unit] = ScanamoFree.putAll(name)(vs)
+
   def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.get[V](name)(key, false)
+
   def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
     ScanamoFree.getAll[V](name)(keys, false)
-  def delete(key: UniqueKey[_]): ScanamoOps[DeleteItemResult] = ScanamoFree.delete(name)(key)
+
+  def delete(key: UniqueKey[_]): ScanamoOps[Unit] = ScanamoFree.delete(name)(key)
+
+  def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
+    ScanamoFree.deleteAndReturn(name)(ret, key)
 
   /**
     * Deletes multiple items by a unique key
@@ -94,7 +99,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List()
     * }}}
     */
-  def deleteAll(items: UniqueKeys[_]): ScanamoOps[List[BatchWriteItemResult]] = ScanamoFree.deleteAll(name)(items)
+  def deleteAll(items: UniqueKeys[_]): ScanamoOps[Unit] = ScanamoFree.deleteAll(name)(items)
 
   /**
     * A secondary index on the table which can be scanned, or queried against
