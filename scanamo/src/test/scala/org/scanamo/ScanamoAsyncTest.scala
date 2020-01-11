@@ -493,7 +493,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
       scanamo.exec(farmerOps).futureValue should equal(
@@ -506,7 +506,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
       scanamo.exec(farmerOps).futureValue should equal(
