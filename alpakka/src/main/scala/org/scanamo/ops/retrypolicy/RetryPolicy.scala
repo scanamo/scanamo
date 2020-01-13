@@ -30,11 +30,9 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
   }
 
   final def delay: Long = self match {
-    case Constant(retryDelay)       => retryDelay.toMillis
-    case Linear(retryDelay, factor) => retryDelay.toMillis * factor.toLong
-    case Exponential(retryDelay, factor, _) =>
-      val delayMillis = retryDelay.toMillis
-      delayMillis * Math.pow(delayMillis.toDouble, factor).toLong
+    case Constant(retryDelay)               => retryDelay.toMillis
+    case Linear(retryDelay, factor)         => retryDelay.toMillis * factor.toLong
+    case Exponential(retryDelay, factor, n) => retryDelay.toMillis * Math.pow(factor, n.toDouble).toLong
     case Jitter(random, margin, innerPolicy) =>
       val delay = innerPolicy.delay
       val (low, high) = (Math.max(0, delay - margin), delay + margin + 1)
