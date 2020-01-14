@@ -33,7 +33,7 @@ trait WithRetry {
           if (retryPolicy.continue) {
             Source
               .single(())
-              .delay(FiniteDuration(retryPolicy.delay, TimeUnit.MILLISECONDS))
+              .delay(FiniteDuration(retryPolicy.delayOrElse(Long.MaxValue)(_.toMillis), TimeUnit.MILLISECONDS))
               .flatMapConcat(_ => retry(op, retryPolicy.update))
           } else {
             Source.failed(exception)
