@@ -55,6 +55,11 @@ sealed abstract class RetryPolicy extends Product with Serializable { self =>
 
   final def &&(that: RetryPolicy): RetryPolicy = And(self, that)
   final def ||(that: RetryPolicy): RetryPolicy = Or(self, that)
+
+  final def delayOrElse[A](or: => A)(f: FiniteDuration => A): A = self.delay match {
+    case duration: FiniteDuration => f(duration)
+    case _: Duration.Infinite     => or
+  }
 }
 
 object RetryPolicy {
