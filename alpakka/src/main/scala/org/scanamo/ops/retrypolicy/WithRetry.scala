@@ -16,7 +16,7 @@
 
 package org.scanamo.ops.retrypolicy
 
-import java.util.concurrent.{ TimeUnit }
+import java.util.concurrent.TimeUnit
 
 import com.amazonaws.services.dynamodbv2.model._
 
@@ -33,7 +33,7 @@ trait WithRetry {
           if (retryPolicy.continue) {
             Source
               .single(())
-              .delay(FiniteDuration(retryPolicy.delay.toMillis, TimeUnit.MILLISECONDS))
+              .delay(FiniteDuration(retryPolicy.delay, TimeUnit.MILLISECONDS))
               .flatMapConcat(_ => retry(op, retryPolicy.update))
           } else {
             Source.failed(exception)
