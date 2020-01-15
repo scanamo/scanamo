@@ -127,11 +127,11 @@ lazy val scanamo = (project in file("scanamo"))
       awsDynamoDB,
       "org.typelevel" %% "cats-free" % catsVersion,
       // Use Joda for custom conversion example
-      "org.joda"          % "joda-convert"              % "2.2.1" % Provided,
-      "joda-time"         % "joda-time"                 % "2.10.5" % Test,
-      "org.scalatest"     %% "scalatest"                % "3.1.0" % Test,
-      "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2",
-      "org.scalacheck"    %% "scalacheck"               % "1.14.3" % Test
+      "org.joda"          % "joda-convert"              % "2.2.1"       % Provided,
+      "joda-time"         % "joda-time"                 % "2.10.5"      % Test,
+      "org.scalatest"     %% "scalatest"                % "3.1.0"       % Test,
+      "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
+      "org.scalacheck"    %% "scalacheck"               % "1.14.3"      % Test
     ) ++ customDeps(scalaVersion.value)
   )
   .dependsOn(testkit % "test->test")
