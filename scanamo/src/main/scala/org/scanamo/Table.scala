@@ -534,7 +534,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Some(Right(Farmer(McDonald,156,Farm(List(gerbil, hamster, squirrel),20))))
     * }}}
     */
-  def given[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
+  def `given`[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
   /**
     * Primes a search request with a key to start from:

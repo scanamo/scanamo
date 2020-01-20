@@ -103,29 +103,32 @@ trait ConditionExpression[T] {
 object ConditionExpression {
   def apply[T](implicit C: ConditionExpression[T]): ConditionExpression[T] = C
 
-  implicit def stringValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(String, V)] {
-    override def apply(pair: (String, V)): RequestCondition =
-      attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))
-  }
-
-  implicit def attributeValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(AttributeName, V)] {
-    val prefix = "equalsCondition"
-    override def apply(pair: (AttributeName, V)): RequestCondition = {
-      val attributeName = pair._1
-      RequestCondition(
-        s"#${attributeName.placeholder(prefix)} = :conditionAttributeValue",
-        attributeName.attributeNames(s"#$prefix"),
-        Some(DynamoObject("conditionAttributeValue" -> pair._2))
-      )
+  implicit def stringValueEqualsCondition[V: DynamoFormat]: ConditionExpression[(String, V)] =
+    new ConditionExpression[(String, V)] {
+      override def apply(pair: (String, V)): RequestCondition =
+        attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))
     }
-  }
 
-  implicit def stringValueInCondition[V: DynamoFormat] = new ConditionExpression[(String, Set[V])] {
-    override def apply(pair: (String, Set[V])): RequestCondition =
-      attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))
-  }
+  implicit def attributeValueEqualsCondition[V: DynamoFormat]: ConditionExpression[(AttributeName, V)] =
+    new ConditionExpression[(AttributeName, V)] {
+      val prefix = "equalsCondition"
+      override def apply(pair: (AttributeName, V)): RequestCondition = {
+        val attributeName = pair._1
+        RequestCondition(
+          s"#${attributeName.placeholder(prefix)} = :conditionAttributeValue",
+          attributeName.attributeNames(s"#$prefix"),
+          Some(DynamoObject("conditionAttributeValue" -> pair._2))
+        )
+      }
+    }
 
-  implicit def attributeValueInCondition[V: DynamoFormat] =
+  implicit def stringValueInCondition[V: DynamoFormat]: ConditionExpression[(String, Set[V])] =
+    new ConditionExpression[(String, Set[V])] {
+      override def apply(pair: (String, Set[V])): RequestCondition =
+        attributeValueInCondition.apply((AttributeName.of(pair._1), pair._2))
+    }
+
+  implicit def attributeValueInCondition[V: DynamoFormat]: ConditionExpression[(AttributeName, Set[V])] =
     new ConditionExpression[(AttributeName, Set[V])] {
       val prefix = "inCondition"
       override def apply(pair: (AttributeName, Set[V])): RequestCondition = {
@@ -142,51 +145,60 @@ object ConditionExpression {
       }
     }
 
-  implicit def attributeExistsCondition = new ConditionExpression[AttributeExists] {
-    val prefix = "attributeExists"
-    override def apply(t: AttributeExists): RequestCondition =
-      RequestCondition(s"attribute_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
-  }
-
-  implicit def attributeNotExistsCondition = new ConditionExpression[AttributeNotExists] {
-    val prefix = "attributeNotExists"
-    override def apply(t: AttributeNotExists): RequestCondition =
-      RequestCondition(s"attribute_not_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
-  }
-
-  implicit def notCondition[T](implicit pcs: ConditionExpression[T]) = new ConditionExpression[Not[T]] {
-    override def apply(not: Not[T]): RequestCondition = {
-      val conditionToNegate = pcs(not.condition)
-      conditionToNegate.copy(expression = s"NOT(${conditionToNegate.expression})")
+  implicit def attributeExistsCondition: ConditionExpression[AttributeExists] =
+    new ConditionExpression[AttributeExists] {
+      val prefix = "attributeExists"
+      override def apply(t: AttributeExists): RequestCondition =
+        RequestCondition(s"attribute_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
     }
-  }
 
-  implicit def beginsWithCondition[V: DynamoFormat] = new ConditionExpression[BeginsWith[V]] {
-    val prefix = "beginsWith"
-    override def apply(b: BeginsWith[V]): RequestCondition =
-      RequestCondition(
-        s"begins_with(#${b.key.placeholder(prefix)}, :conditionAttributeValue)",
-        b.key.attributeNames(s"#$prefix"),
-        Some(DynamoObject("conditionAttributeValue" -> b.v))
-      )
-  }
+  implicit def attributeNotExistsCondition: ConditionExpression[AttributeNotExists] =
+    new ConditionExpression[AttributeNotExists] {
+      val prefix = "attributeNotExists"
+      override def apply(t: AttributeNotExists): RequestCondition =
+        RequestCondition(
+          s"attribute_not_exists(#${t.key.placeholder(prefix)})",
+          t.key.attributeNames(s"#$prefix"),
+          None
+        )
+    }
 
-  implicit def betweenCondition[V: DynamoFormat] = new ConditionExpression[Between[V]] {
-    val prefix = "between"
-    override def apply(b: Between[V]): RequestCondition =
-      RequestCondition(
-        s"#${b.key.placeholder(prefix)} BETWEEN :lower and :upper",
-        b.key.attributeNames(s"#$prefix"),
-        Some(
-          DynamoObject(
-            "lower" -> b.bounds.lowerBound.v,
-            "upper" -> b.bounds.upperBound.v
+  implicit def notCondition[T](implicit pcs: ConditionExpression[T]): ConditionExpression[Not[T]] =
+    new ConditionExpression[Not[T]] {
+      override def apply(not: Not[T]): RequestCondition = {
+        val conditionToNegate = pcs(not.condition)
+        conditionToNegate.copy(expression = s"NOT(${conditionToNegate.expression})")
+      }
+    }
+
+  implicit def beginsWithCondition[V: DynamoFormat]: ConditionExpression[BeginsWith[V]] =
+    new ConditionExpression[BeginsWith[V]] {
+      val prefix = "beginsWith"
+      override def apply(b: BeginsWith[V]): RequestCondition =
+        RequestCondition(
+          s"begins_with(#${b.key.placeholder(prefix)}, :conditionAttributeValue)",
+          b.key.attributeNames(s"#$prefix"),
+          Some(DynamoObject("conditionAttributeValue" -> b.v))
+        )
+    }
+
+  implicit def betweenCondition[V: DynamoFormat]: ConditionExpression[Between[V]] =
+    new ConditionExpression[Between[V]] {
+      val prefix = "between"
+      override def apply(b: Between[V]): RequestCondition =
+        RequestCondition(
+          s"#${b.key.placeholder(prefix)} BETWEEN :lower and :upper",
+          b.key.attributeNames(s"#$prefix"),
+          Some(
+            DynamoObject(
+              "lower" -> b.bounds.lowerBound.v,
+              "upper" -> b.bounds.upperBound.v
+            )
           )
         )
-      )
-  }
+    }
 
-  implicit def keyIsCondition[V: DynamoFormat] = new ConditionExpression[KeyIs[V]] {
+  implicit def keyIsCondition[V: DynamoFormat]: ConditionExpression[KeyIs[V]] = new ConditionExpression[KeyIs[V]] {
     val prefix = "keyIs"
     override def apply(k: KeyIs[V]): RequestCondition =
       RequestCondition(
@@ -196,13 +208,13 @@ object ConditionExpression {
       )
   }
 
-  implicit def andCondition[L: ConditionExpression, R: ConditionExpression] =
+  implicit def andCondition[L: ConditionExpression, R: ConditionExpression]: ConditionExpression[AndCondition[L, R]] =
     new ConditionExpression[AndCondition[L, R]] {
       override def apply(and: AndCondition[L, R]): RequestCondition =
         combineConditions(and.l, and.r, "AND")
     }
 
-  implicit def orCondition[L: ConditionExpression, R: ConditionExpression] =
+  implicit def orCondition[L: ConditionExpression, R: ConditionExpression]: ConditionExpression[OrCondition[L, R]] =
     new ConditionExpression[OrCondition[L, R]] {
       override def apply(and: OrCondition[L, R]): RequestCondition =
         combineConditions(and.l, and.r, "OR")

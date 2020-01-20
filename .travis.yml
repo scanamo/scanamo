@@ -36,9 +36,8 @@ jobs:
       script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck
     - &test
       stage: test
-      name: "Tests for 2.12"
-      script: sbt ++$TRAVIS_SCALA_VERSION coverage startDynamodbLocal test dynamodbLocalTestCleanup stopDynamodbLocal
-      after_success: bash <(curl -s https://codecov.io/bash)
+      name: "Tests for Scala 2.12"
+      script: sbt ++$TRAVIS_SCALA_VERSION startDynamodbLocal test dynamodbLocalTestCleanup stopDynamodbLocal
     - &microsite
       stage: microsite
       name: "Generate microsite"
@@ -51,9 +50,14 @@ jobs:
     # Cross-build
     - <<: *test
       scala: 2.11.12
-      name: "Tests for 2.11"
+      name: "Tests for Scala 2.11"
 
     # Cross-build
     - <<: *test
       scala: 2.13.1
-      name: "Tests for 2.13"
+      name: "Tests for Scala 2.13"
+
+    # Cross-build
+    - <<: *test
+      scala: 0.21.0-RC1
+      name: "Tests for Scala 3"

@@ -28,24 +28,26 @@ package object scanamo {
 
     case class HashAndRangeKeyNames(hash: AttributeName, range: AttributeName)
 
-    implicit def stringTupleToUniqueKey[V: DynamoFormat](pair: (String, V)) =
+    implicit def stringTupleToUniqueKey[V: DynamoFormat](pair: (String, V)): UniqueKey[KeyEquals[V]] =
       UniqueKey(KeyEquals(AttributeName.of(pair._1), pair._2))
 
-    implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)) =
+    implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)): KeyEquals[V] =
       KeyEquals(AttributeName.of(pair._1), pair._2)
 
-    implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
+    implicit def toUniqueKey[T: UniqueKeyCondition](t: T): UniqueKey[T] = UniqueKey(t)
 
-    implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])) =
+    implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])): UniqueKeys[KeyList[V]] =
       UniqueKeys(KeyList(AttributeName.of(pair._1), pair._2))
 
-    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])) =
+    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](
+      pair: (HashAndRangeKeyNames, Set[(H, R)])
+    ): UniqueKeys[MultipleKeyList[H, R]] =
       UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
 
-    implicit def stringTupleToQuery[V: DynamoFormat](pair: (String, V)) =
+    implicit def stringTupleToQuery[V: DynamoFormat](pair: (String, V)): Query[KeyEquals[V]] =
       Query(KeyEquals(AttributeName.of(pair._1), pair._2))
 
-    implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
+    implicit def toQuery[T: QueryableKeyCondition](t: T): Query[T] = Query(t)
 
     case class Bounds[V: DynamoFormat](lowerBound: Bound[V], upperBound: Bound[V])
 
