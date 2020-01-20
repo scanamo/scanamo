@@ -4,7 +4,8 @@ import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import com.amazonaws.services.dynamodbv2.model._
-import org.scalatest.{ Assertion, AsyncFreeSpec, BeforeAndAfterAll }
+import org.scalatest.{ Assertion, BeforeAndAfterAll }
+import org.scalatest.freespec.AsyncFreeSpec
 import org.scanamo.ops.retrypolicy.{ RetryPolicy, WithRetry }
 
 import scala.concurrent.{ Await, Future }

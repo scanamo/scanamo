@@ -8,9 +8,10 @@ import eu.timepit.refined.numeric.Positive
 import org.scanamo.TypeCoercionError
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 
-import org.scalatest.{ FlatSpec, Matchers }
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.flatspec.AnyFlatSpec
 
-class RefinedDynamoFormatSpec extends FlatSpec with Matchers {
+class RefinedDynamoFormatSpec extends AnyFlatSpec with Matchers {
   type PosInt = Int Refined Positive
 
   "DynamoFormat[PosInt]" should "read a positive integer value" in {

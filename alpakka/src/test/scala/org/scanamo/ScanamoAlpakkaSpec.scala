@@ -11,11 +11,13 @@ import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Seconds, Span }
-import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.matchers.should.Matchers
+import org.scalatest.funspec.AnyFunSpecLike
 import cats.implicits._
 import org.scanamo.ops.ScanamoOps
 
-class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
+class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
   implicit val system = ActorSystem("scanamo-alpakka")
   val client = LocalDynamoDB.client()
 
