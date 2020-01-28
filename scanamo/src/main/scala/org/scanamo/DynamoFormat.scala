@@ -91,7 +91,7 @@ trait DynamoFormat[T] {
   def write(t: T): DynamoValue
 }
 
-object DynamoFormat extends LowPriorityFormats {
+object DynamoFormat {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
@@ -600,8 +600,4 @@ object DynamoFormat extends LowPriorityFormats {
   )(
     _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
   )
-}
-
-private[scanamo] trait LowPriorityFormats {
-  implicit final def exportedFormat[A](implicit E: generic.ExportedDynamoFormat[A]): DynamoFormat[A] = E.instance
 }
