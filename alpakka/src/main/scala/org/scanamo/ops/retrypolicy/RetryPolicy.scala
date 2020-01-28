@@ -17,7 +17,9 @@
 package org.scanamo.ops.retrypolicy
 
 import java.util.SplittableRandom
+
 import org.scanamo.ops.retrypolicy.RetryPolicy._
+
 import scala.concurrent.duration._
 
 sealed abstract class RetryPolicy extends Product with Serializable { self =>
