@@ -20,6 +20,13 @@ import cats.{ ~>, Monad }
 import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.{ Sink, Source }
+import com.amazonaws.services.dynamodbv2.model.{
+  InternalServerErrorException,
+  ItemCollectionSizeLimitExceededException,
+  LimitExceededException,
+  ProvisionedThroughputExceededException,
+  RequestLimitExceededException
+}
 import org.scanamo.ops.AlpakkaInterpreter.Alpakka
 import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps, ScanamoOpsT }
 import org.scanamo.ops.retrypolicy.RetryPolicy
@@ -28,15 +35,17 @@ import scala.concurrent.Future
 
 /**
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
-  * [[https://github.com/akka/alpakka Alpakka]] client and a [[org.scanamo.ops.retrypolicy.RetryPolicy]].
+  * [[https://github.com/akka/alpakka Alpakka]] client, a [[org.scanamo.ops.retrypolicy.RetryPolicy]]
+  * and a predicate for which [[scala.Throwable]]s should be retried.
   * `retryPolicy` defaults to [[org.scanamo.ops.retrypolicy.RetryPolicy.max]] with maximum 3 retries if not explicitly
-  * provided. Moreover, the interface returns either a [[scala.concurrent.Future]] or [[akka.stream.scaladsl.Source]]
+  * provided. `isRetryable` defaults to retry the most common retryable Dynamo exceptions.
+  * Moreover, the interface returns either a [[scala.concurrent.Future]] or [[akka.stream.scaladsl.Source]]
   * based on the kind of execution used.
   */
-class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy) {
+class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean) {
   import ScanamoAlpakka._
 
-  final private val interpreter = new AlpakkaInterpreter(client, retryPolicy)
+  final private val interpreter = new AlpakkaInterpreter(client, retryPolicy, isRetryable)
 
   def exec[A](op: ScanamoOps[A]): Alpakka[A] =
     run(op)
@@ -54,8 +63,16 @@ class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy) {
 object ScanamoAlpakka extends AlpakkaInstances {
   def apply(
     client: DynamoClient,
-    retrySettings: RetryPolicy = RetryPolicy.max(3)
-  ): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings)
+    retrySettings: RetryPolicy = RetryPolicy.max(3),
+    isRetryable: Throwable => Boolean = defaultRetryableCheck
+  ): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings, isRetryable)
+
+  def defaultRetryableCheck(throwable: Throwable): Boolean = throwable match {
+    case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
+        _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
+      true
+    case _ => false
+  }
 }
 
 private[scanamo] trait AlpakkaInstances {
