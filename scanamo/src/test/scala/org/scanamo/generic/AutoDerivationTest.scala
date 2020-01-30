@@ -48,4 +48,15 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
     )
   }
 
+  test("Derivation should prioritise implicits from companion") {
+    import org.scanamo.generic.auto._
+
+    val value = Some("umbrella")
+    val expected = DynamoFormat.optionFormat[String].write(value)
+
+    val actual = DynamoFormat[Option[String]].write(value)
+
+    actual should ===(expected)
+  }
+
 }
