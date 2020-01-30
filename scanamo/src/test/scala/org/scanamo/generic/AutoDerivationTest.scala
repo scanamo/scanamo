@@ -2,7 +2,7 @@ package org.scanamo.generic
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.{ DynamoArray, DynamoFormat, DynamoObject, DynamoValue }
+import org.scanamo._
 
 class AutoDerivationTest extends AnyFunSuite with Matchers {
 
@@ -48,7 +48,7 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
     )
   }
 
-  test("Derivation should prioritise implicits from companion") {
+  test("Derivation should prioritise implicits from DynamoFormat companion") {
     import org.scanamo.generic.auto._
 
     val value = Some("umbrella")
@@ -57,6 +57,24 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
     val actual = DynamoFormat[Option[String]].write(value)
 
     actual should ===(expected)
+  }
+
+  test("Derivation should prioritise implicits from user specified companions") {
+    import org.scanamo.generic.auto._
+
+    case class Foo(value: Unit)
+    object Foo {
+      def fromString(s: String): Either[TypeCoercionError, Foo] = s match {
+        case "foo" => Right(Foo(()))
+        case _     => Left(TypeCoercionError(new RuntimeException(s"$s is not a foo")))
+      }
+
+      implicit val dynamoFormatFoo: DynamoFormat[Foo] = DynamoFormat.xmap[Foo, String](fromString)((_: Foo) => "foo")
+    }
+
+    val result = DynamoFormat[Foo].write(Foo(()))
+
+    result should ===(DynamoValue.fromString("foo"))
   }
 
 }

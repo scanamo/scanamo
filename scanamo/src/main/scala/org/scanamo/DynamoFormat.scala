@@ -91,7 +91,7 @@ trait DynamoFormat[T] {
   def write(t: T): DynamoValue
 }
 
-object DynamoFormat {
+object DynamoFormat extends DynamoFormatDefaultInstances {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
@@ -127,25 +127,8 @@ object DynamoFormat {
       }
   }
 
-  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
-    coerce[String, N, NumberFormatException](f)
-
-  private def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
+  private[scanamo] def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
     a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
-
-  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
-    coerce[ByteBuffer, B, IllegalArgumentException](f)
-
-  private def attribute[T](
-    decode: DynamoValue => Option[T],
-    encode: T => DynamoValue,
-    propertyType: String
-  ): DynamoFormat[T] =
-    new DynamoFormat[T] {
-      final def read(av: DynamoValue): Either[DynamoReadError, T] =
-        Either.fromOption(decode(av), NoPropertyOfType(propertyType, av))
-      final def write(t: T): DynamoValue = encode(t)
-    }
 
   /**
     * Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
@@ -208,13 +191,32 @@ object DynamoFormat {
     */
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A)(write: A => B) =
     xmap(coerce[B, A, T](read))(write)
+}
+
+trait DynamoFormatDefaultInstances {
+  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
+    DynamoFormat.coerce[String, N, NumberFormatException](f)
+
+  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
+    DynamoFormat.coerce[ByteBuffer, B, IllegalArgumentException](f)
+
+  private def attribute[T](
+                            decode: DynamoValue => Option[T],
+                            encode: T => DynamoValue,
+                            propertyType: String
+                          ): DynamoFormat[T] =
+    new DynamoFormat[T] {
+      final def read(av: DynamoValue): Either[DynamoReadError, T] =
+        Either.fromOption(decode(av), NoPropertyOfType(propertyType, av))
+      final def write(t: T): DynamoValue = encode(t)
+    }
 
   /**
-    * {{{
-    * prop> (s: String) =>
-    *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == Right(s)
-    * }}}
-    */
+   * {{{
+   * prop> (s: String) =>
+   *     | DynamoFormat[String].read(DynamoFormat[String].write(s)) == Right(s)
+   * }}}
+   */
   implicit val stringFormat: DynamoFormat[String] = new DynamoFormat[String] {
     final def read(av: DynamoValue) =
       if (av.isNull)
@@ -229,11 +231,11 @@ object DynamoFormat {
   }
 
   /**
-    * {{{
-    * prop> (b: Boolean) =>
-    *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == Right(b)
-    * }}}
-    */
+   * {{{
+   * prop> (b: Boolean) =>
+   *     | DynamoFormat[Boolean].read(DynamoFormat[Boolean].write(b)) == Right(b)
+   * }}}
+   */
   implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.fromBoolean, "BOOL")
 
   private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] = new DynamoFormat[N] {
@@ -248,59 +250,59 @@ object DynamoFormat {
   }
 
   /**
-    * {{{
-    * prop> (l: Long) =>
-    *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == Right(l)
-    * }}}
-    */
+   * {{{
+   * prop> (l: Long) =>
+   *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == Right(l)
+   * }}}
+   */
   implicit val longFormat: DynamoFormat[Long] = numFormat(_.toLong)
 
   /**
-    * {{{
-    * prop> (i: Int) =>
-    *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == Right(i)
-    * }}}
-    */
+   * {{{
+   * prop> (i: Int) =>
+   *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == Right(i)
+   * }}}
+   */
   implicit val intFormat: DynamoFormat[Int] = numFormat(_.toInt)
 
   /**
-    * {{{
-    * prop> (d: Float) =>
-    *     | DynamoFormat[Float].read(DynamoFormat[Float].write(d)) == Right(d)
-    * }}}
-    */
+   * {{{
+   * prop> (d: Float) =>
+   *     | DynamoFormat[Float].read(DynamoFormat[Float].write(d)) == Right(d)
+   * }}}
+   */
   implicit val floatFormat: DynamoFormat[Float] = numFormat(_.toFloat)
 
   /**
-    * {{{
-    * prop> (d: Double) =>
-    *     | DynamoFormat[Double].read(DynamoFormat[Double].write(d)) == Right(d)
-    * }}}
-    */
+   * {{{
+   * prop> (d: Double) =>
+   *     | DynamoFormat[Double].read(DynamoFormat[Double].write(d)) == Right(d)
+   * }}}
+   */
   implicit val doubleFormat: DynamoFormat[Double] = numFormat(_.toDouble)
 
   /**
-    * {{{
-    * prop> (d: BigDecimal) =>
-    *     | DynamoFormat[BigDecimal].read(DynamoFormat[BigDecimal].write(d)) == Right(d)
-    * }}}
-    */
+   * {{{
+   * prop> (d: BigDecimal) =>
+   *     | DynamoFormat[BigDecimal].read(DynamoFormat[BigDecimal].write(d)) == Right(d)
+   * }}}
+   */
   implicit val bigDecimalFormat: DynamoFormat[BigDecimal] = numFormat(BigDecimal(_))
 
   /**
-    * {{{
-    * prop> (s: Short) =>
-    *     | DynamoFormat[Short].read(DynamoFormat[Short].write(s)) == Right(s)
-    * }}}
-    */
+   * {{{
+   * prop> (s: Short) =>
+   *     | DynamoFormat[Short].read(DynamoFormat[Short].write(s)) == Right(s)
+   * }}}
+   */
   implicit val shortFormat: DynamoFormat[Short] = numFormat(_.toShort)
 
   /**
-    * {{{
-    * prop> (b: Byte) =>
-    *     | DynamoFormat[Byte].read(DynamoFormat[Byte].write(b)) == Right(b)
-    * }}}
-    */
+   * {{{
+   * prop> (b: Byte) =>
+   *     | DynamoFormat[Byte].read(DynamoFormat[Byte].write(b)) == Right(b)
+   * }}}
+   */
   // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
   implicit val byteFormat: DynamoFormat[Byte] = numFormat(_.toByte)
 
@@ -308,23 +310,23 @@ object DynamoFormat {
   implicit val byteBufferFormat: DynamoFormat[ByteBuffer] = attribute(_.asByteBuffer, DynamoValue.fromByteBuffer, "B")
 
   /**
-    * {{{
-    * prop> (ab:Array[Byte]) =>
-    *     | DynamoFormat[Array[Byte]].read(DynamoFormat[Array[Byte]].write(ab)) == Right(ab)
-    * }}}
-    */
+   * {{{
+   * prop> (ab:Array[Byte]) =>
+   *     | DynamoFormat[Array[Byte]].read(DynamoFormat[Array[Byte]].write(ab)) == Right(ab)
+   * }}}
+   */
   implicit val byteArrayFormat: DynamoFormat[Array[Byte]] =
-    xmap(coerceByteBuffer(_.array))(ByteBuffer.wrap(_))(byteBufferFormat)
+    DynamoFormat.xmap(coerceByteBuffer(_.array))(ByteBuffer.wrap(_))(byteBufferFormat)
 
   /**
-    * {{{
-    * prop> (uuid: java.util.UUID) =>
-    *     | DynamoFormat[java.util.UUID].read(DynamoFormat[java.util.UUID].write(uuid)) ==
-    *     |   Right(uuid)
-    * }}}
-    */
+   * {{{
+   * prop> (uuid: java.util.UUID) =>
+   *     | DynamoFormat[java.util.UUID].read(DynamoFormat[java.util.UUID].write(uuid)) ==
+   *     |   Right(uuid)
+   * }}}
+   */
   implicit val uuidFormat: DynamoFormat[UUID] =
-    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
+    DynamoFormat.coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
     attribute({ dv =>
@@ -333,44 +335,44 @@ object DynamoFormat {
     }, l => DynamoValue.fromValues(l), "L")
 
   /**
-    * {{{
-    * prop> (l: List[String]) =>
-    *     | DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) ==
-    *     |   Right(l)
-    * }}}
-    */
+   * {{{
+   * prop> (l: List[String]) =>
+   *     | DynamoFormat[List[String]].read(DynamoFormat[List[String]].write(l)) ==
+   *     |   Right(l)
+   * }}}
+   */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    xmap[List[T], List[DynamoValue]](_.traverse(f.read))(_.map(f.write))(javaListFormat)
+    DynamoFormat.xmap[List[T], List[DynamoValue]](_.traverse(f.read))(_.map(f.write))(javaListFormat)
 
   /**
-    * {{{
-    * prop> (sq: Seq[String]) =>
-    *     | DynamoFormat[Seq[String]].read(DynamoFormat[Seq[String]].write(sq)) ==
-    *     |   Right(sq)
-    * }}}
-    */
+   * {{{
+   * prop> (sq: Seq[String]) =>
+   *     | DynamoFormat[Seq[String]].read(DynamoFormat[Seq[String]].write(sq)) ==
+   *     |   Right(sq)
+   * }}}
+   */
   implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
-    xmap[Seq[T], List[T]](l => Right(l.toSeq))(_.toList)
+    DynamoFormat.xmap[Seq[T], List[T]](l => Right(l.toSeq))(_.toList)
 
   /**
-    * {{{
-    * prop> (v: Vector[String]) =>
-    *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(v)) ==
-    *     |   Right(v)
-    * }}}
-    */
+   * {{{
+   * prop> (v: Vector[String]) =>
+   *     | DynamoFormat[Vector[String]].read(DynamoFormat[Vector[String]].write(v)) ==
+   *     |   Right(v)
+   * }}}
+   */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
-    xmap[Vector[T], List[DynamoValue]](_.toVector.traverse(f.read))(_.map(f.write).toList)(javaListFormat)
+    DynamoFormat.xmap[Vector[T], List[DynamoValue]](_.toVector.traverse(f.read))(_.map(f.write).toList)(javaListFormat)
 
   /**
-    * {{{
-    * prop> (a: Array[String]) =>
-    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).toList ==
-    *     |   a.toList
-    * }}}
-    */
+   * {{{
+   * prop> (a: Array[String]) =>
+   *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).toList ==
+   *     |   a.toList
+   * }}}
+   */
   implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    xmap[Array[T], List[DynamoValue]](_.traverse(f.read).map(_.toArray))(
+    DynamoFormat.xmap[Array[T], List[DynamoValue]](_.traverse(f.read).map(_.toArray))(
       _.map(f.write).toList
     )(javaListFormat)
 
@@ -394,99 +396,99 @@ object DynamoFormat {
     }
 
   /**
-    * {{{
-    * prop> import org.scalacheck._
-    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
-    *
-    * prop> (s: Set[Int]) =>
-    *     | val av = DynamoValue.fromNumbers(s)
-    *     | DynamoFormat[Set[Int]].write(s) == av &&
-    *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
-    *
-    * >>> DynamoFormat[Set[Int]].write(Set.empty).isNull
-    * true
-    * }}}
-    */
+   * {{{
+   * prop> import org.scalacheck._
+   * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+   *
+   * prop> (s: Set[Int]) =>
+   *     | val av = DynamoValue.fromNumbers(s)
+   *     | DynamoFormat[Set[Int]].write(s) == av &&
+   *     |   DynamoFormat[Set[Int]].read(av) == Right(s)
+   *
+   * >>> DynamoFormat[Set[Int]].write(Set.empty).isNull
+   * true
+   * }}}
+   */
   implicit val intSetFormat: DynamoFormat[Set[Int]] = numSetFormat(coerceNumber(_.toInt))
 
   /**
-    * {{{
-    * prop> import org.scalacheck._
-    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
-    *
-    * prop> (s: Set[Long]) =>
-    *     | val av = DynamoValue.fromNumbers(s)
-    *     | DynamoFormat[Set[Long]].write(s) == av &&
-    *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
-    *
-    * >>> DynamoFormat[Set[Long]].write(Set.empty).isNull
-    * true
-    * }}}
-    */
+   * {{{
+   * prop> import org.scalacheck._
+   * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+   *
+   * prop> (s: Set[Long]) =>
+   *     | val av = DynamoValue.fromNumbers(s)
+   *     | DynamoFormat[Set[Long]].write(s) == av &&
+   *     |   DynamoFormat[Set[Long]].read(av) == Right(s)
+   *
+   * >>> DynamoFormat[Set[Long]].write(Set.empty).isNull
+   * true
+   * }}}
+   */
   implicit val longSetFormat: DynamoFormat[Set[Long]] = numSetFormat(coerceNumber(_.toLong))
 
   /**
-    * {{{
-    * prop> import org.scalacheck._
-    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
-    *
-    * prop> (s: Set[Float]) =>
-    *     | val av = DynamoValue.fromNumbers(s)
-    *     | DynamoFormat[Set[Float]].write(s) == av &&
-    *     |   DynamoFormat[Set[Float]].read(av) == Right(s)
-    *
-    * >>> DynamoFormat[Set[Float]].write(Set.empty).isNull
-    * true
-    * }}}
-    */
+   * {{{
+   * prop> import org.scalacheck._
+   * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+   *
+   * prop> (s: Set[Float]) =>
+   *     | val av = DynamoValue.fromNumbers(s)
+   *     | DynamoFormat[Set[Float]].write(s) == av &&
+   *     |   DynamoFormat[Set[Float]].read(av) == Right(s)
+   *
+   * >>> DynamoFormat[Set[Float]].write(Set.empty).isNull
+   * true
+   * }}}
+   */
   implicit val floatSetFormat: DynamoFormat[Set[Float]] = numSetFormat(coerceNumber(_.toFloat))
 
   /**
-    * {{{
-    * prop> import org.scalacheck._
-    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
-    *
-    * prop> (s: Set[Double]) =>
-    *     | val av = DynamoValue.fromNumbers(s)
-    *     | DynamoFormat[Set[Double]].write(s) == av &&
-    *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
-    *
-    * >>> DynamoFormat[Set[Double]].write(Set.empty).isNull
-    * true
-    * }}}
-    */
+   * {{{
+   * prop> import org.scalacheck._
+   * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+   *
+   * prop> (s: Set[Double]) =>
+   *     | val av = DynamoValue.fromNumbers(s)
+   *     | DynamoFormat[Set[Double]].write(s) == av &&
+   *     |   DynamoFormat[Set[Double]].read(av) == Right(s)
+   *
+   * >>> DynamoFormat[Set[Double]].write(Set.empty).isNull
+   * true
+   * }}}
+   */
   implicit val doubleSetFormat: DynamoFormat[Set[Double]] = numSetFormat(coerceNumber(_.toDouble))
 
   /**
-    * {{{
-    * prop> import org.scalacheck._
-    * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
-    *
-    * prop> (s: Set[BigDecimal]) =>
-    *     | val av = DynamoValue.fromNumbers(s)
-    *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
-    *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
-    *
-    * >>> DynamoFormat[Set[BigDecimal]].write(Set.empty).isNull
-    * true
-    * }}}
-    */
+   * {{{
+   * prop> import org.scalacheck._
+   * prop> implicit def arbNonEmptySet[T: Arbitrary] = Arbitrary(Gen.nonEmptyContainerOf[Set, T](Arbitrary.arbitrary[T]))
+   *
+   * prop> (s: Set[BigDecimal]) =>
+   *     | val av = DynamoValue.fromNumbers(s)
+   *     | DynamoFormat[Set[BigDecimal]].write(s) == av &&
+   *     |   DynamoFormat[Set[BigDecimal]].read(av) == Right(s)
+   *
+   * >>> DynamoFormat[Set[BigDecimal]].write(Set.empty).isNull
+   * true
+   * }}}
+   */
   implicit val BigDecimalSetFormat: DynamoFormat[Set[BigDecimal]] = numSetFormat(coerceNumber(BigDecimal(_)))
 
   /**
-    * {{{
-    * prop> import org.scalacheck._
-    * prop> implicit val arbSet = Arbitrary(Gen.nonEmptyContainerOf[Set, String](Arbitrary.arbitrary[String]))
-    *
-    * prop> (s: Set[String]) =>
-    *     | val av = DynamoValue.fromStrings(s)
-    *     | DynamoFormat[Set[String]].write(s) == av &&
-    *     |   DynamoFormat[Set[String]].read(av) == Right(s)
-    *
-    * >>> DynamoFormat[Set[String]].write(Set.empty).isNull
-    * true
-    * }}}
-    */
+   * {{{
+   * prop> import org.scalacheck._
+   * prop> implicit val arbSet = Arbitrary(Gen.nonEmptyContainerOf[Set, String](Arbitrary.arbitrary[String]))
+   *
+   * prop> (s: Set[String]) =>
+   *     | val av = DynamoValue.fromStrings(s)
+   *     | DynamoFormat[Set[String]].write(s) == av &&
+   *     |   DynamoFormat[Set[String]].read(av) == Right(s)
+   *
+   * >>> DynamoFormat[Set[String]].write(Set.empty).isNull
+   * true
+   * }}}
+   */
   implicit val stringSetFormat: DynamoFormat[Set[String]] =
     new DynamoFormat[Set[String]] {
       final def read(av: DynamoValue) =
@@ -504,40 +506,40 @@ object DynamoFormat {
     }
 
   /**
-    * {{{
-    * prop> (s: Set[Boolean]) =>
-    *     | DynamoFormat[Set[Boolean]].read(DynamoFormat[Set[Boolean]].write(s)) ==
-    *     |   Right(s)
-    * }}}
-    */
-  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = iso[Set[T], List[T]](_.toSet, _.toList)
+   * {{{
+   * prop> (s: Set[Boolean]) =>
+   *     | DynamoFormat[Set[Boolean]].read(DynamoFormat[Set[Boolean]].write(s)) ==
+   *     |   Right(s)
+   * }}}
+   */
+  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = DynamoFormat.iso[Set[T], List[T]](_.toSet, _.toList)
 
   private val javaMapFormat: DynamoFormat[DynamoObject] =
     attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
 
   /**
-    * {{{
-    * prop> (m: Map[String, Int]) =>
-    *     | DynamoFormat[Map[String, Int]].read(DynamoFormat[Map[String, Int]].write(m)) ==
-    *     |   Right(m)
-    * }}}
-    */
+   * {{{
+   * prop> (m: Map[String, Int]) =>
+   *     | DynamoFormat[Map[String, Int]].read(DynamoFormat[Map[String, Int]].write(m)) ==
+   *     |   Right(m)
+   * }}}
+   */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    xmap[Map[String, V], DynamoObject](_.toMap[V])(m => DynamoObject(m.toSeq: _*))(javaMapFormat)
+    DynamoFormat.xmap[Map[String, V], DynamoObject](_.toMap[V])(m => DynamoObject(m.toSeq: _*))(javaMapFormat)
 
   /**
-    * {{{
-    * prop> (o: Option[Long]) =>
-    *     | DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) ==
-    *     |   Right(o)
-    *
-    * >>> DynamoFormat[Option[Long]].read(DynamoValue.nil)
-    * Right(None)
-    *
-    * >>> DynamoFormat[Option[Long]].write(None).isNull
-    * true
-    * }}}
-    */
+   * {{{
+   * prop> (o: Option[Long]) =>
+   *     | DynamoFormat[Option[Long]].read(DynamoFormat[Option[Long]].write(o)) ==
+   *     |   Right(o)
+   *
+   * >>> DynamoFormat[Option[Long]].read(DynamoValue.nil)
+   * Right(None)
+   *
+   * >>> DynamoFormat[Option[Long]].write(None).isNull
+   * true
+   * }}}
+   */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Option[T]] {
     final def read(av: DynamoValue) =
       if (av.isNull)
@@ -549,9 +551,9 @@ object DynamoFormat {
   }
 
   /**
-    * This ensures that if, for instance, you specify an update with Some(5) rather
-    * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
-    */
+   * This ensures that if, for instance, you specify an update with Some(5) rather
+   * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
+   */
   implicit def someFormat[T](implicit f: DynamoFormat[T]) = new DynamoFormat[Some[T]] {
     def read(av: DynamoValue): Either[DynamoReadError, Some[T]] =
       Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
@@ -560,26 +562,26 @@ object DynamoFormat {
   }
 
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
-    *  {{{
-    *  prop> import org.scanamo.DynamoFormat
-    *  prop> import java.time.Instant
-    *  prop> import org.scanamo.TimeGenerators.instantAsLongArb
-    *  prop> (x: Instant) =>
-    *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
-    *  }}}
-    */
+   *  {{{
+   *  prop> import org.scanamo.DynamoFormat
+   *  prop> import java.time.Instant
+   *  prop> import org.scanamo.TimeGenerators.instantAsLongArb
+   *  prop> (x: Instant) =>
+   *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
+   *  }}}
+   */
   implicit val instantAsLongFormat =
     DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x))(x => x.toEpochMilli)
 
   /**  Format for dealing with date-times with an offset from UTC.
-    *  {{{
-    *  prop> import org.scanamo.DynamoFormat
-    *  prop> import java.time.OffsetDateTime
-    *  prop> import org.scanamo.TimeGenerators.offsetDateTimeArb
-    *  prop> (x: OffsetDateTime) =>
-    *      | DynamoFormat[OffsetDateTime].read(DynamoFormat[OffsetDateTime].write(x)) == Right(x)
-    *  }}}
-    */
+   *  {{{
+   *  prop> import org.scanamo.DynamoFormat
+   *  prop> import java.time.OffsetDateTime
+   *  prop> import org.scanamo.TimeGenerators.offsetDateTimeArb
+   *  prop> (x: OffsetDateTime) =>
+   *      | DynamoFormat[OffsetDateTime].read(DynamoFormat[OffsetDateTime].write(x)) == Right(x)
+   *  }}}
+   */
   implicit val offsetDateTimeFormat = DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
     OffsetDateTime.parse
   )(
@@ -587,14 +589,14 @@ object DynamoFormat {
   )
 
   /**  Format for dealing with date-times with a time zone in the ISO-8601 calendar system.
-    *  {{{
-    *  prop> import org.scanamo.DynamoFormat
-    *  prop> import java.time.ZonedDateTime
-    *  prop> import org.scanamo.TimeGenerators.zonedDateTimeArb
-    *  prop> (x: ZonedDateTime) =>
-    *      | DynamoFormat[ZonedDateTime].read(DynamoFormat[ZonedDateTime].write(x)) == Right(x)
-    *  }}}
-    */
+   *  {{{
+   *  prop> import org.scanamo.DynamoFormat
+   *  prop> import java.time.ZonedDateTime
+   *  prop> import org.scanamo.TimeGenerators.zonedDateTimeArb
+   *  prop> (x: ZonedDateTime) =>
+   *      | DynamoFormat[ZonedDateTime].read(DynamoFormat[ZonedDateTime].write(x)) == Right(x)
+   *  }}}
+   */
   implicit val zonedDateTimeFormat = DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
     ZonedDateTime.parse
   )(

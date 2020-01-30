@@ -17,10 +17,13 @@
 package org.scanamo.generic
 
 import magnolia.Magnolia
-import org.scanamo.DynamoFormat
+import org.scanamo.{DynamoFormat, DynamoFormatDefaultInstances}
 
 import scala.language.experimental.macros
 
-trait AutoDerivation extends Derivation {
+trait AutoDerivation extends Derivation with DynamoFormatDefaultInstances with LowPriority
+
+// Needs to have lower priority than the default dynamo format instances
+trait LowPriority {
   final implicit def exportDynamoFormat[A]: DynamoFormat[A] = macro Magnolia.gen[A]
 }
