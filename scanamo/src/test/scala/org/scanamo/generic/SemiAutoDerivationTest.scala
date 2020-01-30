@@ -2,7 +2,7 @@ package org.scanamo.generic
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.DynamoFormat
+import org.scanamo.{DynamoFormat, DynamoObject, DynamoValue}
 
 class SemiAutoDerivationTest extends AnyFunSuite with Matchers {
   test("Derivation should fail if no derived format or automatic derivation") {
@@ -18,6 +18,19 @@ class SemiAutoDerivationTest extends AnyFunSuite with Matchers {
       |
       |write(User(Some(1), true, "Bob", "Geldorf", "pink", "1234", None, Some(LocationInfo(Some("UK"), None, None, None))))
       |""".stripMargin should compile
+  }
+
+  test("Derivation should prioritise implicits from user specified companions") {
+    import org.scanamo.generic.semiauto._
+
+    case class Foo(value: Option[String])
+    object Foo {
+      implicit val dynamoFormatFoo: DynamoFormat[Foo] = deriveDynamoFormat[Foo]
+    }
+
+    val result = DynamoFormat[Foo].write(Foo(Some("this is a foo")))
+
+    result should ===(DynamoValue.fromDynamoObject(DynamoObject("value" -> DynamoValue.fromString("this is a foo"))))
   }
 
   def write[T](t: T)(implicit f: DynamoFormat[T]) = f.write(t)
