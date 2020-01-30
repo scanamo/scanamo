@@ -182,10 +182,11 @@ object DynamoFormat extends LowPriorityFormats {
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] = new DynamoFormat[A] {
-    final def read(item: DynamoValue): Either[DynamoReadError, A] = f.read(item).flatMap(r)
-    final def write(t: A): DynamoValue = f.write(w(t))
-  }
+  def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
+    new DynamoFormat[A] {
+      final def read(item: DynamoValue): Either[DynamoReadError, A] = f.read(item).flatMap(r)
+      final def write(t: A): DynamoValue = f.write(w(t))
+    }
 
   /**
     * Returns a [[DynamoFormat]] for the case where `A` can always be converted `B`,
@@ -580,11 +581,12 @@ object DynamoFormat extends LowPriorityFormats {
     *      | DynamoFormat[OffsetDateTime].read(DynamoFormat[OffsetDateTime].write(x)) == Right(x)
     *  }}}
     */
-  implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] = DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
-    OffsetDateTime.parse
-  )(
-    _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
-  )
+  implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] =
+    DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
+      OffsetDateTime.parse
+    )(
+      _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+    )
 
   /**  Format for dealing with date-times with a time zone in the ISO-8601 calendar system.
     *  {{{
@@ -595,11 +597,12 @@ object DynamoFormat extends LowPriorityFormats {
     *      | DynamoFormat[ZonedDateTime].read(DynamoFormat[ZonedDateTime].write(x)) == Right(x)
     *  }}}
     */
-  implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] = DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
-    ZonedDateTime.parse
-  )(
-    _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
-  )
+  implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] =
+    DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
+      ZonedDateTime.parse
+    )(
+      _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
+    )
 }
 
 private[scanamo] trait LowPriorityFormats {
