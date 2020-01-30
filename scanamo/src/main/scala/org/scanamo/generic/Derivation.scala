@@ -61,7 +61,8 @@ private[scanamo] trait Derivation {
             .fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("S", dv)))(_ => _cachedHit)
 
         def write(t: T): DynamoValue = _cachedAttribute
-      } else
+      }
+    else
       new DynamoFormat.ObjectFormat[T] {
         def readObject(o: DynamoObject): Either[DynamoReadError, T] =
           cc.parameters.toList

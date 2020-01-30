@@ -17,7 +17,7 @@
 package org.scanamo.generic
 
 import magnolia.Magnolia
-import org.scanamo.{DynamoFormat, DynamoFormatDefaultInstances}
+import org.scanamo.{ DynamoFormat, DynamoFormatDefaultInstances }
 
 import scala.language.experimental.macros
 
