@@ -62,17 +62,17 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
   test("Derivation should prioritise implicits from user specified companions") {
     import org.scanamo.generic.auto._
 
-    case class Foo(value: Unit)
-    object Foo {
-      def fromString(s: String): Either[TypeCoercionError, Foo] = s match {
-        case "foo" => Right(Foo(()))
+    case class Foobar(value: Unit)
+    object Foobar {
+      def fromString(s: String): Either[TypeCoercionError, Foobar] = s match {
+        case "foo" => Right(Foobar(()))
         case _     => Left(TypeCoercionError(new RuntimeException(s"$s is not a foo")))
       }
 
-      implicit val dynamoFormatFoo: DynamoFormat[Foo] = DynamoFormat.xmap[Foo, String](fromString)((_: Foo) => "foo")
+      implicit val dynamoFormatFoo: DynamoFormat[Foobar] = DynamoFormat.xmap[Foobar, String](fromString)((_: Foobar) => "foo")
     }
 
-    val result = DynamoFormat[Foo].write(Foo(()))
+    val result = DynamoFormat[Foobar].write(Foobar(()))
 
     result should ===(DynamoValue.fromString("foo"))
   }

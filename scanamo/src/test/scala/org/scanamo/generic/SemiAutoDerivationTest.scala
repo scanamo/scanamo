@@ -23,12 +23,12 @@ class SemiAutoDerivationTest extends AnyFunSuite with Matchers {
   test("Derivation should prioritise implicits from user specified companions") {
     import org.scanamo.generic.semiauto._
 
-    case class Foo(value: Option[String])
-    object Foo {
-      implicit val dynamoFormatFoo: DynamoFormat[Foo] = deriveDynamoFormat[Foo]
+    case class Foobar(value: Option[String])
+    object Foobar {
+      implicit val dynamoFormatFoo: DynamoFormat[Foobar] = deriveDynamoFormat[Foobar]
     }
 
-    val result = DynamoFormat[Foo].write(Foo(Some("this is a foo")))
+    val result = DynamoFormat[Foobar].write(Foobar(Some("this is a foo")))
 
     result should ===(DynamoValue.fromDynamoObject(DynamoObject("value" -> DynamoValue.fromString("this is a foo"))))
   }
