@@ -32,7 +32,7 @@ object JodaFormats {
     *  }}}
     */
   implicit val jodaInstantAsLongFormat =
-    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_))(x => x.getMillis)
+    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_), x => x.getMillis)
 
   /**
     *  Convenient, readable format for Joda DateTime, but requires that all dates serialised
@@ -50,8 +50,7 @@ object JodaFormats {
     *  }}}
     */
   implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
-    DateTime.parse(_)
-  )(
+    DateTime.parse,
     _.toString
   )
 }
