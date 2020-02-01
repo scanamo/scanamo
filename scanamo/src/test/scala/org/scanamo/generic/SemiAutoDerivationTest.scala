@@ -1,6 +1,6 @@
 package org.scanamo.generic
 
-import org.scanamo.DynamoFormat
+import org.scanamo.{ DynamoFormat, DynamoValue }
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
@@ -20,7 +20,7 @@ class SemiAutoDerivationTest extends AnyFunSuite with Matchers {
       |""".stripMargin should compile
   }
 
-  def write[T](t: T)(implicit f: DynamoFormat[T]) = f.write(t)
+  def write[T](t: T)(implicit f: DynamoFormat[T]): DynamoValue = f.write(t)
 }
 
 case class Person(name: String, age: Int)
