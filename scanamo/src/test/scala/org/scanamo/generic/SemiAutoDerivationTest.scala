@@ -2,7 +2,7 @@ package org.scanamo.generic
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.{DynamoFormat, DynamoObject, DynamoValue}
+import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
 
 class SemiAutoDerivationTest extends AnyFunSuite with Matchers {
   test("Derivation should fail if no derived format or automatic derivation") {

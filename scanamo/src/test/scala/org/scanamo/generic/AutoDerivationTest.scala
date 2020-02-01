@@ -69,7 +69,8 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
         case _     => Left(TypeCoercionError(new RuntimeException(s"$s is not a foo")))
       }
 
-      implicit val dynamoFormatFoo: DynamoFormat[Foobar] = DynamoFormat.xmap[Foobar, String](fromString)((_: Foobar) => "foo")
+      implicit val dynamoFormatFoo: DynamoFormat[Foobar] =
+        DynamoFormat.xmap[Foobar, String](fromString)((_: Foobar) => "foo")
     }
 
     val result = DynamoFormat[Foobar].write(Foobar(()))
