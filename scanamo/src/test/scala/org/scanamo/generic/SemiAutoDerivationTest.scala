@@ -1,6 +1,6 @@
 package org.scanamo.generic
 
-import org.scanamo.{DynamoFormat, DynamoValue}
+import org.scanamo.{ DynamoFormat, DynamoValue }
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 
