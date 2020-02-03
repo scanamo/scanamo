@@ -89,6 +89,11 @@ trait DynamoFormat[T] {
   def read(av: DynamoValue): Either[DynamoReadError, T]
   def read(av: AttributeValue): Either[DynamoReadError, T] = read(DynamoValue.fromAttributeValue(av))
   def write(t: T): DynamoValue
+
+  def iso[U](r: T => U, w: U => T): DynamoFormat[U] = DynamoFormat.iso(r, w)(this)
+  def xmap[U](r: T => Either[DynamoReadError, U], w: U => T): DynamoFormat[U] = DynamoFormat.xmap(r, w)(this)
+  def coercedXmap[U](read: T => U, write: U => T): DynamoFormat[U] =
+    DynamoFormat.coercedXmap(read, write)(this, implicitly)
 }
 
 object DynamoFormat extends LowPriorityFormats {
@@ -175,14 +180,14 @@ object DynamoFormat extends LowPriorityFormats {
     *
     * >>> implicit val jodaLongFormat = DynamoFormat.xmap[DateTime, Long](
     * ...   l => Right(new DateTime(l).withZone(DateTimeZone.UTC))
-    * ... )(
+    * ... ,
     * ...   _.withZone(DateTimeZone.UTC).getMillis
     * ... )
     * >>> DynamoFormat[DateTime].read(DynamoValue.fromNumber(0L))
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A])(w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
+  def xmap[A, B](r: B => Either[DynamoReadError, A], w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
     new DynamoFormat[A] {
       final def read(item: DynamoValue): Either[DynamoReadError, A] = f.read(item).flatMap(r)
       final def write(t: A): DynamoValue = f.write(w(t))
@@ -197,7 +202,7 @@ object DynamoFormat extends LowPriorityFormats {
     *
     * >>> val jodaStringFormat = DynamoFormat.coercedXmap[LocalDate, String, IllegalArgumentException](
     * ...   LocalDate.parse
-    * ... )(
+    * ... ,
     * ...   _.toString
     * ... )
     * >>> jodaStringFormat.read(jodaStringFormat.write(new LocalDate(2007, 8, 18)))
@@ -207,8 +212,8 @@ object DynamoFormat extends LowPriorityFormats {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A)(write: A => B): DynamoFormat[A] =
-    xmap(coerce[B, A, T](read))(write)
+  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A, write: A => B): DynamoFormat[A] =
+    xmap(coerce[B, A, T](read), write)
 
   /**
     * {{{
@@ -315,7 +320,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit val byteArrayFormat: DynamoFormat[Array[Byte]] =
-    xmap(coerceByteBuffer(_.array))(ByteBuffer.wrap)(byteBufferFormat)
+    xmap(coerceByteBuffer(_.array), ByteBuffer.wrap)(byteBufferFormat)
 
   /**
     * {{{
@@ -325,7 +330,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit val uuidFormat: DynamoFormat[UUID] =
-    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString)(_.toString)
+    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, _.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
     attribute({ dv =>
@@ -341,7 +346,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    xmap[List[T], List[DynamoValue]](_.traverse(f.read))(_.map(f.write))(javaListFormat)
+    xmap[List[T], List[DynamoValue]](_.traverse(f.read), _.map(f.write))(javaListFormat)
 
   /**
     * {{{
@@ -351,7 +356,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
-    xmap[Seq[T], List[T]](l => Right(l))(_.toList)
+    xmap[Seq[T], List[T]](l => Right(l.toSeq), _.toList)
 
   /**
     * {{{
@@ -361,7 +366,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
-    xmap[Vector[T], List[DynamoValue]](_.toVector.traverse(f.read))(_.map(f.write).toList)(javaListFormat)
+    xmap[Vector[T], List[DynamoValue]](_.toVector.traverse(f.read), _.map(f.write).toList)(javaListFormat)
 
   /**
     * {{{
@@ -371,9 +376,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    xmap[Array[T], List[DynamoValue]](_.traverse(f.read).map(_.toArray))(
-      _.map(f.write).toList
-    )(javaListFormat)
+    xmap[Array[T], List[DynamoValue]](_.traverse(f.read).map(_.toArray), _.map(f.write).toList)(javaListFormat)
 
   private def numSetFormat[T: Numeric](r: String => Either[DynamoReadError, T]): DynamoFormat[Set[T]] =
     new DynamoFormat[Set[T]] {
@@ -524,7 +527,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    xmap[Map[String, V], DynamoObject](_.toMap[V])(m => DynamoObject(m.toSeq: _*))(javaMapFormat)
+    xmap[Map[String, V], DynamoObject](_.toMap[V], m => DynamoObject(m.toSeq: _*))(javaMapFormat)
 
   /**
     * {{{
@@ -570,7 +573,7 @@ object DynamoFormat extends LowPriorityFormats {
     *  }}}
     */
   implicit val instantAsLongFormat: DynamoFormat[Instant] =
-    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x))(x => x.toEpochMilli)
+    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x), x => x.toEpochMilli)
 
   /**  Format for dealing with date-times with an offset from UTC.
     *  {{{
@@ -583,8 +586,7 @@ object DynamoFormat extends LowPriorityFormats {
     */
   implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] =
     DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
-      OffsetDateTime.parse
-    )(
+      OffsetDateTime.parse,
       _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     )
 
@@ -599,8 +601,7 @@ object DynamoFormat extends LowPriorityFormats {
     */
   implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] =
     DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
-      ZonedDateTime.parse
-    )(
+      ZonedDateTime.parse,
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
 }
