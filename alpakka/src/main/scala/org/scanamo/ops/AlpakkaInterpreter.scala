@@ -26,9 +26,13 @@ import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
 import akka.stream.scaladsl.Source
 import akka.NotUsed
 
-private[scanamo] class AlpakkaInterpreter(client: DynamoClient, retryPolicy: RetryPolicy)
+private[scanamo] class AlpakkaInterpreter(client: DynamoClient,
+                                          retryPolicy: RetryPolicy,
+                                          isRetryable: Throwable => Boolean)
     extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
     with WithRetry {
+  override def retryable(throwable: Throwable): Boolean = isRetryable(throwable)
+
   final private def run(op: AwsOp): AlpakkaInterpreter.Alpakka[op.B] =
     retry(DynamoDb.source(op).withAttributes(DynamoAttributes.client(client)), retryPolicy)
 
