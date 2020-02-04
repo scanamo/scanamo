@@ -68,8 +68,7 @@ val scanamo = Scanamo(client)
 LocalDynamoDB.createTable(client)("foo")("dateTime" -> S)
 
 implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
-  DateTime.parse(_).withZone(DateTimeZone.UTC)
-)(
+  DateTime.parse(_).withZone(DateTimeZone.UTC),
   _.toString
 )
 
