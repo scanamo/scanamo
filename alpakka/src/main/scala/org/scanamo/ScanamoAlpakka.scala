@@ -21,6 +21,7 @@ import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.{ Sink, Source }
 import com.amazonaws.services.dynamodbv2.model.{
+  AmazonDynamoDBException,
   InternalServerErrorException,
   ItemCollectionSizeLimitExceededException,
   LimitExceededException,
@@ -71,7 +72,8 @@ object ScanamoAlpakka extends AlpakkaInstances {
     case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
         _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
       true
-    case _ => false
+    case e: AmazonDynamoDBException if e.getErrorCode.contains("ThrottlingException") => true
+    case _                                                                            => false
   }
 }
 
