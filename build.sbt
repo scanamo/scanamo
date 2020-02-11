@@ -92,7 +92,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.504"
+val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.719"
 
 def customDeps(scalaVersion: String) =
   CrossVersion.partialVersion(scalaVersion) match {
