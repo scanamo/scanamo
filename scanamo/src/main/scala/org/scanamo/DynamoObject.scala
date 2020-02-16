@@ -171,11 +171,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   final def toExpressionAttributeValues: Option[JMap[String, AttributeValue]] = self match {
     case Empty => None
     case Strict(xs) =>
-      Some(unsafeTransform { m =>
-        xs.entrySet.stream.forEach { x =>
-          m.put(":" ++ x.getKey, x.getValue); ()
-        }
-      })
+      Some(unsafeTransform(m => xs.entrySet.stream.forEach { x => m.put(":" ++ x.getKey, x.getValue); () }))
     case Pure(xs) => Some(unsafeTransform(m => xs foreach { case (k, x) => m.put(":" ++ k, x.toAttributeValue) }))
     case Concat(xs, ys) =>
       (xs.toExpressionAttributeValues, ys.toExpressionAttributeValues).mapN(unsafeMerge)

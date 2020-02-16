@@ -289,9 +289,7 @@ object DynamoArray {
 
   private[DynamoArray] def unsafeToList[A, B](xs: List[A], f: A => B): ju.List[B] = {
     val l = new java.util.ArrayList[B](xs.size)
-    xs foreach { x =>
-      l.add(f(x))
-    }
+    xs foreach { x => l.add(f(x)) }
     l
   }
 
