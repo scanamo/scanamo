@@ -34,9 +34,7 @@ package object ops {
     def scan(req: ScanamoScanRequest): ScanRequest = {
       def queryRefinement[T](
         o: ScanamoScanRequest => Option[T]
-      )(rt: (ScanRequest, T) => ScanRequest): ScanRequest => ScanRequest = { qr =>
-        o(req).foldLeft(qr)(rt)
-      }
+      )(rt: (ScanRequest, T) => ScanRequest): ScanRequest => ScanRequest = { qr => o(req).foldLeft(qr)(rt) }
 
       NonEmptyList
         .of(
@@ -62,9 +60,7 @@ package object ops {
     def query(req: ScanamoQueryRequest): QueryRequest = {
       def queryRefinement[T](
         f: ScanamoQueryRequest => Option[T]
-      )(g: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr =>
-        f(req).foldLeft(qr)(g)
-      }
+      )(g: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr => f(req).foldLeft(qr)(g) }
 
       val queryCondition: RequestCondition = req.query.apply
       val requestCondition: Option[RequestCondition] = req.options.filter.map(_.apply)

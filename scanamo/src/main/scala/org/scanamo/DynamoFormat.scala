@@ -333,10 +333,13 @@ object DynamoFormat extends LowPriorityFormats {
     coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, _.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
-    attribute({ dv =>
-      if (dv.isNull) Some(List.empty)
-      else dv.asArray.flatMap(_.asArray)
-    }, l => DynamoValue.fromValues(l), "L")
+    attribute(
+      dv =>
+        if (dv.isNull) Some(List.empty)
+        else dv.asArray.flatMap(_.asArray),
+      l => DynamoValue.fromValues(l),
+      "L"
+    )
 
   /**
     * {{{

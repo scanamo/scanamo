@@ -9,13 +9,9 @@ class DynamoObjectTest extends Properties("DynamoValue") with DynamoValueInstanc
   ////
   // Monoid laws
 
-  property("left identity") = forAll { (v: DynamoObject) =>
-    DynamoObject.empty <> v == v
-  }
+  property("left identity") = forAll((v: DynamoObject) => DynamoObject.empty <> v == v)
 
-  property("right identity") = forAll { (v: DynamoObject) =>
-    v <> DynamoObject.empty == v
-  }
+  property("right identity") = forAll((v: DynamoObject) => v <> DynamoObject.empty == v)
 
   property("associativity") = forAll { (x: DynamoObject, y: DynamoObject, z: DynamoObject) =>
     (x <> y) <> z == x <> (y <> z)
