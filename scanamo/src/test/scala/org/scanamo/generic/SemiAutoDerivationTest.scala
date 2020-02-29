@@ -33,7 +33,7 @@ class SemiAutoDerivationTest extends AnyFunSuite with Matchers {
     result should ===(DynamoValue.fromDynamoObject(DynamoObject("value" -> DynamoValue.fromString("this is a foo"))))
   }
 
-  def write[T](t: T)(implicit f: DynamoFormat[T]) = f.write(t)
+  def write[T](t: T)(implicit f: DynamoFormat[T]): DynamoValue = f.write(t)
 }
 
 case class Person(name: String, age: Int)
