@@ -17,8 +17,8 @@
 package org.scanamo
 
 import java.nio.ByteBuffer
-import java.time.format.{DateTimeFormatter, DateTimeParseException}
-import java.time.{Instant, OffsetDateTime, ZonedDateTime}
+import java.time.format.{ DateTimeFormatter, DateTimeParseException }
+import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
 import java.util.UUID
 
 import cats.instances.either._
@@ -28,7 +28,7 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import magnolia.Magnolia
-import org.scanamo.generic.{AutoDerivationUnlocker, Derivation}
+import org.scanamo.generic.{ AutoDerivationUnlocker, Derivation }
 
 import scala.language.experimental.macros
 import scala.reflect.ClassTag
@@ -614,7 +614,8 @@ object DynamoFormat extends Derivation {
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
 
-  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] = macro deriveGenericFormat[A]
+  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] =
+    macro deriveGenericFormat[A]
 
   def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
     val _ = U
