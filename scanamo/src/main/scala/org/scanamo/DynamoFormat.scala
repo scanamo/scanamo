@@ -201,13 +201,6 @@ object DynamoFormat extends Derivation {
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A, write: A => B): DynamoFormat[A] =
     xmap(coerce[B, A, T](read), write)
 
-  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] = macro deriveGenericFormat[A]
-
-  def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
-    val _ = U
-    Magnolia.gen[A](c)
-  }
-
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
     DynamoFormat.coerce[String, N, NumberFormatException](f)
 
@@ -621,4 +614,10 @@ object DynamoFormat extends Derivation {
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
 
+  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] = macro deriveGenericFormat[A]
+
+  def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
+    val _ = U
+    Magnolia.gen[A](c)
+  }
 }
