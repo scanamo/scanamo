@@ -20,8 +20,8 @@ package org.scanamo.generic
   * This class enables the automatic derivation of a [[org.scanamo.DynamoFormat]] instance if in lexical scope.
   * The actual derivation happens inside the companion
   */
-private[scanamo] class AutoDerivationUnlocker
+private[scanamo] sealed abstract class AutoDerivationUnlocker
 
 trait AutoDerivation {
-  implicit final val autoDerivationUnlocker: AutoDerivationUnlocker = new AutoDerivationUnlocker
+  implicit final val autoDerivationUnlocker: AutoDerivationUnlocker = new AutoDerivationUnlocker {}
 }
