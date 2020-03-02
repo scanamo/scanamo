@@ -322,7 +322,7 @@ trait DynamoFormatDefaultInstances {
     * }}}
     */
   implicit val byteArrayFormat: DynamoFormat[Array[Byte]] =
-    DynamoFormat.xmap(coerceByteBuffer(_.array), ByteBuffer.wrap(_))(byteBufferFormat)
+    DynamoFormat.xmap(coerceByteBuffer(_.array), ByteBuffer.wrap)(byteBufferFormat)
 
   /**
     * {{{
