@@ -3,7 +3,6 @@ package org.scanamo.generic
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
 import org.scanamo._
-import org.scanamo.generic.AutoDerivationTest.Foobar
 
 class AutoDerivationTest extends AnyFunSuite with Matchers {
 
@@ -67,16 +66,14 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
 
 }
 
-object AutoDerivationTest {
-  object Foobar {
-    def fromString(s: String): Either[TypeCoercionError, Foobar] = s match {
-      case "foo" => Right(Foobar(()))
-      case _     => Left(TypeCoercionError(new RuntimeException(s"$s is not a foo")))
-    }
-
-    implicit val dynamoFormatFoo: DynamoFormat[Foobar] =
-      DynamoFormat.xmap[Foobar, String](fromString, (_: Foobar) => "foo")
+object Foobar {
+  def fromString(s: String): Either[TypeCoercionError, Foobar] = s match {
+    case "foo" => Right(Foobar(()))
+    case _     => Left(TypeCoercionError(new RuntimeException(s"$s is not a foo")))
   }
 
-  case class Foobar(value: Unit)
+  implicit val dynamoFormatFoo: DynamoFormat[Foobar] =
+    DynamoFormat.xmap[Foobar, String](fromString, (_: Foobar) => "foo")
 }
+
+case class Foobar(value: Unit)
