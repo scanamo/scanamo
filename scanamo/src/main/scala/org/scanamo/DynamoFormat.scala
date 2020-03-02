@@ -536,7 +536,7 @@ object DynamoFormat extends Derivation {
     * }}}
     */
   implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    DynamoFormat.xmap[Map[String, V], DynamoObject](_.toMap[V], m => DynamoObject(m.toSeq: _*))(javaMapFormat)
+    xmap[Map[String, V], DynamoObject](_.toMap[V], m => DynamoObject(m.toSeq: _*))(javaMapFormat)
 
   /**
     * {{{
