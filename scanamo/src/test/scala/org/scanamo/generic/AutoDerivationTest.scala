@@ -68,7 +68,6 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
 }
 
 object AutoDerivationTest {
-  case class Foobar(value: Unit)
   object Foobar {
     def fromString(s: String): Either[TypeCoercionError, Foobar] = s match {
       case "foo" => Right(Foobar(()))
@@ -78,4 +77,6 @@ object AutoDerivationTest {
     implicit val dynamoFormatFoo: DynamoFormat[Foobar] =
       DynamoFormat.xmap[Foobar, String](fromString, (_: Foobar) => "foo")
   }
+
+  case class Foobar(value: Unit)
 }
