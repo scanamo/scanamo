@@ -70,7 +70,7 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
       }
 
       implicit val dynamoFormatFoo: DynamoFormat[Foobar] =
-        DynamoFormat.xmap[Foobar, String](fromString)((_: Foobar) => "foo")
+        DynamoFormat.xmap[Foobar, String](fromString, (_: Foobar) => "foo")
     }
 
     val result = DynamoFormat[Foobar].write(Foobar(()))
