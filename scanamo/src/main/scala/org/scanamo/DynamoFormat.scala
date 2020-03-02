@@ -16,10 +16,9 @@
 
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
-import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
-import java.time.format.{ DateTimeFormatter, DateTimeParseException }
+import java.time.format.{DateTimeFormatter, DateTimeParseException}
+import java.time.{Instant, OffsetDateTime, ZonedDateTime}
 import java.util.UUID
 
 import cats.instances.either._
@@ -27,7 +26,11 @@ import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import magnolia.Magnolia
+import org.scanamo.generic.{AutoDerivationUnlocker, Derivation}
 
+import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 /**
@@ -96,7 +99,7 @@ trait DynamoFormat[T] {
     DynamoFormat.coercedXmap(read, write)(this, implicitly)
 }
 
-object DynamoFormat extends DynamoFormatDefaultInstances {
+object DynamoFormat extends Derivation {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
@@ -197,9 +200,14 @@ object DynamoFormat extends DynamoFormatDefaultInstances {
     */
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A, write: A => B): DynamoFormat[A] =
     xmap(coerce[B, A, T](read), write)
-}
 
-trait DynamoFormatDefaultInstances {
+  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] = macro deriveGenericFormat[A]
+
+  def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
+    val _ = U
+    Magnolia.gen[A](c)
+  }
+
   private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
     DynamoFormat.coerce[String, N, NumberFormatException](f)
 
@@ -612,4 +620,5 @@ trait DynamoFormatDefaultInstances {
       ZonedDateTime.parse,
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
+
 }
