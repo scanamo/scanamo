@@ -99,7 +99,7 @@ def customDeps(scalaVersion: String) =
     case Some((2, 11)) =>
       Seq("com.propensive" %% "magnolia" % "0.10.0")
     case _ =>
-      Seq("com.propensive" %% "magnolia" % "0.12.7")
+      Seq("com.propensive" %% "magnolia" % "0.12.8")
   }
 
 lazy val refined = (project in file("refined"))
