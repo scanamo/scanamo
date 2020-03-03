@@ -59,7 +59,7 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
   }
 
   test("Derivation should prioritise implicits from user specified companions") {
-    val result = DynamoFormat[Foobar].write(Foobar(()))
+    val result = DynamoFormat[FoobarAutoDerivation].write(FoobarAutoDerivation(()))
 
     result should ===(DynamoValue.fromString("foo"))
   }
