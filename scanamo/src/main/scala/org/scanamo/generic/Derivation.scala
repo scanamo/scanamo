@@ -19,7 +19,6 @@ package org.scanamo.generic
 import cats.data.NonEmptyChain
 import cats.instances.either._
 import cats.instances.list._
-import cats.instances.parallel._
 import cats.syntax.bifunctor._
 import cats.syntax.parallel._
 import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
