@@ -1,7 +1,7 @@
 scalaVersion in ThisBuild := "2.12.10"
 crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1")
 
-val catsVersion = "2.0.0"
+val catsVersion = "2.1.1"
 val catsEffectVersion = "2.1.2"
 val zioVersion = "1.0.0-RC18-1"
 
@@ -97,7 +97,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.12",
+      "eu.timepit"    %% "refined"   % "0.9.13",
       "org.scalatest" %% "scalatest" % "3.1.1" % Test
     )
   )
@@ -145,9 +145,9 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
       "io.monix"       %% "monix"       % "3.1.0" % Provided,
-      "co.fs2"         %% "fs2-core"    % "2.1.0" % Provided,
+      "co.fs2"         %% "fs2-core"    % "2.2.2" % Provided,
       "io.monix"       %% "monix"       % "3.1.0" % Test,
-      "co.fs2"         %% "fs2-core"    % "2.1.0" % Test,
+      "co.fs2"         %% "fs2-core"    % "2.2.2" % Test,
       "org.scalatest"  %% "scalatest"   % "3.1.1" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     ),
