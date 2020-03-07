@@ -1,5 +1,5 @@
 scalaVersion in ThisBuild := "2.12.10"
-crossScalaVersions in ThisBuild := Seq("2.11.12", "2.12.10", "2.13.1")
+crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1")
 
 val catsVersion = "2.0.0"
 val catsEffectVersion = "2.0.0"
@@ -43,11 +43,6 @@ def extraOptions(scalaVersion: String) =
         "-Ywarn-unused:imports",
         "-opt:l:inline",
         "-opt-inline-from:<source>"
-      ) ++ std2xOptions
-    case Some((2, 11)) =>
-      Seq(
-        "-Xexperimental",
-        "-Ywarn-unused-import"
       ) ++ std2xOptions
     case _ => Seq.empty
   }
@@ -94,14 +89,6 @@ addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
 val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.738"
 
-def customDeps(scalaVersion: String) =
-  CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2, 11)) =>
-      Seq("com.propensive" %% "magnolia" % "0.10.0")
-    case _ =>
-      Seq("com.propensive" %% "magnolia" % "0.12.7")
-  }
-
 lazy val refined = (project in file("refined"))
   .settings(
     commonSettings,
@@ -125,14 +112,15 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.typelevel" %% "cats-free" % catsVersion,
+      "org.typelevel"  %% "cats-free" % catsVersion,
+      "com.propensive" %% "magnolia"  % "0.12.7",
       // Use Joda for custom conversion example
       "org.joda"          % "joda-convert"              % "2.2.1"       % Provided,
       "joda-time"         % "joda-time"                 % "2.10.5"      % Test,
       "org.scalatest"     %% "scalatest"                % "3.1.1"       % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
       "org.scalacheck"    %% "scalacheck"               % "1.14.3"      % Test
-    ) ++ customDeps(scalaVersion.value)
+    )
   )
   .dependsOn(testkit % "test->test")
 

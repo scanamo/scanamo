@@ -19,7 +19,7 @@ Quick start
 
 Note: the `LocalDynamoDB` object is provided by the `scanamo-testkit` package.
 
-Scanamo is published for Scala 2.13, 2.12 and 2.11 to Maven Central, so just add the following to your `build.sbt`:
+Scanamo is published for Scala 2.13 and 2.12 to Maven Central, so just add the following to your `build.sbt`:
 
 ```sbt
 libraryDependencies += "org.scanamo" %% "scanamo" % "@VERSION@"
@@ -68,7 +68,7 @@ Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/
 [Badge-Codecov]: https://coveralls.io/repos/github/guardian/scanamo/badge.svg?branch=master "Codecov"
 [Badge-IsItMaintained]: http://isitmaintained.com/badge/resolution/scanamo/scanamo.svg "Average time to resolve an issue"
 [Badge-Scaladex]: https://index.scala-lang.org/count.svg?q=dependencies:scanamo/scanamo&subject=scaladex "Scaladex"
-[Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.11/badge.svg "Maven Releases"
+[Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/com.gu/scanamo_2.12/badge.svg "Maven Releases"
 [Badge-Travis]: https://travis-ci.org/scanamo/scanamo.svg?branch=master "Travis CI"
 [Badge-Gitter]: https://badges.gitter.im/guardian/scanamo.svg "Gitter chat"
 
