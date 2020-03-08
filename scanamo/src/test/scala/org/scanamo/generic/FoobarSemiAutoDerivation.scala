@@ -7,4 +7,3 @@ case class FoobarSemiAutoDerivation(value: Option[String])
 object FoobarSemiAutoDerivation {
   implicit val dynamoFormatFoo: DynamoFormat[FoobarSemiAutoDerivation] = deriveDynamoFormat[FoobarSemiAutoDerivation]
 }
-
