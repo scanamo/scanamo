@@ -1,6 +1,6 @@
 package org.scanamo.generic
 
-import org.scanamo.{DynamoFormat, TypeCoercionError}
+import org.scanamo.{ DynamoFormat, TypeCoercionError }
 
 object FoobarAutoDerivation {
   def fromString(s: String): Either[TypeCoercionError, FoobarAutoDerivation] = s match {
