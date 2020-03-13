@@ -166,10 +166,10 @@ package object ops {
           .withUpdateExpression(item.updateExpression.expression)
           .withExpressionAttributeNames(item.updateExpression.attributeNames.asJava)
           .withKey(item.key.toJavaMap)
-        val updatedWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues.fold(update) { avs ⇒
+        val updateWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues.fold(update) { avs ⇒
           update.withExpressionAttributeValues(avs)
         }
-        new TransactWriteItem().withUpdate(updatedWithAvs)
+        new TransactWriteItem().withUpdate(updateWithAvs)
       })
       val deleteItems = req.deleteItems.map(item ⇒ {
         new TransactWriteItem()
