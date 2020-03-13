@@ -156,7 +156,7 @@ package object ops {
       val putItems = req.putItems.map(item ⇒ {
         new TransactWriteItem()
           .withPut(new com.amazonaws.services.dynamodbv2.model.Put()
-            .withItem(item.dynamoValue.asObject.getOrElse(DynamoObject.empty).toJavaMap)
+            .withItem(item.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
               .withTableName(item.tableName)
           )
       })

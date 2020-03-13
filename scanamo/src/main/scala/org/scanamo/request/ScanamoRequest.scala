@@ -76,7 +76,7 @@ case class RequestCondition(
 
 case class TransactPutItem(
   tableName: String,
-  dynamoValue: DynamoValue,
+  item: DynamoValue,
   condition: Option[RequestCondition]
 )
 
