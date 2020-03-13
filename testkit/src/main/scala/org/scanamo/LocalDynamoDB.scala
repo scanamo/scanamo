@@ -25,7 +25,7 @@ import com.amazonaws.services.dynamodbv2.model._
 import scala.collection.JavaConverters._
 
 object LocalDynamoDB {
-  def client(port: Int = 8042): AmazonDynamoDBAsync =
+  def client(port: Int = 8000): AmazonDynamoDBAsync =
     AmazonDynamoDBAsyncClient
       .asyncBuilder()
       .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials")))

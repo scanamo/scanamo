@@ -64,7 +64,7 @@ private[scanamo] class AlpakkaInterpreter(client: DynamoClient,
           .recover {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
-      case TransactPutAll(req) => run(req)
+      case TransactWriteAll(req) => run(JavaRequests.transactItems(req))
     }
 }
 

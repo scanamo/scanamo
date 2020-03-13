@@ -2,7 +2,7 @@ package org.scanamo
 
 import cats.implicits._
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.time.{Millis, Seconds, Span}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -11,6 +11,7 @@ import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
+import org.scanamo.ops.ScanamoOps
 
 class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll with ScalaFutures {
   implicit val defaultPatience =
@@ -564,6 +565,98 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       scanamo.exec(ops).futureValue should equal(
         List(Right(Gremlin(1, false)))
       )
+    }
+  }
+
+  it("transact table write (update) items") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecastTable = Table[Forecast](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+        _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None)))
+        _ <- forecastTable.transactUpdateAll(List(
+          UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain"),
+          UniqueKey(KeyEquals("location", "Amsterdam")) → set("weather" -> "Cloud")
+        ))
+        items <- forecastTable.scan()
+      } yield items
+
+      scanamo.exec(ops).futureValue should equal(
+        List(Right(Forecast("Amsterdam", "Cloud", None)), Right(Forecast("London", "Rain", None)), Right(Forecast("Manchester", "Rain", None)))
+      )
+    }
+  }
+
+  it("transact write (update) items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
+
+        val ops = for {
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
+          _ <- forecastTable.transactUpdateAll(List(
+            UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain")
+          ))
+          _ <- gremlinTable.transactUpdateAll(List(
+            UniqueKey(KeyEquals("number", 2)) → set("wet" -> true)
+          ))
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
+
+        scanamo.exec(ops).futureValue should equal(
+          (List(Right(Gremlin(2, wet = true)), Right(Gremlin(1, wet = false))),
+            List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None))))
+        )
+      }
+    }
+  }
+
+  it("transact table write (delete) items") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecastTable = Table[Forecast](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+        _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None)))
+        _ <- forecastTable.transactDeleteAll(List(
+          UniqueKey(KeyEquals("location", "London")),
+          UniqueKey(KeyEquals("location", "Amsterdam"))
+        ))
+        items <- forecastTable.scan()
+      } yield items
+
+      scanamo.exec(ops).futureValue should equal(
+        List(Right(Forecast("Manchester", "Rain", None)))
+      )
+    }
+  }
+
+  it("transact write (delete) items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
+
+        val ops = for {
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
+          _ <- forecastTable.transactDeleteAll(List(
+            UniqueKey(KeyEquals("location", "London"))
+          ))
+          _ <- gremlinTable.transactDeleteAll(List(
+            UniqueKey(KeyEquals("number", 2))
+          ))
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
+
+        scanamo.exec(ops).futureValue should equal(
+          (List(Right(Gremlin(1, wet = false))),
+            List(Right(Forecast("Amsterdam", "Fog", None))))
+        )
+      }
     }
   }
 }

@@ -151,5 +151,34 @@ package object ops {
         requestWithCondition withExpressionAttributeValues avs
       }
     }
+
+    def transactItems(req: ScanamoTransactWriteRequest): TransactWriteItemsRequest = {
+      val putItems = req.putItems.map(item ⇒ {
+        new TransactWriteItem()
+          .withPut(new com.amazonaws.services.dynamodbv2.model.Put()
+            .withItem(item.dynamoValue.asObject.getOrElse(DynamoObject.empty).toJavaMap)
+              .withTableName(item.tableName)
+          )
+      })
+      val updateItems = req.updateItems.map(item ⇒ {
+        val update = new com.amazonaws.services.dynamodbv2.model.Update()
+          .withTableName(item.tableName)
+          .withUpdateExpression(item.updateExpression.expression)
+          .withExpressionAttributeNames(item.updateExpression.attributeNames.asJava)
+          .withKey(item.key.toJavaMap)
+        val updatedWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues.fold(update) { avs ⇒
+          update.withExpressionAttributeValues(avs)
+        }
+        new TransactWriteItem().withUpdate(updatedWithAvs)
+      })
+      val deleteItems = req.deleteItems.map(item ⇒ {
+        new TransactWriteItem()
+          .withDelete(new com.amazonaws.services.dynamodbv2.model.Delete()
+            .withKey(item.key.toJavaMap)
+            .withTableName(item.tableName))
+      })
+      new TransactWriteItemsRequest()
+        .withTransactItems((putItems ++ updateItems ++ deleteItems).asJava)
+    }
   }
 }

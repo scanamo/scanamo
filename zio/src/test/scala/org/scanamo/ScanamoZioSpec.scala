@@ -526,7 +526,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
     }
   }
 
-  it("transact table write items") {
+  it("transact table write (put) items") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val itemsTable = Table[Item](t)
 
@@ -541,7 +541,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
     }
   }
 
-  it("transact write items in multiple tables") {
+  it("transact write (put) items in multiple tables") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t1 =>
       LocalDynamoDB.usingRandomTable(client)("name" -> S) { t2 =>
         val itemsTable1 = Table[Item](t1)
@@ -555,6 +555,98 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
 
         unsafeRun(zio.exec(ops)) should equal(
           List(Right(Item("one")), Right(Item("two")))
+        )
+      }
+    }
+  }
+
+  it("transact table write (update) items") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecastTable = Table[Forecast](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+        _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None)))
+        _ <- forecastTable.transactUpdateAll(List(
+          UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain"),
+          UniqueKey(KeyEquals("location", "Amsterdam")) → set("weather" -> "Cloud")
+        ))
+        items <- forecastTable.scan()
+      } yield items
+
+      unsafeRun(zio.exec(ops)) should equal(
+        List(Right(Forecast("Amsterdam", "Cloud", None)), Right(Forecast("London", "Rain", None)), Right(Forecast("Manchester", "Rain", None)))
+      )
+    }
+  }
+
+  it("transact write (update) items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
+
+        val ops = for {
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
+          _ <- forecastTable.transactUpdateAll(List(
+            UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain")
+          ))
+          _ <- gremlinTable.transactUpdateAll(List(
+            UniqueKey(KeyEquals("number", 2)) → set("wet" -> true)
+          ))
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
+
+        unsafeRun(zio.exec(ops)) should equal(
+          (List(Right(Gremlin(2, wet = true)), Right(Gremlin(1, wet = false))),
+            List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None))))
+        )
+      }
+    }
+  }
+
+  it("transact table write (delete) items") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecastTable = Table[Forecast](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+        _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None)))
+        _ <- forecastTable.transactDeleteAll(List(
+          UniqueKey(KeyEquals("location", "London")),
+          UniqueKey(KeyEquals("location", "Amsterdam"))
+        ))
+        items <- forecastTable.scan()
+      } yield items
+
+      unsafeRun(zio.exec(ops)) should equal(
+        List(Right(Forecast("Manchester", "Rain", None)))
+      )
+    }
+  }
+
+  it("transact write (delete) items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
+
+        val ops = for {
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
+          _ <- forecastTable.transactDeleteAll(List(
+            UniqueKey(KeyEquals("location", "London"))
+          ))
+          _ <- gremlinTable.transactDeleteAll(List(
+            UniqueKey(KeyEquals("number", 2))
+          ))
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
+
+        unsafeRun(zio.exec(ops)) should equal(
+          (List(Right(Gremlin(1, wet = false))),
+            List(Right(Forecast("Amsterdam", "Fog", None))))
         )
       }
     }
