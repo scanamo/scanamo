@@ -153,30 +153,33 @@ package object ops {
     }
 
     def transactItems(req: ScanamoTransactWriteRequest): TransactWriteItemsRequest = {
-      val putItems = req.putItems.map(item ⇒ {
+      val putItems = req.putItems.map { item ⇒
         new TransactWriteItem()
-          .withPut(new com.amazonaws.services.dynamodbv2.model.Put()
-            .withItem(item.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
+          .withPut(
+            new com.amazonaws.services.dynamodbv2.model.Put()
+              .withItem(item.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
               .withTableName(item.tableName)
           )
-      })
-      val updateItems = req.updateItems.map(item ⇒ {
+      }
+      val updateItems = req.updateItems.map { item ⇒
         val update = new com.amazonaws.services.dynamodbv2.model.Update()
           .withTableName(item.tableName)
           .withUpdateExpression(item.updateExpression.expression)
           .withExpressionAttributeNames(item.updateExpression.attributeNames.asJava)
           .withKey(item.key.toJavaMap)
-        val updateWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues.fold(update) { avs ⇒
-          update.withExpressionAttributeValues(avs)
+        val updateWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues.fold(update) {
+          avs ⇒ update.withExpressionAttributeValues(avs)
         }
         new TransactWriteItem().withUpdate(updateWithAvs)
-      })
-      val deleteItems = req.deleteItems.map(item ⇒ {
+      }
+      val deleteItems = req.deleteItems.map { item ⇒
         new TransactWriteItem()
-          .withDelete(new com.amazonaws.services.dynamodbv2.model.Delete()
-            .withKey(item.key.toJavaMap)
-            .withTableName(item.tableName))
-      })
+          .withDelete(
+            new com.amazonaws.services.dynamodbv2.model.Delete()
+              .withKey(item.key.toJavaMap)
+              .withTableName(item.tableName)
+          )
+      }
       new TransactWriteItemsRequest()
         .withTransactItems((putItems ++ updateItems ++ deleteItems).asJava)
     }

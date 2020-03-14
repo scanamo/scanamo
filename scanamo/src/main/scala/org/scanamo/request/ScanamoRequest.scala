@@ -16,8 +16,8 @@
 
 package org.scanamo.request
 
-import org.scanamo.{DeleteReturn, DynamoObject, DynamoValue, PutReturn}
-import org.scanamo.query.{Condition, Query}
+import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
+import org.scanamo.query.{ Condition, Query }
 import org.scanamo.update.UpdateExpression
 
 case class ScanamoPutRequest(
