@@ -527,16 +527,24 @@ class ScanamoTest extends AnyFunSpec with Matchers {
       val forecastTable = Table[Forecast](t)
 
       val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
-        _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None)))
-        _ <- forecastTable.transactUpdateAll(List(
-          UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain"),
-          UniqueKey(KeyEquals("location", "Amsterdam")) → set("weather" -> "Cloud")
-        ))
+        _ <- forecastTable.putAll(
+          Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None))
+        )
+        _ <- forecastTable.transactUpdateAll(
+          List(
+            UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain"),
+            UniqueKey(KeyEquals("location", "Amsterdam")) → set("weather" -> "Cloud")
+          )
+        )
         items <- forecastTable.scan()
       } yield items
 
       scanamo.exec(ops) should equal(
-        List(Right(Forecast("Amsterdam", "Cloud", None)), Right(Forecast("London", "Rain", None)), Right(Forecast("Manchester", "Rain", None)))
+        List(
+          Right(Forecast("Amsterdam", "Cloud", None)),
+          Right(Forecast("London", "Rain", None)),
+          Right(Forecast("Manchester", "Rain", None))
+        )
       )
     }
   }
@@ -550,19 +558,25 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         val ops = for {
           _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
-          _ <- forecastTable.transactUpdateAll(List(
-            UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain")
-          ))
-          _ <- gremlinTable.transactUpdateAll(List(
-            UniqueKey(KeyEquals("number", 2)) → set("wet" -> true)
-          ))
+          _ <- forecastTable.transactUpdateAll(
+            List(
+              UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain")
+            )
+          )
+          _ <- gremlinTable.transactUpdateAll(
+            List(
+              UniqueKey(KeyEquals("number", 2)) → set("wet" -> true)
+            )
+          )
           gremlins <- gremlinTable.scan()
           forecasts <- forecastTable.scan()
         } yield (gremlins, forecasts)
 
         scanamo.exec(ops) should equal(
-          (List(Right(Gremlin(2, wet = true)), Right(Gremlin(1, wet = false))),
-            List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None))))
+          (
+            List(Right(Gremlin(2, wet = true)), Right(Gremlin(1, wet = false))),
+            List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None)))
+          )
         )
       }
     }
@@ -573,11 +587,15 @@ class ScanamoTest extends AnyFunSpec with Matchers {
       val forecastTable = Table[Forecast](t)
 
       val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
-        _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None)))
-        _ <- forecastTable.transactDeleteAll(List(
-          UniqueKey(KeyEquals("location", "London")),
-          UniqueKey(KeyEquals("location", "Amsterdam"))
-        ))
+        _ <- forecastTable.putAll(
+          Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None))
+        )
+        _ <- forecastTable.transactDeleteAll(
+          List(
+            UniqueKey(KeyEquals("location", "London")),
+            UniqueKey(KeyEquals("location", "Amsterdam"))
+          )
+        )
         items <- forecastTable.scan()
       } yield items
 
@@ -596,19 +614,22 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         val ops = for {
           _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
-          _ <- forecastTable.transactDeleteAll(List(
-            UniqueKey(KeyEquals("location", "London"))
-          ))
-          _ <- gremlinTable.transactDeleteAll(List(
-            UniqueKey(KeyEquals("number", 2))
-          ))
+          _ <- forecastTable.transactDeleteAll(
+            List(
+              UniqueKey(KeyEquals("location", "London"))
+            )
+          )
+          _ <- gremlinTable.transactDeleteAll(
+            List(
+              UniqueKey(KeyEquals("number", 2))
+            )
+          )
           gremlins <- gremlinTable.scan()
           forecasts <- forecastTable.scan()
         } yield (gremlins, forecasts)
 
         scanamo.exec(ops) should equal(
-          (List(Right(Gremlin(1, wet = false))),
-            List(Right(Forecast("Amsterdam", "Fog", None))))
+          (List(Right(Gremlin(1, wet = false))), List(Right(Forecast("Amsterdam", "Fog", None))))
         )
       }
     }
