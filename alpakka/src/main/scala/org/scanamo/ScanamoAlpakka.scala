@@ -72,8 +72,11 @@ object ScanamoAlpakka extends AlpakkaInstances {
     case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
         _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
       true
-    case e: AmazonDynamoDBException if (e.getErrorCode.contains("ThrottlingException") | e.getErrorCode.contains("InternalFailure")) => true
-    case _                                                                            => false
+    case e: AmazonDynamoDBException
+        if e.getErrorCode.contains("ThrottlingException") |
+          e.getErrorCode.contains("InternalFailure") =>
+      true
+    case _ => false
   }
 }
 
