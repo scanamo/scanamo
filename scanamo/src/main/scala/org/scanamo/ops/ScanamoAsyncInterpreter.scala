@@ -88,6 +88,6 @@ class ScanamoAsyncInterpreter(client: AmazonDynamoDBAsync)(implicit ec: Executio
         .recover {
           case e: ConditionalCheckFailedException => Either.left(e)
         }
-    case TransactPutAll(req) => futureOf(client.transactWriteItemsAsync _, req)
+    case TransactWriteAll(req) => futureOf(client.transactWriteItemsAsync, JavaRequests.transactItems(req))
   }
 }

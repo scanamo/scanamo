@@ -84,12 +84,39 @@ object ScanamoFree {
   )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] = {
     val dItems = tableAndItems.map {
       case (tableName, itm) =>
-        new TransactWriteItem()
-          .withPut(
-            new Put().withItem(f.write(itm).asObject.getOrElse(DynamoObject.empty).toJavaMap).withTableName(tableName)
-          )
+        TransactPutItem(tableName, f.write(itm), None)
     }
-    ScanamoOps.transactPutAll(new TransactWriteItemsRequest().withTransactItems(dItems.asJava))
+    ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(dItems, Seq.empty, Seq.empty))
+  }
+
+  def transactUpdateAllTable(
+    tableName: String
+  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResult] =
+    transactUpdateAll(items.map(tableName → _))
+
+  def transactUpdateAll(
+    tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
+  ): ScanamoOps[TransactWriteItemsResult] = {
+    val items = tableAndItems.map {
+      case (tableName, (key, updateExpression)) ⇒
+        TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
+    }
+    ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, items, Seq.empty))
+  }
+
+  def transactDeleteAllTable(
+    tableName: String
+  )(items: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResult] =
+    transactDeleteAll(items.map(tableName → _))
+
+  def transactDeleteAll(
+    tableAndItems: List[(String, UniqueKey[_])]
+  ): ScanamoOps[TransactWriteItemsResult] = {
+    val items = tableAndItems.map {
+      case (tableName, key) ⇒
+        TransactDeleteItem(tableName, key.toDynamoObject, None)
+    }
+    ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, items))
   }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[Unit] =

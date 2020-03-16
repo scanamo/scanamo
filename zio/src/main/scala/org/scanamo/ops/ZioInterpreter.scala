@@ -87,6 +87,6 @@ private[scanamo] class ZioInterpreter(client: AmazonDynamoDBAsync)
         .catchSome {
           case e: ConditionalCheckFailedException => IO.succeed(Left(e))
         }
-    case TransactPutAll(req) => eff(client.transactWriteItemsAsync _, req)
+    case TransactWriteAll(req) => eff(client.transactWriteItemsAsync, JavaRequests.transactItems(req))
   }
 }
