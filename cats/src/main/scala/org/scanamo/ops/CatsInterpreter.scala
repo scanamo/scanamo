@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo.ops
 
 import cats.effect.Async
@@ -6,10 +22,9 @@ import cats.~>
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 
 class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
-
   final private def eff[A <: AmazonWebServiceRequest, B](
     f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
     req: A
@@ -85,5 +100,6 @@ class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) e
             a => F.delay(Right(a))
           )
         )
+    case TransactWriteAll(req) => eff(client.transactWriteItemsAsync, JavaRequests.transactItems(req))
   }
 }

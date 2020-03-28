@@ -1,12 +1,9 @@
-scalaVersion in ThisBuild := "2.12.8"
-crossScalaVersions in ThisBuild := Seq("2.11.12", scalaVersion.value)
+scalaVersion in ThisBuild := "2.12.10"
+crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1")
 
-val catsVersion = "1.6.1"
-val catsEffectVersion = "1.3.1"
-val scalazVersion = "7.2.27" // Bump as needed for io-effect compat
-val scalazIOEffectVersion = "2.10.1"
-val shimsVersion = "1.7.0"
-val zioVersion = "1.0-RC4"
+val catsVersion = "2.1.1"
+val catsEffectVersion = "2.1.2"
+val zioVersion = "1.0.0-RC18-1"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -47,20 +44,18 @@ def extraOptions(scalaVersion: String) =
         "-opt:l:inline",
         "-opt-inline-from:<source>"
       ) ++ std2xOptions
-    case Some((2, 11)) =>
-      Seq(
-        "-Xexperimental",
-        "-Ywarn-unused-import"
-      ) ++ std2xOptions
     case _ => Seq.empty
   }
 
 val commonSettings = Seq(
+  organization := "org.scanamo",
+  organizationName := "Scanamo",
+  startYear := Some(2019),
+  homepage := Some(url("http://www.scanamo.org/")),
+  licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-  // for simulacrum
-  addCompilerPlugin("org.scalamacros" % "paradise"        % "2.1.1" cross CrossVersion.full),
-  addCompilerPlugin("org.spire-math"  %% "kind-projector" % "0.9.10"),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   // sbt-doctest leaves some unused values
   // see https://github.com/scala/bug/issues/10270
   scalacOptions in Test := {
@@ -79,7 +74,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(formats, scanamo, testkit, alpakka, refined, scalaz, catsEffect, javaTime, joda, zio)
+  .aggregate(scanamo, testkit, alpakka, refined, catsEffect, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -89,32 +84,10 @@ lazy val root = (project in file("."))
     stopDynamoDBLocal / aggregate := false
   )
 
-addCommandAlias("tut", "docs/tut")
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.504"
-
-lazy val formats = (project in file("formats"))
-  .settings(
-    commonSettings,
-    publishingSettings,
-    name := "scanamo-formats"
-  )
-  .settings(
-    libraryDependencies ++= Seq(
-      awsDynamoDB,
-      "com.chuusai"          %% "shapeless"  % "2.3.3",
-      "com.github.mpilquist" %% "simulacrum" % "0.18.0",
-      "org.typelevel"        %% "cats-core"  % catsVersion,
-      "org.scalacheck"       %% "scalacheck" % "1.14.0" % Test,
-      "org.scalatest"        %% "scalatest"  % "3.0.7" % Test
-    ),
-    doctestMarkdownEnabled := true,
-    doctestDecodeHtmlEntities := true,
-    doctestTestFramework := DoctestTestFramework.ScalaTest
-  )
-  .dependsOn(testkit % "test->test")
+val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.754"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -124,11 +97,11 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.7",
-      "org.scalatest" %% "scalatest" % "3.0.7" % Test
+      "eu.timepit"    %% "refined"   % "0.9.13",
+      "org.scalatest" %% "scalatest" % "3.1.1" % Test
     )
   )
-  .dependsOn(formats)
+  .dependsOn(scanamo)
 
 lazy val scanamo = (project in file("scanamo"))
   .settings(
@@ -139,17 +112,17 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "com.chuusai"          %% "shapeless"  % "2.3.3",
-      "org.typelevel"        %% "cats-free"  % catsVersion,
-      "com.github.mpilquist" %% "simulacrum" % "0.18.0",
+      "org.typelevel"  %% "cats-free" % catsVersion,
+      "com.propensive" %% "magnolia"  % "0.12.7",
       // Use Joda for custom conversion example
-      "org.joda"       % "joda-convert" % "2.2.1"  % Provided,
-      "joda-time"      % "joda-time"    % "2.10.2" % Test,
-      "org.scalatest"  %% "scalatest"   % "3.0.7"  % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
+      "org.joda"          % "joda-convert"              % "2.2.1"       % Provided,
+      "joda-time"         % "joda-time"                 % "2.10.5"      % Test,
+      "org.scalatest"     %% "scalatest"                % "3.1.1"       % Test,
+      "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
+      "org.scalacheck"    %% "scalacheck"               % "1.14.3"      % Test
     )
   )
-  .dependsOn(formats, testkit % "test->test")
+  .dependsOn(testkit % "test->test")
 
 lazy val testkit = (project in file("testkit"))
   .settings(
@@ -171,50 +144,37 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % catsVersion,
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
-      "org.scalatest"  %% "scalatest"   % "3.0.7" % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.14.0" % Test
+      "io.monix"       %% "monix"       % "3.1.0" % Provided,
+      "co.fs2"         %% "fs2-core"    % "2.3.0" % Provided,
+      "io.monix"       %% "monix"       % "3.1.0" % Test,
+      "co.fs2"         %% "fs2-core"    % "2.3.0" % Test,
+      "org.scalatest"  %% "scalatest"   % "3.1.1" % Test,
+      "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
-  .dependsOn(formats, scanamo, testkit % "test->test")
+  .dependsOn(scanamo, testkit % "test->test")
 
-lazy val scalaz = (project in file("scalaz"))
+lazy val zio = (project in file("zio"))
   .settings(
-    name := "scanamo-scalaz",
+    name := "scanamo-zio",
     commonSettings,
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "com.codecommit" %% "shims"           % shimsVersion,
-      "org.scalaz"     %% "scalaz-core"     % scalazVersion,
-      "org.scalaz"     %% "scalaz-ioeffect" % scalazIOEffectVersion,
-      "org.scalatest"  %% "scalatest"       % "3.0.7" % Test,
-      "org.scalacheck" %% "scalacheck"      % "1.14.0" % Test
+      "org.typelevel"  %% "cats-core"        % catsVersion,
+      "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
+      "dev.zio"        %% "zio"              % zioVersion,
+      "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
+      "dev.zio"        %% "zio-interop-cats" % "2.0.0.0-RC11",
+      "org.scalatest"  %% "scalatest"        % "3.1.1" % Test,
+      "org.scalacheck" %% "scalacheck"       % "1.14.3" % Test
     ),
     fork in Test := true,
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
-  .dependsOn(formats, scanamo, testkit % "test->test")
-
-lazy val zio = (project in file("scalaz-zio"))
-  .settings(
-    name := "scanamo-scalaz-zio",
-    commonSettings,
-    publishingSettings,
-    libraryDependencies ++= List(
-      awsDynamoDB,
-      "org.typelevel"  %% "cats-core"               % catsVersion,
-      "org.typelevel"  %% "cats-effect"             % catsEffectVersion,
-      "org.scalaz"     %% "scalaz-zio"              % zioVersion,
-      "org.scalaz"     %% "scalaz-zio-interop-cats" % zioVersion,
-      "org.scalatest"  %% "scalatest"               % "3.0.7" % Test,
-      "org.scalacheck" %% "scalacheck"              % "1.14.0" % Test
-    ),
-    fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings"
-  )
-  .dependsOn(formats, scanamo, testkit % "test->test")
+  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val alpakka = (project in file("alpakka"))
   .settings(
@@ -226,30 +186,15 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.0.2",
-      "org.scalatest"      %% "scalatest"                    % "3.0.7" % Test,
-      "org.scalacheck"     %% "scalacheck"                   % "1.13.5" % Test
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.1.2",
+      "org.scalatest"      %% "scalatest"                    % "3.1.1" % Test,
+      "org.scalacheck"     %% "scalacheck"                   % "1.14.3" % Test
     ),
     fork in Test := true,
     // unidoc can work out links to other project, but scalac can't
     scalacOptions in (Compile, doc) += "-no-link-warnings"
   )
-  .dependsOn(formats, scanamo, testkit % "test->test")
-
-lazy val javaTime = (project in file("java-time"))
-  .settings(
-    commonSettings,
-    publishingSettings,
-    name := "scanamo-time"
-  )
-  .settings(
-    libraryDependencies ++= List(
-      "org.scalatest"  %% "scalatest"                   % "3.0.7"  % Test,
-      "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
-      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.5"  % Test
-    )
-  )
-  .dependsOn(formats)
+  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val joda = (project in file("joda"))
   .settings(
@@ -259,34 +204,29 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda"       % "joda-convert"                 % "2.2.1" % Provided,
-      "joda-time"      % "joda-time"                    % "2.10.2",
-      "org.scalatest"  %% "scalatest"                   % "3.0.7" % Test,
-      "org.scalacheck" %% "scalacheck"                  % "1.13.5" % Test,
-      "com.47deg"      %% "scalacheck-toolbox-datetime" % "0.2.5" % Test
+      "org.joda"       % "joda-convert" % "2.2.1" % Provided,
+      "joda-time"      % "joda-time"    % "2.10.5",
+      "org.scalatest"  %% "scalatest"   % "3.1.1" % Test,
+      "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     )
   )
-  .dependsOn(formats)
+  .dependsOn(scanamo)
 
 lazy val docs = (project in file("docs"))
   .settings(
     commonSettings,
     micrositeSettings,
     noPublishSettings,
-    includeFilter in makeSite := "*.html" | "*.css" | "*.png" | "*.jpg" | "*.gif" | "*.js" | "*.yml",
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
-    makeMicrosite := makeMicrosite.dependsOn(unidoc in Compile).value,
-    addMappingsToSiteDir(mappings in (ScalaUnidoc, packageDoc), siteSubdirName in ScalaUnidoc),
-    siteSubdirName in ScalaUnidoc := "latest/api"
+    mdocVariables := Map(
+      "VERSION" -> version.value
+    )
   )
-  .enablePlugins(MicrositesPlugin, SiteScaladocPlugin, GhpagesPlugin, ScalaUnidocPlugin)
+  .enablePlugins(MicrositesPlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
-  organization := "org.scanamo",
-  homepage := Some(url("http://www.scanamo.org/")),
-  licenses := Seq("Apache V2" -> url("http://www.apache.org/licenses/LICENSE-2.0.html")),
   publishArtifact in Test := false,
   scmInfo := Some(
     ScmInfo(
@@ -306,21 +246,22 @@ val publishingSettings = Seq(
 )
 
 lazy val noPublishSettings = Seq(
-  publish := {},
-  publishLocal := {},
-  publishArtifact := false
+  publish / skip := true
 )
 
 val micrositeSettings = Seq(
+  micrositeUrl := "https://www.scanamo.org",
   micrositeName := "Scanamo",
   micrositeDescription := "Scanamo: simpler DynamoDB access for Scala",
   micrositeAuthor := "Scanamo Contributors",
   micrositeGithubOwner := "scanamo",
   micrositeGithubRepo := "scanamo",
-  micrositeBaseUrl := "",
   micrositeDocumentationUrl := "/latest/api",
-  micrositeHighlightTheme := "color-brewer",
+  micrositeDocumentationLabelDescription := "API",
+  micrositeHighlightTheme := "monokai",
+  micrositeHighlightLanguages ++= Seq("sbt"),
   micrositeGitterChannel := false,
+  micrositeShareOnSocial := false,
   micrositePalette := Map(
     "brand-primary" -> "#951c55",
     "brand-secondary" -> "#005689",
@@ -330,5 +271,8 @@ val micrositeSettings = Seq(
     "gray-light" -> "#E3E2E3",
     "gray-lighter" -> "#F4F3F4",
     "white-color" -> "#FFFFFF"
-  )
+  ),
+  micrositeCompilingDocsTool := WithMdoc,
+  micrositePushSiteWith := GitHub4s,
+  micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
 )

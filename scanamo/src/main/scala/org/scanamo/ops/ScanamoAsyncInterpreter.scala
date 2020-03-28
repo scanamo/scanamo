@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo.ops
 
 import cats._
@@ -5,7 +21,7 @@ import cats.syntax.either._
 import com.amazonaws.AmazonWebServiceRequest
 import com.amazonaws.handlers.AsyncHandler
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model._
+import com.amazonaws.services.dynamodbv2.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
 
 import scala.concurrent.{ ExecutionContext, Future, Promise }
 import scala.util.{ Failure, Success }
@@ -16,7 +32,6 @@ import scala.util.{ Failure, Success }
  */
 class ScanamoAsyncInterpreter(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext)
     extends (ScanamoOpsA ~> Future) {
-
   final private def futureOf[X <: AmazonWebServiceRequest, T](
     call: (X, AsyncHandler[X, T]) => java.util.concurrent.Future[T],
     req: X
@@ -73,5 +88,6 @@ class ScanamoAsyncInterpreter(client: AmazonDynamoDBAsync)(implicit ec: Executio
         .recover {
           case e: ConditionalCheckFailedException => Either.left(e)
         }
+    case TransactWriteAll(req) => futureOf(client.transactWriteItemsAsync, JavaRequests.transactItems(req))
   }
 }

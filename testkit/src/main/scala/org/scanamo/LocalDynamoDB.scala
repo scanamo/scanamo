@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo
 
 import com.amazonaws.ClientConfiguration
@@ -9,11 +25,11 @@ import com.amazonaws.services.dynamodbv2.model._
 import scala.collection.JavaConverters._
 
 object LocalDynamoDB {
-  def client(): AmazonDynamoDBAsync =
+  def client(port: Int = 8042): AmazonDynamoDBAsync =
     AmazonDynamoDBAsyncClient
       .asyncBuilder()
       .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials")))
-      .withEndpointConfiguration(new EndpointConfiguration("http://localhost:8042", ""))
+      .withEndpointConfiguration(new EndpointConfiguration(s"http://localhost:$port", ""))
       .withClientConfiguration(new ClientConfiguration().withClientExecutionTimeout(50000).withRequestTimeout(5000))
       .build()
 
@@ -56,12 +72,13 @@ object LocalDynamoDB {
     thunk: => T
   ): T = {
     createTable(client)(tableName)(attributeDefinitions: _*)
-    val res = try {
-      thunk
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 
@@ -80,12 +97,13 @@ object LocalDynamoDB {
       }
     }
 
-    val res = try {
-      thunk(tableName)
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk(tableName)
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 
@@ -115,12 +133,13 @@ object LocalDynamoDB {
       primaryIndexAttributes.toList,
       secondaryIndexAttributes.toList
     )
-    val res = try {
-      thunk
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 
@@ -149,12 +168,13 @@ object LocalDynamoDB {
       }
     }
 
-    val res = try {
-      thunk(tableName, indexName)
-    } finally {
-      client.deleteTable(tableName)
-      ()
-    }
+    val res =
+      try {
+        thunk(tableName, indexName)
+      } finally {
+        client.deleteTable(tableName)
+        ()
+      }
     res
   }
 

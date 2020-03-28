@@ -1,3 +1,19 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo.ops
 
 import com.amazonaws.services.dynamodbv2.model._
@@ -18,9 +34,9 @@ final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGet
 final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateItemResult]
 final case class ConditionalUpdate(req: ScanamoUpdateRequest)
     extends ScanamoOpsA[Either[ConditionalCheckFailedException, UpdateItemResult]]
+final case class TransactWriteAll(req: ScanamoTransactWriteRequest) extends ScanamoOpsA[TransactWriteItemsResult]
 
 object ScanamoOps {
-
   import cats.free.Free.liftF
 
   def put(req: ScanamoPutRequest): ScanamoOps[PutItemResult] = liftF[ScanamoOpsA, PutItemResult](Put(req))
@@ -45,4 +61,6 @@ object ScanamoOps {
     req: ScanamoUpdateRequest
   ): ScanamoOps[Either[ConditionalCheckFailedException, UpdateItemResult]] =
     liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, UpdateItemResult]](ConditionalUpdate(req))
+  def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[TransactWriteItemsResult] =
+    liftF[ScanamoOpsA, TransactWriteItemsResult](TransactWriteAll(req))
 }

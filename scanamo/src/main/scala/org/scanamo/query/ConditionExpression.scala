@@ -1,27 +1,81 @@
+/*
+ * Copyright 2019 Scanamo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.scanamo.query
 
-import com.amazonaws.services.dynamodbv2.model._
-import org.scanamo.{ DynamoFormat, DynamoObject }
-import org.scanamo.error.{ ConditionNotMet, ScanamoError }
+import com.amazonaws.services.dynamodbv2.model.{
+  AttributeValue,
+  ConditionalCheckFailedException,
+  DeleteItemResult,
+  PutItemResult
+}
+import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, PutReturn, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
-import simulacrum.typeclass
+import cats.instances.either._
+import cats.instances.option._
 import cats.syntax.either._
+import cats.syntax.functor._
 
-case class ConditionalOperation[V, T](tableName: String, t: T)(
+final case class ConditionalOperation[V, T](tableName: String, t: T)(
   implicit state: ConditionExpression[T],
   format: DynamoFormat[V]
 ) {
-  def put(item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
-    ScanamoOps.conditionalPut(
-      ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)))
-    )
+  def put(item: V): ScanamoOps[Either[ScanamoError, Unit]] =
+    nativePut(PutReturn.Nothing, item).map(_.leftMap(ConditionNotMet(_)).void)
 
-  def delete(key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
-    ScanamoOps.conditionalDelete(
-      ScanamoDeleteRequest(tableName = tableName, key = key.toDynamoObject, Some(state.apply(t)))
-    )
+  def putAndReturn(ret: PutReturn)(item: V): ScanamoOps[Option[Either[ScanamoError, V]]] =
+    nativePut(ret, item).map(decodeReturnValue[PutItemResult](_, _.getAttributes))
+
+  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
+    ScanamoOps.conditionalPut(ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), ret))
+
+  def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
+    nativeDelete(DeleteReturn.Nothing, key).map(_.leftMap(ConditionNotMet(_)).void)
+
+  def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Either[ScanamoError, V]]] =
+    nativeDelete(ret, key).map(decodeReturnValue[DeleteItemResult](_, _.getAttributes))
+
+  private def nativeDelete(ret: DeleteReturn,
+                           key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
+    ScanamoOps
+      .conditionalDelete(
+        ScanamoDeleteRequest(tableName = tableName, key = key.toDynamoObject, Some(state.apply(t)), ret)
+      )
+
+  private def decodeReturnValue[A](
+    either: Either[ConditionalCheckFailedException, A],
+    attrs: A => java.util.Map[String, AttributeValue]
+  ): Option[Either[ScanamoError, V]] = {
+    import cats.data.EitherT
+
+    EitherT
+      .fromEither[Option](either)
+      .leftMap(ConditionNotMet(_))
+      .flatMap(deleteItemResult =>
+        EitherT[Option, ScanamoError, V](
+          Option(attrs(deleteItemResult))
+            .filterNot(_.isEmpty)
+            .map(DynamoObject(_).toDynamoValue)
+            .map(format.read)
+        )
+      )
+      .value
+  }
 
   def update(key: UniqueKey[_], update: UpdateExpression): ScanamoOps[Either[ScanamoError, V]] =
     ScanamoOps
@@ -37,18 +91,18 @@ case class ConditionalOperation[V, T](tableName: String, t: T)(
         )
       )
       .map(
-        either =>
-          either
-            .leftMap[ScanamoError](ConditionNotMet(_))
-            .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
+        _.leftMap(ConditionNotMet(_))
+          .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
       )
 }
 
-@typeclass trait ConditionExpression[T] {
+trait ConditionExpression[T] {
   def apply(t: T): RequestCondition
 }
 
 object ConditionExpression {
+  def apply[T](implicit C: ConditionExpression[T]): ConditionExpression[T] = C
+
   implicit def stringValueEqualsCondition[V: DynamoFormat] = new ConditionExpression[(String, V)] {
     override def apply(pair: (String, V)): RequestCondition =
       attributeValueEqualsCondition.apply((AttributeName.of(pair._1), pair._2))

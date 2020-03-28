@@ -2,22 +2,21 @@ package org.scanamo
 
 import cats.implicits._
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-import org.scalatest.{ FunSpec, Matchers }
+import org.scalatest.funspec.AnyFunSpec
+import org.scalatest.matchers.should.Matchers
 import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
-import org.scanamo.auto._
+import org.scanamo.fixtures._
+import org.scanamo.generic.auto._
+import org.scanamo.ops.ScanamoOps
 
-class ScanamoTest extends FunSpec with Matchers {
-
+class ScanamoTest extends AnyFunSpec with Matchers {
   val client = LocalDynamoDB.client()
   val scanamo = Scanamo(client)
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      case class Farm(asyncAnimals: List[String])
-      case class Farmer(name: String, age: Long, farm: Farm)
-
       val farmers = Table[Farmer](t)
 
       val result = for {
@@ -33,9 +32,6 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should get asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      case class Farm(asyncAnimals: List[String])
-      case class Farmer(name: String, age: Long, farm: Farm)
-
       val farmers = Table[Farmer](t)
 
       val result = for {
@@ -50,8 +46,6 @@ class ScanamoTest extends FunSpec with Matchers {
     }
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S, "number" -> N) { t =>
-      case class Engine(name: String, number: Int)
-
       val engines = Table[Engine](t)
 
       val result = for {
@@ -64,7 +58,6 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("should get consistently asynchronously") {
-    case class City(name: String, country: String)
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val cities = Table[City](t)
 
@@ -79,9 +72,6 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should delete asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      case class Farm(asyncAnimals: List[String])
-      case class Farmer(name: String, age: Long, farm: Farm)
-
       val farmers = Table[Farmer](t)
 
       scanamo.exec {
@@ -96,9 +86,6 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should deleteAll asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      case class Farm(asyncAnimals: List[String])
-      case class Farmer(name: String, age: Long, farm: Farm)
-
       val farmers = Table[Farmer](t)
 
       val dataSet = Set(
@@ -119,23 +106,19 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should update asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
-      case class Forecast(location: String, weather: String)
-
       val forecasts = Table[Forecast](t)
       val ops = for {
-        _ <- forecasts.put(Forecast("London", "Rain"))
+        _ <- forecasts.put(Forecast("London", "Rain", None))
         _ <- forecasts.update("location" -> "London", set("weather" -> "Sun"))
         fs <- forecasts.scan
       } yield fs
 
-      scanamo.exec(ops) should equal(List(Right(Forecast("London", "Sun"))))
+      scanamo.exec(ops) should equal(List(Right(Forecast("London", "Sun", None))))
     }
   }
 
   it("should update asynchronously if a condition holds") {
     LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
-      case class Forecast(location: String, weather: String, equipment: Option[String])
-
       val forecasts = Table[Forecast](t)
 
       val ops = for {
@@ -155,23 +138,20 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should scan asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      case class Bear(name: String, favouriteFood: String)
-
       val bears = Table[Bear](t)
 
       val ops = for {
-        _ <- bears.put(Bear("Pooh", "honey"))
-        _ <- bears.put(Bear("Yogi", "picnic baskets"))
+        _ <- bears.put(Bear("Pooh", "honey", None))
+        _ <- bears.put(Bear("Yogi", "picnic baskets", None))
         bs <- bears.scan
       } yield bs
 
       scanamo.exec(ops) should equal(
-        List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets")))
+        List(Right(Bear("Pooh", "honey", None)), Right(Bear("Yogi", "picnic baskets", None)))
       )
     }
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      case class Lemming(name: String, stuff: String)
       val lemmings = Table[Lemming](t)
       val ops = for {
         _ <- lemmings.putAll(List.fill(100)(Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet)
@@ -183,22 +163,18 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("scans with a limit asynchronously") {
-    case class Bear(name: String, favouriteFood: String)
-
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val bears = Table[Bear](t)
       val ops = for {
-        _ <- bears.put(Bear("Pooh", "honey"))
-        _ <- bears.put(Bear("Yogi", "picnic baskets"))
+        _ <- bears.put(Bear("Pooh", "honey", None))
+        _ <- bears.put(Bear("Yogi", "picnic baskets", None))
         bs <- bears.limit(1).scan
       } yield bs
-      scanamo.exec(ops) should equal(List(Right(Bear("Pooh", "honey"))))
+      scanamo.exec(ops) should equal(List(Right(Bear("Pooh", "honey", None))))
     }
   }
 
   it("scanIndexWithLimit") {
-    case class Bear(name: String, favouriteFood: String, alias: Option[String])
-
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("alias" -> S) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
@@ -212,8 +188,6 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("Paginate scanIndexWithLimit") {
-    case class Bear(name: String, favouriteFood: String, alias: Option[String])
-
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("alias" -> S) { (t, i) =>
       val bears = Table[Bear](t)
       val ops = for {
@@ -233,9 +207,35 @@ class ScanamoTest extends FunSpec with Matchers {
     }
   }
 
+  it("should stream full table scan") {
+    import cats.{ ~>, Id }
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      val list = List(
+        Item("item #1"),
+        Item("item #2"),
+        Item("item #3"),
+        Item("item #4"),
+        Item("item #5"),
+        Item("item #6")
+      )
+      val expected = list.map(i => List(Right(i)))
+
+      val items = Table[Item](t)
+      val ops = for {
+        _ <- items.putAll(list.toSet).toFreeT[Stream]
+        list <- items.scanPaginatedM[Stream](1)
+      } yield list
+
+      val f = new (Id ~> Stream) {
+        override def apply[A](a: Id[A]): Stream[A] = Stream(a)
+      }
+
+      scanamo.execT(f)(ops) should contain theSameElementsAs expected
+    }
+  }
+
   it("should query asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("species" -> S, "number" -> N) { t =>
-      case class Animal(species: String, number: Int)
       val animals = Table[Animal](t)
       val ops = for {
         _ <- animals.put(Animal("Wolf", 1))
@@ -259,48 +259,43 @@ class ScanamoTest extends FunSpec with Matchers {
     }
 
     LocalDynamoDB.usingRandomTable(client)("mode" -> S, "line" -> S) { t =>
-      case class Transport(mode: String, line: String)
       val transports = Table[Transport](t)
       val ops = for {
         _ <- transports.putAll(
           Set(
-            Transport("Underground", "Circle"),
-            Transport("Underground", "Metropolitan"),
-            Transport("Underground", "Central")
+            Transport("Underground", "Circle", "Yellow"),
+            Transport("Underground", "Metropolitan", "Purple"),
+            Transport("Underground", "Central", "Red")
           )
         )
         ts <- transports.query("mode" -> "Underground" and ("line" beginsWith "C"))
       } yield ts
 
       scanamo.exec(ops) should equal(
-        List(Right(Transport("Underground", "Central")), Right(Transport("Underground", "Circle")))
+        List(Right(Transport("Underground", "Central", "Red")), Right(Transport("Underground", "Circle", "Yellow")))
       )
     }
   }
 
   it("queries with a limit asynchronously") {
-    case class Transport(mode: String, line: String)
-
     LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
       val transports = Table[Transport](t)
       val result = for {
         _ <- transports.putAll(
           Set(
-            Transport("Underground", "Circle"),
-            Transport("Underground", "Metropolitan"),
-            Transport("Underground", "Central")
+            Transport("Underground", "Circle", "Yellow"),
+            Transport("Underground", "Metropolitan", "Purple"),
+            Transport("Underground", "Central", "Red")
           )
         )
         rs <- transports.limit(1).query("mode" -> "Underground" and ("line" beginsWith "C"))
       } yield rs
 
-      scanamo.exec(result) should equal(List(Right(Transport("Underground", "Central"))))
+      scanamo.exec(result) should equal(List(Right(Transport("Underground", "Central", "Red"))))
     }
   }
 
   it("queries an index with a limit asynchronously") {
-    case class Transport(mode: String, line: String, colour: String)
-
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("mode" -> S, "colour" -> S) {
       (t, i) =>
         val transports = Table[Transport](t)
@@ -329,8 +324,6 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("queries an index asynchronously with `between` sort-key condition") {
-    case class Station(mode: String, name: String, zone: Int)
-
     def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
       stationTable.deleteAll(
         UniqueKeys(MultipleKeyList(("mode", "name"), stations.map(station => (station.mode, station.name))))
@@ -369,24 +362,20 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("queries for items that are missing an attribute") {
-    case class Farmer(firstName: String, surname: String, age: Option[Int])
-
     LocalDynamoDB.usingRandomTable(client)("firstName" -> S, "surname" -> S) { t =>
-      val farmersTable = Table[Farmer](t)
+      val farmersTable = Table[Worker](t)
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("Fred", "Perry", None))
-        _ <- farmersTable.put(Farmer("Fred", "McDonald", Some(54)))
+        _ <- farmersTable.put(Worker("Fred", "Perry", None))
+        _ <- farmersTable.put(Worker("Fred", "McDonald", Some(54)))
         farmerWithNoAge <- farmersTable.filter(attributeNotExists("age")).query("firstName" -> "Fred")
       } yield farmerWithNoAge
       scanamo.exec(farmerOps) should equal(
-        List(Right(Farmer("Fred", "Perry", None)))
+        List(Right(Worker("Fred", "Perry", None)))
       )
     }
   }
 
   it("should put multiple items asynchronously") {
-    case class Rabbit(name: String)
-
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val rabbits = Table[Rabbit](t)
       val result = for {
@@ -400,8 +389,6 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should get multiple items asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      case class Farm(animals: List[String])
-      case class Farmer(name: String, age: Long, farm: Farm)
       val farmers = Table[Farmer](t)
 
       scanamo.exec(for {
@@ -423,7 +410,6 @@ class ScanamoTest extends FunSpec with Matchers {
     }
 
     LocalDynamoDB.usingRandomTable(client)("actor" -> S, "regeneration" -> N) { t =>
-      case class Doctor(actor: String, regeneration: Int)
       val doctors = Table[Doctor](t)
 
       scanamo.exec(for {
@@ -435,9 +421,8 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should get multiple items asynchronously (automatically handling batching)") {
     LocalDynamoDB.usingRandomTable(client)("id" -> N) { t =>
-      case class Farm(id: Int, name: String)
-      val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
-      val farmsTable = Table[Farm](t)
+      val farms = (1 to 101).map(i => Factory(i, s"Farm #$i")).toSet
+      val farmsTable = Table[Factory](t)
 
       scanamo.exec(for {
         _ <- farmsTable.putAll(farms)
@@ -448,9 +433,8 @@ class ScanamoTest extends FunSpec with Matchers {
 
   it("should get multiple items consistently asynchronously (automatically handling batching)") {
     LocalDynamoDB.usingRandomTable(client)("id" -> N) { t =>
-      case class Farm(id: Int, name: String)
-      val farms = (1 to 101).map(i => Farm(i, s"Farm #$i")).toSet
-      val farmsTable = Table[Farm](t)
+      val farms = (1 to 101).map(i => Factory(i, s"Farm #$i")).toSet
+      val farmsTable = Table[Factory](t)
 
       scanamo.exec(for {
         _ <- farmsTable.putAll(farms)
@@ -460,14 +444,11 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("should return old item after put asynchronously") {
-    case class Farm(animals: List[String])
-    case class Farmer(name: String, age: Long, farm: Farm)
-
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        result <- farmersTable.put(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
       scanamo.exec(farmerOps) should equal(
@@ -477,13 +458,10 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("should return None when putting a new item asynchronously") {
-    case class Farm(animals: List[String])
-    case class Farmer(name: String, age: Long, farm: Farm)
-
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        result <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
       scanamo.exec(farmerOps) should equal(
@@ -493,9 +471,6 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("conditionally put asynchronously") {
-    case class Farm(animals: List[String])
-    case class Farmer(name: String, age: Long, farm: Farm)
-
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
 
@@ -513,9 +488,6 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("conditionally put asynchronously with `between` condition") {
-    case class Farm(animals: List[String])
-    case class Farmer(name: String, age: Long, farm: Farm)
-
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
 
@@ -534,8 +506,6 @@ class ScanamoTest extends FunSpec with Matchers {
   }
 
   it("conditionally delete asynchronously") {
-    case class Gremlin(number: Int, wet: Boolean)
-
     LocalDynamoDB.usingRandomTable(client)("number" -> N) { t =>
       val gremlinsTable = Table[Gremlin](t)
 
@@ -549,6 +519,119 @@ class ScanamoTest extends FunSpec with Matchers {
       scanamo.exec(ops) should equal(
         List(Right(Gremlin(1, false)))
       )
+    }
+  }
+
+  it("transact table write (update) items") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecastTable = Table[Forecast](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+        _ <- forecastTable.putAll(
+          Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None))
+        )
+        _ <- forecastTable.transactUpdateAll(
+          List(
+            UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain"),
+            UniqueKey(KeyEquals("location", "Amsterdam")) → set("weather" -> "Cloud")
+          )
+        )
+        items <- forecastTable.scan()
+      } yield items
+
+      scanamo.exec(ops) should equal(
+        List(
+          Right(Forecast("Amsterdam", "Cloud", None)),
+          Right(Forecast("London", "Rain", None)),
+          Right(Forecast("Manchester", "Rain", None))
+        )
+      )
+    }
+  }
+
+  it("transact write (update) items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
+
+        val ops = for {
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
+          _ <- forecastTable.transactUpdateAll(
+            List(
+              UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain")
+            )
+          )
+          _ <- gremlinTable.transactUpdateAll(
+            List(
+              UniqueKey(KeyEquals("number", 2)) → set("wet" -> true)
+            )
+          )
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
+
+        scanamo.exec(ops) should equal(
+          (
+            List(Right(Gremlin(2, wet = true)), Right(Gremlin(1, wet = false))),
+            List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None)))
+          )
+        )
+      }
+    }
+  }
+
+  it("transact table write (delete) items") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecastTable = Table[Forecast](t)
+
+      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+        _ <- forecastTable.putAll(
+          Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None))
+        )
+        _ <- forecastTable.transactDeleteAll(
+          List(
+            UniqueKey(KeyEquals("location", "London")),
+            UniqueKey(KeyEquals("location", "Amsterdam"))
+          )
+        )
+        items <- forecastTable.scan()
+      } yield items
+
+      scanamo.exec(ops) should equal(
+        List(Right(Forecast("Manchester", "Rain", None)))
+      )
+    }
+  }
+
+  it("transact write (delete) items in multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
+
+        val ops = for {
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
+          _ <- forecastTable.transactDeleteAll(
+            List(
+              UniqueKey(KeyEquals("location", "London"))
+            )
+          )
+          _ <- gremlinTable.transactDeleteAll(
+            List(
+              UniqueKey(KeyEquals("number", 2))
+            )
+          )
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
+
+        scanamo.exec(ops) should equal(
+          (List(Right(Gremlin(1, wet = false))), List(Right(Forecast("Amsterdam", "Fog", None))))
+        )
+      }
     }
   }
 }
