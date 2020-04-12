@@ -15,7 +15,7 @@ Installation
 libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M10"
 ```
 
-Scanamo is published for Scala 2.12 and Scala 2.11
+Scanamo is published for Scala 2.13 and Scala 2.12.
 
 Basic Usage
 -----------
@@ -69,6 +69,6 @@ language governing permissions and limitations under the License.
 [Badge-Codecov]: https://coveralls.io/repos/github/scanamo/scanamo/badge.svg?branch=master "Codecov"
 [Badge-IsItMaintained]: http://isitmaintained.com/badge/resolution/scanamo/scanamo.svg "Average time to resolve an issue"
 [Badge-Scaladex]: https://index.scala-lang.org/count.svg?q=dependencies:scanamo/scanamo&subject=scaladex "Scaladex"
-[Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/org.scanamo/scanamo_2.11/badge.svg "Maven Releases"
+[Badge-MavenReleases]: https://maven-badges.herokuapp.com/maven-central/org.scanamo/scanamo_2.12/badge.svg "Maven Releases"
 [Badge-Travis]: https://travis-ci.org/scanamo/scanamo.svg?branch=master "Travis CI"
 [Badge-Gitter]: https://badges.gitter.im/scanamo/scanamo.svg "Gitter chat"

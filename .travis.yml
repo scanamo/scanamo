@@ -49,11 +49,6 @@ jobs:
 
     # Cross-build
     - <<: *test
-      scala: 2.11.12
-      name: "Tests for Scala 2.11"
-
-    # Cross-build
-    - <<: *test
       scala: 2.13.1
       name: "Tests for Scala 2.13"
 

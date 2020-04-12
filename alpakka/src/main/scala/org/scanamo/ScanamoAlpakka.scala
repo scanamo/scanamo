@@ -21,6 +21,7 @@ import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.{ Sink, Source }
 import com.amazonaws.services.dynamodbv2.model.{
+  AmazonDynamoDBException,
   InternalServerErrorException,
   ItemCollectionSizeLimitExceededException,
   LimitExceededException,
@@ -70,6 +71,10 @@ object ScanamoAlpakka extends AlpakkaInstances {
   def defaultRetryableCheck(throwable: Throwable): Boolean = throwable match {
     case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
         _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
+      true
+    case e: AmazonDynamoDBException
+        if e.getErrorCode.contains("ThrottlingException") |
+          e.getErrorCode.contains("InternalFailure") =>
       true
     case _ => false
   }

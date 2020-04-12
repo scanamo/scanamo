@@ -16,10 +16,9 @@
 
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
 import java.nio.ByteBuffer
-import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
 import java.time.format.{ DateTimeFormatter, DateTimeParseException }
+import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
 import java.util.UUID
 
 import cats.instances.either._
@@ -27,7 +26,11 @@ import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
+import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import magnolia.Magnolia
+import org.scanamo.generic.{ AutoDerivationUnlocker, Derivation }
 
+import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 /**
@@ -96,7 +99,7 @@ trait DynamoFormat[T] {
     DynamoFormat.coercedXmap(read, write)(this, implicitly)
 }
 
-object DynamoFormat extends LowPriorityFormats {
+object DynamoFormat extends Derivation {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
@@ -132,25 +135,8 @@ object DynamoFormat extends LowPriorityFormats {
       }
   }
 
-  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
-    coerce[String, N, NumberFormatException](f)
-
-  private def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
+  private[scanamo] def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
     a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
-
-  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
-    coerce[ByteBuffer, B, IllegalArgumentException](f)
-
-  private def attribute[T](
-    decode: DynamoValue => Option[T],
-    encode: T => DynamoValue,
-    propertyType: String
-  ): DynamoFormat[T] =
-    new DynamoFormat[T] {
-      final def read(av: DynamoValue): Either[DynamoReadError, T] =
-        Either.fromOption(decode(av), NoPropertyOfType(propertyType, av))
-      final def write(t: T): DynamoValue = encode(t)
-    }
 
   /**
     * Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
@@ -214,6 +200,23 @@ object DynamoFormat extends LowPriorityFormats {
     */
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A, write: A => B): DynamoFormat[A] =
     xmap(coerce[B, A, T](read), write)
+
+  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
+    DynamoFormat.coerce[String, N, NumberFormatException](f)
+
+  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
+    DynamoFormat.coerce[ByteBuffer, B, IllegalArgumentException](f)
+
+  private def attribute[T](
+    decode: DynamoValue => Option[T],
+    encode: T => DynamoValue,
+    propertyType: String
+  ): DynamoFormat[T] =
+    new DynamoFormat[T] {
+      final def read(av: DynamoValue): Either[DynamoReadError, T] =
+        Either.fromOption(decode(av), NoPropertyOfType(propertyType, av))
+      final def write(t: T): DynamoValue = encode(t)
+    }
 
   /**
     * {{{
@@ -320,7 +323,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit val byteArrayFormat: DynamoFormat[Array[Byte]] =
-    xmap(coerceByteBuffer(_.array), ByteBuffer.wrap)(byteBufferFormat)
+    DynamoFormat.xmap(coerceByteBuffer(_.array), ByteBuffer.wrap)(byteBufferFormat)
 
   /**
     * {{{
@@ -330,13 +333,16 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit val uuidFormat: DynamoFormat[UUID] =
-    coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, _.toString)
+    DynamoFormat.coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, _.toString)
 
   implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
-    attribute({ dv =>
-      if (dv.isNull) Some(List.empty)
-      else dv.asArray.flatMap(_.asArray)
-    }, l => DynamoValue.fromValues(l), "L")
+    attribute(
+      dv =>
+        if (dv.isNull) Some(List.empty)
+        else dv.asArray.flatMap(_.asArray),
+      l => DynamoValue.fromValues(l),
+      "L"
+    )
 
   /**
     * {{{
@@ -346,7 +352,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    xmap[List[T], List[DynamoValue]](_.traverse(f.read), _.map(f.write))(javaListFormat)
+    DynamoFormat.xmap[List[T], List[DynamoValue]](_.traverse(f.read), _.map(f.write))(javaListFormat)
 
   /**
     * {{{
@@ -356,7 +362,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
-    xmap[Seq[T], List[T]](l => Right(l.toSeq), _.toList)
+    DynamoFormat.xmap[Seq[T], List[T]](l => Right(l.toSeq), _.toList)
 
   /**
     * {{{
@@ -366,7 +372,7 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
-    xmap[Vector[T], List[DynamoValue]](_.toVector.traverse(f.read), _.map(f.write).toList)(javaListFormat)
+    DynamoFormat.xmap[Vector[T], List[DynamoValue]](_.toVector.traverse(f.read), _.map(f.write).toList)(javaListFormat)
 
   /**
     * {{{
@@ -376,7 +382,10 @@ object DynamoFormat extends LowPriorityFormats {
     * }}}
     */
   implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    xmap[Array[T], List[DynamoValue]](_.traverse(f.read).map(_.toArray), _.map(f.write).toList)(javaListFormat)
+    DynamoFormat.xmap[Array[T], List[DynamoValue]](
+      _.traverse(f.read).map(_.toArray),
+      _.map(f.write).toList
+    )(javaListFormat)
 
   private def numSetFormat[T: Numeric](r: String => Either[DynamoReadError, T]): DynamoFormat[Set[T]] =
     new DynamoFormat[Set[T]] {
@@ -514,7 +523,7 @@ object DynamoFormat extends LowPriorityFormats {
     *     |   Right(s)
     * }}}
     */
-  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = iso[Set[T], List[T]](_.toSet, _.toList)
+  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = DynamoFormat.iso[Set[T], List[T]](_.toSet, _.toList)
 
   private val javaMapFormat: DynamoFormat[DynamoObject] =
     attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
@@ -604,5 +613,12 @@ object DynamoFormat extends LowPriorityFormats {
       ZonedDateTime.parse,
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
-}
 
+  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] =
+    macro deriveGenericFormat[A]
+
+  def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
+    val _ = U
+    Magnolia.gen[A](c)
+  }
+}

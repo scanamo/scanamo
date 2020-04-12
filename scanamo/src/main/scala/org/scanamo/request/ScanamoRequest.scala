@@ -18,6 +18,7 @@ package org.scanamo.request
 
 import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
 import org.scanamo.query.{ Condition, Query }
+import org.scanamo.update.UpdateExpression
 
 case class ScanamoPutRequest(
   tableName: String,
@@ -71,4 +72,29 @@ case class RequestCondition(
   expression: String,
   attributeNames: Map[String, String],
   dynamoValues: Option[DynamoObject]
+)
+
+case class TransactPutItem(
+  tableName: String,
+  item: DynamoValue,
+  condition: Option[RequestCondition]
+)
+
+case class TransactUpdateItem(
+  tableName: String,
+  key: DynamoObject,
+  updateExpression: UpdateExpression,
+  condition: Option[RequestCondition]
+)
+
+case class TransactDeleteItem(
+  tableName: String,
+  key: DynamoObject,
+  condition: Option[RequestCondition]
+)
+
+case class ScanamoTransactWriteRequest(
+  putItems: Seq[TransactPutItem],
+  updateItems: Seq[TransactUpdateItem],
+  deleteItems: Seq[TransactDeleteItem]
 )
