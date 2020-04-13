@@ -27,10 +27,6 @@ import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import com.amazonaws.services.dynamodbv2.model.AttributeValue
-import magnolia.Magnolia
-import org.scanamo.generic.{ AutoDerivationUnlocker, Derivation }
-
-import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 /**
@@ -99,7 +95,7 @@ trait DynamoFormat[T] {
     DynamoFormat.coercedXmap(read, write)(this, implicitly)
 }
 
-object DynamoFormat extends Derivation {
+object DynamoFormat extends PlatformSpecificFormat {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
@@ -613,12 +609,4 @@ object DynamoFormat extends Derivation {
       ZonedDateTime.parse,
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
-
-  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] =
-    macro deriveGenericFormat[A]
-
-  def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
-    val _ = U
-    Magnolia.gen[A](c)
-  }
 }
