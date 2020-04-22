@@ -9,7 +9,7 @@ import org.scanamo.generic.auto._
 import org.scanamo.query._
 import org.scanamo.syntax._
 import cats.implicits._
-import zio.DefaultRuntime
+import zio.Runtime.default._
 import zio.stream.interop.catz._
 import zio.stream.{ Sink, Stream }
 import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
@@ -18,9 +18,6 @@ import org.scanamo.ops.ScanamoOps
 class ScanamoZioSpec extends AnyFunSpec with Matchers {
   val client = LocalDynamoDB.client()
   val zio = ScanamoZio(client)
-  val RTS = new DefaultRuntime {}
-
-  import RTS._
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
