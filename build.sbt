@@ -116,7 +116,7 @@ lazy val scanamo = (project in file("scanamo"))
       "com.propensive" %% "magnolia"  % "0.12.7",
       // Use Joda for custom conversion example
       "org.joda"          % "joda-convert"              % "2.2.1"       % Provided,
-      "joda-time"         % "joda-time"                 % "2.10.5"      % Test,
+      "joda-time"         % "joda-time"                 % "2.10.6"      % Test,
       "org.scalatest"     %% "scalatest"                % "3.1.1"       % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
       "org.scalacheck"    %% "scalacheck"               % "1.14.3"      % Test
@@ -205,7 +205,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"       % "joda-convert" % "2.2.1" % Provided,
-      "joda-time"      % "joda-time"    % "2.10.5",
+      "joda-time"      % "joda-time"    % "2.10.6",
       "org.scalatest"  %% "scalatest"   % "3.1.1" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     )
