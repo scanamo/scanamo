@@ -3,7 +3,7 @@ crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1")
 
 val catsVersion = "2.1.1"
 val catsEffectVersion = "2.1.2"
-val zioVersion = "1.0.0-RC18-1"
+val zioVersion = "1.0.0-RC18-2"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -97,7 +97,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.13",
+      "eu.timepit"    %% "refined"   % "0.9.14",
       "org.scalatest" %% "scalatest" % "3.1.1" % Test
     )
   )
@@ -116,7 +116,7 @@ lazy val scanamo = (project in file("scanamo"))
       "com.propensive" %% "magnolia"  % "0.12.7",
       // Use Joda for custom conversion example
       "org.joda"          % "joda-convert"              % "2.2.1"       % Provided,
-      "joda-time"         % "joda-time"                 % "2.10.5"      % Test,
+      "joda-time"         % "joda-time"                 % "2.10.6"      % Test,
       "org.scalatest"     %% "scalatest"                % "3.1.1"       % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
       "org.scalacheck"    %% "scalacheck"               % "1.14.3"      % Test
@@ -205,7 +205,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"       % "joda-convert" % "2.2.1" % Provided,
-      "joda-time"      % "joda-time"    % "2.10.5",
+      "joda-time"      % "joda-time"    % "2.10.6",
       "org.scalatest"  %% "scalatest"   % "3.1.1" % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     )
