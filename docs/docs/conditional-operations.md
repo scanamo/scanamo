@@ -12,7 +12,7 @@ Modifying operations ([Put](operations.md#put-and-get), [Delete](operations.md#d
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 case class Gremlin(number: Int, name: String, wet: Boolean, friendly: Boolean)

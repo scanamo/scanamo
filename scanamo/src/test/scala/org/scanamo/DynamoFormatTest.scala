@@ -2,7 +2,7 @@ package org.scanamo
 
 import scala.reflect.runtime.universe._
 
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers

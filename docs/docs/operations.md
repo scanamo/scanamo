@@ -29,7 +29,7 @@ Dynamo and subsequently retrieving them:
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
@@ -58,7 +58,7 @@ To remove an item in its entirety, we can use delete:
 ```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
 LocalDynamoDB.createTable(client)("villains")("name" -> S)
 
@@ -84,7 +84,7 @@ If you want to change some of the fields of an item, that don't form part of its
 ```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
 LocalDynamoDB.createTable(client)("teams")("name" -> S)
 
@@ -159,7 +159,7 @@ supports scanning it:
 
 ```scala mdoc:silent
 import org.scanamo._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
 LocalDynamoDB.createTable(client)("lines")("mode" -> S, "line" -> S)
 

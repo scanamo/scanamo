@@ -20,7 +20,7 @@ import cats.{ ~>, Monad }
 import akka.NotUsed
 import akka.stream.alpakka.dynamodb.DynamoClient
 import akka.stream.scaladsl.{ Sink, Source }
-import com.amazonaws.services.dynamodbv2.model.{
+import software.amazon.awssdk.services.dynamodb.model.{
   AmazonDynamoDBException,
   InternalServerErrorException,
   ItemCollectionSizeLimitExceededException,

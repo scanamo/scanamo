@@ -2,7 +2,7 @@ package org.scanamo
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
@@ -12,7 +12,7 @@ import cats.implicits._
 import zio.Runtime.default._
 import zio.stream.interop.catz._
 import zio.stream.{ Sink, Stream }
-import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
+import software.amazon.awssdk.services.dynamodb.model.AmazonDynamoDBException
 import org.scanamo.ops.ScanamoOps
 
 class ScanamoZioSpec extends AnyFunSpec with Matchers {

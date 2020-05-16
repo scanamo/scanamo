@@ -18,7 +18,7 @@ package org.scanamo.ops
 
 import cats.~>
 import cats.syntax.either._
-import com.amazonaws.services.dynamodbv2.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
+import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
 import org.scanamo.ops.retrypolicy._
 
 import akka.stream.alpakka.dynamodb.{ AwsOp, AwsPagedOp, DynamoAttributes, DynamoClient }
@@ -48,13 +48,13 @@ private[scanamo] class AlpakkaInterpreter(client: DynamoClient,
       case BatchGet(req)   => run(req)
       case ConditionalDelete(req) =>
         run(JavaRequests.delete(req))
-          .map(Either.right[ConditionalCheckFailedException, DeleteItemResult])
+          .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
           .recover {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
       case ConditionalPut(req) =>
         run(JavaRequests.put(req))
-          .map(Either.right[ConditionalCheckFailedException, PutItemResult])
+          .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
           .recover {
             case e: ConditionalCheckFailedException => Either.left(e)
           }

@@ -15,7 +15,7 @@ returned, it could still exhaust the provisioned capacity or force the provision
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 val client = LocalDynamoDB.client()
 val scanamo = Scanamo(client)
 

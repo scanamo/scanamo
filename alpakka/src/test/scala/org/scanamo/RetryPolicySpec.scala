@@ -4,7 +4,7 @@ import akka.NotUsed
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
-import com.amazonaws.services.dynamodbv2.model._
+import software.amazon.awssdk.services.dynamodb.model._
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{ Assertion, AsyncFreeSpec, BeforeAndAfterAll }
 import org.scanamo.ops.retrypolicy.{ RetryPolicy, WithRetry }

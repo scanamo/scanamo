@@ -18,8 +18,8 @@ package org.scanamo.ops
 
 import cats._
 import cats.syntax.either._
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
-import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
 
 /**
   * Interpret Scanamo operations using blocking requests to DynamoDB with any
@@ -29,7 +29,7 @@ import com.amazonaws.services.dynamodbv2.model.ConditionalCheckFailedException
   * the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
   * a type alias for the type itself (`type Id[A] = A`).
   */
-class ScanamoSyncInterpreter(client: AmazonDynamoDB) extends (ScanamoOpsA ~> Id) {
+class ScanamoSyncInterpreter(client: DynamoDbClient) extends (ScanamoOpsA ~> Id) {
   def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
     case Put(req) =>
       client.putItem(JavaRequests.put(req))

@@ -6,7 +6,7 @@ import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric.Positive
 
 import org.scanamo.TypeCoercionError
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import org.scalatest.{ FlatSpec, Matchers }
 

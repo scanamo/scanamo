@@ -17,15 +17,15 @@
 package org.scanamo.ops
 
 import cats.~>
-import com.amazonaws.AmazonWebServiceRequest
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbRequest
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 import zio.IO
 
-private[scanamo] class ZioInterpreter(client: AmazonDynamoDBAsync)
+private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient)
     extends (ScanamoOpsA ~> IO[AmazonDynamoDBException, ?]) {
-  final private def eff[A <: AmazonWebServiceRequest, B](
+  final private def eff[A <: DynamoDbRequest, B](
     f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
     req: A
   ): IO[AmazonDynamoDBException, B] =
@@ -48,7 +48,7 @@ private[scanamo] class ZioInterpreter(client: AmazonDynamoDBAsync)
       eff(client.putItemAsync, JavaRequests.put(req))
     case ConditionalPut(req) =>
       eff(client.putItemAsync, JavaRequests.put(req))
-        .map[Either[ConditionalCheckFailedException, PutItemResult]](Right(_))
+        .map[Either[ConditionalCheckFailedException, PutItemResponse]](Right(_))
         .catchSome {
           case e: ConditionalCheckFailedException => IO.succeed(Left(e))
         }
@@ -58,7 +58,7 @@ private[scanamo] class ZioInterpreter(client: AmazonDynamoDBAsync)
       eff(client.deleteItemAsync, JavaRequests.delete(req))
     case ConditionalDelete(req) =>
       eff(client.deleteItemAsync, JavaRequests.delete(req))
-        .map[Either[ConditionalCheckFailedException, DeleteItemResult]](Right(_))
+        .map[Either[ConditionalCheckFailedException, DeleteItemResponse]](Right(_))
         .catchSome {
           case e: ConditionalCheckFailedException => IO.succeed(Left(e))
         }

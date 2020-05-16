@@ -17,7 +17,7 @@
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
-import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
@@ -40,7 +40,7 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.generic.auto._
     *
@@ -86,7 +86,7 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
@@ -138,7 +138,7 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     *
@@ -173,7 +173,7 @@ sealed abstract class SecondaryIndex[V] {
     *
     * >>> val client = LocalDynamoDB.client()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     *
@@ -218,11 +218,11 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
   def descending: SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
-  def scan() = ScanResultStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
+  def scan() = ScanResponseStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int) =
-    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
+    ScanResponseStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
-    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
+    QueryResponseStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
   def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int) =
-    QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
+    QueryResponseStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }

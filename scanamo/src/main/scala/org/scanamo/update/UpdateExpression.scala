@@ -16,7 +16,7 @@
 
 package org.scanamo.update
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import cats.data.NonEmptyVector
 import org.scanamo.{ DynamoFormat, DynamoValue }
 import org.scanamo.query._

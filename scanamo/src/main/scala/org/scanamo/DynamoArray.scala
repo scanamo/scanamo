@@ -16,12 +16,13 @@
 
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import cats.syntax.apply._
 import cats.instances.option._
 import java.nio.ByteBuffer
 import java.util.stream.Collectors
 import java.{ util => ju }
+import software.amazon.awssdk.core.SdkBytes
 
 /**
   * A `DynamoArray` is a pure representation of an array of `AttributeValue`s
@@ -99,30 +100,37 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
     */
   // TODO mark as private?
   final def toAttributeValue: AttributeValue = self match {
-    case Empty       => emptyListAttributeValue
-    case Strict(xs)  => new AttributeValue().withL(xs)
-    case StrictS(xs) => new AttributeValue().withSS(xs)
-    case StrictN(xs) => new AttributeValue().withNS(xs)
-    case StrictB(xs) => new AttributeValue().withBS(xs)
-    case Pure(xs)    => new AttributeValue().withL(unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue))
-    case PureS(xs)   => new AttributeValue().withSS(unsafeToList(xs, identity[String]))
-    case PureN(xs)   => new AttributeValue().withNS(unsafeToList(xs, identity[String]))
-    case PureB(xs)   => new AttributeValue().withBS(unsafeToList(xs, identity[ByteBuffer]))
+    case Empty       => DynamoValue.EmptyList
+    case Strict(xs)  => AttributeValue.builder.l(xs).build
+    case StrictS(xs) => AttributeValue.builder.ss(xs).build
+    case StrictN(xs) => AttributeValue.builder.ns(xs).build
+    case StrictB(xs) =>
+      AttributeValue.builder
+        .bs(xs.stream.map[SdkBytes](SdkBytes.fromByteBuffer(_)).collect(Collectors.toList()))
+        .build
+    case Pure(xs)  => AttributeValue.builder.l(unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)).build
+    case PureS(xs) => AttributeValue.builder.ss(unsafeToList(xs, identity[String])).build
+    case PureN(xs) => AttributeValue.builder.ns(unsafeToList(xs, identity[String])).build
+    case PureB(xs) => AttributeValue.builder.bs(unsafeToList(xs, SdkBytes.fromByteBuffer(_))).build
     case Concat(xs, ys) =>
-      new AttributeValue().withL(unsafeMerge[AttributeValue](xs.toJavaCollection, ys.toJavaCollection))
+      AttributeValue.builder.l(unsafeMerge[AttributeValue](xs.toJavaCollection, ys.toJavaCollection)).build
   }
 
   // TODO mark as private?
   final def toJavaCollection: ju.List[AttributeValue] = self match {
-    case Empty          => new java.util.LinkedList[AttributeValue]()
-    case Strict(xs)     => xs
-    case StrictS(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withS(_)).collect(Collectors.toList())
-    case StrictN(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withN(_)).collect(Collectors.toList())
-    case StrictB(xs)    => xs.stream.map[AttributeValue](new AttributeValue().withB(_)).collect(Collectors.toList())
-    case Pure(xs)       => unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)
-    case PureS(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withS(_))
-    case PureN(xs)      => unsafeToList[String, AttributeValue](xs, new AttributeValue().withN(_))
-    case PureB(xs)      => unsafeToList[ByteBuffer, AttributeValue](xs, new AttributeValue().withB(_))
+    case Empty       => new java.util.LinkedList[AttributeValue]()
+    case Strict(xs)  => xs
+    case StrictS(xs) => xs.stream.map[AttributeValue](AttributeValue.builder.s(_).build).collect(Collectors.toList())
+    case StrictN(xs) => xs.stream.map[AttributeValue](AttributeValue.builder.n(_).build).collect(Collectors.toList())
+    case StrictB(xs) =>
+      xs.stream
+        .map[AttributeValue](b => AttributeValue.builder.b(SdkBytes.fromByteBuffer(b)).build)
+        .collect(Collectors.toList())
+    case Pure(xs)  => unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)
+    case PureS(xs) => unsafeToList[String, AttributeValue](xs, AttributeValue.builder.s(_).build)
+    case PureN(xs) => unsafeToList[String, AttributeValue](xs, AttributeValue.builder.n(_).build)
+    case PureB(xs) =>
+      unsafeToList[ByteBuffer, AttributeValue](xs, b => AttributeValue.builder.b(SdkBytes.fromByteBuffer(b)).build)
     case Concat(xs, ys) => unsafeMerge(xs.toJavaCollection, ys.toJavaCollection)
   }
 
@@ -344,9 +352,4 @@ object DynamoArray {
     * The empty array
     */
   val empty: DynamoArray = Empty
-
-  /**
-    * An AttributeValue representing an empty list
-    */
-  private val emptyListAttributeValue: AttributeValue = new AttributeValue().withL()
 }

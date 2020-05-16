@@ -19,14 +19,14 @@ package org.scanamo
 import com.amazonaws.ClientConfiguration
 import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
 import com.amazonaws.client.builder.AwsClientBuilder.EndpointConfiguration
-import com.amazonaws.services.dynamodbv2._
-import com.amazonaws.services.dynamodbv2.model._
+import software.amazon.awssdk.services.dynamodb._
+import software.amazon.awssdk.services.dynamodb.model._
 
 import scala.collection.JavaConverters._
 
 object LocalDynamoDB {
-  def client(port: Int = 8042): AmazonDynamoDBAsync =
-    AmazonDynamoDBAsyncClient
+  def client(port: Int = 8042): DynamoDbAsyncClient =
+    DynamoDbAsyncClientClient
       .asyncBuilder()
       .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials")))
       .withEndpointConfiguration(new EndpointConfiguration(s"http://localhost:$port", ""))

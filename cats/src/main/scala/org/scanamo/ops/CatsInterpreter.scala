@@ -19,13 +19,13 @@ package org.scanamo.ops
 import cats.effect.Async
 import cats.implicits._
 import cats.~>
-import com.amazonaws.AmazonWebServiceRequest
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbRequest
 import com.amazonaws.handlers.AsyncHandler
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 
-class CatsInterpreter[F[_]](client: AmazonDynamoDBAsync)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
-  final private def eff[A <: AmazonWebServiceRequest, B](
+class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
+  final private def eff[A <: DynamoDbRequest, B](
     f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
     req: A
   ): F[B] =

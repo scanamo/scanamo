@@ -6,7 +6,7 @@ import org.scalatest.time.{ Millis, Seconds, Span }
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.fixtures._

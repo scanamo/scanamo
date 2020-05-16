@@ -17,14 +17,14 @@
 package org.scanamo
 
 import cats.{ ~>, Monad }
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
-import com.amazonaws.services.dynamodbv2.model.AmazonDynamoDBException
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model.AmazonDynamoDBException
 import org.scanamo.ops._
 import zio.IO
 import zio.interop.catz._
 import zio.stream.{ Stream, ZStream }
 
-class ScanamoZio private (client: AmazonDynamoDBAsync) {
+class ScanamoZio private (client: DynamoDbAsyncClient) {
   final private val interpreter: ScanamoOpsA ~> IO[AmazonDynamoDBException, ?] =
     new ZioInterpreter(client)
 
@@ -35,7 +35,7 @@ class ScanamoZio private (client: AmazonDynamoDBAsync) {
 }
 
 object ScanamoZio {
-  def apply(client: AmazonDynamoDBAsync): ScanamoZio = new ScanamoZio(client)
+  def apply(client: DynamoDbAsyncClient): ScanamoZio = new ScanamoZio(client)
 
   val ToStream: IO[AmazonDynamoDBException, ?] ~> Stream[AmazonDynamoDBException, ?] =
     new (IO[AmazonDynamoDBException, ?] ~> Stream[AmazonDynamoDBException, ?]) {
