@@ -62,7 +62,7 @@ import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
 case class Foo(dateTime: DateTime)
 
-val client = LocalDynamoDB.client()
+val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 
 LocalDynamoDB.createTable(client)("foo")("dateTime" -> S)
