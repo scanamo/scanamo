@@ -18,34 +18,43 @@ package org.scanamo.ops
 
 import cats.~>
 import cats.syntax.either._
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
 import org.scanamo.ops.retrypolicy._
 
-import akka.stream.alpakka.dynamodb.{ AwsOp, AwsPagedOp, DynamoAttributes, DynamoClient }
+import akka.NotUsed
+import akka.stream.Materializer
+import akka.stream.alpakka.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
 import akka.stream.scaladsl.Source
-import akka.NotUsed
 
-private[scanamo] class AlpakkaInterpreter(client: DynamoClient,
-                                          retryPolicy: RetryPolicy,
-                                          isRetryable: Throwable => Boolean)
-    extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
+private[scanamo] class AlpakkaInterpreter(retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean)(
+  implicit client: DynamoDbAsyncClient,
+  mat: Materializer
+) extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
     with WithRetry {
   override def retryable(throwable: Throwable): Boolean = isRetryable(throwable)
 
-  final private def run(op: AwsOp): AlpakkaInterpreter.Alpakka[op.B] =
-    retry(DynamoDb.source(op).withAttributes(DynamoAttributes.client(client)), retryPolicy)
+  final private def run[In <: DynamoDbRequest, Out <: DynamoDbResponse](
+    op: In
+  )(implicit operation: DynamoDbOp[In, Out]): AlpakkaInterpreter.Alpakka[Out] =
+    retry(Source.fromFuture(DynamoDb.single(op)), retryPolicy)
+
+  final private def runPaginated[In <: DynamoDbRequest, Out <: DynamoDbResponse](
+    op: In
+  )(implicit operation: DynamoDbPaginatedOp[In, Out, _]): AlpakkaInterpreter.Alpakka[Out] =
+    retry(DynamoDb.source(op), retryPolicy)
 
   def apply[A](ops: ScanamoOpsA[A]) =
     ops match {
-      case Put(req)        => run(JavaRequests.put(req))
-      case Get(req)        => run(req)
-      case Delete(req)     => run(JavaRequests.delete(req))
-      case Scan(req)       => run(AwsPagedOp.create(JavaRequests.scan(req)))
-      case Query(req)      => run(AwsPagedOp.create(JavaRequests.query(req)))
-      case Update(req)     => run(JavaRequests.update(req))
-      case BatchWrite(req) => run(req)
-      case BatchGet(req)   => run(req)
+      case Put(req)        => run[PutItemRequest, PutItemResponse](JavaRequests.put(req))
+      case Get(req)        => run[GetItemRequest, GetItemResponse](req)
+      case Delete(req)     => run[DeleteItemRequest, DeleteItemResponse](JavaRequests.delete(req))
+      case Scan(req)       => runPaginated[ScanRequest, ScanResponse](JavaRequests.scan(req))
+      case Query(req)      => runPaginated[QueryRequest, QueryResponse](JavaRequests.query(req))
+      case Update(req)     => run[UpdateItemRequest, UpdateItemResponse](JavaRequests.update(req))
+      case BatchWrite(req) => run[BatchWriteItemRequest, BatchWriteItemResponse](req)
+      case BatchGet(req)   => run[BatchGetItemRequest, BatchGetItemResponse](req)
       case ConditionalDelete(req) =>
         run(JavaRequests.delete(req))
           .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
@@ -60,11 +69,12 @@ private[scanamo] class AlpakkaInterpreter(client: DynamoClient,
           }
       case ConditionalUpdate(req) =>
         run(JavaRequests.update(req))
-          .map(Either.right[ConditionalCheckFailedException, UpdateItemResult])
+          .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
           .recover {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
-      case TransactWriteAll(req) => run(JavaRequests.transactItems(req))
+      case TransactWriteAll(req) =>
+        run[TransactWriteItemsRequest, TransactWriteItemsResponse](JavaRequests.transactItems(req))
     }
 }
 

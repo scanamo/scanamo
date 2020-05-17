@@ -17,76 +17,50 @@
 package org.scanamo.ops
 
 import cats.~>
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbRequest
-import com.amazonaws.handlers.AsyncHandler
+import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
-import zio.IO
+import zio.{ IO, ZIO }
 
-private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient)
-    extends (ScanamoOpsA ~> IO[AmazonDynamoDBException, ?]) {
-  final private def eff[A <: DynamoDbRequest, B](
-    f: (A, AsyncHandler[A, B]) => java.util.concurrent.Future[B],
-    req: A
-  ): IO[AmazonDynamoDBException, B] =
-    IO.effectAsync[AmazonDynamoDBException, B] { cb =>
-      val handler = new AsyncHandler[A, B] {
-        def onError(exception: Exception): Unit =
-          exception match {
-            case e: AmazonDynamoDBException => cb(IO.fail(e))
-            case t                          => cb(IO.die(t))
-          }
+private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (ScanamoOpsA ~> IO[DynamoDbException, ?]) {
+  final private def eff[A](fut: => CompletableFuture[A]): IO[DynamoDbException, A] =
+    ZIO.fromCompletionStage(fut).refineToOrDie[DynamoDbException]
 
-        def onSuccess(request: A, result: B): Unit =
-          cb(IO.succeed(result))
-      }
-      val _ = f(req, handler)
-    }
-
-  def apply[A](op: ScanamoOpsA[A]): IO[AmazonDynamoDBException, A] = op match {
+  def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] = op match {
     case Put(req) =>
-      eff(client.putItemAsync, JavaRequests.put(req))
+      eff(client.putItem(JavaRequests.put(req)))
     case ConditionalPut(req) =>
-      eff(client.putItemAsync, JavaRequests.put(req))
+      eff(client.putItem(JavaRequests.put(req)))
         .map[Either[ConditionalCheckFailedException, PutItemResponse]](Right(_))
         .catchSome {
           case e: ConditionalCheckFailedException => IO.succeed(Left(e))
         }
     case Get(req) =>
-      eff(client.getItemAsync, req)
+      eff(client.getItem(req))
     case Delete(req) =>
-      eff(client.deleteItemAsync, JavaRequests.delete(req))
+      eff(client.deleteItem(JavaRequests.delete(req)))
     case ConditionalDelete(req) =>
-      eff(client.deleteItemAsync, JavaRequests.delete(req))
+      eff(client.deleteItem(JavaRequests.delete(req)))
         .map[Either[ConditionalCheckFailedException, DeleteItemResponse]](Right(_))
         .catchSome {
           case e: ConditionalCheckFailedException => IO.succeed(Left(e))
         }
     case Scan(req) =>
-      eff(client.scanAsync, JavaRequests.scan(req))
+      eff(client.scan(JavaRequests.scan(req)))
     case Query(req) =>
-      eff(client.queryAsync, JavaRequests.query(req))
+      eff(client.query(JavaRequests.query(req)))
     case BatchWrite(req) =>
-      eff(
-        client.batchWriteItemAsync(
-          _: BatchWriteItemRequest,
-          _: AsyncHandler[BatchWriteItemRequest, BatchWriteItemResult]
-        ),
-        req
-      )
+      eff(client.batchWriteItem(req))
     case BatchGet(req) =>
-      eff(
-        client.batchGetItemAsync(_: BatchGetItemRequest, _: AsyncHandler[BatchGetItemRequest, BatchGetItemResult]),
-        req
-      )
+      eff(client.batchGetItem(req))
     case Update(req) =>
-      eff(client.updateItemAsync, JavaRequests.update(req))
+      eff(client.updateItem(JavaRequests.update(req)))
     case ConditionalUpdate(req) =>
-      eff(client.updateItemAsync, JavaRequests.update(req))
-        .map[Either[ConditionalCheckFailedException, UpdateItemResult]](Right(_))
+      eff(client.updateItem(JavaRequests.update(req)))
+        .map[Either[ConditionalCheckFailedException, UpdateItemResponse]](Right(_))
         .catchSome {
           case e: ConditionalCheckFailedException => IO.succeed(Left(e))
         }
-    case TransactWriteAll(req) => eff(client.transactWriteItemsAsync, JavaRequests.transactItems(req))
+    case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
   }
 }

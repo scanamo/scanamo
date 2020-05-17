@@ -18,10 +18,11 @@ package org.scanamo
 
 import cats.{ ~>, Monad }
 import akka.NotUsed
-import akka.stream.alpakka.dynamodb.DynamoClient
+import akka.stream.Materializer
 import akka.stream.scaladsl.{ Sink, Source }
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{
-  AmazonDynamoDBException,
+  DynamoDbException,
   InternalServerErrorException,
   ItemCollectionSizeLimitExceededException,
   LimitExceededException,
@@ -43,10 +44,12 @@ import scala.concurrent.Future
   * Moreover, the interface returns either a [[scala.concurrent.Future]] or [[akka.stream.scaladsl.Source]]
   * based on the kind of execution used.
   */
-class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean) {
+class ScanamoAlpakka private (client: DynamoDbAsyncClient, retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean)(
+  implicit mat: Materializer
+) {
   import ScanamoAlpakka._
 
-  final private val interpreter = new AlpakkaInterpreter(client, retryPolicy, isRetryable)
+  final private val interpreter = new AlpakkaInterpreter(retryPolicy, isRetryable)(client, mat)
 
   def exec[A](op: ScanamoOps[A]): Alpakka[A] =
     run(op)
@@ -55,7 +58,7 @@ class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy, is
     op.foldMap(interpreter andThen hoist)
 
   def execFuture[A](op: ScanamoOps[A]): Future[A] =
-    run(op).runWith(Sink.head[A])(client.materializer)
+    run(op).runWith(Sink.head[A])
 
   private def run[A](op: ScanamoOps[A]): Alpakka[A] =
     op.foldMap(interpreter)
@@ -63,18 +66,18 @@ class ScanamoAlpakka private (client: DynamoClient, retryPolicy: RetryPolicy, is
 
 object ScanamoAlpakka extends AlpakkaInstances {
   def apply(
-    client: DynamoClient,
+    client: DynamoDbAsyncClient,
     retrySettings: RetryPolicy = RetryPolicy.max(3),
     isRetryable: Throwable => Boolean = defaultRetryableCheck
-  ): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings, isRetryable)
+  )(implicit mat: Materializer): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings, isRetryable)
 
   def defaultRetryableCheck(throwable: Throwable): Boolean = throwable match {
     case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
         _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
       true
-    case e: AmazonDynamoDBException
-        if e.getErrorCode.contains("ThrottlingException") |
-          e.getErrorCode.contains("InternalFailure") =>
+    case e: DynamoDbException
+        if e.awsErrorDetails.errorCode.contains("ThrottlingException") |
+          e.awsErrorDetails.errorCode.contains("InternalFailure") =>
       true
     case _ => false
   }
