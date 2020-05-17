@@ -300,7 +300,7 @@ object DynamoValue {
     */
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
     if (av.nul)
-      DynNull
+      nil
     else if (av.bool ne null)
       DynBool(av.bool)
     else if (av.n ne null)
@@ -309,18 +309,20 @@ object DynamoValue {
       DynString(av.s)
     else if (av.b ne null)
       DynByte(av.b.asByteBuffer)
-    else if (av.ns ne null)
+    else if (av.hasNs)
       DynArray(DynamoArray.unsafeNumbers(av.ns))
-    else if (av.bs ne null)
+    else if (av.hasBs)
       DynArray(
         DynamoArray.byteBuffers(av.bs.stream.map[ByteBuffer](_.asByteBuffer).collect(Collectors.toList[ByteBuffer]))
       )
-    else if (av.ss ne null)
+    else if (av.hasSs)
       DynArray(DynamoArray.strings(av.ss))
-    else if (av.l ne null)
+    else if (av.hasL)
       DynArray(DynamoArray(av.l))
-    else
+    else if (av.hasM)
       DynObject(DynamoObject(av.m))
+    else
+      DynNull
 
   /**
     * Creates a map from a [[DynamoObject]]
