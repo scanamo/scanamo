@@ -31,7 +31,7 @@ import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
-val client = LocalDynamoDB.client()
+val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 LocalDynamoDB.createTable(client)("muppets")("name" -> S)
 

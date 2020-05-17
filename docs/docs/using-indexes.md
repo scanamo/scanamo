@@ -20,7 +20,7 @@ case class Transport(mode: String, line: String, colour: String)
 val transport = Table[Transport]("transport")
 val colourIndex = transport.index("colour-index")
 
-val client = LocalDynamoDB.client()
+val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 ```

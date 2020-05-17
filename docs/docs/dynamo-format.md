@@ -105,7 +105,7 @@ import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric._
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
-val client = LocalDynamoDB.client()
+val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 
 type PosInt = Int Refined Positive
