@@ -27,6 +27,7 @@ import scala.concurrent.duration._
 import scala.compat.java8.DurationConverters._
 
 import java.net.URI
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 
 object LocalDynamoDB {
   def client(port: Int = 8042): DynamoDbAsyncClient =
@@ -39,6 +40,7 @@ object LocalDynamoDB {
           .apiCallTimeout(5.seconds.toJava)
           .build
       )
+      .httpClient(NettyNioAsyncHttpClient.builder.build)
       .region(Region.EU_WEST_1)
       .build
 
