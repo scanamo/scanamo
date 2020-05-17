@@ -41,7 +41,7 @@ object ScanamoFree {
   def putAndReturn[T: DynamoFormat](tableName: String)(ret: PutReturn,
                                                        item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     nativePut(tableName, ret, item)
-      .map(r => Option(r.attributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
+      .map(r => if (r.hasAttributes) Some(read[T](DynamoObject(r.attributes))) else None)
 
   private def nativePut[T](tableName: String, ret: PutReturn, item: T)(
     implicit f: DynamoFormat[T]
@@ -146,7 +146,12 @@ object ScanamoFree {
           .consistentRead(consistent)
           .build
       )
-      .map(res => Option(res.item).map(m => read[T](DynamoObject(m))))
+      .map(res =>
+        if (res.hasItem)
+          Some(read[T](DynamoObject(res.item)))
+        else
+          None
+      )
 
   def getAll[T: DynamoFormat](
     tableName: String
@@ -181,7 +186,7 @@ object ScanamoFree {
     tableName: String
   )(ret: DeleteReturn, key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     nativeDelete(tableName, key, ret)
-      .map(r => Option(r.attributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
+      .map(r => if (r.hasAttributes) Some(read[T](DynamoObject(r.attributes))) else None)
 
   def nativeDelete(tableName: String, key: UniqueKey[_], ret: DeleteReturn): ScanamoOps[DeleteItemResponse] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None, ret))
