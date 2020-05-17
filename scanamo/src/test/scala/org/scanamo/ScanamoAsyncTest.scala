@@ -22,7 +22,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
   val scanamo = ScanamoAsync(client)
 
   override protected def afterAll(): Unit = {
-    client.shutdown()
+    client.close()
     super.afterAll()
   }
 

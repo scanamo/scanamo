@@ -3,6 +3,7 @@ package org.scanamo
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
 import org.scanamo.query._
 import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
@@ -12,7 +13,6 @@ import cats.implicits._
 import zio.Runtime.default._
 import zio.stream.interop.catz._
 import zio.stream.{ Sink, Stream }
-import software.amazon.awssdk.services.dynamodb.model.AmazonDynamoDBException
 import org.scanamo.ops.ScanamoOps
 
 class ScanamoZioSpec extends AnyFunSpec with Matchers {
@@ -179,7 +179,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
   }
 
   it("should stream full table scan") {
-    type SIO[A] = Stream[AmazonDynamoDBException, A]
+    type SIO[A] = Stream[DynamoDbException, A]
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val list = List(

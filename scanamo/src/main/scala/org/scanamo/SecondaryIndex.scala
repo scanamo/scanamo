@@ -38,7 +38,7 @@ sealed abstract class SecondaryIndex[V] {
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
@@ -84,7 +84,7 @@ sealed abstract class SecondaryIndex[V] {
     * {{{
     * >>> case class GithubProject(organisation: String, repository: String, language: String, license: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
@@ -136,7 +136,7 @@ sealed abstract class SecondaryIndex[V] {
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
@@ -171,7 +171,7 @@ sealed abstract class SecondaryIndex[V] {
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._

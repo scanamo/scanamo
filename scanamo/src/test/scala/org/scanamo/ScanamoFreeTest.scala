@@ -34,20 +34,22 @@ class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpre
     case Scan(req) =>
       State(counter =>
         if (counter < 42)
-          counter + 1 -> new ScanResponse()
-            .withLastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
-            .withItems(List.fill(req.options.limit.getOrElse(50))(new util.HashMap[String, AttributeValue]()): _*)
+          counter + 1 -> ScanResponse.builder
+            .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
+            .items(List.fill(req.options.limit.getOrElse(50))(new util.HashMap[String, AttributeValue]()): _*)
+            .build
         else
-          counter -> new ScanResponse().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
+          counter -> ScanResponse.builder.items(List.empty[java.util.Map[String, AttributeValue]].asJava).build
       )
     case Query(req) =>
       State(counter =>
         if (counter < 42)
-          counter + 1 -> new QueryResponse()
-            .withLastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
-            .withItems(List.fill(req.options.limit.getOrElse(0))(new util.HashMap[String, AttributeValue]()): _*)
+          counter + 1 -> QueryResponse.builder
+            .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
+            .items(List.fill(req.options.limit.getOrElse(0))(new util.HashMap[String, AttributeValue]()): _*)
+            .build
         else
-          counter -> new QueryResponse().withItems(List.empty[java.util.Map[String, AttributeValue]].asJava)
+          counter -> QueryResponse.builder.items(List.empty[java.util.Map[String, AttributeValue]].asJava).build
       )
     case BatchWrite(_)        => ???
     case BatchGet(_)          => ???

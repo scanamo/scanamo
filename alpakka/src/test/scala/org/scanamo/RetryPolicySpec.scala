@@ -6,12 +6,13 @@ import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{ Sink, Source }
 import software.amazon.awssdk.services.dynamodb.model._
 import org.scalatest.matchers.should.Matchers
-import org.scalatest.{ Assertion, AsyncFreeSpec, BeforeAndAfterAll }
+import org.scalatest.{ Assertion, BeforeAndAfterAll }
+import org.scalatest.freespec.AsyncFreeSpec
 import org.scanamo.ops.retrypolicy.{ RetryPolicy, WithRetry }
 
 import scala.concurrent.{ Await, Future }
 import scala.concurrent.duration._
-import scala.util.control.{ NoStackTrace, NonFatal }
+import scala.util.control.NonFatal
 
 class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetry with Matchers {
   implicit val actorSystem: ActorSystem = ActorSystem()
@@ -29,7 +30,7 @@ class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetr
   private val factor = 1.2
 
   private def testcase(policy: RetryPolicy): Future[Assertion] =
-    retry(Source.failed(new LimitExceededException("Limit Exceeded")), policy).recover {
+    retry(Source.failed(LimitExceededException.builder.message("Limit Exceeded").build), policy).recover {
       case NonFatal(t) => t
     }.runWith(Sink.seq)
       .map(x => assert(x.size == 1))
@@ -61,7 +62,7 @@ class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetr
       def op: Source[String, NotUsed] =
         if (!executedOnce) {
           executedOnce = true
-          Source.failed(new ProvisionedThroughputExceededException("Throughput Exceeded"))
+          Source.failed(ProvisionedThroughputExceededException.builder.message("Throughput Exceeded").build)
         } else {
           Source.single("Success")
         }

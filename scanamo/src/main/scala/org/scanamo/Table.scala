@@ -30,7 +30,7 @@ import org.scanamo.update.UpdateExpression
   * {{{
   * >>> case class Transport(mode: String, line: String)
   *
-  * >>> val client = LocalDynamoDB.client()
+  * >>> val client = LocalDynamoDB.syncClient()
   * >>> val scanamo = Scanamo(client)
   * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
   *
@@ -80,7 +80,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> val dataSet = Set(
@@ -107,7 +107,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
@@ -159,7 +159,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Forecast(location: String, weather: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
@@ -316,7 +316,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
@@ -348,7 +348,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class City(country: String, name: String)
     *
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> val (get, scan, query) = LocalDynamoDB.withRandomTable(client)("country" -> S, "name" -> S) { t =>
     * ...   import org.scanamo.syntax._
@@ -386,7 +386,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.generic.auto._
     * >>> import org.scanamo.query._
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
@@ -543,7 +543,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> case class Bear(name: String, favouriteFood: String)
@@ -594,7 +594,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
@@ -644,7 +644,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import cats.implicits._
@@ -665,7 +665,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     ))
     * ...     res <- table.limit(1).scan0
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
-    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.getLastEvaluatedKey))
+    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
@@ -681,7 +681,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import org.scanamo.syntax._
@@ -737,7 +737,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import cats.implicits._
@@ -761,7 +761,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     ))
     * ...     res <- table.limit(1).query0("mode" -> "Bus" and "line" -> "234")
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
-    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.getLastEvaluatedKey))
+    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
@@ -777,7 +777,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *

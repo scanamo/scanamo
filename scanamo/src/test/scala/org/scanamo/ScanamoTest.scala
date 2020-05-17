@@ -12,7 +12,7 @@ import org.scanamo.generic.auto._
 import org.scanamo.ops.ScanamoOps
 
 class ScanamoTest extends AnyFunSpec with Matchers {
-  val client = LocalDynamoDB.client()
+  val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
 
   it("should put asynchronously") {

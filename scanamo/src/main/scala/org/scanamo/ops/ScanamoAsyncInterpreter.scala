@@ -46,7 +46,7 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
       client
         .deleteItem(JavaRequests.delete(req))
         .toScala
-        .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse](_))
+        .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
         .recover { case e: ConditionalCheckFailedException => Either.left(e) }
     case Scan(req)  => client.scan(JavaRequests.scan(req)).toScala
     case Query(req) => client.query(JavaRequests.query(req)).toScala
@@ -58,7 +58,7 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
       client
         .updateItem(JavaRequests.update(req))
         .toScala
-        .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse](_))
+        .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
         .recover {
           case e: ConditionalCheckFailedException => Either.left(e)
         }
