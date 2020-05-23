@@ -31,41 +31,42 @@ import java.util.concurrent.CompletionException
  */
 class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext)
     extends (ScanamoOpsA ~> Future) {
-  override def apply[A](op: ScanamoOpsA[A]): Future[A] = op match {
-    case Put(req) => client.putItem(JavaRequests.put(req)).toScala
-    case ConditionalPut(req) =>
-      client
-        .putItem(JavaRequests.put(req))
-        .toScala
-        .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-        .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-        .recover {
-          case e: ConditionalCheckFailedException => Either.left(e)
-        }
-    case Get(req)    => client.getItem(req).toScala
-    case Delete(req) => client.deleteItem(JavaRequests.delete(req)).toScala
-    case ConditionalDelete(req) =>
-      client
-        .deleteItem(JavaRequests.delete(req))
-        .toScala
-        .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-        .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-        .recover { case e: ConditionalCheckFailedException => Either.left(e) }
-    case Scan(req)  => client.scan(JavaRequests.scan(req)).toScala
-    case Query(req) => client.query(JavaRequests.query(req)).toScala
-    // Overloading means we need explicit parameter types here
-    case BatchWrite(req) => client.batchWriteItem(req).toScala
-    case BatchGet(req)   => client.batchGetItem(req).toScala
-    case Update(req)     => client.updateItem(JavaRequests.update(req)).toScala
-    case ConditionalUpdate(req) =>
-      client
-        .updateItem(JavaRequests.update(req))
-        .toScala
-        .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-        .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-        .recover {
-          case e: ConditionalCheckFailedException => Either.left(e)
-        }
-    case TransactWriteAll(req) => client.transactWriteItems(JavaRequests.transactItems(req)).toScala
-  }
+  override def apply[A](op: ScanamoOpsA[A]): Future[A] =
+    op match {
+      case Put(req) => client.putItem(JavaRequests.put(req)).toScala
+      case ConditionalPut(req) =>
+        client
+          .putItem(JavaRequests.put(req))
+          .toScala
+          .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
+          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
+          .recover {
+            case e: ConditionalCheckFailedException => Either.left(e)
+          }
+      case Get(req)    => client.getItem(req).toScala
+      case Delete(req) => client.deleteItem(JavaRequests.delete(req)).toScala
+      case ConditionalDelete(req) =>
+        client
+          .deleteItem(JavaRequests.delete(req))
+          .toScala
+          .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
+          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
+          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+      case Scan(req)  => client.scan(JavaRequests.scan(req)).toScala
+      case Query(req) => client.query(JavaRequests.query(req)).toScala
+      // Overloading means we need explicit parameter types here
+      case BatchWrite(req) => client.batchWriteItem(req).toScala
+      case BatchGet(req)   => client.batchGetItem(req).toScala
+      case Update(req)     => client.updateItem(JavaRequests.update(req)).toScala
+      case ConditionalUpdate(req) =>
+        client
+          .updateItem(JavaRequests.update(req))
+          .toScala
+          .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
+          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
+          .recover {
+            case e: ConditionalCheckFailedException => Either.left(e)
+          }
+      case TransactWriteAll(req) => client.transactWriteItems(JavaRequests.transactItems(req)).toScala
+    }
 }

@@ -71,27 +71,30 @@ object ScanamoAlpakka extends AlpakkaInstances {
     isRetryable: Throwable => Boolean = defaultRetryableCheck
   )(implicit mat: Materializer): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings, isRetryable)
 
-  def defaultRetryableCheck(throwable: Throwable): Boolean = throwable match {
-    case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
-        _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
-      true
-    case e: DynamoDbException
-        if e.awsErrorDetails.errorCode.contains("ThrottlingException") |
-          e.awsErrorDetails.errorCode.contains("InternalFailure") =>
-      true
-    case _ => false
-  }
+  def defaultRetryableCheck(throwable: Throwable): Boolean =
+    throwable match {
+      case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
+          _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
+        true
+      case e: DynamoDbException
+          if e.awsErrorDetails.errorCode.contains("ThrottlingException") |
+            e.awsErrorDetails.errorCode.contains("InternalFailure") =>
+        true
+      case _ => false
+    }
 }
 
 private[scanamo] trait AlpakkaInstances {
-  implicit def monad: Monad[Source[?, NotUsed]] = new Monad[Source[?, NotUsed]] {
-    def pure[A](x: A): Source[A, NotUsed] = Source.single(x)
+  implicit def monad: Monad[Source[?, NotUsed]] =
+    new Monad[Source[?, NotUsed]] {
+      def pure[A](x: A): Source[A, NotUsed] = Source.single(x)
 
-    def flatMap[A, B](fa: Source[A, NotUsed])(f: A => Source[B, NotUsed]): Source[B, NotUsed] = fa.flatMapConcat(f)
+      def flatMap[A, B](fa: Source[A, NotUsed])(f: A => Source[B, NotUsed]): Source[B, NotUsed] = fa.flatMapConcat(f)
 
-    def tailRecM[A, B](a: A)(f: A => Source[Either[A, B], NotUsed]): Source[B, NotUsed] = f(a).flatMapConcat {
-      case Left(a)  => tailRecM(a)(f)
-      case Right(b) => Source.single(b)
+      def tailRecM[A, B](a: A)(f: A => Source[Either[A, B], NotUsed]): Source[B, NotUsed] =
+        f(a).flatMapConcat {
+          case Left(a)  => tailRecM(a)(f)
+          case Right(b) => Source.single(b)
+        }
     }
-  }
 }

@@ -155,9 +155,8 @@ package object ops {
 
       attributeValues.toExpressionAttributeValues
         .fold(requestWithCondition) { avs =>
-          if (req.addEmptyList) {
+          if (req.addEmptyList)
             avs.put(":emptyList", DynamoValue.EmptyList)
-          }
           requestWithCondition expressionAttributeValues avs
         }
         .build

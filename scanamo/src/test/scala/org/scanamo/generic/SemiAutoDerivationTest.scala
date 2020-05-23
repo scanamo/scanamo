@@ -56,4 +56,5 @@ case class User(
 case class LocationInfo(nation: Option[String],
                         provState: Option[String],
                         postalCode: Option[String],
-                        preferredLocale: Option[String])
+                        preferredLocale: Option[String]
+)

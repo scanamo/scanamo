@@ -135,9 +135,10 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -237,12 +238,13 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
           Future.traverse(as)(f)
         } map (_.flatten)
 
-      def tailRecM[A, B](a: A)(f: A => SFuture[Either[A, B]]): SFuture[B] = f(a) flatMap { eas =>
-        Future.traverse(eas) {
-          case Left(a)  => tailRecM(a)(f)
-          case Right(b) => Future.successful(Stream(b))
-        } map (_.flatten)
-      }
+      def tailRecM[A, B](a: A)(f: A => SFuture[Either[A, B]]): SFuture[B] =
+        f(a) flatMap { eas =>
+          Future.traverse(eas) {
+            case Left(a)  => tailRecM(a)(f)
+            case Right(b) => Future.successful(Stream(b))
+          } map (_.flatten)
+        }
 
       def pure[A](x: A): SFuture[A] = Future.successful(Stream(x))
     }
@@ -347,12 +349,13 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         scanamo.exec(result).futureValue should equal(

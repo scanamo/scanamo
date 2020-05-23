@@ -148,9 +148,10 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -338,12 +339,13 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         scanamo

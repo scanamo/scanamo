@@ -63,9 +63,8 @@ class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetr
         if (!executedOnce) {
           executedOnce = true
           Source.failed(ProvisionedThroughputExceededException.builder.message("Throughput Exceeded").build)
-        } else {
+        } else
           Source.single("Success")
-        }
 
       retry[String](op, RetryPolicy.once)
         .runWith(Sink.head)
@@ -78,9 +77,8 @@ class RetryPolicySpec extends AsyncFreeSpec with BeforeAndAfterAll with WithRetr
         if (!executedOnce) {
           executedOnce = true
           Source.failed(new RuntimeException("Don't retry me"))
-        } else {
+        } else
           Source.single("Fail, this should not be retried")
-        }
 
       retry[String](op, RetryPolicy.once).recover { case _: RuntimeException => "Success" }
         .runWith(Sink.head)

@@ -128,9 +128,10 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -198,7 +199,9 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         list <- items.scanPaginatedM[SIO](1)
       } yield list
 
-      unsafeRun(zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
+      unsafeRun(
+        zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])
+      ) should contain theSameElementsAs expected
     }
   }
 
@@ -310,12 +313,13 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         unsafeRun(zio.exec(result)) should equal(
@@ -567,8 +571,8 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         )
         _ <- forecastTable.transactUpdateAll(
           List(
-            UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain"),
-            UniqueKey(KeyEquals("location", "Amsterdam")) → set("weather" -> "Cloud")
+            UniqueKey(KeyEquals("location", "London")) -> set("weather" -> "Rain"),
+            UniqueKey(KeyEquals("location", "Amsterdam")) -> set("weather" -> "Cloud")
           )
         )
         items <- forecastTable.scan()
@@ -595,12 +599,12 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
           _ <- forecastTable.transactUpdateAll(
             List(
-              UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain")
+              UniqueKey(KeyEquals("location", "London")) -> set("weather" -> "Rain")
             )
           )
           _ <- gremlinTable.transactUpdateAll(
             List(
-              UniqueKey(KeyEquals("number", 2)) → set("wet" -> true)
+              UniqueKey(KeyEquals("number", 2)) -> set("wet" -> true)
             )
           )
           gremlins <- gremlinTable.scan()

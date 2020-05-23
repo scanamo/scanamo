@@ -25,38 +25,39 @@ class ScanamoFreeTest extends AnyFunSuite with Matchers {
 }
 
 class RequestCountingInterpreter extends (ScanamoOpsA ~> RequestCountingInterpreter.CountingState) {
-  def apply[A](op: ScanamoOpsA[A]): RequestCountingInterpreter.CountingState[A] = op match {
-    case Put(_)               => ???
-    case ConditionalPut(_)    => ???
-    case Get(_)               => ???
-    case Delete(_)            => ???
-    case ConditionalDelete(_) => ???
-    case Scan(req) =>
-      State(counter =>
-        if (counter < 42)
-          counter + 1 -> ScanResponse.builder
-            .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
-            .items(List.fill(req.options.limit.getOrElse(50))(new util.HashMap[String, AttributeValue]()): _*)
-            .build
-        else
-          counter -> ScanResponse.builder.items(List.empty[java.util.Map[String, AttributeValue]].asJava).build
-      )
-    case Query(req) =>
-      State(counter =>
-        if (counter < 42)
-          counter + 1 -> QueryResponse.builder
-            .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
-            .items(List.fill(req.options.limit.getOrElse(0))(new util.HashMap[String, AttributeValue]()): _*)
-            .build
-        else
-          counter -> QueryResponse.builder.items(List.empty[java.util.Map[String, AttributeValue]].asJava).build
-      )
-    case BatchWrite(_)        => ???
-    case BatchGet(_)          => ???
-    case Update(_)            => ???
-    case ConditionalUpdate(_) => ???
-    case TransactWriteAll(_)  => ???
-  }
+  def apply[A](op: ScanamoOpsA[A]): RequestCountingInterpreter.CountingState[A] =
+    op match {
+      case Put(_)               => ???
+      case ConditionalPut(_)    => ???
+      case Get(_)               => ???
+      case Delete(_)            => ???
+      case ConditionalDelete(_) => ???
+      case Scan(req) =>
+        State(counter =>
+          if (counter < 42)
+            counter + 1 -> ScanResponse.builder
+              .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
+              .items(List.fill(req.options.limit.getOrElse(50))(new util.HashMap[String, AttributeValue]()): _*)
+              .build
+          else
+            counter -> ScanResponse.builder.items(List.empty[java.util.Map[String, AttributeValue]].asJava).build
+        )
+      case Query(req) =>
+        State(counter =>
+          if (counter < 42)
+            counter + 1 -> QueryResponse.builder
+              .lastEvaluatedKey(Map("x" -> DynamoFormat[Int].write(1).toAttributeValue).asJava)
+              .items(List.fill(req.options.limit.getOrElse(0))(new util.HashMap[String, AttributeValue]()): _*)
+              .build
+          else
+            counter -> QueryResponse.builder.items(List.empty[java.util.Map[String, AttributeValue]].asJava).build
+        )
+      case BatchWrite(_)        => ???
+      case BatchGet(_)          => ???
+      case Update(_)            => ???
+      case ConditionalUpdate(_) => ???
+      case TransactWriteAll(_)  => ???
+    }
 }
 
 object RequestCountingInterpreter {

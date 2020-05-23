@@ -39,57 +39,58 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
       ()
     }
 
-  override def apply[A](fa: ScanamoOpsA[A]): F[A] = fa match {
-    case Put(req) =>
-      eff(client.putItem(JavaRequests.put(req)))
-    case ConditionalPut(req) =>
-      eff(client.putItem(JavaRequests.put(req))).attempt
-        .flatMap(
-          _.fold(
-            _ match {
-              case e: ConditionalCheckFailedException => F.delay(Left(e))
-              case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-            },
-            a => F.delay(Right(a))
+  override def apply[A](fa: ScanamoOpsA[A]): F[A] =
+    fa match {
+      case Put(req) =>
+        eff(client.putItem(JavaRequests.put(req)))
+      case ConditionalPut(req) =>
+        eff(client.putItem(JavaRequests.put(req))).attempt
+          .flatMap(
+            _.fold(
+              _ match {
+                case e: ConditionalCheckFailedException => F.delay(Left(e))
+                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
+              },
+              a => F.delay(Right(a))
+            )
           )
-        )
-    case Get(req) =>
-      eff(client.getItem(req))
-    case Delete(req) =>
-      eff(client.deleteItem(JavaRequests.delete(req)))
-    case ConditionalDelete(req) =>
-      eff(client.deleteItem(JavaRequests.delete(req))).attempt
-        .flatMap(
-          _.fold(
-            _ match {
-              case e: ConditionalCheckFailedException => F.delay(Left(e))
-              case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-            },
-            a => F.delay(Right(a))
+      case Get(req) =>
+        eff(client.getItem(req))
+      case Delete(req) =>
+        eff(client.deleteItem(JavaRequests.delete(req)))
+      case ConditionalDelete(req) =>
+        eff(client.deleteItem(JavaRequests.delete(req))).attempt
+          .flatMap(
+            _.fold(
+              _ match {
+                case e: ConditionalCheckFailedException => F.delay(Left(e))
+                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
+              },
+              a => F.delay(Right(a))
+            )
           )
-        )
-    case Scan(req) =>
-      eff(client.scan(JavaRequests.scan(req)))
-    case Query(req) =>
-      eff(client.query(JavaRequests.query(req)))
-    // Overloading means we need explicit parameter types here
-    case BatchWrite(req) =>
-      eff(client.batchWriteItem(req))
-    case BatchGet(req) =>
-      eff(client.batchGetItem(req))
-    case Update(req) =>
-      eff(client.updateItem(JavaRequests.update(req)))
-    case ConditionalUpdate(req) =>
-      eff(client.updateItem(JavaRequests.update(req))).attempt
-        .flatMap(
-          _.fold(
-            _ match {
-              case e: ConditionalCheckFailedException => F.delay(Left(e))
-              case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-            },
-            a => F.delay(Right(a))
+      case Scan(req) =>
+        eff(client.scan(JavaRequests.scan(req)))
+      case Query(req) =>
+        eff(client.query(JavaRequests.query(req)))
+      // Overloading means we need explicit parameter types here
+      case BatchWrite(req) =>
+        eff(client.batchWriteItem(req))
+      case BatchGet(req) =>
+        eff(client.batchGetItem(req))
+      case Update(req) =>
+        eff(client.updateItem(JavaRequests.update(req)))
+      case ConditionalUpdate(req) =>
+        eff(client.updateItem(JavaRequests.update(req))).attempt
+          .flatMap(
+            _.fold(
+              _ match {
+                case e: ConditionalCheckFailedException => F.delay(Left(e))
+                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
+              },
+              a => F.delay(Right(a))
+            )
           )
-        )
-    case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
-  }
+      case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
+    }
 }

@@ -128,7 +128,8 @@ sealed abstract class SecondaryIndex[V] {
     * upper bound.
     */
   def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
-                                            pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
+                                            pageSize: Int
+  ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
   /**
     * Query or scan an index, limiting the number of items evaluated by Dynamo
