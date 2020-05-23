@@ -21,7 +21,7 @@ import cats.free.Free
 import cats.free.FreeT
 import cats.instances.option._
 import cats.syntax.apply._
-import com.amazonaws.services.dynamodbv2.model._
+import software.amazon.awssdk.services.dynamodb.model._
 import org.scanamo.request._
 
 package object ops {
@@ -34,61 +34,66 @@ package object ops {
     def scan(req: ScanamoScanRequest): ScanRequest = {
       def queryRefinement[T](
         o: ScanamoScanRequest => Option[T]
-      )(rt: (ScanRequest, T) => ScanRequest): ScanRequest => ScanRequest = { qr => o(req).foldLeft(qr)(rt) }
+      )(rt: (ScanRequest.Builder, T) => ScanRequest.Builder): ScanRequest.Builder => ScanRequest.Builder = { qr =>
+        o(req).foldLeft(qr)(rt)
+      }
 
       NonEmptyList
         .of(
-          queryRefinement(_.index)(_.withIndexName(_)),
-          queryRefinement(_.options.limit)(_.withLimit(_)),
-          queryRefinement(_.options.exclusiveStartKey)((r, k) => r.withExclusiveStartKey(k.toJavaMap)),
+          queryRefinement(_.index)(_.indexName(_)),
+          queryRefinement(_.options.limit)(_.limit(_)),
+          queryRefinement(_.options.exclusiveStartKey)((r, k) => r.exclusiveStartKey(k.toJavaMap)),
           queryRefinement(_.options.filter) { (r, f) =>
             val requestCondition = f.apply
             requestCondition.dynamoValues
               .filter(_.nonEmpty)
               .flatMap(_.toExpressionAttributeValues)
               .foldLeft(
-                r.withFilterExpression(requestCondition.expression)
-                  .withExpressionAttributeNames(requestCondition.attributeNames.asJava)
-              )(_ withExpressionAttributeValues _)
+                r.filterExpression(requestCondition.expression)
+                  .expressionAttributeNames(requestCondition.attributeNames.asJava)
+              )(_ expressionAttributeValues _)
           }
         )
         .reduceLeft(_.compose(_))(
-          new ScanRequest().withTableName(req.tableName).withConsistentRead(req.options.consistent)
+          ScanRequest.builder.tableName(req.tableName).consistentRead(req.options.consistent)
         )
+        .build
     }
 
     def query(req: ScanamoQueryRequest): QueryRequest = {
       def queryRefinement[T](
         f: ScanamoQueryRequest => Option[T]
-      )(g: (QueryRequest, T) => QueryRequest): QueryRequest => QueryRequest = { qr => f(req).foldLeft(qr)(g) }
+      )(g: (QueryRequest.Builder, T) => QueryRequest.Builder): QueryRequest.Builder => QueryRequest.Builder = { qr =>
+        f(req).foldLeft(qr)(g)
+      }
 
       val queryCondition: RequestCondition = req.query.apply
       val requestCondition: Option[RequestCondition] = req.options.filter.map(_.apply)
 
-      val request = NonEmptyList
+      val requestBuilder = NonEmptyList
         .of(
-          queryRefinement(_.index)(_ withIndexName _),
-          queryRefinement(_.options.limit)(_ withLimit _),
-          queryRefinement(_.options.exclusiveStartKey.map(_.toJavaMap))(_ withExclusiveStartKey _)
+          queryRefinement(_.index)(_ indexName _),
+          queryRefinement(_.options.limit)(_ limit _),
+          queryRefinement(_.options.exclusiveStartKey.map(_.toJavaMap))(_ exclusiveStartKey _)
         )
         .reduceLeft(_ compose _)(
-          new QueryRequest()
-            .withTableName(req.tableName)
-            .withConsistentRead(req.options.consistent)
-            .withScanIndexForward(req.options.ascending)
-            .withKeyConditionExpression(queryCondition.expression)
+          QueryRequest.builder
+            .tableName(req.tableName)
+            .consistentRead(req.options.consistent)
+            .scanIndexForward(req.options.ascending)
+            .keyConditionExpression(queryCondition.expression)
         )
 
       requestCondition.fold {
-        val requestWithCondition = request.withExpressionAttributeNames(queryCondition.attributeNames.asJava)
+        val requestWithCondition = requestBuilder.expressionAttributeNames(queryCondition.attributeNames.asJava)
         queryCondition.dynamoValues
           .filter(_.nonEmpty)
           .flatMap(_.toExpressionAttributeValues)
-          .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
+          .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
       } { condition =>
-        val requestWithCondition = request
-          .withFilterExpression(condition.expression)
-          .withExpressionAttributeNames((queryCondition.attributeNames ++ condition.attributeNames).asJava)
+        val requestWithCondition = requestBuilder
+          .filterExpression(condition.expression)
+          .expressionAttributeNames((queryCondition.attributeNames ++ condition.attributeNames).asJava)
         val attributeValues =
           (
             queryCondition.dynamoValues orElse Some(DynamoObject.empty),
@@ -97,91 +102,107 @@ package object ops {
 
         attributeValues
           .flatMap(_.toExpressionAttributeValues)
-          .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
-      }
+          .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
+      }.build
     }
 
     def put(req: ScanamoPutRequest): PutItemRequest = {
-      val request = new PutItemRequest()
-        .withTableName(req.tableName)
-        .withItem(req.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
-        .withReturnValues(req.ret.asDynamoValue)
+      val request = PutItemRequest.builder
+        .tableName(req.tableName)
+        .item(req.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
+        .returnValues(req.ret.asDynamoValue)
 
-      req.condition.fold(request) { condition =>
-        val requestWithCondition = request
-          .withConditionExpression(condition.expression)
-          .withExpressionAttributeNames(condition.attributeNames.asJava)
+      req.condition
+        .fold(request) { condition =>
+          val requestWithCondition = request
+            .conditionExpression(condition.expression)
+            .expressionAttributeNames(condition.attributeNames.asJava)
 
-        condition.dynamoValues
-          .flatMap(_.toExpressionAttributeValues)
-          .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
-      }
+          condition.dynamoValues
+            .flatMap(_.toExpressionAttributeValues)
+            .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
+        }
+        .build
     }
 
     def delete(req: ScanamoDeleteRequest): DeleteItemRequest = {
-      val request = new DeleteItemRequest().withTableName(req.tableName).withKey(req.key.toJavaMap)
-      req.condition.fold(request) { condition =>
-        val requestWithCondition = request
-          .withConditionExpression(condition.expression)
-          .withExpressionAttributeNames(condition.attributeNames.asJava)
+      val request = DeleteItemRequest.builder.tableName(req.tableName).key(req.key.toJavaMap)
+      req.condition
+        .fold(request) { condition =>
+          val requestWithCondition = request
+            .conditionExpression(condition.expression)
+            .expressionAttributeNames(condition.attributeNames.asJava)
 
-        condition.dynamoValues
-          .flatMap(_.toExpressionAttributeValues)
-          .foldLeft(requestWithCondition)(_ withExpressionAttributeValues _)
-      }
+          condition.dynamoValues
+            .flatMap(_.toExpressionAttributeValues)
+            .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
+        }
+        .build
     }
 
     def update(req: ScanamoUpdateRequest): UpdateItemRequest = {
       val attributeNames: Map[String, String] = req.condition.map(_.attributeNames).foldLeft(req.attributeNames)(_ ++ _)
       val attributeValues: DynamoObject = req.condition.flatMap(_.dynamoValues).foldLeft(req.dynamoValues)(_ <> _)
-      val request = new UpdateItemRequest()
-        .withTableName(req.tableName)
-        .withKey(req.key.toJavaMap)
-        .withUpdateExpression(req.updateExpression)
-        .withReturnValues(ReturnValue.ALL_NEW)
-        .withExpressionAttributeNames(attributeNames.asJava)
+      val request = UpdateItemRequest.builder
+        .tableName(req.tableName)
+        .key(req.key.toJavaMap)
+        .updateExpression(req.updateExpression)
+        .returnValues(ReturnValue.ALL_NEW)
+        .expressionAttributeNames(attributeNames.asJava)
 
       val requestWithCondition =
-        req.condition.fold(request)(condition => request.withConditionExpression(condition.expression))
+        req.condition.fold(request)(condition => request.conditionExpression(condition.expression))
 
-      attributeValues.toExpressionAttributeValues.fold(requestWithCondition) { avs =>
-        if (req.addEmptyList) {
-          avs.put(":emptyList", DynamoValue.EmptyList)
+      attributeValues.toExpressionAttributeValues
+        .fold(requestWithCondition) { avs =>
+          if (req.addEmptyList) {
+            avs.put(":emptyList", DynamoValue.EmptyList)
+          }
+          requestWithCondition expressionAttributeValues avs
         }
-        requestWithCondition withExpressionAttributeValues avs
-      }
+        .build
     }
 
     def transactItems(req: ScanamoTransactWriteRequest): TransactWriteItemsRequest = {
       val putItems = req.putItems.map { item ⇒
-        new TransactWriteItem()
-          .withPut(
-            new com.amazonaws.services.dynamodbv2.model.Put()
-              .withItem(item.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
-              .withTableName(item.tableName)
+        TransactWriteItem.builder
+          .put(
+            software.amazon.awssdk.services.dynamodb.model.Put.builder
+              .item(item.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
+              .tableName(item.tableName)
+              .build
           )
+          .build
       }
+
       val updateItems = req.updateItems.map { item ⇒
-        val update = new com.amazonaws.services.dynamodbv2.model.Update()
-          .withTableName(item.tableName)
-          .withUpdateExpression(item.updateExpression.expression)
-          .withExpressionAttributeNames(item.updateExpression.attributeNames.asJava)
-          .withKey(item.key.toJavaMap)
-        val updateWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues.fold(update) {
-          avs ⇒ update.withExpressionAttributeValues(avs)
-        }
-        new TransactWriteItem().withUpdate(updateWithAvs)
+        val update = software.amazon.awssdk.services.dynamodb.model.Update.builder
+          .tableName(item.tableName)
+          .updateExpression(item.updateExpression.expression)
+          .expressionAttributeNames(item.updateExpression.attributeNames.asJava)
+          .key(item.key.toJavaMap)
+
+        val updateWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues
+          .fold(update)(avs ⇒ update.expressionAttributeValues(avs))
+          .build
+
+        TransactWriteItem.builder.update(updateWithAvs).build
       }
+
       val deleteItems = req.deleteItems.map { item ⇒
-        new TransactWriteItem()
-          .withDelete(
-            new com.amazonaws.services.dynamodbv2.model.Delete()
-              .withKey(item.key.toJavaMap)
-              .withTableName(item.tableName)
+        TransactWriteItem.builder
+          .delete(
+            software.amazon.awssdk.services.dynamodb.model.Delete.builder
+              .key(item.key.toJavaMap)
+              .tableName(item.tableName)
+              .build
           )
+          .build
       }
-      new TransactWriteItemsRequest()
-        .withTransactItems((putItems ++ updateItems ++ deleteItems).asJava)
+
+      TransactWriteItemsRequest.builder
+        .transactItems((putItems ++ updateItems ++ deleteItems): _*)
+        .build
     }
   }
 }

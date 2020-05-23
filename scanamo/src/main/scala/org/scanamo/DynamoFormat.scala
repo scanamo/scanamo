@@ -26,7 +26,7 @@ import cats.instances.list._
 import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import magnolia.Magnolia
 import org.scanamo.generic.{ AutoDerivationUnlocker, Derivation }
 

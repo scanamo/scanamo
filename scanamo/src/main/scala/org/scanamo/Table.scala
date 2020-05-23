@@ -17,8 +17,8 @@
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
-import com.amazonaws.services.dynamodbv2.model.{ QueryResult, ScanResult, TransactWriteItemsResult }
-import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse, TransactWriteItemsResponse }
+import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
@@ -30,9 +30,9 @@ import org.scanamo.update.UpdateExpression
   * {{{
   * >>> case class Transport(mode: String, line: String)
   *
-  * >>> val client = LocalDynamoDB.client()
+  * >>> val client = LocalDynamoDB.syncClient()
   * >>> val scanamo = Scanamo(client)
-  * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+  * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
   *
   * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
   * ...   import org.scanamo.syntax._
@@ -76,11 +76,11 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Farm(animals: List[String])
     * >>> case class Farmer(name: String, age: Long, farm: Farm)
     *
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> val dataSet = Set(
@@ -107,9 +107,9 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String, colour: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     *
@@ -159,9 +159,9 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Forecast(location: String, weather: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("location" -> S) { t =>
     * ...   import org.scanamo.syntax._
@@ -316,9 +316,9 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
     * ...   import org.scanamo.syntax._
@@ -347,8 +347,8 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class City(country: String, name: String)
     *
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> val client = LocalDynamoDB.client()
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     * >>> val (get, scan, query) = LocalDynamoDB.withRandomTable(client)("country" -> S, "name" -> S) { t =>
     * ...   import org.scanamo.syntax._
@@ -385,8 +385,8 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     * >>> import org.scanamo.query._
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> val client = LocalDynamoDB.client()
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
@@ -542,8 +542,8 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
-    * >>> val client = LocalDynamoDB.client()
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> case class Bear(name: String, favouriteFood: String)
@@ -594,9 +594,9 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
     * ...   import org.scanamo._
@@ -636,7 +636,7 @@ case class Table[V: DynamoFormat](name: String) {
 
   /**
     * Scans the table and returns the raw DynamoDB result. Sometimes, one might want to
-    * access metadata returned in the `ScanResult` object, such as the last evaluated
+    * access metadata returned in the `ScanResponse` object, such as the last evaluated
     * key for example. `Table#scan` only returns a list of results, so there is no
     * place for putting that information: this is where `scan0` comes in handy!
     *
@@ -644,7 +644,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import cats.implicits._
@@ -653,7 +653,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     * >>> import org.scanamo.query._
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
     * ...   val table = Table[Transport](t)
@@ -665,7 +665,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     ))
     * ...     res <- table.limit(1).scan0
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
-    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.getLastEvaluatedKey))
+    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
@@ -673,7 +673,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
     * }}}
     */
-  def scan0: ScanamoOps[ScanResult] = ScanamoFree.scan0[V](name)
+  def scan0: ScanamoOps[ScanResponse] = ScanamoFree.scan0[V](name)
 
   /**
     * Query a table based on the hash key and optionally the range key
@@ -681,12 +681,12 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
     * ...   val table = Table[Transport](t)
@@ -729,7 +729,7 @@ case class Table[V: DynamoFormat](name: String) {
 
   /**
     * Queries the table and returns the raw DynamoDB result. Sometimes, one might want to
-    * access metadata returned in the `QueryResult` object, such as the last evaluated
+    * access metadata returned in the `QueryResponse` object, such as the last evaluated
     * key for example. `Table#query` only returns a list of results, so there is no
     * place for putting that information: this is where `query0` comes in handy!
     *
@@ -737,7 +737,7 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Transport(mode: String, line: String)
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
     *
     * >>> import cats.implicits._
@@ -746,7 +746,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
     * >>> import org.scanamo.query._
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
     * ...   val table = Table[Transport](t)
@@ -761,7 +761,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     ))
     * ...     res <- table.limit(1).query0("mode" -> "Bus" and "line" -> "234")
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
-    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.getLastEvaluatedKey))
+    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
     * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
@@ -769,7 +769,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Bus,390)), Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
     * }}}
     */
-  def query0(query: Query[_]): ScanamoOps[QueryResult] = ScanamoFree.query0[V](name)(query)
+  def query0(query: Query[_]): ScanamoOps[QueryResponse] = ScanamoFree.query0[V](name)(query)
 
   /**
     * Filter the results of a Scan or Query
@@ -777,9 +777,9 @@ case class Table[V: DynamoFormat](name: String) {
     * {{{
     * >>> case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> import org.scanamo.syntax._
     * >>> import org.scanamo.generic.auto._
@@ -799,7 +799,7 @@ case class Table[V: DynamoFormat](name: String) {
     * >>> case class Station(line: String, name: String, zone: Int)
     *
     *
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withRandomTable(client)("line" -> S, "name" -> S) { t =>
     * ...   val stationTable = Table[Station](t)
@@ -824,13 +824,13 @@ case class Table[V: DynamoFormat](name: String) {
   def descending =
     TableWithOptions(name, ScanamoQueryOptions.default).descending
 
-  def transactPutAll(vs: List[V]): ScanamoOps[TransactWriteItemsResult] =
+  def transactPutAll(vs: List[V]): ScanamoOps[TransactWriteItemsResponse] =
     ScanamoFree.transactPutAllTable(name)(vs)
 
-  def transactUpdateAll(vs: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResult] =
+  def transactUpdateAll(vs: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResponse] =
     ScanamoFree.transactUpdateAllTable(name)(vs)
 
-  def transactDeleteAll(vs: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResult] =
+  def transactDeleteAll(vs: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResponse] =
     ScanamoFree.transactDeleteAllTable(name)(vs)
 }
 
@@ -873,20 +873,20 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
-    ScanResultStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
+    ScanResponseStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
   def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     scanPaginatedM(Int.MaxValue)
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
-    ScanResultStream.streamTo[M, V](ScanamoScanRequest(tableName, None, queryOptions), pageSize)
-  def scan0: ScanamoOps[ScanResult] =
+    ScanResponseStream.streamTo[M, V](ScanamoScanRequest(tableName, None, queryOptions), pageSize)
+  def scan0: ScanamoOps[ScanResponse] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
-    QueryResultStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
+    QueryResponseStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
   def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryPaginatedM(query, Int.MaxValue)
   def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
                                             pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
-    QueryResultStream.streamTo[M, V](ScanamoQueryRequest(tableName, None, query, queryOptions), pageSize)
-  def query0(query: Query[_]): ScanamoOps[QueryResult] =
+    QueryResponseStream.streamTo[M, V](ScanamoQueryRequest(tableName, None, query, queryOptions), pageSize)
+  def query0(query: Query[_]): ScanamoOps[QueryResponse] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, queryOptions))
 }

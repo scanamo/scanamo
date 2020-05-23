@@ -1,10 +1,10 @@
 package org.scanamo
 
 import cats.implicits._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.fixtures._
@@ -12,7 +12,7 @@ import org.scanamo.generic.auto._
 import org.scanamo.ops.ScanamoOps
 
 class ScanamoTest extends AnyFunSpec with Matchers {
-  val client = LocalDynamoDB.client()
+  val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
 
   it("should put asynchronously") {

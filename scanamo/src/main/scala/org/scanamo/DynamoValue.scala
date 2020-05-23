@@ -16,8 +16,11 @@
 
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.core.SdkBytes
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.nio.ByteBuffer
+import java.{ util => ju }
+import java.util.stream.Collectors
 
 /**
   * A `DynamoValue` is a pure representation of an `AttributeValue` from the AWS SDK.
@@ -32,9 +35,9 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     case DynNull        => Null
     case DynBool(true)  => True
     case DynBool(false) => False
-    case DynNum(n)      => new AttributeValue().withN(n.toString)
-    case DynString(s)   => new AttributeValue().withS(s)
-    case DynByte(b)     => new AttributeValue().withB(b)
+    case DynNum(n)      => AttributeValue.builder.n(n.toString).build
+    case DynString(s)   => AttributeValue.builder.s(s).build
+    case DynByte(b)     => AttributeValue.builder.b(SdkBytes.fromByteBuffer(b)).build
     case DynObject(as)  => as.toAttributeValue
     case DynArray(as)   => as.toAttributeValue
   }
@@ -223,10 +226,11 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
 }
 
 object DynamoValue {
-  private[scanamo] val Null: AttributeValue = new AttributeValue().withNULL(true)
-  private[scanamo] val True: AttributeValue = new AttributeValue().withBOOL(true)
-  private[scanamo] val False: AttributeValue = new AttributeValue().withBOOL(false)
-  private[scanamo] val EmptyList: AttributeValue = new AttributeValue().withL()
+  private[scanamo] val Null: AttributeValue = AttributeValue.builder.nul(true).build
+  private[scanamo] val True: AttributeValue = AttributeValue.builder.bool(true).build
+  private[scanamo] val False: AttributeValue = AttributeValue.builder.bool(false).build
+  private[scanamo] val EmptyList: AttributeValue =
+    AttributeValue.builder.l(ju.Collections.EMPTY_LIST.asInstanceOf[ju.List[AttributeValue]]).build
 
   private[DynamoValue] case object DynNull extends DynamoValue
   final private[DynamoValue] case class DynBool(b: Boolean) extends DynamoValue
@@ -295,26 +299,30 @@ object DynamoValue {
     * Creats a pure value from an `AttributeValue`
     */
   final def fromAttributeValue(av: AttributeValue): DynamoValue =
-    if (!(av.isNULL eq null) && av.isNULL)
-      DynNull
-    else if (av.getBOOL ne null)
-      DynBool(av.getBOOL)
-    else if (av.getN ne null)
-      DynNum(av.getN)
-    else if (av.getS ne null)
-      DynString(av.getS)
-    else if (av.getB ne null)
-      DynByte(av.getB)
-    else if (av.getNS ne null)
-      DynArray(DynamoArray.unsafeNumbers(av.getNS))
-    else if (av.getBS ne null)
-      DynArray(DynamoArray.byteBuffers(av.getBS))
-    else if (av.getSS ne null)
-      DynArray(DynamoArray.strings(av.getSS))
-    else if (av.getL ne null)
-      DynArray(DynamoArray(av.getL))
+    if (av.nul)
+      nil
+    else if (av.bool ne null)
+      DynBool(av.bool)
+    else if (av.n ne null)
+      DynNum(av.n)
+    else if (av.s ne null)
+      DynString(av.s)
+    else if (av.b ne null)
+      DynByte(av.b.asByteBuffer)
+    else if (av.hasNs)
+      DynArray(DynamoArray.unsafeNumbers(av.ns))
+    else if (av.hasBs)
+      DynArray(
+        DynamoArray.byteBuffers(av.bs.stream.map[ByteBuffer](_.asByteBuffer).collect(Collectors.toList[ByteBuffer]))
+      )
+    else if (av.hasSs)
+      DynArray(DynamoArray.strings(av.ss))
+    else if (av.hasL)
+      DynArray(DynamoArray(av.l))
+    else if (av.hasM)
+      DynObject(DynamoObject(av.m))
     else
-      DynObject(DynamoObject(av.getM))
+      DynNull
 
   /**
     * Creates a map from a [[DynamoObject]]

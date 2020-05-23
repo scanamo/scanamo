@@ -17,7 +17,7 @@
 package org.scanamo
 
 import cats.{ ~>, Id, Monad }
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import org.scanamo.ops._
 
 /**
@@ -25,7 +25,7 @@ import org.scanamo.ops._
   *
   * To avoid blocking, use [[org.scanamo.ScanamoAsync]]
   */
-class Scanamo private (client: AmazonDynamoDB) {
+class Scanamo private (client: DynamoDbClient) {
   final private val interpreter = new ScanamoSyncInterpreter(client)
 
   /**
@@ -38,9 +38,9 @@ class Scanamo private (client: AmazonDynamoDB) {
     * >>> case class Transport(mode: String, line: String)
     * >>> val transport = Table[Transport]("transport")
     *
-    * >>> val client = LocalDynamoDB.client()
+    * >>> val client = LocalDynamoDB.syncClient()
     * >>> val scanamo = Scanamo(client)
-    * >>> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
     * >>> LocalDynamoDB.withTable(client)("transport")("mode" -> S, "line" -> S) {
     * ...   import org.scanamo.syntax._
@@ -63,7 +63,7 @@ class Scanamo private (client: AmazonDynamoDB) {
 }
 
 object Scanamo {
-  def apply(client: AmazonDynamoDB): Scanamo = new Scanamo(client)
+  def apply(client: DynamoDbClient): Scanamo = new Scanamo(client)
 
   val ToList: Id ~> List = new (Id ~> List) {
     def apply[A](fa: Id[A]): List[A] = fa :: Nil

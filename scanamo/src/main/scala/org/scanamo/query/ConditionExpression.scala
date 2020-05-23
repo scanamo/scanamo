@@ -16,11 +16,11 @@
 
 package org.scanamo.query
 
-import com.amazonaws.services.dynamodbv2.model.{
+import software.amazon.awssdk.services.dynamodb.model.{
   AttributeValue,
   ConditionalCheckFailedException,
-  DeleteItemResult,
-  PutItemResult
+  DeleteItemResponse,
+  PutItemResponse
 }
 import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, PutReturn, ScanamoError }
 import org.scanamo.ops.ScanamoOps
@@ -39,19 +39,19 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(
     nativePut(PutReturn.Nothing, item).map(_.leftMap(ConditionNotMet(_)).void)
 
   def putAndReturn(ret: PutReturn)(item: V): ScanamoOps[Option[Either[ScanamoError, V]]] =
-    nativePut(ret, item).map(decodeReturnValue[PutItemResult](_, _.getAttributes))
+    nativePut(ret, item).map(decodeReturnValue[PutItemResponse](_, _.attributes))
 
-  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
+  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResponse]] =
     ScanamoOps.conditionalPut(ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), ret))
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
     nativeDelete(DeleteReturn.Nothing, key).map(_.leftMap(ConditionNotMet(_)).void)
 
   def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Either[ScanamoError, V]]] =
-    nativeDelete(ret, key).map(decodeReturnValue[DeleteItemResult](_, _.getAttributes))
+    nativeDelete(ret, key).map(decodeReturnValue[DeleteItemResponse](_, _.attributes))
 
   private def nativeDelete(ret: DeleteReturn,
-                           key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
+                           key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResponse]] =
     ScanamoOps
       .conditionalDelete(
         ScanamoDeleteRequest(tableName = tableName, key = key.toDynamoObject, Some(state.apply(t)), ret)
@@ -66,9 +66,9 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(
     EitherT
       .fromEither[Option](either)
       .leftMap(ConditionNotMet(_))
-      .flatMap(deleteItemResult =>
+      .flatMap(DeleteItemResponse =>
         EitherT[Option, ScanamoError, V](
-          Option(attrs(deleteItemResult))
+          Option(attrs(DeleteItemResponse))
             .filterNot(_.isEmpty)
             .map(DynamoObject(_).toDynamoValue)
             .map(format.read)
@@ -92,7 +92,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(
       )
       .map(
         _.leftMap(ConditionNotMet(_))
-          .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
+          .flatMap(r => format.read(DynamoObject(r.attributes).toDynamoValue))
       )
 }
 

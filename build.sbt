@@ -87,7 +87,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "com.amazonaws" % "aws-java-sdk-dynamodb" % "1.11.784"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.18"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -112,8 +112,9 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-free" % catsVersion,
-      "com.propensive" %% "magnolia"  % "0.12.7",
+      "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1",
+      "org.typelevel"          %% "cats-free"          % catsVersion,
+      "com.propensive"         %% "magnolia"           % "0.12.7",
       // Use Joda for custom conversion example
       "org.joda"          % "joda-convert"              % "2.2.1"       % Provided,
       "joda-time"         % "joda-time"                 % "2.10.6"      % Test,
@@ -130,7 +131,8 @@ lazy val testkit = (project in file("testkit"))
     publishingSettings,
     name := "scanamo-testkit",
     libraryDependencies ++= Seq(
-      awsDynamoDB
+      awsDynamoDB,
+      "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1"
     )
   )
 
@@ -186,7 +188,7 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "1.1.2",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.0",
       "org.scalatest"      %% "scalatest"                    % "3.1.2" % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.14.3" % Test
     ),

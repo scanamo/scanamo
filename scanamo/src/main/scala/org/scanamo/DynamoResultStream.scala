@@ -20,7 +20,7 @@ import cats.{ Monad, MonoidK }
 import cats.MonoidK.ops._
 import cats.free.{ Free, FreeT }
 import cats.syntax.semigroupk._
-import com.amazonaws.services.dynamodbv2.model.{ QueryResult, ScanResult }
+import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA, ScanamoOpsT }
 import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
 
@@ -82,10 +82,10 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
 }
 
 private[scanamo] object DynamoResultStream {
-  object ScanResultStream extends DynamoResultStream[ScanamoScanRequest, ScanResult] {
-    final def items(res: ScanResult) =
-      res.getItems.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
-    final def lastEvaluatedKey(res: ScanResult) = Option(res.getLastEvaluatedKey).map(DynamoObject(_))
+  object ScanResponseStream extends DynamoResultStream[ScanamoScanRequest, ScanResponse] {
+    final def items(res: ScanResponse) =
+      res.items.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
+    final def lastEvaluatedKey(res: ScanResponse) = Option(res.lastEvaluatedKey).map(DynamoObject(_))
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
     final def withLimit(limit: Int) =
@@ -97,10 +97,10 @@ private[scanamo] object DynamoResultStream {
     final def startKey(req: ScanamoScanRequest) = req.options.exclusiveStartKey
   }
 
-  object QueryResultStream extends DynamoResultStream[ScanamoQueryRequest, QueryResult] {
-    final def items(res: QueryResult) =
-      res.getItems.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
-    final def lastEvaluatedKey(res: QueryResult) = Option(res.getLastEvaluatedKey).map(DynamoObject(_))
+  object QueryResponseStream extends DynamoResultStream[ScanamoQueryRequest, QueryResponse] {
+    final def items(res: QueryResponse) =
+      res.items.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
+    final def lastEvaluatedKey(res: QueryResponse) = Option(res.lastEvaluatedKey).map(DynamoObject(_))
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
     final def withLimit(limit: Int) =

@@ -18,7 +18,7 @@ package org.scanamo
 
 import cats.Monad
 import cats.~>
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import org.scanamo.ops._
 import scala.concurrent.{ ExecutionContext, Future }
 
@@ -26,10 +26,10 @@ import scala.concurrent.{ ExecutionContext, Future }
   * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an implicit
   * concurrent.ExecutionContext and returns a concurrent.Future
   *
-  * Note that that com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsyncClient just uses an
+  * Note that that software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClientClient just uses an
   * java.util.concurrent.ExecutorService to make calls asynchronously
   */
-class ScanamoAsync private (client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext) {
+class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) {
   import cats.instances.future._
 
   final private val interpreter = new ScanamoAsyncInterpreter(client)
@@ -45,5 +45,5 @@ class ScanamoAsync private (client: AmazonDynamoDBAsync)(implicit ec: ExecutionC
 }
 
 object ScanamoAsync {
-  def apply(client: AmazonDynamoDBAsync)(implicit ec: ExecutionContext): ScanamoAsync = new ScanamoAsync(client)
+  def apply(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext): ScanamoAsync = new ScanamoAsync(client)
 }

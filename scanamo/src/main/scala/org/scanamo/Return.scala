@@ -1,6 +1,6 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.ReturnValue
+import software.amazon.awssdk.services.dynamodb.model.ReturnValue
 
 sealed abstract class PutReturn extends Product with Serializable { self =>
   import PutReturn._

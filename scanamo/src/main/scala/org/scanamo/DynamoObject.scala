@@ -18,7 +18,7 @@ package org.scanamo
 
 import cats.Parallel
 import cats.kernel.Monoid
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.util.{ Map => JMap, HashMap }
 import cats.syntax.apply._
 import cats.syntax.semigroup._
@@ -142,7 +142,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   /**
     * Make an AWS SDK value out of this map
     */
-  final def toAttributeValue: AttributeValue = new AttributeValue().withM(toJavaMap)
+  final def toAttributeValue: AttributeValue = AttributeValue.builder.m(toJavaMap).build
 
   /**
     * Builds a [[scala.collection.Map]] if this map is made entirely of values of type `V`
