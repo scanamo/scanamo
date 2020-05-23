@@ -3,7 +3,7 @@ crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1")
 
 val catsVersion = "2.1.1"
 val catsEffectVersion = "2.1.3"
-val zioVersion = "1.0.0-RC19-2"
+val zioVersion = "1.0.0-RC19"
 
 lazy val stdOptions = Seq(
   "-deprecation",

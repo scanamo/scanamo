@@ -571,8 +571,8 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         )
         _ <- forecastTable.transactUpdateAll(
           List(
-            UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain"),
-            UniqueKey(KeyEquals("location", "Amsterdam")) → set("weather" -> "Cloud")
+            UniqueKey(KeyEquals("location", "London")) -> set("weather" -> "Rain"),
+            UniqueKey(KeyEquals("location", "Amsterdam")) -> set("weather" -> "Cloud")
           )
         )
         items <- forecastTable.scan()
@@ -599,12 +599,12 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
           _ <- forecastTable.transactUpdateAll(
             List(
-              UniqueKey(KeyEquals("location", "London")) → set("weather" -> "Rain")
+              UniqueKey(KeyEquals("location", "London")) -> set("weather" -> "Rain")
             )
           )
           _ <- gremlinTable.transactUpdateAll(
             List(
-              UniqueKey(KeyEquals("number", 2)) → set("wet" -> true)
+              UniqueKey(KeyEquals("number", 2)) -> set("wet" -> true)
             )
           )
           gremlins <- gremlinTable.scan()
