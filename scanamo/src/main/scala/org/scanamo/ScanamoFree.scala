@@ -38,25 +38,27 @@ object ScanamoFree {
   def put[T: DynamoFormat](tableName: String)(item: T): ScanamoOps[Unit] =
     nativePut(tableName, PutReturn.Nothing, item).void
 
-  def putAndReturn[T: DynamoFormat](tableName: String)(ret: PutReturn,
-                                                       item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  def putAndReturn[T: DynamoFormat](
+    tableName: String
+  )(ret: PutReturn, item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     nativePut(tableName, ret, item)
       .map(r => if (r.hasAttributes) Some(read[T](DynamoObject(r.attributes))) else None)
 
-  private def nativePut[T](tableName: String, ret: PutReturn, item: T)(
-    implicit f: DynamoFormat[T]
+  private def nativePut[T](tableName: String, ret: PutReturn, item: T)(implicit
+    f: DynamoFormat[T]
   ): ScanamoOps[PutItemResponse] =
     ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None, ret))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[Unit] = {
-    def loop(items: List[JMap[String, JList[WriteRequest]]]): ScanamoOps[Unit] = items match {
-      case Nil => ().pure[ScanamoOps]
-      case map :: rest =>
-        ScanamoOps.batchWrite(BatchWriteItemRequest.builder.requestItems(map).build).flatMap { resp =>
-          val unprocessed = resp.unprocessedItems
-          loop(if (unprocessed.isEmpty) rest else unprocessed :: rest)
-        }
-    }
+    def loop(items: List[JMap[String, JList[WriteRequest]]]): ScanamoOps[Unit] =
+      items match {
+        case Nil => ().pure[ScanamoOps]
+        case map :: rest =>
+          ScanamoOps.batchWrite(BatchWriteItemRequest.builder.requestItems(map).build).flatMap { resp =>
+            val unprocessed = resp.unprocessedItems
+            loop(if (unprocessed.isEmpty) rest else unprocessed :: rest)
+          }
+      }
 
     val batches = items
       .grouped(batchSize)
@@ -195,7 +197,8 @@ object ScanamoFree {
     ScanResponseStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)
 
   def scanM[M[_]: Monad: MonoidK, T: DynamoFormat](tableName: String,
-                                                   pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+                                                   pageSize: Int
+  ): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
     ScanResponseStream.streamTo[M, T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default), pageSize)
 
   def scan0[T: DynamoFormat](tableName: String): ScanamoOps[ScanResponse] =

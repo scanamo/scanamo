@@ -34,11 +34,12 @@ object DynamoReadError {
     def show(e: DynamoReadError): String = describe(e)
   }
 
-  def describe(d: DynamoReadError): String = d match {
-    case InvalidPropertiesError(problems) =>
-      problems.toList.map(p => s"'${p._1}': ${describe(p._2)}").mkString(", ")
-    case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
-    case TypeCoercionError(e)                   => s"could not be converted to desired type: $e"
-    case MissingProperty                        => "missing"
-  }
+  def describe(d: DynamoReadError): String =
+    d match {
+      case InvalidPropertiesError(problems) =>
+        problems.toList.map(p => s"'${p._1}': ${describe(p._2)}").mkString(", ")
+      case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
+      case TypeCoercionError(e)                   => s"could not be converted to desired type: $e"
+      case MissingProperty                        => "missing"
+    }
 }

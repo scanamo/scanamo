@@ -26,41 +26,42 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
   final private def eff[A](fut: => CompletableFuture[A]): IO[DynamoDbException, A] =
     ZIO.fromCompletionStage(fut).refineToOrDie[DynamoDbException]
 
-  def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] = op match {
-    case Put(req) =>
-      eff(client.putItem(JavaRequests.put(req)))
-    case ConditionalPut(req) =>
-      eff(client.putItem(JavaRequests.put(req)))
-        .map[Either[ConditionalCheckFailedException, PutItemResponse]](Right(_))
-        .catchSome {
-          case e: ConditionalCheckFailedException => IO.succeed(Left(e))
-        }
-    case Get(req) =>
-      eff(client.getItem(req))
-    case Delete(req) =>
-      eff(client.deleteItem(JavaRequests.delete(req)))
-    case ConditionalDelete(req) =>
-      eff(client.deleteItem(JavaRequests.delete(req)))
-        .map[Either[ConditionalCheckFailedException, DeleteItemResponse]](Right(_))
-        .catchSome {
-          case e: ConditionalCheckFailedException => IO.succeed(Left(e))
-        }
-    case Scan(req) =>
-      eff(client.scan(JavaRequests.scan(req)))
-    case Query(req) =>
-      eff(client.query(JavaRequests.query(req)))
-    case BatchWrite(req) =>
-      eff(client.batchWriteItem(req))
-    case BatchGet(req) =>
-      eff(client.batchGetItem(req))
-    case Update(req) =>
-      eff(client.updateItem(JavaRequests.update(req)))
-    case ConditionalUpdate(req) =>
-      eff(client.updateItem(JavaRequests.update(req)))
-        .map[Either[ConditionalCheckFailedException, UpdateItemResponse]](Right(_))
-        .catchSome {
-          case e: ConditionalCheckFailedException => IO.succeed(Left(e))
-        }
-    case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
-  }
+  def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] =
+    op match {
+      case Put(req) =>
+        eff(client.putItem(JavaRequests.put(req)))
+      case ConditionalPut(req) =>
+        eff(client.putItem(JavaRequests.put(req)))
+          .map[Either[ConditionalCheckFailedException, PutItemResponse]](Right(_))
+          .catchSome {
+            case e: ConditionalCheckFailedException => IO.succeed(Left(e))
+          }
+      case Get(req) =>
+        eff(client.getItem(req))
+      case Delete(req) =>
+        eff(client.deleteItem(JavaRequests.delete(req)))
+      case ConditionalDelete(req) =>
+        eff(client.deleteItem(JavaRequests.delete(req)))
+          .map[Either[ConditionalCheckFailedException, DeleteItemResponse]](Right(_))
+          .catchSome {
+            case e: ConditionalCheckFailedException => IO.succeed(Left(e))
+          }
+      case Scan(req) =>
+        eff(client.scan(JavaRequests.scan(req)))
+      case Query(req) =>
+        eff(client.query(JavaRequests.query(req)))
+      case BatchWrite(req) =>
+        eff(client.batchWriteItem(req))
+      case BatchGet(req) =>
+        eff(client.batchGetItem(req))
+      case Update(req) =>
+        eff(client.updateItem(JavaRequests.update(req)))
+      case ConditionalUpdate(req) =>
+        eff(client.updateItem(JavaRequests.update(req)))
+          .map[Either[ConditionalCheckFailedException, UpdateItemResponse]](Right(_))
+          .catchSome {
+            case e: ConditionalCheckFailedException => IO.succeed(Left(e))
+          }
+      case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
+    }
 }

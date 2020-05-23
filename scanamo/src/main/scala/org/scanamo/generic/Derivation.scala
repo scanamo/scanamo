@@ -91,9 +91,10 @@ private[scanamo] trait Derivation {
     new DynamoFormat.ObjectFormat[T] {
       def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
 
-      def writeObject(t: T): DynamoObject = st.dispatch(t) { subtype =>
-        DynamoObject.singleton(subtype.typeName.short, subtype.typeclass.write(subtype.cast(t)))
-      }
+      def writeObject(t: T): DynamoObject =
+        st.dispatch(t) { subtype =>
+          DynamoObject.singleton(subtype.typeName.short, subtype.typeclass.write(subtype.cast(t)))
+        }
     }
   }
 }

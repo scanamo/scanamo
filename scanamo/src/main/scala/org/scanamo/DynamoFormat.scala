@@ -231,10 +231,11 @@ object DynamoFormat extends Derivation {
       else
         av.asString.fold[Either[DynamoReadError, String]](Left(NoPropertyOfType("S", av)))(Right(_))
 
-    final def write(s: String): DynamoValue = s match {
-      case "" => DynamoValue.nil
-      case _  => DynamoValue.fromString(s)
-    }
+    final def write(s: String): DynamoValue =
+      s match {
+        case "" => DynamoValue.nil
+        case _  => DynamoValue.fromString(s)
+      }
   }
 
   /**
@@ -245,16 +246,17 @@ object DynamoFormat extends Derivation {
     */
   implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.fromBoolean, "BOOL")
 
-  private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] = new DynamoFormat[N] {
-    final def read(av: DynamoValue): Either[DynamoReadError, N] =
-      for {
-        ns <- Either.fromOption(av.asNumber, NoPropertyOfType("N", av))
-        transform = coerceNumber(f)
-        n <- transform(ns)
-      } yield n
+  private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] =
+    new DynamoFormat[N] {
+      final def read(av: DynamoValue): Either[DynamoReadError, N] =
+        for {
+          ns <- Either.fromOption(av.asNumber, NoPropertyOfType("N", av))
+          transform = coerceNumber(f)
+          n <- transform(ns)
+        } yield n
 
-    final def write(n: N): DynamoValue = DynamoValue.fromNumber(n)
-  }
+      final def write(n: N): DynamoValue = DynamoValue.fromNumber(n)
+    }
 
   /**
     * {{{
@@ -551,26 +553,28 @@ object DynamoFormat extends Derivation {
     * true
     * }}}
     */
-  implicit def optionFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Option[T]] = new DynamoFormat[Option[T]] {
-    final def read(av: DynamoValue): Either[DynamoReadError, Option[T]] =
-      if (av.isNull)
-        Right(None)
-      else
-        f.read(av).map(Some(_))
+  implicit def optionFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Option[T]] =
+    new DynamoFormat[Option[T]] {
+      final def read(av: DynamoValue): Either[DynamoReadError, Option[T]] =
+        if (av.isNull)
+          Right(None)
+        else
+          f.read(av).map(Some(_))
 
-    final def write(t: Option[T]): DynamoValue = t.fold(DynamoValue.nil)(f.write)
-  }
+      final def write(t: Option[T]): DynamoValue = t.fold(DynamoValue.nil)(f.write)
+    }
 
   /**
     * This ensures that if, for instance, you specify an update with Some(5) rather
     * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
     */
-  implicit def someFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Some[T]] = new DynamoFormat[Some[T]] {
-    def read(av: DynamoValue): Either[DynamoReadError, Some[T]] =
-      Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
+  implicit def someFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Some[T]] =
+    new DynamoFormat[Some[T]] {
+      def read(av: DynamoValue): Either[DynamoReadError, Some[T]] =
+        Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
 
-    def write(t: Some[T]): DynamoValue = f.write(t.get)
-  }
+      def write(t: Some[T]): DynamoValue = f.write(t.get)
+    }
 
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
     *  {{{

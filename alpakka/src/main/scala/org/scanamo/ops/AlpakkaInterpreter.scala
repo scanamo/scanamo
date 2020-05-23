@@ -28,8 +28,8 @@ import akka.stream.alpakka.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
 import akka.stream.scaladsl.Source
 
-private[scanamo] class AlpakkaInterpreter(retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean)(
-  implicit client: DynamoDbAsyncClient,
+private[scanamo] class AlpakkaInterpreter(retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean)(implicit
+  client: DynamoDbAsyncClient,
   mat: Materializer
 ) extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
     with WithRetry {

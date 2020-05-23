@@ -31,128 +31,143 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
   /**
     * Produces the `AttributeValue` isomorphic to this `DynamoValue`
     */
-  def toAttributeValue: AttributeValue = self match {
-    case DynNull        => Null
-    case DynBool(true)  => True
-    case DynBool(false) => False
-    case DynNum(n)      => AttributeValue.builder.n(n.toString).build
-    case DynString(s)   => AttributeValue.builder.s(s).build
-    case DynByte(b)     => AttributeValue.builder.b(SdkBytes.fromByteBuffer(b)).build
-    case DynObject(as)  => as.toAttributeValue
-    case DynArray(as)   => as.toAttributeValue
-  }
+  def toAttributeValue: AttributeValue =
+    self match {
+      case DynNull        => Null
+      case DynBool(true)  => True
+      case DynBool(false) => False
+      case DynNum(n)      => AttributeValue.builder.n(n.toString).build
+      case DynString(s)   => AttributeValue.builder.s(s).build
+      case DynByte(b)     => AttributeValue.builder.b(SdkBytes.fromByteBuffer(b)).build
+      case DynObject(as)  => as.toAttributeValue
+      case DynArray(as)   => as.toAttributeValue
+    }
 
   /**
     * Checks whether this object represents the null object
     */
-  final def isNull: Boolean = self match {
-    case DynNull => true
-    case _       => false
-  }
+  final def isNull: Boolean =
+    self match {
+      case DynNull => true
+      case _       => false
+    }
 
   /**
     * Checks whether this object represents a boolean
     */
-  final def isBoolean: Boolean = self match {
-    case _: DynBool => true
-    case _          => false
-  }
+  final def isBoolean: Boolean =
+    self match {
+      case _: DynBool => true
+      case _          => false
+    }
 
   /**
     * Checks whether this object represents a number
     */
-  final def isNumber: Boolean = self match {
-    case _: DynNum => true
-    case _         => false
-  }
+  final def isNumber: Boolean =
+    self match {
+      case _: DynNum => true
+      case _         => false
+    }
 
   /**
     * Checks whether this object represents a string
     */
-  final def isString: Boolean = self match {
-    case _: DynString => true
-    case _            => false
-  }
+  final def isString: Boolean =
+    self match {
+      case _: DynString => true
+      case _            => false
+    }
 
   /**
     * Checks whether this object represents a byte buffer
     */
-  final def isByteBuffer: Boolean = self match {
-    case _: DynByte => true
-    case _          => false
-  }
+  final def isByteBuffer: Boolean =
+    self match {
+      case _: DynByte => true
+      case _          => false
+    }
 
   /**
     * Checks whether this object rerpresents a composite object
     */
-  final def isObject: Boolean = self match {
-    case _: DynObject => true
-    case _            => false
-  }
+  final def isObject: Boolean =
+    self match {
+      case _: DynObject => true
+      case _            => false
+    }
 
   /**
     * Checks whether this object rerpresents an array
     */
-  final def isArray: Boolean = self match {
-    case _: DynArray => true
-    case _           => false
-  }
+  final def isArray: Boolean =
+    self match {
+      case _: DynArray => true
+      case _           => false
+    }
 
   /**
     * Produces `()` is this object is null
     */
-  final def asNull: Option[Unit] = self match {
-    case DynNull => Some(())
-    case _       => None
-  }
+  final def asNull: Option[Unit] =
+    self match {
+      case DynNull => Some(())
+      case _       => None
+    }
 
   /**
     * Produces the underlying boolean, if applies
     */
-  final def asBoolean: Option[Boolean] = self match {
-    case DynBool(b) => Some(b)
-    case _          => None
-  }
+  final def asBoolean: Option[Boolean] =
+    self match {
+      case DynBool(b) => Some(b)
+      case _          => None
+    }
 
   /**
     * Produces the underlying string, if applies
     */
-  final def asString: Option[String] = self match {
-    case DynString(s) => Some(s)
-    case _            => None
-  }
+  final def asString: Option[String] =
+    self match {
+      case DynString(s) => Some(s)
+      case _            => None
+    }
 
   /**
     * Produces the underlying number, if applies
     */
-  final def asNumber: Option[String] = self match {
-    case DynNum(n) => Some(n)
-    case _         => None
-  }
+  final def asNumber: Option[String] =
+    self match {
+      case DynNum(n) => Some(n)
+      case _         => None
+    }
 
   /**
     * Produces the underlying byte buffer, if applies
     */
-  final def asByteBuffer: Option[ByteBuffer] = self match {
-    case DynByte(b) => Some(b)
-    case _          => None
-  }
+  final def asByteBuffer: Option[ByteBuffer] =
+    self match {
+      case DynByte(b) => Some(b)
+      case _          => None
+    }
 
   /**
     * Produces the underlying array, if applies
     */
-  final def asArray: Option[DynamoArray] = self match {
-    case DynArray(as) => Some(as)
-    case _            => None
-  }
+  final def asArray: Option[DynamoArray] =
+    self match {
+      case DynArray(as) => Some(as)
+      case _            => None
+    }
 
   /**
     * Produces the underlying object, if applies
     */
-  final def asObject: Option[DynamoObject] = self match {
-    case DynObject(as) => Some(as)
-    case _             => None
-  }
+  final def asObject: Option[DynamoObject] =
+    self match {
+      case DynObject(as) => Some(as)
+      case _             => None
+    }
 
   /**
     * Transforms into a value of type `A` for which there is a codec, if applies
@@ -163,66 +178,74 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     * Returns this value if it isn't null, the provided one otherwise (which may be null too),
     * this allows expressions like: v1 orElse v2 orElse v3 ... or even vs.foldLeft(nil)(_ orElse _)
     */
-  final def orElse(that: DynamoValue): DynamoValue = self match {
-    case DynNull => that
-    case _       => self
-  }
+  final def orElse(that: DynamoValue): DynamoValue =
+    self match {
+      case DynNull => that
+      case _       => self
+    }
 
   /**
     * Transforms into a new value if this one is null
     */
-  final def withNull(f: => DynamoValue): DynamoValue = self match {
-    case DynNull => f
-    case _       => self
-  }
+  final def withNull(f: => DynamoValue): DynamoValue =
+    self match {
+      case DynNull => f
+      case _       => self
+    }
 
   /**
     * Transforms into a new value if this one is a boolean
     */
-  final def withBoolean(f: Boolean => DynamoValue): DynamoValue = self match {
-    case DynBool(b) => f(b)
-    case _          => self
-  }
+  final def withBoolean(f: Boolean => DynamoValue): DynamoValue =
+    self match {
+      case DynBool(b) => f(b)
+      case _          => self
+    }
 
   /**
     * Transforms into a new value if this one is a string
     */
-  final def withString(f: String => DynamoValue): DynamoValue = self match {
-    case DynString(s) => f(s)
-    case _            => self
-  }
+  final def withString(f: String => DynamoValue): DynamoValue =
+    self match {
+      case DynString(s) => f(s)
+      case _            => self
+    }
 
   /**
     * Transforms into a new value if this one is a number
     */
-  final def withNumber(f: String => DynamoValue): DynamoValue = self match {
-    case DynNum(n) => f(n)
-    case _         => self
-  }
+  final def withNumber(f: String => DynamoValue): DynamoValue =
+    self match {
+      case DynNum(n) => f(n)
+      case _         => self
+    }
 
   /**
     * Transforms into a new value if this one is a byte buffer
     */
-  final def withByteBuffer(f: ByteBuffer => DynamoValue): DynamoValue = self match {
-    case DynByte(b) => f(b)
-    case _          => self
-  }
+  final def withByteBuffer(f: ByteBuffer => DynamoValue): DynamoValue =
+    self match {
+      case DynByte(b) => f(b)
+      case _          => self
+    }
 
   /**
     * Transforms into a new value if this one is an array
     */
-  final def withArray(f: DynamoArray => DynamoValue): DynamoValue = self match {
-    case DynArray(as) => f(as)
-    case _            => self
-  }
+  final def withArray(f: DynamoArray => DynamoValue): DynamoValue =
+    self match {
+      case DynArray(as) => f(as)
+      case _            => self
+    }
 
   /**
     * Transforms into a new value if this one is a map
     */
-  final def withObject(f: DynamoObject => DynamoValue): DynamoValue = self match {
-    case DynObject(as) => f(as)
-    case _             => self
-  }
+  final def withObject(f: DynamoObject => DynamoValue): DynamoValue =
+    self match {
+      case DynObject(as) => f(as)
+      case _             => self
+    }
 }
 
 object DynamoValue {

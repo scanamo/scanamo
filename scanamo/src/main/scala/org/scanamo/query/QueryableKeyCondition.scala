@@ -26,14 +26,15 @@ trait QueryableKeyCondition[T] {
 object QueryableKeyCondition {
   def apply[T](implicit Q: QueryableKeyCondition[T]): QueryableKeyCondition[T] = Q
 
-  implicit def equalsKeyCondition[V: DynamoFormat] = new QueryableKeyCondition[KeyEquals[V]] {
-    final def apply(t: KeyEquals[V]) =
-      RequestCondition(
-        s"#K = :${t.key.placeholder("")}",
-        Map("#K" -> t.key.placeholder("")),
-        Some(DynamoObject(t.key.placeholder("") -> t.v))
-      )
-  }
+  implicit def equalsKeyCondition[V: DynamoFormat] =
+    new QueryableKeyCondition[KeyEquals[V]] {
+      final def apply(t: KeyEquals[V]) =
+        RequestCondition(
+          s"#K = :${t.key.placeholder("")}",
+          Map("#K" -> t.key.placeholder("")),
+          Some(DynamoObject(t.key.placeholder("") -> t.v))
+        )
+    }
 
   implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat] =
     new QueryableKeyCondition[AndQueryCondition[H, R]] {
@@ -49,8 +50,8 @@ object QueryableKeyCondition {
         )
     }
 
-  implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
-    implicit HR: UniqueKeyCondition[AndEqualsCondition[H, R]]
+  implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](implicit
+    HR: UniqueKeyCondition[AndEqualsCondition[H, R]]
   ) =
     new QueryableKeyCondition[AndEqualsCondition[H, R]] {
       final def apply(t: AndEqualsCondition[H, R]) = {

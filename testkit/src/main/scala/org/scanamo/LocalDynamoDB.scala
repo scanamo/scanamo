@@ -148,9 +148,8 @@ object LocalDynamoDB {
   ): T = {
     createTable(client)(tableName)(attributeDefinitions: _*)
     val res =
-      try {
-        thunk
-      } finally {
+      try thunk
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -164,9 +163,8 @@ object LocalDynamoDB {
   ): T = {
     createTable(client)(tableName)(attributeDefinitions: _*)
     val res =
-      try {
-        thunk
-      } finally {
+      try thunk
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -178,7 +176,7 @@ object LocalDynamoDB {
   ): T = {
     var created: Boolean = false
     var tableName: String = null
-    while (!created) {
+    while (!created)
       try {
         tableName = java.util.UUID.randomUUID.toString
         createTable(client)(tableName)(attributeDefinitions: _*)
@@ -186,12 +184,10 @@ object LocalDynamoDB {
       } catch {
         case _: ResourceInUseException =>
       }
-    }
 
     val res =
-      try {
-        thunk(tableName)
-      } finally {
+      try thunk(tableName)
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -203,7 +199,7 @@ object LocalDynamoDB {
   ): T = {
     var created: Boolean = false
     var tableName: String = null
-    while (!created) {
+    while (!created)
       try {
         tableName = java.util.UUID.randomUUID.toString
         createTable(client)(tableName)(attributeDefinitions: _*)
@@ -211,12 +207,10 @@ object LocalDynamoDB {
       } catch {
         case _: ResourceInUseException =>
       }
-    }
 
     val res =
-      try {
-        thunk(tableName)
-      } finally {
+      try thunk(tableName)
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -268,9 +262,8 @@ object LocalDynamoDB {
       secondaryIndexAttributes.toList
     )
     val res =
-      try {
-        thunk
-      } finally {
+      try thunk
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -290,9 +283,8 @@ object LocalDynamoDB {
       secondaryIndexAttributes.toList
     )
     val res =
-      try {
-        thunk
-      } finally {
+      try thunk
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -307,7 +299,7 @@ object LocalDynamoDB {
     var tableName: String = null
     var indexName: String = null
     var created: Boolean = false
-    while (!created) {
+    while (!created)
       try {
         tableName = java.util.UUID.randomUUID.toString
         indexName = java.util.UUID.randomUUID.toString
@@ -322,12 +314,10 @@ object LocalDynamoDB {
       } catch {
         case _: ResourceInUseException =>
       }
-    }
 
     val res =
-      try {
-        thunk(tableName, indexName)
-      } finally {
+      try thunk(tableName, indexName)
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -342,7 +332,7 @@ object LocalDynamoDB {
     var tableName: String = null
     var indexName: String = null
     var created: Boolean = false
-    while (!created) {
+    while (!created)
       try {
         tableName = java.util.UUID.randomUUID.toString
         indexName = java.util.UUID.randomUUID.toString
@@ -357,12 +347,10 @@ object LocalDynamoDB {
       } catch {
         case _: ResourceInUseException =>
       }
-    }
 
     val res =
-      try {
-        thunk(tableName, indexName)
-      } finally {
+      try thunk(tableName, indexName)
+      finally {
         deleteTable(client)(tableName)
         ()
       }
@@ -372,7 +360,9 @@ object LocalDynamoDB {
   private def keySchema(attributes: Seq[(String, ScalarAttributeType)]) = {
     val hashKeyWithType :: rangeKeyWithType = attributes.toList
     val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
-    keySchemas.map { case (symbol, keyType) => KeySchemaElement.builder.attributeName(symbol).keyType(keyType).build }.asJava
+    keySchemas.map {
+      case (symbol, keyType) => KeySchemaElement.builder.attributeName(symbol).keyType(keyType).build
+    }.asJava
   }
 
   private def attributeDefinitions(attributes: Seq[(String, ScalarAttributeType)]) =

@@ -43,18 +43,19 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
         results = items(res).map(ScanamoFree.read[T])
         newLimit = limit(req).map(_ - results.length)
         lastKey = lastEvaluatedKey(res).filterNot(_.isEmpty)
-        result <- lastKey
-          .filterNot(_ => newLimit.exists(_ <= 0))
-          .foldLeft(
-            Free
-              .pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[DynamoObject])]((results, lastKey))
-          )((rs, k) =>
-            for {
-              results <- rs
-              newReq = prepare(newLimit, k)(req)
-              more <- streamMore(newReq)
-            } yield (results._1 ::: more._1, more._2)
-          )
+        result <-
+          lastKey
+            .filterNot(_ => newLimit.exists(_ <= 0))
+            .foldLeft(
+              Free
+                .pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[DynamoObject])]((results, lastKey))
+            )((rs, k) =>
+              for {
+                results <- rs
+                newReq = prepare(newLimit, k)(req)
+                more <- streamMore(newReq)
+              } yield (results._1 ::: more._1, more._2)
+            )
       } yield result
     streamMore(req)
   }

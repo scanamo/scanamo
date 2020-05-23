@@ -128,9 +128,10 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -198,7 +199,9 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         list <- items.scanPaginatedM[SIO](1)
       } yield list
 
-      unsafeRun(zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])) should contain theSameElementsAs expected
+      unsafeRun(
+        zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])
+      ) should contain theSameElementsAs expected
     }
   }
 
@@ -310,12 +313,13 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         unsafeRun(zio.exec(result)) should equal(

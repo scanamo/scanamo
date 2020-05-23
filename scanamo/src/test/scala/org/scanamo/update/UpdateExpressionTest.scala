@@ -38,9 +38,8 @@ class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestpl
 
   def genTree(level: Int): Gen[UpdateExpression] =
     if (level >= 5) leaf
-    else {
+    else
       Gen.oneOf(leaf, genNode(level + 1))
-    }
   implicit lazy val update: Arbitrary[UpdateExpression] = Arbitrary(genTree(0))
 
   val stringList = DynamoFormat[List[String]]
