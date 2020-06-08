@@ -87,7 +87,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.26"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.32"
 
 lazy val refined = (project in file("refined"))
   .settings(
