@@ -41,8 +41,8 @@ object UniqueKeyCondition {
       final def key(t: KeyEquals[V]): K = t.key
     }
 
-  implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition, KH, KR](
-    implicit H: UniqueKeyCondition.Aux[H, KH],
+  implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition, KH, KR](implicit
+    H: UniqueKeyCondition.Aux[H, KH],
     R: UniqueKeyCondition.Aux[R, KR]
   ): UniqueKeyCondition[AndEqualsCondition[H, R]] =
     new UniqueKeyCondition[AndEqualsCondition[H, R]] {
@@ -66,10 +66,11 @@ trait UniqueKeyConditions[T] {
 object UniqueKeyConditions {
   def apply[T](implicit U: UniqueKeyConditions[T]): UniqueKeyConditions[T] = U
 
-  implicit def keyList[V: DynamoFormat]: UniqueKeyConditions[KeyList[V]] = new UniqueKeyConditions[KeyList[V]] {
-    final def toDynamoObject(kl: KeyList[V]) =
-      kl.values.map(v => DynamoObject(kl.key.placeholder("") -> v))
-  }
+  implicit def keyList[V: DynamoFormat] =
+    new UniqueKeyConditions[KeyList[V]] {
+      final def toDynamoObject(kl: KeyList[V]) =
+        kl.values.map(v => DynamoObject(kl.key.placeholder("") -> v))
+    }
 
   implicit def multipleKeyList[H: DynamoFormat, R: DynamoFormat]: UniqueKeyConditions[MultipleKeyList[H, R]] =
     new UniqueKeyConditions[MultipleKeyList[H, R]] {

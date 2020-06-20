@@ -17,9 +17,9 @@
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
-import com.amazonaws.services.dynamodbv2.model._
+import software.amazon.awssdk.services.dynamodb.model._
 import java.util.{ List => JList, Map => JMap }
-import org.scanamo.DynamoResultStream.{ QueryResultStream, ScanResultStream }
+import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query._
 import org.scanamo.request._
@@ -38,25 +38,27 @@ object ScanamoFree {
   def put[T: DynamoFormat](tableName: String)(item: T): ScanamoOps[Unit] =
     nativePut(tableName, PutReturn.Nothing, item).void
 
-  def putAndReturn[T: DynamoFormat](tableName: String)(ret: PutReturn,
-                                                       item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  def putAndReturn[T: DynamoFormat](
+    tableName: String
+  )(ret: PutReturn, item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     nativePut(tableName, ret, item)
-      .map(r => Option(r.getAttributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
+      .map(r => if (r.hasAttributes) Some(read[T](DynamoObject(r.attributes))) else None)
 
-  private def nativePut[T](tableName: String, ret: PutReturn, item: T)(
-    implicit f: DynamoFormat[T]
-  ): ScanamoOps[PutItemResult] =
+  private def nativePut[T](tableName: String, ret: PutReturn, item: T)(implicit
+    f: DynamoFormat[T]
+  ): ScanamoOps[PutItemResponse] =
     ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None, ret))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[Unit] = {
-    def loop(items: List[JMap[String, JList[WriteRequest]]]): ScanamoOps[Unit] = items match {
-      case Nil => ().pure[ScanamoOps]
-      case map :: rest =>
-        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map)).flatMap { resp =>
-          val unprocessed = resp.getUnprocessedItems
-          loop(if (unprocessed.isEmpty) rest else unprocessed :: rest)
-        }
-    }
+    def loop(items: List[JMap[String, JList[WriteRequest]]]): ScanamoOps[Unit] =
+      items match {
+        case Nil => ().pure[ScanamoOps]
+        case map :: rest =>
+          ScanamoOps.batchWrite(BatchWriteItemRequest.builder.requestItems(map).build).flatMap { resp =>
+            val unprocessed = resp.unprocessedItems
+            loop(if (unprocessed.isEmpty) rest else unprocessed :: rest)
+          }
+      }
 
     val batches = items
       .grouped(batchSize)
@@ -65,8 +67,9 @@ object ScanamoFree {
           tableName,
           batch,
           item =>
-            new WriteRequest()
-              .withPutRequest(new PutRequest().withItem(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap))
+            WriteRequest.builder
+              .putRequest(PutRequest.builder.item(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap).build)
+              .build
         )
       }
       .toList
@@ -76,12 +79,12 @@ object ScanamoFree {
 
   def transactPutAllTable[T](
     tableName: String
-  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] =
+  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] =
     transactPutAll(items.map(tableName -> _))
 
   def transactPutAll[T](
     tableAndItems: List[(String, T)]
-  )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResult] = {
+  )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] = {
     val dItems = tableAndItems.map {
       case (tableName, itm) =>
         TransactPutItem(tableName, f.write(itm), None)
@@ -91,12 +94,12 @@ object ScanamoFree {
 
   def transactUpdateAllTable(
     tableName: String
-  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResult] =
+  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResponse] =
     transactUpdateAll(items.map(tableName → _))
 
   def transactUpdateAll(
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
-  ): ScanamoOps[TransactWriteItemsResult] = {
+  ): ScanamoOps[TransactWriteItemsResponse] = {
     val items = tableAndItems.map {
       case (tableName, (key, updateExpression)) ⇒
         TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
@@ -106,12 +109,12 @@ object ScanamoFree {
 
   def transactDeleteAllTable(
     tableName: String
-  )(items: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResult] =
+  )(items: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResponse] =
     transactDeleteAll(items.map(tableName → _))
 
   def transactDeleteAll(
     tableAndItems: List[(String, UniqueKey[_])]
-  ): ScanamoOps[TransactWriteItemsResult] = {
+  ): ScanamoOps[TransactWriteItemsResponse] = {
     val items = tableAndItems.map {
       case (tableName, key) ⇒
         TransactDeleteItem(tableName, key.toDynamoObject, None)
@@ -127,9 +130,9 @@ object ScanamoFree {
         val map = buildMap[DynamoObject, WriteRequest](
           tableName,
           batch,
-          item => new WriteRequest().withDeleteRequest(new DeleteRequest().withKey(item.toJavaMap))
+          item => WriteRequest.builder.deleteRequest(DeleteRequest.builder.key(item.toJavaMap).build).build
         )
-        ScanamoOps.batchWrite(new BatchWriteItemRequest().withRequestItems(map))
+        ScanamoOps.batchWrite(BatchWriteItemRequest.builder.requestItems(map).build)
       }
       // can't believe cats doesn't provide a version of traverse that doesn't accumulate the result
       .void
@@ -139,12 +142,18 @@ object ScanamoFree {
   )(key: UniqueKey[_], consistent: Boolean): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     ScanamoOps
       .get(
-        new GetItemRequest()
-          .withTableName(tableName)
-          .withKey(key.toDynamoObject.toJavaMap)
-          .withConsistentRead(consistent)
+        GetItemRequest.builder
+          .tableName(tableName)
+          .key(key.toDynamoObject.toJavaMap)
+          .consistentRead(consistent)
+          .build
       )
-      .map(res => Option(res.getItem).map(m => read[T](DynamoObject(m))))
+      .map(res =>
+        if (res.hasItem)
+          Some(read[T](DynamoObject(res.item)))
+        else
+          None
+      )
 
   def getAll[T: DynamoFormat](
     tableName: String
@@ -156,19 +165,20 @@ object ScanamoFree {
         val map = emptyMap[String, KeysAndAttributes](1)
         map.put(
           tableName,
-          new KeysAndAttributes()
-            .withKeys(
+          KeysAndAttributes.builder
+            .keys(
               batch.foldLeft(emptyList[JMap[String, AttributeValue]](batch.size)) {
                 case (keys, key) =>
                   keys.add(key.toJavaMap)
                   keys
               }
             )
-            .withConsistentRead(consistent)
+            .consistentRead(consistent)
+            .build
         )
-        ScanamoOps.batchGet(new BatchGetItemRequest().withRequestItems(map))
+        ScanamoOps.batchGet(BatchGetItemRequest.builder.requestItems(map).build)
       }
-      .map(_.flatMap(_.getResponses.get(tableName).asScala.map(m => read[T](DynamoObject(m)))))
+      .map(_.flatMap(_.responses.get(tableName).asScala.map(m => read[T](DynamoObject(m)))))
       .map(_.toSet)
 
   def delete(tableName: String)(key: UniqueKey[_]): ScanamoOps[Unit] =
@@ -178,30 +188,32 @@ object ScanamoFree {
     tableName: String
   )(ret: DeleteReturn, key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
     nativeDelete(tableName, key, ret)
-      .map(r => Option(r.getAttributes).filterNot(_.isEmpty).map(DynamoObject(_)).map(read[T]))
+      .map(r => if (r.hasAttributes) Some(read[T](DynamoObject(r.attributes))) else None)
 
-  def nativeDelete(tableName: String, key: UniqueKey[_], ret: DeleteReturn): ScanamoOps[DeleteItemResult] =
+  def nativeDelete(tableName: String, key: UniqueKey[_], ret: DeleteReturn): ScanamoOps[DeleteItemResponse] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None, ret))
 
   def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    ScanResultStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)
+    ScanResponseStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)
 
   def scanM[M[_]: Monad: MonoidK, T: DynamoFormat](tableName: String,
-                                                   pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
-    ScanResultStream.streamTo[M, T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default), pageSize)
+                                                   pageSize: Int
+  ): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+    ScanResponseStream.streamTo[M, T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default), pageSize)
 
-  def scan0[T: DynamoFormat](tableName: String): ScanamoOps[ScanResult] =
+  def scan0[T: DynamoFormat](tableName: String): ScanamoOps[ScanResponse] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default))
 
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
-    QueryResultStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default)).map(_._1)
+    QueryResponseStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default)).map(_._1)
 
   def queryM[M[_]: Monad: MonoidK, T: DynamoFormat](
     tableName: String
   )(query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
-    QueryResultStream.streamTo[M, T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default), pageSize)
+    QueryResponseStream
+      .streamTo[M, T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default), pageSize)
 
-  def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResult] =
+  def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResponse] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
 
   def update[T: DynamoFormat](
@@ -219,7 +231,7 @@ object ScanamoFree {
           None
         )
       )
-      .map(r => read[T](DynamoObject(r.getAttributes)))
+      .map(r => read[T](DynamoObject(r.attributes)))
 
   /**
     * {{{

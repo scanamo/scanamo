@@ -2,9 +2,7 @@ package org.scanamo
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.fixtures._
@@ -12,28 +10,21 @@ import org.scanamo.generic.auto._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Seconds, Span }
 import org.scalatest.BeforeAndAfterAll
-import org.scalatest.matchers.should.Matchers
 import org.scalatest.funspec.AnyFunSpecLike
+import org.scalatest.matchers.should.Matchers
 import cats.implicits._
 import org.scanamo.ops.ScanamoOps
 
 class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
   implicit val system = ActorSystem("scanamo-alpakka")
-  val client = LocalDynamoDB.client()
 
   implicit val materializer = ActorMaterializer.create(system)
   implicit val executor = system.dispatcher
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
-  val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
-  val alpakkaClient = DynamoClient(
-    DynamoSettings(region = "", host = "localhost")
-      .withPort(8042)
-      .withParallelism(2)
-      .withCredentialsProvider(dummyCreds)
-  )
 
-  val scanamo = ScanamoAlpakka(alpakkaClient)
+  val client = LocalDynamoDB.client()
+  val scanamo = ScanamoAlpakka(client)
 
   override protected def afterAll(): Unit = {
     system.terminate()
@@ -157,9 +148,10 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -347,12 +339,13 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         scanamo

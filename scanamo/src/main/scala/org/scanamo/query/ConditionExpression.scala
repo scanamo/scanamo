@@ -16,11 +16,11 @@
 
 package org.scanamo.query
 
-import com.amazonaws.services.dynamodbv2.model.{
+import software.amazon.awssdk.services.dynamodb.model.{
   AttributeValue,
   ConditionalCheckFailedException,
-  DeleteItemResult,
-  PutItemResult
+  DeleteItemResponse,
+  PutItemResponse
 }
 import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, PutReturn, ScanamoError }
 import org.scanamo.ops.ScanamoOps
@@ -31,27 +31,28 @@ import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.functor._
 
-final case class ConditionalOperation[V, T](tableName: String, t: T)(
-  implicit state: ConditionExpression[T],
+final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
+  state: ConditionExpression[T],
   format: DynamoFormat[V]
 ) {
   def put(item: V): ScanamoOps[Either[ScanamoError, Unit]] =
     nativePut(PutReturn.Nothing, item).map(_.leftMap(ConditionNotMet(_)).void)
 
   def putAndReturn(ret: PutReturn)(item: V): ScanamoOps[Option[Either[ScanamoError, V]]] =
-    nativePut(ret, item).map(decodeReturnValue[PutItemResult](_, _.getAttributes))
+    nativePut(ret, item).map(decodeReturnValue[PutItemResponse](_, _.attributes))
 
-  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
+  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResponse]] =
     ScanamoOps.conditionalPut(ScanamoPutRequest(tableName, format.write(item), Some(state.apply(t)), ret))
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
     nativeDelete(DeleteReturn.Nothing, key).map(_.leftMap(ConditionNotMet(_)).void)
 
   def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Either[ScanamoError, V]]] =
-    nativeDelete(ret, key).map(decodeReturnValue[DeleteItemResult](_, _.getAttributes))
+    nativeDelete(ret, key).map(decodeReturnValue[DeleteItemResponse](_, _.attributes))
 
   private def nativeDelete(ret: DeleteReturn,
-                           key: UniqueKey[_]): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
+                           key: UniqueKey[_]
+  ): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResponse]] =
     ScanamoOps
       .conditionalDelete(
         ScanamoDeleteRequest(tableName = tableName, key = key.toDynamoObject, Some(state.apply(t)), ret)
@@ -66,9 +67,9 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(
     EitherT
       .fromEither[Option](either)
       .leftMap(ConditionNotMet(_))
-      .flatMap(deleteItemResult =>
+      .flatMap(DeleteItemResponse =>
         EitherT[Option, ScanamoError, V](
-          Option(attrs(deleteItemResult))
+          Option(attrs(DeleteItemResponse))
             .filterNot(_.isEmpty)
             .map(DynamoObject(_).toDynamoValue)
             .map(format.read)
@@ -92,7 +93,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(
       )
       .map(
         _.leftMap(ConditionNotMet(_))
-          .flatMap(r => format.read(DynamoObject(r.getAttributes).toDynamoValue))
+          .flatMap(r => format.read(DynamoObject(r.attributes).toDynamoValue))
       )
 }
 
@@ -198,15 +199,16 @@ object ConditionExpression {
         )
     }
 
-  implicit def keyIsCondition[V: DynamoFormat]: ConditionExpression[KeyIs[V]] = new ConditionExpression[KeyIs[V]] {
-    val prefix = "keyIs"
-    override def apply(k: KeyIs[V]): RequestCondition =
-      RequestCondition(
-        s"#${k.key.placeholder(prefix)} ${k.operator.op} :conditionAttributeValue",
-        k.key.attributeNames(s"#$prefix"),
-        Some(DynamoObject("conditionAttributeValue" -> k.v))
-      )
-  }
+  implicit def keyIsCondition[V: DynamoFormat]: ConditionExpression[KeyIs[V]] =
+    new ConditionExpression[KeyIs[V]] {
+      val prefix = "keyIs"
+      override def apply(k: KeyIs[V]): RequestCondition =
+        RequestCondition(
+          s"#${k.key.placeholder(prefix)} ${k.operator.op} :conditionAttributeValue",
+          k.key.attributeNames(s"#$prefix"),
+          Some(DynamoObject("conditionAttributeValue" -> k.v))
+        )
+    }
 
   implicit def andCondition[L: ConditionExpression, R: ConditionExpression]: ConditionExpression[AndCondition[L, R]] =
     new ConditionExpression[AndCondition[L, R]] {
@@ -220,9 +222,10 @@ object ConditionExpression {
         combineConditions(and.l, and.r, "OR")
     }
 
-  private def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char): Map[String, T] = map.map {
-    case (k, v) => (newKey(k, prefix, Some(magicChar)), v)
-  }
+  private def prefixKeys[T](map: Map[String, T], prefix: String, magicChar: Char): Map[String, T] =
+    map.map {
+      case (k, v) => (newKey(k, prefix, Some(magicChar)), v)
+    }
 
   private def newKey(oldKey: String, prefix: String, magicChar: Option[Char]): String =
     magicChar.fold(s"$prefix$oldKey")(mc => s"$mc$prefix${oldKey.stripPrefix(mc.toString)}")
@@ -230,8 +233,8 @@ object ConditionExpression {
   private def prefixKeysIn(string: String, keys: Iterable[String], prefix: String, magicChar: Option[Char]): String =
     keys.foldLeft(string)((result, key) => result.replaceAllLiterally(key, newKey(key, prefix, magicChar)))
 
-  private def combineConditions[L, R](l: L, r: R, combininingOperator: String)(
-    implicit lce: ConditionExpression[L],
+  private def combineConditions[L, R](l: L, r: R, combininingOperator: String)(implicit
+    lce: ConditionExpression[L],
     rce: ConditionExpression[R]
   ): RequestCondition = {
     val lPrefix: String = s"${combininingOperator.toLowerCase}_l_"

@@ -28,7 +28,7 @@ scala> import org.scanamo.syntax._
 scala> import org.scanamo.generic.auto._
  
 scala> val client = LocalDynamoDB.client()
-scala> import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+scala> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 scala> val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")("name" -> S)
 
 scala> case class Farm(animals: List[String])

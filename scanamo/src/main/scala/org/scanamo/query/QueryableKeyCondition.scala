@@ -51,8 +51,8 @@ object QueryableKeyCondition {
         )
     }
 
-  implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](
-    implicit HR: UniqueKeyCondition[AndEqualsCondition[H, R]]
+  implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](implicit
+    HR: UniqueKeyCondition[AndEqualsCondition[H, R]]
   ): QueryableKeyCondition[AndEqualsCondition[H, R]] =
     new QueryableKeyCondition[AndEqualsCondition[H, R]] {
       final def apply(t: AndEqualsCondition[H, R]) = {

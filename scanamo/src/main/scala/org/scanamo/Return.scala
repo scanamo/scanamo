@@ -1,15 +1,16 @@
 package org.scanamo
 
-import com.amazonaws.services.dynamodbv2.model.ReturnValue
+import software.amazon.awssdk.services.dynamodb.model.ReturnValue
 
 sealed abstract class PutReturn extends Product with Serializable { self =>
   import PutReturn._
 
-  final def asDynamoValue: ReturnValue = self match {
-    case Nothing  => ReturnValue.NONE
-    case OldValue => ReturnValue.ALL_OLD
-    case NewValue => ReturnValue.ALL_NEW
-  }
+  final def asDynamoValue: ReturnValue =
+    self match {
+      case Nothing  => ReturnValue.NONE
+      case OldValue => ReturnValue.ALL_OLD
+      case NewValue => ReturnValue.ALL_NEW
+    }
 }
 
 object PutReturn {
@@ -21,10 +22,11 @@ object PutReturn {
 sealed abstract class DeleteReturn extends Product with Serializable { self =>
   import DeleteReturn._
 
-  final def asDynamoValue: ReturnValue = self match {
-    case Nothing  => ReturnValue.NONE
-    case OldValue => ReturnValue.ALL_OLD
-  }
+  final def asDynamoValue: ReturnValue =
+    self match {
+      case Nothing  => ReturnValue.NONE
+      case OldValue => ReturnValue.ALL_OLD
+    }
 }
 
 object DeleteReturn {

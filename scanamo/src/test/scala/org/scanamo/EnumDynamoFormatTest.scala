@@ -10,7 +10,7 @@ class EnumDynamoFormatTest extends AnyFunSuite with Matchers {
       "First" -> DynamoValue.fromString("First")
     )
     write(First) shouldBe (DynamoValue.fromString("First"))
-    write[ExampleEnum](First) shouldBe (expected)
+    write[ExampleEnum](First) shouldBe expected
   }
 
   test("automatic derivation should handle fields with default values") {

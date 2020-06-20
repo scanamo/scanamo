@@ -4,7 +4,7 @@ import cats.effect.IO
 import cats.implicits._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
@@ -134,9 +134,10 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -360,12 +361,13 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         scanamo.exec[List[Either[DynamoReadError, Transport]]](result).unsafeRunSync should equal(

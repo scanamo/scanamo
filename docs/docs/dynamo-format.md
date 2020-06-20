@@ -58,11 +58,11 @@ For example, to store Joda `DateTime` objects as ISO `String`s in Dynamo:
 import org.joda.time._
 import org.scanamo._
 import org.scanamo.generic.auto._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
 case class Foo(dateTime: DateTime)
 
-val client = LocalDynamoDB.client()
+val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 
 LocalDynamoDB.createTable(client)("foo")("dateTime" -> S)
@@ -103,9 +103,9 @@ import eu.timepit.refined._
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.auto._
 import eu.timepit.refined.numeric._
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
-val client = LocalDynamoDB.client()
+val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 
 type PosInt = Int Refined Positive
