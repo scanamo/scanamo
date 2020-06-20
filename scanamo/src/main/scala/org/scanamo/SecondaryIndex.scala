@@ -32,7 +32,6 @@ sealed abstract class SecondaryIndex[V] {
   /**
     * Scan a secondary index
     *
-    *
     * This will only return items with a value present in the secondary index
     *
     * {{{
