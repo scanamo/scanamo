@@ -584,7 +584,6 @@ case class Table[V: DynamoFormat](name: String) {
     * ... }
     * List(Right(Event(play,print,600)), Right(Event(play,profile,100)))
     * }}}
-    *
     */
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) = TableWithOptions(name, ScanamoQueryOptions.default).from(key)
 
@@ -798,7 +797,6 @@ case class Table[V: DynamoFormat](name: String) {
     * (List(Right(Bear(Pooh,honey,None))),List(Right(Bear(Yogi,picnic baskets,Some(Ranger Smith)))))
     *
     * >>> case class Station(line: String, name: String, zone: Int)
-    *
     *
     * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
     *
