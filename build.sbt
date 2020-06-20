@@ -87,7 +87,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.26"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.41"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -147,9 +147,9 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
       "io.monix"       %% "monix"       % "3.2.2"  % Provided,
-      "co.fs2"         %% "fs2-core"    % "2.3.0"  % Provided,
+      "co.fs2"         %% "fs2-core"    % "2.4.2"  % Provided,
       "io.monix"       %% "monix"       % "3.2.2"  % Test,
-      "co.fs2"         %% "fs2-core"    % "2.3.0"  % Test,
+      "co.fs2"         %% "fs2-core"    % "2.4.2"  % Test,
       "org.scalatest"  %% "scalatest"   % "3.1.2"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     ),
@@ -188,7 +188,7 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.0",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.1",
       "org.scalatest"      %% "scalatest"                    % "3.1.2"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.14.3" % Test
     ),
