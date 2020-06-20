@@ -27,10 +27,7 @@ import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import magnolia.Magnolia
-import org.scanamo.generic.{ AutoDerivationUnlocker, Derivation }
 
-import scala.language.experimental.macros
 import scala.reflect.ClassTag
 
 /**

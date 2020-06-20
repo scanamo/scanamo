@@ -25,7 +25,15 @@ import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
 import org.scanamo._
 import magnolia._
 
+private[scanamo] object Derivation extends Derivation {
+  def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
+    val _ = U
+    Magnolia.gen[A](c)
+  }
+}
+
 private[scanamo] trait Derivation {
+
   type Typeclass[A] = DynamoFormat[A]
 
   type FieldName = String
