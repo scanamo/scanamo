@@ -1,5 +1,5 @@
 scalaVersion in ThisBuild := "2.12.10"
-crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1", "0.23.0-RC1")
+crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1", "0.25.0-RC2")
 
 val catsVersion = "2.1.1"
 val catsEffectVersion = "2.1.3"
@@ -16,9 +16,7 @@ lazy val stdOptions = Seq(
 
 lazy val std2xOptions = Seq(
   "-Xfatal-warnings",
-  "-language:higherKinds",
-  "-language:existentials",
-  "-language:implicitConversions",
+  "-language:higherKinds,existentials,implicitConversions",
   "-explaintypes",
   "-Yrangepos",
   "-Xfuture",
@@ -72,7 +70,7 @@ val commonSettings = Seq(
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-  scalacOptions ++= { if (isDotty.value) Seq("-language:Scala2", "-language:implicitConversions") else Nil },
+  scalacOptions ++= { if (isDotty.value) Seq("-language:Scala2,implicitConversions") else Nil },
   libraryDependencies ++= {
     if (isDotty.value) Seq()
     else Seq(compilerPlugin("org.typelevel" % "kind-projector" % "0.11.0") cross CrossVersion.full)
@@ -158,9 +156,8 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1",
-      "org.typelevel"          %% "cats-free"          % catsVersion,
-      "com.propensive"         %% "magnolia"           % "0.12.7",
+      "org.typelevel"  %% "cats-free" % catsVersion,
+      "com.propensive" %% "magnolia"  % "0.12.7",
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"             % "2.2.1"       % Provided,
       "joda-time"          % "joda-time"                % "2.10.6"      % Test,
@@ -177,10 +174,7 @@ lazy val testkit = (project in file("testkit"))
     commonSettings,
     publishingSettings,
     name := "scanamo-testkit",
-    libraryDependencies ++= Seq(
-      awsDynamoDB,
-      "org.scala-lang.modules" %% "scala-java8-compat" % "0.9.1"
-    )
+    libraryDependencies += awsDynamoDB
   )
 
 lazy val catsEffect = (project in file("cats"))
