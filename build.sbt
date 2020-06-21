@@ -69,7 +69,8 @@ val commonSettings = Seq(
   homepage := Some(url("http://www.scanamo.org/")),
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
-  scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
+  scalacOptions := stdOptions ++ extraOptions(scalaVersion.value) ++
+    (if (isDotty.value) Seq("-Ykind-projector") else Nil),
   scalacOptions ++= { if (isDotty.value) Seq("-language:Scala2,implicitConversions") else Nil },
   libraryDependencies ++= {
     if (isDotty.value) Seq()
