@@ -25,20 +25,20 @@ import zio.interop.catz._
 import zio.stream.{ Stream, ZStream }
 
 class ScanamoZio private (client: DynamoDbAsyncClient) {
-  final private val interpreter: ScanamoOpsA ~> IO[DynamoDbException, ?] =
+  final private val interpreter: ScanamoOpsA ~> IO[DynamoDbException, *] =
     new ZioInterpreter(client)
 
   final def exec[A](op: ScanamoOps[A]): IO[DynamoDbException, A] = op.foldMap(interpreter)
 
-  final def execT[M[_]: Monad, A](hoist: IO[DynamoDbException, ?] ~> M)(op: ScanamoOpsT[M, A]): M[A] =
+  final def execT[M[_]: Monad, A](hoist: IO[DynamoDbException, *] ~> M)(op: ScanamoOpsT[M, A]): M[A] =
     op.foldMap(interpreter andThen hoist)
 }
 
 object ScanamoZio {
   def apply(client: DynamoDbAsyncClient): ScanamoZio = new ScanamoZio(client)
 
-  val ToStream: IO[DynamoDbException, ?] ~> Stream[DynamoDbException, ?] =
-    new (IO[DynamoDbException, ?] ~> Stream[DynamoDbException, ?]) {
+  val ToStream: IO[DynamoDbException, *] ~> Stream[DynamoDbException, *] =
+    new (IO[DynamoDbException, *] ~> Stream[DynamoDbException, *]) {
       def apply[A](fa: IO[DynamoDbException, A]): Stream[DynamoDbException, A] = ZStream.fromEffect(fa)
     }
 }

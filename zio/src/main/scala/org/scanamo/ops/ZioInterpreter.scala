@@ -22,7 +22,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 import zio.{ IO, ZIO }
 
-private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (ScanamoOpsA ~> IO[DynamoDbException, ?]) {
+private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (ScanamoOpsA ~> IO[DynamoDbException, *]) {
   final private def eff[A](fut: => CompletableFuture[A]): IO[DynamoDbException, A] =
     ZIO.fromCompletionStage(fut).refineToOrDie[DynamoDbException]
 
@@ -33,7 +33,7 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
       case ConditionalPut(req) =>
         eff(client.putItem(JavaRequests.put(req)))
           .map[Either[ConditionalCheckFailedException, PutItemResponse]](Right(_))
-          .catchSome {
+          .catchSome[Any, DynamoDbException, Either[ConditionalCheckFailedException, PutItemResponse]] {
             case e: ConditionalCheckFailedException => IO.succeed(Left(e))
           }
       case Get(req) =>
@@ -43,7 +43,7 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
       case ConditionalDelete(req) =>
         eff(client.deleteItem(JavaRequests.delete(req)))
           .map[Either[ConditionalCheckFailedException, DeleteItemResponse]](Right(_))
-          .catchSome {
+          .catchSome[Any, DynamoDbException, Either[ConditionalCheckFailedException, DeleteItemResponse]] {
             case e: ConditionalCheckFailedException => IO.succeed(Left(e))
           }
       case Scan(req) =>
@@ -59,7 +59,7 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
       case ConditionalUpdate(req) =>
         eff(client.updateItem(JavaRequests.update(req)))
           .map[Either[ConditionalCheckFailedException, UpdateItemResponse]](Right(_))
-          .catchSome {
+          .catchSome[Any, DynamoDbException, Either[ConditionalCheckFailedException, UpdateItemResponse]] {
             case e: ConditionalCheckFailedException => IO.succeed(Left(e))
           }
       case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
