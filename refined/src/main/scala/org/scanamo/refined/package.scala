@@ -27,7 +27,7 @@ package object refined {
     validate: Validate[T, P]
   ): DynamoFormat[F[T, P]] =
     new DynamoFormat[F[T, P]] {
-      final def read(av: DynamoValue): Either[DynamoReadError, F[T, P]] =
+      final def read(av: DynamoValue): DynamoFormat.Result[F[T, P]] =
         baseFormat.read(av).flatMap(v => refType.refine[P](v).leftMap(desc => TypeCoercionError(new Exception(desc))))
 
       final def write(v: F[T, P]): DynamoValue =

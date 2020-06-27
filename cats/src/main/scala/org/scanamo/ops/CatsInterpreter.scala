@@ -25,10 +25,10 @@ import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Delete => _, U
 import java.util.concurrent.CompletionException
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
-  final private def eff[A <: AnyRef](fut: => CompletableFuture[A]): F[A] =
+  final private def eff[A](fut: => CompletableFuture[A]): F[A] =
     F.async { cb =>
       fut.handle[Unit] { (a, x) =>
-        if (a eq null)
+        if (a == null)
           x match {
             case t: CompletionException => cb(Left(t.getCause))
             case t                      => cb(Left(t))

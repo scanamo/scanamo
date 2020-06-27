@@ -19,6 +19,8 @@ package org.scanamo.joda
 import org.scanamo.DynamoFormat
 import org.joda.time.{ DateTime, Instant }
 
+import scala.util.Try
+
 object JodaFormats {
 
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
@@ -31,8 +33,8 @@ object JodaFormats {
     *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
     *  }}}
     */
-  implicit val jodaInstantAsLongFormat =
-    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_), x => x.getMillis)
+  implicit val jodaInstantAsLongFormat: DynamoFormat[Instant] =
+    DynamoFormat.tmap[Instant, Long](t => Try(new Instant(t)), x => x.getMillis)
 
   /**
     *  Convenient, readable format for Joda DateTime, but requires that all dates serialised
@@ -49,8 +51,6 @@ object JodaFormats {
     *      | DynamoFormat[DateTime].read(DynamoFormat[DateTime].write(dtBasic)) == Right(dtBasic)
     *  }}}
     */
-  implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
-    DateTime.parse,
-    _.toString
-  )
+  implicit val jodaStringFormat: DynamoFormat[DateTime] =
+    DynamoFormat.tmap[DateTime, String](t => Try(DateTime.parse(t)), _.toString)
 }

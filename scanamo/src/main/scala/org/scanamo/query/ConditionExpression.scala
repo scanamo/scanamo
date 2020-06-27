@@ -139,7 +139,7 @@ object ConditionExpression {
         }
         RequestCondition(
           s"""#${attributeName
-            .placeholder(prefix)} IN ${attributeValues.mapKeys(':' + _).keys.mkString("(", ",", ")")}""",
+            .placeholder(prefix)} IN ${attributeValues.mapKeys(":" + _).keys.mkString("(", ",", ")")}""",
           attributeName.attributeNames(s"#$prefix"),
           Some(attributeValues)
         )

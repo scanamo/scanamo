@@ -36,7 +36,7 @@ object ScanamoCats {
   def apply[F[_]: Async](client: DynamoDbAsyncClient): ScanamoCats[F] = new ScanamoCats(client)
 
   def ToIterant[F[_]: Async]: F ~> Iterant[F, *] =
-    new (F ~> Iterant[F, ?]) {
+    new (F ~> Iterant[F, *]) {
       def apply[A](fa: F[A]): Iterant[F, A] = Iterant.liftF(fa)
     }
 

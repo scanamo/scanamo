@@ -16,6 +16,8 @@
 
 package org.scanamo
 
+import org.scanamo.DynamoFormat.Result
+
 import cats.{ Monad, MonoidK }
 import cats.MonoidK.ops._
 import cats.free.{ Free, FreeT }
@@ -36,8 +38,8 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
   def prepare(limit: Option[Int], lastEvaluatedKey: DynamoObject): Req => Req =
     withExclusiveStartKey(lastEvaluatedKey).andThen(limit.map(withLimit).getOrElse(identity[Req](_)))
 
-  def stream[T: DynamoFormat](req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[DynamoObject])] = {
-    def streamMore(req: Req): ScanamoOps[(List[Either[DynamoReadError, T]], Option[DynamoObject])] =
+  def stream[T: DynamoFormat](req: Req): ScanamoOps[(List[Result[T]], Option[DynamoObject])] = {
+    def streamMore(req: Req): ScanamoOps[(List[Result[T]], Option[DynamoObject])] =
       for {
         res <- exec(req)
         results = items(res).map(ScanamoFree.read[T])
@@ -48,7 +50,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
             .filterNot(_ => newLimit.exists(_ <= 0))
             .foldLeft(
               Free
-                .pure[ScanamoOpsA, (List[Either[DynamoReadError, T]], Option[DynamoObject])]((results, lastKey))
+                .pure[ScanamoOpsA, (List[Result[T]], Option[DynamoObject])]((results, lastKey))
             )((rs, k) =>
               for {
                 results <- rs
@@ -63,8 +65,8 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
   def streamTo[M[_]: Monad, T: DynamoFormat](
     req: Req,
     pageSize: Int
-  )(implicit M: MonoidK[M]): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] = {
-    def streamMore(req: Req, l: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+  )(implicit M: MonoidK[M]): ScanamoOpsT[M, List[Result[T]]] = {
+    def streamMore(req: Req, l: Int): ScanamoOpsT[M, List[Result[T]]] =
       exec(withLimit(l)(req)).toFreeT[M].flatMap { res =>
         val results = items(res).map(ScanamoFree.read[T])
         if (results.isEmpty)
@@ -73,7 +75,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
           val l1 = limit(req).fold(pageSize)(l => Math.min(pageSize, l - results.length))
           lastEvaluatedKey(res)
             .filterNot(_ => l1 <= 0)
-            .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Either[DynamoReadError, T]]](results))((res, k) =>
+            .foldLeft(FreeT.pure[ScanamoOpsA, M, List[Result[T]]](results))((res, k) =>
               res <+> streamMore(withExclusiveStartKey(k)(req), l1)
             )
         }

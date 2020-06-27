@@ -188,40 +188,32 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
   /**
     * Turns into a list of values, if applies
     */
-  final def asArray: Option[List[DynamoValue]] =
+  final def asArray: List[DynamoValue] =
     self match {
-      case Empty => Some(List.empty)
+      case Empty => Nil
       case Strict(xs0) =>
-        Some(
-          xs0.stream.reduce[List[DynamoValue]](
-            Nil,
-            (xs, x) => xs :+ DynamoValue.fromAttributeValue(x),
-            _ ++ _
-          )
+        xs0.stream.reduce[List[DynamoValue]](
+          Nil,
+          (xs, x) => xs :+ DynamoValue.fromAttributeValue(x),
+          _ ++ _
         )
-      case Pure(xs)       => Some(xs)
-      case Concat(xs, ys) => (xs.asArray, ys.asArray).mapN(_ ++ _)
+      case Pure(xs)       => xs
+      case Concat(xs, ys) => xs.asArray ++ ys.asArray
       case StrictS(xs) =>
-        Some(
-          xs.stream.map[DynamoValue](DynamoValue.fromString(_)).reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _).reverse
-        )
-      case PureS(xs) => Some(xs.map(DynamoValue.fromString))
+        xs.stream.map[DynamoValue](DynamoValue.fromString(_)).reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _).reverse
+      case PureS(xs) => xs.map(DynamoValue.fromString)
       case StrictN(xs) =>
-        Some(
-          xs.stream
-            .map[DynamoValue](DynamoValue.unsafeFromNumber(_))
-            .reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _)
-            .reverse
-        )
-      case PureN(xs) => Some(xs.map(DynamoValue.unsafeFromNumber))
+        xs.stream
+          .map[DynamoValue](DynamoValue.unsafeFromNumber(_))
+          .reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _)
+          .reverse
+      case PureN(xs) => xs.map(DynamoValue.unsafeFromNumber)
       case StrictB(xs) =>
-        Some(
-          xs.stream
-            .map[DynamoValue](DynamoValue.fromByteBuffer(_))
-            .reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _)
-            .reverse
-        )
-      case PureB(xs) => Some(xs.map(DynamoValue.fromByteBuffer))
+        xs.stream
+          .map[DynamoValue](DynamoValue.fromByteBuffer(_))
+          .reduce[List[DynamoValue]](Nil, _ :+ _, _ ++ _)
+          .reverse
+      case PureB(xs) => xs.map(DynamoValue.fromByteBuffer)
     }
 
   /**

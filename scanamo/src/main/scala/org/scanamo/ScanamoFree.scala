@@ -16,6 +16,8 @@
 
 package org.scanamo
 
+import org.scanamo.DynamoFormat.Result
+
 import cats.{ Monad, MonoidK }
 import software.amazon.awssdk.services.dynamodb.model._
 import java.util.{ List => JList, Map => JMap }
@@ -40,7 +42,7 @@ object ScanamoFree {
 
   def putAndReturn[T: DynamoFormat](
     tableName: String
-  )(ret: PutReturn, item: T): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  )(ret: PutReturn, item: T): ScanamoOps[Option[Result[T]]] =
     nativePut(tableName, ret, item)
       .map(r => if (r.hasAttributes) Some(read[T](DynamoObject(r.attributes))) else None)
 
@@ -95,7 +97,7 @@ object ScanamoFree {
   def transactUpdateAllTable(
     tableName: String
   )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResponse] =
-    transactUpdateAll(items.map(tableName → _))
+    transactUpdateAll(items.map(tableName -> _))
 
   def transactUpdateAll(
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
@@ -110,7 +112,7 @@ object ScanamoFree {
   def transactDeleteAllTable(
     tableName: String
   )(items: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResponse] =
-    transactDeleteAll(items.map(tableName → _))
+    transactDeleteAll(items.map(tableName -> _))
 
   def transactDeleteAll(
     tableAndItems: List[(String, UniqueKey[_])]
@@ -139,7 +141,7 @@ object ScanamoFree {
 
   def get[T: DynamoFormat](
     tableName: String
-  )(key: UniqueKey[_], consistent: Boolean): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  )(key: UniqueKey[_], consistent: Boolean): ScanamoOps[Option[Result[T]]] =
     ScanamoOps
       .get(
         GetItemRequest.builder
@@ -157,7 +159,7 @@ object ScanamoFree {
 
   def getAll[T: DynamoFormat](
     tableName: String
-  )(keys: UniqueKeys[_], consistent: Boolean): ScanamoOps[Set[Either[DynamoReadError, T]]] =
+  )(keys: UniqueKeys[_], consistent: Boolean): ScanamoOps[Set[Result[T]]] =
     keys.toDynamoObject
       .grouped(batchGetSize)
       .toList
@@ -186,30 +188,28 @@ object ScanamoFree {
 
   def deleteAndReturn[T: DynamoFormat](
     tableName: String
-  )(ret: DeleteReturn, key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, T]]] =
+  )(ret: DeleteReturn, key: UniqueKey[_]): ScanamoOps[Option[Result[T]]] =
     nativeDelete(tableName, key, ret)
       .map(r => if (r.hasAttributes) Some(read[T](DynamoObject(r.attributes))) else None)
 
   def nativeDelete(tableName: String, key: UniqueKey[_], ret: DeleteReturn): ScanamoOps[DeleteItemResponse] =
     ScanamoOps.delete(ScanamoDeleteRequest(tableName, key.toDynamoObject, None, ret))
 
-  def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Either[DynamoReadError, T]]] =
+  def scan[T: DynamoFormat](tableName: String): ScanamoOps[List[Result[T]]] =
     ScanResponseStream.stream[T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default)).map(_._1)
 
-  def scanM[M[_]: Monad: MonoidK, T: DynamoFormat](tableName: String,
-                                                   pageSize: Int
-  ): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+  def scanM[M[_]: Monad: MonoidK, T: DynamoFormat](tableName: String, pageSize: Int): ScanamoOpsT[M, List[Result[T]]] =
     ScanResponseStream.streamTo[M, T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default), pageSize)
 
   def scan0[T: DynamoFormat](tableName: String): ScanamoOps[ScanResponse] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default))
 
-  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
+  def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Result[T]]] =
     QueryResponseStream.stream[T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default)).map(_._1)
 
   def queryM[M[_]: Monad: MonoidK, T: DynamoFormat](
     tableName: String
-  )(query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
+  )(query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Result[T]]] =
     QueryResponseStream
       .streamTo[M, T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default), pageSize)
 
@@ -218,7 +218,7 @@ object ScanamoFree {
 
   def update[T: DynamoFormat](
     tableName: String
-  )(key: UniqueKey[_])(update: UpdateExpression): ScanamoOps[Either[DynamoReadError, T]] =
+  )(key: UniqueKey[_])(update: UpdateExpression): ScanamoOps[Result[T]] =
     ScanamoOps
       .update(
         ScanamoUpdateRequest(
@@ -241,7 +241,7 @@ object ScanamoFree {
     *     |   ) == Right(m)
     * }}}
     */
-  def read[T](m: DynamoObject)(implicit f: DynamoFormat[T]): Either[DynamoReadError, T] =
+  def read[T](m: DynamoObject)(implicit f: DynamoFormat[T]): Result[T] =
     f.read(m.toDynamoValue)
 
   private def emptyList[T](capacity: Int): JList[T] = new java.util.ArrayList[T](capacity)

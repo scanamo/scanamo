@@ -172,7 +172,7 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
   /**
     * Transforms into a value of type `A` for which there is a codec, if applies
     */
-  final def as[A](implicit A: DynamoFormat[A]): Either[DynamoReadError, A] = A.read(self)
+  final def as[A](implicit A: DynamoFormat[A]): DynamoFormat.Result[A] = A.read(self)
 
   /**
     * Returns this value if it isn't null, the provided one otherwise (which may be null too),

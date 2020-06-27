@@ -22,8 +22,6 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
 
 import scala.concurrent.{ ExecutionContext, Future }
-import scala.compat.java8.FutureConverters._
-import java.util.concurrent.CompletionException
 
 /*
  * Interpret Scanamo operations into a `Future` using the DynamoDbClient client
@@ -39,8 +37,7 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
           .putItem(JavaRequests.put(req))
           .toScala
           .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-          .recover {
+          .recover[Either[ConditionalCheckFailedException, PutItemResponse]] {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
       case Get(req)    => client.getItem(req).toScala
@@ -50,8 +47,9 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
           .deleteItem(JavaRequests.delete(req))
           .toScala
           .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+          .recover[Either[ConditionalCheckFailedException, DeleteItemResponse]] {
+            case e: ConditionalCheckFailedException => Either.left(e)
+          }
       case Scan(req)  => client.scan(JavaRequests.scan(req)).toScala
       case Query(req) => client.query(JavaRequests.query(req)).toScala
       // Overloading means we need explicit parameter types here
@@ -63,8 +61,7 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
           .updateItem(JavaRequests.update(req))
           .toScala
           .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-          .recover {
+          .recover[Either[ConditionalCheckFailedException, UpdateItemResponse]] {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
       case TransactWriteAll(req) => client.transactWriteItems(JavaRequests.transactItems(req)).toScala

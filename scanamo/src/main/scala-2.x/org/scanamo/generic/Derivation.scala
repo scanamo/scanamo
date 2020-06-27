@@ -51,7 +51,7 @@ private[scanamo] trait Derivation {
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField(o: DynamoObject, param: Param[Typeclass, T]): Valid[param.PType] =
       o(param.label)
-        .fold[Either[DynamoReadError, param.PType]] {
+        .fold[DynamoFormat.Result[param.PType]] {
           param.default.fold(param.typeclass.read(DynamoValue.nil).leftMap(_ => MissingProperty))(Right(_))
         }(param.typeclass.read(_))
         .leftMap(e => NonEmptyChain.one(param.label -> e))
@@ -62,16 +62,16 @@ private[scanamo] trait Derivation {
         private[this] val _cachedAttribute = DynamoValue.fromString(cc.typeName.short)
         private[this] val _cachedHit = Right(cc.rawConstruct(Nil))
 
-        def read(dv: DynamoValue): Either[DynamoReadError, T] =
+        def read(dv: DynamoValue): DynamoFormat.Result[T] =
           dv.asString
             .filter(_ == cc.typeName.short)
-            .fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("S", dv)))(_ => _cachedHit)
+            .fold[DynamoFormat.Result[T]](Left(NoPropertyOfType("S", dv)))(_ => _cachedHit)
 
         def write(t: T): DynamoValue = _cachedAttribute
       }
     else
       new DynamoFormat.ObjectFormat[T] {
-        def readObject(o: DynamoObject): Either[DynamoReadError, T] =
+        def readObject(o: DynamoObject): DynamoFormat.Result[T] =
           cc.parameters.toList
             .parTraverse(decodeField(o, _))
             .bimap(
@@ -90,14 +90,14 @@ private[scanamo] trait Derivation {
 
   // Derivation for ADTs, they are encoded as an object of one property, the key being the case name
   def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] = {
-    def decode(o: DynamoObject): Either[DynamoReadError, T] =
+    def decode(o: DynamoObject): DynamoFormat.Result[T] =
       (for {
         subtype <- st.subtypes.find(sub => o.contains(sub.typeName.short))
         value <- o(subtype.typeName.short)
       } yield subtype.typeclass.read(value)).getOrElse(Left(NoPropertyOfType("M", DynamoValue.nil)))
 
     new DynamoFormat.ObjectFormat[T] {
-      def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
+      def readObject(o: DynamoObject): DynamoFormat.Result[T] = decode(o)
 
       def writeObject(t: T): DynamoObject =
         st.dispatch(t) { subtype =>

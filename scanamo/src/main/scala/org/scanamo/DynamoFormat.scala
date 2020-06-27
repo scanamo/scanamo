@@ -17,18 +17,20 @@
 package org.scanamo
 
 import java.nio.ByteBuffer
-import java.time.format.{ DateTimeFormatter, DateTimeParseException }
+import java.time.format.DateTimeFormatter
 import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
 import java.util.UUID
 
 import cats.instances.either._
 import cats.instances.list._
-import cats.instances.vector._
 import cats.syntax.either._
+import cats.syntax.show._
 import cats.syntax.traverse._
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
+import scala.util.Try
 import scala.reflect.ClassTag
+import scala.util.control.NonFatal
 
 /**
   * Type class for defining serialisation to and from
@@ -85,23 +87,36 @@ import scala.reflect.ClassTag
   *
   * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.iso]]
   */
-trait DynamoFormat[T] {
-  def read(av: DynamoValue): Either[DynamoReadError, T]
-  def read(av: AttributeValue): Either[DynamoReadError, T] = read(DynamoValue.fromAttributeValue(av))
+trait DynamoFormat[T] extends Serializable {
+
+  /** Attempts to decode a DynamoDB value as a value of type T */
+  def read(av: DynamoValue): DynamoFormat.Result[T]
+
+  /** Attempts to decode a raw attribute value as a value of type T */
+  def read(av: AttributeValue): DynamoFormat.Result[T] = read(DynamoValue.fromAttributeValue(av))
+
+  /** Encodes a value of type T as a DynamoDB value */
   def write(t: T): DynamoValue
 
+  /** Creates an isomorphic format */
   def iso[U](r: T => U, w: U => T): DynamoFormat[U] = DynamoFormat.iso(r, w)(this)
-  def xmap[U](r: T => Either[DynamoReadError, U], w: U => T): DynamoFormat[U] = DynamoFormat.xmap(r, w)(this)
-  def coercedXmap[U](read: T => U, write: U => T): DynamoFormat[U] =
-    DynamoFormat.coercedXmap(read, write)(this, implicitly)
+
+  /** Creates a format for narrower type U */
+  def xmap[U](r: T => Either[String, U], w: U => T): DynamoFormat[U] = DynamoFormat.xmap(r, w)(this)
+
+  /** Creates a format for a coerced type U */
+  def tmap[U](r: T => Try[U], w: U => T): DynamoFormat[U] = DynamoFormat.tmap(r, w)(this)
 }
 
 object DynamoFormat extends PlatformSpecificFormat {
+
+  type Result[A] = Either[DynamoReadError, A]
+
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
-  def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
+  def build[T](r: DynamoValue => Result[T], w: T => DynamoValue): DynamoFormat[T] =
     new DynamoFormat[T] {
-      def read(av: DynamoValue): Either[DynamoReadError, T] = r(av)
+      def read(av: DynamoValue): Result[T] = r(av)
       def write(t: T): DynamoValue = w(t)
     }
 
@@ -112,11 +127,11 @@ object DynamoFormat extends PlatformSpecificFormat {
     * should derive an instance from this class
     */
   trait ObjectFormat[T] extends DynamoFormat[T] {
-    def readObject(o: DynamoObject): Either[DynamoReadError, T]
+    def readObject(o: DynamoObject): Result[T]
     def writeObject(t: T): DynamoObject
 
-    final def read(dv: DynamoValue): Either[DynamoReadError, T] =
-      dv.asObject.fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("M", dv)))(readObject)
+    final def read(dv: DynamoValue): Result[T] =
+      dv.asObject.fold[Result[T]](Left(NoPropertyOfType("M", dv)))(readObject)
 
     final def write(t: T): DynamoValue =
       writeObject(t).toDynamoValue
@@ -125,27 +140,35 @@ object DynamoFormat extends PlatformSpecificFormat {
   object ObjectFormat {
     def apply[T](implicit T: ObjectFormat[T]): ObjectFormat[T] = T
 
-    def build[T](r: DynamoObject => Either[DynamoReadError, T], w: T => DynamoObject): ObjectFormat[T] =
+    def build[T](r: DynamoObject => Result[T], w: T => DynamoObject): ObjectFormat[T] =
       new ObjectFormat[T] {
-        def readObject(o: DynamoObject): Either[DynamoReadError, T] = r(o)
+        def readObject(o: DynamoObject): Result[T] = r(o)
         def writeObject(t: T): DynamoObject = w(t)
       }
   }
 
-  private[scanamo] def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
-    a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
+  trait ArrayFormat[T] extends DynamoFormat[T] {
+    def readArray(a: DynamoArray): Result[T]
+    def writeArray(t: T): DynamoArray
+
+    final def read(dv: DynamoValue): Result[T] =
+      dv.asArray.fold[Result[T]](Left(NoPropertyOfType("L", dv)))(readArray)
+
+    final def write(t: T): DynamoValue =
+      writeArray(t).toDynamoValue
+  }
 
   /**
-    * Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
-    * i.e. an `A` can always be converted to a `B` and vice versa.
+    * Returns a [[DynamoFormat]] for type `A` that is isomorphic to type `B`,
+    * whenever a format for type `B` exists.
     *
     * If there are some values of `B` that have no corresponding value in `A`,
-    * use [[DynamoFormat.xmap]] or [[DynamoFormat.coercedXmap]].
+    * use [[DynamoFormat.xmap]] or [[DynamoFormat.tmap]].
     *
     * {{{
     * >>> case class UserId(value: String)
     *
-    * >>> implicit val userIdFormat =
+    * >>> implicit val userIdFormat: DynamoFormat[UserId] =
     * ...   DynamoFormat.iso[UserId, String](UserId.apply, _.value)
     * >>> DynamoFormat[UserId].read(DynamoValue.fromString("Eric"))
     * Right(UserId(Eric))
@@ -153,26 +176,30 @@ object DynamoFormat extends PlatformSpecificFormat {
     */
   def iso[A, B](r: B => A, w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
     new DynamoFormat[A] {
-      final def read(item: DynamoValue): Either[DynamoReadError, A] = f.read(item).map(r)
+      final def read(item: DynamoValue): Result[A] = f.read(item).map(r)
       final def write(t: A): DynamoValue = f.write(w(t))
     }
 
   /**
-    * {{{
-    * >>> import org.joda.time._
+    *  Returns a [[DynamoFormat]] for type `A` that is narrower than type `B`,
+    * whenever a format for type `B` exists.
     *
-    * >>> implicit val jodaLongFormat = DynamoFormat.xmap[DateTime, Long](
-    * ...   l => Right(new DateTime(l).withZone(DateTimeZone.UTC))
-    * ... ,
-    * ...   _.withZone(DateTimeZone.UTC).getMillis
+    * Taking the example above, and assuming a user ID starts with an octothorpe:
+    *
+    * {{{
+    * >>> class UserId private (val value: String) extends AnyVal
+    *
+    * >>> implicit val userIdFormat: DynamoFormat[UserId] = DynamoFormat.xmap[UserId, String](
+    * ...   x => if (x.startsWith("#")) Right(new UserId(x)) else Left(),
+    * ...   _.value
     * ... )
     * >>> DynamoFormat[DateTime].read(DynamoValue.fromNumber(0L))
     * Right(1970-01-01T00:00:00.000Z)
     * }}}
     */
-  def xmap[A, B](r: B => Either[DynamoReadError, A], w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
+  def xmap[A, B](r: B => Either[String, A], w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
     new DynamoFormat[A] {
-      final def read(item: DynamoValue): Either[DynamoReadError, A] = f.read(item).flatMap(r)
+      final def read(item: DynamoValue): Result[A] = f.read(item).flatMap(r(_).leftMap(ReadFailure(_)))
       final def write(t: A): DynamoValue = f.write(w(t))
     }
 
@@ -195,14 +222,11 @@ object DynamoFormat extends PlatformSpecificFormat {
     * Left(TypeCoercionError(java.lang.IllegalArgumentException: Invalid format: "Togtogdenoggleplop"))
     * }}}
     */
-  def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A, write: A => B): DynamoFormat[A] =
-    xmap(coerce[B, A, T](read), write)
-
-  private def coerceNumber[N: Numeric](f: String => N): String => Either[DynamoReadError, N] =
-    DynamoFormat.coerce[String, N, NumberFormatException](f)
-
-  private def coerceByteBuffer[B](f: ByteBuffer => B): ByteBuffer => Either[DynamoReadError, B] =
-    DynamoFormat.coerce[ByteBuffer, B, IllegalArgumentException](f)
+  def tmap[A, B](r: B => Try[A], w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
+    new DynamoFormat[A] {
+      def read(x: DynamoValue): Result[A] = f.read(x).flatMap(r(_).toEither.leftMap(TypeCoercionError(_)))
+      def write(t: A): DynamoValue = f.write(w(t))
+    }
 
   private def attribute[T](
     decode: DynamoValue => Option[T],
@@ -210,9 +234,23 @@ object DynamoFormat extends PlatformSpecificFormat {
     propertyType: String
   ): DynamoFormat[T] =
     new DynamoFormat[T] {
-      final def read(av: DynamoValue): Either[DynamoReadError, T] =
+      final def read(av: DynamoValue): Result[T] =
         Either.fromOption(decode(av), NoPropertyOfType(propertyType, av))
       final def write(t: T): DynamoValue = encode(t)
+    }
+
+  implicit val dynamoValue: DynamoFormat[DynamoValue] =
+    new DynamoFormat[DynamoValue] {
+      def read(av: DynamoValue): Result[DynamoValue] = Right(av)
+
+      def write(t: DynamoValue): DynamoValue = t
+    }
+
+  implicit val dynamoObject: ObjectFormat[DynamoObject] =
+    new ObjectFormat[DynamoObject] {
+      def readObject(o: DynamoObject): Result[DynamoObject] = Right(o)
+
+      def writeObject(t: DynamoObject): DynamoObject = t
     }
 
   /**
@@ -222,11 +260,11 @@ object DynamoFormat extends PlatformSpecificFormat {
     * }}}
     */
   implicit val stringFormat: DynamoFormat[String] = new DynamoFormat[String] {
-    final def read(av: DynamoValue): Either[DynamoReadError, String] =
+    final def read(av: DynamoValue): Result[String] =
       if (av.isNull)
         Right("")
       else
-        av.asString.fold[Either[DynamoReadError, String]](Left(NoPropertyOfType("S", av)))(Right(_))
+        av.asString.fold[Result[String]](Left(NoPropertyOfType("S", av)))(Right(_))
 
     final def write(s: String): DynamoValue =
       s match {
@@ -243,17 +281,21 @@ object DynamoFormat extends PlatformSpecificFormat {
     */
   implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.fromBoolean, "BOOL")
 
-  private def numFormat[N: Numeric](f: String => N): DynamoFormat[N] =
-    new DynamoFormat[N] {
-      final def read(av: DynamoValue): Either[DynamoReadError, N] =
-        for {
-          ns <- Either.fromOption(av.asNumber, NoPropertyOfType("N", av))
-          transform = coerceNumber(f)
-          n <- transform(ns)
-        } yield n
+  abstract private class NumericFormat[N: Numeric] extends DynamoFormat[N] {
+    def unsafeToNumeric(x: String): N
 
-      final def write(n: N): DynamoValue = DynamoValue.fromNumber(n)
-    }
+    final def read(av: DynamoValue): Result[N] =
+      av.asNumber match {
+        case None => Left(NoPropertyOfType("N", av))
+        case Some(ns) =>
+          try Right(unsafeToNumeric(ns))
+          catch {
+            case NonFatal(t) => Left(TypeCoercionError(t))
+          }
+      }
+
+    final def write(n: N): DynamoValue = DynamoValue.fromNumber(n)
+  }
 
   /**
     * {{{
@@ -261,7 +303,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     | DynamoFormat[Long].read(DynamoFormat[Long].write(l)) == Right(l)
     * }}}
     */
-  implicit val longFormat: DynamoFormat[Long] = numFormat(_.toLong)
+  implicit val longFormat: DynamoFormat[Long] =
+    new NumericFormat[Long] {
+      def unsafeToNumeric(x: String): Long = x.toLong
+    }
 
   /**
     * {{{
@@ -269,7 +314,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     | DynamoFormat[Int].read(DynamoFormat[Int].write(i)) == Right(i)
     * }}}
     */
-  implicit val intFormat: DynamoFormat[Int] = numFormat(_.toInt)
+  implicit val intFormat: DynamoFormat[Int] =
+    new NumericFormat[Int] {
+      def unsafeToNumeric(x: String): Int = x.toInt
+    }
 
   /**
     * {{{
@@ -277,7 +325,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     | DynamoFormat[Float].read(DynamoFormat[Float].write(d)) == Right(d)
     * }}}
     */
-  implicit val floatFormat: DynamoFormat[Float] = numFormat(_.toFloat)
+  implicit val floatFormat: DynamoFormat[Float] =
+    new NumericFormat[Float] {
+      def unsafeToNumeric(x: String): Float = x.toFloat
+    }
 
   /**
     * {{{
@@ -285,7 +336,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     | DynamoFormat[Double].read(DynamoFormat[Double].write(d)) == Right(d)
     * }}}
     */
-  implicit val doubleFormat: DynamoFormat[Double] = numFormat(_.toDouble)
+  implicit val doubleFormat: DynamoFormat[Double] =
+    new NumericFormat[Double] {
+      def unsafeToNumeric(x: String): Double = x.toDouble
+    }
 
   /**
     * {{{
@@ -293,7 +347,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     | DynamoFormat[BigDecimal].read(DynamoFormat[BigDecimal].write(d)) == Right(d)
     * }}}
     */
-  implicit val bigDecimalFormat: DynamoFormat[BigDecimal] = numFormat(BigDecimal(_))
+  implicit val bigDecimalFormat: DynamoFormat[BigDecimal] =
+    new NumericFormat[BigDecimal] {
+      def unsafeToNumeric(x: String): BigDecimal = BigDecimal(x)
+    }
 
   /**
     * {{{
@@ -301,7 +358,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     | DynamoFormat[Short].read(DynamoFormat[Short].write(s)) == Right(s)
     * }}}
     */
-  implicit val shortFormat: DynamoFormat[Short] = numFormat(_.toShort)
+  implicit val shortFormat: DynamoFormat[Short] =
+    new NumericFormat[Short] {
+      def unsafeToNumeric(x: String): Short = x.toShort
+    }
 
   /**
     * {{{
@@ -310,7 +370,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     * }}}
     */
   // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
-  implicit val byteFormat: DynamoFormat[Byte] = numFormat(_.toByte)
+  implicit val byteFormat: DynamoFormat[Byte] =
+    new NumericFormat[Byte] {
+      def unsafeToNumeric(x: String): Byte = x.toByte
+    }
 
   // Since DynamoValue includes a ByteBuffer instance, creating byteArray format backed by ByteBuffer
   implicit val byteBufferFormat: DynamoFormat[ByteBuffer] = attribute(_.asByteBuffer, DynamoValue.fromByteBuffer, "B")
@@ -322,7 +385,17 @@ object DynamoFormat extends PlatformSpecificFormat {
     * }}}
     */
   implicit val byteArrayFormat: DynamoFormat[Array[Byte]] =
-    DynamoFormat.xmap(coerceByteBuffer(_.array), ByteBuffer.wrap)(byteBufferFormat)
+    DynamoFormat.tmap[Array[Byte], ByteBuffer](x => Try(x.array), ByteBuffer.wrap)(byteBufferFormat)
+
+  /**
+    * {{{
+    * prop> (a: Array[String]) =>
+    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).toList ==
+    *     |   a.toList
+    * }}}
+    */
+  implicit def arrayFormat[T: DynamoFormat: ClassTag]: DynamoFormat[Array[T]] =
+    listFormat[T].iso(_.toArray, _.toList)
 
   /**
     * {{{
@@ -332,16 +405,7 @@ object DynamoFormat extends PlatformSpecificFormat {
     * }}}
     */
   implicit val uuidFormat: DynamoFormat[UUID] =
-    DynamoFormat.coercedXmap[UUID, String, IllegalArgumentException](UUID.fromString, _.toString)
-
-  implicit val javaListFormat: DynamoFormat[List[DynamoValue]] =
-    attribute(
-      dv =>
-        if (dv.isNull) Some(List.empty)
-        else dv.asArray.flatMap(_.asArray),
-      l => DynamoValue.fromValues(l),
-      "L"
-    )
+    DynamoFormat.tmap[UUID, String](s => Try(UUID.fromString(s)), _.toString)
 
   /**
     * {{{
@@ -351,7 +415,12 @@ object DynamoFormat extends PlatformSpecificFormat {
     * }}}
     */
   implicit def listFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[List[T]] =
-    DynamoFormat.xmap[List[T], List[DynamoValue]](_.traverse(f.read), _.map(f.write))(javaListFormat)
+    new ArrayFormat[List[T]] {
+      def readArray(a: DynamoArray): Result[List[T]] = a.asArray.traverse(f.read)
+
+      def writeArray(t: List[T]): DynamoArray = DynamoArray(t.map(f.write))
+
+    }
 
   /**
     * {{{
@@ -361,7 +430,7 @@ object DynamoFormat extends PlatformSpecificFormat {
     * }}}
     */
   implicit def seqFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Seq[T]] =
-    DynamoFormat.xmap[Seq[T], List[T]](l => Right(l.toSeq), _.toList)
+    DynamoFormat.iso[Seq[T], List[T]](_.toSeq, _.toList)
 
   /**
     * {{{
@@ -371,39 +440,32 @@ object DynamoFormat extends PlatformSpecificFormat {
     * }}}
     */
   implicit def vectorFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Vector[T]] =
-    DynamoFormat.xmap[Vector[T], List[DynamoValue]](_.toVector.traverse(f.read), _.map(f.write).toList)(javaListFormat)
+    DynamoFormat.iso[Vector[T], List[T]](_.toVector, _.toList)
 
-  /**
-    * {{{
-    * prop> (a: Array[String]) =>
-    *     | DynamoFormat[Array[String]].read(DynamoFormat[Array[String]].write(a)).right.getOrElse(Array("error")).toList ==
-    *     |   a.toList
-    * }}}
-    */
-  implicit def arrayFormat[T: ClassTag](implicit f: DynamoFormat[T]): DynamoFormat[Array[T]] =
-    DynamoFormat.xmap[Array[T], List[DynamoValue]](
-      _.traverse(f.read).map(_.toArray),
-      _.map(f.write).toList
-    )(javaListFormat)
+  abstract private class NumericSetFormat[T: Numeric] extends DynamoFormat[Set[T]] {
+    def unsafeFromString(x: String): T
 
-  private def numSetFormat[T: Numeric](r: String => Either[DynamoReadError, T]): DynamoFormat[Set[T]] =
-    new DynamoFormat[Set[T]] {
-      final def read(av: DynamoValue): Either[DynamoReadError, Set[T]] =
-        if (av.isNull)
-          Right(Set.empty[T])
-        else
-          for {
-            ns <- Either.fromOption(av.asArray.flatMap(_.asNumericArray), NoPropertyOfType("NS", av))
-            set <- ns.traverse(r)
-          } yield set.toSet
+    final def read(av: DynamoValue): Result[Set[T]] =
+      if (av.isNull)
+        Right(Set.empty[T])
+      else
+        for {
+          ns <- Either.fromOption(av.asArray.flatMap(_.asNumericArray), NoPropertyOfType("NS", av))
+          set <- ns.traverse { n =>
+            try Either.right[DynamoReadError, T](unsafeFromString(n))
+            catch {
+              case NonFatal(x) => Left(TypeCoercionError(x))
+            }
+          }
+        } yield set.toSet
 
-      // Set types cannot be empty
-      final def write(t: Set[T]): DynamoValue =
-        if (t.isEmpty)
-          DynamoValue.nil
-        else
-          DynamoValue.fromNumbers(t)
-    }
+    // Set types cannot be empty
+    final def write(t: Set[T]): DynamoValue =
+      if (t.isEmpty)
+        DynamoValue.nil
+      else
+        DynamoValue.fromNumbers(t)
+  }
 
   /**
     * {{{
@@ -419,7 +481,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     * true
     * }}}
     */
-  implicit val intSetFormat: DynamoFormat[Set[Int]] = numSetFormat(coerceNumber(_.toInt))
+  implicit val intSetFormat: DynamoFormat[Set[Int]] =
+    new NumericSetFormat[Int] {
+      def unsafeFromString(x: String): Int = x.toInt
+    }
 
   /**
     * {{{
@@ -435,7 +500,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     * true
     * }}}
     */
-  implicit val longSetFormat: DynamoFormat[Set[Long]] = numSetFormat(coerceNumber(_.toLong))
+  implicit val longSetFormat: DynamoFormat[Set[Long]] =
+    new NumericSetFormat[Long] {
+      def unsafeFromString(x: String): Long = x.toLong
+    }
 
   /**
     * {{{
@@ -451,7 +519,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     * true
     * }}}
     */
-  implicit val floatSetFormat: DynamoFormat[Set[Float]] = numSetFormat(coerceNumber(_.toFloat))
+  implicit val floatSetFormat: DynamoFormat[Set[Float]] =
+    new NumericSetFormat[Float] {
+      def unsafeFromString(x: String): Float = x.toFloat
+    }
 
   /**
     * {{{
@@ -467,7 +538,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     * true
     * }}}
     */
-  implicit val doubleSetFormat: DynamoFormat[Set[Double]] = numSetFormat(coerceNumber(_.toDouble))
+  implicit val doubleSetFormat: DynamoFormat[Set[Double]] =
+    new NumericSetFormat[Double] {
+      def unsafeFromString(x: String): Double = x.toDouble
+    }
 
   /**
     * {{{
@@ -483,7 +557,10 @@ object DynamoFormat extends PlatformSpecificFormat {
     * true
     * }}}
     */
-  implicit val BigDecimalSetFormat: DynamoFormat[Set[BigDecimal]] = numSetFormat(coerceNumber(BigDecimal(_)))
+  implicit val BigDecimalSetFormat: DynamoFormat[Set[BigDecimal]] =
+    new NumericSetFormat[BigDecimal] {
+      def unsafeFromString(x: String): BigDecimal = BigDecimal(x)
+    }
 
   /**
     * {{{
@@ -501,7 +578,7 @@ object DynamoFormat extends PlatformSpecificFormat {
     */
   implicit val stringSetFormat: DynamoFormat[Set[String]] =
     new DynamoFormat[Set[String]] {
-      final def read(av: DynamoValue): Either[DynamoReadError, Set[String]] =
+      final def read(av: DynamoValue): Result[Set[String]] =
         if (av.isNull)
           Right(Set.empty)
         else
@@ -522,10 +599,8 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     |   Right(s)
     * }}}
     */
-  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] = DynamoFormat.iso[Set[T], List[T]](_.toSet, _.toList)
-
-  private val javaMapFormat: DynamoFormat[DynamoObject] =
-    attribute(_.asObject, DynamoValue.fromDynamoObject, "M")
+  implicit def genericSet[T: DynamoFormat]: DynamoFormat[Set[T]] =
+    DynamoFormat.iso[Set[T], List[T]](_.toSet, _.toList)
 
   /**
     * {{{
@@ -534,8 +609,8 @@ object DynamoFormat extends PlatformSpecificFormat {
     *     |   Right(m)
     * }}}
     */
-  implicit def mapFormat[V](implicit f: DynamoFormat[V]): DynamoFormat[Map[String, V]] =
-    xmap[Map[String, V], DynamoObject](_.toMap[V], m => DynamoObject(m.toSeq: _*))(javaMapFormat)
+  implicit def mapFormat[V: DynamoFormat]: DynamoFormat[Map[String, V]] =
+    xmap[Map[String, V], DynamoObject](_.toMap[V].leftMap(_.show), m => DynamoObject(m.toSeq: _*))
 
   /**
     * {{{
@@ -552,7 +627,7 @@ object DynamoFormat extends PlatformSpecificFormat {
     */
   implicit def optionFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Option[T]] =
     new DynamoFormat[Option[T]] {
-      final def read(av: DynamoValue): Either[DynamoReadError, Option[T]] =
+      final def read(av: DynamoValue): Result[Option[T]] =
         if (av.isNull)
           Right(None)
         else
@@ -566,12 +641,7 @@ object DynamoFormat extends PlatformSpecificFormat {
     * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
     */
   implicit def someFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Some[T]] =
-    new DynamoFormat[Some[T]] {
-      def read(av: DynamoValue): Either[DynamoReadError, Some[T]] =
-        Option(av).map(f.read(_).map(Some(_))).getOrElse(Left[DynamoReadError, Some[T]](MissingProperty))
-
-      def write(t: Some[T]): DynamoValue = f.write(t.get)
-    }
+    f.iso(Some.apply, _.value)
 
   /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
     *  {{{
@@ -583,7 +653,7 @@ object DynamoFormat extends PlatformSpecificFormat {
     *  }}}
     */
   implicit val instantAsLongFormat: DynamoFormat[Instant] =
-    DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x), x => x.toEpochMilli)
+    DynamoFormat.tmap[Instant, Long](x => Try(Instant.ofEpochMilli(x)), _.toEpochMilli)
 
   /**  Format for dealing with date-times with an offset from UTC.
     *  {{{
@@ -595,8 +665,8 @@ object DynamoFormat extends PlatformSpecificFormat {
     *  }}}
     */
   implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] =
-    DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
-      OffsetDateTime.parse,
+    DynamoFormat.tmap[OffsetDateTime, String](
+      s => Try(OffsetDateTime.parse(s)),
       _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     )
 
@@ -610,8 +680,8 @@ object DynamoFormat extends PlatformSpecificFormat {
     *  }}}
     */
   implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] =
-    DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](
-      ZonedDateTime.parse,
+    DynamoFormat.tmap[ZonedDateTime, String](
+      s => Try(ZonedDateTime.parse(s)),
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
 }

@@ -21,12 +21,33 @@ import cats.free.Free
 import cats.free.FreeT
 import cats.instances.option._
 import cats.syntax.apply._
+import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.model._
 import org.scanamo.request._
+import scala.concurrent.{ Future, Promise }
+import java.util.concurrent.CompletionException
+import java.util.concurrent.ExecutionException
+import scala.util.control.NonFatal
 
 package object ops {
   type ScanamoOps[A] = Free[ScanamoOpsA, A]
   type ScanamoOpsT[M[_], A] = FreeT[ScanamoOpsA, M, A]
+
+  implicit final class JavaCompletableFutureOps[A <: AnyRef](private val x: CompletableFuture[A]) extends AnyVal {
+    def toScala: Future[A] =
+      if (x.isDone)
+        try Future.successful(x.get)
+        catch {
+          case x: CompletionException => Future.failed(x)
+          case x: ExecutionException  => Future.failed(x)
+          case NonFatal(x)            => Future.failed(x)
+        }
+      else {
+        val p = Promise[A]
+        x.whenComplete((a, t) => if (a eq null) p.failure(t) else p.success(a))
+        p.future
+      }
+  }
 
   private[ops] object JavaRequests {
     import collection.JavaConverters._

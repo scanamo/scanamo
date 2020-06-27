@@ -58,19 +58,19 @@ private[scanamo] class AlpakkaInterpreter(retryPolicy: RetryPolicy, isRetryable:
       case ConditionalDelete(req) =>
         run(JavaRequests.delete(req))
           .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-          .recover {
+          .recover[Either[ConditionalCheckFailedException, DeleteItemResponse]] {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
       case ConditionalPut(req) =>
         run(JavaRequests.put(req))
           .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-          .recover {
+          .recover[Either[ConditionalCheckFailedException, PutItemResponse]] {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
       case ConditionalUpdate(req) =>
         run(JavaRequests.update(req))
           .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-          .recover {
+          .recover[Either[ConditionalCheckFailedException, UpdateItemResponse]] {
             case e: ConditionalCheckFailedException => Either.left(e)
           }
       case TransactWriteAll(req) =>

@@ -16,6 +16,8 @@
 
 package org.scanamo
 
+import org.scanamo.DynamoFormat.Result
+
 import cats.{ Monad, MonoidK }
 import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse, TransactWriteItemsResponse }
 import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
@@ -54,19 +56,19 @@ case class Table[V: DynamoFormat](name: String) {
 
   def put(v: V): ScanamoOps[Unit] = ScanamoFree.put(name)(v)
 
-  def putAndReturn(ret: PutReturn)(v: V): ScanamoOps[Option[Either[DynamoReadError, V]]] =
+  def putAndReturn(ret: PutReturn)(v: V): ScanamoOps[Option[Result[V]]] =
     ScanamoFree.putAndReturn(name)(ret, v)
 
   def putAll(vs: Set[V]): ScanamoOps[Unit] = ScanamoFree.putAll(name)(vs)
 
-  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] = ScanamoFree.get[V](name)(key, false)
+  def get(key: UniqueKey[_]): ScanamoOps[Option[Result[V]]] = ScanamoFree.get[V](name)(key, false)
 
-  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
+  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Result[V]]] =
     ScanamoFree.getAll[V](name)(keys, false)
 
   def delete(key: UniqueKey[_]): ScanamoOps[Unit] = ScanamoFree.delete(name)(key)
 
-  def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
+  def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Result[V]]] =
     ScanamoFree.deleteAndReturn(name)(ret, key)
 
   /**
@@ -308,7 +310,7 @@ case class Table[V: DynamoFormat](name: String) {
     * Right(Thing(a1,3,Some(3)))
     * }}}
     */
-  def update(key: UniqueKey[_], expression: UpdateExpression): ScanamoOps[Either[DynamoReadError, V]] =
+  def update(key: UniqueKey[_], expression: UpdateExpression): ScanamoOps[Result[V]] =
     ScanamoFree.update[V](name)(key)(expression)
 
   /**
@@ -393,8 +395,8 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val farmersTable = Table[Farmer](t)
     * ...   val farmerOps = for {
     * ...     _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
-    * ...     _ <- farmersTable.given("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
-    * ...     _ <- farmersTable.given("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
+    * ...     _ <- farmersTable.`given`("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
+    * ...     _ <- farmersTable.`given`("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
     * ...     farmerWithNewStock <- farmersTable.get("name" -> "McDonald")
     * ...   } yield farmerWithNewStock
     * ...   scanamo.exec(farmerOps)
@@ -406,8 +408,8 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val lettersTable = Table[Letter](t)
     * ...   val ops = for {
     * ...     _ <- lettersTable.putAll(Set(Letter("a", "alpha"), Letter("b", "beta"), Letter("c", "gammon")))
-    * ...     _ <- lettersTable.given("greek" beginsWith "ale").put(Letter("a", "aleph"))
-    * ...     _ <- lettersTable.given("greek" beginsWith "gam").put(Letter("c", "gamma"))
+    * ...     _ <- lettersTable.`given`("greek" beginsWith "ale").put(Letter("a", "aleph"))
+    * ...     _ <- lettersTable.`given`("greek" beginsWith "gam").put(Letter("c", "gamma"))
     * ...     letters <- lettersTable.scan()
     * ...   } yield letters
     * ...   scanamo.exec(ops).toList
@@ -422,7 +424,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     _ <- turnipsTable.putAll(Set(Turnip(1, None), Turnip(1000, None)))
     * ...     initialTurnips <- turnipsTable.scan()
     * ...     _ <- initialTurnips.flatMap(_.toOption).traverse(t =>
-    * ...       turnipsTable.given("size" > 500).put(t.copy(description = Some("Big turnip in the country."))))
+    * ...       turnipsTable.`given`("size" > 500).put(t.copy(description = Some("Big turnip in the country."))))
     * ...     turnips <- turnipsTable.scan()
     * ...   } yield turnips
     * ...   scanamo.exec(ops).toList
@@ -438,10 +440,10 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val thingTable = Table[Thing](t)
     * ...   val ops = for {
     * ...     _ <- thingTable.putAll(Set(Thing("a", None), Thing("b", Some(1)), Thing("c", None)))
-    * ...     _ <- thingTable.given(attributeExists("maybe")).put(Thing("a", Some(2)))
-    * ...     _ <- thingTable.given(attributeExists("maybe")).put(Thing("b", Some(3)))
-    * ...     _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing("c", Some(42)))
-    * ...     _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing("b", Some(42)))
+    * ...     _ <- thingTable.`given`(attributeExists("maybe")).put(Thing("a", Some(2)))
+    * ...     _ <- thingTable.`given`(attributeExists("maybe")).put(Thing("b", Some(3)))
+    * ...     _ <- thingTable.`given`(Not(attributeExists("maybe"))).put(Thing("c", Some(42)))
+    * ...     _ <- thingTable.`given`(Not(attributeExists("maybe"))).put(Thing("b", Some(42)))
     * ...     things <- thingTable.scan()
     * ...   } yield things
     * ...   scanamo.exec(ops).toList
@@ -457,9 +459,9 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val compoundTable = Table[Compound](t)
     * ...   val ops = for {
     * ...     _ <- compoundTable.putAll(Set(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
-    * ...     _ <- compoundTable.given(Condition(attributeExists("maybe")) and "a" -> "alpha").put(Compound("alpha", Some(2)))
-    * ...     _ <- compoundTable.given(Condition(attributeExists("maybe")) and "a" -> "beta").put(Compound("beta", Some(3)))
-    * ...     _ <- compoundTable.given(Condition("a" -> "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
+    * ...     _ <- compoundTable.`given`(Condition(attributeExists("maybe")) and "a" -> "alpha").put(Compound("alpha", Some(2)))
+    * ...     _ <- compoundTable.`given`(Condition(attributeExists("maybe")) and "a" -> "beta").put(Compound("beta", Some(3)))
+    * ...     _ <- compoundTable.`given`(Condition("a" -> "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
     * ...     compounds <- compoundTable.scan()
     * ...   } yield compounds
     * ...   scanamo.exec(ops).toList
@@ -475,8 +477,8 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val choicesTable = Table[Choice](t)
     * ...   val ops = for {
     * ...     _ <- choicesTable.putAll(Set(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
-    * ...     _ <- choicesTable.given(Condition("description" -> "cake") or Condition("description" -> "death")).put(Choice(1, "victoria sponge"))
-    * ...     _ <- choicesTable.given(Condition("description" -> "cake") or Condition("description" -> "death")).put(Choice(2, "victoria sponge"))
+    * ...     _ <- choicesTable.`given`(Condition("description" -> "cake") or Condition("description" -> "death")).put(Choice(1, "victoria sponge"))
+    * ...     _ <- choicesTable.`given`(Condition("description" -> "cake") or Condition("description" -> "death")).put(Choice(2, "victoria sponge"))
     * ...     choices <- choicesTable.scan()
     * ...   } yield choices
     * ...   scanamo.exec(ops).toList
@@ -492,8 +494,8 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val gremlinsTable = Table[Gremlin](t)
     * ...   val ops = for {
     * ...     _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, false)))
-    * ...     _ <- gremlinsTable.given("wet" -> true).delete("number" -> 1)
-    * ...     _ <- gremlinsTable.given("wet" -> true).delete("number" -> 2)
+    * ...     _ <- gremlinsTable.`given`("wet" -> true).delete("number" -> 1)
+    * ...     _ <- gremlinsTable.`given`("wet" -> true).delete("number" -> 2)
     * ...     remainingGremlins <- gremlinsTable.scan()
     * ...   } yield remainingGremlins
     * ...   scanamo.exec(ops).toList
@@ -508,8 +510,8 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val gremlinsTable = Table[Gremlin](t)
     * ...   val ops = for {
     * ...     _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, true)))
-    * ...     _ <- gremlinsTable.given("wet" -> true).update("number" -> 1, set("friendly" -> false))
-    * ...     _ <- gremlinsTable.given("wet" -> true).update("number" -> 2, set("friendly" -> false))
+    * ...     _ <- gremlinsTable.`given`("wet" -> true).update("number" -> 1, set("friendly" -> false))
+    * ...     _ <- gremlinsTable.`given`("wet" -> true).update("number" -> 2, set("friendly" -> false))
     * ...     remainingGremlins <- gremlinsTable.scan()
     * ...   } yield remainingGremlins
     * ...   scanamo.exec(ops).toList
@@ -524,9 +526,9 @@ case class Table[V: DynamoFormat](name: String) {
     * ...   val smallscaleFarmersTable = Table[Farmer](t)
     * ...   val farmerOps = for {
     * ...     _ <- smallscaleFarmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
-    * ...     _ <- smallscaleFarmersTable.given("farm" \ "hectares" < 40L).put(Farmer("McDonald", 156L, Farm(List("gerbil", "hamster"), 20)))
-    * ...     _ <- smallscaleFarmersTable.given("farm" \ "hectares" > 40L).put(Farmer("McDonald", 156L, Farm(List("elephant"), 50)))
-    * ...     _ <- smallscaleFarmersTable.given("farm" \ "hectares" -> 20L).update("name" -> "McDonald", append("farm" \ "animals" -> "squirrel"))
+    * ...     _ <- smallscaleFarmersTable.`given`("farm" \ "hectares" < 40L).put(Farmer("McDonald", 156L, Farm(List("gerbil", "hamster"), 20)))
+    * ...     _ <- smallscaleFarmersTable.`given`("farm" \ "hectares" > 40L).put(Farmer("McDonald", 156L, Farm(List("elephant"), 50)))
+    * ...     _ <- smallscaleFarmersTable.`given`("farm" \ "hectares" -> 20L).update("name" -> "McDonald", append("farm" \ "animals" -> "squirrel"))
     * ...     farmerWithNewStock <- smallscaleFarmersTable.get("name" -> "McDonald")
     * ...   } yield farmerWithNewStock
     * ...   scanamo.exec(farmerOps)
@@ -611,7 +613,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Bear(Pooh,honey)), Right(Bear(Yogi,picnic baskets)))
     * }}}
     */
-  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
+  def scan(): ScanamoOps[List[Result[V]]] = ScanamoFree.scan[V](name)
 
   /**
     * Performs a scan with the ability to introduce effects into the computation. This is
@@ -620,7 +622,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * To control how many maximum items to load at once, use [[scanPaginatedM]]
     */
-  final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
+  final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Result[V]]] = scanPaginatedM(Int.MaxValue)
 
   /**
     * Performs a scan with the ability to introduce effects into the computation. This is
@@ -630,7 +632,7 @@ case class Table[V: DynamoFormat](name: String) {
     * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
     * upper bound.
     */
-  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Result[V]]] =
     ScanamoFree.scanM[M, V](name, pageSize)
 
   /**
@@ -665,7 +667,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     res <- table.limit(1).scan0
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
     * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
-    * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
+    * ...     ts <- lastKey.fold(List.empty[Result[Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
     * ... }
@@ -702,7 +704,7 @@ case class Table[V: DynamoFormat](name: String) {
     * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
     * }}}
     */
-  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
+  def query(query: Query[_]): ScanamoOps[List[Result[V]]] = ScanamoFree.query[V](name)(query)
 
   /**
     * Performs a query with the ability to introduce effects into the computation. This is
@@ -711,7 +713,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * To control how many maximum items to load at once, use [[queryPaginatedM]]
     */
-  final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Result[V]]] =
     queryPaginatedM(query, Int.MaxValue)
 
   /**
@@ -722,9 +724,7 @@ case class Table[V: DynamoFormat](name: String) {
     * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
     * upper bound.
     */
-  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
-                                            pageSize: Int
-  ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Result[V]]] =
     ScanamoFree.queryM[M, V](name)(query, pageSize)
 
   /**
@@ -762,7 +762,7 @@ case class Table[V: DynamoFormat](name: String) {
     * ...     res <- table.limit(1).query0("mode" -> "Bus" and "line" -> "234")
     * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
     * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
-    * ...     ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(table.from(_).scan())
+    * ...     ts <- lastKey.fold(List.empty[Result[Transport]].pure[ScanamoOps])(table.from(_).scan())
     * ...   } yield ts
     * ...   scanamo.exec(ops)
     * ... }
@@ -842,24 +842,22 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
-  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+  def scan(): ScanamoOps[List[Result[V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scan()
-  def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Result[V]]] =
     scanPaginatedM(Int.MaxValue)
-  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Result[V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.scanPaginatedM[M](pageSize)
-  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
+  def query(query: Query[_]): ScanamoOps[List[Result[V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.query(query)
-  def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Result[V]]] =
     queryPaginatedM(query, Int.MaxValue)
-  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
-                                            pageSize: Int
-  ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Result[V]]] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.queryPaginatedM(query, pageSize)
 
-  def get(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
+  def get(key: UniqueKey[_]): ScanamoOps[Option[Result[V]]] =
     ScanamoFree.get[V](tableName)(key, true)
-  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Either[DynamoReadError, V]]] =
+  def getAll(keys: UniqueKeys[_]): ScanamoOps[Set[Result[V]]] =
     ScanamoFree.getAll[V](tableName)(keys, true)
 }
 
@@ -872,21 +870,19 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
 
-  def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
+  def scan(): ScanamoOps[List[Result[V]]] =
     ScanResponseStream.stream[V](ScanamoScanRequest(tableName, None, queryOptions)).map(_._1)
-  def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Result[V]]] =
     scanPaginatedM(Int.MaxValue)
-  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Result[V]]] =
     ScanResponseStream.streamTo[M, V](ScanamoScanRequest(tableName, None, queryOptions), pageSize)
   def scan0: ScanamoOps[ScanResponse] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
-  def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
+  def query(query: Query[_]): ScanamoOps[List[Result[V]]] =
     QueryResponseStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
-  def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Result[V]]] =
     queryPaginatedM(query, Int.MaxValue)
-  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
-                                            pageSize: Int
-  ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
+  def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int): ScanamoOpsT[M, List[Result[V]]] =
     QueryResponseStream.streamTo[M, V](ScanamoQueryRequest(tableName, None, query, queryOptions), pageSize)
   def query0(query: Query[_]): ScanamoOps[QueryResponse] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, queryOptions))

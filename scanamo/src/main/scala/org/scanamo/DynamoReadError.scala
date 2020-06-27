@@ -28,6 +28,7 @@ final case class NoPropertyOfType(propertyType: String, actual: DynamoValue) ext
 final case class TypeCoercionError(t: Throwable) extends DynamoReadError
 case object MissingProperty extends DynamoReadError
 final case class InvalidPropertiesError(errors: NonEmptyList[(String, DynamoReadError)]) extends DynamoReadError
+final case class ReadFailure(message: String) extends DynamoReadError
 
 object DynamoReadError {
   implicit object ShowInstance extends Show[DynamoReadError] {
@@ -41,5 +42,6 @@ object DynamoReadError {
       case NoPropertyOfType(propertyType, actual) => s"not of type: '$propertyType' was '$actual'"
       case TypeCoercionError(e)                   => s"could not be converted to desired type: $e"
       case MissingProperty                        => "missing"
+      case ReadFailure(message)                   => message
     }
 }

@@ -75,8 +75,8 @@ object RetryPolicy {
   final private case class Max(numberOfRetries: Int) extends RetryPolicy
   final private case class And(thisPolicy: RetryPolicy, thatPolicy: RetryPolicy) extends RetryPolicy
   final private case class Or(thisPolicy: RetryPolicy, thatPolicy: RetryPolicy) extends RetryPolicy
-  final private case object Always extends RetryPolicy
-  final private case object Never extends RetryPolicy
+  private case object Always extends RetryPolicy
+  private case object Never extends RetryPolicy
   final private case class Jitter(random: SplittableRandom, margin: Long, inner: RetryPolicy) extends RetryPolicy
 
   /** The policy that always retries immediately */
