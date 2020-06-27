@@ -24,9 +24,10 @@ import software.amazon.awssdk.services.dynamodb.model._
 
 import scala.collection.JavaConverters._
 import scala.concurrent.duration._
-import scala.compat.java8.DurationConverters._
 
 import java.net.URI
+import java.time.Duration
+import java.time.temporal.ChronoUnit
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 
 object LocalDynamoDB {
@@ -36,8 +37,8 @@ object LocalDynamoDB {
       .endpointOverride(URI.create(s"http://localhost:$port"))
       .overrideConfiguration(
         ClientOverrideConfiguration.builder
-          .apiCallAttemptTimeout(5.seconds.toJava)
-          .apiCallTimeout(5.seconds.toJava)
+          .apiCallAttemptTimeout(Duration.of(5, ChronoUnit.SECONDS))
+          .apiCallTimeout(Duration.of(5, ChronoUnit.SECONDS))
           .build
       )
       .httpClient(NettyNioAsyncHttpClient.builder.build)
@@ -50,8 +51,8 @@ object LocalDynamoDB {
       .endpointOverride(URI.create(s"http://localhost:$port"))
       .overrideConfiguration(
         ClientOverrideConfiguration.builder
-          .apiCallAttemptTimeout(5.seconds.toJava)
-          .apiCallTimeout(5.seconds.toJava)
+          .apiCallAttemptTimeout(Duration.of(5, ChronoUnit.SECONDS))
+          .apiCallTimeout(Duration.of(5, ChronoUnit.SECONDS))
           .build
       )
       .region(Region.EU_WEST_1)

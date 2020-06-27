@@ -2,8 +2,7 @@ package org.scanamo
 
 import scala.reflect.runtime.universe._
 
-import software.amazon.awssdk.services.dynamodb.model._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.{ PutItemRequest, GetItemRequest, ScalarAttributeType => Scalar }
 import org.scalacheck._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -16,10 +15,10 @@ class DynamoFormatTest extends AnyFunSpec with Matchers with ScalaCheckDrivenPro
     val typeLabel = typeTag[A].tpe.toString
     it(s"should write and then read a $typeLabel from dynamo") {
       val client = LocalDynamoDB.client()
-      LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      LocalDynamoDB.usingRandomTable(client)("name" -> Scalar.S) { t =>
         final case class Person(name: String, item: A)
         val format = DynamoFormat[Person]
-        forAll(gen) { a: A =>
+        forAll(gen) { (a: A) =>
           val person = Person("bob", a)
           client.putItem(PutItemRequest.builder.tableName(t).item(format.write(person).toAttributeValue.m).build).get
           val resp =

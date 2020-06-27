@@ -127,10 +127,10 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
 
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
-        _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
+        _ <- forecasts.`given`("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
         _ <-
           forecasts
-            .given("weather" -> "Rain")
+            .`given`("weather" -> "Rain")
             .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
@@ -200,7 +200,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       } yield list
 
       unsafeRun(
-        zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])
+        zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Result[Item]]])
       ) should contain theSameElementsAs expected
     }
   }
@@ -481,8 +481,8 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
 
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        _ <- farmersTable.given("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
-        _ <- farmersTable.given("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
+        _ <- farmersTable.`given`("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
+        _ <- farmersTable.`given`("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
         farmerWithNewStock <- farmersTable.get("name" -> "McDonald")
       } yield farmerWithNewStock
 
@@ -500,8 +500,8 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
         _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
-        _ <- farmersTable.given("age" between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
-        _ <- farmersTable.given("age" between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        _ <- farmersTable.`given`("age" between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.`given`("age" between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get("name" -> "Butch")
       } yield farmerButch
       unsafeRun(zio.exec(farmerOps)) should equal(
@@ -516,8 +516,8 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
 
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false), Gremlin(2, true)))
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 1)
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 2)
+        _ <- gremlinsTable.`given`("wet" -> true).delete("number" -> 1)
+        _ <- gremlinsTable.`given`("wet" -> true).delete("number" -> 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
 
@@ -531,7 +531,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val itemsTable = Table[Item](t)
 
-      val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
+      val ops: ScanamoOps[List[Result[Item]]] = for {
         _ <- itemsTable.transactPutAll(Item("one") :: Item("two") :: Nil)
         items <- itemsTable.scan()
       } yield items
@@ -548,7 +548,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         val itemsTable1 = Table[Item](t1)
         val itemsTable2 = Table[Item](t2)
 
-        val ops: ScanamoOps[List[Either[DynamoReadError, Item]]] = for {
+        val ops: ScanamoOps[List[Result[Item]]] = for {
           _ <- ScanamoFree.transactPutAll((t1 -> Item("one")) :: (t2 -> Item("two")) :: Nil)
           items1 <- itemsTable1.scan()
           items2 <- itemsTable2.scan()
@@ -565,7 +565,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
       val forecastTable = Table[Forecast](t)
 
-      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+      val ops: ScanamoOps[List[Result[Forecast]]] = for {
         _ <- forecastTable.putAll(
           Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None))
         )
@@ -625,7 +625,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
       val forecastTable = Table[Forecast](t)
 
-      val ops: ScanamoOps[List[Either[DynamoReadError, Forecast]]] = for {
+      val ops: ScanamoOps[List[Result[Forecast]]] = for {
         _ <- forecastTable.putAll(
           Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None), Forecast("Manchester", "Rain", None))
         )
