@@ -56,9 +56,7 @@ val commonSettings = Seq(
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
-  // sbt-doctest leaves some unused values
-  // see https://github.com/scala/bug/issues/10270
-  scalacOptions in Test := {
+  Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
        mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
