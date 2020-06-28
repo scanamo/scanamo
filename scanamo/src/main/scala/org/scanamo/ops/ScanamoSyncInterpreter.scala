@@ -24,10 +24,6 @@ import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedExce
 /**
   * Interpret Scanamo operations using blocking requests to DynamoDB with any
   * transport errors or semantic errors within DynamoDB thrown as exceptions.
-  *
-  * We need to interpret into a type with a type parameter, so cheat by using
-  * the [Id Monad](http://typelevel.org/cats/datatypes/id.html) which is just
-  * a type alias for the type itself (`type Id[A] = A`).
   */
 class ScanamoSyncInterpreter(client: DynamoDbClient) extends (ScanamoOpsA ~> Id) {
   def apply[A](op: ScanamoOpsA[A]): Id[A] =

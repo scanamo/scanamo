@@ -23,24 +23,23 @@ import org.scanamo.ops._
 import scala.concurrent.{ ExecutionContext, Future }
 
 /**
-  * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an implicit
-  * concurrent.ExecutionContext and returns a concurrent.Future
-  *
-  * Note that that software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClientClient just uses an
-  * java.util.concurrent.ExecutorService to make calls asynchronously
+  * Interprets Scanamo operations in an asynchronous context: Scala futures.
   */
-class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) {
+final class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) {
   import cats.instances.future._
 
-  final private val interpreter = new ScanamoAsyncInterpreter(client)
+  private val interpreter = new ScanamoAsyncInterpreter(client)
 
   /**
-    * Execute the operations built with [[org.scanamo.Table]], using the client
-    * provided asynchronously
+    * Execute the operations built with [[org.scanamo.Table]]
     */
-  final def exec[A](op: ScanamoOps[A]): Future[A] = op.foldMap(interpreter)
+  def exec[A](op: ScanamoOps[A]): Future[A] = op.foldMap(interpreter)
 
-  final def execT[M[_]: Monad, A](hoist: Future ~> M)(op: ScanamoOpsT[M, A]): M[A] =
+  /**
+    * Execute the operations built with [[org.scanamo.Table]] with
+    * effects in the monad `M` threaded in.
+    */
+  def execT[M[_]: Monad, A](hoist: Future ~> M)(op: ScanamoOpsT[M, A]): M[A] =
     op.foldMap(interpreter andThen hoist)
 }
 

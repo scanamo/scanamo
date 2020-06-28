@@ -26,40 +26,19 @@ import org.scanamo.ops._
   *
   * To avoid blocking, use [[org.scanamo.ScanamoAsync]]
   */
-class Scanamo private (client: DynamoDbClient) {
-  final private val interpreter = new ScanamoSyncInterpreter(client)
+final class Scanamo private (client: DynamoDbClient) {
+  private val interpreter = new ScanamoSyncInterpreter(client)
 
   /**
-    * Execute the operations built with [[org.scanamo.Table]], using the client
-    * provided synchronously
-    *
-    * {{{
-    * >>> import org.scanamo.generic.auto._
-    *
-    * >>> case class Transport(mode: String, line: String)
-    * >>> val transport = Table[Transport]("transport")
-    *
-    * >>> val client = LocalDynamoDB.syncClient()
-    * >>> val scanamo = Scanamo(client)
-    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-    *
-    * >>> LocalDynamoDB.withTable(client)("transport")("mode" -> S, "line" -> S) {
-    * ...   import org.scanamo.syntax._
-    * ...   val operations = for {
-    * ...     _ <- transport.putAll(Set(
-    * ...       Transport("Underground", "Circle"),
-    * ...       Transport("Underground", "Metropolitan"),
-    * ...       Transport("Underground", "Central")))
-    * ...     results <- transport.query("mode" -> "Underground" and ("line" beginsWith "C"))
-    * ...   } yield results.toList
-    * ...   scanamo.exec(operations)
-    * ... }
-    * List(Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)))
-    * }}}
+    * Execute the operations built with [[org.scanamo.Table]]
     */
-  final def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
+  def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
 
-  final def execT[M[_]: Monad, A](hoist: Id ~> M)(op: ScanamoOpsT[M, A]): M[A] =
+  /**
+    * Execute the operations built with [[org.scanamo.Table]] with
+    * effects in the monad `M` threaded in.
+    */
+  def execT[M[_]: Monad, A](hoist: Id ~> M)(op: ScanamoOpsT[M, A]): M[A] =
     op.foldMap(interpreter andThen hoist)
 }
 
