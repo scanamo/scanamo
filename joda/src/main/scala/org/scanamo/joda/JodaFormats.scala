@@ -23,15 +23,8 @@ import scala.util.Try
 
 object JodaFormats {
 
-  /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
-    *  {{{
-    *  prop> import org.joda.time.Instant
-    *  prop> import org.scanamo.DynamoFormat
-    *  prop> import org.scanamo.joda.TimeGenerators._
-    *  prop> import org.scanamo.joda.JodaFormats._
-    *  prop> (x: Instant) =>
-    *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
-    *  }}}
+  /**
+    * Format for dealing with points in time stored as the number of milliseconds since Epoch.
     */
   implicit val jodaInstantAsLongFormat: DynamoFormat[Instant] =
     DynamoFormat.tmap[Instant, Long](t => Try(new Instant(t)), x => x.getMillis)
@@ -39,17 +32,6 @@ object JodaFormats {
   /**
     *  Convenient, readable format for Joda DateTime, but requires that all dates serialised
     *  have a consistent chronology and time zone.
-    *
-    *  {{{
-    *  prop> import org.scanamo.DynamoFormat
-    *  prop> import org.joda.time.DateTime
-    *  prop> import org.joda.time.chrono.ISOChronology
-    *  prop> import org.scanamo.joda.TimeGenerators._
-    *  prop> import org.scanamo.joda.JodaFormats.jodaStringFormat
-    *  prop> (dt: DateTime) =>
-    *      | val dtBasic = dt.withChronology(ISOChronology.getInstanceUTC())
-    *      | DynamoFormat[DateTime].read(DynamoFormat[DateTime].write(dtBasic)) == Right(dtBasic)
-    *  }}}
     */
   implicit val jodaStringFormat: DynamoFormat[DateTime] =
     DynamoFormat.tmap[DateTime, String](t => Try(DateTime.parse(t)), _.toString)

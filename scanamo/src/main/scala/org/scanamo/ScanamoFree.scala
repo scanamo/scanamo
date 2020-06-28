@@ -233,14 +233,6 @@ object ScanamoFree {
       )
       .map(r => read[T](DynamoObject(r.attributes)))
 
-  /**
-    * {{{
-    * prop> (m: Map[String, Int]) =>
-    *     |   ScanamoFree.read[Map[String, Int]](
-    *     |     DynamoObject(m.mapValues(DynamoValue.fromNumber(_)).toMap)
-    *     |   ) == Right(m)
-    * }}}
-    */
   def read[T](m: DynamoObject)(implicit f: DynamoFormat[T]): Result[T] =
     f.read(m.toDynamoValue)
 

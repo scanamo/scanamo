@@ -280,8 +280,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
-        _ <- farmersTable.given("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
-        _ <- farmersTable.given("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
+        _ <- farmersTable.`given`("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
+        _ <- farmersTable.`given`("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
         farmerWithNewStock <- farmersTable.get("name" -> "McDonald")
       } yield farmerWithNewStock
       scanamo.exec(farmerOps) should be(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"), 30)))))
@@ -291,8 +291,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val lettersTable = Table[Letter](t)
       val ops = for {
         _ <- lettersTable.putAll(Set(Letter("a", "alpha"), Letter("b", "beta"), Letter("c", "gammon")))
-        _ <- lettersTable.given("greek" beginsWith "ale").put(Letter("a", "aleph"))
-        _ <- lettersTable.given("greek" beginsWith "gam").put(Letter("c", "gamma"))
+        _ <- lettersTable.`given`("greek" beginsWith "ale").put(Letter("a", "aleph"))
+        _ <- lettersTable.`given`("greek" beginsWith "gam").put(Letter("c", "gamma"))
         letters <- lettersTable.scan()
       } yield letters
       scanamo.exec(ops).toList should be(
@@ -309,7 +309,7 @@ class TableTest extends AnyFunSpec with Matchers {
           initialTurnips
             .flatMap(_.toOption)
             .traverse(t =>
-              turnipsTable.given("size" > 500).put(t.copy(description = Some("Big turnip in the country.")))
+              turnipsTable.`given`("size" > 500).put(t.copy(description = Some("Big turnip in the country.")))
             )
         turnips <- turnipsTable.scan()
       } yield turnips
@@ -325,10 +325,10 @@ class TableTest extends AnyFunSpec with Matchers {
       val thingTable = Table[Thing2](t)
       val ops = for {
         _ <- thingTable.putAll(Set(Thing2("a", None), Thing2("b", Some(1)), Thing2("c", None)))
-        _ <- thingTable.given(attributeExists("maybe")).put(Thing2("a", Some(2)))
-        _ <- thingTable.given(attributeExists("maybe")).put(Thing2("b", Some(3)))
-        _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing2("c", Some(42)))
-        _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing2("b", Some(42)))
+        _ <- thingTable.`given`(attributeExists("maybe")).put(Thing2("a", Some(2)))
+        _ <- thingTable.`given`(attributeExists("maybe")).put(Thing2("b", Some(3)))
+        _ <- thingTable.`given`(Not(attributeExists("maybe"))).put(Thing2("c", Some(42)))
+        _ <- thingTable.`given`(Not(attributeExists("maybe"))).put(Thing2("b", Some(42)))
         things <- thingTable.scan()
       } yield things
       scanamo.exec(ops).toList should be(
@@ -340,10 +340,11 @@ class TableTest extends AnyFunSpec with Matchers {
       val compoundTable = Table[Compound](t)
       val ops = for {
         _ <- compoundTable.putAll(Set(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
-        _ <- compoundTable.given(Condition(attributeExists("maybe")) and "a" -> "alpha").put(Compound("alpha", Some(2)))
-        _ <- compoundTable.given(Condition(attributeExists("maybe")) and "a" -> "beta").put(Compound("beta", Some(3)))
         _ <-
-          compoundTable.given(Condition("a" -> "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
+          compoundTable.`given`(Condition(attributeExists("maybe")) and "a" -> "alpha").put(Compound("alpha", Some(2)))
+        _ <- compoundTable.`given`(Condition(attributeExists("maybe")) and "a" -> "beta").put(Compound("beta", Some(3)))
+        _ <-
+          compoundTable.`given`(Condition("a" -> "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
         compounds <- compoundTable.scan()
       } yield compounds
       scanamo.exec(ops).toList should be(
@@ -357,11 +358,11 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- choicesTable.putAll(Set(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
         _ <-
           choicesTable
-            .given(Condition("description" -> "cake") or Condition("description" -> "death"))
+            .`given`(Condition("description" -> "cake") or Condition("description" -> "death"))
             .put(Choice(1, "victoria sponge"))
         _ <-
           choicesTable
-            .given(Condition("description" -> "cake") or Condition("description" -> "death"))
+            .`given`(Condition("description" -> "cake") or Condition("description" -> "death"))
             .put(Choice(2, "victoria sponge"))
         choices <- choicesTable.scan()
       } yield choices
@@ -377,8 +378,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val gremlinsTable = Table[Gremlin](t)
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, false)))
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 1)
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 2)
+        _ <- gremlinsTable.`given`("wet" -> true).delete("number" -> 1)
+        _ <- gremlinsTable.`given`("wet" -> true).delete("number" -> 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
       scanamo.exec(ops).toList should be(List(Right(Gremlin(1, false, true))))
@@ -388,8 +389,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val gremlinsTable = Table[Gremlin](t)
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, true)))
-        _ <- gremlinsTable.given("wet" -> true).update("number" -> 1, set("friendly" -> false))
-        _ <- gremlinsTable.given("wet" -> true).update("number" -> 2, set("friendly" -> false))
+        _ <- gremlinsTable.`given`("wet" -> true).update("number" -> 1, set("friendly" -> false))
+        _ <- gremlinsTable.`given`("wet" -> true).update("number" -> 2, set("friendly" -> false))
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
       scanamo.exec(ops).toList should be(List(Right(Gremlin(2, true, false)), Right(Gremlin(1, false, true))))
@@ -404,15 +405,15 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- smallscaleFarmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
         _ <-
           smallscaleFarmersTable
-            .given("farm" \ "hectares" < 40L)
+            .`given`("farm" \ "hectares" < 40L)
             .put(Farmer("McDonald", 156L, Farm(List("gerbil", "hamster"), 20)))
         _ <-
           smallscaleFarmersTable
-            .given("farm" \ "hectares" > 40L)
+            .`given`("farm" \ "hectares" > 40L)
             .put(Farmer("McDonald", 156L, Farm(List("elephant"), 50)))
         _ <-
           smallscaleFarmersTable
-            .given("farm" \ "hectares" -> 20L)
+            .`given`("farm" \ "hectares" -> 20L)
             .update("name" -> "McDonald", append("farm" \ "animals" -> "squirrel"))
         farmerWithNewStock <- smallscaleFarmersTable.get("name" -> "McDonald")
       } yield farmerWithNewStock

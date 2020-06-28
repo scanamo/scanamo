@@ -120,40 +120,6 @@ case class Table[V: DynamoFormat](name: String) {
     * place for putting that information: this is where `scan0` comes in handy!
     *
     * A particular use case is when one wants to paginate through result sets, say:
-    * <<<<<<< HEAD
-    * {{{
-    * >>> case class Transport(mode: String, line: String)
-    *
-    * >>> val client = LocalDynamoDB.syncClient()
-    * >>> val scanamo = Scanamo(client)
-    *
-    * >>> import cats.implicits._
-    * >>> import org.scanamo._
-    * >>> import org.scanamo.ops._
-    * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.generic.auto._
-    * >>> import org.scanamo.query._
-    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-    *
-    * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
-    * ...   val table = Table[Transport](t)
-    * ...   val ops = for {
-    * ...     _ <- table.putAll(Set(
-    * ...       Transport("Underground", "Circle"),
-    * ...       Transport("Underground", "Metropolitan"),
-    * ...       Transport("Underground", "Central")
-    * ...     ))
-    * ...     res <- table.limit(1).scan0
-    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
-    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
-    * ...     ts <- lastKey.fold(List.empty[Result[Transport]].pure[ScanamoOps])(table.from(_).scan())
-    * ...   } yield ts
-    * ...   scanamo.exec(ops)
-    * ... }
-    * List(Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
-    * }}}
-    * =======
-    * >>>>>>> 221e05111d061475b34df86b24cce8c610b70bbf
     */
   def scan0: ScanamoOps[ScanResponse] = ScanamoFree.scan0[V](name)
 
@@ -190,43 +156,6 @@ case class Table[V: DynamoFormat](name: String) {
     * place for putting that information: this is where `query0` comes in handy!
     *
     * A particular use case is when one wants to paginate through result sets, say:
-    * <<<<<<< HEAD
-    * {{{
-    * >>> case class Transport(mode: String, line: String)
-    *
-    * >>> val client = LocalDynamoDB.syncClient()
-    * >>> val scanamo = Scanamo(client)
-    *
-    * >>> import cats.implicits._
-    * >>> import org.scanamo._
-    * >>> import org.scanamo.ops._
-    * >>> import org.scanamo.syntax._
-    * >>> import org.scanamo.generic.auto._
-    * >>> import org.scanamo.query._
-    * >>> import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-    *
-    * >>> LocalDynamoDB.withRandomTable(client)("mode" -> S, "line" -> S) { t =>
-    * ...   val table = Table[Transport](t)
-    * ...   val ops = for {
-    * ...     _ <- table.putAll(Set(
-    * ...       Transport("Underground", "Circle"),
-    * ...       Transport("Underground", "Metropolitan"),
-    * ...       Transport("Underground", "Central"),
-    * ...       Transport("Bus", "390"),
-    * ...       Transport("Bus", "143"),
-    * ...       Transport("Bus", "234")
-    * ...     ))
-    * ...     res <- table.limit(1).query0("mode" -> "Bus" and "line" -> "234")
-    * ...     uniqueKeyCondition = UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
-    * ...     lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
-    * ...     ts <- lastKey.fold(List.empty[Result[Transport]].pure[ScanamoOps])(table.from(_).scan())
-    * ...   } yield ts
-    * ...   scanamo.exec(ops)
-    * ... }
-    * List(Right(Transport(Bus,390)), Right(Transport(Underground,Central)), Right(Transport(Underground,Circle)), Right(Transport(Underground,Metropolitan)))
-    * }}}
-    * =======
-    * >>>>>>> 221e05111d061475b34df86b24cce8c610b70bbf
     */
   def query0(query: Query[_]): ScanamoOps[QueryResponse] = ScanamoFree.query0[V](name)(query)
 
