@@ -23,6 +23,7 @@ import cats.instances.option._
 import cats.syntax.apply._
 import software.amazon.awssdk.services.dynamodb.model._
 import org.scanamo.request._
+import org.scanamo.internal.SB
 
 package object ops {
   type ScanamoOps[A] = Free[ScanamoOpsA, A]
@@ -44,7 +45,7 @@ package object ops {
           queryRefinement(_.options.limit)(_.limit(_)),
           queryRefinement(_.options.exclusiveStartKey)((r, k) => r.exclusiveStartKey(k.toJavaMap)),
           queryRefinement(_.options.filter) { (r, f) =>
-            val requestCondition = f.apply
+            val requestCondition = f.apply.runA(SB.root).value
             requestCondition.dynamoValues
               .filter(_.nonEmpty)
               .flatMap(_.toExpressionAttributeValues)
@@ -68,7 +69,7 @@ package object ops {
       }
 
       val queryCondition: RequestCondition = req.query.apply
-      val requestCondition: Option[RequestCondition] = req.options.filter.map(_.apply)
+      val requestCondition: Option[RequestCondition] = req.options.filter.map(_.apply.runA(SB.root).value)
 
       val requestBuilder = NonEmptyList
         .of(
