@@ -328,8 +328,8 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- thingTable.putAll(Set(Thing2("a", None), Thing2("b", Some(1)), Thing2("c", None)))
         _ <- thingTable.given(attributeExists("maybe")).put(Thing2("a", Some(2)))
         _ <- thingTable.given(attributeExists("maybe")).put(Thing2("b", Some(3)))
-        _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing2("c", Some(42)))
-        _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing2("b", Some(42)))
+        _ <- thingTable.given(!attributeExists("maybe")).put(Thing2("c", Some(42)))
+        _ <- thingTable.given(!attributeExists("maybe")).put(Thing2("b", Some(42)))
         things <- thingTable.scan()
       } yield things
       scanamo.exec(ops).toList should be(

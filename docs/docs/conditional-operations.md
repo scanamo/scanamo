@@ -24,9 +24,9 @@ LocalDynamoDB.withTable(client)("gremlins")("number" -> N) {
     _ <- gremlinsTable.putAll(
       Set(Gremlin(1, "Gizmo", false, true), Gremlin(2, "George", true, false)))
     // Only `put` Gremlins if not already one with the same number
-    _ <- gremlinsTable.given(not(attributeExists("number")))
+    _ <- gremlinsTable.given(!attributeExists("number"))
       .put(Gremlin(2, "Stripe", false, true))
-    _ <- gremlinsTable.given(not(attributeExists("number")))
+    _ <- gremlinsTable.given(!attributeExists("number"))
       .put(Gremlin(3, "Greta", true, true))
     allGremlins <- gremlinsTable.scan()  
     _ <- gremlinsTable.given("wet" -> true)
