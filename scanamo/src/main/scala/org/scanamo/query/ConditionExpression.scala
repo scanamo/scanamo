@@ -127,7 +127,7 @@ object ConditionExpression {
   implicit def attributeValueEqualsCondition[V: DynamoFormat] =
     new ConditionExpression[(AttributeName, V)] {
       override def apply(pair: (AttributeName, V)): State[SB, RequestCondition] =
-        State.get[SB].map { sb =>
+        State.inspect { sb =>
           val prefix = "equalsCondition" + sb.asKey
           val attributeName = pair._1
           val namePlaceholder = attributeName.placeholder(prefix)
@@ -146,7 +146,7 @@ object ConditionExpression {
   implicit def attributeValueInCondition[V: DynamoFormat]: ConditionExpression[(AttributeName, Set[V])] =
     new ConditionExpression[(AttributeName, Set[V])] {
       override def apply(pair: (AttributeName, Set[V])): State[SB, RequestCondition] =
-        State.get[SB].map { sb =>
+        State.inspect { sb =>
           val prefix = "inCondition" + sb.asKey
           val attributeName = pair._1
           val namePlaceholder = attributeName.placeholder(prefix)
@@ -167,7 +167,7 @@ object ConditionExpression {
   implicit def attributeExistsCondition: ConditionExpression[AttributeExists] =
     new ConditionExpression[AttributeExists] {
       override def apply(t: AttributeExists): State[SB, RequestCondition] =
-        State.get[SB].map { sb =>
+        State.inspect { sb =>
           val prefix = "attributeExists" + sb.asKey
           RequestCondition(s"attribute_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
         }
@@ -176,7 +176,7 @@ object ConditionExpression {
   implicit def attributeNotExistsCondition: ConditionExpression[AttributeNotExists] =
     new ConditionExpression[AttributeNotExists] {
       override def apply(t: AttributeNotExists): State[SB, RequestCondition] =
-        State.get[SB].map { sb =>
+        State.inspect { sb =>
           val prefix = "attributeNotExists" + sb.asKey
           RequestCondition(
             s"attribute_not_exists(#${t.key.placeholder(prefix)})",
@@ -197,7 +197,7 @@ object ConditionExpression {
   implicit def beginsWithCondition[V: DynamoFormat]: ConditionExpression[BeginsWith[V]] =
     new ConditionExpression[BeginsWith[V]] {
       override def apply(b: BeginsWith[V]): State[SB, RequestCondition] =
-        State.get[SB].map { sb =>
+        State.inspect { sb =>
           val prefix = "beginsWith" + sb.asKey
           val valuePlaceholder = "conditionAttributeValue" + sb.asKey
           RequestCondition(
@@ -212,7 +212,7 @@ object ConditionExpression {
     new ConditionExpression[Between[V]] {
 
       override def apply(b: Between[V]): State[SB, RequestCondition] =
-        State.get[SB].map { sb =>
+        State.inspect { sb =>
           val prefix = "between" + sb.asKey
           val lowerPh = "lower" + sb.asKey
           val upperPh = "upper" + sb.asKey
@@ -232,7 +232,7 @@ object ConditionExpression {
   implicit def keyIsCondition[V: DynamoFormat]: ConditionExpression[KeyIs[V]] =
     new ConditionExpression[KeyIs[V]] {
       override def apply(k: KeyIs[V]): State[SB, RequestCondition] =
-        State.inspect[SB, RequestCondition] { sb =>
+        State.inspect { sb =>
           val prefix = "keyIs" + sb.asKey
           val valuePlaceholder = "conditionAttributeValue" + sb.asKey
           RequestCondition(
