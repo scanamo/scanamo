@@ -47,24 +47,23 @@ package object scanamo {
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
 
-    case class Bounds[V: DynamoFormat](lowerBound: Bound[V], upperBound: Bound[V])
+    case class Bounds[V: DynamoFormat](lowerBound: V, upperBound: V)
 
-    implicit class Bound[V: DynamoFormat](val v: V) {
-      def and(upperBound: V) = Bounds(Bound(v), Bound(upperBound))
+    implicit final class Bound[V](private val v: V) extends AnyVal {
+      def and(upperBound: V)(implicit V: DynamoFormat[V]): Bounds[V] = Bounds(v, upperBound)
     }
 
     def attributeExists(string: String) = AttributeExists(AttributeName.of(string))
 
     def attributeNotExists(string: String) = AttributeNotExists(AttributeName.of(string))
 
-    def not[T: ConditionExpression](t: T) = Not(t)
+    implicit final class ConditionExpressionOps[X](private val x: X) extends AnyVal {
+      def unary_!(implicit X: ConditionExpression[X]): Not[X] = Not(x)
 
-    implicit class AndConditionExpression[X: ConditionExpression](x: X) {
-      def and[Y: ConditionExpression](y: Y) = AndCondition(x, y)
-    }
-
-    implicit class OrConditionExpression[X: ConditionExpression](x: X) {
-      def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
+      def &&[Y](y: Y)(implicit X: ConditionExpression[X], Y: ConditionExpression[Y]): AndCondition[X, Y] =
+        AndCondition(x, y)
+      def ||[Y](y: Y)(implicit X: ConditionExpression[X], Y: ConditionExpression[Y]): OrCondition[X, Y] =
+        OrCondition(x, y)
     }
 
     def set(to: String, from: String): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
@@ -82,9 +81,5 @@ package object scanamo {
 
     implicit def stringAttributeName(s: String): AttributeName = AttributeName.of(s)
     implicit def stringAttributeNameValue[T](sv: (String, T)): (AttributeName, T) = AttributeName.of(sv._1) -> sv._2
-
-    implicit class AndUpdateExpression(x: UpdateExpression) {
-      def and(y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
-    }
   }
 }

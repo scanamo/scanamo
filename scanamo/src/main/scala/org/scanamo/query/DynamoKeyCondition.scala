@@ -65,8 +65,8 @@ final case class Between[V: DynamoFormat](key: AttributeName, bounds: Bounds[V])
   override def keyConditionExpression(s: String): String = s"#${key.placeholder(s)} BETWEEN :lower AND :upper"
   override def attributes =
     Map(
-      "lower" -> bounds.lowerBound.v,
-      "upper" -> bounds.upperBound.v
+      "lower" -> bounds.lowerBound,
+      "upper" -> bounds.upperBound
     )
 }
 

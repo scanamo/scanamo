@@ -221,8 +221,8 @@ object ConditionExpression {
             b.key.attributeNames(s"#$prefix"),
             Some(
               DynamoObject(
-                lowerPh -> b.bounds.lowerBound.v,
-                upperPh -> b.bounds.upperBound.v
+                lowerPh -> b.bounds.lowerBound,
+                upperPh -> b.bounds.upperBound
               )
             )
           )
