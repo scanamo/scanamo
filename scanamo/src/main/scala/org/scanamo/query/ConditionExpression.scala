@@ -29,7 +29,7 @@ import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, 
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
-import org.scanamo.internal.SB
+import org.scanamo.internal._
 import cats.instances.either._
 import cats.instances.option._
 import cats.syntax.either._
@@ -47,7 +47,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
 
   private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResponse]] =
     ScanamoOps.conditionalPut(
-      ScanamoPutRequest(tableName, format.write(item), Some(expr(t).runA(SB.root).value), ret)
+      ScanamoPutRequest(tableName, format.write(item), Some(expr(t).runA(CW).value), ret)
     )
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
@@ -64,7 +64,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
         ScanamoDeleteRequest(
           tableName = tableName,
           key = key.toDynamoObject,
-          Some(expr(t).runA(SB.root).value),
+          Some(expr(t).runA(CW).value),
           ret
         )
       )
@@ -99,7 +99,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
           update.attributeNames,
           DynamoObject(update.dynamoValues),
           update.addEmptyList,
-          Some(expr(t).runA(SB.root).value)
+          Some(expr(t).runA(CW).value)
         )
       )
       .map(
@@ -109,11 +109,11 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
 }
 
 trait ConditionExpression[-T] { self =>
-  def apply(x: T): State[SB, RequestCondition]
+  def apply(x: T): State[CW, RequestCondition]
 
   def contramap[S](f: S => T): ConditionExpression[S] =
     new ConditionExpression[S] {
-      def apply(x: S): State[SB, RequestCondition] = self(f(x))
+      def apply(x: S): State[CW, RequestCondition] = self(f(x))
     }
 
 }
@@ -126,12 +126,12 @@ object ConditionExpression {
 
   implicit def attributeValueEqualsCondition[V: DynamoFormat] =
     new ConditionExpression[(AttributeName, V)] {
-      override def apply(pair: (AttributeName, V)): State[SB, RequestCondition] =
-        State.inspect { sb =>
-          val prefix = "equalsCondition" + sb.asKey
+      override def apply(pair: (AttributeName, V)): State[CW, RequestCondition] =
+        State.inspect { cw =>
+          val prefix = "equalsCondition" + cw.asKey
           val attributeName = pair._1
           val namePlaceholder = attributeName.placeholder(prefix)
-          val valuePlaceholder = "conditionAttributeValue" + sb.asKey
+          val valuePlaceholder = "conditionAttributeValue" + cw.asKey
           RequestCondition(
             s"#$namePlaceholder = :$valuePlaceholder",
             attributeName.attributeNames(s"#$prefix"),
@@ -145,12 +145,12 @@ object ConditionExpression {
 
   implicit def attributeValueInCondition[V: DynamoFormat]: ConditionExpression[(AttributeName, Set[V])] =
     new ConditionExpression[(AttributeName, Set[V])] {
-      override def apply(pair: (AttributeName, Set[V])): State[SB, RequestCondition] =
-        State.inspect { sb =>
-          val prefix = "inCondition" + sb.asKey
+      override def apply(pair: (AttributeName, Set[V])): State[CW, RequestCondition] =
+        State.inspect { cw =>
+          val prefix = "inCondition" + cw.asKey
           val attributeName = pair._1
           val namePlaceholder = attributeName.placeholder(prefix)
-          val valuePlaceholder = "conditionAttributeValue" + sb.asKey
+          val valuePlaceholder = "conditionAttributeValue" + cw.asKey
           val attributeValues = pair._2
             .foldLeft(DynamoObject.empty -> 0) {
               case ((m, i), v) => (m <> DynamoObject(s"$valuePlaceholder$i" -> v)) -> (i + 1)
@@ -166,18 +166,18 @@ object ConditionExpression {
 
   implicit def attributeExistsCondition: ConditionExpression[AttributeExists] =
     new ConditionExpression[AttributeExists] {
-      override def apply(t: AttributeExists): State[SB, RequestCondition] =
-        State.inspect { sb =>
-          val prefix = "attributeExists" + sb.asKey
+      override def apply(t: AttributeExists): State[CW, RequestCondition] =
+        State.inspect { cw =>
+          val prefix = "attributeExists" + cw.asKey
           RequestCondition(s"attribute_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
         }
     }
 
   implicit def attributeNotExistsCondition: ConditionExpression[AttributeNotExists] =
     new ConditionExpression[AttributeNotExists] {
-      override def apply(t: AttributeNotExists): State[SB, RequestCondition] =
-        State.inspect { sb =>
-          val prefix = "attributeNotExists" + sb.asKey
+      override def apply(t: AttributeNotExists): State[CW, RequestCondition] =
+        State.inspect { cw =>
+          val prefix = "attributeNotExists" + cw.asKey
           RequestCondition(
             s"attribute_not_exists(#${t.key.placeholder(prefix)})",
             t.key.attributeNames(s"#$prefix"),
@@ -188,7 +188,7 @@ object ConditionExpression {
 
   implicit def notCondition[T](implicit pcs: ConditionExpression[T]): ConditionExpression[Not[T]] =
     new ConditionExpression[Not[T]] {
-      override def apply(not: Not[T]): State[SB, RequestCondition] =
+      override def apply(not: Not[T]): State[CW, RequestCondition] =
         pcs(not.condition).map { conditionToNegate =>
           conditionToNegate.copy(expression = s"NOT(${conditionToNegate.expression})")
         }
@@ -196,10 +196,10 @@ object ConditionExpression {
 
   implicit def beginsWithCondition[V: DynamoFormat]: ConditionExpression[BeginsWith[V]] =
     new ConditionExpression[BeginsWith[V]] {
-      override def apply(b: BeginsWith[V]): State[SB, RequestCondition] =
-        State.inspect { sb =>
-          val prefix = "beginsWith" + sb.asKey
-          val valuePlaceholder = "conditionAttributeValue" + sb.asKey
+      override def apply(b: BeginsWith[V]): State[CW, RequestCondition] =
+        State.inspect { cw =>
+          val prefix = "beginsWith" + cw.asKey
+          val valuePlaceholder = "conditionAttributeValue" + cw.asKey
           RequestCondition(
             s"begins_with(#${b.key.placeholder(prefix)}, :$valuePlaceholder)",
             b.key.attributeNames(s"#$prefix"),
@@ -211,11 +211,11 @@ object ConditionExpression {
   implicit def betweenCondition[V: DynamoFormat]: ConditionExpression[Between[V]] =
     new ConditionExpression[Between[V]] {
 
-      override def apply(b: Between[V]): State[SB, RequestCondition] =
-        State.inspect { sb =>
-          val prefix = "between" + sb.asKey
-          val lowerPh = "lower" + sb.asKey
-          val upperPh = "upper" + sb.asKey
+      override def apply(b: Between[V]): State[CW, RequestCondition] =
+        State.inspect { cw =>
+          val prefix = "between" + cw.asKey
+          val lowerPh = "lower" + cw.asKey
+          val upperPh = "upper" + cw.asKey
           RequestCondition(
             s"#${b.key.placeholder(prefix)} BETWEEN :$lowerPh and :$upperPh",
             b.key.attributeNames(s"#$prefix"),
@@ -231,10 +231,10 @@ object ConditionExpression {
 
   implicit def keyIsCondition[V: DynamoFormat]: ConditionExpression[KeyIs[V]] =
     new ConditionExpression[KeyIs[V]] {
-      override def apply(k: KeyIs[V]): State[SB, RequestCondition] =
-        State.inspect { sb =>
-          val prefix = "keyIs" + sb.asKey
-          val valuePlaceholder = "conditionAttributeValue" + sb.asKey
+      override def apply(k: KeyIs[V]): State[CW, RequestCondition] =
+        State.inspect { cw =>
+          val prefix = "keyIs" + cw.asKey
+          val valuePlaceholder = "conditionAttributeValue" + cw.asKey
           RequestCondition(
             s"#${k.key.placeholder(prefix)} ${k.operator.op} :$valuePlaceholder",
             k.key.attributeNames(s"#$prefix"),
@@ -245,26 +245,26 @@ object ConditionExpression {
 
   implicit def andCondition[L: ConditionExpression, R: ConditionExpression] =
     new ConditionExpression[AndCondition[L, R]] {
-      override def apply(and: AndCondition[L, R]): State[SB, RequestCondition] =
+      override def apply(and: AndCondition[L, R]): State[CW, RequestCondition] =
         combineConditions(and.l, and.r, "AND")
     }
 
   implicit def orCondition[L: ConditionExpression, R: ConditionExpression] =
     new ConditionExpression[OrCondition[L, R]] {
-      override def apply(and: OrCondition[L, R]): State[SB, RequestCondition] =
+      override def apply(and: OrCondition[L, R]): State[CW, RequestCondition] =
         combineConditions(and.l, and.r, "OR")
     }
 
   private def combineConditions[L, R](l: L, r: R, combininingOperator: String)(implicit
     lce: ConditionExpression[L],
     rce: ConditionExpression[R]
-  ): State[SB, RequestCondition] =
-    State.get[SB].flatMap { sb =>
-      val (sbl, sbr) = sb.split
+  ): State[CW, RequestCondition] =
+    State.get[CW].flatMap { cw =>
+      val (cwl, cwr) = cw.split
 
       for {
-        l <- State.set(sbl) >> lce(l)
-        r <- State.set(sbr) >> rce(r)
+        l <- State.set(cwl) >> lce(l)
+        r <- State.set(cwr) >> rce(r)
       } yield RequestCondition(
         s"(${l.expression} $combininingOperator ${r.expression})",
         l.attributeNames ++ r.attributeNames,
@@ -278,7 +278,7 @@ case class AndCondition[L: ConditionExpression, R: ConditionExpression](l: L, r:
 case class OrCondition[L: ConditionExpression, R: ConditionExpression](l: L, r: R)
 
 case class Condition[T](t: T)(implicit T: ConditionExpression[T]) {
-  def apply: State[SB, RequestCondition] = T.apply(t)
+  def apply: State[CW, RequestCondition] = T.apply(t)
   def and[Y: ConditionExpression](other: Y) = AndCondition(t, other)
   def or[Y: ConditionExpression](other: Y) = OrCondition(t, other)
 }
@@ -286,6 +286,6 @@ case class Condition[T](t: T)(implicit T: ConditionExpression[T]) {
 object Condition {
   implicit def conditionExpression[T]: ConditionExpression[Condition[T]] =
     new ConditionExpression[Condition[T]] {
-      override def apply(condition: Condition[T]): State[SB, RequestCondition] = condition.apply
+      override def apply(condition: Condition[T]): State[CW, RequestCondition] = condition.apply
     }
 }
