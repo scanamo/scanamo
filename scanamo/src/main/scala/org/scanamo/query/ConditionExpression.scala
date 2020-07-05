@@ -47,7 +47,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
 
   private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResponse]] =
     ScanamoOps.conditionalPut(
-      ScanamoPutRequest(tableName, format.write(item), Some(expr(t).runA(CW).value), ret)
+      ScanamoPutRequest(tableName, format.write(item), Some(expr(t).runA(CW.Root).value), ret)
     )
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
@@ -64,7 +64,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
         ScanamoDeleteRequest(
           tableName = tableName,
           key = key.toDynamoObject,
-          Some(expr(t).runA(CW).value),
+          Some(expr(t).runA(CW.Root).value),
           ret
         )
       )
@@ -99,7 +99,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
           update.attributeNames,
           DynamoObject(update.dynamoValues),
           update.addEmptyList,
-          Some(expr(t).runA(CW).value)
+          Some(expr(t).runA(CW.Root).value)
         )
       )
       .map(

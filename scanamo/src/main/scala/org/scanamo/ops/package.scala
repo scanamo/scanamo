@@ -45,7 +45,7 @@ package object ops {
           queryRefinement(_.options.limit)(_.limit(_)),
           queryRefinement(_.options.exclusiveStartKey)((r, k) => r.exclusiveStartKey(k.toJavaMap)),
           queryRefinement(_.options.filter) { (r, f) =>
-            val requestCondition = f.apply.runA(CW).value
+            val requestCondition = f.apply.runA(CW.Root).value
             requestCondition.dynamoValues
               .filter(_.nonEmpty)
               .flatMap(_.toExpressionAttributeValues)
@@ -69,7 +69,7 @@ package object ops {
       }
 
       val queryCondition: RequestCondition = req.query.apply
-      val requestCondition: Option[RequestCondition] = req.options.filter.map(_.apply.runA(CW).value)
+      val requestCondition: Option[RequestCondition] = req.options.filter.map(_.apply.runA(CW.Root).value)
 
       val requestBuilder = NonEmptyList
         .of(

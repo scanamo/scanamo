@@ -1,4 +1,4 @@
-package org.scanamo
+package org.scanamo.internal
 
 /**
   * A purely functional implementation of the Calkin-Wilf tree, [[https://en.wikipedia.org/wiki/Calkin–Wilf_tree]].
@@ -15,19 +15,16 @@ package org.scanamo
   * Inspired by functional peal "Enumerating the Rationals" by Gibbons, Lester and Bird.
   * http://www.cs.ox.ac.uk/people/jeremy.gibbons/publications/rationals.pdf
   */
+private[scanamo] case class CW(node: (Int, Int)) extends AnyVal {
 
-package object internal {
-  type CW = (Int, Int)
+  def asKey: String = s"${node._1}_${node._2}"
 
-  implicit final private[scanamo] class CWOps(private val node: CW) extends AnyVal {
-    def asKey: String =
-      s"${node._1}_${node._2}"
-
-    def split: (CW, CW) = {
-      val m = node._1 + node._2
-      (node._1 -> m) -> (m -> node._2)
-    }
+  def split: (CW, CW) = {
+    val m = node._1 + node._2
+    CW(node._1 -> m) -> CW(m -> node._2)
   }
+}
 
-  val CW: CW = 1 -> 1
+private[scanamo] object CW {
+  val Root: CW = CW(1 -> 1)
 }
