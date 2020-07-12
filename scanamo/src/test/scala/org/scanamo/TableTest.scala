@@ -593,7 +593,7 @@ class TableTest extends AnyFunSpec with Matchers {
     }
   }
 
-  it("Filters a table with a very long condition expression") {
+  it("Filters a table with 11 condition expression attribute values, fixing #597") {
     LocalDynamoDB.withRandomTable(client)("line" -> S, "name" -> S) { t =>
       val stationTable = Table[Station](t)
       val ops = for {
