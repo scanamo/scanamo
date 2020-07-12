@@ -219,10 +219,7 @@ object ConditionExpression {
             s"#${b.key.placeholder(prefix)} BETWEEN :$lowerPh and :$upperPh",
             b.key.attributeNames(s"#$prefix"),
             Some(
-              DynamoObject(
-                lowerPh -> b.bounds.lowerBound,
-                upperPh -> b.bounds.upperBound
-              )
+              DynamoObject(lowerPh -> b.lo, upperPh -> b.hi)
             )
           )
         }

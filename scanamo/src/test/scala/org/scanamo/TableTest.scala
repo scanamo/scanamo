@@ -328,8 +328,8 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- thingTable.putAll(Set(Thing2("a", None), Thing2("b", Some(1)), Thing2("c", None)))
         _ <- thingTable.given(attributeExists("maybe")).put(Thing2("a", Some(2)))
         _ <- thingTable.given(attributeExists("maybe")).put(Thing2("b", Some(3)))
-        _ <- thingTable.given(!attributeExists("maybe")).put(Thing2("c", Some(42)))
-        _ <- thingTable.given(!attributeExists("maybe")).put(Thing2("b", Some(42)))
+        _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing2("c", Some(42)))
+        _ <- thingTable.given(Not(attributeExists("maybe"))).put(Thing2("b", Some(42)))
         things <- thingTable.scan()
       } yield things
       scanamo.exec(ops).toList should be(
@@ -610,16 +610,16 @@ class TableTest extends AnyFunSpec with Matchers {
           stationTable
             .filter(
               (
-                attributeExists("line") &&
-                  attributeExists("name") &&
-                  attributeNotExists("colour") &&
-                  !attributeExists("speed") &&
-                  "zone" -> Set(8, 7, 5) &&
-                  ("line" beginsWith "Metr") &&
-                  ("name" beginsWith "C") &&
-                  ("zone" between (5 and 8)) &&
+                attributeExists("line") and
+                  attributeExists("name") and
+                  attributeNotExists("colour") and
+                  Not(attributeExists("speed")) and
+                  "zone" -> Set(8, 7, 5) and
+                  ("line" beginsWith "Metr") and
+                  ("name" beginsWith "C") and
+                  ("zone" between 5 and 8) and
                   "name" -> "Chorleywood"
-              ) || (
+              ) or (
                 "line" -> "Jubilee"
               )
             )
