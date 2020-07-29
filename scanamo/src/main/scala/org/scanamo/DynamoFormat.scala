@@ -27,10 +27,8 @@ import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import magnolia.Magnolia
-import org.scanamo.generic.{ AutoDerivationUnlocker, Derivation }
 
-import scala.language.experimental.macros
+import scala.annotation.implicitNotFound
 import scala.reflect.ClassTag
 
 /**
@@ -88,6 +86,25 @@ import scala.reflect.ClassTag
   *
   * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.iso]]
   */
+@implicitNotFound(
+  "There is no format for ${T}, you may have to do one of the following:\n" +
+    "  1- enable automatic derivation:\n" +
+    "      ```\n" +
+    "        import org.scanamo.generic.auto._\n" +
+    "      ```\n" +
+    "  2- enable semi-automatic derivation:\n" +
+    "      ```\n" +
+    "        import org.scanamo.generic.semiauto._\n" +
+    "        implicit val format${T}: DynamoFormat[${T}] = deriveDynamoFormat[${T}]\n" +
+    "      ```\n" +
+    "  3- or write your own custom format:\n" +
+    "      ```\n" +
+    "        implicit val format${T}: DynamoFormat[${T}] =\n" +
+    "          new DynamoFormat[${T}] {\n" +
+    "            ...\n" +
+    "          }\n" +
+    "      ```"
+)
 trait DynamoFormat[T] {
   def read(av: DynamoValue): Either[DynamoReadError, T]
   def read(av: AttributeValue): Either[DynamoReadError, T] = read(DynamoValue.fromAttributeValue(av))
@@ -99,7 +116,7 @@ trait DynamoFormat[T] {
     DynamoFormat.coercedXmap(read, write)(this, implicitly)
 }
 
-object DynamoFormat extends Derivation {
+object DynamoFormat {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
@@ -618,11 +635,6 @@ object DynamoFormat extends Derivation {
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
 
-  implicit final def genericFormat[A](implicit U: AutoDerivationUnlocker): DynamoFormat[A] =
-    macro deriveGenericFormat[A]
-
-  def deriveGenericFormat[A: c.WeakTypeTag](c: scala.reflect.macros.whitebox.Context)(U: c.Tree): c.Tree = {
-    val _ = U
-    Magnolia.gen[A](c)
-  }
+  implicit def generic[A](implicit A: org.scanamo.generic.Exported[DynamoFormat[A]]): DynamoFormat[A] =
+    A.instance
 }
