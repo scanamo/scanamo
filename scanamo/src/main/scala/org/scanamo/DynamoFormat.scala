@@ -95,12 +95,12 @@ import scala.reflect.ClassTag
     "  2- enable semi-automatic derivation:\n" +
     "      ```\n" +
     "        import org.scanamo.generic.semiauto._\n" +
-    "        implicit val yourFormat: DynamoFormat[YourType] = deriveDynamoFormat[YourType]\n" +
+    "        implicit val format${T}: DynamoFormat[${T}] = deriveDynamoFormat[${T}]\n" +
     "      ```\n" +
     "  3- or write your own custom format:\n" +
     "      ```\n" +
-    "        implicit val yourFormat: DynamoFormat[YourType] =\n" +
-    "          new DynamoFormat[YourType] {\n" +
+    "        implicit val format${T}: DynamoFormat[${T}] =\n" +
+    "          new DynamoFormat[${T}] {\n" +
     "            ...\n" +
     "          }\n" +
     "      ```"
