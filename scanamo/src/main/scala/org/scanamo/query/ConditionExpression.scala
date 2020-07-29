@@ -22,7 +22,7 @@ import software.amazon.awssdk.services.dynamodb.model.{
   DeleteItemResponse,
   PutItemResponse
 }
-import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, PutReturn, ScanamoError }
+import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, DynamoValue, PutReturn, ScanamoError }
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
@@ -161,6 +161,17 @@ object ConditionExpression {
           s"attribute_not_exists(#${t.key.placeholder(prefix)})",
           t.key.attributeNames(s"#$prefix"),
           None
+        )
+    }
+
+  implicit val containsCondition =
+    new ConditionExpression[Contains] {
+      val prefix = "contains"
+      def apply(t: Contains): RequestCondition =
+        RequestCondition(
+          s"contains(#${t.key.placeholder(prefix)}, :containsAttributeValue)",
+          t.key.attributeNames(s"#$prefix"),
+          Some(DynamoObject("containsAttributeValue" -> DynamoValue.fromString(t.value)))
         )
     }
 
