@@ -37,7 +37,7 @@ LocalDynamoDB.createTable(client)("muppets")("name" -> S)
 
 case class Muppet(name: String, species: String)
 ```
-```scala mdoc:nest
+```scala mdoc
 val muppets = Table[Muppet]("muppets")
 scanamo.exec {
   for {
