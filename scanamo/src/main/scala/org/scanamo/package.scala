@@ -47,12 +47,6 @@ package object scanamo {
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
 
-    case class Bounds[V: DynamoFormat](lowerBound: Bound[V], upperBound: Bound[V])
-
-    implicit class Bound[V: DynamoFormat](val v: V) {
-      def and(upperBound: V) = Bounds(Bound(v), Bound(upperBound))
-    }
-
     def attributeExists(string: String) = AttributeExists(AttributeName.of(string))
 
     def attributeNotExists(string: String) = AttributeNotExists(AttributeName.of(string))

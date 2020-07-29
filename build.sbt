@@ -2,7 +2,7 @@ scalaVersion in ThisBuild := "2.12.10"
 crossScalaVersions in ThisBuild := Seq("2.12.10", "2.13.1")
 
 val catsVersion = "2.1.1"
-val catsEffectVersion = "2.1.3"
+val catsEffectVersion = "2.1.4"
 val zioVersion = "1.0.0-RC19"
 
 lazy val stdOptions = Seq(
@@ -85,7 +85,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.46"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.63"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -95,7 +95,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.14",
+      "eu.timepit"    %% "refined"   % "0.9.15",
       "org.scalatest" %% "scalatest" % "3.1.2" % Test
     )
   )

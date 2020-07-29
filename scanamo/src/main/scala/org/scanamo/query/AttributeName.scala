@@ -17,9 +17,10 @@
 package org.scanamo.query
 
 import org.scanamo.DynamoFormat
-import org.scanamo.syntax.Bounds
 
 case class AttributeName(components: List[String], index: Option[Int]) {
+  import AttributeName.PartiallyAppliedBetween
+
   def placeholder(prefix: String): String =
     index.foldLeft(
       components.map(s => s"$prefix$s").mkString(".#")
@@ -37,10 +38,15 @@ case class AttributeName(components: List[String], index: Option[Int]) {
   def <=[V: DynamoFormat](v: V) = KeyIs(this, LTE, v)
   def >=[V: DynamoFormat](v: V) = KeyIs(this, GTE, v)
   def beginsWith[V: DynamoFormat](v: V) = BeginsWith(this, v)
-  def between[V: DynamoFormat](bounds: Bounds[V]) = Between(this, bounds)
+  def between[V: DynamoFormat](lo: V): PartiallyAppliedBetween[V] =
+    new PartiallyAppliedBetween(this, lo)
   def contains(substr: String): Contains = Contains(this, substr)
 }
 
 object AttributeName {
   def of(s: String): AttributeName = AttributeName(List(s), None)
+
+  final private[scanamo] class PartiallyAppliedBetween[V: DynamoFormat](attr: AttributeName, lo: V) {
+    def and(hi: V): Between[V] = Between(attr, lo, hi)
+  }
 }

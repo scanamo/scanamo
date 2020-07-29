@@ -29,6 +29,7 @@ object TableTest {
   case class Letter(roman: String, greek: String)
   case class Middle(name: String, counter: Long, inner: Inner, list: List[Int])
   case class Outer(id: java.util.UUID, middle: Middle)
+  case class Station(line: String, name: String, zone: Int)
   case class Thing(id: String, mandatory: Int, optional: Option[Int])
   case class Thing2(a: String, maybe: Option[Int])
   case class Transport(mode: String, line: String, colour: String)
@@ -567,8 +568,6 @@ class TableTest extends AnyFunSpec with Matchers {
       )
     }
 
-    case class Station(line: String, name: String, zone: Int)
-
     LocalDynamoDB.withRandomTable(client)("line" -> S, "name" -> S) { t =>
       val stationTable = Table[Station](t)
       val ops = for {
@@ -589,6 +588,48 @@ class TableTest extends AnyFunSpec with Matchers {
           Right(Station("Metropolitan", "Chalfont & Latimer", 8)),
           Right(Station("Metropolitan", "Chorleywood", 7)),
           Right(Station("Metropolitan", "Croxley", 7))
+        )
+      )
+    }
+  }
+
+  it("Filters a table with 11 condition expression attribute values, fixing #597") {
+    LocalDynamoDB.withRandomTable(client)("line" -> S, "name" -> S) { t =>
+      val stationTable = Table[Station](t)
+      val ops = for {
+        _ <- stationTable.putAll(
+          Set(
+            Station("Metropolitan", "Chalfont & Latimer", 8),
+            Station("Metropolitan", "Chorleywood", 7),
+            Station("Metropolitan", "Rickmansworth", 7),
+            Station("Metropolitan", "Croxley", 7),
+            Station("Jubilee", "Canons Park", 5)
+          )
+        )
+        filteredStations <-
+          stationTable
+            .filter(
+              (
+                attributeExists("line") and
+                  attributeExists("name") and
+                  attributeNotExists("colour") and
+                  Not(attributeExists("speed")) and
+                  "zone" -> Set(8, 7, 5) and
+                  ("line" beginsWith "Metr") and
+                  ("name" beginsWith "C") and
+                  ("zone" between 5 and 8) and
+                  "name" -> "Chorleywood"
+              ) or (
+                "line" -> "Jubilee"
+              )
+            )
+            .scan
+      } yield filteredStations
+
+      scanamo.exec(ops) should be(
+        List(
+          Right(Station("Metropolitan", "Chorleywood", 7)),
+          Right(Station("Jubilee", "Canons Park", 5))
         )
       )
     }
