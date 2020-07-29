@@ -375,13 +375,13 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
-          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 2 and 4))
           ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
-          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 2 and 4))
           ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
-          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (1 and 1)))
+          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
         scanamo
@@ -560,8 +560,8 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
         _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
-        _ <- farmersTable.given("age" between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
-        _ <- farmersTable.given("age" between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        _ <- farmersTable.given("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.given("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get("name" -> "Butch")
       } yield farmerButch
       scanamo
