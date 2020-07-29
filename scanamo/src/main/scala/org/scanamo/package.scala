@@ -22,6 +22,10 @@ import scala.language.implicitConversions
 
 package object scanamo {
   object syntax {
+    implicit final class AsDynamoValue[A](private val x: A) extends AnyVal {
+      def asDynamoValue(implicit A: DynamoFormat[A]): DynamoValue = A.write(x)
+    }
+
     implicit class AttributeNameKeyCondition(s: String) {
       def and(other: String) = HashAndRangeKeyNames(AttributeName.of(s), AttributeName.of(other))
     }
