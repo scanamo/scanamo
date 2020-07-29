@@ -28,6 +28,7 @@ import cats.syntax.either._
 import cats.syntax.traverse._
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
+import scala.annotation.implicitNotFound
 import scala.reflect.ClassTag
 
 /**
@@ -85,6 +86,25 @@ import scala.reflect.ClassTag
   *
   * Custom formats can often be most easily defined using [[DynamoFormat.coercedXmap]], [[DynamoFormat.xmap]] or [[DynamoFormat.iso]]
   */
+@implicitNotFound(
+  "There is no format for ${T}, you may have to do one of the following:\n" +
+    "  1- enable automatic derivation:\n" +
+    "      ```\n" +
+    "        import org.scanamo.generic.auto._\n" +
+    "      ```\n" +
+    "  2- enable semi-automatic derivation:\n" +
+    "      ```\n" +
+    "        import org.scanamo.generic.semiauto._\n" +
+    "        implicit val yourFormat: DynamoFormat[YourType] = deriveDynamoFormat[YourType]\n" +
+    "      ```\n" +
+    "  3- or write your own custom format:\n" +
+    "      ```\n" +
+    "        implicit val yourFormat: DynamoFormat[YourType] =\n" +
+    "          new DynamoFormat[YourType] {\n" +
+    "            ...\n" +
+    "          }\n" +
+    "      ```"
+)
 trait DynamoFormat[T] {
   def read(av: DynamoValue): Either[DynamoReadError, T]
   def read(av: AttributeValue): Either[DynamoReadError, T] = read(DynamoValue.fromAttributeValue(av))
