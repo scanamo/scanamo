@@ -16,12 +16,14 @@
 
 package org.scanamo.generic
 
-/**
-  * This class enables the automatic derivation of a [[org.scanamo.DynamoFormat]] instance if in lexical scope.
-  * The actual derivation happens inside the companion
-  */
-sealed abstract private[scanamo] class AutoDerivationUnlocker
+import magnolia._
 
-trait AutoDerivation {
-  implicit final val autoDerivationUnlocker: AutoDerivationUnlocker = new AutoDerivationUnlocker {}
+import org.scanamo.DynamoFormat
+import scala.reflect.macros.whitebox
+
+trait AutoDerivation extends Derivation {
+  def materializeImpl[A: c.WeakTypeTag](c: whitebox.Context): c.Expr[Exported[DynamoFormat[A]]] = {
+    val magnoliaTree = c.Expr[DynamoFormat[A]](Magnolia.gen[A](c))
+    c.universe.reify(new Exported(magnoliaTree.splice))
+  }
 }
