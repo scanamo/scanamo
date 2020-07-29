@@ -16,4 +16,4 @@
 
 package org.scanamo.generic
 
-final private[scanamo] case class Exported[T](instance: T) extends AnyVal
+final case class Exported[T](instance: T) extends AnyVal
