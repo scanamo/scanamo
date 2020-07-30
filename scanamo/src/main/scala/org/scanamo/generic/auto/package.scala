@@ -16,10 +16,16 @@
 
 package org.scanamo.generic
 
+import scala.language.experimental.macros
+
+import org.scanamo.DynamoFormat
+
 /**
   * Fully automatic format derivation.
   *
   * Importing the contents of this package object provides [[org.scanamo.DynamoFormat]]
-  * instances for case classes (if all members have instances)
+  * instances for algebraic data types.
   */
-package object auto extends AutoDerivation
+package object auto extends AutoDerivation {
+  implicit final def genericDerivedFormat[A]: Exported[DynamoFormat[A]] = macro materializeImpl[A]
+}

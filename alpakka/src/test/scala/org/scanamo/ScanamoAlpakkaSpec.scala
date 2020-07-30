@@ -2,36 +2,29 @@ package org.scanamo
 
 import akka.actor.ActorSystem
 import akka.stream.ActorMaterializer
-import akka.stream.alpakka.dynamodb.{ DynamoClient, DynamoSettings }
-import com.amazonaws.auth.{ AWSStaticCredentialsProvider, BasicAWSCredentials }
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.time.{ Millis, Seconds, Span }
-import org.scalatest.{ BeforeAndAfterAll, FunSpecLike, Matchers }
+import org.scalatest.BeforeAndAfterAll
+import org.scalatest.funspec.AnyFunSpecLike
+import org.scalatest.matchers.should.Matchers
 import cats.implicits._
 import org.scanamo.ops.ScanamoOps
 
-class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
+class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
   implicit val system = ActorSystem("scanamo-alpakka")
-  val client = LocalDynamoDB.client()
 
   implicit val materializer = ActorMaterializer.create(system)
   implicit val executor = system.dispatcher
   implicit val defaultPatience =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
-  val dummyCreds = new AWSStaticCredentialsProvider(new BasicAWSCredentials("dummy", "credentials"))
-  val alpakkaClient = DynamoClient(
-    DynamoSettings(region = "", host = "localhost")
-      .withPort(8042)
-      .withParallelism(2)
-      .withCredentialsProvider(dummyCreds)
-  )
 
-  val scanamo = ScanamoAlpakka(alpakkaClient)
+  val client = LocalDynamoDB.client()
+  val scanamo = ScanamoAlpakka(client)
 
   override protected def afterAll(): Unit = {
     system.terminate()
@@ -155,9 +148,10 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -345,12 +339,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         scanamo
@@ -380,13 +375,13 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
-          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 2 and 4))
           ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
-          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 2 and 4))
           ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
-          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (1 and 1)))
+          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
         scanamo
@@ -565,8 +560,8 @@ class ScanamoAlpakkaSpec extends FunSpecLike with BeforeAndAfterAll with Matcher
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
         _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
-        _ <- farmersTable.given("age" between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
-        _ <- farmersTable.given("age" between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        _ <- farmersTable.given("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.given("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get("name" -> "Butch")
       } yield farmerButch
       scanamo

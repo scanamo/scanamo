@@ -16,7 +16,7 @@
 
 package org.scanamo.update
 
-import com.amazonaws.services.dynamodbv2.model.AttributeValue
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import cats.data.NonEmptyVector
 import org.scanamo.{ DynamoFormat, DynamoValue }
 import org.scanamo.query._
@@ -29,26 +29,28 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
         s"${t.op} ${e.map(_.expression).toVector.mkString(", ")}"
     }.mkString(" ")
 
-  final def typeExpressions: HashMap[UpdateType, NonEmptyVector[LeafUpdateExpression]] = self match {
-    case SimpleUpdate(leaf) => HashMap(leaf.updateType -> NonEmptyVector.of(leaf))
-    case AndUpdate(l, r) =>
-      val leftUpdates = l.typeExpressions.map { case (k, v)  => k -> v.map(_.prefixKeys("l_")) }
-      val rightUpdates = r.typeExpressions.map { case (k, v) => k -> v.map(_.prefixKeys("r_")) }
+  final def typeExpressions: HashMap[UpdateType, NonEmptyVector[LeafUpdateExpression]] =
+    self match {
+      case SimpleUpdate(leaf) => HashMap(leaf.updateType -> NonEmptyVector.of(leaf))
+      case AndUpdate(l, r) =>
+        val leftUpdates = l.typeExpressions.map { case (k, v) => k -> v.map(_.prefixKeys("l_")) }
+        val rightUpdates = r.typeExpressions.map { case (k, v) => k -> v.map(_.prefixKeys("r_")) }
 
-      leftUpdates.merged(rightUpdates) {
-        case ((k, v1), (_, v2)) => k -> (v1 concatNev v2)
-      }
-  }
+        leftUpdates.merged(rightUpdates) {
+          case ((k, v1), (_, v2)) => k -> (v1 concatNev v2)
+        }
+    }
 
   final def attributeNames: Map[String, String] =
     unprefixedAttributeNames.map {
       case (k, v) => (s"#$k", v)
     }
 
-  final def unprefixedAttributeNames: Map[String, String] = self match {
-    case SimpleUpdate(leaf) => leaf.attributeNames
-    case AndUpdate(l, r)    => l.unprefixedAttributeNames ++ r.unprefixedAttributeNames
-  }
+  final def unprefixedAttributeNames: Map[String, String] =
+    self match {
+      case SimpleUpdate(leaf) => leaf.attributeNames
+      case AndUpdate(l, r)    => l.unprefixedAttributeNames ++ r.unprefixedAttributeNames
+    }
 
   final def dynamoValues: Map[String, DynamoValue] = unprefixedDynamoValues
 
@@ -59,12 +61,13 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
 
   final def attributeValues: Map[String, AttributeValue] = dynamoValues.mapValues(_.toAttributeValue).toMap
 
-  final def unprefixedDynamoValues: Map[String, DynamoValue] = self match {
-    case SimpleUpdate(leaf) => leaf.dynamoValue.toMap
-    case AndUpdate(l, r) =>
-      UpdateExpression.prefixKeys(l.unprefixedDynamoValues, "l_") ++ UpdateExpression
-        .prefixKeys(r.unprefixedDynamoValues, "r_")
-  }
+  final def unprefixedDynamoValues: Map[String, DynamoValue] =
+    self match {
+      case SimpleUpdate(leaf) => leaf.dynamoValue.toMap
+      case AndUpdate(l, r) =>
+        UpdateExpression.prefixKeys(l.unprefixedDynamoValues, "l_") ++ UpdateExpression
+          .prefixKeys(r.unprefixedDynamoValues, "r_")
+    }
 
   final def unprefixedAttributeValues: Map[String, AttributeValue] =
     unprefixedDynamoValues.mapValues(_.toAttributeValue).toMap
@@ -76,9 +79,10 @@ final private[scanamo] case class SimpleUpdate(leaf: LeafUpdateExpression) exten
 final private[scanamo] case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExpression
 
 object UpdateExpression {
-  def prefixKeys[T](map: Map[String, T], prefix: String) = map.map {
-    case (k, v) => (s"$prefix$k", v)
-  }
+  def prefixKeys[T](map: Map[String, T], prefix: String) =
+    map.map {
+      case (k, v) => (s"$prefix$k", v)
+    }
 
   def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     SetExpression(fieldValue._1, fieldValue._2)
@@ -133,14 +137,15 @@ sealed private[update] trait LeafUpdateExpression { self =>
     case LeafAttributeExpression(prefix, from, to) => s"#${to.placeholder(prefix)} = #${from.placeholder(prefix)}"
   }
 
-  final def prefixKeys(prefix: String): LeafUpdateExpression = self match {
-    case x: LeafSetExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-    case x: LeafAppendExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-    case x: LeafPrependExpression => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-    case x: LeafAddExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-    case x: LeafDeleteExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-    case x                        => x
-  }
+  final def prefixKeys(prefix: String): LeafUpdateExpression =
+    self match {
+      case x: LeafSetExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafAppendExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafPrependExpression => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafAddExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafDeleteExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x                        => x
+    }
 
   final val dynamoValue: Option[(String, DynamoValue)] = self match {
     case LeafAddExpression(_, _, valuePlaceholder, av)     => Some(valuePlaceholder -> av)

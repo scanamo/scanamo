@@ -17,7 +17,6 @@
 package org.scanamo.query
 
 import org.scanamo.DynamoFormat
-import org.scanamo.syntax.Bounds
 
 case class KeyEquals[V: DynamoFormat](key: AttributeName, v: V) {
   def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]) =
@@ -61,12 +60,13 @@ final case class BeginsWith[V: DynamoFormat](key: AttributeName, v: V) extends R
   override def attributes = Map(placeholder -> v)
 }
 
-final case class Between[V: DynamoFormat](key: AttributeName, bounds: Bounds[V]) extends RangeKeyCondition[V] {
+final case class Between[V: DynamoFormat](key: AttributeName, lo: V, hi: V) extends RangeKeyCondition[V] {
   override def keyConditionExpression(s: String): String = s"#${key.placeholder(s)} BETWEEN :lower AND :upper"
-  override def attributes = Map(
-    "lower" -> bounds.lowerBound.v,
-    "upper" -> bounds.upperBound.v
-  )
+  override def attributes =
+    Map(
+      "lower" -> lo,
+      "upper" -> hi
+    )
 }
 
 final case class AttributeExists(key: AttributeName)

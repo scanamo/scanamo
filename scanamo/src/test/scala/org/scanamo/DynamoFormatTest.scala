@@ -2,7 +2,8 @@ package org.scanamo
 
 import scala.reflect.runtime.universe._
 
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scalacheck._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -20,9 +21,10 @@ class DynamoFormatTest extends AnyFunSpec with Matchers with ScalaCheckDrivenPro
         val format = DynamoFormat[Person]
         forAll(gen) { a: A =>
           val person = Person("bob", a)
-          client.putItem(t, format.write(person).toAttributeValue.getM)
-          val resp = client.getItem(t, DynamoObject("name" -> "bob").toJavaMap)
-          format.read(DynamoObject(resp.getItem).toDynamoValue) shouldBe Right(person)
+          client.putItem(PutItemRequest.builder.tableName(t).item(format.write(person).toAttributeValue.m).build).get
+          val resp =
+            client.getItem(GetItemRequest.builder.tableName(t).key(DynamoObject("name" -> "bob").toJavaMap).build).get
+          format.read(DynamoObject(resp.item).toDynamoValue) shouldBe Right(person)
         }
       }
     }

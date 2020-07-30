@@ -32,16 +32,17 @@ object UniqueKeyCondition {
 
   def apply[T, K](implicit U: UniqueKeyCondition.Aux[T, K]): UniqueKeyCondition.Aux[T, K] = U
 
-  implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]) = new UniqueKeyCondition[KeyEquals[V]] {
-    type K = AttributeName
-    final def toDynamoObject(t: KeyEquals[V]): DynamoObject = DynamoObject(t.key.placeholder("") -> t.v)
-    final def fromDynamoObject(key: K, dvs: DynamoObject): Option[KeyEquals[V]] =
-      dvs(key.placeholder("")).flatMap(V.read(_).right.toOption.map(KeyEquals(key, _)))
-    final def key(t: KeyEquals[V]): K = t.key
-  }
+  implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]) =
+    new UniqueKeyCondition[KeyEquals[V]] {
+      type K = AttributeName
+      final def toDynamoObject(t: KeyEquals[V]): DynamoObject = DynamoObject(t.key.placeholder("") -> t.v)
+      final def fromDynamoObject(key: K, dvs: DynamoObject): Option[KeyEquals[V]] =
+        dvs(key.placeholder("")).flatMap(V.read(_).right.toOption.map(KeyEquals(key, _)))
+      final def key(t: KeyEquals[V]): K = t.key
+    }
 
-  implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition, KH, KR](
-    implicit H: UniqueKeyCondition.Aux[H, KH],
+  implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition, KH, KR](implicit
+    H: UniqueKeyCondition.Aux[H, KH],
     R: UniqueKeyCondition.Aux[R, KR]
   ) =
     new UniqueKeyCondition[AndEqualsCondition[H, R]] {
@@ -65,10 +66,11 @@ trait UniqueKeyConditions[T] {
 object UniqueKeyConditions {
   def apply[T](implicit U: UniqueKeyConditions[T]): UniqueKeyConditions[T] = U
 
-  implicit def keyList[V: DynamoFormat] = new UniqueKeyConditions[KeyList[V]] {
-    final def toDynamoObject(kl: KeyList[V]) =
-      kl.values.map(v => DynamoObject(kl.key.placeholder("") -> v))
-  }
+  implicit def keyList[V: DynamoFormat] =
+    new UniqueKeyConditions[KeyList[V]] {
+      final def toDynamoObject(kl: KeyList[V]) =
+        kl.values.map(v => DynamoObject(kl.key.placeholder("") -> v))
+    }
 
   implicit def multipleKeyList[H: DynamoFormat, R: DynamoFormat] =
     new UniqueKeyConditions[MultipleKeyList[H, R]] {

@@ -20,9 +20,9 @@ case class Transport(mode: String, line: String, colour: String)
 val transport = Table[Transport]("transport")
 val colourIndex = transport.index("colour-index")
 
-val client = LocalDynamoDB.client()
+val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 ```
 ```scala mdoc
 LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")("mode" -> S, "line" -> S)("colour" -> S) {

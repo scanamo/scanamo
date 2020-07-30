@@ -22,6 +22,10 @@ import scala.language.implicitConversions
 
 package object scanamo {
   object syntax {
+    implicit final class AsDynamoValue[A](private val x: A) extends AnyVal {
+      def asDynamoValue(implicit A: DynamoFormat[A]): DynamoValue = A.write(x)
+    }
+
     implicit class AttributeNameKeyCondition(s: String) {
       def and(other: String) = HashAndRangeKeyNames(AttributeName.of(s), AttributeName.of(other))
     }
@@ -46,12 +50,6 @@ package object scanamo {
       Query(KeyEquals(AttributeName.of(pair._1), pair._2))
 
     implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
-
-    case class Bounds[V: DynamoFormat](lowerBound: Bound[V], upperBound: Bound[V])
-
-    implicit class Bound[V: DynamoFormat](val v: V) {
-      def and(upperBound: V) = Bounds(Bound(v), Bound(upperBound))
-    }
 
     def attributeExists(string: String) = AttributeExists(AttributeName.of(string))
 

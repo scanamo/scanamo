@@ -4,7 +4,7 @@ import cats.effect.IO
 import cats.implicits._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import com.amazonaws.services.dynamodbv2.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query._
 import org.scanamo.syntax._
@@ -134,9 +134,10 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
         _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
-        _ <- forecasts
-          .given("weather" -> "Rain")
-          .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
+        _ <-
+          forecasts
+            .given("weather" -> "Rain")
+            .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
@@ -360,12 +361,13 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
               Transport("Underground", "Northern", "Black")
             )
           )
-          rs <- transports
-            .index(i)
-            .limit(1)
-            .query(
-              "mode" -> "Underground" and ("colour" beginsWith "Bl")
-            )
+          rs <-
+            transports
+              .index(i)
+              .limit(1)
+              .query(
+                "mode" -> "Underground" and ("colour" beginsWith "Bl")
+              )
         } yield rs
 
         scanamo.exec[List[Either[DynamoReadError, Transport]]](result).unsafeRunSync should equal(
@@ -391,13 +393,13 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
-          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts1 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 2 and 4))
           ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
-          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (2 and 4)))
+          ts3 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 2 and 4))
           ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
-          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between (1 and 1)))
+          ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
         scanamo
@@ -564,8 +566,8 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
         _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
-        _ <- farmersTable.given("age" between (56 and 57)).put(Farmer("Butch", 57, Farm(List("chicken"))))
-        _ <- farmersTable.given("age" between (58 and 59)).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        _ <- farmersTable.given("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.given("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get("name" -> "Butch")
       } yield farmerButch
       scanamo.exec[Option[Either[DynamoReadError, Farmer]]](farmerOps).unsafeRunSync should equal(

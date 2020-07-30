@@ -18,12 +18,12 @@ package org.scanamo
 
 import cats.{ ~>, Monad }
 import cats.effect.Async
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBAsync
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import fs2.Stream
 import monix.tail.Iterant
 import org.scanamo.ops.{ CatsInterpreter, ScanamoOps, ScanamoOpsT }
 
-class ScanamoCats[F[_]: Async](client: AmazonDynamoDBAsync) {
+class ScanamoCats[F[_]: Async](client: DynamoDbAsyncClient) {
   final private val interpreter = new CatsInterpreter(client)
 
   final def exec[A](op: ScanamoOps[A]): F[A] = op.foldMap(interpreter)
@@ -33,7 +33,7 @@ class ScanamoCats[F[_]: Async](client: AmazonDynamoDBAsync) {
 }
 
 object ScanamoCats {
-  def apply[F[_]: Async](client: AmazonDynamoDBAsync): ScanamoCats[F] = new ScanamoCats(client)
+  def apply[F[_]: Async](client: DynamoDbAsyncClient): ScanamoCats[F] = new ScanamoCats(client)
 
   def ToIterant[F[_]: Async]: F ~> Iterant[F, ?] =
     new (F ~> Iterant[F, ?]) {

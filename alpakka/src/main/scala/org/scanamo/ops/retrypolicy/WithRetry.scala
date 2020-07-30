@@ -28,16 +28,16 @@ trait WithRetry {
 
   final def retry[T](op: => Source[T, NotUsed], retryPolicy: RetryPolicy): Source[T, NotUsed] =
     op.recoverWithRetries(
-      1, {
+      1,
+      {
         case exception if retryable(exception) =>
-          if (retryPolicy.continue) {
+          if (retryPolicy.continue)
             Source
               .single(())
               .delay(FiniteDuration(retryPolicy.delayOrElse(Long.MaxValue)(_.toMillis), TimeUnit.MILLISECONDS))
               .flatMapConcat(_ => retry(op, retryPolicy.update))
-          } else {
+          else
             Source.failed(exception)
-          }
       }
     )
 }

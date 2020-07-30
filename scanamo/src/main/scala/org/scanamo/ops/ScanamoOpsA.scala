@@ -16,51 +16,51 @@
 
 package org.scanamo.ops
 
-import com.amazonaws.services.dynamodbv2.model._
+import software.amazon.awssdk.services.dynamodb.model._
 import org.scanamo.request._
 
 sealed trait ScanamoOpsA[A] extends Product with Serializable
-final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResult]
+final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResponse]
 final case class ConditionalPut(req: ScanamoPutRequest)
-    extends ScanamoOpsA[Either[ConditionalCheckFailedException, PutItemResult]]
-final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResult]
-final case class Delete(req: ScanamoDeleteRequest) extends ScanamoOpsA[DeleteItemResult]
+    extends ScanamoOpsA[Either[ConditionalCheckFailedException, PutItemResponse]]
+final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResponse]
+final case class Delete(req: ScanamoDeleteRequest) extends ScanamoOpsA[DeleteItemResponse]
 final case class ConditionalDelete(req: ScanamoDeleteRequest)
-    extends ScanamoOpsA[Either[ConditionalCheckFailedException, DeleteItemResult]]
-final case class Scan(req: ScanamoScanRequest) extends ScanamoOpsA[ScanResult]
-final case class Query(req: ScanamoQueryRequest) extends ScanamoOpsA[QueryResult]
-final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResult]
-final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGetItemResult]
-final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateItemResult]
+    extends ScanamoOpsA[Either[ConditionalCheckFailedException, DeleteItemResponse]]
+final case class Scan(req: ScanamoScanRequest) extends ScanamoOpsA[ScanResponse]
+final case class Query(req: ScanamoQueryRequest) extends ScanamoOpsA[QueryResponse]
+final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[BatchWriteItemResponse]
+final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGetItemResponse]
+final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateItemResponse]
 final case class ConditionalUpdate(req: ScanamoUpdateRequest)
-    extends ScanamoOpsA[Either[ConditionalCheckFailedException, UpdateItemResult]]
-final case class TransactWriteAll(req: ScanamoTransactWriteRequest) extends ScanamoOpsA[TransactWriteItemsResult]
+    extends ScanamoOpsA[Either[ConditionalCheckFailedException, UpdateItemResponse]]
+final case class TransactWriteAll(req: ScanamoTransactWriteRequest) extends ScanamoOpsA[TransactWriteItemsResponse]
 
 object ScanamoOps {
   import cats.free.Free.liftF
 
-  def put(req: ScanamoPutRequest): ScanamoOps[PutItemResult] = liftF[ScanamoOpsA, PutItemResult](Put(req))
-  def conditionalPut(req: ScanamoPutRequest): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResult]] =
-    liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, PutItemResult]](ConditionalPut(req))
-  def get(req: GetItemRequest): ScanamoOps[GetItemResult] = liftF[ScanamoOpsA, GetItemResult](Get(req))
-  def delete(req: ScanamoDeleteRequest): ScanamoOps[DeleteItemResult] =
-    liftF[ScanamoOpsA, DeleteItemResult](Delete(req))
+  def put(req: ScanamoPutRequest): ScanamoOps[PutItemResponse] = liftF[ScanamoOpsA, PutItemResponse](Put(req))
+  def conditionalPut(req: ScanamoPutRequest): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResponse]] =
+    liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, PutItemResponse]](ConditionalPut(req))
+  def get(req: GetItemRequest): ScanamoOps[GetItemResponse] = liftF[ScanamoOpsA, GetItemResponse](Get(req))
+  def delete(req: ScanamoDeleteRequest): ScanamoOps[DeleteItemResponse] =
+    liftF[ScanamoOpsA, DeleteItemResponse](Delete(req))
   def conditionalDelete(
     req: ScanamoDeleteRequest
-  ): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResult]] =
-    liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, DeleteItemResult]](ConditionalDelete(req))
-  def scan(req: ScanamoScanRequest): ScanamoOps[ScanResult] = liftF[ScanamoOpsA, ScanResult](Scan(req))
-  def query(req: ScanamoQueryRequest): ScanamoOps[QueryResult] = liftF[ScanamoOpsA, QueryResult](Query(req))
-  def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResult] =
-    liftF[ScanamoOpsA, BatchWriteItemResult](BatchWrite(req))
-  def batchGet(req: BatchGetItemRequest): ScanamoOps[BatchGetItemResult] =
-    liftF[ScanamoOpsA, BatchGetItemResult](BatchGet(req))
-  def update(req: ScanamoUpdateRequest): ScanamoOps[UpdateItemResult] =
-    liftF[ScanamoOpsA, UpdateItemResult](Update(req))
+  ): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResponse]] =
+    liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, DeleteItemResponse]](ConditionalDelete(req))
+  def scan(req: ScanamoScanRequest): ScanamoOps[ScanResponse] = liftF[ScanamoOpsA, ScanResponse](Scan(req))
+  def query(req: ScanamoQueryRequest): ScanamoOps[QueryResponse] = liftF[ScanamoOpsA, QueryResponse](Query(req))
+  def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResponse] =
+    liftF[ScanamoOpsA, BatchWriteItemResponse](BatchWrite(req))
+  def batchGet(req: BatchGetItemRequest): ScanamoOps[BatchGetItemResponse] =
+    liftF[ScanamoOpsA, BatchGetItemResponse](BatchGet(req))
+  def update(req: ScanamoUpdateRequest): ScanamoOps[UpdateItemResponse] =
+    liftF[ScanamoOpsA, UpdateItemResponse](Update(req))
   def conditionalUpdate(
     req: ScanamoUpdateRequest
-  ): ScanamoOps[Either[ConditionalCheckFailedException, UpdateItemResult]] =
-    liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, UpdateItemResult]](ConditionalUpdate(req))
-  def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[TransactWriteItemsResult] =
-    liftF[ScanamoOpsA, TransactWriteItemsResult](TransactWriteAll(req))
+  ): ScanamoOps[Either[ConditionalCheckFailedException, UpdateItemResponse]] =
+    liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, UpdateItemResponse]](ConditionalUpdate(req))
+  def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[TransactWriteItemsResponse] =
+    liftF[ScanamoOpsA, TransactWriteItemsResponse](TransactWriteAll(req))
 }

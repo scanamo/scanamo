@@ -9,6 +9,14 @@ class SemiAutoDerivationTest extends AnyFunSuite with Matchers {
     """write(Person("Alice", 65))""" shouldNot compile
   }
 
+  test("Derivation should not switch to automatic for class members") {
+    """|
+       |import org.scanamo._
+       |import org.scanamo.generic.semiauto._
+       |implicit val failingFormat: DynamoFormat[User] = deriveDynamoFormat[User]
+       |""".stripMargin shouldNot compile
+  }
+
   test("Derivation should succeed if derived format in scope") {
     """
       |import org.scanamo._
@@ -56,4 +64,5 @@ case class User(
 case class LocationInfo(nation: Option[String],
                         provState: Option[String],
                         postalCode: Option[String],
-                        preferredLocale: Option[String])
+                        preferredLocale: Option[String]
+)
