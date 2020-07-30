@@ -5,6 +5,8 @@ scala:
 - 2.12.12
 jdk:
 - openjdk8
+env:
+- SBTOPTS="-Dsbt.coursier.home=$HOME/.coursier"
 install:
   - rvm use 2.6.0 --install --fuzzy
   - gem update --system
@@ -12,11 +14,8 @@ install:
   - gem install jekyll -v 4.0.0
 cache:
   directories:
-  - $HOME/.sbt
-  - $HOME/.ivy2
-before_cache:
-  - find $HOME/.sbt -name "*.lock" -type f -delete -print
-  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -type f -delete -print
+  - $HOME/.sbt/boot
+  - $HOME/.coursier
 before_install:
   - git fetch --tags
   - export PATH=${PATH}:./vendor/bundle
@@ -33,20 +32,20 @@ jobs:
     - &lint
       stage: test
       name: "Lint"
-      script: sbt ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck
+      script: sbt $SBTOPTS ++$TRAVIS_SCALA_VERSION scalafmtCheck test:scalafmtCheck scalafmtSbtCheck
     - &test
       stage: test
       name: "Tests for 2.12"
-      script: sbt ++$TRAVIS_SCALA_VERSION coverage startDynamodbLocal test dynamodbLocalTestCleanup stopDynamodbLocal
+      script: sbt $SBTOPTS ++$TRAVIS_SCALA_VERSION coverage startDynamodbLocal test dynamodbLocalTestCleanup stopDynamodbLocal
       after_success: bash <(curl -s https://codecov.io/bash)
     - &microsite
       stage: microsite
       name: "Generate microsite"
-      script: sbt ++$TRAVIS_SCALA_VERSION startDynamodbLocal makeMicrosite stopDynamodbLocal
+      script: sbt $SBTOPTS ++$TRAVIS_SCALA_VERSION startDynamodbLocal makeMicrosite stopDynamodbLocal
     - &release
       stage: release
       name: "Release artifacts"
-      script: sbt ci-release
+      script: sbt $SBTOPTS ci-release
 
     # Cross-build
     - <<: *test
