@@ -12,6 +12,7 @@ cache:
   - $HOME/.sbt/boot
   - $HOME/.sbt/launchers
   - $HOME/.coursier
+  - $HOME/.rvm
 before_install:
   - git fetch --tags
   - export PATH=${PATH}:./vendor/bundle
