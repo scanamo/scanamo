@@ -10,6 +10,7 @@ env:
 cache:
   directories:
   - $HOME/.sbt/boot
+  - $HOME/.sbt/launchers
   - $HOME/.coursier
 before_install:
   - git fetch --tags
