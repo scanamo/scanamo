@@ -210,7 +210,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val operations = for {
         _ <- outers.put(Outer(id, Middle("x", 1L, Inner("alpha"), List(1, 2))))
         updatedOuter <-
-          outers.update("id" -> id, set("middle" \ "inner" \ "session" -> "beta") and add(("middle" \ "list")(1) -> 1))
+          outers.update("id" -> id, set("middle" \ "inner" \ "session" -> "beta") and add(("middle" \ "list" ! 1) -> 1))
       } yield updatedOuter
       scanamo.exec(operations) should be(Right(Outer(id, Middle("x", 1, Inner("beta"), List(1, 3)))))
     }
