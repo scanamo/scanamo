@@ -32,37 +32,39 @@ package object scanamo {
 
     case class HashAndRangeKeyNames(hash: AttributeName, range: AttributeName)
 
-    implicit def stringTupleToUniqueKey[V: DynamoFormat](pair: (String, V)) =
+    implicit def stringTupleToUniqueKey[V: DynamoFormat](pair: (String, V)): UniqueKey[KeyEquals[V]] =
       UniqueKey(KeyEquals(AttributeName.of(pair._1), pair._2))
 
-    implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)) =
+    implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)): KeyEquals[V] =
       KeyEquals(AttributeName.of(pair._1), pair._2)
 
-    implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
+    implicit def toUniqueKey[T: UniqueKeyCondition](t: T): UniqueKey[T] = UniqueKey(t)
 
-    implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])) =
+    implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])): UniqueKeys[KeyList[V]] =
       UniqueKeys(KeyList(AttributeName.of(pair._1), pair._2))
 
-    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])) =
+    implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](
+      pair: (HashAndRangeKeyNames, Set[(H, R)])
+    ): UniqueKeys[MultipleKeyList[H, R]] =
       UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
 
-    implicit def stringTupleToQuery[V: DynamoFormat](pair: (String, V)) =
+    implicit def stringTupleToQuery[V: DynamoFormat](pair: (String, V)): Query[KeyEquals[V]] =
       Query(KeyEquals(AttributeName.of(pair._1), pair._2))
 
-    implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
+    implicit def toQuery[T: QueryableKeyCondition](t: T): Query[T] = Query(t)
 
-    def attributeExists(string: String) = AttributeExists(AttributeName.of(string))
+    def attributeExists(string: String): AttributeExists = AttributeExists(AttributeName.of(string))
 
-    def attributeNotExists(string: String) = AttributeNotExists(AttributeName.of(string))
+    def attributeNotExists(string: String): AttributeNotExists = AttributeNotExists(AttributeName.of(string))
 
-    def not[T: ConditionExpression](t: T) = Not(t)
+    def not[T: ConditionExpression](t: T): Not[T] = Not(t)
 
     implicit class AndConditionExpression[X: ConditionExpression](x: X) {
-      def and[Y: ConditionExpression](y: Y) = AndCondition(x, y)
+      def and[Y: ConditionExpression](y: Y): AndCondition[X, Y] = AndCondition(x, y)
     }
 
     implicit class OrConditionExpression[X: ConditionExpression](x: X) {
-      def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
+      def or[Y: ConditionExpression](y: Y): OrCondition[X, Y] = OrCondition(x, y)
     }
 
     def set(to: String, from: String): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
@@ -80,9 +82,5 @@ package object scanamo {
 
     implicit def stringAttributeName(s: String): AttributeName = AttributeName.of(s)
     implicit def stringAttributeNameValue[T](sv: (String, T)): (AttributeName, T) = AttributeName.of(sv._1) -> sv._2
-
-    implicit class AndUpdateExpression(x: UpdateExpression) {
-      def and(y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
-    }
   }
 }
