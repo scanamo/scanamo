@@ -20,7 +20,6 @@ import cats.~>
 import cats.syntax.either._
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
-import org.scanamo.ops.retrypolicy._
 
 import akka.NotUsed
 import akka.stream.Materializer
@@ -28,22 +27,18 @@ import akka.stream.alpakka.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
 import akka.stream.scaladsl.Source
 
-private[scanamo] class AlpakkaInterpreter(retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean)(implicit
-  client: DynamoDbAsyncClient,
-  mat: Materializer
-) extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka)
-    with WithRetry {
-  override def retryable(throwable: Throwable): Boolean = isRetryable(throwable)
+private[scanamo] class AlpakkaInterpreter(implicit client: DynamoDbAsyncClient, mat: Materializer)
+    extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka) {
 
   final private def run[In <: DynamoDbRequest, Out <: DynamoDbResponse](
     op: In
   )(implicit operation: DynamoDbOp[In, Out]): AlpakkaInterpreter.Alpakka[Out] =
-    retry(Source.fromFuture(DynamoDb.single(op)), retryPolicy)
+    Source.fromFuture(DynamoDb.single(op))
 
   final private def runPaginated[In <: DynamoDbRequest, Out <: DynamoDbResponse](
     op: In
   )(implicit operation: DynamoDbPaginatedOp[In, Out, _]): AlpakkaInterpreter.Alpakka[Out] =
-    retry(DynamoDb.source(op), retryPolicy)
+    DynamoDb.source(op)
 
   def apply[A](ops: ScanamoOpsA[A]) =
     ops match {

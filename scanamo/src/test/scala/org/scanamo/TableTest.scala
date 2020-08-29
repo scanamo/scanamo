@@ -288,6 +288,24 @@ class TableTest extends AnyFunSpec with Matchers {
       scanamo.exec(farmerOps) should be(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"), 30)))))
     }
 
+    LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
+      val farmersTable = Table[Farmer](t)
+      val farmerOps = for {
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
+        _ <-
+          farmersTable
+            .given(AttributeName.of("farm") \ "animals" contains "chicken")
+            .put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 50)))
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("chicken"), 10)))
+        _ <-
+          farmersTable
+            .given(AttributeName.of("farm") \ "animals" contains "chicken")
+            .put(Farmer("McDonald", 156L, Farm(List("veals", "chicken"), 70)))
+        farmerWithNewStock <- farmersTable.get("name" -> "McDonald")
+      } yield farmerWithNewStock
+      scanamo.exec(farmerOps) should be(Some(Right(Farmer("McDonald", 156, Farm(List("veals", "chicken"), 70)))))
+    }
+
     LocalDynamoDB.withRandomTable(client)("roman" -> S) { t =>
       val lettersTable = Table[Letter](t)
       val ops = for {
@@ -630,6 +648,33 @@ class TableTest extends AnyFunSpec with Matchers {
         List(
           Right(Station("Metropolitan", "Chorleywood", 7)),
           Right(Station("Jubilee", "Canons Park", 5))
+        )
+      )
+    }
+  }
+
+  it("Filters a table for attributes containing a specific substring") {
+    LocalDynamoDB.withRandomTable(client)("line" -> S, "name" -> S) { t =>
+      val stationTable = Table[Station](t)
+      val ops = for {
+        _ <- stationTable.putAll(
+          Set(
+            Station("Metropolitan", "Chalfont & Latimer", 8),
+            Station("Metropolitan", "Chorleywood", 7),
+            Station("Metropolitan", "Rickmansworth", 7),
+            Station("Metropolitan", "Croxley", 7),
+            Station("Jubilee", "Canons Park", 5)
+          )
+        )
+        filteredStations <- stationTable.filter(AttributeName.of("line") contains "opo").scan
+      } yield filteredStations
+
+      scanamo.exec(ops) should contain theSameElementsAs (
+        List(
+          Right(Station("Metropolitan", "Chalfont & Latimer", 8)),
+          Right(Station("Metropolitan", "Chorleywood", 7)),
+          Right(Station("Metropolitan", "Rickmansworth", 7)),
+          Right(Station("Metropolitan", "Croxley", 7))
         )
       )
     }
