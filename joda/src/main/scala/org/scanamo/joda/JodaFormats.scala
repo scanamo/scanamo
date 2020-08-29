@@ -31,7 +31,7 @@ object JodaFormats {
     *      | DynamoFormat[Instant].read(DynamoFormat[Instant].write(x)) == Right(x)
     *  }}}
     */
-  implicit val jodaInstantAsLongFormat =
+  implicit val jodaInstantAsLongFormat: DynamoFormat[Instant] =
     DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_), x => x.getMillis)
 
   /**
@@ -49,8 +49,9 @@ object JodaFormats {
     *      | DynamoFormat[DateTime].read(DynamoFormat[DateTime].write(dtBasic)) == Right(dtBasic)
     *  }}}
     */
-  implicit val jodaStringFormat = DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
-    DateTime.parse,
-    _.toString
-  )
+  implicit val jodaStringFormat: DynamoFormat[DateTime] =
+    DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
+      DateTime.parse,
+      _.toString
+    )
 }
