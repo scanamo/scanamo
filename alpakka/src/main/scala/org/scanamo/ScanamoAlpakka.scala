@@ -31,7 +31,6 @@ import software.amazon.awssdk.services.dynamodb.model.{
 }
 import org.scanamo.ops.AlpakkaInterpreter.Alpakka
 import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps, ScanamoOpsT }
-import org.scanamo.ops.retrypolicy.RetryPolicy
 
 import scala.concurrent.Future
 
@@ -44,12 +43,10 @@ import scala.concurrent.Future
   * Moreover, the interface returns either a [[scala.concurrent.Future]] or [[akka.stream.scaladsl.Source]]
   * based on the kind of execution used.
   */
-class ScanamoAlpakka private (client: DynamoDbAsyncClient, retryPolicy: RetryPolicy, isRetryable: Throwable => Boolean)(
-  implicit mat: Materializer
-) {
+class ScanamoAlpakka private (client: DynamoDbAsyncClient)(implicit mat: Materializer) {
   import ScanamoAlpakka._
 
-  final private val interpreter = new AlpakkaInterpreter(retryPolicy, isRetryable)(client, mat)
+  final private val interpreter = new AlpakkaInterpreter()(client, mat)
 
   def exec[A](op: ScanamoOps[A]): Alpakka[A] =
     run(op)
@@ -65,11 +62,8 @@ class ScanamoAlpakka private (client: DynamoDbAsyncClient, retryPolicy: RetryPol
 }
 
 object ScanamoAlpakka extends AlpakkaInstances {
-  def apply(
-    client: DynamoDbAsyncClient,
-    retrySettings: RetryPolicy = RetryPolicy.max(3),
-    isRetryable: Throwable => Boolean = defaultRetryableCheck
-  )(implicit mat: Materializer): ScanamoAlpakka = new ScanamoAlpakka(client, retrySettings, isRetryable)
+  def apply(client: DynamoDbAsyncClient)(implicit mat: Materializer): ScanamoAlpakka =
+    new ScanamoAlpakka(client)
 
   def defaultRetryableCheck(throwable: Throwable): Boolean =
     throwable match {
