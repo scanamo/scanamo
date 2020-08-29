@@ -40,6 +40,7 @@ case class AttributeName(components: List[String], index: Option[Int]) {
   def beginsWith[V: DynamoFormat](v: V) = BeginsWith(this, v)
   def between[V: DynamoFormat](lo: V): PartiallyAppliedBetween[V] =
     new PartiallyAppliedBetween(this, lo)
+  def contains(substr: String): Contains = Contains(this, substr)
 }
 
 object AttributeName {
