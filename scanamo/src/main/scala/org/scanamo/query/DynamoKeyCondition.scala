@@ -72,3 +72,4 @@ final case class Between[V: DynamoFormat](key: AttributeName, lo: V, hi: V) exte
 final case class AttributeExists(key: AttributeName)
 final case class AttributeNotExists(key: AttributeName)
 final case class Not[T: ConditionExpression](condition: T)
+final case class Contains(key: AttributeName, value: String)

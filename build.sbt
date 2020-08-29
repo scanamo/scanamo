@@ -85,7 +85,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.71"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.76"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -145,10 +145,10 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
       "io.monix"       %% "monix"       % "3.2.2"  % Provided,
-      "co.fs2"         %% "fs2-core"    % "2.4.2"  % Provided,
+      "co.fs2"         %% "fs2-core"    % "2.4.4"  % Provided,
       "io.monix"       %% "monix"       % "3.2.2"  % Test,
-      "co.fs2"         %% "fs2-core"    % "2.4.2"  % Test,
-      "org.scalatest"  %% "scalatest"   % "3.2.2"  % Test,
+      "co.fs2"         %% "fs2-core"    % "2.4.4"  % Test,
+      "org.scalatest"  %% "scalatest"   % "3.2.1"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.14.3" % Test
     ),
     fork in Test := true,
