@@ -14,13 +14,14 @@ import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
 import cats.implicits._
 import org.scanamo.ops.ScanamoOps
+import scala.concurrent.ExecutionContext
 
 class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
-  implicit val system = ActorSystem("scanamo-alpakka")
+  implicit val system: ActorSystem = ActorSystem("scanamo-alpakka")
 
-  implicit val materializer = ActorMaterializer.create(system)
-  implicit val executor = system.dispatcher
-  implicit val defaultPatience =
+  implicit val materializer: ActorMaterializer = ActorMaterializer.create(system)
+  implicit val executor: ExecutionContext = system.dispatcher
+  implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(10, Seconds), interval = Span(15, Millis))
 
   val client = LocalDynamoDB.client()

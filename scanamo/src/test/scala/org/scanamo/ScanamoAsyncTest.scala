@@ -14,7 +14,7 @@ import org.scanamo.generic.auto._
 import org.scanamo.ops.ScanamoOps
 
 class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll with ScalaFutures {
-  implicit val defaultPatience =
+  implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
   import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -228,7 +228,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
 
     type SFuture[A] = Future[Stream[A]]
 
-    implicit val applicative = new MonoidK[SFuture] with Monad[SFuture] {
+    implicit val applicative: MonoidK[SFuture] with Monad[SFuture] = new MonoidK[SFuture] with Monad[SFuture] {
       def combineK[A](x: SFuture[A], y: SFuture[A]): SFuture[A] = Apply[Future].map2(x, y)(_ ++ _)
 
       def empty[A]: SFuture[A] = Future.successful(Stream.empty)
