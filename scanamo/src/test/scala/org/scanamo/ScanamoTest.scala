@@ -123,10 +123,10 @@ class ScanamoTest extends AnyFunSpec with Matchers {
 
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
-        _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
+        _ <- forecasts.when("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
         _ <-
           forecasts
-            .given("weather" -> "Rain")
+            .when("weather" -> "Rain")
             .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
@@ -478,8 +478,8 @@ class ScanamoTest extends AnyFunSpec with Matchers {
 
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        _ <- farmersTable.given("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
-        _ <- farmersTable.given("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
+        _ <- farmersTable.when("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
+        _ <- farmersTable.when("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
         farmerWithNewStock <- farmersTable.get("name" -> "McDonald")
       } yield farmerWithNewStock
 
@@ -497,8 +497,8 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
         _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
-        _ <- farmersTable.given("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"))))
-        _ <- farmersTable.given("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        _ <- farmersTable.when("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.when("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get("name" -> "Butch")
       } yield farmerButch
       scanamo.exec(farmerOps) should equal(
@@ -513,8 +513,8 @@ class ScanamoTest extends AnyFunSpec with Matchers {
 
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false), Gremlin(2, true)))
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 1)
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 2)
+        _ <- gremlinsTable.when("wet" -> true).delete("number" -> 1)
+        _ <- gremlinsTable.when("wet" -> true).delete("number" -> 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
 

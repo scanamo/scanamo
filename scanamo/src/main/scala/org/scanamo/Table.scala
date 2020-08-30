@@ -79,7 +79,7 @@ case class Table[V: DynamoFormat](name: String) {
   /**
     * Performs the chained operation, `put` if the condition is met
     */
-  def given[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
+  def when[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
   /**
     * Primes a search request with a key to start from:
