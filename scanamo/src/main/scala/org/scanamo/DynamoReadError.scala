@@ -26,7 +26,7 @@ final case class ConditionNotMet(e: ConditionalCheckFailedException) extends Sca
 sealed abstract class DynamoReadError extends ScanamoError
 final case class NoPropertyOfType(propertyType: String, actual: DynamoValue) extends DynamoReadError
 final case class TypeCoercionError(t: Throwable) extends DynamoReadError
-final case object MissingProperty extends DynamoReadError
+case object MissingProperty extends DynamoReadError
 final case class InvalidPropertiesError(errors: NonEmptyList[(String, DynamoReadError)]) extends DynamoReadError
 
 object DynamoReadError {

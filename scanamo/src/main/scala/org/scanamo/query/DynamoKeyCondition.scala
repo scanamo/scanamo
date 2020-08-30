@@ -42,10 +42,10 @@ sealed abstract class RangeKeyCondition[V: DynamoFormat] extends Product with Se
 }
 
 sealed abstract class DynamoOperator(val op: String) extends Product with Serializable
-final case object LT extends DynamoOperator("<")
-final case object LTE extends DynamoOperator("<=")
-final case object GT extends DynamoOperator(">")
-final case object GTE extends DynamoOperator(">=")
+case object LT extends DynamoOperator("<")
+case object LTE extends DynamoOperator("<=")
+case object GT extends DynamoOperator(">")
+case object GTE extends DynamoOperator(">=")
 
 final case class KeyIs[V: DynamoFormat](key: AttributeName, operator: DynamoOperator, v: V)
     extends RangeKeyCondition[V] {
