@@ -123,7 +123,7 @@ object ConditionExpression {
   implicit def stringValueEqualsCondition[V: DynamoFormat]: ConditionExpression[(String, V)] =
     attributeValueEqualsCondition[V].contramap { case (attr, v) => AttributeName.of(attr) -> v }
 
-  implicit def attributeValueEqualsCondition[V: DynamoFormat] =
+  implicit def attributeValueEqualsCondition[V: DynamoFormat]: ConditionExpression[(AttributeName, V)] =
     new ConditionExpression[(AttributeName, V)] {
       override def apply(pair: (AttributeName, V)): State[Int, RequestCondition] =
         State.inspect { cpt =>
@@ -253,13 +253,13 @@ object ConditionExpression {
         }
     }
 
-  implicit def andCondition[L: ConditionExpression, R: ConditionExpression] =
+  implicit def andCondition[L: ConditionExpression, R: ConditionExpression]: ConditionExpression[AndCondition[L, R]] =
     new ConditionExpression[AndCondition[L, R]] {
       override def apply(and: AndCondition[L, R]): State[Int, RequestCondition] =
         combineConditions(and.l, and.r, "AND")
     }
 
-  implicit def orCondition[L: ConditionExpression, R: ConditionExpression] =
+  implicit def orCondition[L: ConditionExpression, R: ConditionExpression]: ConditionExpression[OrCondition[L, R]] =
     new ConditionExpression[OrCondition[L, R]] {
       override def apply(and: OrCondition[L, R]): State[Int, RequestCondition] =
         combineConditions(and.l, and.r, "OR")

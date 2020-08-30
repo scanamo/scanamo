@@ -1,7 +1,9 @@
 package org.scanamo
 
 import cats.implicits._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import org.scalatest.concurrent.ScalaFutures
+import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
@@ -11,9 +13,18 @@ import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
 import org.scanamo.ops.ScanamoOps
 
-class ScanamoTest extends AnyFunSpec with Matchers {
-  val client = LocalDynamoDB.syncClient()
-  val scanamo = Scanamo(client)
+class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll with ScalaFutures {
+  implicit val defaultPatience: PatienceConfig =
+    PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  val client = LocalDynamoDB.client()
+  val scanamo = ScanamoAsync(client)
+
+  override protected def afterAll(): Unit = {
+    client.close()
+    super.afterAll()
+  }
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
@@ -24,7 +35,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         f <- farmers.get("name" -> "McDonald")
       } yield f
 
-      scanamo.exec(result) should equal(
+      scanamo.exec(result).futureValue should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow")))))
       )
     }
@@ -40,7 +51,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         r2 <- farmers.get("name" -> "Maggot")
       } yield (r1, r1 == r2)
 
-      scanamo.exec(result) should equal(
+      scanamo.exec(result).futureValue should equal(
         (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
       )
     }
@@ -53,7 +64,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         e <- engines.get("name" -> "Thomas" and "number" -> 1)
       } yield e
 
-      scanamo.exec(result) should equal(Some(Right(Engine("Thomas", 1))))
+      scanamo.exec(result).futureValue should equal(Some(Right(Engine("Thomas", 1))))
     }
   }
 
@@ -66,7 +77,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         c <- cities.consistently.get("name" -> "Nashville")
       } yield c
 
-      scanamo.exec(result) should equal(Some(Right(City("Nashville", "US"))))
+      scanamo.exec(result).futureValue should equal(Some(Right(City("Nashville", "US"))))
     }
   }
 
@@ -80,7 +91,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
           _ <- farmers.delete("name" -> "McGregor")
           f <- farmers.get("name" -> "McGregor")
         } yield f
-      } should equal(None)
+      }.futureValue should equal(None)
     }
   }
 
@@ -100,7 +111,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         fs <- farmers.scan
       } yield fs
 
-      scanamo.exec(ops) should equal(List.empty)
+      scanamo.exec(ops).futureValue should equal(List.empty)
     }
   }
 
@@ -113,7 +124,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         fs <- forecasts.scan
       } yield fs
 
-      scanamo.exec(ops) should equal(List(Right(Forecast("London", "Sun", None))))
+      scanamo.exec(ops).futureValue should equal(List(Right(Forecast("London", "Sun", None))))
     }
   }
 
@@ -123,15 +134,15 @@ class ScanamoTest extends AnyFunSpec with Matchers {
 
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
-        _ <- forecasts.given("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
+        _ <- forecasts.when("weather" -> "Rain").update("location" -> "London", set("equipment" -> Some("umbrella")))
         _ <-
           forecasts
-            .given("weather" -> "Rain")
+            .when("weather" -> "Rain")
             .update("location" -> "Birmingham", set("equipment" -> Some("umbrella")))
         results <- forecasts.scan()
       } yield results
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None)))
       )
     }
@@ -147,7 +158,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         bs <- bears.scan
       } yield bs
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         List(Right(Bear("Pooh", "honey", None)), Right(Bear("Yogi", "picnic baskets", None)))
       )
     }
@@ -159,7 +170,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         ls <- lemmings.scan
       } yield ls
 
-      scanamo.exec(ops).size should equal(100)
+      scanamo.exec(ops).futureValue.size should equal(100)
     }
   }
 
@@ -171,7 +182,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         _ <- bears.put(Bear("Yogi", "picnic baskets", None))
         bs <- bears.limit(1).scan
       } yield bs
-      scanamo.exec(ops) should equal(List(Right(Bear("Pooh", "honey", None))))
+      scanamo.exec(ops).futureValue should equal(List(Right(Bear("Pooh", "honey", None))))
     }
   }
 
@@ -184,7 +195,9 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- bears.index(i).limit(1).scan
       } yield bs
-      scanamo.exec(ops) should equal(List(Right(Bear("Graham", "quinoa", Some("Guardianista")))))
+      scanamo.exec(ops).futureValue should equal(
+        List(Right(Bear("Graham", "quinoa", Some("Guardianista"))))
+      )
     }
   }
 
@@ -202,14 +215,40 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         } yield res2 ::: res3
       } yield bs
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
       )
     }
   }
 
   it("should stream full table scan") {
-    import cats.{ ~>, Id }
+    import cats.{ ~>, Apply, Monad, MonoidK }
+    import cats.instances.future._
+    import scala.concurrent.Future
+
+    type SFuture[A] = Future[Stream[A]]
+
+    implicit val applicative: MonoidK[SFuture] with Monad[SFuture] = new MonoidK[SFuture] with Monad[SFuture] {
+      def combineK[A](x: SFuture[A], y: SFuture[A]): SFuture[A] = Apply[Future].map2(x, y)(_ ++ _)
+
+      def empty[A]: SFuture[A] = Future.successful(Stream.empty)
+
+      def flatMap[A, B](fa: SFuture[A])(f: A => SFuture[B]): SFuture[B] =
+        fa flatMap { as =>
+          Future.traverse(as)(f)
+        } map (_.flatten)
+
+      def tailRecM[A, B](a: A)(f: A => SFuture[Either[A, B]]): SFuture[B] =
+        f(a) flatMap { eas =>
+          Future.traverse(eas) {
+            case Left(a)  => tailRecM(a)(f)
+            case Right(b) => Future.successful(Stream(b))
+          } map (_.flatten)
+        }
+
+      def pure[A](x: A): SFuture[A] = Future.successful(Stream(x))
+    }
+
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val list = List(
         Item("item #1"),
@@ -223,15 +262,15 @@ class ScanamoTest extends AnyFunSpec with Matchers {
 
       val items = Table[Item](t)
       val ops = for {
-        _ <- items.putAll(list.toSet).toFreeT[Stream]
-        list <- items.scanPaginatedM[Stream](1)
+        _ <- items.putAll(list.toSet).toFreeT[SFuture]
+        list <- items.scanPaginatedM[SFuture](1)
       } yield list
 
-      val f = new (Id ~> Stream) {
-        override def apply[A](a: Id[A]): Stream[A] = Stream(a)
+      val f = new (Future ~> SFuture) {
+        override def apply[A](a: Future[A]): SFuture[A] = a.map(Stream(_))
       }
 
-      scanamo.execT(f)(ops) should contain theSameElementsAs expected
+      scanamo.execT(f)(ops).futureValue should contain theSameElementsAs expected
     }
   }
 
@@ -248,7 +287,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         r5 <- animals.query("species" -> "Pig" and "number" >= 2)
       } yield (r1, r2, r3, r4, r5)
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         (
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
           List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
@@ -272,7 +311,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         ts <- transports.query("mode" -> "Underground" and ("line" beginsWith "C"))
       } yield ts
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         List(Right(Transport("Underground", "Central", "Red")), Right(Transport("Underground", "Circle", "Yellow")))
       )
     }
@@ -292,7 +331,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         rs <- transports.limit(1).query("mode" -> "Underground" and ("line" beginsWith "C"))
       } yield rs
 
-      scanamo.exec(result) should equal(List(Right(Transport("Underground", "Central", "Red"))))
+      scanamo.exec(result).futureValue should equal(List(Right(Transport("Underground", "Central", "Red"))))
     }
   }
 
@@ -319,7 +358,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
               )
         } yield rs
 
-        scanamo.exec(result) should equal(
+        scanamo.exec(result).futureValue should equal(
           List(Right(Transport("Underground", "Northern", "Black")))
         )
     }
@@ -351,7 +390,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
           ts5 <- stationTable.index(i).query("mode" -> "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
-        scanamo.exec(ops) should equal(
+        scanamo.exec(ops).futureValue should equal(
           (
             List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
             List.empty,
@@ -371,7 +410,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         _ <- farmersTable.put(Worker("Fred", "McDonald", Some(54)))
         farmerWithNoAge <- farmersTable.filter(attributeNotExists("age")).query("firstName" -> "Fred")
       } yield farmerWithNoAge
-      scanamo.exec(farmerOps) should equal(
+      scanamo.exec(farmerOps).futureValue should equal(
         List(Right(Worker("Fred", "Perry", None)))
       )
     }
@@ -385,7 +424,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         rs <- rabbits.scan
       } yield rs
 
-      scanamo.exec(result).size should equal(100)
+      scanamo.exec(result).futureValue.size should equal(100)
     }
   }
 
@@ -393,17 +432,19 @@ class ScanamoTest extends AnyFunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmers = Table[Farmer](t)
 
-      scanamo.exec(for {
-        _ <- farmers.putAll(
-          Set(
-            Farmer("Boggis", 43L, Farm(List("chicken"))),
-            Farmer("Bunce", 52L, Farm(List("goose"))),
-            Farmer("Bean", 55L, Farm(List("turkey")))
+      scanamo
+        .exec(for {
+          _ <- farmers.putAll(
+            Set(
+              Farmer("Boggis", 43L, Farm(List("chicken"))),
+              Farmer("Bunce", 52L, Farm(List("goose"))),
+              Farmer("Bean", 55L, Farm(List("turkey")))
+            )
           )
-        )
-        fs1 <- farmers.getAll(UniqueKeys(KeyList("name", Set("Boggis", "Bean"))))
-        fs2 <- farmers.getAll("name" -> Set("Boggis", "Bean"))
-      } yield (fs1, fs2)) should equal(
+          fs1 <- farmers.getAll(UniqueKeys(KeyList("name", Set("Boggis", "Bean"))))
+          fs2 <- farmers.getAll("name" -> Set("Boggis", "Bean"))
+        } yield (fs1, fs2))
+        .futureValue should equal(
         (
           Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))),
           Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
@@ -414,10 +455,12 @@ class ScanamoTest extends AnyFunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("actor" -> S, "regeneration" -> N) { t =>
       val doctors = Table[Doctor](t)
 
-      scanamo.exec(for {
-        _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
-        ds <- doctors.getAll(("actor" and "regeneration") -> Set("McCoy" -> 9, "Ecclestone" -> 11))
-      } yield ds) should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
+      scanamo
+        .exec(for {
+          _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
+          ds <- doctors.getAll(("actor" and "regeneration") -> Set("McCoy" -> 9, "Ecclestone" -> 11))
+        } yield ds)
+        .futureValue should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
     }
   }
 
@@ -426,10 +469,12 @@ class ScanamoTest extends AnyFunSpec with Matchers {
       val farms = (1 to 101).map(i => Factory(i, s"Farm #$i")).toSet
       val farmsTable = Table[Factory](t)
 
-      scanamo.exec(for {
-        _ <- farmsTable.putAll(farms)
-        fs <- farmsTable.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
-      } yield fs) should equal(farms.map(Right(_)))
+      scanamo
+        .exec(for {
+          _ <- farmsTable.putAll(farms)
+          fs <- farmsTable.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
+        } yield fs)
+        .futureValue should equal(farms.map(Right(_)))
     }
   }
 
@@ -438,10 +483,12 @@ class ScanamoTest extends AnyFunSpec with Matchers {
       val farms = (1 to 101).map(i => Factory(i, s"Farm #$i")).toSet
       val farmsTable = Table[Factory](t)
 
-      scanamo.exec(for {
-        _ <- farmsTable.putAll(farms)
-        fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
-      } yield fs) should equal(farms.map(Right(_)))
+      scanamo
+        .exec(for {
+          _ <- farmsTable.putAll(farms)
+          fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
+        } yield fs)
+        .futureValue should equal(farms.map(Right(_)))
     }
   }
 
@@ -453,7 +500,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"))))
       } yield result
 
-      scanamo.exec(farmerOps) should equal(
+      scanamo.exec(farmerOps).futureValue should equal(
         Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
       )
     }
@@ -466,7 +513,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
       } yield result
 
-      scanamo.exec(farmerOps) should equal(
+      scanamo.exec(farmerOps).futureValue should equal(
         None
       )
     }
@@ -478,12 +525,12 @@ class ScanamoTest extends AnyFunSpec with Matchers {
 
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
-        _ <- farmersTable.given("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
-        _ <- farmersTable.given("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
+        _ <- farmersTable.when("age" -> 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"))))
+        _ <- farmersTable.when("age" -> 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"))))
         farmerWithNewStock <- farmersTable.get("name" -> "McDonald")
       } yield farmerWithNewStock
 
-      scanamo.exec(farmerOps) should equal(
+      scanamo.exec(farmerOps).futureValue should equal(
         Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken")))))
       )
     }
@@ -497,11 +544,11 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"))))
         _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"))))
         _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"))))
-        _ <- farmersTable.given("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"))))
-        _ <- farmersTable.given("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
+        _ <- farmersTable.when("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"))))
+        _ <- farmersTable.when("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"))))
         farmerButch <- farmersTable.get("name" -> "Butch")
       } yield farmerButch
-      scanamo.exec(farmerOps) should equal(
+      scanamo.exec(farmerOps).futureValue should equal(
         Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
       )
     }
@@ -513,12 +560,12 @@ class ScanamoTest extends AnyFunSpec with Matchers {
 
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false), Gremlin(2, true)))
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 1)
-        _ <- gremlinsTable.given("wet" -> true).delete("number" -> 2)
+        _ <- gremlinsTable.when("wet" -> true).delete("number" -> 1)
+        _ <- gremlinsTable.when("wet" -> true).delete("number" -> 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         List(Right(Gremlin(1, false)))
       )
     }
@@ -541,7 +588,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         items <- forecastTable.scan()
       } yield items
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         List(
           Right(Forecast("Amsterdam", "Cloud", None)),
           Right(Forecast("London", "Rain", None)),
@@ -574,7 +621,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
           forecasts <- forecastTable.scan()
         } yield (gremlins, forecasts)
 
-        scanamo.exec(ops) should equal(
+        scanamo.exec(ops).futureValue should equal(
           (
             List(Right(Gremlin(2, wet = true)), Right(Gremlin(1, wet = false))),
             List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None)))
@@ -601,7 +648,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
         items <- forecastTable.scan()
       } yield items
 
-      scanamo.exec(ops) should equal(
+      scanamo.exec(ops).futureValue should equal(
         List(Right(Forecast("Manchester", "Rain", None)))
       )
     }
@@ -630,7 +677,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
           forecasts <- forecastTable.scan()
         } yield (gremlins, forecasts)
 
-        scanamo.exec(ops) should equal(
+        scanamo.exec(ops).futureValue should equal(
           (List(Right(Gremlin(1, wet = false))), List(Right(Forecast("Amsterdam", "Fog", None))))
         )
       }

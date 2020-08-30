@@ -19,9 +19,9 @@ package org.scanamo.query
 import org.scanamo.DynamoFormat
 
 case class KeyEquals[V: DynamoFormat](key: AttributeName, v: V) {
-  def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]) =
+  def and[R: DynamoFormat](equalsKeyCondition: KeyEquals[R]): AndEqualsCondition[KeyEquals[V], KeyEquals[R]] =
     AndEqualsCondition(this, equalsKeyCondition)
-  def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]) =
+  def and[R: DynamoFormat](rangeKeyCondition: RangeKeyCondition[R]): AndQueryCondition[V, R] =
     AndQueryCondition(this, rangeKeyCondition)
 }
 
@@ -42,27 +42,35 @@ sealed abstract class RangeKeyCondition[V: DynamoFormat] extends Product with Se
 }
 
 sealed abstract class DynamoOperator(val op: String) extends Product with Serializable
-final case object LT extends DynamoOperator("<")
-final case object LTE extends DynamoOperator("<=")
-final case object GT extends DynamoOperator(">")
-final case object GTE extends DynamoOperator(">=")
+case object LT extends DynamoOperator("<")
+case object LTE extends DynamoOperator("<=")
+case object GT extends DynamoOperator(">")
+case object GTE extends DynamoOperator(">=")
 
 final case class KeyIs[V: DynamoFormat](key: AttributeName, operator: DynamoOperator, v: V)
     extends RangeKeyCondition[V] {
-  val placeholder = "keyIsValue"
+  import KeyIs._
   override def keyConditionExpression(s: String): String = s"#${key.placeholder(s)} ${operator.op} :$placeholder"
-  override def attributes = Map(placeholder -> v)
+  override def attributes: Map[String, V] = Map(placeholder -> v)
+}
+
+object KeyIs {
+  val placeholder: String = "keyIsValue"
 }
 
 final case class BeginsWith[V: DynamoFormat](key: AttributeName, v: V) extends RangeKeyCondition[V] {
-  val placeholder = "beginsWithValue"
+  import BeginsWith._
   override def keyConditionExpression(s: String): String = s"begins_with(#${key.placeholder(s)}, :$placeholder)"
-  override def attributes = Map(placeholder -> v)
+  override def attributes: Map[String, V] = Map(placeholder -> v)
+}
+
+object BeginsWith {
+  val placeholder: String = "beginsWithValue"
 }
 
 final case class Between[V: DynamoFormat](key: AttributeName, lo: V, hi: V) extends RangeKeyCondition[V] {
   override def keyConditionExpression(s: String): String = s"#${key.placeholder(s)} BETWEEN :lower AND :upper"
-  override def attributes =
+  override def attributes: Map[String, V] =
     Map(
       "lower" -> lo,
       "upper" -> hi
