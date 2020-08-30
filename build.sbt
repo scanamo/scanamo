@@ -47,6 +47,23 @@ def extraOptions(scalaVersion: String) =
     case _ => Seq.empty
   }
 
+def platformSpecificSources(conf: String, baseDirectory: File)(versions: String*) =
+  List("scala" :: versions.toList.map("scala-" + _): _*).map { version =>
+    baseDirectory.getParentFile / "src" / conf / version
+  }.filter(_.exists)
+
+def crossPlatformSources(scalaVer: String, conf: String, baseDir: File, isDotty: Boolean) =
+  CrossVersion.partialVersion(scalaVer) match {
+    case Some((2, x)) if x <= 11 =>
+      platformSpecificSources(conf, baseDir)("2.11", "2.x")
+    case Some((2, x)) if x >= 12 =>
+      platformSpecificSources(conf, baseDir)("2.12+", "2.12", "2.x")
+    case _ if isDotty =>
+      platformSpecificSources(conf, baseDir)("2.12+", "dotty")
+    case _ =>
+      Nil
+  }
+
 val commonSettings = Seq(
   organization := "org.scanamo",
   organizationName := "Scanamo",
@@ -68,7 +85,17 @@ val commonSettings = Seq(
   apiURL := Some(url("http://www.scanamo.org/latest/api/")),
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
-  Test / parallelExecution := false
+  Test / parallelExecution := false,
+  Compile / unmanagedSourceDirectories ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, _)) =>
+        Seq(
+          file(sourceDirectory.value.getPath + "/main/scala-2.x")
+        )
+      case _ =>
+        Nil
+    }
+  }
 )
 
 lazy val root = (project in file("."))
