@@ -64,7 +64,7 @@ trait DynamoFormat[T] {
     DynamoFormat.coercedXmap(read, write)(this, implicitly)
 }
 
-object DynamoFormat {
+object DynamoFormat extends PlatformSpecificFormat {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
@@ -322,7 +322,4 @@ object DynamoFormat {
       ZonedDateTime.parse,
       _.format(DateTimeFormatter.ISO_ZONED_DATE_TIME)
     )
-
-  implicit def generic[A](implicit A: org.scanamo.generic.Exported[DynamoFormat[A]]): DynamoFormat[A] =
-    A.instance
 }
