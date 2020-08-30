@@ -95,6 +95,16 @@ val commonSettings = Seq(
       case _ =>
         Nil
     }
+  },
+  Test / unmanagedSourceDirectories ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((2, _)) =>
+        Seq(
+          file(sourceDirectory.value.getPath + "/test/scala-2.x")
+        )
+      case _ =>
+        Nil
+    }
   }
 )
 
