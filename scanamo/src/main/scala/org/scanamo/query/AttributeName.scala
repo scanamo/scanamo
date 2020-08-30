@@ -33,14 +33,16 @@ case class AttributeName(components: List[String], index: Option[Int]) {
 
   def apply(index: Int): AttributeName = copy(index = Some(index))
 
-  def <[V: DynamoFormat](v: V) = KeyIs(this, LT, v)
-  def >[V: DynamoFormat](v: V) = KeyIs(this, GT, v)
-  def <=[V: DynamoFormat](v: V) = KeyIs(this, LTE, v)
-  def >=[V: DynamoFormat](v: V) = KeyIs(this, GTE, v)
-  def beginsWith[V: DynamoFormat](v: V) = BeginsWith(this, v)
+  def ===[V: DynamoFormat](v: V): KeyEquals[V] = KeyEquals(this, v)
+  def <[V: DynamoFormat](v: V): KeyIs[V] = KeyIs(this, LT, v)
+  def >[V: DynamoFormat](v: V): KeyIs[V] = KeyIs(this, GT, v)
+  def <=[V: DynamoFormat](v: V): KeyIs[V] = KeyIs(this, LTE, v)
+  def >=[V: DynamoFormat](v: V): KeyIs[V] = KeyIs(this, GTE, v)
+  def beginsWith[V: DynamoFormat](v: V): BeginsWith[V] = BeginsWith(this, v)
   def between[V: DynamoFormat](lo: V): PartiallyAppliedBetween[V] =
     new PartiallyAppliedBetween(this, lo)
   def contains(substr: String): Contains = Contains(this, substr)
+  def in[V: DynamoFormat](vs: Set[V]): KeyList[V] = KeyList(this, vs)
 }
 
 object AttributeName {

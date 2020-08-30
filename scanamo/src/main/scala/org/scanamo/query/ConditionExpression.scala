@@ -120,37 +120,47 @@ trait ConditionExpression[-T] { self =>
 object ConditionExpression {
   def apply[T](implicit C: ConditionExpression[T]): ConditionExpression[T] = C
 
+  @deprecated("Use `attr === value` syntax", "1.0")
   implicit def stringValueEqualsCondition[V: DynamoFormat]: ConditionExpression[(String, V)] =
     attributeValueEqualsCondition[V].contramap { case (attr, v) => AttributeName.of(attr) -> v }
 
+  @deprecated("Use `attr === value` syntax", "1.0")
   implicit def attributeValueEqualsCondition[V: DynamoFormat]: ConditionExpression[(AttributeName, V)] =
-    new ConditionExpression[(AttributeName, V)] {
-      override def apply(pair: (AttributeName, V)): State[Int, RequestCondition] =
+    keyEqualsCondition.contramap { case (attr, v) => KeyEquals(attr, v) }
+
+  implicit def keyEqualsCondition[V: DynamoFormat]: ConditionExpression[KeyEquals[V]] =
+    new ConditionExpression[KeyEquals[V]] {
+      override def apply(key: KeyEquals[V]): State[Int, RequestCondition] =
         State.inspect { cpt =>
           val prefix = s"equalsCondition$cpt"
-          val attributeName = pair._1
+          val attributeName = key.key
           val namePlaceholder = attributeName.placeholder(prefix)
           val valuePlaceholder = s"conditionAttributeValue$cpt"
           RequestCondition(
             s"#$namePlaceholder = :$valuePlaceholder",
             attributeName.attributeNames(s"#$prefix"),
-            Some(DynamoObject(valuePlaceholder -> pair._2))
+            Some(DynamoObject(valuePlaceholder -> key.v))
           )
         }
     }
 
+  @deprecated("Use `attr in values` syntax", "1.0")
   implicit def stringValueInCondition[V: DynamoFormat]: ConditionExpression[(String, Set[V])] =
     attributeValueInCondition.contramap { case (attr, vs) => AttributeName.of(attr) -> vs }
 
+  @deprecated("Use `attr in values` syntax", "1.0")
   implicit def attributeValueInCondition[V: DynamoFormat]: ConditionExpression[(AttributeName, Set[V])] =
-    new ConditionExpression[(AttributeName, Set[V])] {
-      override def apply(pair: (AttributeName, Set[V])): State[Int, RequestCondition] =
+    keyListCondition.contramap { case (attr, vs) => KeyList(attr, vs) }
+
+  implicit def keyListCondition[V: DynamoFormat]: ConditionExpression[KeyList[V]] =
+    new ConditionExpression[KeyList[V]] {
+      override def apply(keys: KeyList[V]): State[Int, RequestCondition] =
         State.inspect { cpt =>
           val prefix = s"inCondition$cpt"
-          val attributeName = pair._1
+          val attributeName = keys.key
           val namePlaceholder = attributeName.placeholder(prefix)
           val valuePlaceholder = s"conditionAttributeValue$cpt"
-          val attributeValues = pair._2
+          val attributeValues = keys.values
             .foldLeft(DynamoObject.empty -> 0) {
               case ((m, i), v) => (m <> DynamoObject(s"$valuePlaceholder$i" -> v)) -> (i + 1)
             }
