@@ -480,7 +480,7 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
       scanamo
         .exec[Set[Either[DynamoReadError, Doctor]]](for {
           _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
-          ds <- doctors.getAll(("actor" and "regeneration") -> Set("McCoy" -> 9, "Ecclestone" -> 11))
+          ds <- doctors.getAll("actor" -> "regeneration" =*= Set("McCoy" -> 9, "Ecclestone" -> 11))
         } yield ds)
         .unsafeRunSync should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
     }

@@ -27,7 +27,13 @@ package object scanamo {
     }
 
     implicit class AttributeNameKeyCondition(s: String) {
+      @deprecated("use `(attr, attr) =*= values` syntax", "1.0")
       def and(other: String) = HashAndRangeKeyNames(AttributeName.of(s), AttributeName.of(other))
+    }
+
+    implicit class AttributeNameTuple(s: (String, String)) {
+      def =*=[H: DynamoFormat, R: DynamoFormat](values: Set[(H, R)]): MultipleKeyList[H, R] =
+        MultipleKeyList((AttributeName.of(s._1), AttributeName.of(s._2)), values)
     }
 
     case class HashAndRangeKeyNames(hash: AttributeName, range: AttributeName)
