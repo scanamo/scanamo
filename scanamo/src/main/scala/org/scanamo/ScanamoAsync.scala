@@ -26,7 +26,6 @@ import scala.concurrent.{ ExecutionContext, Future }
   * Interprets Scanamo operations in an asynchronous context: Scala futures.
   */
 final class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) {
-  import cats.instances.future._
 
   private val interpreter = new ScanamoAsyncInterpreter(client)
 

@@ -20,10 +20,6 @@ import java.nio.ByteBuffer
 import java.time.format.{ DateTimeFormatter, DateTimeParseException }
 import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
 import java.util.UUID
-
-import cats.instances.either._
-import cats.instances.list._
-import cats.instances.vector._
 import cats.syntax.either._
 import cats.syntax.traverse._
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue

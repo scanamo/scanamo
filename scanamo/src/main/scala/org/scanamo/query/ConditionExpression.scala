@@ -17,7 +17,6 @@
 package org.scanamo.query
 
 import cats.data.State
-import cats.instances.int._
 
 import software.amazon.awssdk.services.dynamodb.model.{
   AttributeValue,
@@ -29,8 +28,6 @@ import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, 
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
-import cats.instances.either._
-import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.functor._
 

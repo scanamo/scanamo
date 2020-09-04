@@ -22,8 +22,6 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.util.{ Map => JMap, HashMap }
 import cats.syntax.apply._
 import cats.syntax.semigroup._
-import cats.instances.either._
-import cats.instances.option._
 import scala.annotation.tailrec
 
 /**

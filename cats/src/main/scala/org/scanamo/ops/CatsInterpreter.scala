@@ -17,7 +17,6 @@
 package org.scanamo.ops
 
 import cats.effect.Async
-import cats.implicits._
 import cats.~>
 import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
