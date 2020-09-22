@@ -61,8 +61,8 @@ private[scanamo] trait DynamoObjectInstances {
 
   private val genEmpty: Gen[DynamoObject] = Gen.const(DynamoObject.empty)
 
-  private val genLeaf: Gen[DynamoObject] = arbitrary[(String, Int)].map {
-    case (k, v) => DynamoObject.singleton(k, DynamoValue.fromNumber(v))
+  private val genLeaf: Gen[DynamoObject] = arbitrary[(String, Int)].map { case (k, v) =>
+    DynamoObject.singleton(k, DynamoValue.fromNumber(v))
   }
 
   private def genNode(size: Int): Gen[DynamoObject] =

@@ -33,8 +33,8 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
       case ConditionalPut(req) =>
         eff(client.putItem(JavaRequests.put(req)))
           .map[Either[ConditionalCheckFailedException, PutItemResponse]](Right(_))
-          .catchSome {
-            case e: ConditionalCheckFailedException => IO.succeed(Left(e))
+          .catchSome { case e: ConditionalCheckFailedException =>
+            IO.succeed(Left(e))
           }
       case Get(req) =>
         eff(client.getItem(req))
@@ -43,8 +43,8 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
       case ConditionalDelete(req) =>
         eff(client.deleteItem(JavaRequests.delete(req)))
           .map[Either[ConditionalCheckFailedException, DeleteItemResponse]](Right(_))
-          .catchSome {
-            case e: ConditionalCheckFailedException => IO.succeed(Left(e))
+          .catchSome { case e: ConditionalCheckFailedException =>
+            IO.succeed(Left(e))
           }
       case Scan(req) =>
         eff(client.scan(JavaRequests.scan(req)))
@@ -59,8 +59,8 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
       case ConditionalUpdate(req) =>
         eff(client.updateItem(JavaRequests.update(req)))
           .map[Either[ConditionalCheckFailedException, UpdateItemResponse]](Right(_))
-          .catchSome {
-            case e: ConditionalCheckFailedException => IO.succeed(Left(e))
+          .catchSome { case e: ConditionalCheckFailedException =>
+            IO.succeed(Left(e))
           }
       case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
     }
