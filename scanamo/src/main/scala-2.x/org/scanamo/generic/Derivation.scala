@@ -72,10 +72,9 @@ private[scanamo] trait Derivation {
             )
 
         def writeObject(t: T): DynamoObject =
-          DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) {
-            case (xs, p) =>
-              val v = p.typeclass.write(p.dereference(t))
-              if (v.isNull) xs else (p.label -> v) :: xs
+          DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) { case (xs, p) =>
+            val v = p.typeclass.write(p.dereference(t))
+            if (v.isNull) xs else (p.label -> v) :: xs
           }: _*)
       }
   }

@@ -151,8 +151,8 @@ object ConditionExpression {
           val namePlaceholder = attributeName.placeholder(prefix)
           val valuePlaceholder = s"conditionAttributeValue$cpt"
           val attributeValues = pair._2
-            .foldLeft(DynamoObject.empty -> 0) {
-              case ((m, i), v) => (m <> DynamoObject(s"$valuePlaceholder$i" -> v)) -> (i + 1)
+            .foldLeft(DynamoObject.empty -> 0) { case ((m, i), v) =>
+              (m <> DynamoObject(s"$valuePlaceholder$i" -> v)) -> (i + 1)
             }
             ._1
           RequestCondition(

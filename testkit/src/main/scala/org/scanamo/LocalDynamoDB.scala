@@ -360,15 +360,14 @@ object LocalDynamoDB {
   private def keySchema(attributes: Seq[(String, ScalarAttributeType)]) = {
     val hashKeyWithType :: rangeKeyWithType = attributes.toList
     val keySchemas = hashKeyWithType._1 -> KeyType.HASH :: rangeKeyWithType.map(_._1 -> KeyType.RANGE)
-    keySchemas.map {
-      case (symbol, keyType) => KeySchemaElement.builder.attributeName(symbol).keyType(keyType).build
+    keySchemas.map { case (symbol, keyType) =>
+      KeySchemaElement.builder.attributeName(symbol).keyType(keyType).build
     }.asJava
   }
 
   private def attributeDefinitions(attributes: Seq[(String, ScalarAttributeType)]) =
-    attributes.map {
-      case (symbol, attributeType) =>
-        AttributeDefinition.builder.attributeName(symbol).attributeType(attributeType).build
+    attributes.map { case (symbol, attributeType) =>
+      AttributeDefinition.builder.attributeName(symbol).attributeType(attributeType).build
     }.asJava
 
   private val arbitraryThroughputThatIsIgnoredByDynamoDBLocal =
