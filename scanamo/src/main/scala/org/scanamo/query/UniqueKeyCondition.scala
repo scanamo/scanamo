@@ -74,9 +74,8 @@ object UniqueKeyConditions {
     new UniqueKeyConditions[MultipleKeyList[H, R]] {
       final def toDynamoObject(mkl: MultipleKeyList[H, R]) = {
         val (hashKey, rangeKey) = mkl.keys
-        mkl.values.map {
-          case (h, r) =>
-            DynamoObject(hashKey.placeholder("") -> h) <> DynamoObject(rangeKey.placeholder("") -> r)
+        mkl.values.map { case (h, r) =>
+          DynamoObject(hashKey.placeholder("") -> h) <> DynamoObject(rangeKey.placeholder("") -> r)
         }
       }
     }
