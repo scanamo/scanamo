@@ -39,6 +39,7 @@ sealed abstract class AttributeName extends Product with Serializable { self =>
 
   final def !(index: Int) = AttributeName.ListElement(self, index)
 
+  def ===[V: DynamoFormat](v: V): KeyEquals[V] = KeyEquals(this, v)
   final def <[V: DynamoFormat](v: V) = KeyIs(self, LT, v)
   final def >[V: DynamoFormat](v: V) = KeyIs(self, GT, v)
   final def <=[V: DynamoFormat](v: V) = KeyIs(self, LTE, v)
@@ -46,6 +47,8 @@ sealed abstract class AttributeName extends Product with Serializable { self =>
   final def beginsWith[V: DynamoFormat](v: V) = BeginsWith(self, v)
   def between[V: DynamoFormat](lo: V): PartiallyAppliedBetween[V] =
     new PartiallyAppliedBetween(this, lo)
+  def contains(substr: String): Contains = Contains(this, substr)
+  def in[V: DynamoFormat](vs: Set[V]): KeyList[V] = KeyList(this, vs)
 }
 
 object AttributeName {

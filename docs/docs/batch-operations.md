@@ -29,8 +29,8 @@ val ops = for {
   _ <- lemmingsTable.putAll(Set(
     Lemming("Walker", 99), Lemming("Blocker", 42), Lemming("Builder", 180)
   ))
-  bLemmings <- lemmingsTable.getAll("role" -> Set("Blocker", "Builder"))
-  _ <- lemmingsTable.deleteAll("role" -> Set("Walker", "Blocker"))
+  bLemmings <- lemmingsTable.getAll("role" in Set("Blocker", "Builder"))
+  _ <- lemmingsTable.deleteAll("role" in Set("Walker", "Blocker"))
   survivors <- lemmingsTable.scan()
 } yield (bLemmings, survivors)
 val (bLemmings, survivors) = scanamo.exec(ops)

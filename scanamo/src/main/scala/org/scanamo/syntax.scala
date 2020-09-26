@@ -26,61 +26,95 @@ object syntax {
   }
 
   implicit class AttributeNameKeyCondition(s: String) {
+    @deprecated("use `(attr, attr) =*= values` syntax", "1.0")
     def and(other: String) = HashAndRangeKeyNames(AttributeName.of(s), AttributeName.of(other))
+  }
+
+  implicit class AttributeNameTuple(s: (String, String)) {
+    def =*=[H: DynamoFormat, R: DynamoFormat](values: Set[(H, R)]): MultipleKeyList[H, R] =
+      MultipleKeyList((AttributeName.of(s._1), AttributeName.of(s._2)), values)
   }
 
   case class HashAndRangeKeyNames(hash: AttributeName, range: AttributeName)
 
-  implicit def stringTupleToUniqueKey[V: DynamoFormat](pair: (String, V)) =
+  @deprecated("use `attr === value` syntax", "1.0")
+  implicit def stringTupleToUniqueKey[V: DynamoFormat](pair: (String, V)): UniqueKey[KeyEquals[V]] =
     UniqueKey(KeyEquals(AttributeName.of(pair._1), pair._2))
 
-  implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)) =
+  @deprecated("use `attr === value` syntax", "1.0")
+  implicit def stringTupleToKeyCondition[V: DynamoFormat](pair: (String, V)): KeyEquals[V] =
     KeyEquals(AttributeName.of(pair._1), pair._2)
 
-  implicit def toUniqueKey[T: UniqueKeyCondition](t: T) = UniqueKey(t)
+  implicit def toUniqueKey[T: UniqueKeyCondition](t: T): UniqueKey[T] = UniqueKey(t)
 
-  implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])) =
+  implicit def toUniqueKeys[T: UniqueKeyConditions](t: T): UniqueKeys[T] = UniqueKeys(t)
+
+  @deprecated("use `attr in values` syntax", "1.0")
+  implicit def stringListTupleToUniqueKeys[V: DynamoFormat](pair: (String, Set[V])): UniqueKeys[KeyList[V]] =
     UniqueKeys(KeyList(AttributeName.of(pair._1), pair._2))
 
-  implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](pair: (HashAndRangeKeyNames, Set[(H, R)])) =
+  implicit def toMultipleKeyList[H: DynamoFormat, R: DynamoFormat](
+    pair: (HashAndRangeKeyNames, Set[(H, R)])
+  ): UniqueKeys[MultipleKeyList[H, R]] =
     UniqueKeys(MultipleKeyList(pair._1.hash -> pair._1.range, pair._2))
 
-  implicit def stringTupleToQuery[V: DynamoFormat](pair: (String, V)) =
+  @deprecated("use `attr === value` syntax", "1.0")
+  implicit def stringTupleToQuery[V: DynamoFormat](pair: (String, V)): Query[KeyEquals[V]] =
     Query(KeyEquals(AttributeName.of(pair._1), pair._2))
 
-  implicit def toQuery[T: QueryableKeyCondition](t: T) = Query(t)
+  implicit def toQuery[T: QueryableKeyCondition](t: T): Query[T] = Query(t)
 
-  def attributeExists(string: String) = AttributeExists(AttributeName.of(string))
+  def attributeExists(string: String): AttributeExists = AttributeExists(AttributeName.of(string))
 
-  def attributeNotExists(string: String) = AttributeNotExists(AttributeName.of(string))
+  def attributeNotExists(string: String): AttributeNotExists = AttributeNotExists(AttributeName.of(string))
 
-  def not[T: ConditionExpression](t: T) = Not(t)
+  def not[T: ConditionExpression](t: T): Not[T] = Not(t)
 
   implicit class AndConditionExpression[X: ConditionExpression](x: X) {
-    def and[Y: ConditionExpression](y: Y) = AndCondition(x, y)
+    def and[Y: ConditionExpression](y: Y): AndCondition[X, Y] = AndCondition(x, y)
   }
 
   implicit class OrConditionExpression[X: ConditionExpression](x: X) {
-    def or[Y: ConditionExpression](y: Y) = OrCondition(x, y)
+    def or[Y: ConditionExpression](y: Y): OrCondition[X, Y] = OrCondition(x, y)
   }
 
-  def set(to: String, from: String): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
+  @deprecated("use uncurried `set(attr, value)` syntax", "1.0")
   def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression = UpdateExpression.set(fieldValue)
+  def set[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression = UpdateExpression.set(attr, value)
+
+  @deprecated("use uncurried `append(attr, value)` syntax", "1.0")
   def append[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression = UpdateExpression.append(fieldValue)
+  def append[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression = UpdateExpression.append(attr, value)
+
+  @deprecated("use uncurried `prepend(attr, value)` syntax", "1.0")
   def prepend[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     UpdateExpression.prepend(fieldValue)
+  def prepend[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+    UpdateExpression.prepend(attr, value)
+
+  @deprecated("use uncurried `appendAll(attr, value)` syntax", "1.0")
   def appendAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
     UpdateExpression.appendAll(fieldValue)
+  def appendAll[V: DynamoFormat](attr: AttributeName, value: List[V]): UpdateExpression =
+    UpdateExpression.appendAll(attr, value)
+
+  @deprecated("use uncurried `prependAll(attr, value)` syntax", "1.0")
   def prependAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
     UpdateExpression.prependAll(fieldValue)
+  def prependAll[V: DynamoFormat](attr: AttributeName, value: List[V]): UpdateExpression =
+    UpdateExpression.prependAll(attr, value)
+
+  @deprecated("use uncurried `add(attr, value)` syntax", "1.0")
   def add[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression = UpdateExpression.add(fieldValue)
+  def add[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression = UpdateExpression.add(attr, value)
+
+  @deprecated("use uncurried `delete(attr, value)` syntax", "1.0")
   def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression = UpdateExpression.delete(fieldValue)
+  def delete[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression = UpdateExpression.delete(attr, value)
+
+  def setFrom(to: AttributeName, from: AttributeName): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
   def remove(field: AttributeName): UpdateExpression = UpdateExpression.remove(field)
 
   implicit def stringAttributeName(s: String): AttributeName = AttributeName.of(s)
   implicit def stringAttributeNameValue[T](sv: (String, T)): (AttributeName, T) = AttributeName.of(sv._1) -> sv._2
-
-  implicit class AndUpdateExpression(x: UpdateExpression) {
-    def and(y: UpdateExpression): UpdateExpression = AndUpdate(x, y)
-  }
 }
