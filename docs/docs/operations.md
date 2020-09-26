@@ -144,7 +144,7 @@ val updates = List(
 scanamo.exec(
   for {
     _ <- updates.flatMap(updateFavourite).sequence
-    result <- favouritesTable.get("name", "Alice")
+    result <- favouritesTable.get("name" === "Alice")
   } yield result
 )
 
