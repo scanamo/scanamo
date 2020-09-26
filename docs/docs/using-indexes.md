@@ -31,7 +31,7 @@ LocalDynamoDB.withTableWithSecondaryIndex(client)("transport", "colour-index")("
       Transport("Underground", "Circle", "Yellow"),
       Transport("Underground", "Metropolitan", "Maroon"),
       Transport("Underground", "Central", "Red")))
-    maroonLine <- colourIndex.query("colour" -> "Maroon")
+    maroonLine <- colourIndex.query("colour" === "Maroon")
   } yield maroonLine.toList
   scanamo.exec(operations)
 }

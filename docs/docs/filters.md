@@ -35,7 +35,7 @@ LocalDynamoDB.withTable(client)("Station")("line" -> S, "name" -> S) {
     filteredStations <- 
       stationTable
         .filter("zone" < 8)
-        .query("line" -> "Metropolitan" and ("name" beginsWith "C"))
+        .query("line" === "Metropolitan" and ("name" beginsWith "C"))
   } yield filteredStations
   scanamo.exec(ops)
 }
