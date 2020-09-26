@@ -113,7 +113,7 @@ package object scanamo {
     def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression = UpdateExpression.delete(fieldValue)
     def delete[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression = UpdateExpression.delete(attr, value)
 
-    def copy(from: String, to: String): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
+    def setFrom(to: AttributeName, from: AttributeName): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
     def remove(field: AttributeName): UpdateExpression = UpdateExpression.remove(field)
 
     implicit def stringAttributeName(s: String): AttributeName = AttributeName.of(s)
