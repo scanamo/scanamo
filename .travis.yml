@@ -9,7 +9,6 @@ env:
 - SBTOPTS="-Dsbt.coursier.home=$HOME/.coursier"
 cache:
   directories:
-  - $HOME/.sbt/boot
   - $HOME/.sbt/launchers
   - $HOME/.coursier
   - $HOME/.rvm
