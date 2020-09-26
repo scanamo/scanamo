@@ -18,7 +18,6 @@ package org.scanamo
 
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import cats.syntax.apply._
-import cats.instances.option._
 import java.nio.ByteBuffer
 import java.util.stream.Collectors
 import java.{ util => ju }

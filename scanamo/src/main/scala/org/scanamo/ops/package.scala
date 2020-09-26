@@ -19,8 +19,6 @@ package org.scanamo
 import cats.data.NonEmptyList
 import cats.free.Free
 import cats.free.FreeT
-import cats.instances.option._
-import cats.instances.int._
 import cats.syntax.apply._
 import software.amazon.awssdk.services.dynamodb.model._
 import org.scanamo.request._
