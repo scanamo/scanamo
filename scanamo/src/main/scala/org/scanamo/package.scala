@@ -79,8 +79,6 @@ package object scanamo {
       def or[Y: ConditionExpression](y: Y): OrCondition[X, Y] = OrCondition(x, y)
     }
 
-    def set(to: String, from: String): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
-
     @deprecated("use uncurried `set(attr, value)` syntax", "1.0")
     def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression = UpdateExpression.set(fieldValue)
     def set[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression = UpdateExpression.set(attr, value)
@@ -115,6 +113,7 @@ package object scanamo {
     def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression = UpdateExpression.delete(fieldValue)
     def delete[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression = UpdateExpression.delete(attr, value)
 
+    def copy(from: String, to: String): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
     def remove(field: AttributeName): UpdateExpression = UpdateExpression.remove(field)
 
     implicit def stringAttributeName(s: String): AttributeName = AttributeName.of(s)

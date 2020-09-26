@@ -222,7 +222,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val things = Table[Thing](t)
       val operations = for {
         _ <- things.put(Thing("a1", 3, None))
-        updated <- things.update("id" === "a1", set("optional", "mandatory"))
+        updated <- things.update("id" === "a1", copy("mandatory", "optional"))
       } yield updated
       scanamo.exec(operations) should be(Right(Thing("a1", 3, Some(3))))
     }
