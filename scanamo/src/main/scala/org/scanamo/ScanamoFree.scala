@@ -26,7 +26,6 @@ import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
 
 object ScanamoFree {
-  import cats.instances.list._
   import cats.syntax.functor._
   import cats.syntax.applicative._
   import cats.syntax.traverse._
