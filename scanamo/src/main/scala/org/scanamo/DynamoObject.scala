@@ -22,8 +22,6 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import java.util.{ Map => JMap, HashMap }
 import cats.syntax.apply._
 import cats.syntax.semigroup._
-import cats.instances.either._
-import cats.instances.option._
 import scala.annotation.tailrec
 
 /**
@@ -269,9 +267,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
           )
           parTraverseWithKey_(xs, r2)
         case Pure(ys) :: xs =>
-          val r2 = ys.foldLeft(r) {
-            case (fm, (k, dv)) =>
-              F.apply.map2(fm, F.parallel(f(k, dv)))(c)
+          val r2 = ys.foldLeft(r) { case (fm, (k, dv)) =>
+            F.apply.map2(fm, F.parallel(f(k, dv)))(c)
           }
           parTraverseWithKey_(xs, r2)
         case Concat(ys1, ys2) :: xs =>

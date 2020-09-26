@@ -16,7 +16,6 @@
 
 package org.scanamo.query
 
-import cats.instances.option._
 import cats.syntax.apply._
 import org.scanamo.{ DynamoFormat, DynamoObject }
 
@@ -76,9 +75,8 @@ object UniqueKeyConditions {
     new UniqueKeyConditions[MultipleKeyList[H, R]] {
       final def toDynamoObject(mkl: MultipleKeyList[H, R]) = {
         val (hashKey, rangeKey) = mkl.keys
-        mkl.values.map {
-          case (h, r) =>
-            DynamoObject(hashKey.placeholder("") -> h) <> DynamoObject(rangeKey.placeholder("") -> r)
+        mkl.values.map { case (h, r) =>
+          DynamoObject(hashKey.placeholder("") -> h) <> DynamoObject(rangeKey.placeholder("") -> r)
         }
       }
     }

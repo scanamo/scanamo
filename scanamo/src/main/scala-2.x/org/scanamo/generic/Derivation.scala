@@ -17,8 +17,6 @@
 package org.scanamo.generic
 
 import cats.data.NonEmptyChain
-import cats.instances.either._
-import cats.instances.list._
 import cats.syntax.bifunctor._
 import cats.syntax.parallel._
 import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
@@ -72,10 +70,9 @@ private[scanamo] trait Derivation {
             )
 
         def writeObject(t: T): DynamoObject =
-          DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) {
-            case (xs, p) =>
-              val v = p.typeclass.write(p.dereference(t))
-              if (v.isNull) xs else (p.label -> v) :: xs
+          DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) { case (xs, p) =>
+            val v = p.typeclass.write(p.dereference(t))
+            if (v.isNull) xs else (p.label -> v) :: xs
           }: _*)
       }
   }

@@ -53,20 +53,20 @@ private[scanamo] class AlpakkaInterpreter(implicit client: DynamoDbAsyncClient, 
       case ConditionalDelete(req) =>
         run(JavaRequests.delete(req))
           .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-          .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
+          .recover { case e: ConditionalCheckFailedException =>
+            Either.left(e)
           }
       case ConditionalPut(req) =>
         run(JavaRequests.put(req))
           .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-          .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
+          .recover { case e: ConditionalCheckFailedException =>
+            Either.left(e)
           }
       case ConditionalUpdate(req) =>
         run(JavaRequests.update(req))
           .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-          .recover {
-            case e: ConditionalCheckFailedException => Either.left(e)
+          .recover { case e: ConditionalCheckFailedException =>
+            Either.left(e)
           }
       case TransactWriteAll(req) =>
         run[TransactWriteItemsRequest, TransactWriteItemsResponse](JavaRequests.transactItems(req))

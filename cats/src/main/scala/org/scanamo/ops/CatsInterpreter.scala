@@ -17,12 +17,13 @@
 package org.scanamo.ops
 
 import cats.effect.Async
-import cats.implicits._
 import cats.~>
+import cats.syntax.applicativeError._
+import cats.syntax.flatMap._
 import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
 import java.util.concurrent.CompletionException
+import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
   final private def eff[A <: AnyRef](fut: => CompletableFuture[A]): F[A] =

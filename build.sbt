@@ -1,8 +1,8 @@
 scalaVersion in ThisBuild := "2.12.12"
 crossScalaVersions in ThisBuild := Seq("2.12.12", "2.13.3")
 
-val catsVersion = "2.1.1"
-val catsEffectVersion = "2.1.4"
+val catsVersion = "2.2.0"
+val catsEffectVersion = "2.2.0"
 val zioVersion = "1.0.1"
 
 lazy val stdOptions = Seq(
@@ -122,7 +122,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.13.76"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.14.22"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -132,7 +132,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.15",
+      "eu.timepit"    %% "refined"   % "0.9.16",
       "org.scalatest" %% "scalatest" % "3.2.2" % Test
     )
   )
@@ -223,7 +223,7 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.1",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
       "org.scalatest"      %% "scalatest"                    % "3.2.2"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.14.3" % Test
     ),

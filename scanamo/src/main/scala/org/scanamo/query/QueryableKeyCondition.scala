@@ -57,8 +57,8 @@ object QueryableKeyCondition {
     new QueryableKeyCondition[AndEqualsCondition[H, R]] {
       final def apply(t: AndEqualsCondition[H, R]) = {
         val m: DynamoObject = HR.toDynamoObject(t)
-        val charWithKey: Iterable[(String, String)] = m.keys.zipWithIndex map {
-          case (k, v) => (s"#${('A'.toInt + v).toChar}", k)
+        val charWithKey: Iterable[(String, String)] = m.keys.zipWithIndex map { case (k, v) =>
+          (s"#${('A'.toInt + v).toChar}", k)
         }
 
         RequestCondition(

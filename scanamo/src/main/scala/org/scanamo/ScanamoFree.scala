@@ -26,7 +26,6 @@ import org.scanamo.request._
 import org.scanamo.update.UpdateExpression
 
 object ScanamoFree {
-  import cats.instances.list._
   import cats.syntax.functor._
   import cats.syntax.applicative._
   import cats.syntax.traverse._
@@ -85,9 +84,8 @@ object ScanamoFree {
   def transactPutAll[T](
     tableAndItems: List[(String, T)]
   )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] = {
-    val dItems = tableAndItems.map {
-      case (tableName, itm) =>
-        TransactPutItem(tableName, f.write(itm), None)
+    val dItems = tableAndItems.map { case (tableName, itm) =>
+      TransactPutItem(tableName, f.write(itm), None)
     }
     ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(dItems, Seq.empty, Seq.empty))
   }
@@ -100,9 +98,8 @@ object ScanamoFree {
   def transactUpdateAll(
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
   ): ScanamoOps[TransactWriteItemsResponse] = {
-    val items = tableAndItems.map {
-      case (tableName, (key, updateExpression)) ⇒
-        TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
+    val items = tableAndItems.map { case (tableName, (key, updateExpression)) ⇒
+      TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
     }
     ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, items, Seq.empty))
   }
@@ -115,9 +112,8 @@ object ScanamoFree {
   def transactDeleteAll(
     tableAndItems: List[(String, UniqueKey[_])]
   ): ScanamoOps[TransactWriteItemsResponse] = {
-    val items = tableAndItems.map {
-      case (tableName, key) ⇒
-        TransactDeleteItem(tableName, key.toDynamoObject, None)
+    val items = tableAndItems.map { case (tableName, key) ⇒
+      TransactDeleteItem(tableName, key.toDynamoObject, None)
     }
     ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, items))
   }
@@ -167,10 +163,9 @@ object ScanamoFree {
           tableName,
           KeysAndAttributes.builder
             .keys(
-              batch.foldLeft(emptyList[JMap[String, AttributeValue]](batch.size)) {
-                case (keys, key) =>
-                  keys.add(key.toJavaMap)
-                  keys
+              batch.foldLeft(emptyList[JMap[String, AttributeValue]](batch.size)) { case (keys, key) =>
+                keys.add(key.toJavaMap)
+                keys
               }
             )
             .consistentRead(consistent)
@@ -244,10 +239,9 @@ object ScanamoFree {
     map.put(
       tableName,
       batch
-        .foldLeft(emptyList[B](batch.size)) {
-          case (reqs, i) =>
-            reqs.add(f(i))
-            reqs
+        .foldLeft(emptyList[B](batch.size)) { case (reqs, i) =>
+          reqs.add(f(i))
+          reqs
         }
     )
     map

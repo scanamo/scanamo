@@ -17,7 +17,6 @@
 package org.scanamo.query
 
 import cats.data.State
-import cats.instances.int._
 
 import software.amazon.awssdk.services.dynamodb.model.{
   AttributeValue,
@@ -29,8 +28,6 @@ import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, 
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
-import cats.instances.either._
-import cats.instances.option._
 import cats.syntax.either._
 import cats.syntax.functor._
 
@@ -161,8 +158,8 @@ object ConditionExpression {
           val namePlaceholder = attributeName.placeholder(prefix)
           val valuePlaceholder = s"conditionAttributeValue$cpt"
           val attributeValues = keys.values
-            .foldLeft(DynamoObject.empty -> 0) {
-              case ((m, i), v) => (m <> DynamoObject(s"$valuePlaceholder$i" -> v)) -> (i + 1)
+            .foldLeft(DynamoObject.empty -> 0) { case ((m, i), v) =>
+              (m <> DynamoObject(s"$valuePlaceholder$i" -> v)) -> (i + 1)
             }
             ._1
           RequestCondition(
