@@ -18,14 +18,14 @@ class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestpl
       l <- arbitrary[List[String]]
       u <- Gen.oneOf(
         List(
-          set(s -> i),
-          add(s -> i),
+          set(s, i),
+          add(s, i),
           remove(s),
-          delete(s -> si),
-          append(s -> i),
-          prepend(s -> i),
-          appendAll(s -> l),
-          prependAll(s -> l)
+          delete(s, si),
+          append(s, i),
+          prepend(s, i),
+          appendAll(s, l),
+          prependAll(s, l)
         )
       )
     } yield u
@@ -54,15 +54,15 @@ class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestpl
 
   it("append/prepend should wrap scalar values in a list") {
     check { (s: String, v: String) =>
-      append(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
-      prepend(s -> v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
+      append(s, v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
+      prepend(s, v).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(List(v)))
     }
   }
 
   it("appendAll/prependAll should take the value as a list") {
     check { (s: String, l: List[String]) =>
-      appendAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
-      prependAll(s -> l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
+      appendAll(s, l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
+      prependAll(s, l).unprefixedAttributeValues.get("update").exists(stringList.read(_) == Right(l))
     }
   }
 }

@@ -57,7 +57,7 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
             GithubProject("guardian", "scanamo", "Scala", "Apache 2")
           )
         )
-        scalaMIT <- githubProjects.index(i).query("language" -> "Scala" and ("license" -> "MIT"))
+        scalaMIT <- githubProjects.index(i).query("language" === "Scala" and "license" === "MIT")
       } yield scalaMIT.toList
       scanamo.exec(operations) should be(
         List(
@@ -90,7 +90,7 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
               .limit(1)
               .descending
               .query(
-                ("mode" -> "Underground" and ("colour" beginsWith "Bl"))
+                ("mode" === "Underground" and ("colour" beginsWith "Bl"))
               )
         } yield somethingBeginningWithBl.toList
         scanamo.exec(operations) should be(List(Right(Transport("Underground", "Picadilly", "Blue"))))
@@ -115,7 +115,7 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
             transport
               .index(i)
               .filter("line" beginsWith "C")
-              .query("mode" -> "Underground")
+              .query("mode" === "Underground")
         } yield somethingBeginningWithC.toList
         scanamo.exec(operations) should be(
           List(Right(Transport("Underground", "Central", "Red")), Right(Transport("Underground", "Circle", "Yellow")))

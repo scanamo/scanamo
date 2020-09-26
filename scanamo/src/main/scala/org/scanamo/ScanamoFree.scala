@@ -93,7 +93,7 @@ object ScanamoFree {
   def transactUpdateAllTable(
     tableName: String
   )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResponse] =
-    transactUpdateAll(items.map(tableName → _))
+    transactUpdateAll(items.map(tableName -> _))
 
   def transactUpdateAll(
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
@@ -107,7 +107,7 @@ object ScanamoFree {
   def transactDeleteAllTable(
     tableName: String
   )(items: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResponse] =
-    transactDeleteAll(items.map(tableName → _))
+    transactDeleteAll(items.map(tableName -> _))
 
   def transactDeleteAll(
     tableAndItems: List[(String, UniqueKey[_])]

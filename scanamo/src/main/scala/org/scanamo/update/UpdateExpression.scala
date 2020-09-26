@@ -83,23 +83,52 @@ object UpdateExpression {
       (s"$prefix$k", v)
     }
 
-  def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
-    SetExpression(fieldValue._1, fieldValue._2)
   def setFromAttribute(from: AttributeName, to: AttributeName): UpdateExpression =
     SetExpression.fromAttribute(from, to)
+
+  def remove(field: AttributeName): UpdateExpression = RemoveExpression(field)
+
+  @deprecated("use uncurried `set(attr, value)` syntax", "1.0")
+  def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
+    SetExpression(fieldValue._1, fieldValue._2)
+  def set[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+    SetExpression(attr, value)
+
+  @deprecated("use uncurried `append(attr, value)` syntax", "1.0")
   def append[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     AppendExpression(fieldValue._1, fieldValue._2)
+  def append[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+    AppendExpression(attr, value)
+
+  @deprecated("use uncurried `prepend(attr, value)` syntax", "1.0")
   def prepend[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     PrependExpression(fieldValue._1, fieldValue._2)
+  def prepend[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+    PrependExpression(attr, value)
+
+  @deprecated("use uncurried `appendAll(attr, value)` syntax", "1.0")
   def appendAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
     AppendAllExpression(fieldValue._1, fieldValue._2)
+  def appendAll[V: DynamoFormat](attr: AttributeName, value: List[V]): UpdateExpression =
+    AppendAllExpression(attr, value)
+
+  @deprecated("use uncurried `prependAll(attr, value)` syntax", "1.0")
   def prependAll[V: DynamoFormat](fieldValue: (AttributeName, List[V])): UpdateExpression =
     PrependAllExpression(fieldValue._1, fieldValue._2)
+  def prependAll[V: DynamoFormat](attr: AttributeName, value: List[V]): UpdateExpression =
+    PrependAllExpression(attr, value)
+
+  @deprecated("use uncurried `add(attr, value)` syntax", "1.0")
   def add[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     AddExpression(fieldValue._1, fieldValue._2)
+  def add[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+    AddExpression(attr, value)
+
+  @deprecated("use uncurried `delete(attr, value)` syntax", "1.0")
   def delete[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     DeleteExpression(fieldValue._1, fieldValue._2)
-  def remove(field: AttributeName): UpdateExpression = RemoveExpression(field)
+  def delete[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+    DeleteExpression(attr, value)
 }
 
 sealed private[update] trait UpdateType { val op: String }

@@ -46,7 +46,7 @@ we can simply `put` and `get` items from Dynamo, without boilerplate or reflecti
 val table = Table[Farmer]("farmer")
 
 scanamo.exec(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
-scanamo.exec(table.get("name" -> "McDonald"))
+scanamo.exec(table.get("name" === "McDonald"))
 ```
 
 Scanamo supports most other DynamoDB [operations](operations.md), beyond
