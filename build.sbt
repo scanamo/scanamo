@@ -204,7 +204,7 @@ lazy val zio = (project in file("zio"))
       "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "2.1.4.0",
+      "dev.zio"        %% "zio-interop-cats" % "2.1.4.1",
       "org.scalatest"  %% "scalatest"        % "3.2.2"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.14.3"   % Test
     ),
