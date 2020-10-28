@@ -358,4 +358,9 @@ object DynamoValue {
   def fromDynamoArray(xs: DynamoArray): DynamoValue = DynArray(xs)
 
   private[scanamo] def unsafeFromNumber(n: String): DynamoValue = DynNum(n)
+
+  implicit object dynamoValueFormat extends DynamoFormat[DynamoValue] {
+    def read(av: DynamoValue): Either[DynamoReadError, DynamoValue] = Right(av)
+    def write(av: DynamoValue): DynamoValue = av
+  }
 }
