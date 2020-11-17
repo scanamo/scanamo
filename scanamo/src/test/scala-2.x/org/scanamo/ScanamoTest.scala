@@ -524,6 +524,34 @@ class ScanamoTest extends AnyFunSpec with Matchers {
     }
   }
 
+  it("should return None after delete asynchronously") {
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      val farmersTable = Table[Farmer](t)
+      val farmerOps = for {
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.deleteAndReturn(DeleteReturn.Nothing)("name" === "McDonald")
+      } yield result
+
+      scanamo.exec(farmerOps) should equal(
+        None
+      )
+    }
+  }
+
+  it("should return old item after delete asynchronously") {
+    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
+      val farmersTable = Table[Farmer](t)
+      val farmerOps = for {
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"))))
+        result <- farmersTable.deleteAndReturn(DeleteReturn.OldValue)("name" === "McDonald")
+      } yield result
+
+      scanamo.exec(farmerOps) should equal(
+        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
+      )
+    }
+  }
+
   it("transact table write (update) items") {
     LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
       val forecastTable = Table[Forecast](t)
