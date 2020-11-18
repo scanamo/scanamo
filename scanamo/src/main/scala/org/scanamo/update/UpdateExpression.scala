@@ -88,6 +88,9 @@ object UpdateExpression {
 
   def remove(field: AttributeName): UpdateExpression = RemoveExpression(field)
 
+  def setIfNotExists[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+    SetIfNotExistsExpression(attr, value)
+
   @deprecated("use uncurried `set(attr, value)` syntax", "1.0")
   def set[V: DynamoFormat](fieldValue: (AttributeName, V)): UpdateExpression =
     SetExpression(fieldValue._1, fieldValue._2)
@@ -139,13 +142,14 @@ private[update] case object REMOVE extends UpdateType { override val op = "REMOV
 
 sealed private[update] trait LeafUpdateExpression { self =>
   final val updateType: UpdateType = self match {
-    case _: LeafAddExpression       => ADD
-    case _: LeafAppendExpression    => SET
-    case _: LeafDeleteExpression    => DELETE
-    case _: LeafPrependExpression   => SET
-    case _: LeafRemoveExpression    => REMOVE
-    case _: LeafSetExpression       => SET
-    case _: LeafAttributeExpression => SET
+    case _: LeafAddExpression            => ADD
+    case _: LeafAppendExpression         => SET
+    case _: LeafDeleteExpression         => DELETE
+    case _: LeafPrependExpression        => SET
+    case _: LeafRemoveExpression         => REMOVE
+    case _: LeafSetExpression            => SET
+    case _: LeafAttributeExpression      => SET
+    case _: LeafSetIfNotExistsExpression => SET
   }
 
   final val addEmptyList: Boolean = self match {
@@ -163,25 +167,29 @@ sealed private[update] trait LeafUpdateExpression { self =>
       s"#$namePlaceholder = list_append(:$valuePlaceholder, if_not_exists(#$namePlaceholder, :emptyList))"
     case LeafRemoveExpression(namePlaceholder, _)  => s"#$namePlaceholder"
     case LeafAttributeExpression(prefix, from, to) => s"#${to.placeholder(prefix)} = #${from.placeholder(prefix)}"
+    case LeafSetIfNotExistsExpression(namePlaceholder, _, valuePlaceholder, _) =>
+      s"#$namePlaceholder = if_not_exists(#$namePlaceholder, :$valuePlaceholder)"
   }
 
   final def prefixKeys(prefix: String): LeafUpdateExpression =
     self match {
-      case x: LeafSetExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafAppendExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafPrependExpression => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafAddExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafDeleteExpression  => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafSetExpression                => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafAppendExpression             => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafPrependExpression            => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafAddExpression                => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafDeleteExpression             => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafSetIfNotExistsExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
       case x                        => x
     }
 
   final val dynamoValue: Option[(String, DynamoValue)] = self match {
-    case LeafAddExpression(_, _, valuePlaceholder, av)     => Some(valuePlaceholder -> av)
-    case LeafAppendExpression(_, _, valuePlaceholder, av)  => Some(valuePlaceholder -> av)
-    case LeafDeleteExpression(_, _, valuePlaceholder, av)  => Some(valuePlaceholder -> av)
-    case LeafPrependExpression(_, _, valuePlaceholder, av) => Some(valuePlaceholder -> av)
-    case LeafSetExpression(_, _, valuePlaceholder, av)     => Some(valuePlaceholder -> av)
-    case _                                                 => None
+    case LeafAddExpression(_, _, valuePlaceholder, av)                => Some(valuePlaceholder -> av)
+    case LeafAppendExpression(_, _, valuePlaceholder, av)             => Some(valuePlaceholder -> av)
+    case LeafDeleteExpression(_, _, valuePlaceholder, av)             => Some(valuePlaceholder -> av)
+    case LeafPrependExpression(_, _, valuePlaceholder, av)            => Some(valuePlaceholder -> av)
+    case LeafSetExpression(_, _, valuePlaceholder, av)                => Some(valuePlaceholder -> av)
+    case LeafSetIfNotExistsExpression(_, _, valuePlaceholder, av)     => Some(valuePlaceholder -> av)
+    case _                                                            => None
   }
 
   def attributeNames: Map[String, String]
@@ -211,6 +219,13 @@ final private[update] case class LeafPrependExpression(
 ) extends LeafUpdateExpression
 
 final private[update] case class LeafAddExpression(
+  namePlaceholder: String,
+  attributeNames: Map[String, String],
+  valuePlaceholder: String,
+  av: DynamoValue
+) extends LeafUpdateExpression
+
+final private[update] case class LeafSetIfNotExistsExpression(
   namePlaceholder: String,
   attributeNames: Map[String, String],
   valuePlaceholder: String,
@@ -255,6 +270,19 @@ object SetExpression {
     )
   def fromAttribute(from: AttributeName, to: AttributeName): UpdateExpression =
     SimpleUpdate(LeafAttributeExpression(prefix, from, to))
+}
+
+object SetIfNotExistsExpression {
+  private val prefix = "updateSetIfNE"
+  def apply[V](field: AttributeName, value: V)(implicit format: DynamoFormat[V]): UpdateExpression =
+    SimpleUpdate(
+      LeafSetIfNotExistsExpression(
+        field.placeholder(prefix),
+        field.attributeNames(prefix),
+        "update",
+        format.write(value)
+      )
+    )
 }
 
 object AppendExpression {

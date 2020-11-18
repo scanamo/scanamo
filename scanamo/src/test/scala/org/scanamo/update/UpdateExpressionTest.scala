@@ -19,6 +19,7 @@ class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestpl
       u <- Gen.oneOf(
         List(
           set(s, i),
+          setIfNotExists(s, i),
           add(s, i),
           remove(s),
           delete(s, si),

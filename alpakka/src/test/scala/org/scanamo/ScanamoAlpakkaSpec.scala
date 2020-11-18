@@ -766,4 +766,30 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
       }
     }
   }
+
+  it("should not update field if it exists") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecasts = Table[Forecast](t)
+      val ops = for {
+        _ <- forecasts.put(Forecast("London", "Rain", Some("umbrella")))
+        _ <- forecasts.update("location" === "London", setIfNotExists("equipment", "shades"))
+        fs <- forecasts.scan
+      } yield fs
+
+      scanamo.exec(ops).runForeach(_ should equal(List(Right(Forecast("London", "Sun", Some("umbrella"))))))
+    }
+  }
+
+  it("should update field if it does not exist") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecasts = Table[Forecast](t)
+      val ops = for {
+        _ <- forecasts.put(Forecast("London", "Sun", None))
+        _ <- forecasts.update("location" === "London", setIfNotExists("equipment", "shades"))
+        fs <- forecasts.scan
+      } yield fs
+
+      scanamo.exec(ops).runForeach(_ should equal(List(Right(Forecast("London", "Sun", Some("shades"))))))
+    }
+  }
 }
