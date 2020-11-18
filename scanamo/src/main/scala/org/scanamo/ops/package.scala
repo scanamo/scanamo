@@ -125,7 +125,11 @@ package object ops {
     }
 
     def delete(req: ScanamoDeleteRequest): DeleteItemRequest = {
-      val request = DeleteItemRequest.builder.tableName(req.tableName).key(req.key.toJavaMap)
+      val request = DeleteItemRequest.builder
+        .tableName(req.tableName)
+        .key(req.key.toJavaMap)
+        .returnValues(req.ret.asDynamoValue)
+
       req.condition
         .fold(request) { condition =>
           val requestWithCondition = request
