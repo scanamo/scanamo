@@ -205,7 +205,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "2.2.0.1",
-      "org.scalatest"  %% "scalatest"        % "3.2.2"    % Test,
+      "org.scalatest"  %% "scalatest"        % "3.2.3"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.15.1"   % Test
     ),
     fork in Test := true,
