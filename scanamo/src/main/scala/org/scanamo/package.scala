@@ -115,6 +115,8 @@ package object scanamo {
 
     def setFrom(to: AttributeName, from: AttributeName): UpdateExpression = UpdateExpression.setFromAttribute(from, to)
     def remove(field: AttributeName): UpdateExpression = UpdateExpression.remove(field)
+    def setIfNotExists[V: DynamoFormat](attr: AttributeName, value: V): UpdateExpression =
+      UpdateExpression.setIfNotExists(attr, value)
 
     implicit def stringAttributeName(s: String): AttributeName = AttributeName.of(s)
     implicit def stringAttributeNameValue[T](sv: (String, T)): (AttributeName, T) = AttributeName.of(sv._1) -> sv._2
