@@ -20,8 +20,7 @@ import scala.language.experimental.macros
 
 import org.scanamo.DynamoFormat
 
-/**
-  * Fully automatic format derivation.
+/** Fully automatic format derivation.
   *
   * Importing the contents of this package object provides [[org.scanamo.DynamoFormat]]
   * instances for algebraic data types.

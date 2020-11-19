@@ -23,16 +23,14 @@ import java.util.stream.Collectors
 import java.{ util => ju }
 import software.amazon.awssdk.core.SdkBytes
 
-/**
-  * A `DynamoArray` is a pure representation of an array of `AttributeValue`s
+/** A `DynamoArray` is a pure representation of an array of `AttributeValue`s
   */
 sealed abstract class DynamoArray extends Product with Serializable { self =>
   import DynamoArray._
 
   protected def toList: List[DynamoValue]
 
-  /**
-    * Gets the `i`th value in the array
+  /** Gets the `i`th value in the array
     */
   final def apply(i: Int): Option[DynamoValue] =
     self match {
@@ -50,8 +48,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
         if (s > i) xs(i) else ys(i - s)
     }
 
-  /**
-    * Gets the size of the array
+  /** Gets the size of the array
     */
   final def size: Int =
     self match {
@@ -67,8 +64,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case Concat(xs, ys) => xs.size + ys.size
     }
 
-  /**
-    * Checks if the array is empty
+  /** Checks if the array is empty
     */
   final def isEmpty: Boolean =
     self match {
@@ -76,13 +72,11 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _     => false
     }
 
-  /**
-    * Chekcs if the array is not empty
+  /** Chekcs if the array is not empty
     */
   final def nonEmpty: Boolean = !isEmpty
 
-  /**
-    * Chekcs if the arra contains a certain `x`
+  /** Chekcs if the arra contains a certain `x`
     */
   final def contains(x: DynamoValue): Boolean =
     self match {
@@ -98,8 +92,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case Concat(xs, ys) => xs.contains(x) || ys.contains(x)
     }
 
-  /**
-    * Make an AWS SDK value out of this array
+  /** Make an AWS SDK value out of this array
     */
   // TODO mark as private?
   final def toAttributeValue: AttributeValue =
@@ -139,13 +132,11 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case Concat(xs, ys) => unsafeMerge(xs.toJavaCollection, ys.toJavaCollection)
     }
 
-  /**
-    * Make a value out of this array
+  /** Make a value out of this array
     */
   final def toDynamoValue: DynamoValue = DynamoValue.fromDynamoArray(self)
 
-  /**
-    * Checks if the array is made of values
+  /** Checks if the array is made of values
     */
   final def isValueArray: Boolean =
     self match {
@@ -154,8 +145,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _                   => false
     }
 
-  /**
-    * Checks if the array is made of strings
+  /** Checks if the array is made of strings
     */
   final def isStringArray: Boolean =
     self match {
@@ -164,8 +154,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _                     => false
     }
 
-  /**
-    * Checks if the array is made of numeric values
+  /** Checks if the array is made of numeric values
     */
   final def isNumericArray: Boolean =
     self match {
@@ -174,8 +163,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _                     => false
     }
 
-  /**
-    * Checks if the array is made of byte buffers
+  /** Checks if the array is made of byte buffers
     */
   final def isByteBufferArray: Boolean =
     self match {
@@ -184,8 +172,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _                     => false
     }
 
-  /**
-    * Turns into a list of values, if applies
+  /** Turns into a list of values, if applies
     */
   final def asArray: Option[List[DynamoValue]] =
     self match {
@@ -223,8 +210,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case PureB(xs) => Some(xs.map(DynamoValue.fromByteBuffer))
     }
 
-  /**
-    * Turns into a list of strings, if applies
+  /** Turns into a list of strings, if applies
     */
   final def asStringArray: Option[List[String]] =
     self match {
@@ -235,8 +221,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _              => None
     }
 
-  /**
-    * Turns into a list of numeric values, if applies
+  /** Turns into a list of numeric values, if applies
     */
   final def asNumericArray: Option[List[String]] =
     self match {
@@ -247,8 +232,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _              => None
     }
 
-  /**
-    * Turns into a list of byte buffers, if applies
+  /** Turns into a list of byte buffers, if applies
     */
   final def asByteBufferArray: Option[List[ByteBuffer]] =
     self match {
@@ -259,16 +243,14 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
       case _              => None
     }
 
-  /**
-    * Concatenatres two arrays
+  /** Concatenatres two arrays
     */
   final def concat(that: DynamoArray): DynamoArray =
     if (self.isEmpty) that
     else if (that.isEmpty) self
     else Concat(self, that)
 
-  /**
-    * Operator alias for `concat`
+  /** Operator alias for `concat`
     */
   final def <>(that: DynamoArray): DynamoArray = self concat that
 
@@ -326,48 +308,39 @@ object DynamoArray {
     builder.result()
   }
 
-  /**
-    * Make an array out of a list of `AttributeValue`s
+  /** Make an array out of a list of `AttributeValue`s
     */
   private[scanamo] def apply(xs: ju.List[AttributeValue]): DynamoArray = if (xs.isEmpty) Empty else Strict(xs)
 
-  /**
-    * Make an array out of a list of values
+  /** Make an array out of a list of values
     */
   def apply(xs: Iterable[DynamoValue]): DynamoArray = if (xs.isEmpty) Empty else Pure(xs.toList)
 
-  /**
-    * Make an array out of a list of strings
+  /** Make an array out of a list of strings
     */
   private[scanamo] def strings(xs: ju.List[String]): DynamoArray = if (xs.isEmpty) Empty else StrictS(xs)
 
-  /**
-    * Make an array out of a list of strings
+  /** Make an array out of a list of strings
     */
   def strings(xs: Iterable[String]): DynamoArray = if (xs.isEmpty) Empty else PureS(xs.toList)
 
-  /**
-    * Make an array out of a list of numeric values
+  /** Make an array out of a list of numeric values
     */
   private[scanamo] def unsafeNumbers(xs: ju.List[String]): DynamoArray = if (xs.isEmpty) Empty else StrictN(xs)
 
-  /**
-    * Make an array out of a list of numeric values
+  /** Make an array out of a list of numeric values
     */
   def numbers[N: Numeric](xs: Iterable[N]): DynamoArray = if (xs.isEmpty) Empty else PureN(xs.toList.map(_.toString))
 
-  /**
-    * Make an array out of a list of byte buffers
+  /** Make an array out of a list of byte buffers
     */
   private[scanamo] def byteBuffers(xs: ju.List[ByteBuffer]): DynamoArray = if (xs.isEmpty) Empty else StrictB(xs)
 
-  /**
-    * Make an array out of a list of byte buffers
+  /** Make an array out of a list of byte buffers
     */
   def byteBuffers(xs: Iterable[ByteBuffer]): DynamoArray = if (xs.isEmpty) Empty else PureB(xs.toList)
 
-  /**
-    * The empty array
+  /** The empty array
     */
   val empty: DynamoArray = Empty
 }

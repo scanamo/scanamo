@@ -28,8 +28,7 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import scala.annotation.implicitNotFound
 import scala.reflect.ClassTag
 
-/**
-  * Type class for defining serialisation to and from * DynamoDB's `AttributeValue`.
+/** Type class for defining serialisation to and from * DynamoDB's `AttributeValue`.
   */
 @implicitNotFound(
   "There is no format for ${T}, you may have to do one of the following:\n" +
@@ -70,8 +69,7 @@ object DynamoFormat extends PlatformSpecificFormat {
       def write(t: T): DynamoValue = w(t)
     }
 
-  /**
-    * DynamoFormats for object-like structures
+  /** DynamoFormats for object-like structures
     *
     * @note All data types used as the carrier type in [[Table]] operations
     * should derive an instance from this class
@@ -100,8 +98,7 @@ object DynamoFormat extends PlatformSpecificFormat {
   private[scanamo] def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
     a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
 
-  /**
-    * Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
+  /** Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
     * i.e. an `A` can always be converted to a `B` and vice versa.
     *
     * If there are some values of `B` that have no corresponding value in `A`,
@@ -113,8 +110,7 @@ object DynamoFormat extends PlatformSpecificFormat {
       final def write(t: A): DynamoValue = f.write(w(t))
     }
 
-  /**
-    * Returns a [[DynamoFormat]] for the case where `A` and `B` form an epimorphism,
+  /** Returns a [[DynamoFormat]] for the case where `A` and `B` form an epimorphism,
     * i.e. an `A` can always be converted to a `B` but the opposite is not necessarily true.
     */
   def xmap[A, B](r: B => Either[DynamoReadError, A], w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
@@ -123,8 +119,7 @@ object DynamoFormat extends PlatformSpecificFormat {
       final def write(t: A): DynamoValue = f.write(w(t))
     }
 
-  /**
-    * Returns a [[DynamoFormat]] for the case where `A` can always be converted `B`,
+  /** Returns a [[DynamoFormat]] for the case where `A` can always be converted `B`,
     * with `write`, but `read` may throw an exception for some value of `B`
     */
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A, write: A => B): DynamoFormat[A] =
@@ -287,8 +282,7 @@ object DynamoFormat extends PlatformSpecificFormat {
       final def write(t: Option[T]): DynamoValue = t.fold(DynamoValue.nil)(f.write)
     }
 
-  /**
-    * This ensures that if, for instance, you specify an update with Some(5) rather
+  /** This ensures that if, for instance, you specify an update with Some(5) rather
     * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
     */
   implicit def someFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Some[T]] =
