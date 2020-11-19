@@ -173,23 +173,23 @@ sealed private[update] trait LeafUpdateExpression { self =>
 
   final def prefixKeys(prefix: String): LeafUpdateExpression =
     self match {
-      case x: LeafSetExpression                => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafAppendExpression             => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafPrependExpression            => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafAddExpression                => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafDeleteExpression             => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x: LeafSetIfNotExistsExpression     => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
-      case x                        => x
+      case x: LeafSetExpression            => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafAppendExpression         => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafPrependExpression        => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafAddExpression            => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafDeleteExpression         => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x: LeafSetIfNotExistsExpression => x.copy(valuePlaceholder = s"$prefix${x.valuePlaceholder}")
+      case x                               => x
     }
 
   final val dynamoValue: Option[(String, DynamoValue)] = self match {
-    case LeafAddExpression(_, _, valuePlaceholder, av)                => Some(valuePlaceholder -> av)
-    case LeafAppendExpression(_, _, valuePlaceholder, av)             => Some(valuePlaceholder -> av)
-    case LeafDeleteExpression(_, _, valuePlaceholder, av)             => Some(valuePlaceholder -> av)
-    case LeafPrependExpression(_, _, valuePlaceholder, av)            => Some(valuePlaceholder -> av)
-    case LeafSetExpression(_, _, valuePlaceholder, av)                => Some(valuePlaceholder -> av)
-    case LeafSetIfNotExistsExpression(_, _, valuePlaceholder, av)     => Some(valuePlaceholder -> av)
-    case _                                                            => None
+    case LeafAddExpression(_, _, valuePlaceholder, av)            => Some(valuePlaceholder -> av)
+    case LeafAppendExpression(_, _, valuePlaceholder, av)         => Some(valuePlaceholder -> av)
+    case LeafDeleteExpression(_, _, valuePlaceholder, av)         => Some(valuePlaceholder -> av)
+    case LeafPrependExpression(_, _, valuePlaceholder, av)        => Some(valuePlaceholder -> av)
+    case LeafSetExpression(_, _, valuePlaceholder, av)            => Some(valuePlaceholder -> av)
+    case LeafSetIfNotExistsExpression(_, _, valuePlaceholder, av) => Some(valuePlaceholder -> av)
+    case _                                                        => None
   }
 
   def attributeNames: Map[String, String]
