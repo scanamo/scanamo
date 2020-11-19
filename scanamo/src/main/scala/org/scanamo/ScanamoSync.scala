@@ -20,21 +20,18 @@ import cats.{ ~>, Id, Monad }
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import org.scanamo.ops._
 
-/**
-  * Provides a simplified interface for reading and writing case classes to DynamoDB
+/** Provides a simplified interface for reading and writing case classes to DynamoDB
   *
   * To avoid blocking, use [[org.scanamo.ScanamoAsync]]
   */
 final class Scanamo private (client: DynamoDbClient) {
   private val interpreter = new ScanamoSyncInterpreter(client)
 
-  /**
-    * Execute the operations built with [[org.scanamo.Table]]
+  /** Execute the operations built with [[org.scanamo.Table]]
     */
   def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
 
-  /**
-    * Execute the operations built with [[org.scanamo.Table]] with
+  /** Execute the operations built with [[org.scanamo.Table]] with
     * effects in the monad `M` threaded in.
     */
   def execT[M[_]: Monad, A](hoist: Id ~> M)(op: ScanamoOpsT[M, A]): M[A] =

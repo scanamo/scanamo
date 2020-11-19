@@ -22,20 +22,17 @@ import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 
-/**
-  * Represents a secondary index on a DynamoDB table.
+/** Represents a secondary index on a DynamoDB table.
   *
   * Can be constructed via the [[org.scanamo.Table#index index]] method on [[org.scanamo.Table Table]]
   */
 sealed abstract class SecondaryIndex[V] {
 
-  /**
-    * Scan a secondary index
+  /** Scan a secondary index
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
 
-  /**
-    * Performs a scan with the ability to introduce effects into the computation. This is
+  /** Performs a scan with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page.
     *
@@ -43,8 +40,7 @@ sealed abstract class SecondaryIndex[V] {
     */
   final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
 
-  /**
-    * Performs a scan with the ability to introduce effects into the computation. This is
+  /** Performs a scan with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page, with a maximum of `pageSize` items per page..
     *
@@ -53,13 +49,11 @@ sealed abstract class SecondaryIndex[V] {
     */
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
-  /**
-    * Run a query against keys in a secondary index
+  /** Run a query against keys in a secondary index
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
 
-  /**
-    * Performs a query with the ability to introduce effects into the computation. This is
+  /** Performs a query with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page.
     *
@@ -68,8 +62,7 @@ sealed abstract class SecondaryIndex[V] {
   final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryPaginatedM(query, Int.MaxValue)
 
-  /**
-    * Performs a scan with the ability to introduce effects into the computation. This is
+  /** Performs a scan with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page, with a maximum of `pageSize` items per page.
     *
@@ -80,13 +73,11 @@ sealed abstract class SecondaryIndex[V] {
                                             pageSize: Int
   ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
-  /**
-    * Query or scan an index, limiting the number of items evaluated by Dynamo
+  /** Query or scan an index, limiting the number of items evaluated by Dynamo
     */
   def limit(n: Int): SecondaryIndex[V]
 
-  /**
-    * Filter the results of `scan` or `query` within DynamoDB
+  /** Filter the results of `scan` or `query` within DynamoDB
     *
     * Note that rows filtered out still count towards your consumed capacity
     */

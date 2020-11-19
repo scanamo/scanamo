@@ -34,8 +34,7 @@ import org.scanamo.ops.{ AlpakkaInterpreter, ScanamoOps, ScanamoOpsT }
 
 import scala.concurrent.Future
 
-/**
-  * Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
+/** Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
   * [[https://github.com/akka/alpakka Alpakka]] client, a [[org.scanamo.ops.retrypolicy.RetryPolicy]]
   * and a predicate for which [[scala.Throwable]]s should be retried.
   * `retryPolicy` defaults to [[org.scanamo.ops.retrypolicy.RetryPolicy.max]] with maximum 3 retries if not explicitly

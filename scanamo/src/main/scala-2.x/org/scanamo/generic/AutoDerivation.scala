@@ -23,8 +23,7 @@ import scala.reflect.macros.whitebox
 
 trait AutoDerivation extends Derivation {
 
-  /**
-    * Materialize an exported format by wrapping the magnolia derivation
+  /** Materialize an exported format by wrapping the magnolia derivation
     * during macro expansion
     *
     * @note All credits to the inimitable @neko-kai https://github.com/propensive/magnolia/issues/107#issuecomment-589289260

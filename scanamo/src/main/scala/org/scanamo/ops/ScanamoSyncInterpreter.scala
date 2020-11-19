@@ -21,8 +21,7 @@ import cats.syntax.either._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
 
-/**
-  * Interpret Scanamo operations using blocking requests to DynamoDB with any
+/** Interpret Scanamo operations using blocking requests to DynamoDB with any
   * transport errors or semantic errors within DynamoDB thrown as exceptions.
   */
 class ScanamoSyncInterpreter(client: DynamoDbClient) extends (ScanamoOpsA ~> Id) {

@@ -26,8 +26,7 @@ object JodaFormats {
   implicit val jodaInstantAsLongFormat: DynamoFormat[Instant] =
     DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_), x => x.getMillis)
 
-  /**
-    *  Convenient, readable format for Joda DateTime, but requires that all dates serialised
+  /**  Convenient, readable format for Joda DateTime, but requires that all dates serialised
     *  have a consistent chronology and time zone.
     */
   implicit val jodaStringFormat: DynamoFormat[DateTime] =

@@ -24,8 +24,7 @@ import org.scanamo.query._
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 import org.scanamo.update.UpdateExpression
 
-/**
-  * Represents a DynamoDB table that operations can be performed against
+/** Represents a DynamoDB table that operations can be performed against
   */
 case class Table[V: DynamoFormat](name: String) {
 
@@ -46,53 +45,44 @@ case class Table[V: DynamoFormat](name: String) {
   def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Either[DynamoReadError, V]]] =
     ScanamoFree.deleteAndReturn(name)(ret, key)
 
-  /**
-    * Deletes multiple items by a unique key
+  /** Deletes multiple items by a unique key
     */
   def deleteAll(items: UniqueKeys[_]): ScanamoOps[Unit] = ScanamoFree.deleteAll(name)(items)
 
-  /**
-    * A secondary index on the table which can be scanned, or queried against
+  /** A secondary index on the table which can be scanned, or queried against
     */
   def index(indexName: String): SecondaryIndex[V] =
     SecondaryIndexWithOptions[V](name, indexName, ScanamoQueryOptions.default)
 
-  /**
-    * Updates an attribute that is not part of the key and returns the updated row
+  /** Updates an attribute that is not part of the key and returns the updated row
     */
   def update(key: UniqueKey[_], expression: UpdateExpression): ScanamoOps[Either[DynamoReadError, V]] =
     ScanamoFree.update[V](name)(key)(expression)
 
-  /**
-    * Query or scan a table, limiting the number of items evaluated by Dynamo
+  /** Query or scan a table, limiting the number of items evaluated by Dynamo
     */
   def limit(n: Int) = TableWithOptions[V](name, ScanamoQueryOptions.default).limit(n)
 
-  /**
-    * Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
+  /** Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
     * read operations against this table. Note that there is no equivalent on
     * table indexes as consistent reads from secondary indexes are not
     * supported by DynamoDB
     */
   def consistently = ConsistentlyReadTable(name)
 
-  /**
-    * Performs the chained operation, `put` if the condition is met
+  /** Performs the chained operation, `put` if the condition is met
     */
   def when[T: ConditionExpression](condition: T) = ConditionalOperation[V, T](name, condition)
 
-  /**
-    * Primes a search request with a key to start from:
+  /** Primes a search request with a key to start from:
     */
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) = TableWithOptions(name, ScanamoQueryOptions.default).from(key)
 
-  /**
-    * Scans all elements of a table
+  /** Scans all elements of a table
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
-  /**
-    * Performs a scan with the ability to introduce effects into the computation. This is
+  /** Performs a scan with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page.
     *
@@ -100,8 +90,7 @@ case class Table[V: DynamoFormat](name: String) {
     */
   final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
 
-  /**
-    * Performs a scan with the ability to introduce effects into the computation. This is
+  /** Performs a scan with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page, with a maximum of `pageSize` items per page..
     *
@@ -111,8 +100,7 @@ case class Table[V: DynamoFormat](name: String) {
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanM[M, V](name, pageSize)
 
-  /**
-    * Scans the table and returns the raw DynamoDB result. Sometimes, one might want to
+  /** Scans the table and returns the raw DynamoDB result. Sometimes, one might want to
     * access metadata returned in the `ScanResponse` object, such as the last evaluated
     * key for example. `Table#scan` only returns a list of results, so there is no
     * place for putting that information: this is where `scan0` comes in handy!
@@ -121,13 +109,11 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def scan0: ScanamoOps[ScanResponse] = ScanamoFree.scan0[V](name)
 
-  /**
-    * Query a table based on the hash key and optionally the range key
+  /** Query a table based on the hash key and optionally the range key
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
-  /**
-    * Performs a query with the ability to introduce effects into the computation. This is
+  /** Performs a query with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page.
     *
@@ -136,8 +122,7 @@ case class Table[V: DynamoFormat](name: String) {
   final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryPaginatedM(query, Int.MaxValue)
 
-  /**
-    * Performs a scan with the ability to introduce effects into the computation. This is
+  /** Performs a scan with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
     * scan it page by page, with a maximum of `pageSize` items per page.
     *
@@ -149,8 +134,7 @@ case class Table[V: DynamoFormat](name: String) {
   ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.queryM[M, V](name)(query, pageSize)
 
-  /**
-    * Queries the table and returns the raw DynamoDB result. Sometimes, one might want to
+  /** Queries the table and returns the raw DynamoDB result. Sometimes, one might want to
     * access metadata returned in the `QueryResponse` object, such as the last evaluated
     * key for example. `Table#query` only returns a list of results, so there is no
     * place for putting that information: this is where `query0` comes in handy!
@@ -159,8 +143,7 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def query0(query: Query[_]): ScanamoOps[QueryResponse] = ScanamoFree.query0[V](name)(query)
 
-  /**
-    * Filter the results of a Scan or Query
+  /** Filter the results of a Scan or Query
     */
   def filter[C: ConditionExpression](condition: C) =
     TableWithOptions(name, ScanamoQueryOptions.default).filter(Condition(condition))
