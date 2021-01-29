@@ -30,6 +30,6 @@ documentation changes:
 Releasing
 ---------
 
-`release cross` from the SBT prompt should publish an artifact to Maven 
-Central for both Scala 2.12 and Scala 2.13. It will also attempt to update
+Creating a git tag is all that is required to trigger Travis to publish an artifact to Maven 
+Central for both Scala 2.12 and Scala 2.13 once the build is complete. It will also attempt to update
 the documentation website at http://www.scanamo.org/ with the latest scaladoc.
