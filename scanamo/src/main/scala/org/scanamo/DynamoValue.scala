@@ -36,7 +36,7 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
       case DynBool(false) => False
       case DynNum(n)      => AttributeValue.builder.n(n.toString).build
       case DynString(s)   => AttributeValue.builder.s(s).build
-      case DynByte(b)     => AttributeValue.builder.b(SdkBytes.fromByteBuffer(b)).build
+      case DynByte(b)     => AttributeValue.builder.b(SdkBytes.fromByteArray(b)).build
       case DynObject(as)  => as.toAttributeValue
       case DynArray(as)   => as.toAttributeValue
     }
@@ -133,7 +133,7 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     */
   final def asByteBuffer: Option[ByteBuffer] =
     self match {
-      case DynByte(b) => Some(b)
+      case DynByte(b) => Some(ByteBuffer.wrap(b))
       case _          => None
     }
 
@@ -202,7 +202,7 @@ sealed abstract class DynamoValue extends Product with Serializable { self =>
     */
   final def withByteBuffer(f: ByteBuffer => DynamoValue): DynamoValue =
     self match {
-      case DynByte(b) => f(b)
+      case DynByte(b) => f(ByteBuffer.wrap(b))
       case _          => self
     }
 
@@ -234,7 +234,7 @@ object DynamoValue {
   final private[DynamoValue] case class DynBool(b: Boolean) extends DynamoValue
   final private[DynamoValue] case class DynNum(n: String) extends DynamoValue
   final private[DynamoValue] case class DynString(s: String) extends DynamoValue
-  final private[DynamoValue] case class DynByte(b: ByteBuffer) extends DynamoValue
+  final private[DynamoValue] case class DynByte(b: Array[Byte]) extends DynamoValue
   final private[DynamoValue] case class DynArray(as: DynamoArray) extends DynamoValue
   final private[DynamoValue] case class DynObject(as: DynamoObject) extends DynamoValue
 
@@ -256,7 +256,7 @@ object DynamoValue {
 
   /** Creates a byte buffer value
     */
-  def fromByteBuffer(b: ByteBuffer): DynamoValue = DynByte(b)
+  def fromByteBuffer(b: ByteBuffer): DynamoValue = DynByte(b.array)
 
   /** Creates an array of values
     */
@@ -294,7 +294,7 @@ object DynamoValue {
     else if (av.s ne null)
       DynString(av.s)
     else if (av.b ne null)
-      DynByte(av.b.asByteBuffer)
+      DynByte(av.b.asByteArray)
     else if (av.hasNs)
       DynArray(DynamoArray.unsafeNumbers(av.ns))
     else if (av.hasBs)

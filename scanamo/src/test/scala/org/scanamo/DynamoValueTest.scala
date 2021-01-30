@@ -1,9 +1,12 @@
 package org.scanamo
 
 import java.nio.ByteBuffer
-import org.scalacheck._
+
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.forAll
+import org.scalacheck._
+import software.amazon.awssdk.core.SdkBytes
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class DynamoObjectTest extends Properties("DynamoValue") with DynamoValueInstances {
   ////
@@ -39,10 +42,14 @@ private[scanamo] trait DynamoValueInstances extends DynamoObjectInstances with D
 
   val genBuffers = arbitrary[List[Array[Byte]]].map(xs => DynamoValue.fromByteBuffers(xs.map(ByteBuffer.wrap)))
 
+  val genAttributeValue = arbitrary[Array[Byte]].map(xs =>
+    DynamoValue.fromAttributeValue(AttributeValue.builder.b(SdkBytes.fromByteArray(xs)).build)
+  )
+
   def fromSize(size: Int): Gen[DynamoValue] =
     size match {
       case 0 => genNull
-      case 1 => Gen.oneOf(genNumber, genString, genBuffer)
+      case 1 => Gen.oneOf(genNumber, genString, genBuffer, genAttributeValue)
       case n =>
         Gen.oneOf(
           Gen.listOf(fromSize(n - 1)).map(xs => DynamoValue.fromValues(xs)),
