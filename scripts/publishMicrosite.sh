@@ -5,4 +5,4 @@ git config --global user.email "regis.kuckaertz@gmail.com"
 git config --global user.name "regiskuckaertz"
 git config --global push.default simple
 
-sbt docs/publishMicrosite
+sbt startDynamodbLocal docs/publishMicrosite stopDynamodbLocal
