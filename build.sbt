@@ -152,7 +152,7 @@ lazy val scanamo = (project in file("scanamo"))
       "com.propensive"         %% "magnolia"           % "0.12.7",
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"             % "2.2.1"       % Provided,
-      "joda-time"          % "joda-time"                % "2.10.10"      % Test,
+      "joda-time"          % "joda-time"                % "2.10.10"     % Test,
       "org.scalatest"     %% "scalatest"                % "3.2.3"       % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
       "org.scalacheck"    %% "scalacheck"               % "1.15.2"      % Test
