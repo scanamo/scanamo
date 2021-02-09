@@ -16,29 +16,34 @@
 
 package org.scanamo.ops
 
-import cats.~>
-import cats.syntax.either._
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
-
 import akka.NotUsed
 import akka.stream.Materializer
-import akka.stream.alpakka.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import akka.stream.alpakka.dynamodb.scaladsl.DynamoDb
+import akka.stream.alpakka.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import akka.stream.scaladsl.Source
+import cats.syntax.either._
+import cats.~>
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model.{ Delete => _, Get => _, Put => _, Update => _, _ }
+
+import java.util.concurrent.CompletionException
 
 private[scanamo] class AlpakkaInterpreter(implicit client: DynamoDbAsyncClient, mat: Materializer)
     extends (ScanamoOpsA ~> AlpakkaInterpreter.Alpakka) {
 
+  private[this] val unwrap: PartialFunction[Throwable, Throwable] = { case error: CompletionException =>
+    error.getCause
+  }
+
   final private def run[In <: DynamoDbRequest, Out <: DynamoDbResponse](
     op: In
   )(implicit operation: DynamoDbOp[In, Out]): AlpakkaInterpreter.Alpakka[Out] =
-    Source.fromFuture(DynamoDb.single(op))
+    Source.fromFuture(DynamoDb.single(op)).mapError(unwrap)
 
   final private def runPaginated[In <: DynamoDbRequest, Out <: DynamoDbResponse](
     op: In
   )(implicit operation: DynamoDbPaginatedOp[In, Out, _]): AlpakkaInterpreter.Alpakka[Out] =
-    DynamoDb.source(op)
+    DynamoDb.source(op).mapError(unwrap)
 
   def apply[A](ops: ScanamoOpsA[A]) =
     ops match {
