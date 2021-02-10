@@ -149,11 +149,7 @@ object DynamoFormat extends PlatformSpecificFormat {
       else
         av.asString.fold[Either[DynamoReadError, String]](Left(NoPropertyOfType("S", av)))(Right(_))
 
-    final def write(s: String): DynamoValue =
-      s match {
-        case "" => DynamoValue.nil
-        case _  => DynamoValue.fromString(s)
-      }
+    final def write(s: String): DynamoValue = DynamoValue.fromString(s)
   }
 
   implicit val booleanFormat: DynamoFormat[Boolean] = attribute(_.asBoolean, DynamoValue.fromBoolean, "BOOL")
