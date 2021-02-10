@@ -19,11 +19,11 @@ package org.scanamo.ops
 import cats._
 import cats.syntax.either._
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Get => _, Delete => _, Update => _, _ }
+import software.amazon.awssdk.services.dynamodb.model.{ Delete => _, Get => _, Put => _, Update => _, _ }
 
-import scala.concurrent.{ ExecutionContext, Future }
+import java.util.concurrent.{ CompletionException, CompletionStage }
 import scala.compat.java8.FutureConverters._
-import java.util.concurrent.CompletionException
+import scala.concurrent.{ ExecutionContext, Future }
 
 /*
  * Interpret Scanamo operations into a `Future` using the DynamoDbClient client
@@ -31,42 +31,42 @@ import java.util.concurrent.CompletionException
  */
 class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext)
     extends (ScanamoOpsA ~> Future) {
+
+  private def run[A](completionStage: CompletionStage[A]): Future[A] =
+    completionStage.toScala.recoverWith { case error: CompletionException => Future.failed(error.getCause) }
+
   override def apply[A](op: ScanamoOpsA[A]): Future[A] =
     op match {
-      case Put(req) => client.putItem(JavaRequests.put(req)).toScala
+      case Put(req) =>
+        run(client.putItem(JavaRequests.put(req)))
       case ConditionalPut(req) =>
-        client
-          .putItem(JavaRequests.put(req))
-          .toScala
+        run(client.putItem(JavaRequests.put(req)))
           .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-          .recover { case e: ConditionalCheckFailedException =>
-            Either.left(e)
-          }
-      case Get(req)    => client.getItem(req).toScala
-      case Delete(req) => client.deleteItem(JavaRequests.delete(req)).toScala
-      case ConditionalDelete(req) =>
-        client
-          .deleteItem(JavaRequests.delete(req))
-          .toScala
-          .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
           .recover { case e: ConditionalCheckFailedException => Either.left(e) }
-      case Scan(req)  => client.scan(JavaRequests.scan(req)).toScala
-      case Query(req) => client.query(JavaRequests.query(req)).toScala
+      case Get(req) =>
+        run(client.getItem(req))
+      case Delete(req) =>
+        run(client.deleteItem(JavaRequests.delete(req)))
+      case ConditionalDelete(req) =>
+        run(client.deleteItem(JavaRequests.delete(req)))
+          .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
+          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+      case Scan(req) =>
+        run(client.scan(JavaRequests.scan(req)))
+      case Query(req) =>
+        run(client.query(JavaRequests.query(req)))
       // Overloading means we need explicit parameter types here
-      case BatchWrite(req) => client.batchWriteItem(req).toScala
-      case BatchGet(req)   => client.batchGetItem(req).toScala
-      case Update(req)     => client.updateItem(JavaRequests.update(req)).toScala
+      case BatchWrite(req) =>
+        run(client.batchWriteItem(req))
+      case BatchGet(req) =>
+        run(client.batchGetItem(req))
+      case Update(req) =>
+        run(client.updateItem(JavaRequests.update(req)))
       case ConditionalUpdate(req) =>
-        client
-          .updateItem(JavaRequests.update(req))
-          .toScala
+        run(client.updateItem(JavaRequests.update(req)))
           .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-          .recoverWith { case e: CompletionException => Future.failed(e.getCause) }
-          .recover { case e: ConditionalCheckFailedException =>
-            Either.left(e)
-          }
-      case TransactWriteAll(req) => client.transactWriteItems(JavaRequests.transactItems(req)).toScala
+          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+      case TransactWriteAll(req) =>
+        run(client.transactWriteItems(JavaRequests.transactItems(req)))
     }
 }
