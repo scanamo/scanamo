@@ -92,7 +92,7 @@ assign wrong values to them.
 To use them in your project you will need to include the dependency in your project:
 
 ```
-libraryDependencies += "com.gu" %% "scanamo-refined" % "x.y.z"
+libraryDependencies += "org.scanamo" %% "scanamo-refined" % "x.y.z"
 ```
 
 And then import the support for refined types and define your model:
