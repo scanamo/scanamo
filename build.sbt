@@ -1,7 +1,7 @@
 scalaVersion in ThisBuild := "2.12.12"
 crossScalaVersions in ThisBuild := Seq("2.12.12", "2.13.3")
 
-val catsVersion = "2.3.1"
+val catsVersion = "2.4.2"
 val catsEffectVersion = "2.3.3"
 val zioVersion = "1.0.4-2"
 
