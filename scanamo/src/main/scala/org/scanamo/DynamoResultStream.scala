@@ -29,6 +29,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
   def startKey(req: Req): Option[DynamoObject]
   def items(res: Res): List[DynamoObject]
   def lastEvaluatedKey(res: Res): Option[DynamoObject]
+  def scannedCount(res: Res): Option[Int]
   def withExclusiveStartKey(key: DynamoObject): Req => Req
   def withLimit(limit: Int): Req => Req
   def exec(req: Req): ScanamoOps[Res]
@@ -41,7 +42,7 @@ private[scanamo] trait DynamoResultStream[Req, Res] {
       for {
         res <- exec(req)
         results = items(res).map(ScanamoFree.read[T])
-        newLimit = limit(req).map(_ - results.length)
+        newLimit = limit(req).map(_ - scannedCount(res).getOrElse(0))
         lastKey = lastEvaluatedKey(res).filterNot(_.isEmpty)
         result <-
           lastKey
@@ -87,6 +88,7 @@ private[scanamo] object DynamoResultStream {
     final def items(res: ScanResponse) =
       res.items.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
     final def lastEvaluatedKey(res: ScanResponse) = Option(res.lastEvaluatedKey).map(DynamoObject(_))
+    final def scannedCount(res: ScanResponse) = Option(res.scannedCount().intValue())
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
     final def withLimit(limit: Int) =
@@ -102,6 +104,7 @@ private[scanamo] object DynamoResultStream {
     final def items(res: QueryResponse) =
       res.items.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
     final def lastEvaluatedKey(res: QueryResponse) = Option(res.lastEvaluatedKey).map(DynamoObject(_))
+    final def scannedCount(res: QueryResponse) = Option(res.scannedCount().intValue())
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
     final def withLimit(limit: Int) =
