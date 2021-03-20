@@ -87,7 +87,9 @@ private[scanamo] object DynamoResultStream {
   object ScanResponseStream extends DynamoResultStream[ScanamoScanRequest, ScanResponse] {
     final def items(res: ScanResponse) =
       res.items.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
-    final def lastEvaluatedKey(res: ScanResponse) = Option(res.lastEvaluatedKey).map(DynamoObject(_))
+    final def lastEvaluatedKey(res: ScanResponse) =
+      Option(res.lastEvaluatedKey).filterNot(_.isEmpty).map(DynamoObject(_))
+
     final def scannedCount(res: ScanResponse) = Option(res.scannedCount().intValue())
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
