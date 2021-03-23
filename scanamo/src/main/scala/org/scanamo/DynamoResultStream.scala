@@ -105,7 +105,7 @@ private[scanamo] object DynamoResultStream {
   object QueryResponseStream extends DynamoResultStream[ScanamoQueryRequest, QueryResponse] {
     final def items(res: QueryResponse) =
       res.items.stream.reduce[List[DynamoObject]](Nil, (m, xs) => DynamoObject(xs) :: m, _ ++ _).reverse
-    final def lastEvaluatedKey(res: QueryResponse) = 
+    final def lastEvaluatedKey(res: QueryResponse) =
       Option(res.lastEvaluatedKey).filterNot(_.isEmpty).map(DynamoObject(_))
 
     final def scannedCount(res: QueryResponse) = Option(res.scannedCount().intValue())
