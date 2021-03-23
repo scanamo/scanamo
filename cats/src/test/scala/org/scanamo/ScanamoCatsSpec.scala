@@ -227,15 +227,20 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
         Item("item #5"),
         Item("item #6")
       )
-      val expected = list.map(i => List(Right(i)))
+      val expected = list.map(i => Right(i))
 
       val items = Table[Item](t)
       val ops = for {
         _ <- items.putAll(list.toSet).toFreeT[SIO]
-        list <- items.scanPaginatedM[SIO](1)
+        list <- items.scanPaginatedM[SIO](4)
       } yield list
 
-      scanamo.execT(ScanamoCats.ToStream)(ops).compile.toList.unsafeRunSync should contain theSameElementsAs expected
+      scanamo
+        .execT(ScanamoCats.ToStream)(ops)
+        .compile
+        .toList
+        .unsafeRunSync
+        .flatten should contain theSameElementsAs expected
     }
   }
 
