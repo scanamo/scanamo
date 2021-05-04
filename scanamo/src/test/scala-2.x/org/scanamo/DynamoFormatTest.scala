@@ -42,7 +42,7 @@ class DynamoFormatTest extends AnyFunSpec with Matchers with ScalaCheckDrivenPro
     Gen.containerOf[Set, BigDecimal](Arbitrary.arbLong.arbitrary.map(BigDecimal(_)))
   )
   val nonEmptyStringGen: Gen[String] =
-    Gen.nonEmptyContainerOf[Array, Char](Arbitrary.arbChar.arbitrary).map(arr => new String(arr))
+    Gen.nonEmptyContainerOf[Array, Char](Arbitrary.arbChar.arbitrary).map(String.valueOf)
   testReadWrite[Set[String]](Gen.containerOf[Set, String](nonEmptyStringGen))
   testReadWrite[Option[String]](Gen.option(nonEmptyStringGen))
   testReadWrite[Option[Int]]()

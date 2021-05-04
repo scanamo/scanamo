@@ -17,11 +17,12 @@
 package org.scanamo.generic
 
 import magnolia._
-
 import org.scanamo.DynamoFormat
+
 import scala.reflect.macros.whitebox
 
 trait AutoDerivation extends Derivation {
+  this: FieldNamingMode =>
 
   /** Materialize an exported format by wrapping the magnolia derivation
     * during macro expansion
@@ -30,6 +31,6 @@ trait AutoDerivation extends Derivation {
     */
   def materializeImpl[A: c.WeakTypeTag](c: whitebox.Context): c.Expr[Exported[DynamoFormat[A]]] = {
     val magnoliaTree = c.Expr[DynamoFormat[A]](Magnolia.gen[A](c))
-    c.universe.reify(new Exported(magnoliaTree.splice))
+    c.universe.reify(Exported(magnoliaTree.splice))
   }
 }
