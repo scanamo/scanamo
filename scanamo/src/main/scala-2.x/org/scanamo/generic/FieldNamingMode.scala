@@ -8,12 +8,12 @@ trait FieldNamingMode {
 
 trait NoOpFieldNamingMode extends FieldNamingMode {
 
-  @inline final override def transformName(fieldName: String): String = fieldName
+  final override def transformName(fieldName: String): String = fieldName
 }
 
 trait PascalCaseFieldNamingMode extends FieldNamingMode {
 
-  @inline final override def transformName(fieldName: String): String = fieldName.capitalize
+  final override def transformName(fieldName: String): String = fieldName.capitalize
 }
 
 trait SnakeCaseFieldNamingMode extends FieldNamingMode {
