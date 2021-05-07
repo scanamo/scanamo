@@ -2,7 +2,7 @@ scalaVersion in ThisBuild := "2.12.12"
 crossScalaVersions in ThisBuild := Seq("2.12.12", "2.13.3")
 
 val catsVersion = "2.6.0"
-val catsEffectVersion = "2.5.0"
+val catsEffectVersion = "3.1.0"
 val zioVersion = "1.0.7"
 
 lazy val stdOptions = Seq(
