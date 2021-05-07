@@ -1,8 +1,8 @@
 scalaVersion in ThisBuild := "2.12.12"
 crossScalaVersions in ThisBuild := Seq("2.12.12", "2.13.3")
 
-val catsVersion = "2.4.2"
-val catsEffectVersion = "3.1.0"
+val catsVersion = "2.6.0"
+val catsEffectVersion = "2.5.0"
 val zioVersion = "1.0.7"
 
 lazy val stdOptions = Seq(
@@ -132,7 +132,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.21",
+      "eu.timepit"    %% "refined"   % "0.9.24",
       "org.scalatest" %% "scalatest" % "3.2.8" % Test
     )
   )
@@ -204,7 +204,7 @@ lazy val zio = (project in file("zio"))
       "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "2.3.1.0",
+      "dev.zio"        %% "zio-interop-cats" % "2.4.1.0",
       "org.scalatest"  %% "scalatest"        % "3.2.8"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.15.4"   % Test
     ),
