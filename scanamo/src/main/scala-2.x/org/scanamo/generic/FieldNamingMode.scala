@@ -18,7 +18,7 @@ trait PascalCaseFieldNamingMode extends FieldNamingMode {
 
 trait SnakeCaseFieldNamingMode extends FieldNamingMode {
   private val pattern: Pattern = Pattern.compile("([a-z\\d])([A-Z])")
-  override def transformName(fieldName: String): String =
+  final override def transformName(fieldName: String): String =
     fieldName
       .replaceAll(pattern.pattern(), "$1_$2")
       .toLowerCase()
@@ -26,7 +26,7 @@ trait SnakeCaseFieldNamingMode extends FieldNamingMode {
 
 trait KebabCaseFieldNamingMode extends FieldNamingMode {
   private val pattern: Pattern = Pattern.compile("([a-z\\d])([A-Z])")
-  override def transformName(fieldName: String): String =
+  final override def transformName(fieldName: String): String =
     fieldName
       .replaceAll(pattern.pattern(), "$1-$2")
       .toLowerCase()
