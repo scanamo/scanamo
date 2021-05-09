@@ -20,7 +20,7 @@ import cats.data.NonEmptyChain
 import cats.syntax.bifunctor._
 import cats.syntax.parallel._
 import magnolia._
-import org.scanamo.{DynamoFormat, DynamoObject, DynamoValue, _}
+import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue, _ }
 
 private[scanamo] trait Derivation {
   this: FieldNamingMode =>

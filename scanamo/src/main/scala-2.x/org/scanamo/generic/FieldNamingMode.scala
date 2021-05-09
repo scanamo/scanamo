@@ -31,5 +31,3 @@ trait KebabCaseFieldNamingMode extends FieldNamingMode {
       .replaceAll(pattern.pattern(), "$1-$2")
       .toLowerCase()
 }
-
-
