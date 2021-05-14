@@ -54,18 +54,18 @@ Ex:</p>
 <span class="k">case</span> <span class="k">class</span> <span class="nc">Foo</span><span class="o">(</span><span class="n">dateTime</span><span class="k">:</span> <span class="kt">DateTime</span><span class="o">)</span>
 
 <span class="k">val</span> <span class="nv">client</span> <span class="k">=</span> <span class="nv">LocalDynamoDB</span><span class="o">.</span><span class="py">syncClient</span><span class="o">()</span>
-<span class="c1">// client: software.amazon.awssdk.services.dynamodb.DynamoDbClient = software.amazon.awssdk.services.dynamodb.DefaultDynamoDbClient@301adaf</span>
+<span class="c1">// client: software.amazon.awssdk.services.dynamodb.DynamoDbClient = software.amazon.awssdk.services.dynamodb.DefaultDynamoDbClient@2633a50c</span>
 <span class="k">val</span> <span class="nv">scanamo</span> <span class="k">=</span> <span class="nc">Scanamo</span><span class="o">(</span><span class="n">client</span><span class="o">)</span>
-<span class="c1">// scanamo: Scanamo = org.scanamo.Scanamo@6c1c602e</span>
+<span class="c1">// scanamo: Scanamo = org.scanamo.Scanamo@61309cd4</span>
 
 <span class="nv">LocalDynamoDB</span><span class="o">.</span><span class="py">createTable</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="s">"foo"</span><span class="o">)(</span><span class="s">"dateTime"</span> <span class="o">-&gt;</span> <span class="n">S</span><span class="o">)</span>
-<span class="c1">// res3: software.amazon.awssdk.services.dynamodb.model.CreateTableResponse = CreateTableResponse(TableDescription=TableDescription(AttributeDefinitions=[AttributeDefinition(AttributeName=dateTime, AttributeType=S)], TableName=foo, KeySchema=[KeySchemaElement(AttributeName=dateTime, KeyType=HASH)], TableStatus=ACTIVE, CreationDateTime=2021-05-13T21:21:18.160Z, ProvisionedThroughput=ProvisionedThroughputDescription(LastIncreaseDateTime=1970-01-01T00:00:00Z, LastDecreaseDateTime=1970-01-01T00:00:00Z, NumberOfDecreasesToday=0, ReadCapacityUnits=1, WriteCapacityUnits=1), TableSizeBytes=0, ItemCount=0, TableArn=arn:aws:dynamodb:ddblocal:000000000000:table/foo))</span>
+<span class="c1">// res3: software.amazon.awssdk.services.dynamodb.model.CreateTableResponse = CreateTableResponse(TableDescription=TableDescription(AttributeDefinitions=[AttributeDefinition(AttributeName=dateTime, AttributeType=S)], TableName=foo, KeySchema=[KeySchemaElement(AttributeName=dateTime, KeyType=HASH)], TableStatus=ACTIVE, CreationDateTime=2021-05-14T01:32:18.264Z, ProvisionedThroughput=ProvisionedThroughputDescription(LastIncreaseDateTime=1970-01-01T00:00:00Z, LastDecreaseDateTime=1970-01-01T00:00:00Z, NumberOfDecreasesToday=0, ReadCapacityUnits=1, WriteCapacityUnits=1), TableSizeBytes=0, ItemCount=0, TableArn=arn:aws:dynamodb:ddblocal:000000000000:table/foo))</span>
 
 <span class="k">implicit</span> <span class="k">val</span> <span class="nv">jodaStringFormat</span> <span class="k">=</span> <span class="nv">DynamoFormat</span><span class="o">.</span><span class="py">coercedXmap</span><span class="o">[</span><span class="kt">DateTime</span>, <span class="kt">String</span>, <span class="kt">IllegalArgumentException</span><span class="o">](</span>
   <span class="nv">DateTime</span><span class="o">.</span><span class="py">parse</span><span class="o">(</span><span class="k">_</span><span class="o">).</span><span class="py">withZone</span><span class="o">(</span><span class="nv">DateTimeZone</span><span class="o">.</span><span class="py">UTC</span><span class="o">),</span>
   <span class="nv">_</span><span class="o">.</span><span class="py">toString</span>
 <span class="o">)</span>
-<span class="c1">// jodaStringFormat: DynamoFormat[DateTime] = org.scanamo.DynamoFormat$$anon$4@27abea28</span>
+<span class="c1">// jodaStringFormat: DynamoFormat[DateTime] = org.scanamo.DynamoFormat$$anon$4@3256d5b4</span>
 
 <span class="k">val</span> <span class="nv">fooTable</span> <span class="k">=</span> <span class="nc">Table</span><span class="o">[</span><span class="kt">Foo</span><span class="o">](</span><span class="s">"foo"</span><span class="o">)</span>
 <span class="c1">// fooTable: Table[Foo] = Table("foo")</span>
