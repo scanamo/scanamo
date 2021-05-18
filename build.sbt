@@ -2,8 +2,8 @@ scalaVersion in ThisBuild := "2.12.13"
 crossScalaVersions in ThisBuild := Seq("2.12.13", "2.13.5")
 
 val catsVersion = "2.6.1"
-val catsEffectVersion = "3.1.1"
-val zioVersion = "1.0.7"
+val catsEffectVersion = "2.5.1"
+val zioVersion = "1.0.8"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -122,7 +122,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.16.62"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.16.64"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -132,8 +132,8 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.24",
-      "org.scalatest" %% "scalatest" % "3.2.8" % Test
+      "eu.timepit"    %% "refined"   % "0.9.25",
+      "org.scalatest" %% "scalatest" % "3.2.9" % Test
     )
   )
   .dependsOn(scanamo)
@@ -153,7 +153,7 @@ lazy val scanamo = (project in file("scanamo"))
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"             % "2.2.1"       % Provided,
       "joda-time"          % "joda-time"                % "2.10.10"     % Test,
-      "org.scalatest"     %% "scalatest"                % "3.2.8"       % Test,
+      "org.scalatest"     %% "scalatest"                % "3.2.9"       % Test,
       "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
       "org.scalacheck"    %% "scalacheck"               % "1.15.4"      % Test
     )
@@ -182,10 +182,10 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
       "io.monix"       %% "monix"       % "3.4.0"  % Provided,
-      "co.fs2"         %% "fs2-core"    % "2.5.5"  % Provided,
+      "co.fs2"         %% "fs2-core"    % "2.5.6"  % Provided,
       "io.monix"       %% "monix"       % "3.4.0"  % Test,
-      "co.fs2"         %% "fs2-core"    % "2.5.5"  % Test,
-      "org.scalatest"  %% "scalatest"   % "3.2.8"  % Test,
+      "co.fs2"         %% "fs2-core"    % "2.5.6"  % Test,
+      "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.15.4" % Test
     ),
     fork in Test := true,
@@ -205,7 +205,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "2.4.1.0",
-      "org.scalatest"  %% "scalatest"        % "3.2.8"    % Test,
+      "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.15.4"   % Test
     ),
     fork in Test := true,
@@ -224,7 +224,7 @@ lazy val alpakka = (project in file("alpakka"))
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
-      "org.scalatest"      %% "scalatest"                    % "3.2.8"  % Test,
+      "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
     ),
     fork in Test := true,
@@ -243,7 +243,7 @@ lazy val joda = (project in file("joda"))
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"       % "joda-time"    % "2.10.10",
-      "org.scalatest"  %% "scalatest"    % "3.2.8"  % Test,
+      "org.scalatest"  %% "scalatest"    % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.15.4" % Test
     )
   )
