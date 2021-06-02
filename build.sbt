@@ -1,9 +1,9 @@
-scalaVersion in ThisBuild := "2.12.13"
-crossScalaVersions in ThisBuild := Seq("2.12.13", "2.13.5")
+scalaVersion in ThisBuild := "2.12.14"
+crossScalaVersions in ThisBuild := Seq("2.12.14", "2.13.6")
 
 val catsVersion = "2.6.1"
-val catsEffectVersion = "3.1.1"
-val zioVersion = "1.0.8"
+val catsEffectVersion = "2.5.1"
+val zioVersion = "1.0.9"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -122,7 +122,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.16.64"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.16.75"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -132,7 +132,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.25",
+      "eu.timepit"    %% "refined"   % "0.9.26",
       "org.scalatest" %% "scalatest" % "3.2.9" % Test
     )
   )
@@ -204,7 +204,7 @@ lazy val zio = (project in file("zio"))
       "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "2.4.1.0",
+      "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
       "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.15.4"   % Test
     ),
