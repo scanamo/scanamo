@@ -268,8 +268,8 @@ object ConditionExpression {
 
   implicit def orCondition[L: ConditionExpression, R: ConditionExpression]: ConditionExpression[OrCondition[L, R]] =
     new ConditionExpression[OrCondition[L, R]] {
-      override def apply(and: OrCondition[L, R]): State[Int, RequestCondition] =
-        combineConditions(and.l, and.r, "OR")
+      override def apply(or: OrCondition[L, R]): State[Int, RequestCondition] =
+        combineConditions(or.l, or.r, "OR")
     }
 
   private def combineConditions[L, R](l: L, r: R, combininingOperator: String)(implicit
