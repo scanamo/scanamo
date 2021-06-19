@@ -36,6 +36,3 @@ options:
     nested_options:
     - title: Custom Formats
       url: dynamo-format.html#custom-formats
-
-  - title: Asynchronous Requests
-    url: asynchronous.html
