@@ -32,7 +32,7 @@ import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
- 
+
 val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 val farmersTableResult = LocalDynamoDB.createTable(client)("farmer")("name" -> S)
@@ -49,11 +49,11 @@ scanamo.exec(table.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
 scanamo.exec(table.get("name" === "McDonald"))
 ```
 
-Scanamo supports most other DynamoDB [operations](operations.md), beyond
+Scanamo supports most other DynamoDB [operations](operations.html), beyond
 the basic `Put` and `Get`.
 
 The translation between Dynamo items and Scala types is handled by a type class
-called [DynamoFormat](dynamo-format.md).
+called [DynamoFormat](dynamo-format.html).
 
 Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/LICENSE-2.0).
 

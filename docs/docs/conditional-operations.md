@@ -6,7 +6,7 @@ position: 3
 
 ## Conditional Operations
 
-Modifying operations ([Put](operations.md#put-and-get), [Delete](operations.md#delete), [Update](operations.md#update)) can be performed conditionally, so that they only have an effect if some state of the DynamoDB table is true at the time of execution.
+Modifying operations ([Put](operations.html#put-and-get), [Delete](operations.html#delete), [Update](operations.html#update)) can be performed conditionally, so that they only have an effect if some state of the DynamoDB table is true at the time of execution.
 
 ```scala mdoc:silent
 import org.scanamo._

@@ -1,6 +1,6 @@
 ---
 layout: docs
-title: Operations 
+title: Operations
 position: 1
 ---
 
@@ -11,18 +11,18 @@ Scanamo supports all the DynamoDB operations that interact with individual items
  * [Put](#put-and-get) for adding a new item, or replacing an existing one
  * [Get](#put-and-get) for retrieving an item by a fully specified key
  * [Delete](#delete) for removing an item
- * [Update](#update) for updating some portion of the fields of an item, whilst leaving the rest 
+ * [Update](#update) for updating some portion of the fields of an item, whilst leaving the rest
  as is
  * [Scan](#scan) for retrieving all elements of a table
  * [Query](#query) for retrieving all elements with a given hash-key and a range key that matches
  some criteria
- 
-Scanamo also supports [batched operations](batch-operations.md), [conditional operations](conditional-operations.md) 
-and queries against [secondary indexes](using-indexes.md).
- 
+
+Scanamo also supports [batched operations](batch-operations.html), [conditional operations](conditional-operations.html)
+and queries against [secondary indexes](using-indexes.html).
+
 ### Put and Get
 
-Often when using DynamoDB, the primary use case is simply putting objects into 
+Often when using DynamoDB, the primary use case is simply putting objects into
 Dynamo and subsequently retrieving them:
 
 ```scala mdoc:silent
@@ -49,7 +49,7 @@ scanamo.exec {
 }
 ```
 
-Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called. 
+Note that when using `Table` no operations are actually executed against DynamoDB until `exec` is called.
 
 ### Delete
 
@@ -96,7 +96,7 @@ val teamTable = Table[Team]("teams")
 scanamo.exec {
   for {
     _ <- teamTable.put(Team("Watford", 1, List("Blissett"), Some("Harry the Hornet")))
-    updated <- teamTable.update("name" === "Watford", 
+    updated <- teamTable.update("name" === "Watford",
       set("goals", 2) and append("scorers", "Barnes") and remove("mascot"))
   } yield updated
 }
@@ -124,7 +124,7 @@ case class FavouriteUpdate(name: String, colour: Option[String], number: Option[
 
 def updateFavourite(fu: FavouriteUpdate): Option[ScanamoOps[Either[DynamoReadError, Favourites]]] = {
   val updates: List[UpdateExpression] = List(
-    fu.colour.map(c => set("colour", c)), 
+    fu.colour.map(c => set("colour", c)),
     fu.number.map(n => set("number", n))
   ).flatten
   NonEmptyList.fromList(updates).map(ups =>
@@ -154,7 +154,7 @@ Further examples, showcasing different types of update can be found in the scala
 
 ### Scan
 
-If you want to go through all elements of a table, or index, Scanamo 
+If you want to go through all elements of a table, or index, Scanamo
 supports scanning it:
 
 ```scala mdoc:silent
