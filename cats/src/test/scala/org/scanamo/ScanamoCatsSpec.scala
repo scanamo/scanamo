@@ -10,6 +10,7 @@ import org.scanamo.query._
 import org.scanamo.syntax._
 import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
+import cats.effect.unsafe.implicits.global
 
 class ScanamoCatsSpec extends AnyFunSpec with Matchers {
   val client = LocalDynamoDB.client()

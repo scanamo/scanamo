@@ -27,7 +27,7 @@ import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedExce
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
   final private def eff[A <: AnyRef](fut: => CompletableFuture[A]): F[A] =
-    F.async { cb =>
+    F.async_ { cb =>
       fut.handle[Unit] { (a, x) =>
         if (a eq null)
           x match {
