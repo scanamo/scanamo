@@ -2,3 +2,7 @@ target/
 *dynamodb-local
 travis-deploy-key
 sbt.json
+.idea
+.bloop
+.bsp
+
