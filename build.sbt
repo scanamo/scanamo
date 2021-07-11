@@ -1,5 +1,5 @@
-scalaVersion in ThisBuild := "2.12.14"
-crossScalaVersions in ThisBuild := Seq("2.12.14", "2.13.6")
+ThisBuild / scalaVersion := "2.12.14"
+ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.6")
 
 val catsVersion = "2.6.1"
 val catsEffectVersion = "3.1.1"
@@ -80,7 +80,7 @@ val commonSettings = Seq(
      else
        mainScalacOptions).filter(_ != "-Xfatal-warnings")
   },
-  scalacOptions in (Compile, console) := (scalacOptions in Test).value,
+  Compile / console / scalacOptions := (Test / scalacOptions).value,
   autoAPIMappings := true,
   apiURL := Some(url("http://www.scanamo.org/latest/api/")),
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
@@ -188,8 +188,8 @@ lazy val catsEffect = (project in file("cats"))
       "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.15.4" % Test
     ),
-    fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings"
+    Test / fork := true,
+    Compile / doc / scalacOptions += "-no-link-warnings"
   )
   .dependsOn(scanamo, testkit % "test->test")
 
@@ -208,8 +208,8 @@ lazy val zio = (project in file("zio"))
       "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.15.4"   % Test
     ),
-    fork in Test := true,
-    scalacOptions in (Compile, doc) += "-no-link-warnings"
+    Test / fork := true,
+    Compile / doc / scalacOptions += "-no-link-warnings"
   )
   .dependsOn(scanamo, testkit % "test->test")
 
@@ -227,9 +227,10 @@ lazy val alpakka = (project in file("alpakka"))
       "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
     ),
-    fork in Test := true,
+    evictionErrorLevel := Level.Info, // until Akka 2.6.16 released - see https://github.com/akka/akka/pull/30375
+    Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
-    scalacOptions in (Compile, doc) += "-no-link-warnings"
+    Compile / doc / scalacOptions += "-no-link-warnings"
   )
   .dependsOn(scanamo, testkit % "test->test")
 
@@ -264,7 +265,7 @@ lazy val docs = (project in file("docs"))
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
-  publishArtifact in Test := false,
+  Test / publishArtifact := false,
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/scanamo/scanamo"),
