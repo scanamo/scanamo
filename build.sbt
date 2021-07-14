@@ -10,11 +10,12 @@ lazy val stdOptions = Seq(
   "-encoding",
   "UTF-8",
   "-feature",
-  "-unchecked",
-  "-target:jvm-1.8"
+  "-unchecked"
 )
 
 lazy val std2xOptions = Seq(
+  "-Xsource:3", // https://docs.scala-lang.org/scala3/guides/migration/tooling-tour.html#the-scala-213-compiler
+  "-target:jvm-1.8",
   "-Xfatal-warnings",
   "-language:higherKinds",
   "-language:existentials",
@@ -137,7 +138,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.joda"           % "joda-convert"             % "2.2.1"       % Provided,
       "joda-time"          % "joda-time"                % "2.10.10"     % Test,
       "org.scalatest"     %% "scalatest"                % "3.2.9"       % Test,
-      "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
+      "org.scalatestplus" %% "scalacheck-1-15"          % "3.2.9.0"     % Test,
       "org.scalacheck"    %% "scalacheck"               % "1.15.4"      % Test
     )
   )

@@ -166,7 +166,7 @@ package object ops {
     }
 
     def transactItems(req: ScanamoTransactWriteRequest): TransactWriteItemsRequest = {
-      val putItems = req.putItems.map { item ⇒
+      val putItems = req.putItems.map { item =>
         TransactWriteItem.builder
           .put(
             software.amazon.awssdk.services.dynamodb.model.Put.builder
@@ -177,7 +177,7 @@ package object ops {
           .build
       }
 
-      val updateItems = req.updateItems.map { item ⇒
+      val updateItems = req.updateItems.map { item =>
         val update = software.amazon.awssdk.services.dynamodb.model.Update.builder
           .tableName(item.tableName)
           .updateExpression(item.updateExpression.expression)
@@ -185,13 +185,13 @@ package object ops {
           .key(item.key.toJavaMap)
 
         val updateWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues
-          .fold(update)(avs ⇒ update.expressionAttributeValues(avs))
+          .fold(update)(avs => update.expressionAttributeValues(avs))
           .build
 
         TransactWriteItem.builder.update(updateWithAvs).build
       }
 
-      val deleteItems = req.deleteItems.map { item ⇒
+      val deleteItems = req.deleteItems.map { item =>
         TransactWriteItem.builder
           .delete(
             software.amazon.awssdk.services.dynamodb.model.Delete.builder
