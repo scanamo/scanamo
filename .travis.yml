@@ -52,3 +52,6 @@ jobs:
     - <<: *test
       scala: 2.13.6
       name: "Tests for 2.13"
+    - <<: *test
+      scala: 3.0.1
+      name: "Tests for 3.0.1"

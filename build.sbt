@@ -1,5 +1,5 @@
-ThisBuild / scalaVersion := "2.12.14"
-ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.6")
+ThisBuild / scalaVersion := "3.0.1"
+ThisBuild / crossScalaVersions := Seq("3.0.1", "2.12.14", "2.13.6")
 
 val catsVersion = "2.6.1"
 val catsEffectVersion = "3.1.1"
@@ -45,6 +45,7 @@ def extraOptions(scalaVersion: String) =
         "-opt:l:inline",
         "-opt-inline-from:<source>"
       ) ++ std2xOptions
+    case Some((3, _)) => Seq("-Ykind-projector")
     case _ => Seq.empty
   }
 
@@ -56,7 +57,6 @@ val commonSettings = Seq(
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
@@ -91,6 +91,12 @@ val commonSettings = Seq(
     }
   }
 )
+
+def kindProjectionDependencyFor(scalaVer: String) = CrossVersion.partialVersion(scalaVer) match {
+  case Some((2,_)) =>
+    Seq(compilerPlugin("org.typelevel" % "kind-projector" % "0.13.0" cross CrossVersion.full))
+  case _ => Nil // Not needed in Scala 3
+}
 
 lazy val root = (project in file("."))
   .aggregate(scanamo, testkit, alpakka, refined, catsEffect, joda, zio)
@@ -131,9 +137,12 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules"       %% "scala-java8-compat" % "1.0.0",
-      "org.typelevel"                %% "cats-free"          % catsVersion,
-      "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.0.0-M5",
+      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.0",
+      "org.typelevel"          %% "cats-free"          % catsVersion,
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, _)) => "com.softwaremill.magnolia1_2" %% "magnolia" % "1.0.0-M5"
+        case _ => "com.softwaremill.magnolia1_3" %% "magnolia" % "1.0.0-M5"
+      },
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.1"   % Provided,
       "joda-time"          % "joda-time"       % "2.10.10" % Test,
@@ -168,7 +177,7 @@ lazy val catsEffect = (project in file("cats"))
       "co.fs2"         %% "fs2-core"    % "3.1.0",
       "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.15.4" % Test
-    ),
+    ) ++ kindProjectionDependencyFor(scalaVersion.value),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
   )
@@ -188,7 +197,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
       "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.15.4"   % Test
-    ),
+    ) ++ kindProjectionDependencyFor(scalaVersion.value),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
   )
@@ -201,13 +210,14 @@ lazy val alpakka = (project in file("alpakka"))
     name := "scanamo-alpakka"
   )
   .settings(
+    crossScalaVersions := crossScalaVersions.value.filter(v => CrossVersion.partialVersion(v).exists(_._1 < 3)),
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
       "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
-    ),
+    ) ++ kindProjectionDependencyFor(scalaVersion.value),
     evictionErrorLevel := Level.Info, // until Akka 2.6.16 released - see https://github.com/akka/akka/pull/30375
     Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
