@@ -72,7 +72,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val operations = for {
         _ <- farm.putAll(dataSet)
         _ <- farm.deleteAll("name" in dataSet.map(_.name))
-        scanned <- farm.scan
+        scanned <- farm.scan()
       } yield scanned.toList
       scanamo.exec(operations) should be(Nil)
     }
@@ -641,7 +641,7 @@ class TableTest extends AnyFunSpec with Matchers {
                 "line" === "Jubilee"
               )
             )
-            .scan
+            .scan()
       } yield filteredStations
 
       scanamo.exec(ops) should be(
@@ -666,7 +666,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Station("Jubilee", "Canons Park", 5)
           )
         )
-        filteredStations <- stationTable.filter(AttributeName.of("line") contains "opo").scan
+        filteredStations <- stationTable.filter(AttributeName.of("line") contains "opo").scan()
       } yield filteredStations
 
       scanamo.exec(ops) should contain theSameElementsAs (
