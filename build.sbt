@@ -47,23 +47,6 @@ def extraOptions(scalaVersion: String) =
     case _ => Seq.empty
   }
 
-def platformSpecificSources(conf: String, baseDirectory: File)(versions: String*) =
-  List("scala" :: versions.toList.map("scala-" + _): _*).map { version =>
-    baseDirectory.getParentFile / "src" / conf / version
-  }.filter(_.exists)
-
-def crossPlatformSources(scalaVer: String, conf: String, baseDir: File, isDotty: Boolean) =
-  CrossVersion.partialVersion(scalaVer) match {
-    case Some((2, x)) if x <= 11 =>
-      platformSpecificSources(conf, baseDir)("2.11", "2.x")
-    case Some((2, x)) if x >= 12 =>
-      platformSpecificSources(conf, baseDir)("2.12+", "2.12", "2.x")
-    case _ if isDotty =>
-      platformSpecificSources(conf, baseDir)("2.12+", "dotty")
-    case _ =>
-      Nil
-  }
-
 val commonSettings = Seq(
   organization := "org.scanamo",
   organizationName := "Scanamo",
