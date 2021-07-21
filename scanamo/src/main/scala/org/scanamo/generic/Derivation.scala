@@ -39,7 +39,7 @@ private[scanamo] trait Derivation {
   // 5. finally, we wrap errors in [[cats.data.NonEmptyChain]] so multiple decoding errors can
   //    be accumulated
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
-    def decodeField(o: DynamoObject, param: Param[Typeclass, T]): Valid[param.PType] =
+    def decodeField(o: DynamoObject, param: CaseClass.Param[Typeclass, T]): Valid[param.PType] =
       o(param.label)
         .fold[Either[DynamoReadError, param.PType]] {
           param.default.fold(param.typeclass.read(DynamoValue.nil).leftMap(_ => MissingProperty))(Right(_))
@@ -49,12 +49,12 @@ private[scanamo] trait Derivation {
     // case objects are inlined as strings
     if (cc.isObject)
       new DynamoFormat[T] {
-        private[this] val _cachedAttribute = DynamoValue.fromString(cc.typeName.short)
+        private[this] val _cachedAttribute = DynamoValue.fromString(cc.typeInfo.short)
         private[this] val _cachedHit = Right(cc.rawConstruct(Nil))
 
         def read(dv: DynamoValue): Either[DynamoReadError, T] =
           dv.asString
-            .filter(_ == cc.typeName.short)
+            .filter(_ == cc.typeInfo.short)
             .fold[Either[DynamoReadError, T]](Left(NoPropertyOfType("S", dv)))(_ => _cachedHit)
 
         def write(t: T): DynamoValue = _cachedAttribute
@@ -62,7 +62,7 @@ private[scanamo] trait Derivation {
     else
       new DynamoFormat.ObjectFormat[T] {
         def readObject(o: DynamoObject): Either[DynamoReadError, T] =
-          cc.parameters.toList
+          cc.params.toList
             .parTraverse(decodeField(o, _))
             .bimap(
               es => InvalidPropertiesError(es.toNonEmptyList),
@@ -70,8 +70,8 @@ private[scanamo] trait Derivation {
             )
 
         def writeObject(t: T): DynamoObject =
-          DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) { case (xs, p) =>
-            val v = p.typeclass.write(p.dereference(t))
+          DynamoObject(cc.params.foldLeft(List.empty[(String, DynamoValue)]) { case (xs, p) =>
+            val v = p.typeclass.write(p.deref(t))
             if (v.isNull) xs else (p.label -> v) :: xs
           }: _*)
       }
@@ -81,16 +81,16 @@ private[scanamo] trait Derivation {
   def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] = {
     def decode(o: DynamoObject): Either[DynamoReadError, T] =
       (for {
-        subtype <- st.subtypes.find(sub => o.contains(sub.typeName.short))
-        value <- o(subtype.typeName.short)
+        subtype <- st.subtypes.find(sub => o.contains(sub.typeInfo.short))
+        value <- o(subtype.typeInfo.short)
       } yield subtype.typeclass.read(value)).getOrElse(Left(NoPropertyOfType("M", DynamoValue.nil)))
 
     new DynamoFormat.ObjectFormat[T] {
       def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
 
       def writeObject(t: T): DynamoObject =
-        st.dispatch(t) { subtype =>
-          DynamoObject.singleton(subtype.typeName.short, subtype.typeclass.write(subtype.cast(t)))
+        st.choose(t) { subtype =>
+          DynamoObject.singleton(subtype.typeInfo.short, subtype.typeclass.write(subtype.cast(t)))
         }
     }
   }
