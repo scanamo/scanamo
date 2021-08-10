@@ -21,13 +21,13 @@ import org.scanamo.DynamoFormat
 
 import scala.language.experimental.macros
 
-trait SemiautoDerivation extends Derivation with magnolia1.Derivation[DynamoFormat] {
+import org.scanamo.DynamoFormat
 
-  // Members declared in magnolia1.CommonDerivation
-  override def join[T](ctx: magnolia1.CaseClass[Typeclass, T]): Typeclass[T] = ???
-
-  override def split[T](ctx: magnolia1.SealedTrait[Typeclass, T]): Typeclass[T] = ???
-
-
-  final def deriveDynamoFormat[A]: DynamoFormat[A] = ??? // derived[A]
+/** Fully automatic format derivation.
+  *
+  * Importing the contents of this package object provides [[org.scanamo.DynamoFormat]]
+  * instances for algebraic data types.
+  */
+package object auto extends AutoDerivation {
+  implicit final def genericDerivedFormat[A]: Exported[DynamoFormat[A]] = macro materializeImpl[A]
 }

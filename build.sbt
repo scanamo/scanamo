@@ -76,6 +76,10 @@ val commonSettings = Seq(
         Seq(
           file(sourceDirectory.value.getPath + "/main/scala-2.x")
         )
+      case Some((3, _)) =>
+        Seq(
+          file(sourceDirectory.value.getPath + "/main/scala-3")
+        )
       case _ =>
         Nil
     }
@@ -99,7 +103,7 @@ def kindProjectionDependencyFor(scalaVer: String) = CrossVersion.partialVersion(
 }
 
 lazy val root = (project in file("."))
-  .aggregate(scanamo, testkit, alpakka, refined, catsEffect, joda, zio)
+  .aggregate(scanamo, testkit, refined, catsEffect, joda, zio)
   .settings(
     commonSettings,
     publishingSettings,
@@ -203,27 +207,27 @@ lazy val zio = (project in file("zio"))
   )
   .dependsOn(scanamo, testkit % "test->test")
 
-lazy val alpakka = (project in file("alpakka"))
-  .settings(
-    commonSettings,
-    publishingSettings,
-    name := "scanamo-alpakka"
-  )
-  .settings(
-    crossScalaVersions := crossScalaVersions.value.filter(v => CrossVersion.partialVersion(v).exists(_._1 < 3)),
-    libraryDependencies ++= Seq(
-      awsDynamoDB,
-      "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
-      "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
-      "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
-    ) ++ kindProjectionDependencyFor(scalaVersion.value),
-    evictionErrorLevel := Level.Info, // until Akka 2.6.16 released - see https://github.com/akka/akka/pull/30375
-    Test / fork := true,
-    // unidoc can work out links to other project, but scalac can't
-    Compile / doc / scalacOptions += "-no-link-warnings"
-  )
-  .dependsOn(scanamo, testkit % "test->test")
+//lazy val alpakka = (project in file("alpakka"))
+//  .settings(
+//    commonSettings,
+//    publishingSettings,
+//    name := "scanamo-alpakka"
+//  )
+//  .settings(
+//    crossScalaVersions := crossScalaVersions.value.filter(v => CrossVersion.partialVersion(v).exists(_._1 < 3)),
+//    libraryDependencies ++= Seq(
+//      awsDynamoDB,
+//      "org.typelevel"      %% "cats-free"                    % catsVersion,
+//      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
+//      "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
+//      "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
+//    ) ++ kindProjectionDependencyFor(scalaVersion.value),
+//    evictionErrorLevel := Level.Info, // until Akka 2.6.16 released - see https://github.com/akka/akka/pull/30375
+//    Test / fork := true,
+//    // unidoc can work out links to other project, but scalac can't
+//    Compile / doc / scalacOptions += "-no-link-warnings"
+//  )
+//  .dependsOn(scanamo, testkit % "test->test")
 
 lazy val joda = (project in file("joda"))
   .settings(
@@ -254,7 +258,7 @@ lazy val docs = (project in file("docs"))
     )
   )
   .enablePlugins(MicrositesPlugin)
-  .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
+  .dependsOn(scanamo % "compile->test", refined % "compile")
 
 val publishingSettings = Seq(
   Test / publishArtifact := false,
