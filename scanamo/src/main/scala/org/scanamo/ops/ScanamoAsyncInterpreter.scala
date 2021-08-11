@@ -17,7 +17,6 @@
 package org.scanamo.ops
 
 import cats._
-import cats.syntax.either._
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{ Delete => _, Get => _, Put => _, Update => _, _ }
 
@@ -35,27 +34,27 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
   private def run[A](completionStage: CompletionStage[A]): Future[A] =
     completionStage.toScala.recoverWith { case error: CompletionException => Future.failed(error.getCause) }
 
+  final private def runEitherConditionalCheckFailed[A](
+    completionStage: CompletionStage[A]
+  ): Future[Either[ConditionalCheckFailedException, A]] =
+    run(completionStage).map(Right(_)).recover { case e: ConditionalCheckFailedException => Left(e) }
+
   override def apply[A](op: ScanamoOpsA[A]): Future[A] =
     op match {
       case Put(req) =>
         run(client.putItem(JavaRequests.put(req)))
       case ConditionalPut(req) =>
-        run(client.putItem(JavaRequests.put(req)))
-          .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+        runEitherConditionalCheckFailed(client.putItem(JavaRequests.put(req)))
       case Get(req) =>
         run(client.getItem(req))
       case Delete(req) =>
         run(client.deleteItem(JavaRequests.delete(req)))
       case ConditionalDelete(req) =>
-        run(client.deleteItem(JavaRequests.delete(req)))
-          .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+        runEitherConditionalCheckFailed(client.deleteItem(JavaRequests.delete(req)))
       case Scan(req) =>
         run(client.scan(JavaRequests.scan(req)))
       case Query(req) =>
         run(client.query(JavaRequests.query(req)))
-      // Overloading means we need explicit parameter types here
       case BatchWrite(req) =>
         run(client.batchWriteItem(req))
       case BatchGet(req) =>
@@ -63,9 +62,7 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
       case Update(req) =>
         run(client.updateItem(JavaRequests.update(req)))
       case ConditionalUpdate(req) =>
-        run(client.updateItem(JavaRequests.update(req)))
-          .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-          .recover { case e: ConditionalCheckFailedException => Either.left(e) }
+        runEitherConditionalCheckFailed(client.updateItem(JavaRequests.update(req)))
       case TransactWriteAll(req) =>
         run(client.transactWriteItems(JavaRequests.transactItems(req)))
     }

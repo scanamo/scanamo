@@ -26,10 +26,10 @@ import java.util.concurrent.CompletionException
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
-  final private def eff[A <: AnyRef](fut: => CompletableFuture[A]): F[A] =
+  final private def eff[A](fut: => CompletableFuture[A]): F[A] =
     F.async_ { cb =>
       fut.handle[Unit] { (a, x) =>
-        if (a eq null)
+        if (a == null)
           x match {
             case t: CompletionException => cb(Left(t.getCause))
             case t                      => cb(Left(t))
@@ -48,7 +48,7 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
         eff(client.putItem(JavaRequests.put(req))).attempt
           .flatMap(
             _.fold(
-              _ match {
+              {
                 case e: ConditionalCheckFailedException => F.delay(Left(e))
                 case t                                  => F.raiseError(t) // raise error as opposed to swallowing
               },

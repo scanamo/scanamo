@@ -108,7 +108,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val ops = for {
         _ <- farmers.putAll(dataSet)
         _ <- farmers.deleteAll("name" in dataSet.map(_.name))
-        fs <- farmers.scan
+        fs <- farmers.scan()
       } yield fs
 
       scanamo.exec(ops).futureValue should equal(List.empty)
@@ -121,7 +121,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val ops = for {
         _ <- forecasts.put(Forecast("London", "Rain", None))
         _ <- forecasts.update("location" === "London", set("weather", "Sun"))
-        fs <- forecasts.scan
+        fs <- forecasts.scan()
       } yield fs
 
       scanamo.exec(ops).futureValue should equal(List(Right(Forecast("London", "Sun", None))))
@@ -155,7 +155,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", None))
         _ <- bears.put(Bear("Yogi", "picnic baskets", None))
-        bs <- bears.scan
+        bs <- bears.scan()
       } yield bs
 
       scanamo.exec(ops).futureValue should equal(
@@ -167,7 +167,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val lemmings = Table[Lemming](t)
       val ops = for {
         _ <- lemmings.putAll(List.fill(100)(Lemming(util.Random.nextString(500), util.Random.nextString(5000))).toSet)
-        ls <- lemmings.scan
+        ls <- lemmings.scan()
       } yield ls
 
       scanamo.exec(ops).futureValue.size should equal(100)
@@ -180,7 +180,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val ops = for {
         _ <- bears.put(Bear("Pooh", "honey", None))
         _ <- bears.put(Bear("Yogi", "picnic baskets", None))
-        bs <- bears.limit(1).scan
+        bs <- bears.limit(1).scan()
       } yield bs
       scanamo.exec(ops).futureValue should equal(List(Right(Bear("Pooh", "honey", None))))
     }
@@ -193,7 +193,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         _ <- bears.put(Bear("Pooh", "honey", Some("Winnie")))
         _ <- bears.put(Bear("Yogi", "picnic baskets", None))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
-        bs <- bears.index(i).limit(1).scan
+        bs <- bears.index(i).limit(1).scan()
       } yield bs
       scanamo.exec(ops).futureValue should equal(
         List(Right(Bear("Graham", "quinoa", Some("Guardianista"))))
@@ -209,9 +209,9 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         _ <- bears.put(Bear("Yogi", "picnic baskets", Some("Kanga")))
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
-          _ <- bears.index(i).limit(1).scan
-          res2 <- bears.index(i).limit(1).from("name" === "Graham" and "alias" === "Guardianista").scan
-          res3 <- bears.index(i).limit(1).from("name" === "Yogi" and "alias" === "Kanga").scan
+          _ <- bears.index(i).limit(1).scan()
+          res2 <- bears.index(i).limit(1).from("name" === "Graham" and "alias" === "Guardianista").scan()
+          res3 <- bears.index(i).limit(1).from("name" === "Yogi" and "alias" === "Kanga").scan()
         } yield res2 ::: res3
       } yield bs
 
@@ -382,10 +382,10 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         val ops = for {
           _ <- stationTable.putAll(stations)
           ts1 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
-          ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+          ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
           ts3 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
-          ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan } yield ts
+          ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
           ts5 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
@@ -421,7 +421,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val rabbits = Table[Rabbit](t)
       val result = for {
         _ <- rabbits.putAll(List.fill(100)(Rabbit(util.Random.nextString(500))).toSet)
-        rs <- rabbits.scan
+        rs <- rabbits.scan()
       } yield rs
 
       scanamo.exec(result).futureValue.size should equal(100)

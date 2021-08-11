@@ -31,19 +31,20 @@ object UniqueKeyCondition {
 
   def apply[T, K](implicit U: UniqueKeyCondition.Aux[T, K]): UniqueKeyCondition.Aux[T, K] = U
 
-  implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]) =
-    new UniqueKeyCondition[KeyEquals[V]] {
-      type K = AttributeName
-      final def toDynamoObject(t: KeyEquals[V]): DynamoObject = DynamoObject(t.key.placeholder("") -> t.v)
-      final def fromDynamoObject(key: K, dvs: DynamoObject): Option[KeyEquals[V]] =
-        dvs(key.placeholder("")).flatMap(V.read(_).right.toOption.map(KeyEquals(key, _)))
-      final def key(t: KeyEquals[V]): K = t.key
-    }
+  implicit def uniqueEqualsKey[V](implicit V: DynamoFormat[V]): UniqueKeyCondition[KeyEquals[V]] {
+    type K = AttributeName
+  } = new UniqueKeyCondition[KeyEquals[V]] {
+    type K = AttributeName
+    final def toDynamoObject(t: KeyEquals[V]): DynamoObject = DynamoObject(t.key.placeholder("") -> t.v)
+    final def fromDynamoObject(key: K, dvs: DynamoObject): Option[KeyEquals[V]] =
+      dvs(key.placeholder("")).flatMap(V.read(_).right.toOption.map(KeyEquals(key, _)))
+    final def key(t: KeyEquals[V]): K = t.key
+  }
 
   implicit def uniqueAndEqualsKey[H: UniqueKeyCondition, R: UniqueKeyCondition, KH, KR](implicit
     H: UniqueKeyCondition.Aux[H, KH],
     R: UniqueKeyCondition.Aux[R, KR]
-  ) =
+  ): UniqueKeyCondition[AndEqualsCondition[H, R]] { type K = (KH, KR) } =
     new UniqueKeyCondition[AndEqualsCondition[H, R]] {
       type K = (KH, KR)
       final def toDynamoObject(t: AndEqualsCondition[H, R]): DynamoObject =
@@ -65,19 +66,14 @@ trait UniqueKeyConditions[T] {
 object UniqueKeyConditions {
   def apply[T](implicit U: UniqueKeyConditions[T]): UniqueKeyConditions[T] = U
 
-  implicit def keyList[V: DynamoFormat] =
-    new UniqueKeyConditions[KeyList[V]] {
-      final def toDynamoObject(kl: KeyList[V]) =
-        kl.values.map(v => DynamoObject(kl.key.placeholder("") -> v))
-    }
+  implicit def keyList[V: DynamoFormat]: UniqueKeyConditions[KeyList[V]] =
+    (kl: KeyList[V]) => kl.values.map(v => DynamoObject(kl.key.placeholder("") -> v))
 
-  implicit def multipleKeyList[H: DynamoFormat, R: DynamoFormat] =
-    new UniqueKeyConditions[MultipleKeyList[H, R]] {
-      final def toDynamoObject(mkl: MultipleKeyList[H, R]) = {
-        val (hashKey, rangeKey) = mkl.keys
-        mkl.values.map { case (h, r) =>
-          DynamoObject(hashKey.placeholder("") -> h) <> DynamoObject(rangeKey.placeholder("") -> r)
-        }
+  implicit def multipleKeyList[H: DynamoFormat, R: DynamoFormat]: UniqueKeyConditions[MultipleKeyList[H, R]] =
+    (mkl: MultipleKeyList[H, R]) => {
+      val (hashKey, rangeKey) = mkl.keys
+      mkl.values.map { case (h, r) =>
+        DynamoObject(hashKey.placeholder("") -> h) <> DynamoObject(rangeKey.placeholder("") -> r)
       }
     }
 }

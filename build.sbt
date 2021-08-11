@@ -10,11 +10,12 @@ lazy val stdOptions = Seq(
   "-encoding",
   "UTF-8",
   "-feature",
-  "-unchecked",
-  "-target:jvm-1.8"
+  "-unchecked"
 )
 
 lazy val std2xOptions = Seq(
+  "-Xsource:3", // https://docs.scala-lang.org/scala3/guides/migration/tooling-tour.html#the-scala-213-compiler
+  "-target:jvm-1.8",
   "-Xfatal-warnings",
   "-language:higherKinds",
   "-language:existentials",
@@ -45,23 +46,6 @@ def extraOptions(scalaVersion: String) =
         "-opt-inline-from:<source>"
       ) ++ std2xOptions
     case _ => Seq.empty
-  }
-
-def platformSpecificSources(conf: String, baseDirectory: File)(versions: String*) =
-  List("scala" :: versions.toList.map("scala-" + _): _*).map { version =>
-    baseDirectory.getParentFile / "src" / conf / version
-  }.filter(_.exists)
-
-def crossPlatformSources(scalaVer: String, conf: String, baseDir: File, isDotty: Boolean) =
-  CrossVersion.partialVersion(scalaVer) match {
-    case Some((2, x)) if x <= 11 =>
-      platformSpecificSources(conf, baseDir)("2.11", "2.x")
-    case Some((2, x)) if x >= 12 =>
-      platformSpecificSources(conf, baseDir)("2.12+", "2.12", "2.x")
-    case _ if isDotty =>
-      platformSpecificSources(conf, baseDir)("2.12+", "dotty")
-    case _ =>
-      Nil
   }
 
 val commonSettings = Seq(
@@ -154,7 +138,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.joda"           % "joda-convert"             % "2.2.1"       % Provided,
       "joda-time"          % "joda-time"                % "2.10.10"     % Test,
       "org.scalatest"     %% "scalatest"                % "3.2.9"       % Test,
-      "org.scalatestplus" %% "scalatestplus-scalacheck" % "3.1.0.0-RC2" % Test,
+      "org.scalatestplus" %% "scalacheck-1-15"          % "3.2.9.0"     % Test,
       "org.scalacheck"    %% "scalacheck"               % "1.15.4"      % Test
     )
   )

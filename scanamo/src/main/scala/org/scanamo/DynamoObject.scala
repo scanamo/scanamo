@@ -87,7 +87,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
           final val iterator = new Iterator[String] {
             private[this] val underlying = xs.keySet.iterator
             final def hasNext = underlying.hasNext
-            final def next = underlying.next
+            final def next() = underlying.next
           }
         }
       case Pure(xs)       => xs.keys
@@ -104,7 +104,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
           final val iterator = new Iterator[DynamoValue] {
             private[this] val underlying = xs.values.iterator
             final def hasNext = underlying.hasNext
-            final def next = DynamoValue.fromAttributeValue(underlying.next)
+            final def next() = DynamoValue.fromAttributeValue(underlying.next)
           }
         }
       case Pure(xs)       => xs.values
