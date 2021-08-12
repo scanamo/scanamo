@@ -16,7 +16,7 @@
 
 package org.scanamo
 
-import cats.{Id, Monad, catsInstancesForId, ~>}
+import cats.{ ~>, catsInstancesForId, Id, Monad }
 import org.scanamo.ops._
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 

@@ -62,14 +62,14 @@ Licensed under the [Apache License, Version 2.0](http://www.apache.org/licenses/
 [Link-IsItMaintained]: https://isitmaintained.com/project/scanamo/scanamo "Average time to resolve an issue"
 [Link-Scaladex]: https://index.scala-lang.org/search?q=dependencies:scanamo/scanamo "Scaladex"
 [Link-MavenReleases]: https://index.scala-lang.org/scanamo/scanamo/scanamo "Maven Releases"
-[Link-Travis]: https://travis-ci.org/scanamo/scanamo "Travis CI"
+[Link-Travis]: https://travis-ci.com/github/scanamo/scanamo "Travis CI"
 [Link-Gitter]: https://gitter.im/guardian/scanamo "Gitter chat"
 
 [Badge-Codecov]: https://coveralls.io/repos/github/guardian/scanamo/badge.svg?branch=master "Codecov"
 [Badge-IsItMaintained]: http://isitmaintained.com/badge/resolution/scanamo/scanamo.svg "Average time to resolve an issue"
 [Badge-Scaladex]: https://index.scala-lang.org/count.svg?q=dependencies:scanamo/scanamo&subject=scaladex "Scaladex"
 [Badge-MavenReleases]: https://index.scala-lang.org/scanamo/scanamo/scanamo/latest-by-scala-version.svg "Maven Releases"
-[Badge-Travis]: https://travis-ci.org/scanamo/scanamo.svg?branch=master "Travis CI"
+[Badge-Travis]: https://travis-ci.com/scanamo/scanamo.svg?branch=master "Travis CI"
 [Badge-Gitter]: https://badges.gitter.im/guardian/scanamo.svg "Gitter chat"
 
 ```scala mdoc:invisible
