@@ -207,7 +207,7 @@ lazy val alpakka = (project in file("alpakka"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "3.0.3",
       "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
     ),
