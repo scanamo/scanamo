@@ -188,32 +188,6 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
     }
   }
 
-  it("should stream full table scan to a Monix Iterant") {
-    import monix.tail.Iterant
-
-    type SIO[A] = Iterant[IO, A]
-
-    LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
-      val list = List(
-        Item("item #1"),
-        Item("item #2"),
-        Item("item #3"),
-        Item("item #4"),
-        Item("item #5"),
-        Item("item #6")
-      )
-      val expected = list.map(i => List(Right(i)))
-
-      val items = Table[Item](t)
-      val ops = for {
-        _ <- items.putAll(list.toSet).toFreeT[SIO]
-        list <- items.scanPaginatedM[SIO](1)
-      } yield list
-
-      scanamo.execT(ScanamoCats.ToIterant)(ops).toListL.unsafeRunSync() should contain theSameElementsAs expected
-    }
-  }
-
   it("should stream full table scan to an FS2 stream") {
     import fs2.Stream
 
