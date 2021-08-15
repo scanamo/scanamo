@@ -21,7 +21,7 @@ import cats.syntax.bifunctor._
 import cats.syntax.parallel._
 import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
 import org.scanamo._
-import magnolia._
+import magnolia1._
 
 private[scanamo] trait Derivation {
   type Typeclass[A] = DynamoFormat[A]

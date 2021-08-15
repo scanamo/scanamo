@@ -16,7 +16,7 @@
 
 package org.scanamo.generic
 
-import magnolia.Magnolia
+import magnolia1.Magnolia
 import org.scanamo.DynamoFormat
 
 import scala.language.experimental.macros

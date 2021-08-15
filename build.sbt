@@ -131,9 +131,9 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.0",
-      "org.typelevel"          %% "cats-free"          % catsVersion,
-      "com.propensive"         %% "magnolia"           % "0.12.7",
+      "org.scala-lang.modules"       %% "scala-java8-compat" % "1.0.0",
+      "org.typelevel"                %% "cats-free"          % catsVersion,
+      "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.0.0-M5",
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.1"   % Provided,
       "joda-time"          % "joda-time"       % "2.10.10" % Test,
