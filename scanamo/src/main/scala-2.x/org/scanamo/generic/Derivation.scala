@@ -19,11 +19,11 @@ package org.scanamo.generic
 import cats.data.NonEmptyChain
 import cats.syntax.bifunctor._
 import cats.syntax.parallel._
-import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
-import org.scanamo._
 import magnolia._
+import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue, _ }
 
 private[scanamo] trait Derivation {
+  this: FieldNamingMode =>
   type Typeclass[A] = DynamoFormat[A]
 
   type FieldName = String
@@ -40,7 +40,7 @@ private[scanamo] trait Derivation {
   //    be accumulated
   def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField(o: DynamoObject, param: Param[Typeclass, T]): Valid[param.PType] =
-      o(param.label)
+      o(transformName(param.label))
         .fold[Either[DynamoReadError, param.PType]] {
           param.default.fold(param.typeclass.read(DynamoValue.nil).leftMap(_ => MissingProperty))(Right(_))
         }(param.typeclass.read(_))
@@ -72,7 +72,7 @@ private[scanamo] trait Derivation {
         def writeObject(t: T): DynamoObject =
           DynamoObject(cc.parameters.foldLeft(List.empty[(String, DynamoValue)]) { case (xs, p) =>
             val v = p.typeclass.write(p.dereference(t))
-            if (v.isNull) xs else (p.label -> v) :: xs
+            if (v.isNull) xs else (transformName(p.label) -> v) :: xs
           }: _*)
       }
   }

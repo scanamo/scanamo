@@ -21,4 +21,4 @@ package org.scanamo.generic
   * This object provides helpers for creating [[org.scanamo.DynamoFormat]]
   * instances for case classes.
   */
-package object semiauto extends SemiautoDerivation
+package object semiauto extends SemiautoDerivation with NoOpFieldNamingMode

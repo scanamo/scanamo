@@ -22,5 +22,6 @@ import org.scanamo.DynamoFormat
 import scala.language.experimental.macros
 
 trait SemiautoDerivation extends Derivation {
+  this: FieldNamingMode =>
   final def deriveDynamoFormat[A]: DynamoFormat[A] = macro Magnolia.gen[A]
 }
