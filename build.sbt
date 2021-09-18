@@ -117,7 +117,7 @@ lazy val refined = (project in file("refined"))
   .settings(
     libraryDependencies ++= Seq(
       "eu.timepit"    %% "refined"   % "0.9.27",
-      "org.scalatest" %% "scalatest" % "3.2.9" % Test
+      "org.scalatest" %% "scalatest" % "3.2.10" % Test
     )
   )
   .dependsOn(scanamo)
@@ -137,7 +137,7 @@ lazy val scanamo = (project in file("scanamo"))
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.1"   % Provided,
       "joda-time"          % "joda-time"       % "2.10.10" % Test,
-      "org.scalatest"     %% "scalatest"       % "3.2.9"   % Test,
+      "org.scalatest"     %% "scalatest"       % "3.2.10"   % Test,
       "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
       "org.scalacheck"    %% "scalacheck"      % "1.15.4"  % Test
     )
@@ -166,7 +166,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
       "co.fs2"         %% "fs2-core"    % "3.1.0",
-      "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
+      "org.scalatest"  %% "scalatest"   % "3.2.10"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.15.4" % Test
     ),
     Test / fork := true,
@@ -186,7 +186,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
-      "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
+      "org.scalatest"  %% "scalatest"        % "3.2.10"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.15.4"   % Test
     ),
     Test / fork := true,
@@ -205,7 +205,7 @@ lazy val alpakka = (project in file("alpakka"))
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
-      "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
+      "org.scalatest"      %% "scalatest"                    % "3.2.10"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
     ),
     evictionErrorLevel := Level.Info, // until Akka 2.6.16 released - see https://github.com/akka/akka/pull/30375
@@ -225,7 +225,7 @@ lazy val joda = (project in file("joda"))
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.1"  % Provided,
       "joda-time"       % "joda-time"    % "2.10.10",
-      "org.scalatest"  %% "scalatest"    % "3.2.9"  % Test,
+      "org.scalatest"  %% "scalatest"    % "3.2.10"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.15.4" % Test
     )
   )
