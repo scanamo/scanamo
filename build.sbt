@@ -2,8 +2,10 @@ ThisBuild / scalaVersion := "2.12.14"
 ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.6")
 
 val catsVersion = "2.6.1"
-val catsEffectVersion = "3.1.1"
-val zioVersion = "1.0.9"
+
+val catsEffectVersion = "3.2.9"
+
+val zioVersion = "1.0.12"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -135,11 +137,11 @@ lazy val scanamo = (project in file("scanamo"))
       "org.typelevel"                %% "cats-free"          % catsVersion,
       "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.0.0-M5",
       // Use Joda for custom conversion example
-      "org.joda"           % "joda-convert"    % "2.2.1"   % Provided,
-      "joda-time"          % "joda-time"       % "2.10.10" % Test,
-      "org.scalatest"     %% "scalatest"       % "3.2.10"   % Test,
-      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
-      "org.scalacheck"    %% "scalacheck"      % "1.15.4"  % Test
+      "org.joda"           % "joda-convert"    % "2.2.1"    % Provided,
+      "joda-time"          % "joda-time"       % "2.10.10"  % Test,
+      "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
+      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
+      "org.scalacheck"    %% "scalacheck"      % "1.15.4"   % Test
     )
   )
   .dependsOn(testkit % "test->test")
