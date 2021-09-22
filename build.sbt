@@ -135,11 +135,11 @@ lazy val scanamo = (project in file("scanamo"))
       "org.typelevel"                %% "cats-free"          % catsVersion,
       "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.0.0-M5",
       // Use Joda for custom conversion example
-      "org.joda"           % "joda-convert"    % "2.2.1"   % Provided,
-      "joda-time"          % "joda-time"       % "2.10.10" % Test,
-      "org.scalatest"     %% "scalatest"       % "3.2.9"   % Test,
-      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0"% Test,
-      "org.scalacheck"    %% "scalacheck"      % "1.15.4"  % Test
+      "org.joda"           % "joda-convert"    % "2.2.1"    % Provided,
+      "joda-time"          % "joda-time"       % "2.10.10"  % Test,
+      "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
+      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
+      "org.scalacheck"    %% "scalacheck"      % "1.15.4"   % Test
     )
   )
   .dependsOn(testkit % "test->test")
