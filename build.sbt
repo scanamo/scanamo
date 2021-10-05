@@ -1,9 +1,11 @@
-ThisBuild / scalaVersion := "2.12.14"
-ThisBuild / crossScalaVersions := Seq("2.12.14", "2.13.6")
+ThisBuild / scalaVersion := "2.12.15"
+ThisBuild / crossScalaVersions := Seq("2.12.15", "2.13.6")
 
 val catsVersion = "2.6.1"
-val catsEffectVersion = "3.1.1"
-val zioVersion = "1.0.9"
+
+val catsEffectVersion = "3.2.9"
+
+val zioVersion = "1.0.12"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -106,7 +108,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.16.84"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.17.52"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -131,15 +133,15 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules"       %% "scala-java8-compat" % "1.0.0",
+      "org.scala-lang.modules"       %% "scala-java8-compat" % "1.0.1",
       "org.typelevel"                %% "cats-free"          % catsVersion,
       "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.0.0-M5",
       // Use Joda for custom conversion example
-      "org.joda"           % "joda-convert"    % "2.2.1"   % Provided,
-      "joda-time"          % "joda-time"       % "2.10.10" % Test,
-      "org.scalatest"     %% "scalatest"       % "3.2.9"   % Test,
-      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.9.0" % Test,
-      "org.scalacheck"    %% "scalacheck"      % "1.15.4"  % Test
+      "org.joda"           % "joda-convert"    % "2.2.1"    % Provided,
+      "joda-time"          % "joda-time"       % "2.10.12"  % Test,
+      "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
+      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
+      "org.scalacheck"    %% "scalacheck"      % "1.15.4"   % Test
     )
   )
   .dependsOn(testkit % "test->test")
@@ -151,7 +153,7 @@ lazy val testkit = (project in file("testkit"))
     name := "scanamo-testkit",
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.0"
+      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.1"
     )
   )
 
@@ -165,7 +167,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % catsVersion,
       "org.typelevel"  %% "cats-core"   % catsVersion,
       "org.typelevel"  %% "cats-effect" % catsEffectVersion,
-      "co.fs2"         %% "fs2-core"    % "3.1.0",
+      "co.fs2"         %% "fs2-core"    % "3.1.3",
       "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.15.4" % Test
     ),
@@ -224,7 +226,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.1"  % Provided,
-      "joda-time"       % "joda-time"    % "2.10.10",
+      "joda-time"       % "joda-time"    % "2.10.12",
       "org.scalatest"  %% "scalatest"    % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.15.4" % Test
     )
