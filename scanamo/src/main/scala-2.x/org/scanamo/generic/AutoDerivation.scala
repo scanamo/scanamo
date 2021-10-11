@@ -16,7 +16,7 @@
 
 package org.scanamo.generic
 
-import magnolia._
+import magnolia1._
 
 import org.scanamo.DynamoFormat
 import scala.reflect.macros.whitebox

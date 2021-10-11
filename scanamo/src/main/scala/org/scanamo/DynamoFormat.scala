@@ -56,8 +56,6 @@ trait DynamoFormat[T] {
 
   def iso[U](r: T => U, w: U => T): DynamoFormat[U] = DynamoFormat.iso(r, w)(this)
   def xmap[U](r: T => Either[DynamoReadError, U], w: U => T): DynamoFormat[U] = DynamoFormat.xmap(r, w)(this)
-  def coercedXmap[U](read: T => U, write: U => T): DynamoFormat[U] =
-    DynamoFormat.coercedXmap(read, write)(this, implicitly)
 }
 
 object DynamoFormat extends PlatformSpecificFormat {

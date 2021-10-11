@@ -20,7 +20,6 @@ import cats.{ ~>, Monad }
 import cats.effect.Async
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import fs2.Stream
-import monix.tail.Iterant
 import org.scanamo.ops.{ CatsInterpreter, ScanamoOps, ScanamoOpsT }
 
 class ScanamoCats[F[_]: Async](client: DynamoDbAsyncClient) {
@@ -34,11 +33,6 @@ class ScanamoCats[F[_]: Async](client: DynamoDbAsyncClient) {
 
 object ScanamoCats {
   def apply[F[_]: Async](client: DynamoDbAsyncClient): ScanamoCats[F] = new ScanamoCats(client)
-
-  def ToIterant[F[_]: Async]: F ~> Iterant[F, *] =
-    new (F ~> Iterant[F, *]) {
-      def apply[A](fa: F[A]): Iterant[F, A] = Iterant.liftF(fa)
-    }
 
   def ToStream[F[_]: Async]: F ~> Stream[F, *] =
     new (F ~> Stream[F, *]) {
