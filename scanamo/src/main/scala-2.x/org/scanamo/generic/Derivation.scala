@@ -38,7 +38,7 @@ private[scanamo] trait Derivation {
   // 4. otherwise, we decode the found value
   // 5. finally, we wrap errors in [[cats.data.NonEmptyChain]] so multiple decoding errors can
   //    be accumulated
-  def combine[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
+  def join[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
     def decodeField(o: DynamoObject, param: Param[Typeclass, T]): Valid[param.PType] =
       o(param.label)
         .fold[Either[DynamoReadError, param.PType]] {
@@ -78,7 +78,7 @@ private[scanamo] trait Derivation {
   }
 
   // Derivation for ADTs, they are encoded as an object of one property, the key being the case name
-  def dispatch[T](st: SealedTrait[Typeclass, T]): Typeclass[T] = {
+  def split[T](st: SealedTrait[Typeclass, T]): Typeclass[T] = {
     def decode(o: DynamoObject): Either[DynamoReadError, T] =
       (for {
         subtype <- st.subtypes.find(sub => o.contains(sub.typeName.short))
@@ -89,7 +89,7 @@ private[scanamo] trait Derivation {
       def readObject(o: DynamoObject): Either[DynamoReadError, T] = decode(o)
 
       def writeObject(t: T): DynamoObject =
-        st.dispatch(t) { subtype =>
+        st.split(t) { subtype =>
           DynamoObject.singleton(subtype.typeName.short, subtype.typeclass.write(subtype.cast(t)))
         }
     }
