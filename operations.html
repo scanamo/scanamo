@@ -6,19 +6,19 @@
   <li><a href="#put-and-get">Put</a> for adding a new item, or replacing an existing one</li>
   <li><a href="#put-and-get">Get</a> for retrieving an item by a fully specified key</li>
   <li><a href="#delete">Delete</a> for removing an item</li>
-  <li><a href="#update">Update</a> for updating some portion of the fields of an item, whilst leaving the rest 
+  <li><a href="#update">Update</a> for updating some portion of the fields of an item, whilst leaving the rest
  as is</li>
   <li><a href="#scan">Scan</a> for retrieving all elements of a table</li>
   <li><a href="#query">Query</a> for retrieving all elements with a given hash-key and a range key that matches
  some criteria</li>
 </ul>
 
-<p>Scanamo also supports <a href="batch-operations.md">batched operations</a>, <a href="conditional-operations.md">conditional operations</a> 
-and queries against <a href="using-indexes.md">secondary indexes</a>.</p>
+<p>Scanamo also supports <a href="batch-operations.html">batched operations</a>, <a href="conditional-operations.html">conditional operations</a>
+and queries against <a href="using-indexes.html">secondary indexes</a>.</p>
 
 <h3 id="put-and-get">Put and Get</h3>
 
-<p>Often when using DynamoDB, the primary use case is simply putting objects into 
+<p>Often when using DynamoDB, the primary use case is simply putting objects into
 Dynamo and subsequently retrieving them:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.scanamo._</span>
@@ -95,7 +95,7 @@ Dynamo and subsequently retrieving them:</p>
 <span class="nv">scanamo</span><span class="o">.</span><span class="py">exec</span> <span class="o">{</span>
   <span class="k">for</span> <span class="o">{</span>
     <span class="k">_</span> <span class="k">&lt;-</span> <span class="nv">teamTable</span><span class="o">.</span><span class="py">put</span><span class="o">(</span><span class="nc">Team</span><span class="o">(</span><span class="s">"Watford"</span><span class="o">,</span> <span class="mi">1</span><span class="o">,</span> <span class="nc">List</span><span class="o">(</span><span class="s">"Blissett"</span><span class="o">),</span> <span class="nc">Some</span><span class="o">(</span><span class="s">"Harry the Hornet"</span><span class="o">)))</span>
-    <span class="n">updated</span> <span class="k">&lt;-</span> <span class="nv">teamTable</span><span class="o">.</span><span class="py">update</span><span class="o">(</span><span class="s">"name"</span> <span class="o">===</span> <span class="s">"Watford"</span><span class="o">,</span> 
+    <span class="n">updated</span> <span class="k">&lt;-</span> <span class="nv">teamTable</span><span class="o">.</span><span class="py">update</span><span class="o">(</span><span class="s">"name"</span> <span class="o">===</span> <span class="s">"Watford"</span><span class="o">,</span>
       <span class="nf">set</span><span class="o">(</span><span class="s">"goals"</span><span class="o">,</span> <span class="mi">2</span><span class="o">)</span> <span class="n">and</span> <span class="nf">append</span><span class="o">(</span><span class="s">"scorers"</span><span class="o">,</span> <span class="s">"Barnes"</span><span class="o">)</span> <span class="n">and</span> <span class="nf">remove</span><span class="o">(</span><span class="s">"mascot"</span><span class="o">))</span>
   <span class="o">}</span> <span class="k">yield</span> <span class="n">updated</span>
 <span class="o">}</span>
@@ -125,7 +125,7 @@ Dynamo and subsequently retrieving them:</p>
 
 <span class="k">def</span> <span class="nf">updateFavourite</span><span class="o">(</span><span class="n">fu</span><span class="k">:</span> <span class="kt">FavouriteUpdate</span><span class="o">)</span><span class="k">:</span> <span class="kt">Option</span><span class="o">[</span><span class="kt">ScanamoOps</span><span class="o">[</span><span class="kt">Either</span><span class="o">[</span><span class="kt">DynamoReadError</span>, <span class="kt">Favourites</span><span class="o">]]]</span> <span class="k">=</span> <span class="o">{</span>
   <span class="k">val</span> <span class="nv">updates</span><span class="k">:</span> <span class="kt">List</span><span class="o">[</span><span class="kt">UpdateExpression</span><span class="o">]</span> <span class="k">=</span> <span class="nc">List</span><span class="o">(</span>
-    <span class="nv">fu</span><span class="o">.</span><span class="py">colour</span><span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">c</span> <span class="k">=&gt;</span> <span class="nf">set</span><span class="o">(</span><span class="s">"colour"</span><span class="o">,</span> <span class="n">c</span><span class="o">)),</span> 
+    <span class="nv">fu</span><span class="o">.</span><span class="py">colour</span><span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">c</span> <span class="k">=&gt;</span> <span class="nf">set</span><span class="o">(</span><span class="s">"colour"</span><span class="o">,</span> <span class="n">c</span><span class="o">)),</span>
     <span class="nv">fu</span><span class="o">.</span><span class="py">number</span><span class="o">.</span><span class="py">map</span><span class="o">(</span><span class="n">n</span> <span class="k">=&gt;</span> <span class="nf">set</span><span class="o">(</span><span class="s">"number"</span><span class="o">,</span> <span class="n">n</span><span class="o">))</span>
   <span class="o">).</span><span class="py">flatten</span>
   <span class="nv">NonEmptyList</span><span class="o">.</span><span class="py">fromList</span><span class="o">(</span><span class="n">updates</span><span class="o">).</span><span class="py">map</span><span class="o">(</span><span class="n">ups</span> <span class="k">=&gt;</span>
@@ -161,7 +161,7 @@ Dynamo and subsequently retrieving them:</p>
 
 <h3 id="scan">Scan</h3>
 
-<p>If you want to go through all elements of a table, or index, Scanamo 
+<p>If you want to go through all elements of a table, or index, Scanamo
 supports scanning it:</p>
 
 <div class="language-scala highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">import</span> <span class="nn">org.scanamo._</span>
@@ -189,7 +189,7 @@ supports scanning it:</p>
 <span class="c1">//         BatchWriteItemRequest(RequestItems={lines=[WriteRequest(PutRequest=PutRequest(Item={line=AttributeValue(S=Circle), mode=AttributeValue(S=Underground)})), WriteRequest(PutRequest=PutRequest(Item={line=AttributeValue(S=Metropolitan), mode=AttributeValue(S=Underground)})), WriteRequest(PutRequest=PutRequest(Item={line=AttributeValue(S=Central), mode=AttributeValue(S=Underground)})), WriteRequest(PutRequest=PutRequest(Item={line=AttributeValue(S=Croydon Tramlink), mode=AttributeValue(S=Tram)}))]})</span>
 <span class="c1">//       )</span>
 <span class="c1">//     ),</span>
-<span class="c1">//     org.scanamo.ScanamoFree$$$Lambda$11291/171212654@2f5921e8</span>
+<span class="c1">//     org.scanamo.ScanamoFree$$$Lambda$11290/1865545238@a39bcf9</span>
 <span class="c1">//   ),</span>
 <span class="c1">//   &lt;function1&gt;</span>
 <span class="c1">// )</span>

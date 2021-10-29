@@ -33,7 +33,7 @@ higher level abstractions.</p>
 
 <p>Scanamo is published for Scala 2.13 and 2.12 to Maven Central, so just add the following to your <code class="highlighter-rouge">build.sbt</code>:</p>
 
-<pre><code class="language-sbt">libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M17+19-b1d3049c-SNAPSHOT"
+<pre><code class="language-sbt">libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M17+20-0846e9ea-SNAPSHOT"
 </code></pre>
 
 <p>then, given a table and some case classes</p>
@@ -42,7 +42,7 @@ higher level abstractions.</p>
 <span class="k">import</span> <span class="nn">org.scanamo.syntax._</span>
 <span class="k">import</span> <span class="nn">org.scanamo.generic.auto._</span>
 <span class="k">import</span> <span class="nn">software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._</span>
- 
+
 <span class="k">val</span> <span class="nv">client</span> <span class="k">=</span> <span class="nv">LocalDynamoDB</span><span class="o">.</span><span class="py">syncClient</span><span class="o">()</span>
 <span class="k">val</span> <span class="nv">scanamo</span> <span class="k">=</span> <span class="nc">Scanamo</span><span class="o">(</span><span class="n">client</span><span class="o">)</span>
 <span class="k">val</span> <span class="nv">farmersTableResult</span> <span class="k">=</span> <span class="nv">LocalDynamoDB</span><span class="o">.</span><span class="py">createTable</span><span class="o">(</span><span class="n">client</span><span class="o">)(</span><span class="s">"farmer"</span><span class="o">)(</span><span class="s">"name"</span> <span class="o">-&gt;</span> <span class="n">S</span><span class="o">)</span>
@@ -62,11 +62,11 @@ higher level abstractions.</p>
 <span class="c1">// )</span>
 </code></pre></div></div>
 
-<p>Scanamo supports most other DynamoDB <a href="operations.md">operations</a>, beyond
+<p>Scanamo supports most other DynamoDB <a href="operations.html">operations</a>, beyond
 the basic <code class="highlighter-rouge">Put</code> and <code class="highlighter-rouge">Get</code>.</p>
 
 <p>The translation between Dynamo items and Scala types is handled by a type class
-called <a href="dynamo-format.md">DynamoFormat</a>.</p>
+called <a href="dynamo-format.html">DynamoFormat</a>.</p>
 
 <p>Licensed under the <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License, Version 2.0</a>.</p>
 
