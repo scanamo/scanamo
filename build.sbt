@@ -1,5 +1,5 @@
 ThisBuild / scalaVersion := "2.12.15"
-ThisBuild / crossScalaVersions := Seq("2.12.15", "2.13.6")
+ThisBuild / crossScalaVersions := Seq("2.12.15", "2.13.7")
 
 val catsVersion = "2.6.1"
 
