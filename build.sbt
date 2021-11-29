@@ -197,6 +197,9 @@ lazy val zio = (project in file("zio"))
   )
   .dependsOn(scanamo, testkit % "test->test")
 
+// Necessary until Alpakka uses Akka 2.6.16 or later - see https://github.com/akka/akka/pull/30375
+ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-java8-compat" % VersionScheme.Always
+
 lazy val alpakka = (project in file("alpakka"))
   .settings(
     commonSettings,
@@ -211,7 +214,6 @@ lazy val alpakka = (project in file("alpakka"))
       "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.15.4" % Test
     ),
-    evictionErrorLevel := Level.Info, // until Akka 2.6.16 released - see https://github.com/akka/akka/pull/30375
     Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
     Compile / doc / scalacOptions += "-no-link-warnings"
@@ -239,7 +241,6 @@ lazy val docs = (project in file("docs"))
     commonSettings,
     micrositeSettings,
     noPublishSettings,
-    evictionErrorLevel := Level.Info, // until Akka 2.6.16 released - see https://github.com/akka/akka/pull/30375
     ghpagesNoJekyll := false,
     git.remoteRepo := "git@github.com:scanamo/scanamo.git",
     mdocVariables := Map(
