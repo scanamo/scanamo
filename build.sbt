@@ -138,7 +138,7 @@ lazy val scanamo = (project in file("scanamo"))
       "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.0.0-M7",
       "org.scala-lang"                % "scala-reflect"      % scalaVersion.value,
       // Use Joda for custom conversion example
-      "org.joda"           % "joda-convert"    % "2.2.1"    % Provided,
+      "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
       "joda-time"          % "joda-time"       % "2.10.13"  % Test,
       "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
       "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
@@ -228,7 +228,7 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda"        % "joda-convert" % "2.2.1"  % Provided,
+      "org.joda"        % "joda-convert" % "2.2.2"  % Provided,
       "joda-time"       % "joda-time"    % "2.10.13",
       "org.scalatest"  %% "scalatest"    % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.15.4" % Test
