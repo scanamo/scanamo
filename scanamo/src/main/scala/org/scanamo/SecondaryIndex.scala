@@ -16,11 +16,12 @@
 
 package org.scanamo
 
-import cats.{ Monad, MonoidK }
-import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
-import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
-import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
-import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import cats.{Monad, MonoidK}
+import org.scanamo.DynamoResultStream.{QueryResponseStream, ScanResponseStream}
+import org.scanamo.ops.{ScanamoOps, ScanamoOpsT}
+import org.scanamo.query.{Condition, ConditionExpression, IndexKey, Query}
+import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
+import software.amazon.awssdk.services.dynamodb.model.{QueryResponse, ScanResponse}
 
 /** Represents a secondary index on a DynamoDB table.
   *
@@ -49,9 +50,17 @@ sealed abstract class SecondaryIndex[V] {
     */
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]]
 
+  /** Scans the table and returns the raw DynamoDB result.
+    */
+  def scan0: ScanamoOps[ScanResponse]
+
   /** Run a query against keys in a secondary index
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  /** Queries the table and returns the raw DynamoDB result.
+    */
+  def query0(query: Query[_]): ScanamoOps[QueryResponse]
 
   /** Performs a query with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
@@ -85,7 +94,7 @@ sealed abstract class SecondaryIndex[V] {
 
   def descending: SecondaryIndex[V]
 
-  def from[K: UniqueKeyCondition](key: UniqueKey[K]): SecondaryIndex[V]
+  def from[T, K](key: T)(implicit K: IndexKey.Aux[T, K]): SecondaryIndex[V]
 }
 
 private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
@@ -94,8 +103,8 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   queryOptions: ScanamoQueryOptions
 ) extends SecondaryIndex[V] {
   def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
-  def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
-    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
+  def from[T, K](key: T)(implicit K: IndexKey.Aux[T, K]) =
+    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(IndexKey.toDynamoObject(key))))
   def filter[C: ConditionExpression](condition: C) =
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =
@@ -105,8 +114,12 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   def scan() = ScanResponseStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int) =
     ScanResponseStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
+  def scan0: ScanamoOps[ScanResponse] =
+    ScanamoOps.scan(ScanamoScanRequest(tableName, Some(indexName), queryOptions))
   def query(query: Query[_]) =
     QueryResponseStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
+  def query0(query: Query[_]): ScanamoOps[QueryResponse] =
+    ScanamoOps.query(ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
   def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int) =
     QueryResponseStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }

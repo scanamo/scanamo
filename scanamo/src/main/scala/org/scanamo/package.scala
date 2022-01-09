@@ -18,6 +18,7 @@ package org
 
 import org.scanamo.query._
 import org.scanamo.update._
+
 import scala.language.implicitConversions
 
 package object scanamo {
@@ -77,6 +78,14 @@ package object scanamo {
 
     implicit class OrConditionExpression[X: ConditionExpression](x: X) {
       def or[Y: ConditionExpression](y: Y): OrCondition[X, Y] = OrCondition(x, y)
+    }
+
+    /** Syntax for `AndEqualsCondition` instances over a pair of `KeyEquals` with an `and` method to support
+      * construction of index keys of 3 properties.
+      */
+    implicit class AndEqualsConditionOps[H, S](ae: AndEqualsCondition[KeyEquals[H], KeyEquals[S]]) {
+      def and[I](ke: KeyEquals[I]): IndexKey3[KeyEquals[H], KeyEquals[S], KeyEquals[I]] =
+        IndexKey3(ae.hashEquality, ae.rangeEquality, ke)
     }
 
     @deprecated("use uncurried `set(attr, value)` syntax", "1.0")
