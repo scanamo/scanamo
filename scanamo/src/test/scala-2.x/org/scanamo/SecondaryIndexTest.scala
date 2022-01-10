@@ -146,7 +146,9 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
           ts <- lastKey.fold(List.empty[Either[DynamoReadError, Transport]].pure[ScanamoOps])(index.from(_).scan())
         } yield ts
         scanamo.exec(ops) should be(
-          List(Right(Transport("Underground", "Circle", "Y")), Right(Transport("Underground", "Metropolitan", "M")))
+          List(
+            Right(Transport("Underground", "Central", "R")),
+            Right(Transport("Underground", "Circle", "Y")))
         )
     }
   }
