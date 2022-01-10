@@ -16,12 +16,12 @@
 
 package org.scanamo
 
-import cats.{Monad, MonoidK}
-import org.scanamo.DynamoResultStream.{QueryResponseStream, ScanResponseStream}
-import org.scanamo.ops.{ScanamoOps, ScanamoOpsT}
-import org.scanamo.query.{Condition, ConditionExpression, IndexKey, Query}
-import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
-import software.amazon.awssdk.services.dynamodb.model.{QueryResponse, ScanResponse}
+import cats.{ Monad, MonoidK }
+import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
+import org.scanamo.query.{ Condition, ConditionExpression, IndexKey, Query }
+import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse }
 
 /** Represents a secondary index on a DynamoDB table.
   *
