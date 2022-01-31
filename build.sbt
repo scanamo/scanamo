@@ -135,7 +135,7 @@ lazy val scanamo = (project in file("scanamo"))
       awsDynamoDB,
       "org.scala-lang.modules"       %% "scala-java8-compat" % "1.0.2",
       "org.typelevel"                %% "cats-free"          % catsVersion,
-      "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.0.0",
+      "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.1.0",
       "org.scala-lang"                % "scala-reflect"      % scalaVersion.value,
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
