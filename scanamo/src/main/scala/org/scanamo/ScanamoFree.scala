@@ -212,7 +212,8 @@ object ScanamoFree {
       .streamTo[M, T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default), pageSize)
 
   @deprecated("use `queryRaw`", "1.0")
-  def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResponse] = queryRaw[T](tableName)(query)
+  def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResponse] =
+    queryRaw[T](tableName)(query)
 
   def queryRaw[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResponse] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
