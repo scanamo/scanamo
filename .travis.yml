@@ -2,7 +2,7 @@ version: ~> 1.0
 language: scala
 os: linux
 scala:
-- 2.12.12
+- 2.12.15
 jdk:
 - openjdk8
 env:
@@ -50,5 +50,5 @@ jobs:
 
     # Cross-build
     - <<: *test
-      scala: 2.13.6
+      scala: 2.13.8
       name: "Tests for 2.13"
