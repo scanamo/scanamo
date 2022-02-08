@@ -502,7 +502,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Transport("Underground", "Central", "R")
           )
         )
-        res <- table.limit(1).scan0
+        res <- table.limit(1).scanRaw
         uniqueKeyCondition =
           UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
         lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
@@ -549,7 +549,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Transport("Bus", "234", "R")
           )
         )
-        res <- table.limit(1).query0("mode" === "Bus" and "line" === "234")
+        res <- table.limit(1).queryRaw("mode" === "Bus" and "line" === "234")
         uniqueKeyCondition =
           UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
         lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))

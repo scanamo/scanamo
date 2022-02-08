@@ -1,11 +1,10 @@
 package org.scanamo
 
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import org.scanamo.syntax._
 import org.scanamo.generic.auto._
+import org.scanamo.syntax._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 
 object SecondaryIndexTest {
   case class Transport(mode: String, line: String, colour: String)
@@ -121,6 +120,56 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
           List(Right(Transport("Underground", "Central", "Red")), Right(Transport("Underground", "Circle", "Yellow")))
         )
     }
-
   }
+
+  it("Query the index and returns the raw DynamoDB result") {
+    case class Key(mode: String, line: String, colour: String)
+    val fmt = DynamoFormat.generic[Key]
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("mode" -> S, "colour" -> S) {
+      (t, i) =>
+        val table = Table[Transport](t)
+        val index = table.index(i)
+        val operations = for {
+          _ <- table.putAll(
+            Set(
+              Transport("Underground", "Circle", "Yellow"),
+              Transport("Underground", "Metropolitan", "Magenta"),
+              Transport("Underground", "Central", "Red"),
+              Transport("Underground", "Picadilly", "Blue"),
+              Transport("Underground", "Northern", "Black")
+            )
+          )
+          raw <- index.limit(2).queryRaw("mode" === "Underground")
+          lastKey = Option(raw.lastEvaluatedKey()).filterNot(_.isEmpty).map(DynamoObject(_))
+          key = lastKey.map(_.toDynamoValue).map(fmt.read)
+        } yield key
+        scanamo.exec(operations) should be(Some(Right(Key("Underground", "Picadilly", "Blue"))))
+    }
+  }
+
+  it("Scan the index and returns the raw DynamoDB result") {
+    case class Key(mode: String, line: String, colour: String)
+    val fmt = DynamoFormat.generic[Key]
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("mode" -> S, "colour" -> S) {
+      (t, i) =>
+        val table = Table[Transport](t)
+        val index = table.index(i)
+        val operations = for {
+          _ <- table.putAll(
+            Set(
+              Transport("Underground", "Circle", "Yellow"),
+              Transport("Underground", "Metropolitan", "Magenta"),
+              Transport("Underground", "Central", "Red"),
+              Transport("Underground", "Picadilly", "Blue"),
+              Transport("Underground", "Northern", "Black")
+            )
+          )
+          raw <- index.limit(3).scanRaw
+          lastKey = Option(raw.lastEvaluatedKey()).filterNot(_.isEmpty).map(DynamoObject(_))
+          key = lastKey.map(_.toDynamoValue).map(fmt.read)
+        } yield key
+        scanamo.exec(operations) should be(Some(Right(Key("Underground", "Metropolitan", "Magenta"))))
+    }
+  }
+
 }
