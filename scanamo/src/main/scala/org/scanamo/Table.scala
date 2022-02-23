@@ -100,6 +100,9 @@ case class Table[V: DynamoFormat](name: String) {
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanM[M, V](name, pageSize)
 
+  @deprecated("use `scanRaw`", "1.0")
+  def scan0: ScanamoOps[ScanResponse] = scanRaw
+
   /** Scans the table and returns the raw DynamoDB result. Sometimes, one might want to
     * access metadata returned in the `ScanResponse` object, such as the last evaluated
     * key for example. `Table#scan` only returns a list of results, so there is no
@@ -107,7 +110,7 @@ case class Table[V: DynamoFormat](name: String) {
     *
     * A particular use case is when one wants to paginate through result sets, say:
     */
-  def scan0: ScanamoOps[ScanResponse] = ScanamoFree.scan0[V](name)
+  def scanRaw: ScanamoOps[ScanResponse] = ScanamoFree.scanRaw[V](name)
 
   /** Query a table based on the hash key and optionally the range key
     */
@@ -134,14 +137,15 @@ case class Table[V: DynamoFormat](name: String) {
   ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.queryM[M, V](name)(query, pageSize)
 
+  @deprecated("use `queryRaw`", "1.0")
+  def query0(query: Query[_]): ScanamoOps[QueryResponse] = queryRaw(query)
+
   /** Queries the table and returns the raw DynamoDB result. Sometimes, one might want to
     * access metadata returned in the `QueryResponse` object, such as the last evaluated
     * key for example. `Table#query` only returns a list of results, so there is no
     * place for putting that information: this is where `query0` comes in handy!
-    *
-    * A particular use case is when one wants to paginate through result sets, say:
     */
-  def query0(query: Query[_]): ScanamoOps[QueryResponse] = ScanamoFree.query0[V](name)(query)
+  def queryRaw(query: Query[_]): ScanamoOps[QueryResponse] = ScanamoFree.queryRaw[V](name)(query)
 
   /** Filter the results of a Scan or Query
     */
@@ -206,7 +210,7 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
     scanPaginatedM(Int.MaxValue)
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanResponseStream.streamTo[M, V](ScanamoScanRequest(tableName, None, queryOptions), pageSize)
-  def scan0: ScanamoOps[ScanResponse] =
+  def scanRaw: ScanamoOps[ScanResponse] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, queryOptions))
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] =
     QueryResponseStream.stream[V](ScanamoQueryRequest(tableName, None, query, queryOptions)).map(_._1)
@@ -216,6 +220,6 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
                                             pageSize: Int
   ): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     QueryResponseStream.streamTo[M, V](ScanamoQueryRequest(tableName, None, query, queryOptions), pageSize)
-  def query0(query: Query[_]): ScanamoOps[QueryResponse] =
+  def queryRaw(query: Query[_]): ScanamoOps[QueryResponse] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, queryOptions))
 }

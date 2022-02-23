@@ -196,7 +196,10 @@ object ScanamoFree {
   ): ScanamoOpsT[M, List[Either[DynamoReadError, T]]] =
     ScanResponseStream.streamTo[M, T](ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default), pageSize)
 
-  def scan0[T: DynamoFormat](tableName: String): ScanamoOps[ScanResponse] =
+  @deprecated("use `scanRaw`", "1.0")
+  def scan0[T: DynamoFormat](tableName: String): ScanamoOps[ScanResponse] = scanRaw[T](tableName)
+
+  def scanRaw[T: DynamoFormat](tableName: String): ScanamoOps[ScanResponse] =
     ScanamoOps.scan(ScanamoScanRequest(tableName, None, ScanamoQueryOptions.default))
 
   def query[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, T]]] =
@@ -208,7 +211,11 @@ object ScanamoFree {
     QueryResponseStream
       .streamTo[M, T](ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default), pageSize)
 
+  @deprecated("use `queryRaw`", "1.0")
   def query0[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResponse] =
+    queryRaw[T](tableName)(query)
+
+  def queryRaw[T: DynamoFormat](tableName: String)(query: Query[_]): ScanamoOps[QueryResponse] =
     ScanamoOps.query(ScanamoQueryRequest(tableName, None, query, ScanamoQueryOptions.default))
 
   def update[T: DynamoFormat](

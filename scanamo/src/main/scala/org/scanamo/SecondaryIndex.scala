@@ -21,6 +21,7 @@ import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream 
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse }
 
 /** Represents a secondary index on a DynamoDB table.
   *
@@ -31,6 +32,10 @@ sealed abstract class SecondaryIndex[V] {
   /** Scan a secondary index
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  /** Scans the index and returns the raw DynamoDB result.
+    */
+  def scanRaw: ScanamoOps[ScanResponse]
 
   /** Performs a scan with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
@@ -52,6 +57,10 @@ sealed abstract class SecondaryIndex[V] {
   /** Run a query against keys in a secondary index
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]]
+
+  /** Queries the index and returns the raw DynamoDB result.
+    */
+  def queryRaw(query: Query[_]): ScanamoOps[QueryResponse]
 
   /** Performs a query with the ability to introduce effects into the computation. This is
     * useful for huge tables when you don't want to load the whole of it in memory, but
@@ -103,10 +112,13 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   def descending: SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(ascending = false))
   def scan() = ScanResponseStream.stream[V](ScanamoScanRequest(tableName, Some(indexName), queryOptions)).map(_._1)
+  def scanRaw: ScanamoOps[ScanResponse] = ScanamoOps.scan(ScanamoScanRequest(tableName, Some(indexName), queryOptions))
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int) =
     ScanResponseStream.streamTo[M, V](ScanamoScanRequest(tableName, Some(indexName), queryOptions), pageSize)
   def query(query: Query[_]) =
     QueryResponseStream.stream[V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions)).map(_._1)
+  def queryRaw(query: Query[_]): ScanamoOps[QueryResponse] =
+    ScanamoOps.query(ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions))
   def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_], pageSize: Int) =
     QueryResponseStream.streamTo[M, V](ScanamoQueryRequest(tableName, Some(indexName), query, queryOptions), pageSize)
 }
