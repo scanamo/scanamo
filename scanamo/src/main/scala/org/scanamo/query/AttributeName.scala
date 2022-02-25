@@ -27,10 +27,10 @@ case class AttributeName(components: List[String], index: Option[Int]) {
     )((p, i) => s"$p[$i]")
 
   def attributeNames(prefix: String): Map[String, String] =
-    Map(components.map(s => {
+    Map(components.map { s =>
       val alphaNumericS = s.replaceAll("[^A-Za-z0-9]", "")
       s"$prefix$alphaNumericS" -> s
-    }): _*)
+    }: _*)
 
   def \(component: String) = copy(components = components :+ component)
 
