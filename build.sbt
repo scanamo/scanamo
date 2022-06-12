@@ -141,7 +141,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
       "joda-time"          % "joda-time"       % "2.10.14"  % Test,
       "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
-      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
+      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0" % Test,
       "org.scalacheck"    %% "scalacheck"      % "1.16.0"   % Test
     )
   )
