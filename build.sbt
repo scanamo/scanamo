@@ -118,7 +118,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.29",
+      "eu.timepit"    %% "refined"   % "0.10.1",
       "org.scalatest" %% "scalatest" % "3.2.9" % Test
     )
   )
