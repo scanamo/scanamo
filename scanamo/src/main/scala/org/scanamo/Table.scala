@@ -222,9 +222,9 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
   def limit(n: Int): TableWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def consistently: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(consistent = true))
   def descending: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(ascending = false))
-  def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]): TableWithOptions[V] =
     copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
-  def from(exclusiveStartKey: DynamoObject) =
+  def from(exclusiveStartKey: DynamoObject): TableWithOptions[V] =
     copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(exclusiveStartKey)))
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))

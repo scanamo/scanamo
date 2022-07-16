@@ -1,15 +1,12 @@
 package org.scanamo.joda
 
-import org.joda.time.{ DateTime, Instant }
-
-import org.scanamo.DynamoFormat
-import org.joda.time.DateTime
 import org.joda.time.chrono.ISOChronology
-import org.scanamo.joda.TimeGenerators._
-import org.scanamo.joda.JodaFormats._
-
-import org.scalacheck._
+import org.joda.time.{ DateTime, Instant }
+import org.scalacheck.*
 import org.scalacheck.Prop.forAll
+import org.scanamo.DynamoFormat
+import org.scanamo.joda.JodaFormats.*
+import org.scanamo.joda.TimeGenerators.*
 
 class JodaFormatsTest extends Properties("DynamoValue") {
   property("Instant round trip") =

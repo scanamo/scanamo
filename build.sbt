@@ -1,17 +1,27 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
   val scala212 = "2.12.18"
-  val scala213 = "2.13.8"
-  val scala3 = "3.2.0"
+  val scala213 = "2.13.12"
+  val scala3 = "3.3.1"
+  val alpakka = "2.0.2"
+  val cats = "2.10.0"
+  val catsEffect = "3.5.2"
+  val fs2 = "3.9.3"
+  val jodaConvert = "2.2.3"
+  val jodaTime = "2.12.5"
   val magnolia = "1.1.6"
   val magnoliaFor3 = "1.3.0"
-  val catsVersion = "2.9.0"
-  val catsEffectVersion = "3.4.10"
+  val pekko = "1.0.1"
+  val refined = "0.11.0"
+  val scalaCheck = "1.17.0"
+  val scalaJava8 = "1.0.2"
+  val scalaTest = "3.2.17"
+  val scalaTestPlus = "3.2.17.0"
+  val zio = "2.0.20"
+  val zioInteropCats = "23.1.0.0"
 }
 val scala2xVersions = Seq(V.scala212, V.scala213)
 val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
-
-val zioVersion = "1.0.13"
 
 lazy val stdOptions = Seq(
   "-deprecation",
@@ -41,7 +51,7 @@ lazy val std2_12Options = Seq(
 
 lazy val std2xOptions = Seq(
   "-Xsource:3", // https://docs.scala-lang.org/scala3/guides/migration/tooling-tour.html#the-scala-213-compiler
-  "-target:jvm-1.8",
+  "-release:8",
   "-language:higherKinds",
   "-language:existentials",
   "-language:implicitConversions",
@@ -49,7 +59,8 @@ lazy val std2xOptions = Seq(
   "-Yrangepos",
   "-Xlint:_,-type-parameter-shadow",
   "-Ywarn-numeric-widen",
-  "-Ywarn-value-discard"
+  "-Ywarn-value-discard",
+  "-Wconf:msg=package object inheritance:silent"
 )
 
 def extraOptions(scalaVersion: String) =
@@ -96,7 +107,7 @@ val commonSettings = Seq(
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
-    (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
+    (if (CrossVersion.partialVersion(scalaVersion.value).contains((2, 12)))
        mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
      else
        mainScalacOptions).filter(_ != "-Xfatal-warnings")
@@ -123,7 +134,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.21.26"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.22.0"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -134,8 +145,8 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.10.3",
-      "org.scalatest" %% "scalatest" % "3.2.9" % Test
+      "eu.timepit"    %% "refined"   % V.refined,
+      "org.scalatest" %% "scalatest" % V.scalaTest % Test
     )
   )
   .dependsOn(scanamo)
@@ -152,14 +163,14 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
-      "org.typelevel"          %% "cats-free"          % V.catsVersion,
+      "org.scala-lang.modules" %% "scala-java8-compat" % V.scalaJava8,
+      "org.typelevel"          %% "cats-free"          % V.cats,
       // Use Joda for custom conversion example
-      "org.joda"           % "joda-convert"    % "2.2.3"    % Provided,
-      "joda-time"          % "joda-time"       % "2.11.2"   % Test,
-      "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
-      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
-      "org.scalacheck"    %% "scalacheck"      % "1.16.0"   % Test
+      "org.joda"           % "joda-convert"    % V.jodaConvert % Provided,
+      "joda-time"          % "joda-time"       % V.jodaTime % Test,
+      "org.scalatest"     %% "scalatest"       % V.scalaTest % Test,
+      "org.scalatestplus" %% "scalacheck-1-17" % V.scalaTestPlus % Test,
+      "org.scalacheck"    %% "scalacheck"      % V.scalaCheck % Test
     )
   )
   .dependsOn(testkit % "test->test")
@@ -172,7 +183,7 @@ lazy val testkit = (project in file("testkit"))
     name := "scanamo-testkit",
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2"
+      "org.scala-lang.modules" %% "scala-java8-compat" % V.scalaJava8
     )
   )
 
@@ -184,12 +195,12 @@ lazy val catsEffect = (project in file("cats"))
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-free"   % V.catsVersion,
-      "org.typelevel"  %% "cats-core"   % V.catsVersion,
-      "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
-      "co.fs2"         %% "fs2-core"    % "3.6.1",
-      "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.16.0" % Test
+      "org.typelevel"  %% "cats-free"   % V.cats,
+      "org.typelevel"  %% "cats-core"   % V.cats,
+      "org.typelevel"  %% "cats-effect" % V.catsEffect,
+      "co.fs2"         %% "fs2-core"    % V.fs2,
+      "org.scalatest"  %% "scalatest"   % V.scalaTest % Test,
+      "org.scalacheck" %% "scalacheck"  % V.scalaCheck % Test
     ),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
@@ -206,13 +217,13 @@ lazy val zio = (project in file("zio"))
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-core"        % V.catsVersion,
-      "org.typelevel"  %% "cats-effect"      % V.catsEffectVersion,
-      "dev.zio"        %% "zio"              % zioVersion,
-      "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
-      "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
-      "org.scalacheck" %% "scalacheck"       % "1.16.0"   % Test
+      "org.typelevel"  %% "cats-core"        % V.cats,
+      "org.typelevel"  %% "cats-effect"      % V.catsEffect,
+      "dev.zio"        %% "zio"              % V.zio,
+      "dev.zio"        %% "zio-streams"      % V.zio % Provided,
+      "dev.zio"        %% "zio-interop-cats" % V.zioInteropCats,
+      "org.scalatest"  %% "scalatest"        % V.scalaTest % Test,
+      "org.scalacheck" %% "scalacheck"       % V.scalaCheck % Test
     ),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
@@ -233,10 +244,10 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.typelevel"      %% "cats-free"                    % V.catsVersion,
-      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
-      "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
-      "org.scalacheck"     %% "scalacheck"                   % "1.16.0" % Test
+      "org.typelevel"      %% "cats-free"                    % V.cats,
+      "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % V.alpakka,
+      "org.scalatest"      %% "scalatest"                    % V.scalaTest % Test,
+      "org.scalacheck"     %% "scalacheck"                   % V.scalaCheck % Test
     ),
     Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
@@ -255,10 +266,10 @@ lazy val pekko = (project in file("pekko"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.typelevel"    %% "cats-free"                 % V.catsVersion,
-      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.0",
-      "org.scalatest"    %% "scalatest"                 % "3.2.9"  % Test,
-      "org.scalacheck"   %% "scalacheck"                % "1.16.0" % Test
+      "org.typelevel"    %% "cats-free"                 % V.cats,
+      "org.apache.pekko" %% "pekko-connectors-dynamodb" % V.pekko,
+      "org.scalatest"    %% "scalatest"                 % V.scalaTest  % Test,
+      "org.scalacheck"   %% "scalacheck"                % V.scalaCheck % Test
     ),
     Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
@@ -276,10 +287,10 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda"        % "joda-convert" % "2.2.3"  % Provided,
-      "joda-time"       % "joda-time"    % "2.12.5",
-      "org.scalatest"  %% "scalatest"    % "3.2.15"  % Test,
-      "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
+      "org.joda"        % "joda-convert" % V.jodaConvert  % Provided,
+      "joda-time"       % "joda-time"    % V.jodaTime,
+      "org.scalatest"  %% "scalatest"    % V.scalaTest  % Test,
+      "org.scalacheck" %% "scalacheck"   % V.scalaCheck % Test
     )
   )
   .dependsOn(scanamo)
