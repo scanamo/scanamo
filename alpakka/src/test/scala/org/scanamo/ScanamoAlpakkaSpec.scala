@@ -43,11 +43,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(result)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow")))))
           )
-        )
+        }
     }
   }
 
@@ -63,11 +63,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(result)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             (Some(Right(Farmer("Maggot", 75, Farm(List("dog"))))), true)
           )
-        )
+        }
     }
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S, "number" -> N) { t =>
@@ -78,7 +78,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         e <- engines.get("name" === "Thomas" and "number" === 1)
       } yield e
 
-      scanamo.exec(result).runForeach(_ should equal(Some(Right(Engine("Thomas", 1)))))
+      scanamo.exec(result).runForeach { x =>
+        val _ = x should equal(Some(Right(Engine("Thomas", 1))))
+      }
     }
   }
 
@@ -91,7 +93,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         c <- cities.consistently.get("name" === "Nashville")
       } yield c
 
-      scanamo.exec(result).runForeach(_ should equal(Some(Right(City("Nashville", "US")))))
+      scanamo.exec(result).runForeach { x =>
+        val _ = x should equal(Some(Right(City("Nashville", "US"))))
+      }
     }
   }
 
@@ -105,7 +109,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
           _ <- farmers.delete("name" === "McGregor")
           f <- farmers.get("name" === "McGregor")
         } yield f
-      }.runForeach(_ should equal(None))
+      }.runForeach { x =>
+        val _ = x should equal(None)
+      }
     }
   }
 
@@ -125,7 +131,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         fs <- farmers.scan()
       } yield fs
 
-      scanamo.exec(ops).runForeach(_ should equal(List.empty))
+      scanamo.exec(ops).runForeach { x =>
+        val _ = x should equal(List.empty)
+      }
     }
   }
 
@@ -138,7 +146,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         fs <- forecasts.scan()
       } yield fs
 
-      scanamo.exec(ops).runForeach(_ should equal(List(Right(Forecast("London", "Sun", None)))))
+      scanamo.exec(ops).runForeach { x =>
+        val _ = x should equal(List(Right(Forecast("London", "Sun", None))))
+      }
     }
   }
 
@@ -158,11 +168,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Forecast("London", "Rain", Some("umbrella"))), Right(Forecast("Birmingham", "Sun", None)))
           )
-        )
+        }
     }
   }
 
@@ -178,11 +188,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Bear("Pooh", "honey", None)), Right(Bear("Yogi", "picnic baskets", None)))
           )
-        )
+        }
     }
 
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
@@ -192,7 +202,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         ls <- lemmings.scan()
       } yield ls
 
-      scanamo.exec(ops).runForeach(_.size should equal(100))
+      scanamo.exec(ops).runForeach { x =>
+        val _ = x.size should equal(100)
+      }
     }
   }
 
@@ -204,7 +216,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         _ <- bears.put(Bear("Yogi", "picnic baskets", None))
         bs <- bears.limit(1).scan()
       } yield bs
-      scanamo.exec(ops).runForeach(_ should equal(List(Right(Bear("Pooh", "honey", None)))))
+      scanamo.exec(ops).runForeach { x =>
+        val _ = x should equal(List(Right(Bear("Pooh", "honey", None))))
+      }
     }
   }
 
@@ -219,11 +233,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
       } yield bs
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Bear("Graham", "quinoa", Some("Guardianista"))))
           )
-        )
+        }
     }
   }
 
@@ -243,11 +257,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Bear("Yogi", "picnic baskets", Some("Kanga"))), Right(Bear("Pooh", "honey", Some("Winnie"))))
           )
-        )
+        }
     }
   }
 
@@ -266,8 +280,8 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             (
               List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2)), Right(Animal("Pig", 3))),
               List(Right(Animal("Pig", 1)), Right(Animal("Pig", 2))),
@@ -276,7 +290,7 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
               List(Right(Animal("Pig", 2)), Right(Animal("Pig", 3)))
             )
           )
-        )
+        }
     }
 
     LocalDynamoDB.usingRandomTable(client)("mode" -> S, "line" -> S) { t =>
@@ -294,11 +308,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Transport("Underground", "Central", "Red")), Right(Transport("Underground", "Circle", "Yellow")))
           )
-        )
+        }
     }
   }
 
@@ -318,11 +332,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(result)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Transport("Underground", "Central", "Red")))
           )
-        )
+        }
     }
   }
 
@@ -351,11 +365,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
         scanamo
           .exec(result)
-          .runForeach(
-            _ should equal(
+          .runForeach { x =>
+            val _ = x should equal(
               List(Right(Transport("Underground", "Northern", "Black")))
             )
-          )
+          }
     }
   }
 
@@ -387,8 +401,8 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
         scanamo
           .exec(ops)
-          .runForeach(
-            _ should equal(
+          .runForeach { x =>
+            val _ = x should equal(
               (
                 List(Right(CamdenTown), Right(GoldersGreen), Right(Hainault)),
                 List.empty,
@@ -397,7 +411,7 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
                 List.empty
               )
             )
-          )
+          }
     }
   }
 
@@ -411,11 +425,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
       } yield farmerWithNoAge
       scanamo
         .exec(farmerOps)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Farmer("Fred", 20, Farm(Nil))))
           )
-        )
+        }
     }
   }
 
@@ -427,7 +441,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         rs <- rabbits.scan()
       } yield rs
 
-      scanamo.exec(result).runForeach(_.size should equal(100))
+      scanamo.exec(result).runForeach { x =>
+        val _ = x.size should equal(100)
+      }
     }
   }
 
@@ -447,14 +463,14 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
           fs1 <- farmers.getAll(UniqueKeys(KeyList("name", Set("Boggis", "Bean"))))
           fs2 <- farmers.getAll("name" in Set("Boggis", "Bean"))
         } yield (fs1, fs2))
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             (
               Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey"))))),
               Set(Right(Farmer("Boggis", 43, Farm(List("chicken")))), Right(Farmer("Bean", 55, Farm(List("turkey")))))
             )
           )
-        )
+        }
     }
 
     LocalDynamoDB.usingRandomTable(client)("actor" -> S, "regeneration" -> N) { t =>
@@ -465,7 +481,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
           _ <- doctors.putAll(Set(Doctor("McCoy", 9), Doctor("Ecclestone", 10), Doctor("Ecclestone", 11)))
           ds <- doctors.getAll("actor" -> "regeneration" =*= Set("McCoy" -> 9, "Ecclestone" -> 11))
         } yield ds)
-        .runForeach(_ should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11)))))
+        .runForeach { x =>
+          val _ = x should equal(Set(Right(Doctor("McCoy", 9)), Right(Doctor("Ecclestone", 11))))
+        }
     }
   }
 
@@ -479,7 +497,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
           _ <- farmsTable.putAll(farms)
           fs <- farmsTable.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
         } yield fs)
-        .runForeach(_ should equal(farms.map(Right(_))))
+        .runForeach { x =>
+          val _ = x should equal(farms.map(Right(_)))
+        }
     }
   }
 
@@ -493,7 +513,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
           _ <- farmsTable.putAll(farms)
           fs <- farmsTable.consistently.getAll(UniqueKeys(KeyList("id", farms.map(_.id))))
         } yield fs)
-        .runForeach(_ should equal(farms.map(Right(_))))
+        .runForeach { x =>
+          val _ = x should equal(farms.map(Right(_)))
+        }
     }
   }
 
@@ -507,11 +529,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(farmerOps)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow")))))
           )
-        )
+        }
     }
   }
 
@@ -524,11 +546,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(farmerOps)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             None
           )
-        )
+        }
     }
   }
 
@@ -545,11 +567,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(farmerOps)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken")))))
           )
-        )
+        }
     }
   }
 
@@ -567,11 +589,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
       } yield farmerButch
       scanamo
         .exec(farmerOps)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             Some(Right(Farmer("Butch", 57, Farm(List("chicken")))))
           )
-        )
+        }
     }
   }
 
@@ -588,11 +610,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Gremlin(1, false)))
           )
-        )
+        }
     }
   }
 
@@ -607,11 +629,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec[List[Either[DynamoReadError, Item]]](ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Item("one")), Right(Item("two")))
           )
-        )
+        }
     }
   }
 
@@ -629,11 +651,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
         scanamo
           .exec[List[Either[DynamoReadError, Item]]](ops)
-          .runForeach(
-            _ should equal(
+          .runForeach { x =>
+            val _ = x should equal(
               List(Right(Item("one")), Right(Item("two")))
             )
-          )
+          }
       }
     }
   }
@@ -657,15 +679,15 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec[List[Either[DynamoReadError, Forecast]]](ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(
               Right(Forecast("Amsterdam", "Cloud", None)),
               Right(Forecast("London", "Rain", None)),
               Right(Forecast("Manchester", "Rain", None))
             )
           )
-        )
+        }
     }
   }
 
@@ -694,14 +716,14 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
         scanamo
           .exec[(List[Either[DynamoReadError, Gremlin]], List[Either[DynamoReadError, Forecast]])](ops)
-          .runForeach(
-            _ should equal(
+          .runForeach { x =>
+            val _ = x should equal(
               (
                 List(Right(Gremlin(2, wet = true)), Right(Gremlin(1, wet = false))),
                 List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None)))
               )
             )
-          )
+          }
       }
     }
   }
@@ -725,11 +747,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
       scanamo
         .exec(ops)
-        .runForeach(
-          _ should equal(
+        .runForeach { x =>
+          val _ = x should equal(
             List(Right(Forecast("Manchester", "Rain", None)))
           )
-        )
+        }
     }
   }
 
@@ -758,11 +780,11 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
 
         scanamo
           .exec(ops)
-          .runForeach(
-            _ should equal(
+          .runForeach { x =>
+            val _ = x should equal(
               (List(Right(Gremlin(1, wet = false))), List(Right(Forecast("Amsterdam", "Fog", None))))
             )
-          )
+          }
       }
     }
   }
@@ -776,7 +798,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         fs <- forecasts.scan()
       } yield fs
 
-      scanamo.exec(ops).runForeach(_ should equal(List(Right(Forecast("London", "Sun", Some("umbrella"))))))
+      scanamo.exec(ops).runForeach { x =>
+        val _ = x should equal(List(Right(Forecast("London", "Sun", Some("umbrella")))))
+      }
     }
   }
 
@@ -789,7 +813,9 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
         fs <- forecasts.scan()
       } yield fs
 
-      scanamo.exec(ops).runForeach(_ should equal(List(Right(Forecast("London", "Sun", Some("shades"))))))
+      scanamo.exec(ops).runForeach { x =>
+        val _ = x should equal(List(Right(Forecast("London", "Sun", Some("shades")))))
+      }
     }
   }
 }

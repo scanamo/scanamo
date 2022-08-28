@@ -1,23 +1,27 @@
 package org.scanamo
 
+import cats.implicits.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
-import org.scanamo.query._
-import org.scanamo.fixtures._
-import org.scanamo.generic.auto._
-import org.scanamo.query._
-import org.scanamo.syntax._
-import cats.implicits._
-import zio.Runtime.default._
-import zio.stream.interop.catz._
-import zio.stream.{ Sink, Stream }
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.query.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
+import zio.stream.interop.catz.*
+import zio.stream.{ Stream, ZSink }
+import zio.{ IO, Runtime, Unsafe }
 
 class ScanamoZioSpec extends AnyFunSpec with Matchers {
   val client = LocalDynamoDB.client()
   val zio = ScanamoZio(client)
+
+  def unsafeRun[A](effect: IO[DynamoDbException, A]) =
+    Unsafe.unsafe { implicit unsafe =>
+      Runtime.default.unsafe.run(effect).getOrThrowFiberFailure()
+    }
 
   it("should put asynchronously") {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
@@ -200,7 +204,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       } yield list
 
       unsafeRun(
-        zio.execT(ScanamoZio.ToStream)(ops).run(Sink.collectAll[List[Either[DynamoReadError, Item]]])
+        zio.execT(ScanamoZio.ToStream)(ops).run(ZSink.collectAll[List[Either[DynamoReadError, Item]]])
       ) should contain theSameElementsAs expected
     }
   }
