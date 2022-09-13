@@ -27,7 +27,6 @@ object TableTest {
   case class Thing2(a: String, maybe: Option[Int])
   case class Turnip(size: Int, description: Option[String])
 }
-
 class TableTest extends AnyFunSpec with Matchers {
   import TableTest._
 
@@ -45,7 +44,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Transport("Underground", "Central", "Red")
           )
         )
-        results <- transport.query("mode" === "Underground" and ("line" beginsWith "C"))
+        results <- transport.query(AttributeName.of("mode") === "Underground" and ("line" beginsWith "C"))
       } yield results.toList
       scanamo.exec(operations) should be(
         List(Right(Transport("Underground", "Central", "Red")), Right(Transport("Underground", "Circle", "Yellow")))
@@ -81,7 +80,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Transport("Underground", "Central", "Red")
           )
         )
-        MagentaLine <- transport.index(i).query("colour" === "Magenta")
+        MagentaLine <- transport.index(i).query(AttributeName.of("colour") === "Magenta")
       } yield MagentaLine.toList
       scanamo.exec(operations) should be(List(Right(Transport("Underground", "Metropolitan", "Magenta"))))
     }
@@ -100,7 +99,7 @@ class TableTest extends AnyFunSpec with Matchers {
             GithubProject("guardian", "scanamo", "Scala", "Apache 2")
           )
         )
-        scalaMIT <- githubProjects.index(i).query("language" === "Scala" and ("license" === "MIT"))
+        scalaMIT <- githubProjects.index(i).query(AttributeName.of("language") === "Scala" and (AttributeName.of("license") === "MIT"))
       } yield scalaMIT.toList
       scanamo.exec(operations) should be(
         List(
@@ -118,7 +117,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val forecast = Table[Forecast](t)
       val operations = for {
         _ <- forecast.put(Forecast("London", "Rain",None))
-        updated <- forecast.update("location" === "London", set("weather", "Sun"))
+        updated <- forecast.update(AttributeName.of("location") === "London", set("weather", "Sun"))
       } yield updated
       scanamo.exec(operations) should be(Right(Forecast("London", "Sun",None)))
     }
@@ -131,8 +130,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val characters = Table[Character](t)
       val operations = for {
         _ <- characters.put(Character("The Doctor", List("Ecclestone", "Tennant", "Smith")))
-        _ <- characters.update("name" === "The Doctor", append("actors", "Capaldi"))
-        _ <- characters.update("name" === "The Doctor", prepend("actors", "McCoy"))
+        _ <- characters.update(AttributeName.of("name") === "The Doctor", append("actors", "Capaldi"))
+        _ <- characters.update(AttributeName.of("name") === "The Doctor", prepend("actors", "McCoy"))
         results <- characters.scan()
       } yield results.toList
       scanamo.exec(operations) should be(
@@ -147,8 +146,8 @@ class TableTest extends AnyFunSpec with Matchers {
     LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
       val characters = Table[Character](t)
       val operations = for {
-        _ <- characters.update("name" === "James Bond", append("actors", "Craig"))
-        results <- characters.query("name" === "James Bond")
+        _ <- characters.update(AttributeName.of("name") === "James Bond", append("actors", "Craig"))
+        results <- characters.query(AttributeName.of("name") === "James Bond")
       } yield results.toList
       scanamo.exec(operations) should be(List(Right(Character("James Bond", List("Craig")))))
     }
@@ -160,9 +159,9 @@ class TableTest extends AnyFunSpec with Matchers {
       val fruits = Table[Fruit](t)
       val operations = for {
         _ <- fruits.put(Fruit("watermelon", List("USA")))
-        _ <- fruits.update("kind" === "watermelon", appendAll("sources", List("China", "Turkey")))
-        _ <- fruits.update("kind" === "watermelon", prependAll("sources", List("Brazil")))
-        results <- fruits.query("kind" === "watermelon")
+        _ <- fruits.update(AttributeName.of("kind") === "watermelon", appendAll("sources", List("China", "Turkey")))
+        _ <- fruits.update(AttributeName.of("kind") === "watermelon", prependAll("sources", List("Brazil")))
+        results <- fruits.query(AttributeName.of("kind") === "watermelon")
       } yield results.toList
       scanamo.exec(operations) should be(List(Right(Fruit("watermelon", List("Brazil", "USA", "China", "Turkey")))))
     }
@@ -174,7 +173,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val foos = Table[Foo](t)
       val operations = for {
         _ <- foos.put(Foo("x", 0, List("First")))
-        updated <- foos.update("name" === "x", append("l", "Second") and set("bar", 1))
+        updated <- foos.update(AttributeName.of("name") === "x", append("l", "Second") and set("bar", 1))
       } yield updated
       scanamo.exec(operations) should be(Right(Foo("x", 1, List("First", "Second"))))
     }
@@ -187,8 +186,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val bars = Table[Bar](t)
       val operations = for {
         _ <- bars.put(Bar("x", 1L, Set("First")))
-        _ <- bars.update("name" === "x", add("counter", 10L) and add("set", Set("Second")))
-        updatedBar <- bars.update("name" === "x", delete("set", Set("First")))
+        _ <- bars.update(AttributeName.of("name") === "x", add("counter", 10L) and add("set", Set("Second")))
+        updatedBar <- bars.update(AttributeName.of("name") === "x", delete("set", Set("First")))
       } yield updatedBar
       scanamo.exec(operations) should be(Right(Bar("x", 11, Set("Second"))))
     }
@@ -202,7 +201,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val operations = for {
         _ <- outers.put(Outer(id, Middle("x", 1L, Inner("alpha"), List(1, 2))))
         updatedOuter <-
-          outers.update("id" === id, set("middle" \ "inner" \ "session", "beta") and add(("middle" \ "list")(1), 1))
+          outers.update(AttributeName.of("id") === id, set("middle" \ "inner" \ "session", "beta") and add(("middle" \ "list")(1), 1))
       } yield updatedOuter
       scanamo.exec(operations) should be(Right(Outer(id, Middle("x", 1, Inner("beta"), List(1, 3)))))
     }
@@ -214,7 +213,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val things = Table[Thing](t)
       val operations = for {
         _ <- things.put(Thing("a1", 3, None))
-        updated <- things.update("id" === "a1", setFrom("optional", "mandatory"))
+        updated <- things.update(AttributeName.of("id") === "a1", setFrom("optional", "mandatory"))
       } yield updated
       scanamo.exec(operations) should be(Right(Thing("a1", 3, Some(3))))
     }
@@ -232,7 +231,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Transport("Underground", "Central", "Red")
           )
         )
-        results <- transport.limit(1).query("mode" === "Underground" and ("line" beginsWith "C"))
+        results <- transport.limit(1).query(AttributeName.of("mode") === "Underground" and ("line" beginsWith "C"))
       } yield results.toList
       scanamo.exec(operations) should be(List(Right(Transport("Underground", "Central", "Red"))))
     }
@@ -248,9 +247,9 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- cityTable.putAll(
           Set(City("Nashville", "US"), City("Rome", "IT"), City("Siena", "IT"), City("Dar es Salaam", "TZ"))
         )
-        get <- cityTable.consistently.get("country" === "US" and "name" === "Nashville")
+        get <- cityTable.consistently.get(AttributeName.of("country") === "US" and AttributeName.of("name") === "Nashville")
         scan <- cityTable.consistently.scan()
-        query <- cityTable.consistently.query("country" === "IT")
+        query <- cityTable.consistently.query(AttributeName.of("country") === "IT")
       } yield (get, scan, query)
       scanamo.exec(ops)
     }
@@ -273,9 +272,9 @@ class TableTest extends AnyFunSpec with Matchers {
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
-        _ <- farmersTable.when("age" === 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
-        _ <- farmersTable.when("age" === 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
-        farmerWithNewStock <- farmersTable.get("name" === "McDonald")
+        _ <- farmersTable.when(AttributeName.of("age") === 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
+        _ <- farmersTable.when(AttributeName.of("age") === 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
+        farmerWithNewStock <- farmersTable.get(AttributeName.of("name") === "McDonald")
       } yield farmerWithNewStock
       scanamo.exec(farmerOps) should be(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"), 30)))))
     }
@@ -293,7 +292,7 @@ class TableTest extends AnyFunSpec with Matchers {
           farmersTable
             .when(AttributeName.of("farm") \ "animals" contains "chicken")
             .put(Farmer("McDonald", 156L, Farm(List("veals", "chicken"), 70)))
-        farmerWithNewStock <- farmersTable.get("name" === "McDonald")
+        farmerWithNewStock <- farmersTable.get(AttributeName.of("name") === "McDonald")
       } yield farmerWithNewStock
       scanamo.exec(farmerOps) should be(Some(Right(Farmer("McDonald", 156, Farm(List("veals", "chicken"), 70)))))
     }
@@ -351,10 +350,10 @@ class TableTest extends AnyFunSpec with Matchers {
       val compoundTable = Table[Compound](t)
       val ops = for {
         _ <- compoundTable.putAll(Set(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
-        _ <- compoundTable.when(Condition(attributeExists("maybe")) and "a" === "alpha").put(Compound("alpha", Some(2)))
-        _ <- compoundTable.when(Condition(attributeExists("maybe")) and "a" === "beta").put(Compound("beta", Some(3)))
+        _ <- compoundTable.when(Condition(attributeExists("maybe")) and AttributeName.of("a") === "alpha").put(Compound("alpha", Some(2)))
+        _ <- compoundTable.when(Condition(attributeExists("maybe")) and AttributeName.of("a") === "beta").put(Compound("beta", Some(3)))
         _ <-
-          compoundTable.when(Condition("a" === "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
+          compoundTable.when(Condition(AttributeName.of("a") === "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
         compounds <- compoundTable.scan()
       } yield compounds
       scanamo.exec(ops).toList should be(
@@ -368,11 +367,11 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- choicesTable.putAll(Set(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
         _ <-
           choicesTable
-            .when(Condition("description" === "cake") or Condition("description" === "death"))
+            .when(Condition(AttributeName.of("description") === "cake") or Condition(AttributeName.of("description") === "death"))
             .put(Choice(1, "victoria sponge"))
         _ <-
           choicesTable
-            .when(Condition("description" === "cake") or Condition("description" === "death"))
+            .when(Condition(AttributeName.of("description") === "cake") or Condition(AttributeName.of("description") === "death"))
             .put(Choice(2, "victoria sponge"))
         choices <- choicesTable.scan()
       } yield choices
@@ -388,8 +387,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val gremlinsTable = Table[Gremlin](t)
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, false)))
-        _ <- gremlinsTable.when("wet" === true).delete("number" === 1)
-        _ <- gremlinsTable.when("wet" === true).delete("number" === 2)
+        _ <- gremlinsTable.when(AttributeName.of("wet") === true).delete(AttributeName.of("number") === 1)
+        _ <- gremlinsTable.when(AttributeName.of("wet") === true).delete(AttributeName.of("number") === 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
       scanamo.exec(ops).toList should be(List(Right(Gremlin(1, false, true))))
@@ -399,8 +398,8 @@ class TableTest extends AnyFunSpec with Matchers {
       val gremlinsTable = Table[Gremlin](t)
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, true)))
-        _ <- gremlinsTable.when("wet" === true).update("number" === 1, set("friendly", false))
-        _ <- gremlinsTable.when("wet" === true).update("number" === 2, set("friendly", false))
+        _ <- gremlinsTable.when(AttributeName.of("wet") === true).update(AttributeName.of("number") === 1, set("friendly", false))
+        _ <- gremlinsTable.when(AttributeName.of("wet") === true).update(AttributeName.of("number") === 2, set("friendly", false))
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
       scanamo.exec(ops).toList should be(List(Right(Gremlin(2, true, false)), Right(Gremlin(1, false, true))))
@@ -424,8 +423,8 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <-
           smallscaleFarmersTable
             .when("farm" \ "hectares" === 20L)
-            .update("name" === "McDonald", append("farm" \ "animals", "squirrel"))
-        farmerWithNewStock <- smallscaleFarmersTable.get("name" === "McDonald")
+            .update(AttributeName.of("name") === "McDonald", append("farm" \ "animals", "squirrel"))
+        farmerWithNewStock <- smallscaleFarmersTable.get(AttributeName.of("name") === "McDonald")
       } yield farmerWithNewStock
       scanamo.exec(farmerOps) should be(
         Some(Right(Farmer("McDonald", 156, Farm(List("gerbil", "hamster", "squirrel"), 20))))
@@ -441,7 +440,7 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- table.put(Bear("Pooh", "honey",None))
         _ <- table.put(Bear("Baloo", "ants",None))
         _ <- table.put(Bear("Yogi", "picnic baskets",None))
-        bears <- table.from("name" === "Baloo").scan()
+        bears <- table.from(AttributeName.of("name") === "Baloo").scan()
       } yield bears
       scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey",None)), Right(Bear("Yogi", "picnic baskets",None))))
     }
@@ -461,7 +460,7 @@ class TableTest extends AnyFunSpec with Matchers {
           )
         )
         events <-
-          table.from("type" === "play" and "tag" === "politics").query("type" === "play" and ("tag" beginsWith "p"))
+          table.from(AttributeName.of("type") === "play" and  AttributeName.of("tag") === "politics").query(AttributeName.of("type") === "play" and ("tag" beginsWith "p"))
       } yield events
       scanamo.exec(ops) should be(List(Right(Event("play", "print", 600)), Right(Event("play", "profile", 100))))
     }
@@ -518,7 +517,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Transport("Underground", "Central", "R")
           )
         )
-        linesBeginningWithC <- table.query("mode" === "Underground" and ("line" beginsWith "C"))
+        linesBeginningWithC <- table.query(AttributeName.of("mode") === "Underground" and ("line" beginsWith "C"))
       } yield linesBeginningWithC
       scanamo.exec(ops) should be(
         List(Right(Transport("Underground", "Central", "R")), Right(Transport("Underground", "Circle", "Y")))
@@ -541,7 +540,7 @@ class TableTest extends AnyFunSpec with Matchers {
             Transport("Bus", "234", "R")
           )
         )
-        res <- table.limit(1).queryRaw("mode" === "Bus" and "line" === "234")
+        res <- table.limit(1).queryRaw(AttributeName.of("mode") === "Bus" and AttributeName.of("line") === "234")
         uniqueKeyCondition =
           UniqueKeyCondition[AndEqualsCondition[KeyEquals[String], KeyEquals[String]], (AttributeName, AttributeName)]
         lastKey = uniqueKeyCondition.fromDynamoObject(("mode", "line"), DynamoObject(res.lastEvaluatedKey))
@@ -561,14 +560,13 @@ class TableTest extends AnyFunSpec with Matchers {
 
   it("Filter the results of a Scan or Query") {
 
-    case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
       val table = Table[Bear](t)
       val ops = for {
         _ <- table.put(Bear("Pooh", "honey", None))
         _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
-        honeyBears <- table.filter("favouriteFood" === "honey").scan()
-        competitiveBears <- table.filter(attributeExists("antagonist")).scan()
+        honeyBears <- table.filter(AttributeName.of("favouriteFood") === "honey").scan()
+        competitiveBears <- table.filter(attributeExists("alias")).scan()
       } yield (honeyBears, competitiveBears)
       scanamo.exec(ops) should be(
         (
@@ -591,7 +589,7 @@ class TableTest extends AnyFunSpec with Matchers {
           )
         )
         filteredStations <-
-          stationTable.filter("zone" in Set(8, 7)).query("line" === "Metropolitan" and ("name" beginsWith "C"))
+          stationTable.filter("zone" in Set(8, 7)).query(AttributeName.of("line") === "Metropolitan" and ("name" beginsWith "C"))
       } yield filteredStations
       scanamo.exec(ops) should be(
         List(
@@ -628,9 +626,9 @@ class TableTest extends AnyFunSpec with Matchers {
                   ("line" beginsWith "Metr") and
                   ("name" beginsWith "C") and
                   ("zone" between 5 and 8) and
-                  "name" === "Chorleywood"
+                  AttributeName.of("name") === "Chorleywood"
               ) or (
-                "line" === "Jubilee"
+                AttributeName.of("line") === "Jubilee"
               )
             )
             .scan()

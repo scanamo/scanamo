@@ -1,6 +1,7 @@
 package org.scanamo.generic
 import org.scanamo.DynamoFormat
 import org.scanamo.fixtures._
+import org.scanamo._
 import org.scanamo.generic.semiauto.deriveDynamoFormat
 // dummy for testing
 object auto:
@@ -23,4 +24,18 @@ object auto:
   implicit val githubProjectInst:DynamoFormat[GithubProject] = deriveDynamoFormat[GithubProject]  
   implicit val keyInst:DynamoFormat[Key] = deriveDynamoFormat[Key]
   implicit val keyInstExported:Exported[DynamoFormat[Key]] = Exported(keyInst)
+  implicit val BarInst: DynamoFormat[TableTest.Bar] = deriveDynamoFormat[TableTest.Bar]
+  implicit val CharacterInst: DynamoFormat[TableTest.Character] = deriveDynamoFormat[TableTest.Character]
+  implicit val ChoiceInst: DynamoFormat[TableTest.Choice] = deriveDynamoFormat[TableTest.Choice]
+  implicit val CompoundInst: DynamoFormat[TableTest.Compound] = deriveDynamoFormat[TableTest.Compound]
+  implicit val EventInst: DynamoFormat[TableTest.Event] = deriveDynamoFormat[TableTest.Event]
+  implicit val FooInst: DynamoFormat[TableTest.Foo] = deriveDynamoFormat[TableTest.Foo]
+  implicit val FruitInst: DynamoFormat[TableTest.Fruit] = deriveDynamoFormat[TableTest.Fruit]
+  implicit val InnerInst: DynamoFormat[TableTest.Inner] = deriveDynamoFormat[TableTest.Inner]
+  implicit val LetterInst: DynamoFormat[TableTest.Letter] = deriveDynamoFormat[TableTest.Letter]
+  implicit val MiddleInst: DynamoFormat[TableTest.Middle] = deriveDynamoFormat[TableTest.Middle]
+  implicit val OuterInst: DynamoFormat[TableTest.Outer] = deriveDynamoFormat[TableTest.Outer]
+  implicit val ThingInst: DynamoFormat[TableTest.Thing] = deriveDynamoFormat[TableTest.Thing]
+  implicit val Thing2Inst: DynamoFormat[TableTest.Thing2] = deriveDynamoFormat[TableTest.Thing2]
+  implicit val TurnipInst: DynamoFormat[TableTest.Turnip] = deriveDynamoFormat[TableTest.Turnip]
 end auto
