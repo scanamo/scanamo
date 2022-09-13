@@ -14,6 +14,17 @@
  * limitations under the License.
  */
 
-package org.scanamo
+package org.scanamo.generic
 
-private[scanamo] trait FormatDerivation
+import scala.deriving.Mirror
+import org.scanamo.{DynamoFormat,FormatDerivation}
+import scala.language.implicitConversions
+
+/** Fully automatic format derivation.
+  *
+  * Importing the contents of this package object provides [[org.scanamo.DynamoFormat]]
+  * instances for algebraic data types.
+  */
+object auto extends FormatDerivation {
+  implicit inline final def autoDerived[A](using Mirror.Of[A]): Exported[DynamoFormat[A]] = Exported(derived[A])
+}
