@@ -58,7 +58,7 @@ trait DynamoFormat[T] {
   def xmap[U](r: T => Either[DynamoReadError, U], w: U => T): DynamoFormat[U] = DynamoFormat.xmap(r, w)(this)
 }
 
-object DynamoFormat extends PlatformSpecificFormat {
+object DynamoFormat extends PlatformSpecificFormat with FormatDerivation {
   def apply[T](implicit D: DynamoFormat[T]): DynamoFormat[T] = D
 
   def build[T](r: DynamoValue => Either[DynamoReadError, T], w: T => DynamoValue): DynamoFormat[T] =
