@@ -1,5 +1,5 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
-val V = new  { 
+val V = new {
   val scala212 = "2.12.16"
   val scala213 = "2.13.8"
   val scala3 = "3.2.0"
@@ -8,9 +8,8 @@ val V = new  {
   val catsVersion = "2.6.1"
   val catsEffectVersion = "3.3.12"
 }
-val scala2xVersions = Seq(V.scala212,V.scala213)
-val allCrossVersions = Seq(V.scala212,V.scala213,V.scala3)
-
+val scala2xVersions = Seq(V.scala212, V.scala213)
+val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
 
 val zioVersion = "1.0.13"
 
@@ -58,22 +57,25 @@ def extraOptions(scalaVersion: String) =
   }
 
 lazy val scala2settings = Seq(
-    libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2,_)) => Seq(
-      "org.scala-lang"                % "scala-reflect"      % scalaVersion.value,
+  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) =>
+      Seq(
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value,
         compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
       )
-      case _ => Seq.empty
-    })
-  )
+    case _ => Seq.empty
+  })
+)
 lazy val macroSettings = Seq(
   libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
-    case Some((2,_)) => Seq(
-        "com.softwaremill.magnolia1_2" %% "magnolia"           % V.magnolia
-    )
-    case _ => Seq(
-        "com.softwaremill.magnolia1_3" %% "magnolia"           % V.magnoliaFor3
-    )
+    case Some((2, _)) =>
+      Seq(
+        "com.softwaremill.magnolia1_2" %% "magnolia" % V.magnolia
+      )
+    case _ =>
+      Seq(
+        "com.softwaremill.magnolia1_3" %% "magnolia" % V.magnoliaFor3
+      )
   })
 )
 val commonSettings = Seq(
@@ -97,7 +99,7 @@ val commonSettings = Seq(
   apiURL := Some(url("http://www.scanamo.org/latest/api/")),
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
-  Test / parallelExecution := false,
+  Test / parallelExecution := false
 )
 
 lazy val root = (project in file("."))
@@ -144,8 +146,8 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules"       %% "scala-java8-compat" % "1.0.2",
-      "org.typelevel"                %% "cats-free"          % V.catsVersion,
+      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
+      "org.typelevel"          %% "cats-free"          % V.catsVersion,
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
       "joda-time"          % "joda-time"       % "2.10.14"  % Test,
