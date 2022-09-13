@@ -23,3 +23,4 @@ object auto:
   implicit val githubProjectInst:DynamoFormat[GithubProject] = deriveDynamoFormat[GithubProject]  
   implicit val keyInst:DynamoFormat[Key] = deriveDynamoFormat[Key]
   implicit val keyInstExported:Exported[DynamoFormat[Key]] = Exported(keyInst)
+end auto

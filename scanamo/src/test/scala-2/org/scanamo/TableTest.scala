@@ -7,32 +7,24 @@ import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
+import org.scanamo.fixtures.{Bear,City,Farm,Farmer,Forecast,GithubProject,Gremlin,Station,Transport}
 import org.scanamo.generic.auto._
 import org.scanamo.ops.ScanamoOps
 
 object TableTest {
   case class Bar(name: String, counter: Long, set: Set[String])
-  case class Bear(name: String, favouriteFood: String)
   case class Character(name: String, actors: List[String])
   case class Choice(number: Int, description: String)
-  case class City(country: String, name: String)
   case class Compound(a: String, maybe: Option[Int])
   case class Event(`type`: String, tag: String, count: Int)
-  case class Farm(animals: List[String], hectares: Int)
-  case class Farmer(name: String, age: Long, farm: Farm)
   case class Foo(name: String, bar: Int, l: List[String])
-  case class Forecast(location: String, weather: String)
   case class Fruit(kind: String, sources: List[String])
-  case class GithubProject(organisation: String, repository: String, language: String, license: String)
-  case class Gremlin(number: Int, wet: Boolean, friendly: Boolean)
   case class Inner(session: String)
   case class Letter(roman: String, greek: String)
   case class Middle(name: String, counter: Long, inner: Inner, list: List[Int])
   case class Outer(id: java.util.UUID, middle: Middle)
-  case class Station(line: String, name: String, zone: Int)
   case class Thing(id: String, mandatory: Int, optional: Option[Int])
   case class Thing2(a: String, maybe: Option[Int])
-  case class Transport(mode: String, line: String, colour: String)
   case class Turnip(size: Int, description: Option[String])
 }
 
@@ -125,10 +117,10 @@ class TableTest extends AnyFunSpec with Matchers {
     LocalDynamoDB.withRandomTable(client)("location" -> S) { t =>
       val forecast = Table[Forecast](t)
       val operations = for {
-        _ <- forecast.put(Forecast("London", "Rain"))
+        _ <- forecast.put(Forecast("London", "Rain",None))
         updated <- forecast.update("location" === "London", set("weather", "Sun"))
       } yield updated
-      scanamo.exec(operations) should be(Right(Forecast("London", "Sun")))
+      scanamo.exec(operations) should be(Right(Forecast("London", "Sun",None)))
     }
 
   }
@@ -254,7 +246,7 @@ class TableTest extends AnyFunSpec with Matchers {
       val cityTable = Table[City](t)
       val ops = for {
         _ <- cityTable.putAll(
-          Set(City("US", "Nashville"), City("IT", "Rome"), City("IT", "Siena"), City("TZ", "Dar es Salaam"))
+          Set(City("Nashville", "US"), City("Rome", "IT"), City("Siena", "IT"), City("Dar es Salaam", "TZ"))
         )
         get <- cityTable.consistently.get("country" === "US" and "name" === "Nashville")
         scan <- cityTable.consistently.scan()
@@ -262,17 +254,17 @@ class TableTest extends AnyFunSpec with Matchers {
       } yield (get, scan, query)
       scanamo.exec(ops)
     }
-    get should be(Some(Right(City("US", "Nashville"))))
+    get should be(Some(Right(City("Nashville", "US"))))
     scan should be(
       List(
-        Right(City("US", "Nashville")),
-        Right(City("IT", "Rome")),
-        Right(City("IT", "Siena")),
-        Right(City("TZ", "Dar es Salaam"))
+        Right(City("Nashville", "US")),
+        Right(City("Rome", "IT")),
+        Right(City("Siena", "IT")),
+        Right(City("Dar es Salaam", "TZ"))
       )
     )
 
-    query should be(List(Right(City("IT", "Rome")), Right(City("IT", "Siena"))))
+    query should be(List(Right(City("Rome", "IT")), Right(City("Siena", "IT"))))
   }
 
   it("Performs the chained operation, `put` if the condition is met") {
@@ -446,12 +438,12 @@ class TableTest extends AnyFunSpec with Matchers {
     LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
       val table = Table[Bear](t)
       val ops = for {
-        _ <- table.put(Bear("Pooh", "honey"))
-        _ <- table.put(Bear("Baloo", "ants"))
-        _ <- table.put(Bear("Yogi", "picnic baskets"))
+        _ <- table.put(Bear("Pooh", "honey",None))
+        _ <- table.put(Bear("Baloo", "ants",None))
+        _ <- table.put(Bear("Yogi", "picnic baskets",None))
         bears <- table.from("name" === "Baloo").scan()
       } yield bears
-      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets"))))
+      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey",None)), Right(Bear("Yogi", "picnic baskets",None))))
     }
 
     LocalDynamoDB.withRandomTable(client)("type" -> S, "tag" -> S) { t =>
@@ -482,11 +474,11 @@ class TableTest extends AnyFunSpec with Matchers {
       import org.scanamo.generic.auto._
       val table = Table[Bear](t)
       val ops = for {
-        _ <- table.put(Bear("Pooh", "honey"))
-        _ <- table.put(Bear("Yogi", "picnic baskets"))
+        _ <- table.put(Bear("Pooh", "honey",None))
+        _ <- table.put(Bear("Yogi", "picnic baskets",None))
         bears <- table.scan()
       } yield bears
-      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey")), Right(Bear("Yogi", "picnic baskets"))))
+      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey",None)), Right(Bear("Yogi", "picnic baskets",None))))
     }
   }
 
