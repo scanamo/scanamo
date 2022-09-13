@@ -63,8 +63,7 @@ lazy val scala2settings = Seq(
       "org.scala-lang"                % "scala-reflect"      % scalaVersion.value,
         compilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3")
       )
-      case _ => Seq(
-      )
+      case _ => Seq.empty
     })
   )
 lazy val macroSettings = Seq(
