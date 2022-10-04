@@ -139,7 +139,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.scala-lang"                % "scala-reflect"      % scalaVersion.value,
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
-      "joda-time"          % "joda-time"       % "2.10.14"  % Test,
+      "joda-time"          % "joda-time"       % "2.11.1"   % Test,
       "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
       "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
       "org.scalacheck"    %% "scalacheck"      % "1.16.0"   % Test
@@ -229,7 +229,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.2"  % Provided,
-      "joda-time"       % "joda-time"    % "2.10.14",
+      "joda-time"       % "joda-time"    % "2.11.1",
       "org.scalatest"  %% "scalatest"    % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.16.0" % Test
     )
