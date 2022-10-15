@@ -5,7 +5,7 @@ val catsVersion = "2.6.1"
 
 val catsEffectVersion = "3.3.12"
 
-val zioVersion = "1.0.13"
+val zioVersion = "1.0.17"
 
 lazy val stdOptions = Seq(
   "-deprecation",
