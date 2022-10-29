@@ -1,5 +1,7 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 ThisBuild / versionScheme := Some("early-semver")
+ThisBuild / sonatypeCredentialHost := "s01.oss.sonatype.org"
+ThisBuild / sonatypeRepository := "https://s01.oss.sonatype.org/service/local"
 val V = new {
   val scala212 = "2.12.16"
   val scala213 = "2.13.8"
