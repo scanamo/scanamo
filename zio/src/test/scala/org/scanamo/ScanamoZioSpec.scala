@@ -9,7 +9,7 @@ import org.scanamo.fixtures._
 import org.scanamo.generic.auto._
 import org.scanamo.query._
 import org.scanamo.syntax._
-import org.scanamo.fixtures.{Station}
+import org.scanamo.fixtures.Station
 import cats.implicits._
 import zio.Runtime.default._
 import zio.stream.interop.catz._
@@ -25,12 +25,12 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val farmers = Table[Farmer](t)
 
       val result = for {
-        _ <- farmers.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
+        _ <- farmers.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100)))
         f <- farmers.get("name" === "McDonald")
       } yield f
 
       unsafeRun(zio.exec(result)) should equal(
-        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"),100))))
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"), 100))))
       )
     }
   }
@@ -40,13 +40,13 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val farmers = Table[Farmer](t)
 
       val result = for {
-        _ <- farmers.put(Farmer("Maggot", 75L, Farm(List("dog"),100)))
+        _ <- farmers.put(Farmer("Maggot", 75L, Farm(List("dog"), 100)))
         r1 <- farmers.get(UniqueKey(KeyEquals("name", "Maggot")))
         r2 <- farmers.get("name" === "Maggot")
       } yield (r1, r1 == r2)
 
       unsafeRun(zio.exec(result)) should equal(
-        (Some(Right(Farmer("Maggot", 75, Farm(List("dog"),100)))), true)
+        (Some(Right(Farmer("Maggot", 75, Farm(List("dog"), 100)))), true)
       )
     }
 
@@ -81,7 +81,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
 
       unsafeRun(zio.exec {
         for {
-          _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"),100)))
+          _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"), 100)))
           _ <- farmers.delete("name" === "McGregor")
           f <- farmers.get("name" === "McGregor")
         } yield f
@@ -94,9 +94,9 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val farmers = Table[Farmer](t)
 
       val dataSet = Set(
-        Farmer("Patty", 200L, Farm(List("unicorn"),100)),
-        Farmer("Ted", 40L, Farm(List("T-Rex"),100)),
-        Farmer("Jack", 2L, Farm(List("velociraptor"),100))
+        Farmer("Patty", 200L, Farm(List("unicorn"), 100)),
+        Farmer("Ted", 40L, Farm(List("T-Rex"), 100)),
+        Farmer("Jack", 2L, Farm(List("velociraptor"), 100))
       )
 
       val ops = for {
@@ -400,17 +400,23 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       unsafeRun(zio.exec(for {
         _ <- farmers.putAll(
           Set(
-            Farmer("Boggis", 43L, Farm(List("chicken"),100)),
-            Farmer("Bunce", 52L, Farm(List("goose"),100)),
-            Farmer("Bean", 55L, Farm(List("turkey"),100))
+            Farmer("Boggis", 43L, Farm(List("chicken"), 100)),
+            Farmer("Bunce", 52L, Farm(List("goose"), 100)),
+            Farmer("Bean", 55L, Farm(List("turkey"), 100))
           )
         )
         fs1 <- farmers.getAll(UniqueKeys(KeyList("name", Set("Boggis", "Bean"))))
         fs2 <- farmers.getAll("name" in Set("Boggis", "Bean"))
       } yield (fs1, fs2))) should equal(
         (
-          Set(Right(Farmer("Boggis", 43, Farm(List("chicken"),100))), Right(Farmer("Bean", 55, Farm(List("turkey"),100)))),
-          Set(Right(Farmer("Boggis", 43, Farm(List("chicken"),100))), Right(Farmer("Bean", 55, Farm(List("turkey"),100))))
+          Set(
+            Right(Farmer("Boggis", 43, Farm(List("chicken"), 100))),
+            Right(Farmer("Bean", 55, Farm(List("turkey"), 100)))
+          ),
+          Set(
+            Right(Farmer("Boggis", 43, Farm(List("chicken"), 100))),
+            Right(Farmer("Bean", 55, Farm(List("turkey"), 100)))
+          )
         )
       )
     }
@@ -453,12 +459,14 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
-        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"),100)))
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100)))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(
+          Farmer("McDonald", 50L, Farm(List("chicken", "cow"), 100))
+        )
       } yield result
 
       unsafeRun(zio.exec(farmerOps)) should equal(
-        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100))))
+        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100))))
       )
     }
   }
@@ -467,7 +475,9 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(
+          Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100))
+        )
       } yield result
 
       unsafeRun(zio.exec(farmerOps)) should equal(
@@ -481,14 +491,14 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
-        _ <- farmersTable.when("age" === 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"),100)))
-        _ <- farmersTable.when("age" === 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"),100)))
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100)))
+        _ <- farmersTable.when("age" === 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 100)))
+        _ <- farmersTable.when("age" === 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 100)))
         farmerWithNewStock <- farmersTable.get("name" === "McDonald")
       } yield farmerWithNewStock
 
       unsafeRun(zio.exec(farmerOps)) should equal(
-        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"),100))))
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"), 100))))
       )
     }
   }
@@ -498,15 +508,15 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"),100)))
-        _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"),100)))
-        _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"),100)))
-        _ <- farmersTable.when("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"),100)))
-        _ <- farmersTable.when("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"),100)))
+        _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"), 100)))
+        _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"), 100)))
+        _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"), 100)))
+        _ <- farmersTable.when("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"), 100)))
+        _ <- farmersTable.when("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"), 100)))
         farmerButch <- farmersTable.get("name" === "Butch")
       } yield farmerButch
       unsafeRun(zio.exec(farmerOps)) should equal(
-        Some(Right(Farmer("Butch", 57, Farm(List("chicken"),100))))
+        Some(Right(Farmer("Butch", 57, Farm(List("chicken"), 100))))
       )
     }
   }
@@ -516,14 +526,14 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
       val gremlinsTable = Table[Gremlin](t)
 
       val ops = for {
-        _ <- gremlinsTable.putAll(Set(Gremlin(1, false,true), Gremlin(2, true,false)))
+        _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, false)))
         _ <- gremlinsTable.when("wet" === true).delete("number" === 1)
         _ <- gremlinsTable.when("wet" === true).delete("number" === 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
 
       unsafeRun(zio.exec(ops)) should equal(
-        List(Right(Gremlin(1, false,true)))
+        List(Right(Gremlin(1, false, true)))
       )
     }
   }
@@ -596,7 +606,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         val forecastTable = Table[Forecast](t2)
 
         val ops = for {
-          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false,true), Gremlin(2, wet = true,false)))
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false, true), Gremlin(2, wet = true, false)))
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
           _ <- forecastTable.transactUpdateAll(
             List(
@@ -614,7 +624,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
 
         unsafeRun(zio.exec(ops)) should equal(
           (
-            List(Right(Gremlin(2, wet = true,false)), Right(Gremlin(1, wet = false,true))),
+            List(Right(Gremlin(2, wet = true, false)), Right(Gremlin(1, wet = false, true))),
             List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None)))
           )
         )
@@ -652,7 +662,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         val forecastTable = Table[Forecast](t2)
 
         val ops = for {
-          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false,true), Gremlin(2, wet = true,false)))
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false, true), Gremlin(2, wet = true, false)))
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
           _ <- forecastTable.transactDeleteAll(
             List(
@@ -669,7 +679,7 @@ class ScanamoZioSpec extends AnyFunSpec with Matchers {
         } yield (gremlins, forecasts)
 
         unsafeRun(zio.exec(ops)) should equal(
-          (List(Right(Gremlin(1, wet = false,true))), List(Right(Forecast("Amsterdam", "Fog", None))))
+          (List(Right(Gremlin(1, wet = false, true))), List(Right(Forecast("Amsterdam", "Fog", None))))
         )
       }
     }
