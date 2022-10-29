@@ -193,6 +193,7 @@ lazy val zio = (project in file("zio"))
   .settings(
     name := "scanamo-zio",
     commonSettings,
+    crossScalaVersions := scala2xVersions,
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
@@ -216,6 +217,7 @@ ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-java8
 lazy val alpakka = (project in file("alpakka"))
   .settings(
     commonSettings,
+    crossScalaVersions := scala2xVersions,
     publishingSettings,
     name := "scanamo-alpakka"
   )
@@ -237,6 +239,7 @@ lazy val alpakka = (project in file("alpakka"))
 lazy val joda = (project in file("joda"))
   .settings(
     commonSettings,
+    crossScalaVersions := scala2xVersions,
     publishingSettings,
     name := "scanamo-joda"
   )
@@ -253,6 +256,7 @@ lazy val joda = (project in file("joda"))
 lazy val docs = (project in file("docs"))
   .settings(
     commonSettings,
+    crossScalaVersions := allCrossVersions,
     micrositeSettings,
     noPublishSettings,
     ghpagesNoJekyll := false,
