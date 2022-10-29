@@ -84,8 +84,8 @@ val commonSettings = Seq(
   startYear := Some(2019),
   homepage := Some(url("http://www.scanamo.org/")),
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
-  scalaVersion := V.scala212,
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
+  scalaVersion := V.scala213,
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
@@ -138,7 +138,6 @@ lazy val scanamo = (project in file("scanamo"))
     commonSettings,
     publishingSettings,
     name := "scanamo",
-    scalaVersion := V.scala212,
     crossScalaVersions := allCrossVersions
   )
   .settings(scala2settings)
@@ -174,7 +173,6 @@ lazy val catsEffect = (project in file("cats"))
   .settings(
     name := "scanamo-cats-effect",
     commonSettings,
-    scalaVersion := V.scala3,
     crossScalaVersions := allCrossVersions,
     publishingSettings,
     libraryDependencies ++= List(
@@ -268,7 +266,6 @@ lazy val docs = (project in file("docs"))
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
-  Test / publishArtifact := false,
   scmInfo := Some(
     ScmInfo(
       url("https://github.com/scanamo/scanamo"),
