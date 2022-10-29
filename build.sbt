@@ -85,7 +85,6 @@ val commonSettings = Seq(
   homepage := Some(url("http://www.scanamo.org/")),
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
-  scalaVersion := V.scala213,
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
