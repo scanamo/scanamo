@@ -23,7 +23,7 @@ import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
 import org.scanamo._
 import magnolia1._
 
-private[scanamo] trait FormatDerivation extends Derivation[DynamoFormat]{
+private[scanamo] trait FormatDerivation extends Derivation[DynamoFormat] {
   type Typeclass[A] = DynamoFormat[A]
 
   type FieldName = String
@@ -39,13 +39,14 @@ private[scanamo] trait FormatDerivation extends Derivation[DynamoFormat]{
   // 5. finally, we wrap errors in [[cats.data.NonEmptyChain]] so multiple decoding errors can
   //    be accumulated
   def join[T](cc: CaseClass[Typeclass, T]): Typeclass[T] = {
-    
+
     def decodeField(o: DynamoObject, param: CaseClass.Param[Typeclass, T]): Valid[param.PType] =
       o(param.label)
         .fold[Either[DynamoReadError, param.PType]] {
           param.default.fold(param.typeclass.read(DynamoValue.nil).leftMap(_ => MissingProperty))(Right(_))
         }(param.typeclass.read(_))
-        .left.map(e => NonEmptyChain.one(param.label -> e))
+        .left
+        .map(e => NonEmptyChain.one(param.label -> e))
 
     // case objects are inlined as strings
     if (cc.isObject)

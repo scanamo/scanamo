@@ -7,7 +7,7 @@ import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
-import org.scanamo.fixtures.{Bear,City,Farm,Farmer,Forecast,GithubProject,Gremlin,Station,Transport}
+import org.scanamo.fixtures.{ Bear, City, Farm, Farmer, Forecast, GithubProject, Gremlin, Station, Transport }
 import org.scanamo.generic.auto._
 import org.scanamo.ops.ScanamoOps
 
@@ -99,7 +99,9 @@ class TableTest extends AnyFunSpec with Matchers {
             GithubProject("guardian", "scanamo", "Scala", "Apache 2")
           )
         )
-        scalaMIT <- githubProjects.index(i).query(AttributeName.of("language") === "Scala" and (AttributeName.of("license") === "MIT"))
+        scalaMIT <- githubProjects
+          .index(i)
+          .query(AttributeName.of("language") === "Scala" and (AttributeName.of("license") === "MIT"))
       } yield scalaMIT.toList
       scanamo.exec(operations) should be(
         List(
@@ -116,10 +118,10 @@ class TableTest extends AnyFunSpec with Matchers {
     LocalDynamoDB.withRandomTable(client)("location" -> S) { t =>
       val forecast = Table[Forecast](t)
       val operations = for {
-        _ <- forecast.put(Forecast("London", "Rain",None))
+        _ <- forecast.put(Forecast("London", "Rain", None))
         updated <- forecast.update(AttributeName.of("location") === "London", set("weather", "Sun"))
       } yield updated
-      scanamo.exec(operations) should be(Right(Forecast("London", "Sun",None)))
+      scanamo.exec(operations) should be(Right(Forecast("London", "Sun", None)))
     }
 
   }
@@ -201,7 +203,10 @@ class TableTest extends AnyFunSpec with Matchers {
       val operations = for {
         _ <- outers.put(Outer(id, Middle("x", 1L, Inner("alpha"), List(1, 2))))
         updatedOuter <-
-          outers.update(AttributeName.of("id") === id, set("middle" \ "inner" \ "session", "beta") and add(("middle" \ "list")(1), 1))
+          outers.update(
+            AttributeName.of("id") === id,
+            set("middle" \ "inner" \ "session", "beta") and add(("middle" \ "list")(1), 1)
+          )
       } yield updatedOuter
       scanamo.exec(operations) should be(Right(Outer(id, Middle("x", 1, Inner("beta"), List(1, 3)))))
     }
@@ -247,7 +252,9 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- cityTable.putAll(
           Set(City("Nashville", "US"), City("Rome", "IT"), City("Siena", "IT"), City("Dar es Salaam", "TZ"))
         )
-        get <- cityTable.consistently.get(AttributeName.of("country") === "US" and AttributeName.of("name") === "Nashville")
+        get <- cityTable.consistently.get(
+          AttributeName.of("country") === "US" and AttributeName.of("name") === "Nashville"
+        )
         scan <- cityTable.consistently.scan()
         query <- cityTable.consistently.query(AttributeName.of("country") === "IT")
       } yield (get, scan, query)
@@ -272,8 +279,12 @@ class TableTest extends AnyFunSpec with Matchers {
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
         _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 30)))
-        _ <- farmersTable.when(AttributeName.of("age") === 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
-        _ <- farmersTable.when(AttributeName.of("age") === 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
+        _ <- farmersTable
+          .when(AttributeName.of("age") === 156L)
+          .put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 30)))
+        _ <- farmersTable
+          .when(AttributeName.of("age") === 15L)
+          .put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 30)))
         farmerWithNewStock <- farmersTable.get(AttributeName.of("name") === "McDonald")
       } yield farmerWithNewStock
       scanamo.exec(farmerOps) should be(Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"), 30)))))
@@ -350,10 +361,16 @@ class TableTest extends AnyFunSpec with Matchers {
       val compoundTable = Table[Compound](t)
       val ops = for {
         _ <- compoundTable.putAll(Set(Compound("alpha", None), Compound("beta", Some(1)), Compound("gamma", None)))
-        _ <- compoundTable.when(Condition(attributeExists("maybe")) and AttributeName.of("a") === "alpha").put(Compound("alpha", Some(2)))
-        _ <- compoundTable.when(Condition(attributeExists("maybe")) and AttributeName.of("a") === "beta").put(Compound("beta", Some(3)))
+        _ <- compoundTable
+          .when(Condition(attributeExists("maybe")) and AttributeName.of("a") === "alpha")
+          .put(Compound("alpha", Some(2)))
+        _ <- compoundTable
+          .when(Condition(attributeExists("maybe")) and AttributeName.of("a") === "beta")
+          .put(Compound("beta", Some(3)))
         _ <-
-          compoundTable.when(Condition(AttributeName.of("a") === "gamma") and attributeExists("maybe")).put(Compound("gamma", Some(42)))
+          compoundTable
+            .when(Condition(AttributeName.of("a") === "gamma") and attributeExists("maybe"))
+            .put(Compound("gamma", Some(42)))
         compounds <- compoundTable.scan()
       } yield compounds
       scanamo.exec(ops).toList should be(
@@ -367,11 +384,19 @@ class TableTest extends AnyFunSpec with Matchers {
         _ <- choicesTable.putAll(Set(Choice(1, "cake"), Choice(2, "crumble"), Choice(3, "custard")))
         _ <-
           choicesTable
-            .when(Condition(AttributeName.of("description") === "cake") or Condition(AttributeName.of("description") === "death"))
+            .when(
+              Condition(AttributeName.of("description") === "cake") or Condition(
+                AttributeName.of("description") === "death"
+              )
+            )
             .put(Choice(1, "victoria sponge"))
         _ <-
           choicesTable
-            .when(Condition(AttributeName.of("description") === "cake") or Condition(AttributeName.of("description") === "death"))
+            .when(
+              Condition(AttributeName.of("description") === "cake") or Condition(
+                AttributeName.of("description") === "death"
+              )
+            )
             .put(Choice(2, "victoria sponge"))
         choices <- choicesTable.scan()
       } yield choices
@@ -398,8 +423,12 @@ class TableTest extends AnyFunSpec with Matchers {
       val gremlinsTable = Table[Gremlin](t)
       val ops = for {
         _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, true)))
-        _ <- gremlinsTable.when(AttributeName.of("wet") === true).update(AttributeName.of("number") === 1, set("friendly", false))
-        _ <- gremlinsTable.when(AttributeName.of("wet") === true).update(AttributeName.of("number") === 2, set("friendly", false))
+        _ <- gremlinsTable
+          .when(AttributeName.of("wet") === true)
+          .update(AttributeName.of("number") === 1, set("friendly", false))
+        _ <- gremlinsTable
+          .when(AttributeName.of("wet") === true)
+          .update(AttributeName.of("number") === 2, set("friendly", false))
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
       scanamo.exec(ops).toList should be(List(Right(Gremlin(2, true, false)), Right(Gremlin(1, false, true))))
@@ -437,12 +466,12 @@ class TableTest extends AnyFunSpec with Matchers {
     LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
       val table = Table[Bear](t)
       val ops = for {
-        _ <- table.put(Bear("Pooh", "honey",None))
-        _ <- table.put(Bear("Baloo", "ants",None))
-        _ <- table.put(Bear("Yogi", "picnic baskets",None))
+        _ <- table.put(Bear("Pooh", "honey", None))
+        _ <- table.put(Bear("Baloo", "ants", None))
+        _ <- table.put(Bear("Yogi", "picnic baskets", None))
         bears <- table.from(AttributeName.of("name") === "Baloo").scan()
       } yield bears
-      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey",None)), Right(Bear("Yogi", "picnic baskets",None))))
+      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey", None)), Right(Bear("Yogi", "picnic baskets", None))))
     }
 
     LocalDynamoDB.withRandomTable(client)("type" -> S, "tag" -> S) { t =>
@@ -460,7 +489,9 @@ class TableTest extends AnyFunSpec with Matchers {
           )
         )
         events <-
-          table.from(AttributeName.of("type") === "play" and  AttributeName.of("tag") === "politics").query(AttributeName.of("type") === "play" and ("tag" beginsWith "p"))
+          table
+            .from(AttributeName.of("type") === "play" and AttributeName.of("tag") === "politics")
+            .query(AttributeName.of("type") === "play" and ("tag" beginsWith "p"))
       } yield events
       scanamo.exec(ops) should be(List(Right(Event("play", "print", 600)), Right(Event("play", "profile", 100))))
     }
@@ -473,11 +504,11 @@ class TableTest extends AnyFunSpec with Matchers {
       import org.scanamo.generic.auto._
       val table = Table[Bear](t)
       val ops = for {
-        _ <- table.put(Bear("Pooh", "honey",None))
-        _ <- table.put(Bear("Yogi", "picnic baskets",None))
+        _ <- table.put(Bear("Pooh", "honey", None))
+        _ <- table.put(Bear("Yogi", "picnic baskets", None))
         bears <- table.scan()
       } yield bears
-      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey",None)), Right(Bear("Yogi", "picnic baskets",None))))
+      scanamo.exec(ops) should be(List(Right(Bear("Pooh", "honey", None)), Right(Bear("Yogi", "picnic baskets", None))))
     }
   }
 
@@ -589,7 +620,9 @@ class TableTest extends AnyFunSpec with Matchers {
           )
         )
         filteredStations <-
-          stationTable.filter("zone" in Set(8, 7)).query(AttributeName.of("line") === "Metropolitan" and ("name" beginsWith "C"))
+          stationTable
+            .filter("zone" in Set(8, 7))
+            .query(AttributeName.of("line") === "Metropolitan" and ("name" beginsWith "C"))
       } yield filteredStations
       scanamo.exec(ops) should be(
         List(

@@ -31,12 +31,12 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val farmers = Table[Farmer](t)
 
       val result = for {
-        _ <- farmers.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
+        _ <- farmers.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100)))
         f <- farmers.get(AttributeName.of("name") === "McDonald")
       } yield f
 
       scanamo.exec(result).futureValue should equal(
-        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"),100))))
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "cow"), 100))))
       )
     }
   }
@@ -46,13 +46,13 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val farmers = Table[Farmer](t)
 
       val result = for {
-        _ <- farmers.put(Farmer("Maggot", 75L, Farm(List("dog"),100)))
+        _ <- farmers.put(Farmer("Maggot", 75L, Farm(List("dog"), 100)))
         r1 <- farmers.get(UniqueKey(KeyEquals("name", "Maggot")))
         r2 <- farmers.get(AttributeName.of("name") === "Maggot")
       } yield (r1, r1 == r2)
 
       scanamo.exec(result).futureValue should equal(
-        (Some(Right(Farmer("Maggot", 75, Farm(List("dog"),100)))), true)
+        (Some(Right(Farmer("Maggot", 75, Farm(List("dog"), 100)))), true)
       )
     }
 
@@ -87,7 +87,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
 
       scanamo.exec {
         for {
-          _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"),100)))
+          _ <- farmers.put(Farmer("McGregor", 62L, Farm(List("rabbit"), 100)))
           _ <- farmers.delete(AttributeName.of("name") === "McGregor")
           f <- farmers.get(AttributeName.of("name") === "McGregor")
         } yield f
@@ -100,9 +100,9 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val farmers = Table[Farmer](t)
 
       val dataSet = Set(
-        Farmer("Patty", 200L, Farm(List("unicorn"),100)),
-        Farmer("Ted", 40L, Farm(List("T-Rex"),100)),
-        Farmer("Jack", 2L, Farm(List("velociraptor"),100))
+        Farmer("Patty", 200L, Farm(List("unicorn"), 100)),
+        Farmer("Ted", 40L, Farm(List("T-Rex"), 100)),
+        Farmer("Jack", 2L, Farm(List("velociraptor"), 100))
       )
 
       val ops = for {
@@ -134,7 +134,9 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
 
       val ops = for {
         _ <- forecasts.putAll(Set(Forecast("London", "Rain", None), Forecast("Birmingham", "Sun", None)))
-        _ <- forecasts.when(AttributeName.of("weather") === "Rain").update(AttributeName.of("location") === "London", set("equipment", Some("umbrella")))
+        _ <- forecasts
+          .when(AttributeName.of("weather") === "Rain")
+          .update(AttributeName.of("location") === "London", set("equipment", Some("umbrella")))
         _ <-
           forecasts
             .when(AttributeName.of("weather") === "Rain")
@@ -210,8 +212,16 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         _ <- bears.put(Bear("Graham", "quinoa", Some("Guardianista")))
         bs <- for {
           _ <- bears.index(i).limit(1).scan()
-          res2 <- bears.index(i).limit(1).from(AttributeName.of("name") === "Graham" and AttributeName.of("alias") === "Guardianista").scan()
-          res3 <- bears.index(i).limit(1).from(AttributeName.of("name") === "Yogi" and AttributeName.of("alias") === "Kanga").scan()
+          res2 <- bears
+            .index(i)
+            .limit(1)
+            .from(AttributeName.of("name") === "Graham" and AttributeName.of("alias") === "Guardianista")
+            .scan()
+          res3 <- bears
+            .index(i)
+            .limit(1)
+            .from(AttributeName.of("name") === "Yogi" and AttributeName.of("alias") === "Kanga")
+            .scan()
         } yield res2 ::: res3
       } yield bs
 
@@ -408,7 +418,9 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val farmerOps = for {
         _ <- farmersTable.put(Worker("Fred", "Perry", None))
         _ <- farmersTable.put(Worker("Fred", "McDonald", Some(54)))
-        farmerWithNoAge <- farmersTable.filter(attributeNotExists("age")).query(AttributeName.of("firstName") === "Fred")
+        farmerWithNoAge <- farmersTable
+          .filter(attributeNotExists("age"))
+          .query(AttributeName.of("firstName") === "Fred")
       } yield farmerWithNoAge
       scanamo.exec(farmerOps).futureValue should equal(
         List(Right(Worker("Fred", "Perry", None)))
@@ -436,9 +448,9 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         .exec(for {
           _ <- farmers.putAll(
             Set(
-              Farmer("Boggis", 43L, Farm(List("chicken"),100)),
-              Farmer("Bunce", 52L, Farm(List("goose"),100)),
-              Farmer("Bean", 55L, Farm(List("turkey"),100))
+              Farmer("Boggis", 43L, Farm(List("chicken"), 100)),
+              Farmer("Bunce", 52L, Farm(List("goose"), 100)),
+              Farmer("Bean", 55L, Farm(List("turkey"), 100))
             )
           )
           fs1 <- farmers.getAll(UniqueKeys(KeyList("name", Set("Boggis", "Bean"))))
@@ -446,8 +458,14 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         } yield (fs1, fs2))
         .futureValue should equal(
         (
-          Set(Right(Farmer("Boggis", 43, Farm(List("chicken"),100))), Right(Farmer("Bean", 55, Farm(List("turkey"),100)))),
-          Set(Right(Farmer("Boggis", 43, Farm(List("chicken"),100))), Right(Farmer("Bean", 55, Farm(List("turkey"),100))))
+          Set(
+            Right(Farmer("Boggis", 43, Farm(List("chicken"), 100))),
+            Right(Farmer("Bean", 55, Farm(List("turkey"), 100)))
+          ),
+          Set(
+            Right(Farmer("Boggis", 43, Farm(List("chicken"), 100))),
+            Right(Farmer("Bean", 55, Farm(List("turkey"), 100)))
+          )
         )
       )
     }
@@ -496,12 +514,14 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
-        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 50L, Farm(List("chicken", "cow"),100)))
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100)))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(
+          Farmer("McDonald", 50L, Farm(List("chicken", "cow"), 100))
+        )
       } yield result
 
       scanamo.exec(farmerOps).futureValue should equal(
-        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100))))
+        Some(Right(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100))))
       )
     }
   }
@@ -510,7 +530,9 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val farmersTable = Table[Farmer](t)
       val farmerOps = for {
-        result <- farmersTable.putAndReturn(PutReturn.OldValue)(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
+        result <- farmersTable.putAndReturn(PutReturn.OldValue)(
+          Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100))
+        )
       } yield result
 
       scanamo.exec(farmerOps).futureValue should equal(
@@ -524,14 +546,18 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"),100)))
-        _ <- farmersTable.when(AttributeName.of("age") === 156L).put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"),100)))
-        _ <- farmersTable.when(AttributeName.of("age") === 15L).put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"),100)))
+        _ <- farmersTable.put(Farmer("McDonald", 156L, Farm(List("sheep", "cow"), 100)))
+        _ <- farmersTable
+          .when(AttributeName.of("age") === 156L)
+          .put(Farmer("McDonald", 156L, Farm(List("sheep", "chicken"), 100)))
+        _ <- farmersTable
+          .when(AttributeName.of("age") === 15L)
+          .put(Farmer("McDonald", 156L, Farm(List("gnu", "chicken"), 100)))
         farmerWithNewStock <- farmersTable.get(AttributeName.of("name") === "McDonald")
       } yield farmerWithNewStock
 
       scanamo.exec(farmerOps).futureValue should equal(
-        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"),100))))
+        Some(Right(Farmer("McDonald", 156, Farm(List("sheep", "chicken"), 100))))
       )
     }
   }
@@ -541,15 +567,15 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val farmersTable = Table[Farmer](t)
 
       val farmerOps = for {
-        _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"),100)))
-        _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"),100)))
-        _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"),100)))
-        _ <- farmersTable.when("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"),100)))
-        _ <- farmersTable.when("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"),100)))
+        _ <- farmersTable.put(Farmer("McDonald", 55, Farm(List("sheep", "cow"), 100)))
+        _ <- farmersTable.put(Farmer("Butch", 57, Farm(List("cattle"), 100)))
+        _ <- farmersTable.put(Farmer("Wade", 58, Farm(List("chicken", "sheep"), 100)))
+        _ <- farmersTable.when("age" between 56 and 57).put(Farmer("Butch", 57, Farm(List("chicken"), 100)))
+        _ <- farmersTable.when("age" between 58 and 59).put(Farmer("Butch", 57, Farm(List("dinosaur"), 100)))
         farmerButch <- farmersTable.get(AttributeName.of("name") === "Butch")
       } yield farmerButch
       scanamo.exec(farmerOps).futureValue should equal(
-        Some(Right(Farmer("Butch", 57, Farm(List("chicken"),100))))
+        Some(Right(Farmer("Butch", 57, Farm(List("chicken"), 100))))
       )
     }
   }
@@ -559,14 +585,14 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
       val gremlinsTable = Table[Gremlin](t)
 
       val ops = for {
-        _ <- gremlinsTable.putAll(Set(Gremlin(1, false,true), Gremlin(2, true,false)))
+        _ <- gremlinsTable.putAll(Set(Gremlin(1, false, true), Gremlin(2, true, false)))
         _ <- gremlinsTable.when(AttributeName.of("wet") === true).delete(AttributeName.of("number") === 1)
         _ <- gremlinsTable.when(AttributeName.of("wet") === true).delete(AttributeName.of("number") === 2)
         remainingGremlins <- gremlinsTable.scan()
       } yield remainingGremlins
 
       scanamo.exec(ops).futureValue should equal(
-        List(Right(Gremlin(1, false,true)))
+        List(Right(Gremlin(1, false, true)))
       )
     }
   }
@@ -605,7 +631,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         val forecastTable = Table[Forecast](t2)
 
         val ops = for {
-          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false,true), Gremlin(2, wet = true,false)))
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false, true), Gremlin(2, wet = true, false)))
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
           _ <- forecastTable.transactUpdateAll(
             List(
@@ -623,7 +649,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
 
         scanamo.exec(ops).futureValue should equal(
           (
-            List(Right(Gremlin(2, wet = true,false)), Right(Gremlin(1, wet = false,true))),
+            List(Right(Gremlin(2, wet = true, false)), Right(Gremlin(1, wet = false, true))),
             List(Right(Forecast("Amsterdam", "Fog", None)), Right(Forecast("London", "Rain", None)))
           )
         )
@@ -661,7 +687,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         val forecastTable = Table[Forecast](t2)
 
         val ops = for {
-          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false,true), Gremlin(2, wet = true,false)))
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false, true), Gremlin(2, wet = true, false)))
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
           _ <- forecastTable.transactDeleteAll(
             List(
@@ -678,7 +704,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
         } yield (gremlins, forecasts)
 
         scanamo.exec(ops).futureValue should equal(
-          (List(Right(Gremlin(1, wet = false,true))), List(Right(Forecast("Amsterdam", "Fog", None))))
+          (List(Right(Gremlin(1, wet = false, true))), List(Right(Forecast("Amsterdam", "Fog", None))))
         )
       }
     }

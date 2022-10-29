@@ -22,8 +22,8 @@ import org.scanamo.DynamoFormat
 
 /** Fully automatic format derivation.
   *
-  * Importing the contents of this package object provides [[org.scanamo.DynamoFormat]]
-  * instances for algebraic data types.
+  * Importing the contents of this package object provides [[org.scanamo.DynamoFormat]] instances for algebraic data
+  * types.
   */
 package object auto extends AutoDerivation {
   implicit final def genericDerivedFormat[A]: Exported[DynamoFormat[A]] = macro materializeImpl[A]

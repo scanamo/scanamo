@@ -1,7 +1,5 @@
 package org.scanamo.generic
 
-
-
 case class Person(name: String, age: Int)
 
 trait UserShape {
@@ -34,4 +32,3 @@ case class LocationInfo(nation: Option[String],
 
 sealed trait ExampleEnum
 case object First extends ExampleEnum
-

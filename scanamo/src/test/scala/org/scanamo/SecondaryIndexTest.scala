@@ -3,12 +3,10 @@ package org.scanamo
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.generic.auto._
-import org.scanamo.fixtures.{Transport,GithubProject,Bear,Key}
+import org.scanamo.fixtures.{ Bear, GithubProject, Key, Transport }
 import org.scanamo.syntax._
 import org.scanamo.query.AttributeName
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-
-
 
 class SecondaryIndexTest extends AnyFunSpec with Matchers {
 
@@ -51,7 +49,9 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
             GithubProject("guardian", "scanamo", "Scala", "Apache 2")
           )
         )
-        scalaMIT <- githubProjects.index(i).query(AttributeName.of("language") === "Scala" and AttributeName.of("license") === "MIT")
+        scalaMIT <- githubProjects
+          .index(i)
+          .query(AttributeName.of("language") === "Scala" and AttributeName.of("license") === "MIT")
       } yield scalaMIT.toList
       scanamo.exec(operations) should be(
         List(
@@ -84,7 +84,7 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
               .limit(1)
               .descending
               .query(
-                (AttributeName.of("mode") === "Underground" and ("colour" beginsWith "Bl"))
+                AttributeName.of("mode") === "Underground" and ("colour" beginsWith "Bl")
               )
         } yield somethingBeginningWithBl.toList
         scanamo.exec(operations) should be(List(Right(Transport("Underground", "Picadilly", "Blue"))))

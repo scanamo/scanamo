@@ -15,13 +15,12 @@
  */
 
 package org.scanamo.generic
-import org.scanamo.{DynamoFormat,FormatDerivation}
+import org.scanamo.{ DynamoFormat, FormatDerivation }
 import scala.deriving.Mirror
 
 /** Semi-automatic format derivation.
   *
-  * This object provides helpers for creating [[org.scanamo.DynamoFormat]]
-  * instances for case classes.
+  * This object provides helpers for creating [[org.scanamo.DynamoFormat]] instances for case classes.
   */
 package object semiauto extends FormatDerivation:
-    inline final def deriveDynamoFormat[A](using inline A: Mirror.Of[A]): DynamoFormat[A] = derived[A]
+  final inline def deriveDynamoFormat[A](using inline A: Mirror.Of[A]): DynamoFormat[A] = derived[A]
