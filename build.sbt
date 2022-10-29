@@ -116,7 +116,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.17.209"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.17.272"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -150,7 +150,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.typelevel"          %% "cats-free"          % V.catsVersion,
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
-      "joda-time"          % "joda-time"       % "2.10.14"  % Test,
+      "joda-time"          % "joda-time"       % "2.11.1"   % Test,
       "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
       "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
       "org.scalacheck"    %% "scalacheck"      % "1.16.0"   % Test
@@ -182,7 +182,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % V.catsVersion,
       "org.typelevel"  %% "cats-core"   % V.catsVersion,
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
-      "co.fs2"         %% "fs2-core"    % "3.2.10",
+      "co.fs2"         %% "fs2-core"    % "3.2.14",
       "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.16.0" % Test
     ),
@@ -246,7 +246,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.2"  % Provided,
-      "joda-time"       % "joda-time"    % "2.10.14",
+      "joda-time"       % "joda-time"    % "2.11.1",
       "org.scalatest"  %% "scalatest"    % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.16.0" % Test
     )
