@@ -69,8 +69,8 @@ object DynamoFormat extends PlatformSpecificFormat {
 
   /** DynamoFormats for object-like structures
     *
-    * @note All data types used as the carrier type in [[Table]] operations
-    * should derive an instance from this class
+    * @note
+    *   All data types used as the carrier type in [[Table]] operations should derive an instance from this class
     */
   trait ObjectFormat[T] extends DynamoFormat[T] {
     def readObject(o: DynamoObject): Either[DynamoReadError, T]
@@ -99,8 +99,8 @@ object DynamoFormat extends PlatformSpecificFormat {
   /** Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
     * i.e. an `A` can always be converted to a `B` and vice versa.
     *
-    * If there are some values of `B` that have no corresponding value in `A`,
-    * use [[DynamoFormat.xmap]] or [[DynamoFormat.coercedXmap]].
+    * If there are some values of `B` that have no corresponding value in `A`, use [[DynamoFormat.xmap]] or
+    * [[DynamoFormat.coercedXmap]].
     */
   def iso[A, B](r: B => A, w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
     new DynamoFormat[A] {
@@ -117,8 +117,8 @@ object DynamoFormat extends PlatformSpecificFormat {
       final def write(t: A): DynamoValue = f.write(w(t))
     }
 
-  /** Returns a [[DynamoFormat]] for the case where `A` can always be converted `B`,
-    * with `write`, but `read` may throw an exception for some value of `B`
+  /** Returns a [[DynamoFormat]] for the case where `A` can always be converted `B`, with `write`, but `read` may throw
+    * an exception for some value of `B`
     */
   def coercedXmap[A, B: DynamoFormat, T >: Null <: Throwable: ClassTag](read: B => A, write: A => B): DynamoFormat[A] =
     xmap(coerce[B, A, T](read), write)
@@ -276,8 +276,8 @@ object DynamoFormat extends PlatformSpecificFormat {
       final def write(t: Option[T]): DynamoValue = t.fold(DynamoValue.nil)(f.write)
     }
 
-  /** This ensures that if, for instance, you specify an update with Some(5) rather
-    * than making the type of `Option` explicit, it doesn't fall back to auto-derivation
+  /** This ensures that if, for instance, you specify an update with Some(5) rather than making the type of `Option`
+    * explicit, it doesn't fall back to auto-derivation
     */
   implicit def someFormat[T](implicit f: DynamoFormat[T]): DynamoFormat[Some[T]] =
     new DynamoFormat[Some[T]] {
@@ -287,12 +287,12 @@ object DynamoFormat extends PlatformSpecificFormat {
       def write(t: Some[T]): DynamoValue = f.write(t.get)
     }
 
-  /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
+  /** Format for dealing with points in time stored as the number of milliseconds since Epoch.
     */
   implicit val instantAsLongFormat: DynamoFormat[Instant] =
     DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](x => Instant.ofEpochMilli(x), x => x.toEpochMilli)
 
-  /**  Format for dealing with date-times with an offset from UTC.
+  /** Format for dealing with date-times with an offset from UTC.
     */
   implicit val offsetDateTimeFormat: DynamoFormat[OffsetDateTime] =
     DynamoFormat.coercedXmap[OffsetDateTime, String, DateTimeParseException](
@@ -300,7 +300,7 @@ object DynamoFormat extends PlatformSpecificFormat {
       _.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME)
     )
 
-  /**  Format for dealing with date-times with a time zone in the ISO-8601 calendar system.
+  /** Format for dealing with date-times with a time zone in the ISO-8601 calendar system.
     */
   implicit val zonedDateTimeFormat: DynamoFormat[ZonedDateTime] =
     DynamoFormat.coercedXmap[ZonedDateTime, String, DateTimeParseException](

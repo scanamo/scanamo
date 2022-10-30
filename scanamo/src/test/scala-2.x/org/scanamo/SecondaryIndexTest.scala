@@ -89,7 +89,7 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
               .limit(1)
               .descending
               .query(
-                ("mode" === "Underground" and ("colour" beginsWith "Bl"))
+                "mode" === "Underground" and ("colour" beginsWith "Bl")
               )
         } yield somethingBeginningWithBl.toList
         scanamo.exec(operations) should be(List(Right(Transport("Underground", "Picadilly", "Blue"))))
