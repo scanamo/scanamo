@@ -7,35 +7,26 @@ import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
 import org.scanamo.query._
 import org.scanamo.syntax._
+import org.scanamo.fixtures.{ Bear, City, Farm, Farmer, Forecast, GithubProject, Gremlin, Station, Transport }
 import org.scanamo.generic.auto._
 import org.scanamo.ops.ScanamoOps
 
 object TableTest {
   case class Bar(name: String, counter: Long, set: Set[String])
-  case class Bear(name: String, favouriteFood: String)
   case class Character(name: String, actors: List[String])
   case class Choice(number: Int, description: String)
-  case class City(country: String, name: String)
   case class Compound(a: String, maybe: Option[Int])
   case class Event(`type`: String, tag: String, count: Int)
-  case class Farm(animals: List[String], hectares: Int)
-  case class Farmer(name: String, age: Long, farm: Farm)
   case class Foo(name: String, bar: Int, l: List[String])
-  case class Forecast(location: String, weather: String)
   case class Fruit(kind: String, sources: List[String])
-  case class GithubProject(organisation: String, repository: String, language: String, license: String)
-  case class Gremlin(number: Int, wet: Boolean, friendly: Boolean)
   case class Inner(session: String)
   case class Letter(roman: String, greek: String)
   case class Middle(name: String, counter: Long, inner: Inner, list: List[Int])
   case class Outer(id: java.util.UUID, middle: Middle)
-  case class Station(line: String, name: String, zone: Int)
   case class Thing(id: String, mandatory: Int, optional: Option[Int])
   case class Thing2(a: String, maybe: Option[Int])
-  case class Transport(mode: String, line: String, colour: String)
   case class Turnip(size: Int, description: Option[String])
 }
-
 class TableTest extends AnyFunSpec with Matchers {
   import TableTest._
 

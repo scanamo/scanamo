@@ -362,7 +362,7 @@ class ScanamoAlpakkaSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matc
   it("queries an index asynchronously with `between` sort-key condition") {
     def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
       stationTable.deleteAll(
-        UniqueKeys(MultipleKeyList(("mode", "name"), stations.map(station => (station.mode, station.name))))
+        UniqueKeys(MultipleKeyList(("mode", "name"), stations.map(station => (station.line, station.name))))
       )
 
     val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
