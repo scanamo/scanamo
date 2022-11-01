@@ -1,15 +1,14 @@
 package org.scanamo
 
-import cats.implicits._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import cats.implicits.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import org.scanamo.query._
-import org.scanamo.syntax._
-import org.scanamo.fixtures.{ Bear, City, Farm, Farmer, Forecast, GithubProject, Gremlin, Station, Transport }
-import org.scanamo.generic.auto._
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.query.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
 object TableTest {
   case class Bar(name: String, counter: Long, set: Set[String])
@@ -28,7 +27,7 @@ object TableTest {
   case class Turnip(size: Int, description: Option[String])
 }
 class TableTest extends AnyFunSpec with Matchers {
-  import TableTest._
+  import TableTest.*
 
   val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
@@ -240,8 +239,8 @@ class TableTest extends AnyFunSpec with Matchers {
   it("Perform strongly consistent read operations against this table") {
 
     val (get, scan, query) = LocalDynamoDB.withRandomTable(client)("country" -> S, "name" -> S) { t =>
-      import org.scanamo.syntax._
-      import org.scanamo.generic.auto._
+      import org.scanamo.generic.auto.*
+      import org.scanamo.syntax.*
       val cityTable = Table[City](t)
       val ops = for {
         _ <- cityTable.putAll(
@@ -469,8 +468,7 @@ class TableTest extends AnyFunSpec with Matchers {
   it("Scans all elements of a table") {
 
     LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
-      import org.scanamo._
-      import org.scanamo.generic.auto._
+      import org.scanamo.generic.auto.*
       val table = Table[Bear](t)
       val ops = for {
         _ <- table.put(Bear("Pooh", "honey"))

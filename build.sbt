@@ -15,38 +15,41 @@ lazy val stdOptions = Seq(
   "-unchecked"
 )
 
-lazy val std2xOptions = Seq(
-  "-Xsource:3", // https://docs.scala-lang.org/scala3/guides/migration/tooling-tour.html#the-scala-213-compiler
-  "-target:jvm-1.8",
-  "-Xfatal-warnings",
-  "-language:higherKinds",
-  "-language:existentials",
-  "-language:implicitConversions",
-  "-explaintypes",
-  "-Yrangepos",
+lazy val std2_12Options = Seq(
+  "-opt-warnings",
+  "-Ywarn-extra-implicit",
+  "-Ywarn-unused:_,imports",
+  "-Ywarn-unused:imports",
+  "-opt:l:inline",
+  "-opt-inline-from:<source>",
+  "-Xfatal-warnings", // lots of warnings against Scala 2.13 at the moment, so not enabling for 2.13
   "-Xfuture",
-  "-Xlint:_,-type-parameter-shadow",
+  "-Ypartial-unification",
   "-Yno-adapted-args",
   "-Ypartial-unification",
   "-Ywarn-inaccessible",
   "-Ywarn-infer-any",
   "-Ywarn-nullary-override",
-  "-Ywarn-nullary-unit",
+  "-Ywarn-nullary-unit"
+)
+
+lazy val std2xOptions = Seq(
+  "-Xsource:3", // https://docs.scala-lang.org/scala3/guides/migration/tooling-tour.html#the-scala-213-compiler
+  "-target:jvm-1.8",
+  "-language:higherKinds",
+  "-language:existentials",
+  "-language:implicitConversions",
+  "-explaintypes",
+  "-Yrangepos",
+  "-Xlint:_,-type-parameter-shadow",
   "-Ywarn-numeric-widen",
   "-Ywarn-value-discard"
 )
 
 def extraOptions(scalaVersion: String) =
   CrossVersion.partialVersion(scalaVersion) match {
-    case Some((2, 12)) =>
-      Seq(
-        "-opt-warnings",
-        "-Ywarn-extra-implicit",
-        "-Ywarn-unused:_,imports",
-        "-Ywarn-unused:imports",
-        "-opt:l:inline",
-        "-opt-inline-from:<source>"
-      ) ++ std2xOptions
+    case Some((2, scala2subVersion)) =>
+      std2xOptions ++ (if (scala2subVersion == 12) std2_12Options else Seq.empty)
     case _ => Seq.empty
   }
 
@@ -71,27 +74,7 @@ val commonSettings = Seq(
   apiURL := Some(url("http://www.scanamo.org/latest/api/")),
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
-  Test / parallelExecution := false,
-  Compile / unmanagedSourceDirectories ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, _)) =>
-        Seq(
-          file(sourceDirectory.value.getPath + "/main/scala-2.x")
-        )
-      case _ =>
-        Nil
-    }
-  },
-  Test / unmanagedSourceDirectories ++= {
-    CrossVersion.partialVersion(scalaVersion.value) match {
-      case Some((2, _)) =>
-        Seq(
-          file(sourceDirectory.value.getPath + "/test/scala-2.x")
-        )
-      case _ =>
-        Nil
-    }
-  }
+  Test / parallelExecution := false
 )
 
 lazy val root = (project in file("."))

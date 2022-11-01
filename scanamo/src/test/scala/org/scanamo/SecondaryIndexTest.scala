@@ -2,9 +2,9 @@ package org.scanamo
 
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.generic.auto._
-import org.scanamo.syntax._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import org.scanamo.generic.auto.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
 object SecondaryIndexTest {
   case class Transport(mode: String, line: String, colour: String)
@@ -15,7 +15,7 @@ object SecondaryIndexTest {
 }
 
 class SecondaryIndexTest extends AnyFunSpec with Matchers {
-  import SecondaryIndexTest._
+  import SecondaryIndexTest.*
 
   val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
