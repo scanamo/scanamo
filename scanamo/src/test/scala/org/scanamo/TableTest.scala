@@ -557,15 +557,13 @@ class TableTest extends AnyFunSpec with Matchers {
   }
 
   it("Filter the results of a Scan or Query") {
-
-    case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
     LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
       val table = Table[Bear](t)
       val ops = for {
         _ <- table.put(Bear("Pooh", "honey", None))
         _ <- table.put(Bear("Yogi", "picnic baskets", Some("Ranger Smith")))
         honeyBears <- table.filter("favouriteFood" === "honey").scan()
-        competitiveBears <- table.filter(attributeExists("antagonist")).scan()
+        competitiveBears <- table.filter(attributeExists("alias")).scan()
       } yield (honeyBears, competitiveBears)
       scanamo.exec(ops) should be(
         (
