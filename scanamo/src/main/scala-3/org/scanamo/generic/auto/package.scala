@@ -16,4 +16,15 @@
 
 package org.scanamo.generic
 
-final case class Exported[T](instance: T) extends AnyVal
+import scala.deriving.Mirror
+import org.scanamo.{ DynamoFormat, FormatDerivation }
+import scala.language.implicitConversions
+
+/** Fully automatic format derivation.
+  *
+  * Importing the contents of this package object provides [[org.scanamo.DynamoFormat]] instances for algebraic data
+  * types.
+  */
+object auto extends FormatDerivation {
+  implicit final inline def autoDerived[A](using Mirror.Of[A]): Exported[DynamoFormat[A]] = Exported(derived[A])
+}

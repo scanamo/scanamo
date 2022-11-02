@@ -14,6 +14,6 @@
  * limitations under the License.
  */
 
-package org.scanamo.generic
+package org.scanamo
 
-final case class Exported[T](instance: T) extends AnyVal
+private[scanamo] trait FormatDerivation
