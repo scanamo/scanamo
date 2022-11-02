@@ -1,7 +1,7 @@
 package org.scanamo
 
 import cats.implicits.*
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{ BeforeAndAfterAll, NonImplicitAssertions }
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
@@ -13,7 +13,12 @@ import org.scanamo.query.*
 import org.scanamo.syntax.*
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
-class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll with ScalaFutures {
+class ScanamoAsyncTest
+    extends AnyFunSpec
+    with Matchers
+    with BeforeAndAfterAll
+    with ScalaFutures
+    with NonImplicitAssertions {
   implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
   import scala.concurrent.ExecutionContext.Implicits.global

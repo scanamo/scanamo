@@ -1,6 +1,7 @@
 package org.scanamo
 
 import cats.implicits.*
+import org.scalatest.NonImplicitAssertions
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.fixtures.*
@@ -10,7 +11,7 @@ import org.scanamo.query.*
 import org.scanamo.syntax.*
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
-class ScanamoTest extends AnyFunSpec with Matchers {
+class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
   val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
 

@@ -1,5 +1,6 @@
 package org.scanamo
 
+import org.scalatest.NonImplicitAssertions
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.fixtures.*
@@ -7,7 +8,7 @@ import org.scanamo.generic.auto.*
 import org.scanamo.syntax.*
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
-class SecondaryIndexTest extends AnyFunSpec with Matchers {
+class SecondaryIndexTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
 
   val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)

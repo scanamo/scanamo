@@ -1,6 +1,7 @@
 package org.scanamo
 
 import cats.implicits.*
+import org.scalatest.NonImplicitAssertions
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scanamo.fixtures.*
@@ -26,7 +27,7 @@ object TableTest {
   case class Thing2(a: String, maybe: Option[Int])
   case class Turnip(size: Int, description: Option[String])
 }
-class TableTest extends AnyFunSpec with Matchers {
+class TableTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
   import TableTest.*
 
   val client = LocalDynamoDB.syncClient()
