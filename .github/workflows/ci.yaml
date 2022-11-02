@@ -18,7 +18,7 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest"]
-        version: ["2.12.16","2.13.8"]
+        version: ["2.12.16","2.13.8","3.2.0"]
         jdk: [graalvm@11]
     runs-on: ${{ matrix.os }} 
     steps:
@@ -58,6 +58,14 @@ jobs:
           sbt ++${{ matrix.version }}
           startDynamodbLocal
           test
+          dynamodbLocalTestCleanup
+          stopDynamodbLocal
+      - name: test without coverage
+        if: matrix.version == '3.2.0'
+        run: >
+          sbt ++${{ matrix.version }}
+          startDynamodbLocal
+          scanamo/test catsEffect/test joda/test
           dynamodbLocalTestCleanup
           stopDynamodbLocal
       - name: cleanup

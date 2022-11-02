@@ -1,9 +1,15 @@
-ThisBuild / scalaVersion := "2.12.16"
-ThisBuild / crossScalaVersions := Seq("2.12.16", "2.13.8")
-
-val catsVersion = "2.6.1"
-
-val catsEffectVersion = "3.3.12"
+Global / onChangedBuildSource := ReloadOnSourceChanges
+val V = new {
+  val scala212 = "2.12.16"
+  val scala213 = "2.13.8"
+  val scala3 = "3.2.0"
+  val magnolia = "1.1.2"
+  val magnoliaFor3 = "1.1.5"
+  val catsVersion = "2.6.1"
+  val catsEffectVersion = "3.3.12"
+}
+val scala2xVersions = Seq(V.scala212, V.scala213)
+val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
 
 val zioVersion = "1.0.13"
 
@@ -53,6 +59,22 @@ def extraOptions(scalaVersion: String) =
     case _ => Seq.empty
   }
 
+lazy val scala2settings = Seq(
+  libraryDependencies ++= (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) =>
+      Seq(
+        "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+        compilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)
+      )
+    case _ => Seq.empty
+  })
+)
+lazy val macroSettings = Seq(
+  libraryDependencies += (CrossVersion.partialVersion(scalaVersion.value) match {
+    case Some((2, _)) => "com.softwaremill.magnolia1_2" %% "magnolia" % V.magnolia
+    case _ => "com.softwaremill.magnolia1_3" %% "magnolia" % V.magnoliaFor3
+  })
+)
 val commonSettings = Seq(
   organization := "org.scanamo",
   organizationName := "Scanamo",
@@ -61,7 +83,6 @@ val commonSettings = Seq(
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
   javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
-  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.10.3"),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
@@ -97,7 +118,8 @@ lazy val refined = (project in file("refined"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo-refined"
+    name := "scanamo-refined",
+    crossScalaVersions := scala2xVersions
   )
   .settings(
     libraryDependencies ++= Seq(
@@ -111,15 +133,16 @@ lazy val scanamo = (project in file("scanamo"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo"
+    name := "scanamo",
+    crossScalaVersions := allCrossVersions
   )
+  .settings(scala2settings)
+  .settings(macroSettings)
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.scala-lang.modules"       %% "scala-java8-compat" % "1.0.2",
-      "org.typelevel"                %% "cats-free"          % catsVersion,
-      "com.softwaremill.magnolia1_2" %% "magnolia"           % "1.1.2",
-      "org.scala-lang"                % "scala-reflect"      % scalaVersion.value,
+      "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
+      "org.typelevel"          %% "cats-free"          % V.catsVersion,
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
       "joda-time"          % "joda-time"       % "2.11.1"   % Test,
@@ -133,6 +156,7 @@ lazy val scanamo = (project in file("scanamo"))
 lazy val testkit = (project in file("testkit"))
   .settings(
     commonSettings,
+    crossScalaVersions := allCrossVersions,
     publishingSettings,
     name := "scanamo-testkit",
     libraryDependencies ++= Seq(
@@ -145,12 +169,13 @@ lazy val catsEffect = (project in file("cats"))
   .settings(
     name := "scanamo-cats-effect",
     commonSettings,
+    crossScalaVersions := allCrossVersions,
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-free"   % catsVersion,
-      "org.typelevel"  %% "cats-core"   % catsVersion,
-      "org.typelevel"  %% "cats-effect" % catsEffectVersion,
+      "org.typelevel"  %% "cats-free"   % V.catsVersion,
+      "org.typelevel"  %% "cats-core"   % V.catsVersion,
+      "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
       "co.fs2"         %% "fs2-core"    % "3.2.14",
       "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.16.0" % Test
@@ -158,17 +183,19 @@ lazy val catsEffect = (project in file("cats"))
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
   )
+  .settings(scala2settings)
   .dependsOn(scanamo, testkit % "test->test")
 
 lazy val zio = (project in file("zio"))
   .settings(
     name := "scanamo-zio",
     commonSettings,
+    crossScalaVersions := scala2xVersions,
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
-      "org.typelevel"  %% "cats-core"        % catsVersion,
-      "org.typelevel"  %% "cats-effect"      % catsEffectVersion,
+      "org.typelevel"  %% "cats-core"        % V.catsVersion,
+      "org.typelevel"  %% "cats-effect"      % V.catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
@@ -178,6 +205,7 @@ lazy val zio = (project in file("zio"))
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
   )
+  .settings(scala2settings)
   .dependsOn(scanamo, testkit % "test->test")
 
 // Necessary until Alpakka uses Akka 2.6.16 or later - see https://github.com/akka/akka/pull/30375
@@ -186,13 +214,14 @@ ThisBuild / libraryDependencySchemes += "org.scala-lang.modules" %% "scala-java8
 lazy val alpakka = (project in file("alpakka"))
   .settings(
     commonSettings,
+    crossScalaVersions := scala2xVersions,
     publishingSettings,
     name := "scanamo-alpakka"
   )
   .settings(
     libraryDependencies ++= Seq(
       awsDynamoDB,
-      "org.typelevel"      %% "cats-free"                    % catsVersion,
+      "org.typelevel"      %% "cats-free"                    % V.catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
       "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
       "org.scalacheck"     %% "scalacheck"                   % "1.16.0" % Test
@@ -201,20 +230,22 @@ lazy val alpakka = (project in file("alpakka"))
     // unidoc can work out links to other project, but scalac can't
     Compile / doc / scalacOptions += "-no-link-warnings"
   )
+  .settings(scala2settings)
   .dependsOn(scanamo, testkit % "test->test")
 
 lazy val joda = (project in file("joda"))
   .settings(
     commonSettings,
+    crossScalaVersions := allCrossVersions,
     publishingSettings,
     name := "scanamo-joda"
   )
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.2"  % Provided,
-      "joda-time"       % "joda-time"    % "2.11.1",
-      "org.scalatest"  %% "scalatest"    % "3.2.9"  % Test,
-      "org.scalacheck" %% "scalacheck"   % "1.16.0" % Test
+      "joda-time"       % "joda-time"    % "2.12.0",
+      "org.scalatest"  %% "scalatest"    % "3.2.14"  % Test,
+      "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
     )
   )
   .dependsOn(scanamo)
@@ -222,6 +253,7 @@ lazy val joda = (project in file("joda"))
 lazy val docs = (project in file("docs"))
   .settings(
     commonSettings,
+    crossScalaVersions := allCrossVersions,
     micrositeSettings,
     noPublishSettings,
     ghpagesNoJekyll := false,
