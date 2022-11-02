@@ -23,10 +23,10 @@ import scala.reflect.macros.whitebox
 
 trait AutoDerivation extends Derivation {
 
-  /** Materialize an exported format by wrapping the magnolia derivation
-    * during macro expansion
+  /** Materialize an exported format by wrapping the magnolia derivation during macro expansion
     *
-    * @note All credits to the inimitable @neko-kai https://github.com/propensive/magnolia/issues/107#issuecomment-589289260
+    * @note
+    *   All credits to the inimitable @neko-kai https://github.com/propensive/magnolia/issues/107#issuecomment-589289260
     */
   def materializeImpl[A: c.WeakTypeTag](c: whitebox.Context): c.Expr[Exported[DynamoFormat[A]]] = {
     val magnoliaTree = c.Expr[DynamoFormat[A]](Magnolia.gen[A](c))

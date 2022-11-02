@@ -105,7 +105,7 @@ sealed abstract class DynamoArray extends Product with Serializable { self =>
         AttributeValue.builder
           .bs(xs.stream.map[SdkBytes](SdkBytes.fromByteBuffer(_)).collect(Collectors.toList()))
           .build
-      case Pure(xs)  => AttributeValue.builder.l(unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)).build
+      case Pure(xs) => AttributeValue.builder.l(unsafeToList[DynamoValue, AttributeValue](xs, _.toAttributeValue)).build
       case PureS(xs) => AttributeValue.builder.ss(unsafeToList(xs, identity[String])).build
       case PureN(xs) => AttributeValue.builder.ns(unsafeToList(xs, identity[String])).build
       case PureB(xs) => AttributeValue.builder.bs(unsafeToList(xs, SdkBytes.fromByteBuffer(_))).build

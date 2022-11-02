@@ -21,13 +21,13 @@ import org.joda.time.{ DateTime, Instant }
 
 object JodaFormats {
 
-  /**  Format for dealing with points in time stored as the number of milliseconds since Epoch.
+  /** Format for dealing with points in time stored as the number of milliseconds since Epoch.
     */
   implicit val jodaInstantAsLongFormat: DynamoFormat[Instant] =
     DynamoFormat.coercedXmap[Instant, Long, ArithmeticException](new Instant(_), x => x.getMillis)
 
-  /**  Convenient, readable format for Joda DateTime, but requires that all dates serialised
-    *  have a consistent chronology and time zone.
+  /** Convenient, readable format for Joda DateTime, but requires that all dates serialised have a consistent chronology
+    * and time zone.
     */
   implicit val jodaStringFormat: DynamoFormat[DateTime] =
     DynamoFormat.coercedXmap[DateTime, String, IllegalArgumentException](
