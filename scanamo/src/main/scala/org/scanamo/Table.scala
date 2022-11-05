@@ -63,10 +63,10 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def limit(n: Int) = TableWithOptions[V](name, ScanamoQueryOptions.default).limit(n)
 
-  /** Perform strongly consistent (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html)
-    * read operations against this table. Note that there is no equivalent on
-    * table indexes as consistent reads from secondary indexes are not
-    * supported by DynamoDB
+  /** Perform strongly consistent
+    * (http://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html) read operations
+    * against this table. Note that there is no equivalent on table indexes as consistent reads from secondary indexes
+    * are not supported by DynamoDB
     */
   def consistently = ConsistentlyReadTable(name)
 
@@ -82,20 +82,19 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
 
-  /** Performs a scan with the ability to introduce effects into the computation. This is
-    * useful for huge tables when you don't want to load the whole of it in memory, but
-    * scan it page by page.
+  /** Performs a scan with the ability to introduce effects into the computation. This is useful for huge tables when
+    * you don't want to load the whole of it in memory, but scan it page by page.
     *
     * To control how many maximum items to load at once, use [[scanPaginatedM]]
     */
   final def scanM[M[_]: Monad: MonoidK]: ScanamoOpsT[M, List[Either[DynamoReadError, V]]] = scanPaginatedM(Int.MaxValue)
 
-  /** Performs a scan with the ability to introduce effects into the computation. This is
-    * useful for huge tables when you don't want to load the whole of it in memory, but
-    * scan it page by page, with a maximum of `pageSize` items per page..
+  /** Performs a scan with the ability to introduce effects into the computation. This is useful for huge tables when
+    * you don't want to load the whole of it in memory, but scan it page by page, with a maximum of `pageSize` items per
+    * page..
     *
-    * @note DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an
-    * upper bound.
+    * @note
+    *   DynamoDB will only ever return maximum 1MB of data per scan, so `pageSize` is an upper bound.
     */
   def scanPaginatedM[M[_]: Monad: MonoidK](pageSize: Int): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     ScanamoFree.scanM[M, V](name, pageSize)
@@ -103,10 +102,9 @@ case class Table[V: DynamoFormat](name: String) {
   @deprecated("use `scanRaw`", "1.0")
   def scan0: ScanamoOps[ScanResponse] = scanRaw
 
-  /** Scans the table and returns the raw DynamoDB result. Sometimes, one might want to
-    * access metadata returned in the `ScanResponse` object, such as the last evaluated
-    * key for example. `Table#scan` only returns a list of results, so there is no
-    * place for putting that information: this is where `scan0` comes in handy!
+  /** Scans the table and returns the raw DynamoDB result. Sometimes, one might want to access metadata returned in the
+    * `ScanResponse` object, such as the last evaluated key for example. `Table#scan` only returns a list of results, so
+    * there is no place for putting that information: this is where `scan0` comes in handy!
     *
     * A particular use case is when one wants to paginate through result sets, say:
     */
@@ -116,21 +114,20 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def query(query: Query[_]): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.query[V](name)(query)
 
-  /** Performs a query with the ability to introduce effects into the computation. This is
-    * useful for huge tables when you don't want to load the whole of it in memory, but
-    * scan it page by page.
+  /** Performs a query with the ability to introduce effects into the computation. This is useful for huge tables when
+    * you don't want to load the whole of it in memory, but scan it page by page.
     *
     * To control how many maximum items to load at once, use [[queryPaginatedM]]
     */
   final def queryM[M[_]: Monad: MonoidK](query: Query[_]): ScanamoOpsT[M, List[Either[DynamoReadError, V]]] =
     queryPaginatedM(query, Int.MaxValue)
 
-  /** Performs a scan with the ability to introduce effects into the computation. This is
-    * useful for huge tables when you don't want to load the whole of it in memory, but
-    * scan it page by page, with a maximum of `pageSize` items per page.
+  /** Performs a scan with the ability to introduce effects into the computation. This is useful for huge tables when
+    * you don't want to load the whole of it in memory, but scan it page by page, with a maximum of `pageSize` items per
+    * page.
     *
-    * @note DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an
-    * upper bound.
+    * @note
+    *   DynamoDB will only ever return maximum 1MB of data per query, so `pageSize` is an upper bound.
     */
   def queryPaginatedM[M[_]: Monad: MonoidK](query: Query[_],
                                             pageSize: Int
@@ -140,10 +137,9 @@ case class Table[V: DynamoFormat](name: String) {
   @deprecated("use `queryRaw`", "1.0")
   def query0(query: Query[_]): ScanamoOps[QueryResponse] = queryRaw(query)
 
-  /** Queries the table and returns the raw DynamoDB result. Sometimes, one might want to
-    * access metadata returned in the `QueryResponse` object, such as the last evaluated
-    * key for example. `Table#query` only returns a list of results, so there is no
-    * place for putting that information: this is where `query0` comes in handy!
+  /** Queries the table and returns the raw DynamoDB result. Sometimes, one might want to access metadata returned in
+    * the `QueryResponse` object, such as the last evaluated key for example. `Table#query` only returns a list of
+    * results, so there is no place for putting that information: this is where `query0` comes in handy!
     */
   def queryRaw(query: Query[_]): ScanamoOps[QueryResponse] = ScanamoFree.queryRaw[V](name)(query)
 

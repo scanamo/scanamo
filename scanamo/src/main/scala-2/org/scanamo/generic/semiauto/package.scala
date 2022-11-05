@@ -18,7 +18,6 @@ package org.scanamo.generic
 
 /** Semi-automatic format derivation.
   *
-  * This object provides helpers for creating [[org.scanamo.DynamoFormat]]
-  * instances for case classes.
+  * This object provides helpers for creating [[org.scanamo.DynamoFormat]] instances for case classes.
   */
 package object semiauto extends SemiautoDerivation
