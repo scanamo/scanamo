@@ -1,18 +1,19 @@
 package org.scanamo
 
 import cats.effect.IO
-import cats.implicits._
+import cats.implicits.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 import org.scanamo.ops.ScanamoOps
-import org.scanamo.query._
-import org.scanamo.syntax._
-import org.scanamo.fixtures._
-import org.scanamo.generic.auto._
+import org.scanamo.query.*
+import org.scanamo.syntax.*
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
 import cats.effect.unsafe.implicits.global
+import org.scalatest.NonImplicitAssertions
 
-class ScanamoCatsSpec extends AnyFunSpec with Matchers {
+class ScanamoCatsSpec extends AnyFunSpec with Matchers with NonImplicitAssertions {
   val client = LocalDynamoDB.client()
   val scanamo = ScanamoCats[IO](client)
 
@@ -359,7 +360,7 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
   it("queries an index asynchronously with `between` sort-key condition") {
     def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
       stationTable.deleteAll(
-        UniqueKeys(MultipleKeyList(("mode", "name"), stations.map(station => (station.mode, station.name))))
+        UniqueKeys(MultipleKeyList(("line", "name"), stations.map(station => (station.line, station.name))))
       )
 
     val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
@@ -367,19 +368,19 @@ class ScanamoCatsSpec extends AnyFunSpec with Matchers {
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "name" -> S)("mode" -> S, "zone" -> N) {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("line" -> S, "name" -> S)("line" -> S, "zone" -> N) {
       (t, i) =>
         val stationTable = Table[Station](t)
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
-          ts1 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
+          ts1 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 2 and 4))
           ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
-          ts3 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
+          ts3 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 2 and 4))
           ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
-          ts5 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 1 and 1))
+          ts5 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
         scanamo

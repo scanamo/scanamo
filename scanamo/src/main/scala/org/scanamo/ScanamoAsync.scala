@@ -32,8 +32,7 @@ final class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: Exec
     */
   def exec[A](op: ScanamoOps[A]): Future[A] = op.foldMap(interpreter)
 
-  /** Execute the operations built with [[org.scanamo.Table]] with
-    * effects in the monad `M` threaded in.
+  /** Execute the operations built with [[org.scanamo.Table]] with effects in the monad `M` threaded in.
     */
   def execT[M[_]: Monad, A](hoist: Future ~> M)(op: ScanamoOpsT[M, A]): M[A] =
     op.foldMap(interpreter andThen hoist)

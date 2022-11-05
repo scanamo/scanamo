@@ -1,19 +1,24 @@
 package org.scanamo
 
-import cats.implicits._
+import cats.implicits.*
+import org.scalatest.{ BeforeAndAfterAll, NonImplicitAssertions }
 import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
-import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import org.scanamo.query._
-import org.scanamo.syntax._
-import org.scanamo.fixtures._
-import org.scanamo.generic.auto._
+import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.query.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
-class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll with ScalaFutures {
+class ScanamoAsyncTest
+    extends AnyFunSpec
+    with Matchers
+    with BeforeAndAfterAll
+    with ScalaFutures
+    with NonImplicitAssertions {
   implicit val defaultPatience: PatienceConfig =
     PatienceConfig(timeout = Span(2, Seconds), interval = Span(15, Millis))
   import scala.concurrent.ExecutionContext.Implicits.global
@@ -222,8 +227,9 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
   }
 
   it("should stream full table scan") {
-    import cats.{ ~>, Apply, Monad, MonoidK }
-    import cats.instances.future._
+    import cats.instances.future.*
+    import cats.{ Apply, Monad, MonoidK, ~> }
+
     import scala.concurrent.Future
 
     type SFuture[A] = Future[Stream[A]]
@@ -367,7 +373,7 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
   it("queries an index asynchronously with `between` sort-key condition") {
     def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
       stationTable.deleteAll(
-        UniqueKeys(MultipleKeyList(("mode", "name"), stations.map(station => (station.mode, station.name))))
+        UniqueKeys(MultipleKeyList(("line", "name"), stations.map(station => (station.line, station.name))))
       )
 
     val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
@@ -375,19 +381,19 @@ class ScanamoAsyncTest extends AnyFunSpec with Matchers with BeforeAndAfterAll w
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "name" -> S)("mode" -> S, "zone" -> N) {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("line" -> S, "name" -> S)("line" -> S, "zone" -> N) {
       (t, i) =>
         val stationTable = Table[Station](t)
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
-          ts1 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
+          ts1 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 2 and 4))
           ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
-          ts3 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
+          ts3 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 2 and 4))
           ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
-          ts5 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 1 and 1))
+          ts5 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
         scanamo.exec(ops).futureValue should equal(
