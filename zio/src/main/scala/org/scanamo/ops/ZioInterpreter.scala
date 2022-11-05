@@ -19,7 +19,7 @@ package org.scanamo.ops
 import cats.~>
 import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{ Put => _, Delete => _, Update => _, Get => _, _ }
+import software.amazon.awssdk.services.dynamodb.model.{ Delete => _, Get => _, Put => _, Update => _, _ }
 import zio.{ IO, ZIO }
 
 private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (ScanamoOpsA ~> IO[DynamoDbException, *]) {
