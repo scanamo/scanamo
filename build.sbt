@@ -243,7 +243,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.2"  % Provided,
-      "joda-time"       % "joda-time"    % "2.12.0",
+      "joda-time"       % "joda-time"    % "2.12.1",
       "org.scalatest"  %% "scalatest"    % "3.2.14"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
     )
