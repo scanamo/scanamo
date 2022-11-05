@@ -50,5 +50,5 @@ jobs:
 
     # Cross-build
     - <<: *test
-      scala: 2.13.10
+      scala: 2.13.8
       name: "Tests for 2.13"
