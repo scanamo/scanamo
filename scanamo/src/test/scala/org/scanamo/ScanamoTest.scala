@@ -1,17 +1,17 @@
 package org.scanamo
 
-import cats.implicits._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import cats.implicits.*
+import org.scalatest.NonImplicitAssertions
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import org.scanamo.query._
-import org.scanamo.syntax._
-import org.scanamo.fixtures._
-import org.scanamo.generic.auto._
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.query.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
-class ScanamoTest extends AnyFunSpec with Matchers {
+class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
   val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
 
@@ -209,7 +209,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
   }
 
   it("should stream full table scan") {
-    import cats.{ ~>, Id }
+    import cats.{ Id, ~> }
     LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
       val list = List(
         Item("item #1"),
@@ -328,7 +328,7 @@ class ScanamoTest extends AnyFunSpec with Matchers {
   it("queries an index asynchronously with `between` sort-key condition") {
     def deletaAllStations(stationTable: Table[Station], stations: Set[Station]) =
       stationTable.deleteAll(
-        UniqueKeys(MultipleKeyList(("mode", "name"), stations.map(station => (station.mode, station.name))))
+        UniqueKeys(MultipleKeyList(("line", "name"), stations.map(station => (station.line, station.name))))
       )
 
     val LiverpoolStreet = Station("Underground", "Liverpool Street", 1)
@@ -336,19 +336,19 @@ class ScanamoTest extends AnyFunSpec with Matchers {
     val GoldersGreen = Station("Underground", "Golders Green", 3)
     val Hainault = Station("Underground", "Hainault", 4)
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "name" -> S)("mode" -> S, "zone" -> N) {
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("line" -> S, "name" -> S)("line" -> S, "zone" -> N) {
       (t, i) =>
         val stationTable = Table[Station](t)
         val stations = Set(LiverpoolStreet, CamdenTown, GoldersGreen, Hainault)
         val ops = for {
           _ <- stationTable.putAll(stations)
-          ts1 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
+          ts1 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 2 and 4))
           ts2 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(LiverpoolStreet))
-          ts3 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 2 and 4))
+          ts3 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 2 and 4))
           ts4 <- for { _ <- deletaAllStations(stationTable, stations); ts <- stationTable.scan() } yield ts
           _ <- stationTable.putAll(Set(CamdenTown))
-          ts5 <- stationTable.index(i).query("mode" === "Underground" and ("zone" between 1 and 1))
+          ts5 <- stationTable.index(i).query("line" === "Underground" and ("zone" between 1 and 1))
         } yield (ts1, ts2, ts3, ts4, ts5)
 
         scanamo.exec(ops) should equal(
