@@ -1,21 +1,14 @@
 package org.scanamo
 
+import org.scalatest.NonImplicitAssertions
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.generic.auto._
-import org.scanamo.syntax._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
-object SecondaryIndexTest {
-  case class Transport(mode: String, line: String, colour: String)
-
-  case class Bear(name: String, favouriteFood: String, antagonist: Option[String])
-
-  case class GithubProject(organisation: String, repository: String, language: String, license: String)
-}
-
-class SecondaryIndexTest extends AnyFunSpec with Matchers {
-  import SecondaryIndexTest._
+class SecondaryIndexTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
 
   val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
@@ -23,7 +16,7 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
   it("Scan a secondary index") {
     // This will only return items with a value present in the secondary index
 
-    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("antagonist" -> S) { (t, i) =>
+    LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("name" -> S)("alias" -> S) { (t, i) =>
       val table = Table[Bear](t)
       val ops = for {
         _ <- table.put(Bear("Pooh", "honey", None))
@@ -89,7 +82,7 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
               .limit(1)
               .descending
               .query(
-                ("mode" === "Underground" and ("colour" beginsWith "Bl"))
+                "mode" === "Underground" and ("colour" beginsWith "Bl")
               )
         } yield somethingBeginningWithBl.toList
         scanamo.exec(operations) should be(List(Right(Transport("Underground", "Picadilly", "Blue"))))
@@ -123,7 +116,6 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
   }
 
   it("Query the index and returns the raw DynamoDB result") {
-    case class Key(mode: String, line: String, colour: String)
     val fmt = DynamoFormat.generic[Key]
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("mode" -> S, "colour" -> S) {
       (t, i) =>
@@ -148,7 +140,6 @@ class SecondaryIndexTest extends AnyFunSpec with Matchers {
   }
 
   it("Scan the index and returns the raw DynamoDB result") {
-    case class Key(mode: String, line: String, colour: String)
     val fmt = DynamoFormat.generic[Key]
     LocalDynamoDB.withRandomTableWithSecondaryIndex(client)("mode" -> S, "line" -> S)("mode" -> S, "colour" -> S) {
       (t, i) =>

@@ -1,6 +1,6 @@
 | CI | Coverage | Release | Issues | Users | Chat |
 | --- | --- | --- | --- | --- | --- |
-| [![Build Status][Badge-Travis]][Link-Travis] | [![Coverage Status][Badge-Codecov]][Link-Codecov] | [![Release Artifacts][Badge-MavenReleases]][Link-MavenReleases] | [![Average time to resolve an issue][Badge-IsItMaintained]][Link-IsItMaintained] | [![Scaladex dependencies badge][Badge-Scaladex]][Link-Scaladex] | [![Gitter][Badge-Gitter]][Link-Gitter] |
+| [![.github/workflows/ci.yaml](https://github.com/scanamo/scanamo/actions/workflows/ci.yaml/badge.svg)](https://github.com/scanamo/scanamo/actions/workflows/ci.yaml) | [![Coverage Status][Badge-Codecov]][Link-Codecov] | [![Release Artifacts][Badge-MavenReleases]][Link-MavenReleases] | [![Average time to resolve an issue][Badge-IsItMaintained]][Link-IsItMaintained] | [![Scaladex dependencies badge][Badge-Scaladex]][Link-Scaladex] | [![Gitter][Badge-Gitter]][Link-Gitter] |
 
 Scanamo is a library to make using [DynamoDB](https://aws.amazon.com/documentation/dynamodb/) with Scala 
 simpler and less error-prone.
@@ -12,7 +12,7 @@ Installation
 ------------
 
 ```scala
-libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M10"
+libraryDependencies += "org.scanamo" %% "scanamo" % "1.0.0-M23"
 ```
 
 Scanamo is published for Scala 2.13 and Scala 2.12.
@@ -63,12 +63,10 @@ language governing permissions and limitations under the License.
 [Link-IsItMaintained]: https://isitmaintained.com/project/scanamo/scanamo "Average time to resolve an issue"
 [Link-Scaladex]: https://index.scala-lang.org/search?q=dependencies:scanamo/scanamo "Scaladex"
 [Link-MavenReleases]: https://index.scala-lang.org/scanamo/scanamo/scanamo "Maven Releases"
-[Link-Travis]: https://travis-ci.com/github/scanamo/scanamo "Travis CI"
 [Link-Gitter]: https://gitter.im/scanamo/scanamo "Gitter chat"
 
 [Badge-Codecov]: https://coveralls.io/repos/github/scanamo/scanamo/badge.svg?branch=master "Codecov"
 [Badge-IsItMaintained]: http://isitmaintained.com/badge/resolution/scanamo/scanamo.svg "Average time to resolve an issue"
 [Badge-Scaladex]: https://index.scala-lang.org/count.svg?q=dependencies:scanamo/scanamo&subject=scaladex "Scaladex"
 [Badge-MavenReleases]: https://index.scala-lang.org/scanamo/scanamo/scanamo/latest-by-scala-version.svg "Maven Releases"
-[Badge-Travis]: https://travis-ci.com/scanamo/scanamo.svg?branch=master "Travis CI"
 [Badge-Gitter]: https://badges.gitter.im/scanamo/scanamo.svg "Gitter chat"

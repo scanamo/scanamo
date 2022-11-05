@@ -19,13 +19,12 @@ package org.scanamo
 import cats.Parallel
 import cats.kernel.Monoid
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import java.util.{ Map => JMap, HashMap }
+import java.util.{ HashMap, Map => JMap }
 import cats.syntax.apply._
 import cats.syntax.semigroup._
 import scala.annotation.tailrec
 
-/** A `DynamoObject` is a map of strings to values that can be embedded into
-  * an `AttributeValue`.
+/** A `DynamoObject` is a map of strings to values that can be embedded into an `AttributeValue`.
   */
 sealed abstract class DynamoObject extends Product with Serializable { self =>
   import DynamoObject._
@@ -158,15 +157,21 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
       case Concat(xs0, ys0) => (xs0.toMap, ys0.toMap).mapN(_ ++ _)
     }
 
-  /** Builds a map where the keys are transformed to match the convention for
-    * expression attribute values in DynamoDB operations
-    * See [[https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeValues.html]]
+  /** Builds a map where the keys are transformed to match the convention for expression attribute values in DynamoDB
+    * operations See
+    * [[https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Expressions.ExpressionAttributeValues.html]]
     */
   final def toExpressionAttributeValues: Option[JMap[String, AttributeValue]] =
     self match {
       case Empty => None
       case Strict(xs) =>
-        Some(unsafeTransform(m => xs.entrySet.stream.forEach { x => m.put(":" ++ x.getKey, x.getValue); () }))
+        Some(
+          unsafeTransform(m =>
+            xs.entrySet.stream.forEach { x =>
+              m.put(":" ++ x.getKey, x.getValue); ()
+            }
+          )
+        )
       case Pure(xs) => Some(unsafeTransform(m => xs foreach { case (k, x) => m.put(":" ++ k, x.toAttributeValue) }))
       case Concat(xs, ys) =>
         (xs.toExpressionAttributeValues, ys.toExpressionAttributeValues).mapN(unsafeMerge)
@@ -189,9 +194,9 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     */
   final def remove(key: String): DynamoObject =
     self match {
-      case Empty                              => Empty
-      case Strict(xs)                         => Pure((unsafeToScalaMap(xs) - key).mapValues(DynamoValue.fromAttributeValue).toMap)
-      case Pure(xs)                           => Pure(xs - key)
+      case Empty      => Empty
+      case Strict(xs) => Pure((unsafeToScalaMap(xs) - key).mapValues(DynamoValue.fromAttributeValue).toMap)
+      case Pure(xs)   => Pure(xs - key)
       case Concat(xs, ys) if xs.contains(key) => Concat(xs.remove(key), ys)
       case Concat(xs, ys)                     => Concat(xs, ys.remove(key))
     }
@@ -322,8 +327,7 @@ object DynamoObject {
     */
   def apply(xs: Map[String, DynamoValue]): DynamoObject = if (xs.isEmpty) Empty else Pure(xs)
 
-  /** Builds a map from an arbitrary number of `(String, A)` pairs for any `A` that can be
-    * turned into a value
+  /** Builds a map from an arbitrary number of `(String, A)` pairs for any `A` that can be turned into a value
     */
   def apply[A](xs: (String, A)*)(implicit D: DynamoFormat[A]): DynamoObject =
     apply(xs.foldLeft(Map.empty[String, DynamoValue]) { case (m, (k, x)) => m + (k -> D.write(x)) })
