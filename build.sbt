@@ -5,7 +5,7 @@ val V = new {
   val scala3 = "3.2.0"
   val magnolia = "1.1.2"
   val magnoliaFor3 = "1.1.5"
-  val catsVersion = "2.6.1"
+  val catsVersion = "2.9.0"
   val catsEffectVersion = "3.3.12"
 }
 val scala2xVersions = Seq(V.scala212, V.scala213)
