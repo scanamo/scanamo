@@ -69,6 +69,17 @@ lazy val scala2settings = Seq(
     case _ => Seq.empty
   })
 )
+
+lazy val kindprojectorSettings = Seq(
+  scalacOptions ++= {
+    CrossVersion.partialVersion(scalaVersion.value) match {
+      case Some((3, _)) => Seq("-Ykind-projector:underscores")
+      case Some((2, 12 | 13)) => Seq("-Xsource:3", "-P:kind-projector:underscore-placeholders")
+      case _ => Seq.empty
+    }
+  }
+)
+
 lazy val macroSettings = Seq(
   libraryDependencies += (CrossVersion.partialVersion(scalaVersion.value) match {
     case Some((2, _)) => "com.softwaremill.magnolia1_2" %% "magnolia" % V.magnolia
@@ -184,6 +195,7 @@ lazy val catsEffect = (project in file("cats"))
     Compile / doc / scalacOptions += "-no-link-warnings"
   )
   .settings(scala2settings)
+  .settings(kindprojectorSettings)
   .dependsOn(scanamo, testkit % "test->test")
 
 lazy val zio = (project in file("zio"))
