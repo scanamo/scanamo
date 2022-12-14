@@ -4,7 +4,7 @@ val V = new {
   val scala213 = "2.13.8"
   val scala3 = "3.2.0"
   val magnolia = "1.1.2"
-  val magnoliaFor3 = "1.1.5"
+  val magnoliaFor3 = "1.2.5"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "3.3.12"
 }
