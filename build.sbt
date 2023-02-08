@@ -11,7 +11,7 @@ val V = new {
 val scala2xVersions = Seq(V.scala212, V.scala213)
 val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
 
-val zioVersion = "1.0.13"
+val zioVersion = "1.0.18"
 
 lazy val stdOptions = Seq(
   "-deprecation",
