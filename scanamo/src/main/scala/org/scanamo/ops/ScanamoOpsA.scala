@@ -61,6 +61,8 @@ object ScanamoOps {
     req: ScanamoUpdateRequest
   ): ScanamoOps[Either[ConditionalCheckFailedException, UpdateItemResponse]] =
     liftF[ScanamoOpsA, Either[ConditionalCheckFailedException, UpdateItemResponse]](ConditionalUpdate(req))
-  def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[TransactWriteItemsResponse] =
+  def transactWriteAll(
+    req: ScanamoTransactWriteRequest
+  ): ScanamoOps[TransactWriteItemsResponse] =
     liftF[ScanamoOpsA, TransactWriteItemsResponse](TransactWriteAll(req))
 }
