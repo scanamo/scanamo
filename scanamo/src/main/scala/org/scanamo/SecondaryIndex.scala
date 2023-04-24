@@ -93,6 +93,32 @@ sealed abstract class SecondaryIndex[V] {
   def descending: SecondaryIndex[V]
 
   def from[K: UniqueKeyCondition](key: UniqueKey[K]): SecondaryIndex[V]
+
+  /** Primes a search request with a key to start from:
+    *
+    * @param exclusiveStartKey
+    *   A [[DynamoObject]] containing attributes that match the partition key and sort key of the secondary index as
+    *   well as the partition key of the table itself
+    * @return
+    *   A new [[SecondaryIndex]] which when queried will return items after the provided exclusive start key
+    * @example
+    *   {{{
+    *   import org.scanamo._
+    *   import org.scanamo.syntax._
+    *
+    *   val table: Table[_] = ???
+    *   val secondaryIndex: SecondaryIndex[_] = table.index("myIndex")
+    *   val exclusiveStartKey = DynamoObject(
+    *     Map(
+    *       "myIndexPartitionKeyName" -> myIndexPartitionKeyValue.asDynamoValue,
+    *       "myIndexSortKeyName" -> myIndexSortKeyValue.asDynamoValue,
+    *       "myTablePartitionKeyName" -> myTablePartitionKeyValue.asDynamoValue
+    *     )
+    *   )
+    *   val indexStartingFromExclusiveStartKey: SecondaryIndex[_] = secondaryIndex.from(exclusiveStartKey)
+    *   }}}
+    */
+  def from(exclusiveStartKey: DynamoObject): SecondaryIndex[V]
 }
 
 private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
@@ -103,6 +129,8 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
     copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
+  def from(exclusiveStartKey: DynamoObject) =
+    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(exclusiveStartKey)))
   def filter[C: ConditionExpression](condition: C) =
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =
