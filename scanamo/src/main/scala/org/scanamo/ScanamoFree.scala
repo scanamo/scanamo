@@ -76,6 +76,28 @@ object ScanamoFree {
     loop(batches)
   }
 
+  def transactionalWrite(
+    actions: List[TransactionalWriteAction]
+  ): ScanamoOps[TransactWriteItemsResponse] = {
+    val transactionWriteRequest =
+      actions.foldLeft(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { case (acc, action) =>
+        action match {
+          case r @ TransactionalWriteAction.Put(table, _) =>
+            acc.copy(putItems = acc.putItems :+ TransactPutItem(table, r.asDynamoValue, None))
+          case TransactionalWriteAction.Update(table, key, updateExpr) =>
+            acc.copy(updateItems = acc.updateItems :+ TransactUpdateItem(table, key.toDynamoObject, updateExpr, None))
+          case TransactionalWriteAction.Delete(table, key) =>
+            acc.copy(deleteItems = acc.deleteItems :+ TransactDeleteItem(table, key.toDynamoObject, None))
+          case r @ TransactionalWriteAction.ConditionCheck(table, key, _) =>
+            acc.copy(conditionCheck =
+              acc.conditionCheck :+ TransactConditionCheck(table, key.toDynamoObject, r.asRequestCondition)
+            )
+        }
+      }
+    ScanamoOps
+      .transactWriteAll(transactionWriteRequest)
+  }
+
   def transactPutAllTable[T](
     tableName: String
   )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] =
@@ -87,7 +109,8 @@ object ScanamoFree {
     val dItems = tableAndItems.map { case (tableName, itm) =>
       TransactPutItem(tableName, f.write(itm), None)
     }
-    ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(dItems, Seq.empty, Seq.empty))
+    ScanamoOps
+      .transactWriteAll(ScanamoTransactWriteRequest(dItems, Seq.empty, Seq.empty, Seq.empty))
   }
 
   def transactUpdateAllTable(
@@ -101,7 +124,8 @@ object ScanamoFree {
     val items = tableAndItems.map { case (tableName, (key, updateExpression)) =>
       TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
     }
-    ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, items, Seq.empty))
+    ScanamoOps
+      .transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, items, Seq.empty, Seq.empty))
   }
 
   def transactDeleteAllTable(
@@ -115,7 +139,8 @@ object ScanamoFree {
     val items = tableAndItems.map { case (tableName, key) =>
       TransactDeleteItem(tableName, key.toDynamoObject, None)
     }
-    ScanamoOps.transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, items))
+    ScanamoOps
+      .transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, items, Seq.empty))
   }
 
   def deleteAll(tableName: String)(items: UniqueKeys[_]): ScanamoOps[Unit] =

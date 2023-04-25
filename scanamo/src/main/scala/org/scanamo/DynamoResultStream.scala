@@ -90,7 +90,8 @@ private[scanamo] object DynamoResultStream {
     final def lastEvaluatedKey(res: ScanResponse) =
       Option(res.lastEvaluatedKey).filterNot(_.isEmpty).map(DynamoObject(_))
 
-    final def scannedCount(res: ScanResponse) = Option(res.scannedCount().intValue())
+    final def scannedCount(res: ScanResponse) =
+      Option(res).flatMap(sr => Option(sr.scannedCount())).flatMap(sc => Option(sc.intValue()))
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
     final def withLimit(limit: Int) =
@@ -108,7 +109,8 @@ private[scanamo] object DynamoResultStream {
     final def lastEvaluatedKey(res: QueryResponse) =
       Option(res.lastEvaluatedKey).filterNot(_.isEmpty).map(DynamoObject(_))
 
-    final def scannedCount(res: QueryResponse) = Option(res.scannedCount().intValue())
+    final def scannedCount(res: QueryResponse) =
+      Option(res).flatMap(sr => Option(sr.scannedCount())).flatMap(sc => Option(sc.intValue()))
     final def withExclusiveStartKey(key: DynamoObject) =
       req => req.copy(options = req.options.copy(exclusiveStartKey = Some(key)))
     final def withLimit(limit: Int) =
