@@ -16,8 +16,8 @@
 
 package org.scanamo.ops
 
-import cats._
-import cats.syntax.either._
+import cats.*
+import cats.syntax.either.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
 
@@ -55,6 +55,7 @@ class ScanamoSyncInterpreter(client: DynamoDbClient) extends (ScanamoOpsA ~> Id)
         Either.catchOnly[ConditionalCheckFailedException] {
           client.updateItem(JavaRequests.update(req))
         }
-      case TransactWriteAll(req) => client.transactWriteItems(JavaRequests.transactItems(req))
+      case TransactWriteAll(req) =>
+        client.transactWriteItems(JavaRequests.transactItems(req))
     }
 }

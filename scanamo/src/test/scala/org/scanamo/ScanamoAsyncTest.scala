@@ -689,4 +689,37 @@ class ScanamoAsyncTest
       }
     }
   }
+
+  it("transact multiple write actions (put, update, delete) across multiple tables") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
+
+        val ops = for {
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false), Gremlin(2, wet = true)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None), Forecast("Amsterdam", "Fog", None)))
+          _ <- ScanamoFree.transactionalWrite(
+            List(
+              TransactionalWriteAction
+                .Put(t1, Gremlin(3, wet = true)),
+              TransactionalWriteAction
+                .Put(t2, Forecast("Berlin", "Wind", None)),
+              TransactionalWriteAction.Update(t1, UniqueKey(KeyEquals("number", 2)), set("wet", false)),
+              TransactionalWriteAction.Delete(t2, UniqueKey(KeyEquals("location", "Amsterdam")))
+            )
+          )
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
+
+        scanamo.exec(ops).futureValue should equal(
+          (
+            List(Right(Gremlin(2, wet = false)), Right(Gremlin(1, wet = false)), Right(Gremlin(3, wet = true))),
+            List(Right(Forecast("London", "Sun", None)), Right(Forecast("Berlin", "Wind", None)))
+          )
+        )
+      }
+    }
+  }
 }

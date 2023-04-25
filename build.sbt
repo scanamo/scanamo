@@ -2,9 +2,9 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
   val scala212 = "2.12.16"
   val scala213 = "2.13.8"
-  val scala3 = "3.2.0"
+  val scala3 = "3.2.2"
   val magnolia = "1.1.2"
-  val magnoliaFor3 = "1.2.6"
+  val magnoliaFor3 = "1.3.0"
   val catsVersion = "2.6.1"
   val catsEffectVersion = "3.3.12"
 }
@@ -134,7 +134,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.9.29",
+      "eu.timepit"    %% "refined"   % "0.10.2",
       "org.scalatest" %% "scalatest" % "3.2.9" % Test
     )
   )
@@ -187,7 +187,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % V.catsVersion,
       "org.typelevel"  %% "cats-core"   % V.catsVersion,
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
-      "co.fs2"         %% "fs2-core"    % "3.4.0",
+      "co.fs2"         %% "fs2-core"    % "3.6.1",
       "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.16.0" % Test
     ),
@@ -255,7 +255,7 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.2"  % Provided,
-      "joda-time"       % "joda-time"    % "2.12.0",
+      "joda-time"       % "joda-time"    % "2.12.5",
       "org.scalatest"  %% "scalatest"    % "3.2.15"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
     )
