@@ -34,8 +34,8 @@ class ScanamoCats[F[_]: Async](client: DynamoDbAsyncClient) {
 object ScanamoCats {
   def apply[F[_]: Async](client: DynamoDbAsyncClient): ScanamoCats[F] = new ScanamoCats(client)
 
-  def ToStream[F[_]: Async]: F ~> Stream[F, *] =
-    new (F ~> Stream[F, *]) {
+  def ToStream[F[_]: Async]: F ~> Stream[F, _] =
+    new (F ~> Stream[F, _]) {
       def apply[A](fa: F[A]): Stream[F, A] = Stream.eval(fa)
     }
 }

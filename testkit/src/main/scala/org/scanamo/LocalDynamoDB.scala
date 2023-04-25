@@ -135,6 +135,75 @@ object LocalDynamoDB {
           .build
       )
 
+  def createTableWithIndexes(
+    client: DynamoDbAsyncClient,
+    tableName: String,
+    primaryIndexAttributes: List[(String, ScalarAttributeType)],
+    secondaryIndexes: List[(String, List[(String, ScalarAttributeType)])]
+  ) =
+    client
+      .createTable(
+        CreateTableRequest.builder
+          .tableName(tableName)
+          .attributeDefinitions(
+            attributeDefinitions(
+              secondaryIndexes
+                .map(_._2)
+                .foldLeft(primaryIndexAttributes) { (allAttributes, indexAttributes) =>
+                  allAttributes ++ (indexAttributes diff allAttributes)
+                }
+            )
+          )
+          .keySchema(keySchema(primaryIndexAttributes))
+          .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+          .globalSecondaryIndexes(
+            secondaryIndexes.map { case (indexName, indexAttributes) =>
+              GlobalSecondaryIndex.builder
+                .indexName(indexName)
+                .keySchema(keySchema(indexAttributes))
+                .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+                .projection(Projection.builder.projectionType(ProjectionType.ALL).build)
+                .build
+            }.asJava
+          )
+          .build
+      )
+      .get
+
+  def createTableWithIndexes(
+    client: DynamoDbClient,
+    tableName: String,
+    primaryIndexAttributes: List[(String, ScalarAttributeType)],
+    secondaryIndexes: List[(String, List[(String, ScalarAttributeType)])]
+  ) =
+    client
+      .createTable(
+        CreateTableRequest.builder
+          .tableName(tableName)
+          .attributeDefinitions(
+            attributeDefinitions(
+              secondaryIndexes
+                .map(_._2)
+                .foldLeft(primaryIndexAttributes) { (allAttributes, indexAttributes) =>
+                  allAttributes ++ (indexAttributes diff allAttributes)
+                }
+            )
+          )
+          .keySchema(keySchema(primaryIndexAttributes))
+          .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+          .globalSecondaryIndexes(
+            secondaryIndexes.map { case (indexName, indexAttributes) =>
+              GlobalSecondaryIndex.builder
+                .indexName(indexName)
+                .keySchema(keySchema(indexAttributes))
+                .provisionedThroughput(arbitraryThroughputThatIsIgnoredByDynamoDBLocal)
+                .projection(Projection.builder.projectionType(ProjectionType.ALL).build)
+                .build
+            }.asJava
+          )
+          .build
+      )
+
   def deleteTable(client: DynamoDbAsyncClient)(tableName: String) =
     client.deleteTable { b => b.tableName(tableName); () }.get
 
@@ -281,6 +350,46 @@ object LocalDynamoDB {
       secondaryIndexName,
       primaryIndexAttributes.toList,
       secondaryIndexAttributes.toList
+    )
+    val res =
+      try thunk
+      finally {
+        deleteTable(client)(tableName)
+        ()
+      }
+    res
+  }
+
+  def withTableWithSecondaryIndexes[T](client: DynamoDbAsyncClient)(tableName: String)(
+    primaryIndexAttributes: (String, ScalarAttributeType)*
+  )(
+    secondaryIndexes: (String, List[(String, ScalarAttributeType)])*
+  )(thunk: => T): T = {
+    createTableWithIndexes(
+      client,
+      tableName,
+      primaryIndexAttributes.toList,
+      secondaryIndexes.toList
+    )
+    val res =
+      try thunk
+      finally {
+        deleteTable(client)(tableName)
+        ()
+      }
+    res
+  }
+
+  def withTableWithSecondaryIndexes[T](client: DynamoDbClient)(tableName: String)(
+    primaryIndexAttributes: (String, ScalarAttributeType)*
+  )(
+    secondaryIndexes: (String, List[(String, ScalarAttributeType)])*
+  )(thunk: => T): T = {
+    createTableWithIndexes(
+      client,
+      tableName,
+      primaryIndexAttributes.toList,
+      secondaryIndexes.toList
     )
     val res =
       try thunk

@@ -92,9 +92,15 @@ case class TransactDeleteItem(
   key: DynamoObject,
   condition: Option[RequestCondition]
 )
+case class TransactConditionCheck(
+  tableName: String,
+  key: DynamoObject,
+  condition: RequestCondition
+)
 
 case class ScanamoTransactWriteRequest(
   putItems: Seq[TransactPutItem],
   updateItems: Seq[TransactUpdateItem],
-  deleteItems: Seq[TransactDeleteItem]
+  deleteItems: Seq[TransactDeleteItem],
+  conditionCheck: Seq[TransactConditionCheck]
 )

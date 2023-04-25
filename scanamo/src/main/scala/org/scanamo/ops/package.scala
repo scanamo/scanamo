@@ -190,7 +190,6 @@ package object ops {
 
         TransactWriteItem.builder.update(updateWithAvs).build
       }
-
       val deleteItems = req.deleteItems.map { item =>
         TransactWriteItem.builder
           .delete(
@@ -202,8 +201,23 @@ package object ops {
           .build
       }
 
+      val conditionChecks = req.conditionCheck.map { item =>
+        val check = software.amazon.awssdk.services.dynamodb.model.ConditionCheck.builder
+          .key(item.key.toJavaMap)
+          .tableName(item.tableName)
+          .conditionExpression(item.condition.expression)
+          .expressionAttributeNames(item.condition.attributeNames.asJava)
+
+        val checkWithAvs = item.condition.dynamoValues
+          .flatMap(_.toExpressionAttributeValues)
+          .foldLeft(check)(_ expressionAttributeValues _)
+          .build
+
+        TransactWriteItem.builder.conditionCheck(checkWithAvs).build
+      }
+
       TransactWriteItemsRequest.builder
-        .transactItems((putItems ++ updateItems ++ deleteItems): _*)
+        .transactItems((putItems ++ updateItems ++ deleteItems ++ conditionChecks): _*)
         .build
     }
   }
