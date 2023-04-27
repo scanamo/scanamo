@@ -92,6 +92,7 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
               a => F.delay(Right(a))
             )
           )
-      case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
+      case TransactWriteAll(req) =>
+        eff(client.transactWriteItems(JavaRequests.transactItems(req)))
     }
 }

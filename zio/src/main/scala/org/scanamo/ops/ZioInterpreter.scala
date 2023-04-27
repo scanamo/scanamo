@@ -55,6 +55,7 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
         eff(client.updateItem(JavaRequests.update(req)))
       case ConditionalUpdate(req) =>
         effEitherConditionalCheckFailed(client.updateItem(JavaRequests.update(req)))
-      case TransactWriteAll(req) => eff(client.transactWriteItems(JavaRequests.transactItems(req)))
+      case TransactWriteAll(req) =>
+        eff(client.transactWriteItems(JavaRequests.transactItems(req)))
     }
 }
