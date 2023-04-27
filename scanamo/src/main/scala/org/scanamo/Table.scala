@@ -78,6 +78,29 @@ case class Table[V: DynamoFormat](name: String) {
     */
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) = TableWithOptions(name, ScanamoQueryOptions.default).from(key)
 
+  /** Primes a search request with a key to start from:
+    * @param exclusiveStartKey
+    *   A [[DynamoObject]] containing attributes that match the partition key and sort key of the table
+    * @return
+    *   A new [[Table]] which when queried will return items after the provided exclusive start key
+    * @example
+    *   {{{
+    *   import org.scanamo._
+    *   import org.scanamo.syntax._
+    *
+    *   val table: Table[_] = ???
+    *   val exclusiveStartKey = DynamoObject(
+    *     Map(
+    *       "myPartitionKeyName" -> myPartitionKeyValue.asDynamoValue,
+    *       "mySortKeyName" -> mySortKeyValue.asDynamoValue
+    *     )
+    *   )
+    *   val tableStartingFromExclusiveStartKey: Table[_] = table.from(exclusiveStartKey)
+    *   }}}
+    */
+  def from(exclusiveStartKey: DynamoObject) =
+    TableWithOptions(name, ScanamoQueryOptions.default).from(exclusiveStartKey)
+
   /** Scans all elements of a table
     */
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] = ScanamoFree.scan[V](name)
@@ -170,6 +193,8 @@ private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: St
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.descending
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(key)
+  def from(exclusiveStartKey: DynamoObject) =
+    TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.from(exclusiveStartKey)
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     TableWithOptions(tableName, ScanamoQueryOptions.default).consistently.filter(c)
   def scan(): ScanamoOps[List[Either[DynamoReadError, V]]] =
@@ -199,6 +224,8 @@ private[scanamo] case class TableWithOptions[V: DynamoFormat](tableName: String,
   def descending: TableWithOptions[V] = copy(queryOptions = queryOptions.copy(ascending = false))
   def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
     copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
+  def from(exclusiveStartKey: DynamoObject) =
+    copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(exclusiveStartKey)))
   def filter[T](c: Condition[T]): TableWithOptions[V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))
 

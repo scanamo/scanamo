@@ -1,11 +1,11 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
-  val scala212 = "2.12.16"
+  val scala212 = "2.12.17"
   val scala213 = "2.13.8"
   val scala3 = "3.2.2"
   val magnolia = "1.1.2"
   val magnoliaFor3 = "1.3.0"
-  val catsVersion = "2.6.1"
+  val catsVersion = "2.9.0"
   val catsEffectVersion = "3.3.12"
 }
 val scala2xVersions = Seq(V.scala212, V.scala213)
@@ -123,7 +123,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.17.272"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.17.295"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -134,7 +134,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.10.2",
+      "eu.timepit"    %% "refined"   % "0.10.3",
       "org.scalatest" %% "scalatest" % "3.2.9" % Test
     )
   )
@@ -155,7 +155,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
       "org.typelevel"          %% "cats-free"          % V.catsVersion,
       // Use Joda for custom conversion example
-      "org.joda"           % "joda-convert"    % "2.2.2"    % Provided,
+      "org.joda"           % "joda-convert"    % "2.2.3"    % Provided,
       "joda-time"          % "joda-time"       % "2.11.1"   % Test,
       "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
       "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
@@ -254,7 +254,7 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda"        % "joda-convert" % "2.2.2"  % Provided,
+      "org.joda"        % "joda-convert" % "2.2.3"  % Provided,
       "joda-time"       % "joda-time"    % "2.12.5",
       "org.scalatest"  %% "scalatest"    % "3.2.15"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
