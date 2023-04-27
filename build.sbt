@@ -6,7 +6,7 @@ val V = new {
   val magnolia = "1.1.2"
   val magnoliaFor3 = "1.1.5"
   val catsVersion = "2.6.1"
-  val catsEffectVersion = "3.3.14"
+  val catsEffectVersion = "3.3.12"
 }
 val scala2xVersions = Seq(V.scala212, V.scala213)
 val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
