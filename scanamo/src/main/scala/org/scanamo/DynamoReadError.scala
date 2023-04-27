@@ -16,8 +16,8 @@
 
 package org.scanamo
 
-import cats.data.NonEmptyList
 import cats.Show
+import cats.data.NonEmptyList
 import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
 
 sealed abstract class ScanamoError
