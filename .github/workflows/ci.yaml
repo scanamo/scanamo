@@ -68,6 +68,10 @@ jobs:
           scanamo/test catsEffect/test joda/test
           dynamodbLocalTestCleanup
           stopDynamodbLocal
+      - name: test docs
+        run: >
+          sbt ++${{ matrix.version }}
+          doc
       - name: cleanup
         run: bash <(curl -s https://codecov.io/bash)
   gen_microsite:
