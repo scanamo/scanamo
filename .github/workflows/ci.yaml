@@ -61,7 +61,7 @@ jobs:
           dynamodbLocalTestCleanup
           stopDynamodbLocal
       - name: test without coverage
-        if: matrix.version == '3.2.2'
+        if: matrix.version == '3.2.0'
         run: >
           sbt ++${{ matrix.version }}
           startDynamodbLocal
