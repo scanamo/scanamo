@@ -68,13 +68,16 @@ jobs:
           scanamo/test catsEffect/test joda/test
           dynamodbLocalTestCleanup
           stopDynamodbLocal
-      - name: test docs
-        run: >
-          sbt ++${{ matrix.version }}
-          doc
       - name: cleanup
         run: bash <(curl -s https://codecov.io/bash)
+  test_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: test docs
+        run: >
+          sbt +doc
   gen_microsite:
+    needs: [check,test_docs]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
@@ -92,7 +95,7 @@ jobs:
         run: sbt startDynamodbLocal makeMicrosite stopDynamodbLocal
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [check,gen_microsite]
+    needs: [check,test_docs,gen_microsite]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
