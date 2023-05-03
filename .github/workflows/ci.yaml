@@ -73,9 +73,12 @@ jobs:
   test_docs:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout current branch
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
       - name: test docs
-        run: >
-          sbt +doc
+        run: sbt +doc
   gen_microsite:
     needs: [check,test_docs]
     runs-on: ubuntu-latest
