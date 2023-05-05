@@ -2,11 +2,11 @@ Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
   val scala212 = "2.12.17"
   val scala213 = "2.13.8"
-  val scala3 = "3.2.2"
+  val scala3 = "3.2.0"
   val magnolia = "1.1.2"
   val magnoliaFor3 = "1.3.0"
   val catsVersion = "2.9.0"
-  val catsEffectVersion = "3.3.12"
+  val catsEffectVersion = "3.4.10"
 }
 val scala2xVersions = Seq(V.scala212, V.scala213)
 val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
@@ -123,7 +123,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.17.295"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.20.56"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -156,7 +156,7 @@ lazy val scanamo = (project in file("scanamo"))
       "org.typelevel"          %% "cats-free"          % V.catsVersion,
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.3"    % Provided,
-      "joda-time"          % "joda-time"       % "2.11.1"   % Test,
+      "joda-time"          % "joda-time"       % "2.11.2"   % Test,
       "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
       "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
       "org.scalacheck"    %% "scalacheck"      % "1.16.0"   % Test
