@@ -18,8 +18,11 @@ package org.scanamo.ops
 
 import cats.effect.Async
 import cats.~>
+import cats.syntax.applicative._
 import cats.syntax.applicativeError._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
+import cats.syntax.option._
 import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import java.util.concurrent.CompletionException
@@ -27,8 +30,9 @@ import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedExce
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
   final private def eff[A](fut: => CompletableFuture[A]): F[A] =
-    F.async_ { cb =>
-      fut.handle[Unit] { (a, x) =>
+    F.async { cb =>
+      lazy val materialised = fut
+      materialised.handle[Unit] { (a, x) =>
         if (a == null)
           x match {
             case t: CompletionException => cb(Left(t.getCause))
@@ -37,7 +41,7 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
         else
           cb(Right(a))
       }
-      ()
+      F.delay(materialised.cancel(false)).void.some.pure[F]
     }
 
   override def apply[A](fa: ScanamoOpsA[A]): F[A] =
@@ -63,7 +67,7 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
         eff(client.deleteItem(JavaRequests.delete(req))).attempt
           .flatMap(
             _.fold(
-              _ match {
+              {
                 case e: ConditionalCheckFailedException => F.delay(Left(e))
                 case t                                  => F.raiseError(t) // raise error as opposed to swallowing
               },
@@ -85,7 +89,7 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
         eff(client.updateItem(JavaRequests.update(req))).attempt
           .flatMap(
             _.fold(
-              _ match {
+              {
                 case e: ConditionalCheckFailedException => F.delay(Left(e))
                 case t                                  => F.raiseError(t) // raise error as opposed to swallowing
               },
