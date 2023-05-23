@@ -176,6 +176,8 @@ object DynamoFormat extends PlatformSpecificFormat with FormatDerivation {
 
   implicit val shortFormat: DynamoFormat[Short] = numFormat(_.toShort)
 
+  implicit val bigIntFormat: DynamoFormat[BigInt] = numFormat(BigInt(_))
+
   // Thrift and therefore Scanamo-Scrooge provides a byte and binary types backed by byte and byte[].
   implicit val byteFormat: DynamoFormat[Byte] = numFormat(_.toByte)
 
@@ -240,6 +242,8 @@ object DynamoFormat extends PlatformSpecificFormat with FormatDerivation {
   implicit val doubleSetFormat: DynamoFormat[Set[Double]] = numSetFormat(coerceNumber(_.toDouble))
 
   implicit val BigDecimalSetFormat: DynamoFormat[Set[BigDecimal]] = numSetFormat(coerceNumber(BigDecimal(_)))
+
+  implicit val BigIntSetFormat: DynamoFormat[Set[BigInt]] = numSetFormat(coerceNumber(BigInt(_)))
 
   implicit val stringSetFormat: DynamoFormat[Set[String]] =
     new DynamoFormat[Set[String]] {
