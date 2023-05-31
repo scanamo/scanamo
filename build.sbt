@@ -245,6 +245,30 @@ lazy val alpakka = (project in file("alpakka"))
   .settings(scala2settings)
   .dependsOn(scanamo, testkit % "test->test")
 
+lazy val pekko = (project in file("pekko"))
+  .settings(
+    commonSettings,
+    crossScalaVersions := scala2xVersions,
+    publishingSettings,
+    name := "scanamo-pekko"
+  )
+  .settings(
+    resolvers += "Apache Pekko Snapshots".at("https://repository.apache.org/content/groups/snapshots"),
+    resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
+    libraryDependencies ++= Seq(
+      awsDynamoDB,
+      "org.typelevel"    %% "cats-free"                 % V.catsVersion,
+      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "0.0.0+111-5b038c8d-SNAPSHOT",
+      "org.scalatest"    %% "scalatest"                 % "3.2.9"  % Test,
+      "org.scalacheck"   %% "scalacheck"                % "1.16.0" % Test
+    ),
+    Test / fork := true,
+    // unidoc can work out links to other project, but scalac can't
+    Compile / doc / scalacOptions += "-no-link-warnings"
+  )
+  .settings(scala2settings)
+  .dependsOn(scanamo, testkit % "test->test")
+
 lazy val joda = (project in file("joda"))
   .settings(
     commonSettings,
