@@ -1,6 +1,6 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
-  val scala212 = "2.12.17"
+  val scala212 = "2.12.18"
   val scala213 = "2.13.8"
   val scala3 = "3.2.0"
   val magnolia = "1.1.2"
@@ -123,7 +123,7 @@ lazy val root = (project in file("."))
 addCommandAlias("makeMicrosite", "docs/makeMicrosite")
 addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.20.56"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.20.82"
 
 lazy val refined = (project in file("refined"))
   .settings(
