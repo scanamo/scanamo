@@ -253,12 +253,10 @@ lazy val pekko = (project in file("pekko"))
     name := "scanamo-pekko"
   )
   .settings(
-    resolvers += "Apache Pekko Snapshots".at("https://repository.apache.org/content/groups/snapshots"),
-    resolvers ++= Resolver.sonatypeOssRepos("snapshots"),
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"    %% "cats-free"                 % V.catsVersion,
-      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "0.0.0+111-5b038c8d-SNAPSHOT",
+      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.0",
       "org.scalatest"    %% "scalatest"                 % "3.2.9"  % Test,
       "org.scalacheck"   %% "scalacheck"                % "1.16.0" % Test
     ),
