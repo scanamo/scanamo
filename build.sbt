@@ -1,7 +1,7 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
   val scala212 = "2.12.18"
-  val scala213 = "2.13.8"
+  val scala213 = "2.13.12"
   val scala3 = "3.2.0"
   val magnolia = "1.1.2"
   val magnoliaFor3 = "1.3.0"
