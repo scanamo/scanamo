@@ -110,7 +110,7 @@ val commonSettings = Seq(
 )
 
 lazy val root = (project in file("."))
-  .aggregate(scanamo, testkit, alpakka, refined, catsEffect, joda, zio)
+  .aggregate(scanamo, testkit, alpakka, refined, catsEffect, joda, zio, pekko)
   .settings(
     commonSettings,
     publishingSettings,
