@@ -256,7 +256,7 @@ lazy val pekko = (project in file("pekko"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"    %% "cats-free"                 % V.catsVersion,
-      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.0",
+      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.2",
       "org.scalatest"    %% "scalatest"                 % "3.2.9"  % Test,
       "org.scalacheck"   %% "scalacheck"                % "1.16.0" % Test
     ),
