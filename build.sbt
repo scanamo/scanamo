@@ -64,7 +64,7 @@ lazy val scala2settings = Seq(
     case Some((2, _)) =>
       Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-        compilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)
+        compilerPlugin("org.typelevel" % "kind-projector" % "0.13.3" cross CrossVersion.full)
       )
     case _ => Seq.empty
   })
