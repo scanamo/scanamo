@@ -39,6 +39,6 @@ object ScanamoZio {
 
   val ToStream: IO[DynamoDbException, *] ~> Stream[DynamoDbException, *] =
     new (IO[DynamoDbException, *] ~> Stream[DynamoDbException, *]) {
-      def apply[A](fa: IO[DynamoDbException, A]): Stream[DynamoDbException, A] = ZStream.fromEffect(fa)
+      def apply[A](fa: IO[DynamoDbException, A]): Stream[DynamoDbException, A] = ZStream.from(fa)
     }
 }

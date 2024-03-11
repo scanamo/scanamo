@@ -18,16 +18,17 @@ package org.scanamo
 
 import cats.Parallel
 import cats.kernel.Monoid
+import cats.syntax.apply.*
+import cats.syntax.semigroup.*
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import java.util.{ HashMap, Map => JMap }
-import cats.syntax.apply._
-import cats.syntax.semigroup._
+
+import java.util.{ HashMap, Map as JMap }
 import scala.annotation.tailrec
 
 /** A `DynamoObject` is a map of strings to values that can be embedded into an `AttributeValue`.
   */
 sealed abstract class DynamoObject extends Product with Serializable { self =>
-  import DynamoObject._
+  import DynamoObject.*
 
   protected def internalToMap: Map[String, DynamoValue]
 
@@ -83,7 +84,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
       case Empty => Iterable.empty[String]
       case Strict(xs) =>
         new Iterable[String] {
-          final val iterator = new Iterator[String] {
+          final val iterator: Iterator[String] = new Iterator[String] {
             private[this] val underlying = xs.keySet.iterator
             final def hasNext = underlying.hasNext
             final def next() = underlying.next
@@ -100,7 +101,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
       case Empty => Iterable.empty[DynamoValue]
       case Strict(xs) =>
         new Iterable[DynamoValue] {
-          final val iterator = new Iterator[DynamoValue] {
+          final val iterator: Iterator[DynamoValue] = new Iterator[DynamoValue] {
             private[this] val underlying = xs.values.iterator
             final def hasNext = underlying.hasNext
             final def next() = DynamoValue.fromAttributeValue(underlying.next)
@@ -303,7 +304,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
 
 object DynamoObject {
   private[DynamoObject] case object Empty extends DynamoObject {
-    final def internalToMap = Map.empty
+    final def internalToMap: Map[String, DynamoValue] = Map.empty
   }
   final private[DynamoObject] case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
     final def internalToMap = unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue).toMap
