@@ -14,6 +14,7 @@ val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
 val zioVersion = "1.0.13"
 
 lazy val stdOptions = Seq(
+  "-release:8",
   "-deprecation",
   "-encoding",
   "UTF-8",
@@ -41,7 +42,6 @@ lazy val std2_12Options = Seq(
 
 lazy val std2xOptions = Seq(
   "-Xsource:3", // https://docs.scala-lang.org/scala3/guides/migration/tooling-tour.html#the-scala-213-compiler
-  "-target:jvm-1.8",
   "-language:higherKinds",
   "-language:existentials",
   "-language:implicitConversions",
@@ -92,7 +92,6 @@ val commonSettings = Seq(
   startYear := Some(2019),
   homepage := Some(url("http://www.scanamo.org/")),
   licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
-  javacOptions ++= Seq("-source", "1.8", "-target", "1.8", "-Xlint"),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
