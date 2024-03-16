@@ -20,7 +20,7 @@ import cats.Parallel
 import cats.kernel.Monoid
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
-import java.util.{HashMap, Map as JMap}
+import java.util.{ HashMap, Map as JMap }
 import cats.syntax.apply.*
 import cats.syntax.semigroup.*
 
@@ -309,7 +309,8 @@ object DynamoObject {
     final def internalToMap: Map[String, DynamoValue] = Map.empty
   }
   final private[DynamoObject] case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
-    final def internalToMap: Map[String, DynamoValue] = unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue).toMap
+    final def internalToMap: Map[String, DynamoValue] =
+      unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue).toMap
   }
   final private[DynamoObject] case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject {
     final def internalToMap: Map[String, DynamoValue] = xs
