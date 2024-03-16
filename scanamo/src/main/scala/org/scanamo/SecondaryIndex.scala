@@ -127,11 +127,11 @@ private[scanamo] case class SecondaryIndexWithOptions[V: DynamoFormat](
   queryOptions: ScanamoQueryOptions
 ) extends SecondaryIndex[V] {
   def limit(n: Int): SecondaryIndexWithOptions[V] = copy(queryOptions = queryOptions.copy(limit = Some(n)))
-  def from[K: UniqueKeyCondition](key: UniqueKey[K]) =
+  def from[K: UniqueKeyCondition](key: UniqueKey[K]): SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(key.toDynamoObject)))
-  def from(exclusiveStartKey: DynamoObject) =
+  def from(exclusiveStartKey: DynamoObject): SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(exclusiveStartKey = Some(exclusiveStartKey)))
-  def filter[C: ConditionExpression](condition: C) =
+  def filter[C: ConditionExpression](condition: C): SecondaryIndexWithOptions[V] =
     SecondaryIndexWithOptions[V](tableName, indexName, ScanamoQueryOptions.default).filter(Condition(condition))
   def filter[T](c: Condition[T]): SecondaryIndexWithOptions[V] =
     copy(queryOptions = queryOptions.copy(filter = Some(c)))

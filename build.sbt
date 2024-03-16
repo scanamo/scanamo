@@ -1,8 +1,8 @@
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
   val scala212 = "2.12.18"
-  val scala213 = "2.13.8"
-  val scala3 = "3.2.0"
+  val scala213 = "2.13.13"
+  val scala3 = "3.3.3"
   val magnolia = "1.1.6"
   val magnoliaFor3 = "1.3.0"
   val catsVersion = "2.9.0"
@@ -64,7 +64,7 @@ lazy val scala2settings = Seq(
     case Some((2, _)) =>
       Seq(
         "org.scala-lang" % "scala-reflect" % scalaVersion.value,
-        compilerPlugin("org.typelevel" % "kind-projector" % "0.13.2" cross CrossVersion.full)
+        compilerPlugin("org.typelevel" % "kind-projector" % "0.13.3" cross CrossVersion.full)
       )
     case _ => Seq.empty
   })
