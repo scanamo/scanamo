@@ -19,7 +19,7 @@ class DynamoFormatTest extends AnyFunSpec with Matchers with ScalaCheckDrivenPro
       LocalDynamoDB.usingRandomTable(client)("name" -> S) { t =>
         final case class Person(name: String, item: A)
         val format = DynamoFormat[Person]
-        forAll(gen) { a: A =>
+        forAll(gen) { (a: A) =>
           val person = Person("bob", a)
           client.putItem(PutItemRequest.builder.tableName(t).item(format.write(person).toAttributeValue.m).build).get
           val resp =
