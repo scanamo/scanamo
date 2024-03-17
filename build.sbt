@@ -91,12 +91,12 @@ val commonSettings = Seq(
   organizationName := "Scanamo",
   startYear := Some(2019),
   homepage := Some(url("http://www.scanamo.org/")),
-  licenses += ("Apache-2.0", new URL("https://www.apache.org/licenses/LICENSE-2.0.txt")),
+  licenses := Seq(License.Apache2),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
-    (if (CrossVersion.partialVersion(scalaVersion.value) == Some((2, 12)))
-       mainScalacOptions.filter(!Seq("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+    (if (CrossVersion.partialVersion(scalaVersion.value).contains((2, 12)))
+       mainScalacOptions.filter(!Set("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
      else
        mainScalacOptions).filter(_ != "-Xfatal-warnings")
   },
@@ -118,9 +118,6 @@ lazy val root = (project in file("."))
     dynamoDBLocalTestCleanup / aggregate := false,
     stopDynamoDBLocal / aggregate := false
   )
-
-addCommandAlias("makeMicrosite", "docs/makeMicrosite")
-addCommandAlias("publishMicrosite", "docs/publishMicrosite")
 
 val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.21.26"
 
@@ -287,15 +284,11 @@ lazy val docs = (project in file("docs"))
   .settings(
     commonSettings,
     crossScalaVersions := allCrossVersions,
-    micrositeSettings,
     noPublishSettings,
-    ghpagesNoJekyll := false,
-    git.remoteRepo := "git@github.com:scanamo/scanamo.git",
     mdocVariables := Map(
       "VERSION" -> version.value
     )
   )
-  .enablePlugins(MicrositesPlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
@@ -319,31 +312,4 @@ val publishingSettings = Seq(
 
 lazy val noPublishSettings = Seq(
   publish / skip := true
-)
-
-val micrositeSettings = Seq(
-  micrositeUrl := "https://www.scanamo.org",
-  micrositeName := "Scanamo",
-  micrositeDescription := "Scanamo: simpler DynamoDB access for Scala",
-  micrositeAuthor := "Scanamo Contributors",
-  micrositeGithubOwner := "scanamo",
-  micrositeGithubRepo := "scanamo",
-  micrositeDocumentationUrl := "/latest/api",
-  micrositeDocumentationLabelDescription := "API",
-  micrositeHighlightTheme := "monokai",
-  micrositeHighlightLanguages ++= Seq("sbt"),
-  micrositeGitterChannel := false,
-  micrositeShareOnSocial := false,
-  micrositePalette := Map(
-    "brand-primary" -> "#951c55",
-    "brand-secondary" -> "#005689",
-    "brand-tertiary" -> "#00456e",
-    "gray-dark" -> "#453E46",
-    "gray" -> "#837F84",
-    "gray-light" -> "#E3E2E3",
-    "gray-lighter" -> "#F4F3F4",
-    "white-color" -> "#FFFFFF"
-  ),
-  micrositePushSiteWith := GitHub4s,
-  micrositeGithubToken := sys.env.get("GITHUB_TOKEN")
 )

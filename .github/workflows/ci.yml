@@ -14,8 +14,8 @@ jobs:
     strategy:
       matrix:
         os: ["ubuntu-latest"]
-        version: ["2.12.19","2.13.13","3.3.3"]
-        java-version: [ '8', '11', '21' ]
+        scala-version: ["2.12.19","2.13.13","3.3.3"]
+        java-version: [ '11', '21' ]
     runs-on: ${{ matrix.os }} 
     steps:
       - name: Checkout
@@ -28,31 +28,31 @@ jobs:
           cache: sbt
       - name: lint
         run: >
-          sbt ++${{ matrix.version }}
+          sbt ++${{ matrix.scala-version }}
           scalafmtCheck
           test:scalafmtCheck
           scalafmtSbtCheck
       - name: test with coverage
-        if: matrix.version == '2.12.19'
+        if: matrix.scala-version == '2.12.19'
         run: >
-          sbt ++${{ matrix.version }}
+          sbt ++${{ matrix.scala-version }}
           coverage
           startDynamodbLocal
           test
           dynamodbLocalTestCleanup
           stopDynamodbLocal
       - name: test without coverage
-        if: matrix.version == '2.13.13'
+        if: matrix.scala-version == '2.13.13'
         run: >
-          sbt ++${{ matrix.version }}
+          sbt ++${{ matrix.scala-version }}
           startDynamodbLocal
           test
           dynamodbLocalTestCleanup
           stopDynamodbLocal
       - name: test without coverage
-        if: matrix.version == '3.3.3'
+        if: matrix.scala-version == '3.3.3'
         run: >
-          sbt ++${{ matrix.version }}
+          sbt ++${{ matrix.scala-version }}
           startDynamodbLocal
           scanamo/test catsEffect/test joda/test
           dynamodbLocalTestCleanup
@@ -64,30 +64,11 @@ jobs:
     steps:
       - name: Checkout current branch
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
       - name: test docs
         run: sbt +doc
-  gen_microsite:
-    needs: [check,test_docs]
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout current branch
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: setup ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: '2.6.0'
-          bundler-cache: true
-      - name: setup jekyll
-        run: gem install jekyll -v 4.0.0
-      - name: gen microsite
-        run: sbt startDynamodbLocal makeMicrosite stopDynamodbLocal
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [check,test_docs,gen_microsite]
+    needs: [check,test_docs]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
