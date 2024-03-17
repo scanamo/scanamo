@@ -1,17 +1,13 @@
-
+name: CI
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - "*"
-    branches: [master, main]
   pull_request:
-    branches: [master, main]
-    types:
-      - opened
-      - synchronize
-      - reopened
-      - closed
+
+  # triggering CI default branch improves caching
+  # see https://docs.github.com/en/free-pro-team@latest/actions/guides/caching-dependencies-to-speed-up-workflows#restrictions-for-accessing-a-cache
+  push:
+    branches:
+      - main
 
 jobs:
   check:
@@ -19,24 +15,17 @@ jobs:
       matrix:
         os: ["ubuntu-latest"]
         version: ["2.12.19","2.13.13","3.3.3"]
-        jdk: [graalvm@11]
+        java-version: [ '8', '11', '21' ]
     runs-on: ${{ matrix.os }} 
     steps:
-      - name: Checkout current branch
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup java
+        uses: actions/setup-java@v4
         with:
-          fetch-depth: 0
-      - name: Cache sbt
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/.sbt
-            ~/.ivy2/cache
-            ~/.coursier/cache/v1
-            ~/.cache/coursier/v1
-            ~/AppData/Local/Coursier/Cache/v1
-            ~/Library/Caches/Coursier/v1
-          key: ${{ runner.os }}-sbt-cache-v2-${{ hashFiles('**/*.sbt') }}-${{ hashFiles('project/build.properties') }}
+          distribution: 'corretto'
+          java-version: ${{ matrix.java-version }}
+          cache: sbt
       - name: lint
         run: >
           sbt ++${{ matrix.version }}
@@ -74,7 +63,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: test docs
@@ -84,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: setup ruby
@@ -102,9 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout current branch
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v4
       - name: release
         run: sbt ci-release
         env:
