@@ -13,14 +13,13 @@ jobs:
   check:
     strategy:
       matrix:
-        os: ["ubuntu-latest"]
         scala-version: ["2.12.19","2.13.13","3.3.3"]
         java-version: [ '11', '21' ]
-    runs-on: ${{ matrix.os }} 
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup java
+      - name: Setup JDK
         uses: actions/setup-java@v4
         with:
           distribution: 'corretto'
