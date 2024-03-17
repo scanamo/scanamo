@@ -280,15 +280,15 @@ lazy val joda = (project in file("joda"))
   )
   .dependsOn(scanamo)
 
-lazy val docs = (project in file("docs"))
+lazy val docs = project
+  .in(file("scanamo-docs"))
   .settings(
-    commonSettings,
-    crossScalaVersions := allCrossVersions,
-    noPublishSettings,
+    moduleName := "scanamo-docs",
     mdocVariables := Map(
-      "VERSION" -> version.value
+       "VERSION" -> version.value
     )
   )
+  .enablePlugins(MdocPlugin, DocusaurusPlugin)
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
