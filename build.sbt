@@ -3,15 +3,15 @@ val V = new {
   val scala212 = "2.12.19"
   val scala213 = "2.13.13"
   val scala3 = "3.3.3"
-  val magnolia = "1.1.6"
-  val magnoliaFor3 = "1.3.0"
-  val catsVersion = "2.9.0"
-  val catsEffectVersion = "3.4.10"
+  val magnolia = "1.1.8"
+  val magnoliaFor3 = "1.3.4"
+  val catsVersion = "2.10.0"
+  val catsEffectVersion = "3.4.11"
 }
 val scala2xVersions = Seq(V.scala212, V.scala213)
 val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
 
-val zioVersion = "1.0.13"
+val zioVersion = "1.0.18"
 
 lazy val stdOptions = Seq(
   "-release:8",
@@ -130,7 +130,7 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.10.3",
+      "eu.timepit"    %% "refined"   % "0.11.1",
       "org.scalatest" %% "scalatest" % "3.2.9" % Test
     )
   )
@@ -183,7 +183,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % V.catsVersion,
       "org.typelevel"  %% "cats-core"   % V.catsVersion,
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
-      "co.fs2"         %% "fs2-core"    % "3.6.1",
+      "co.fs2"         %% "fs2-core"    % "3.10.0",
       "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.16.0" % Test
     ),
@@ -206,7 +206,7 @@ lazy val zio = (project in file("zio"))
       "org.typelevel"  %% "cats-effect"      % V.catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
+      "dev.zio"        %% "zio-interop-cats" % "3.3.0",
       "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.16.0"   % Test
     ),
@@ -252,7 +252,7 @@ lazy val pekko = (project in file("pekko"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"    %% "cats-free"                 % V.catsVersion,
-      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.0",
+      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.2",
       "org.scalatest"    %% "scalatest"                 % "3.2.9"  % Test,
       "org.scalacheck"   %% "scalacheck"                % "1.16.0" % Test
     ),
@@ -273,8 +273,8 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.3"  % Provided,
-      "joda-time"       % "joda-time"    % "2.12.5",
-      "org.scalatest"  %% "scalatest"    % "3.2.15"  % Test,
+      "joda-time"       % "joda-time"    % "2.12.7",
+      "org.scalatest"  %% "scalatest"    % "3.2.18"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
     )
   )
