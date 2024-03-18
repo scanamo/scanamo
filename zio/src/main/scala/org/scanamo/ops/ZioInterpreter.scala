@@ -29,7 +29,7 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
   final private def effEitherConditionalCheckFailed[A](
     fut: => CompletableFuture[A]
   ): IO[DynamoDbException, Either[ConditionalCheckFailedException, A]] =
-    eff(fut).map(Right(_)).catchSome { case e: ConditionalCheckFailedException => IO.succeed(Left(e)) }
+    eff(fut).map(Right(_)).catchSome { case e: ConditionalCheckFailedException => ZIO.succeed(Left(e)) }
 
   def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] =
     op match {

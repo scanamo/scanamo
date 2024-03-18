@@ -11,7 +11,7 @@ val V = new {
 val scala2xVersions = Seq(V.scala212, V.scala213)
 val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
 
-val zioVersion = "1.0.13"
+val zioVersion = "2.0.1"
 
 lazy val stdOptions = Seq(
   "-release:8",
@@ -206,7 +206,7 @@ lazy val zio = (project in file("zio"))
       "org.typelevel"  %% "cats-effect"      % V.catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
+      "dev.zio"        %% "zio-interop-cats" % "3.3.0",
       "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.16.0"   % Test
     ),
