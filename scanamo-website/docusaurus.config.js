@@ -32,7 +32,6 @@ const config = {
   i18n: {
     defaultLocale: 'en',
     locales: ['en'],
-    // path: "../scanamo-docs/target/mdoc",
   },
 
   presets: [
@@ -95,15 +94,11 @@ const config = {
             items: [
               {
                 label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
+                href: 'https://stackoverflow.com/questions/tagged/scanamo',
               },
               {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
-              },
-              {
-                label: 'Twitter',
-                href: 'https://twitter.com/docusaurus',
+                label: 'Gitter',
+                href: 'https://app.gitter.im/#/room/#scanamo_scanamo:gitter.im',
               },
             ],
           },
@@ -111,12 +106,8 @@ const config = {
             title: 'More',
             items: [
               {
-                label: 'Blog',
-                to: '/blog',
-              },
-              {
                 label: 'GitHub',
-                href: 'https://github.com/facebook/docusaurus',
+                href: 'https://github.com/scanamo/scanamo',
               },
             ],
           },
