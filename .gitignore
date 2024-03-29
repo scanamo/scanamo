@@ -9,3 +9,4 @@ sbt.json
 .vscode
 project/metals.sbt
 project/project
+scanamo-website/docs/
