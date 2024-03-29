@@ -1,20 +1,17 @@
 ---
-layout: docs
 title: Batch Operations
-position: 2
+sidebar_position: 2
 ---
-
-## Batch Operations
  
 Many operations against Dynamo can be performed in batches. Scanamo
-has support for putting, getting and deleting in batches
+has support for putting, getting and deleting in batches.
 
 ```scala mdoc:silent
 import org.scanamo._
 import org.scanamo.syntax._
 import org.scanamo.generic.auto._
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
- 
+
 val client = LocalDynamoDB.syncClient()
 val scanamo = Scanamo(client)
 
