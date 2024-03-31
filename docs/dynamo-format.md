@@ -1,10 +1,7 @@
 ---
-layout: docs
 title: DynamoFormat
-position:  6
+sidebar_position: 6
 ---
-
-## DynamoFormat
 
 Scanamo uses the `DynamoFormat` type class to define how to read and write different types to DynamoDB.
 

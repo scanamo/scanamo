@@ -284,6 +284,7 @@ lazy val docs = project
   .in(file("scanamo-docs"))
   .settings(
     moduleName := "scanamo-docs",
+    mdocOut := file("scanamo-website/docs"),
     mdocVariables := Map(
        "VERSION" -> version.value
     )
