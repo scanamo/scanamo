@@ -1,6 +1,5 @@
 ---
-layout: home
-section: home
+title: Overview
 sidebar_position: 1
 ---
 

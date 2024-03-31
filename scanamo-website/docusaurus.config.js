@@ -10,7 +10,6 @@ import {themes as prismThemes} from 'prism-react-renderer';
 const config = {
   title: 'Scanamo',
   tagline: 'simpler DynamoDB access for Scala',
-  favicon: 'img/favicon.ico',
 
   // Set the production url of your site here
   url: 'https://www.scanamo.org',
@@ -59,17 +58,7 @@ const config = {
       image: 'img/docusaurus-social-card.jpg',
       navbar: {
         title: 'Scanamo',
-        logo: {
-          alt: 'My Site Logo',
-          src: 'img/logo.svg',
-        },
         items: [
-          {
-            type: 'docSidebar',
-            sidebarId: 'tutorialSidebar',
-            position: 'left',
-            label: 'Tutorial',
-          },
           {
             href: 'https://github.com/scanamo/scanamo',
             label: 'GitHub',
@@ -80,15 +69,6 @@ const config = {
       footer: {
         style: 'dark',
         links: [
-          {
-            title: 'Docs',
-            items: [
-              {
-                label: 'Tutorial',
-                to: '/docs/intro',
-              },
-            ],
-          },
           {
             title: 'Community',
             items: [
@@ -112,7 +92,6 @@ const config = {
             ],
           },
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} My Project, Inc. Built with Docusaurus.`,
       },
       prism: {
         additionalLanguages: ['java', 'scala'],
