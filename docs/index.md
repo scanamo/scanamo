@@ -18,7 +18,7 @@ Quick start
 
 Note: the `LocalDynamoDB` object is provided by the `scanamo-testkit` package.
 
-Scanamo is published for Scala 2.13 and 2.12 to Maven Central, so just add the following to your `build.sbt`:
+Scanamo is published to Maven Central, so just add the following to your `build.sbt`:
 
 ```sbt
 libraryDependencies += "org.scanamo" %% "scanamo" % "@VERSION@"
