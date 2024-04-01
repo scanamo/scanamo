@@ -90,7 +90,7 @@ val commonSettings = Seq(
   organization := "org.scanamo",
   organizationName := "Scanamo",
   startYear := Some(2019),
-  homepage := Some(url("http://www.scanamo.org/")),
+  homepage := Some(url("https://www.scanamo.org/")),
   licenses := Seq(License.Apache2),
   scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   Test / scalacOptions := {
@@ -102,7 +102,7 @@ val commonSettings = Seq(
   },
   Compile / console / scalacOptions := (Test / scalacOptions).value,
   autoAPIMappings := true,
-  apiURL := Some(url("http://www.scanamo.org/latest/api/")),
+  apiURL := Some(url("https://www.scanamo.org/latest/api/")),
   dynamoDBLocalDownloadDir := file(".dynamodb-local"),
   dynamoDBLocalPort := 8042,
   Test / parallelExecution := false
@@ -119,7 +119,7 @@ lazy val root = (project in file("."))
     stopDynamoDBLocal / aggregate := false
   )
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.21.26"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.23.4"
 
 lazy val refined = (project in file("refined"))
   .settings(
@@ -130,8 +130,8 @@ lazy val refined = (project in file("refined"))
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.10.3",
-      "org.scalatest" %% "scalatest" % "3.2.9" % Test
+      "eu.timepit"    %% "refined"   % "0.11.1",
+      "org.scalatest" %% "scalatest" % "3.2.17" % Test
     )
   )
   .dependsOn(scanamo)
@@ -152,10 +152,10 @@ lazy val scanamo = (project in file("scanamo"))
       "org.typelevel"          %% "cats-free"          % V.catsVersion,
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.3"    % Provided,
-      "joda-time"          % "joda-time"       % "2.11.2"   % Test,
-      "org.scalatest"     %% "scalatest"       % "3.2.9"    % Test,
-      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.10.0" % Test,
-      "org.scalacheck"    %% "scalacheck"      % "1.16.0"   % Test
+      "joda-time"          % "joda-time"       % "2.12.6"   % Test,
+      "org.scalatest"     %% "scalatest"       % "3.2.17"    % Test,
+      "org.scalatestplus" %% "scalacheck-1-15" % "3.2.11.0" % Test,
+      "org.scalacheck"    %% "scalacheck"      % "1.17.0"   % Test
     )
   )
   .dependsOn(testkit % "test->test")
@@ -184,8 +184,8 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % V.catsVersion,
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
       "co.fs2"         %% "fs2-core"    % "3.6.1",
-      "org.scalatest"  %% "scalatest"   % "3.2.9"  % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.16.0" % Test
+      "org.scalatest"  %% "scalatest"   % "3.2.17"  % Test,
+      "org.scalacheck" %% "scalacheck"  % "1.17.0" % Test
     ),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
@@ -207,8 +207,8 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
-      "org.scalatest"  %% "scalatest"        % "3.2.9"    % Test,
-      "org.scalacheck" %% "scalacheck"       % "1.16.0"   % Test
+      "org.scalatest"  %% "scalatest"        % "3.2.17"    % Test,
+      "org.scalacheck" %% "scalacheck"       % "1.17.0"   % Test
     ),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
@@ -231,8 +231,8 @@ lazy val alpakka = (project in file("alpakka"))
       awsDynamoDB,
       "org.typelevel"      %% "cats-free"                    % V.catsVersion,
       "com.lightbend.akka" %% "akka-stream-alpakka-dynamodb" % "2.0.2",
-      "org.scalatest"      %% "scalatest"                    % "3.2.9"  % Test,
-      "org.scalacheck"     %% "scalacheck"                   % "1.16.0" % Test
+      "org.scalatest"      %% "scalatest"                    % "3.2.17"  % Test,
+      "org.scalacheck"     %% "scalacheck"                   % "1.17.0" % Test
     ),
     Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
@@ -252,9 +252,9 @@ lazy val pekko = (project in file("pekko"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"    %% "cats-free"                 % V.catsVersion,
-      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.0",
-      "org.scalatest"    %% "scalatest"                 % "3.2.9"  % Test,
-      "org.scalacheck"   %% "scalacheck"                % "1.16.0" % Test
+      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.2",
+      "org.scalatest"    %% "scalatest"                 % "3.2.17"  % Test,
+      "org.scalacheck"   %% "scalacheck"                % "1.17.0" % Test
     ),
     Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
@@ -273,8 +273,8 @@ lazy val joda = (project in file("joda"))
   .settings(
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.3"  % Provided,
-      "joda-time"       % "joda-time"    % "2.12.5",
-      "org.scalatest"  %% "scalatest"    % "3.2.15"  % Test,
+      "joda-time"       % "joda-time"    % "2.12.6",
+      "org.scalatest"  %% "scalatest"    % "3.2.17"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
     )
   )
