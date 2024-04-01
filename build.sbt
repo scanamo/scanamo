@@ -8,7 +8,7 @@ val V = new {
   val scala3 = "3.3.3"
   val magnolia = "1.1.8"
   val magnoliaFor3 = "1.3.4"
-  val catsVersion = "2.9.0"
+  val catsVersion = "2.10.0"
   val catsEffectVersion = "3.4.10"
 }
 val scala2xVersions = Seq(V.scala212, V.scala213)
