@@ -1,0 +1,18 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    uses: guardian/gha-scala-library-release-workflow/.github/workflows/reusable-release.yml@main
+    permissions: { contents: write, pull-requests: write }
+    with:
+      GITHUB_APP_ID: 838920
+      SONATYPE_PROFILE_NAME: 'org.scanamo'
+      SONATYPE_CREDENTIAL_HOST: 'oss.sonatype.org'
+      SONATYPE_USERNAME: 'scanamo'
+    secrets:
+      SONATYPE_PASSWORD: ${{ secrets.AUTOMATED_MAVEN_RELEASE_SONATYPE_PASSWORD }}
+      PGP_PRIVATE_KEY: ${{ secrets.AUTOMATED_MAVEN_RELEASE_PGP_SECRET }}
+      GITHUB_APP_PRIVATE_KEY: ${{ secrets.AUTOMATED_MAVEN_RELEASE_GITHUB_APP_PRIVATE_KEY }}

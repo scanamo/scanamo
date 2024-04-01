@@ -33,9 +33,8 @@ scalafmtCheck
 scalafmtSbtCheck
 ```
 
+# Publishing a new release
 
-Releasing
----------
-
-Creating a git tag is all that is required to trigger GitHub Actions to publish an artifact to Maven 
-Central for both Scala 2.12 and Scala 2.13 once the build is complete.
+This repo uses [`gha-scala-library-release-workflow`](https://github.com/guardian/gha-scala-library-release-workflow)
+to automate publishing releases (both full & preview releases) - see
+[**Making a Release**](https://github.com/guardian/gha-scala-library-release-workflow/blob/main/docs/making-a-release.md).
