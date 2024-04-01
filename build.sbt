@@ -1,3 +1,6 @@
+import ReleaseTransformations.*
+import sbtversionpolicy.withsbtrelease.ReleaseVersion
+
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
   val scala212 = "2.12.19"
@@ -87,12 +90,8 @@ lazy val macroSettings = Seq(
   })
 )
 val commonSettings = Seq(
-  organization := "org.scanamo",
-  organizationName := "Scanamo",
   startYear := Some(2019),
   homepage := Some(url("https://www.scanamo.org/")),
-  licenses := Seq(License.Apache2),
-  scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value).contains((2, 12)))
@@ -112,8 +111,20 @@ lazy val root = (project in file("."))
   .aggregate(scanamo, testkit, alpakka, refined, catsEffect, joda, zio, pekko)
   .settings(
     commonSettings,
-    publishingSettings,
-    noPublishSettings,
+    publish / skip := true,
+    // releaseVersion := ReleaseVersion.fromAggregatedAssessedCompatibilityWithLatestRelease().value,
+    releaseCrossBuild := true, // true if you cross-build the project for multiple Scala versions
+    releaseProcess := Seq[ReleaseStep](
+      checkSnapshotDependencies,
+      inquireVersions,
+      runClean,
+      runTest,
+      setReleaseVersion,
+      commitReleaseVersion,
+      tagRelease,
+      setNextVersion,
+      commitNextVersion
+    ),
     startDynamoDBLocal / aggregate := false,
     dynamoDBLocalTestCleanup / aggregate := false,
     stopDynamoDBLocal / aggregate := false
@@ -293,24 +304,9 @@ lazy val docs = project
   .dependsOn(scanamo % "compile->test", alpakka % "compile", refined % "compile")
 
 val publishingSettings = Seq(
-  Test / publishArtifact := false,
-  scmInfo := Some(
-    ScmInfo(
-      url("https://github.com/scanamo/scanamo"),
-      "scm:git:git@github.com:scanamo/scanamo.git"
-    )
-  ),
-  developers := List(
-    Developer("philwills", "Phil Wills", "", url("https://github.com/philwills")),
-    Developer(
-      "regiskuckaertz",
-      "Regis Kuckaertz",
-      "regis.kuckaertz@theguardian.com",
-      url("https://github.com/regiskuckaertz")
-    )
-  )
-)
-
-lazy val noPublishSettings = Seq(
-  publish / skip := true
+  organization := "org.scanamo",
+  organizationName := "Scanamo",
+  scalacOptions := stdOptions ++ extraOptions(scalaVersion.value),
+  licenses := Seq(License.Apache2),
+  Test / publishArtifact := false
 )
