@@ -193,7 +193,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % V.catsVersion,
       "org.typelevel"  %% "cats-core"   % V.catsVersion,
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
-      "co.fs2"         %% "fs2-core"    % "3.6.1",
+      "co.fs2"         %% "fs2-core"    % "3.10.2",
       "org.scalatest"  %% "scalatest"   % "3.2.17"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.17.0" % Test
     ),
