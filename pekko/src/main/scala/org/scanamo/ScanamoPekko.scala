@@ -44,8 +44,8 @@ import scala.concurrent.Future
   * returns either a [[scala.concurrent.Future]] or [[org.apache.pekko.stream.scaladsl.Source]] based on the kind of
   * execution used.
   *
-  * This is a port of
-  * [[https://github.com/scanamo/scanamo/blob/master/alpakka/src/main/scala/org/scanamo/ScanamoAlpakka.scala ScanamoAlpakka]]
+  * This is a port of [[https://github.com/scanamo/scanamo/pull/151 ScanamoAlpakka]], which has since been removed from
+  * the core Scanamo project.
   */
 class ScanamoPekko private (client: DynamoDbAsyncClient)(implicit system: ClassicActorSystemProvider) {
   import ScanamoPekko._
