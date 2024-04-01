@@ -51,8 +51,8 @@ import software.amazon.awssdk.services.dynamodb.model.{
 
 import java.util.concurrent.CompletionException
 
-/** This is a port of
-  * [[https://github.com/scanamo/scanamo/blob/master/alpakka/src/main/scala/org/scanamo/ops/AlpakkaInterpreter.scala AlpakkaInterpreter]]
+/** This is a port of [[https://github.com/scanamo/scanamo/pull/151 AlpakkaInterpreter]], which has since been removed
+  * from the core Scanamo project.
   */
 private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, system: ClassicActorSystemProvider)
     extends (ScanamoOpsA ~> PekkoInterpreter.Pekko) {

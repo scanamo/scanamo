@@ -15,9 +15,6 @@ import cats.implicits._
 import org.scanamo.ops.ScanamoOps
 import scala.concurrent.ExecutionContext
 
-/** This is a port of
-  * [[https://github.com/scanamo/scanamo/blob/master/alpakka/src/test/scala/org/scanamo/ScanamoAlpakkaSpec.scala ScanamoAlpakkaSpec]]
-  */
 class ScanamoPekkoSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
   implicit val system: ActorSystem = ActorSystem("scanamo-pekko")
 
