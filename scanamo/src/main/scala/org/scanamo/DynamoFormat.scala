@@ -96,8 +96,8 @@ object DynamoFormat extends PlatformSpecificFormat with FormatDerivation {
   private[scanamo] def coerce[A, B, T >: Null <: Throwable: ClassTag](f: A => B): A => Either[DynamoReadError, B] =
     a => Either.catchOnly[T](f(a)).leftMap(TypeCoercionError(_))
 
-  /** Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic,
-    * i.e. an `A` can always be converted to a `B` and vice versa.
+  /** Returns a [[DynamoFormat]] for the case where `A` and `B` are isomorphic, i.e. an `A` can always be converted to a
+    * `B` and vice versa.
     *
     * If there are some values of `B` that have no corresponding value in `A`, use [[DynamoFormat.xmap]] or
     * [[DynamoFormat.coercedXmap]].
@@ -108,8 +108,8 @@ object DynamoFormat extends PlatformSpecificFormat with FormatDerivation {
       final def write(t: A): DynamoValue = f.write(w(t))
     }
 
-  /** Returns a [[DynamoFormat]] for the case where `A` and `B` form an epimorphism,
-    * i.e. an `A` can always be converted to a `B` but the opposite is not necessarily true.
+  /** Returns a [[DynamoFormat]] for the case where `A` and `B` form an epimorphism, i.e. an `A` can always be converted
+    * to a `B` but the opposite is not necessarily true.
     */
   def xmap[A, B](r: B => Either[DynamoReadError, A], w: A => B)(implicit f: DynamoFormat[B]): DynamoFormat[A] =
     new DynamoFormat[A] {
