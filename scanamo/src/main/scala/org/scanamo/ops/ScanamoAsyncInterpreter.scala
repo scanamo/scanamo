@@ -39,6 +39,11 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
   ): Future[Either[ConditionalCheckFailedException, A]] =
     run(completionStage).map(Right(_)).recover { case e: ConditionalCheckFailedException => Left(e) }
 
+  final private def runEitherTransactionCanceledFailed[A](
+    completionStage: CompletionStage[A]
+  ): Future[Either[TransactionCanceledException, A]] =
+    run(completionStage).map(Right(_)).recover { case e: TransactionCanceledException => Left(e) }
+
   override def apply[A](op: ScanamoOpsA[A]): Future[A] =
     op match {
       case Put(req) =>
@@ -64,6 +69,6 @@ class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: Executio
       case ConditionalUpdate(req) =>
         runEitherConditionalCheckFailed(client.updateItem(JavaRequests.update(req)))
       case TransactWriteAll(req) =>
-        run(client.transactWriteItems(JavaRequests.transactItems(req)))
+        runEitherTransactionCanceledFailed(client.transactWriteItems(JavaRequests.transactItems(req)))
     }
 }

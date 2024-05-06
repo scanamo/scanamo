@@ -31,6 +31,11 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
   ): IO[DynamoDbException, Either[ConditionalCheckFailedException, A]] =
     eff(fut).map(Right(_)).catchSome { case e: ConditionalCheckFailedException => IO.succeed(Left(e)) }
 
+  final private def effEitherTransactionCanceledFailed[A](
+    fut: => CompletableFuture[A]
+  ): IO[DynamoDbException, Either[TransactionCanceledException, A]] =
+    eff(fut).map(Right(_)).catchSome { case e: TransactionCanceledException => IO.succeed(Left(e)) }
+
   def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] =
     op match {
       case Put(req) =>
@@ -56,6 +61,6 @@ private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (Scan
       case ConditionalUpdate(req) =>
         effEitherConditionalCheckFailed(client.updateItem(JavaRequests.update(req)))
       case TransactWriteAll(req) =>
-        eff(client.transactWriteItems(JavaRequests.transactItems(req)))
+        effEitherTransactionCanceledFailed(client.transactWriteItems(JavaRequests.transactItems(req)))
     }
 }
