@@ -78,7 +78,7 @@ object ScanamoFree {
 
   def transactionalWrite(
     actions: List[TransactionalWriteAction]
-  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]]  = {
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] = {
     val transactionWriteRequest =
       actions.foldLeft(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { case (acc, action) =>
         action match {
@@ -100,7 +100,9 @@ object ScanamoFree {
 
   def transactPutAllTable[T](
     tableName: String
-  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]]  =
+  )(items: List[T])(implicit
+    f: DynamoFormat[T]
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
     transactPutAll(items.map(tableName -> _))
 
   def transactPutAll[T](
@@ -115,12 +117,14 @@ object ScanamoFree {
 
   def transactUpdateAllTable(
     tableName: String
-  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]]  =
+  )(
+    items: List[(UniqueKey[_], UpdateExpression)]
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
     transactUpdateAll(items.map(tableName -> _))
 
   def transactUpdateAll(
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
-  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]]  = {
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] = {
     val items = tableAndItems.map { case (tableName, (key, updateExpression)) =>
       TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
     }
@@ -130,7 +134,7 @@ object ScanamoFree {
 
   def transactDeleteAllTable(
     tableName: String
-  )(items: List[UniqueKey[_]]): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]]  =
+  )(items: List[UniqueKey[_]]): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
     transactDeleteAll(items.map(tableName -> _))
 
   def transactDeleteAll(
