@@ -26,7 +26,7 @@ import cats.syntax.option.*
 import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import java.util.concurrent.CompletionException
-import software.amazon.awssdk.services.dynamodb.model.{ConditionalCheckFailedException, TransactionCanceledException}
+import software.amazon.awssdk.services.dynamodb.model.{ ConditionalCheckFailedException, TransactionCanceledException }
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
   final private def eff[A](fut: => CompletableFuture[A]): F[A] =
