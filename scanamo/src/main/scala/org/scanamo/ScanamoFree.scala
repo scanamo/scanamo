@@ -78,7 +78,7 @@ object ScanamoFree {
 
   def transactionalWrite(
     actions: List[TransactionalWriteAction]
-  ): ScanamoOps[TransactWriteItemsResponse] = {
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] = {
     val transactionWriteRequest =
       actions.foldLeft(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { case (acc, action) =>
         action match {
@@ -100,12 +100,14 @@ object ScanamoFree {
 
   def transactPutAllTable[T](
     tableName: String
-  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] =
+  )(items: List[T])(implicit
+    f: DynamoFormat[T]
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
     transactPutAll(items.map(tableName -> _))
 
   def transactPutAll[T](
     tableAndItems: List[(String, T)]
-  )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] = {
+  )(implicit f: DynamoFormat[T]): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] = {
     val dItems = tableAndItems.map { case (tableName, itm) =>
       TransactPutItem(tableName, f.write(itm), None)
     }
@@ -115,12 +117,14 @@ object ScanamoFree {
 
   def transactUpdateAllTable(
     tableName: String
-  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResponse] =
+  )(
+    items: List[(UniqueKey[_], UpdateExpression)]
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
     transactUpdateAll(items.map(tableName -> _))
 
   def transactUpdateAll(
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
-  ): ScanamoOps[TransactWriteItemsResponse] = {
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] = {
     val items = tableAndItems.map { case (tableName, (key, updateExpression)) =>
       TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
     }
@@ -130,12 +134,12 @@ object ScanamoFree {
 
   def transactDeleteAllTable(
     tableName: String
-  )(items: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResponse] =
+  )(items: List[UniqueKey[_]]): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
     transactDeleteAll(items.map(tableName -> _))
 
   def transactDeleteAll(
     tableAndItems: List[(String, UniqueKey[_])]
-  ): ScanamoOps[TransactWriteItemsResponse] = {
+  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] = {
     val items = tableAndItems.map { case (tableName, key) =>
       TransactDeleteItem(tableName, key.toDynamoObject, None)
     }
