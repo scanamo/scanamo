@@ -165,7 +165,7 @@ lazy val scanamo = (project in file("scanamo"))
       "joda-time"          % "joda-time"       % "2.12.7"   % Test,
       "org.scalatest"     %% "scalatest"       % "3.2.18"    % Test,
       "org.scalatestplus" %% "scalacheck-1-16" % "3.2.14.0" % Test,
-      "org.scalacheck"    %% "scalacheck"      % "1.17.0"   % Test
+      "org.scalacheck"    %% "scalacheck"      % "1.17.1"   % Test
     )
   )
   .dependsOn(testkit % "test->test")
@@ -195,7 +195,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
       "co.fs2"         %% "fs2-core"    % "3.10.2",
       "org.scalatest"  %% "scalatest"   % "3.2.18"  % Test,
-      "org.scalacheck" %% "scalacheck"  % "1.17.0" % Test
+      "org.scalacheck" %% "scalacheck"  % "1.17.1" % Test
     ),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
@@ -218,7 +218,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "3.3.0",
       "org.scalatest"  %% "scalatest"        % "3.2.18"    % Test,
-      "org.scalacheck" %% "scalacheck"       % "1.17.0"   % Test
+      "org.scalacheck" %% "scalacheck"       % "1.17.1"   % Test
     ),
     Test / fork := true,
     Compile / doc / scalacOptions += "-no-link-warnings"
@@ -239,7 +239,7 @@ lazy val pekko = (project in file("pekko"))
       "org.typelevel"    %% "cats-free"                 % V.catsVersion,
       "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.2",
       "org.scalatest"    %% "scalatest"                 % "3.2.18"  % Test,
-      "org.scalacheck"   %% "scalacheck"                % "1.17.0" % Test
+      "org.scalacheck"   %% "scalacheck"                % "1.17.1" % Test
     ),
     Test / fork := true,
     // unidoc can work out links to other project, but scalac can't
@@ -260,7 +260,7 @@ lazy val joda = (project in file("joda"))
       "org.joda"        % "joda-convert" % "2.2.3"  % Provided,
       "joda-time"       % "joda-time"    % "2.12.7",
       "org.scalatest"  %% "scalatest"    % "3.2.18"  % Test,
-      "org.scalacheck" %% "scalacheck"   % "1.17.0" % Test
+      "org.scalacheck" %% "scalacheck"   % "1.17.1" % Test
     )
   )
   .dependsOn(scanamo)
