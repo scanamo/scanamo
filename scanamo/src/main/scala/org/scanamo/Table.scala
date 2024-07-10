@@ -16,18 +16,14 @@
 
 package org.scanamo
 
-import cats.{ Monad, MonoidK }
-import software.amazon.awssdk.services.dynamodb.model.{
-  QueryResponse,
-  ScanResponse,
-  TransactWriteItemsResponse,
-  TransactionCanceledException
-}
-import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
-import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
+import cats.{Monad, MonoidK}
+import org.scanamo.DynamoResultStream.{QueryResponseStream, ScanResponseStream}
+import org.scanamo.ops.ScanamoOps.Transact
+import org.scanamo.ops.{ScanamoOps, ScanamoOpsT}
 import org.scanamo.query.*
-import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import org.scanamo.update.UpdateExpression
+import software.amazon.awssdk.services.dynamodb.model.{QueryResponse, ScanResponse, TransactWriteItemsResponse}
 
 /** Represents a DynamoDB table that operations can be performed against
   */
@@ -179,17 +175,17 @@ case class Table[V: DynamoFormat](name: String) {
   def descending =
     TableWithOptions(name, ScanamoQueryOptions.default).descending
 
-  def transactPutAll(vs: List[V]): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
+  def transactPutAll(vs: List[V]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactPutAllTable(name)(vs)
 
   def transactUpdateAll(
     vs: List[(UniqueKey[_], UpdateExpression)]
-  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactUpdateAllTable(name)(vs)
 
   def transactDeleteAll(
     vs: List[UniqueKey[_]]
-  ): ScanamoOps[Either[TransactionCanceledException, TransactWriteItemsResponse]] =
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactDeleteAllTable(name)(vs)
 }
 

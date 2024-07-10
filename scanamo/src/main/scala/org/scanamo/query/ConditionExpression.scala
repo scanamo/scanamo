@@ -17,19 +17,14 @@
 package org.scanamo.query
 
 import cats.data.State
-
-import software.amazon.awssdk.services.dynamodb.model.{
-  AttributeValue,
-  ConditionalCheckFailedException,
-  DeleteItemResponse,
-  PutItemResponse
-}
-import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, DynamoValue, PutReturn, ScanamoError }
+import software.amazon.awssdk.services.dynamodb.model.{AttributeValue, ConditionalCheckFailedException, DeleteItemResponse, PutItemResponse}
+import org.scanamo.{ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, DynamoValue, PutReturn, ScanamoError}
 import org.scanamo.ops.ScanamoOps
-import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
+import org.scanamo.request.{RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest}
 import org.scanamo.update.UpdateExpression
-import cats.syntax.either._
-import cats.syntax.functor._
+import cats.syntax.either.*
+import cats.syntax.functor.*
+import org.scanamo.ops.ScanamoOps.Conditional
 
 final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
   expr: ConditionExpression[T],
@@ -41,7 +36,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
   def putAndReturn(ret: PutReturn)(item: V): ScanamoOps[Option[Either[ScanamoError, V]]] =
     nativePut(ret, item).map(decodeReturnValue[PutItemResponse](_, _.attributes))
 
-  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResponse]] =
+  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Conditional[PutItemResponse]] =
     ScanamoOps.conditionalPut(
       ScanamoPutRequest(tableName, format.write(item), Some(expr(t).runEmptyA.value), ret)
     )
@@ -54,7 +49,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
 
   private def nativeDelete(ret: DeleteReturn,
                            key: UniqueKey[_]
-  ): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResponse]] =
+  ): ScanamoOps[Conditional[DeleteItemResponse]] =
     ScanamoOps
       .conditionalDelete(
         ScanamoDeleteRequest(
