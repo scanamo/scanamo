@@ -58,21 +58,20 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
   def runTransact[In <: DynamoDbRequest, Out <: DynamoDbResponse](op: In)(implicit o: DynamoDbOp[In, Out]): Source[Transact[Out], NotUsed] =
     runAndExposeException(op) { case e: TransactionCanceledException => e }
 
-  def apply[A](ops: ScanamoOpsA[A]) =
-    ops match {
-      case Put(req)        => run[PutItemRequest, PutItemResponse](JavaRequests.put(req))
-      case Get(req)        => run[GetItemRequest, GetItemResponse](req)
-      case Delete(req)     => run[DeleteItemRequest, DeleteItemResponse](JavaRequests.delete(req))
-      case Scan(req)       => runPaginated[ScanRequest, ScanResponse](JavaRequests.scan(req))
-      case Query(req)      => runPaginated[QueryRequest, QueryResponse](JavaRequests.query(req))
-      case Update(req)     => run[UpdateItemRequest, UpdateItemResponse](JavaRequests.update(req))
-      case BatchWrite(req) => run[BatchWriteItemRequest, BatchWriteItemResponse](req)
-      case BatchGet(req)   => run[BatchGetItemRequest, BatchGetItemResponse](req)
-      case ConditionalDelete(req) => runConditional(JavaRequests.delete(req))
-      case ConditionalPut(req) => runConditional(JavaRequests.put(req))
-      case ConditionalUpdate(req) => runConditional(JavaRequests.update(req))
-      case TransactWriteAll(req) => runTransact(JavaRequests.transactItems(req))
-    }
+  def apply[A](ops: ScanamoOpsA[A]) = ops match {
+    case Put(req)        => run[PutItemRequest, PutItemResponse](JavaRequests.put(req))
+    case Get(req)        => run[GetItemRequest, GetItemResponse](req)
+    case Delete(req)     => run[DeleteItemRequest, DeleteItemResponse](JavaRequests.delete(req))
+    case Scan(req)       => runPaginated[ScanRequest, ScanResponse](JavaRequests.scan(req))
+    case Query(req)      => runPaginated[QueryRequest, QueryResponse](JavaRequests.query(req))
+    case Update(req)     => run[UpdateItemRequest, UpdateItemResponse](JavaRequests.update(req))
+    case BatchWrite(req) => run[BatchWriteItemRequest, BatchWriteItemResponse](req)
+    case BatchGet(req)   => run[BatchGetItemRequest, BatchGetItemResponse](req)
+    case ConditionalDelete(req) => runConditional(JavaRequests.delete(req))
+    case ConditionalPut(req) => runConditional(JavaRequests.put(req))
+    case ConditionalUpdate(req) => runConditional(JavaRequests.update(req))
+    case TransactWriteAll(req) => runTransact(JavaRequests.transactItems(req))
+  }
 }
 
 object PekkoInterpreter {
