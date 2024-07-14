@@ -16,38 +16,16 @@
 
 package org.scanamo.ops
 
-import org.apache.pekko.NotUsed
-import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
-import org.apache.pekko.stream.connectors.dynamodb.DynamoDbOp
-import org.apache.pekko.stream.connectors.dynamodb.DynamoDbPaginatedOp
-import org.apache.pekko.stream.scaladsl.Source
 import cats.syntax.either.*
 import cats.~>
+import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ClassicActorSystemProvider
+import org.apache.pekko.stream.connectors.dynamodb.{DynamoDbOp, DynamoDbPaginatedOp}
+import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
+import org.apache.pekko.stream.scaladsl.Source
+import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{
-  BatchGetItemRequest,
-  BatchGetItemResponse,
-  BatchWriteItemRequest,
-  BatchWriteItemResponse,
-  ConditionalCheckFailedException,
-  DeleteItemRequest,
-  DeleteItemResponse,
-  DynamoDbRequest,
-  DynamoDbResponse,
-  GetItemRequest,
-  GetItemResponse,
-  PutItemRequest,
-  PutItemResponse,
-  QueryRequest,
-  QueryResponse,
-  ScanRequest,
-  ScanResponse,
-  TransactWriteItemsResponse,
-  TransactionCanceledException,
-  UpdateItemRequest,
-  UpdateItemResponse
-}
+import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchGetItemResponse, BatchWriteItemRequest, BatchWriteItemResponse, ConditionalCheckFailedException, DeleteItemRequest, DeleteItemResponse, DynamoDbRequest, DynamoDbResponse, GetItemRequest, GetItemResponse, PutItemRequest, PutItemResponse, QueryRequest, QueryResponse, ScanRequest, ScanResponse, TransactionCanceledException, UpdateItemRequest, UpdateItemResponse}
 
 import java.util.concurrent.CompletionException
 
@@ -71,6 +49,15 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
   )(implicit operation: DynamoDbPaginatedOp[In, Out, _]): PekkoInterpreter.Pekko[Out] =
     DynamoDb.source(op).mapError(unwrap)
 
+  def runAndExposeException[In <: DynamoDbRequest, Out <: DynamoDbResponse, ExposedEx](op: In)(rF: PartialFunction[Throwable, ExposedEx])(implicit operation: DynamoDbOp[In, Out]): Source[Either[ExposedEx, Out], NotUsed] =
+    run(op).map(Either.right[ExposedEx, Out]).recover(rF.andThen(Either.left))
+
+  def runConditional[In <: DynamoDbRequest, Out <: DynamoDbResponse](op: In)(implicit o: DynamoDbOp[In, Out]): Source[Conditional[Out], NotUsed] =
+    runAndExposeException(op) { case e: ConditionalCheckFailedException => e }
+
+  def runTransact[In <: DynamoDbRequest, Out <: DynamoDbResponse](op: In)(implicit o: DynamoDbOp[In, Out]): Source[Transact[Out], NotUsed] =
+    runAndExposeException(op) { case e: TransactionCanceledException => e }
+
   def apply[A](ops: ScanamoOpsA[A]) =
     ops match {
       case Put(req)        => run[PutItemRequest, PutItemResponse](JavaRequests.put(req))
@@ -81,30 +68,10 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
       case Update(req)     => run[UpdateItemRequest, UpdateItemResponse](JavaRequests.update(req))
       case BatchWrite(req) => run[BatchWriteItemRequest, BatchWriteItemResponse](req)
       case BatchGet(req)   => run[BatchGetItemRequest, BatchGetItemResponse](req)
-      case ConditionalDelete(req) =>
-        run(JavaRequests.delete(req))
-          .map(Either.right[ConditionalCheckFailedException, DeleteItemResponse])
-          .recover { case e: ConditionalCheckFailedException =>
-            Either.left(e)
-          }
-      case ConditionalPut(req) =>
-        run(JavaRequests.put(req))
-          .map(Either.right[ConditionalCheckFailedException, PutItemResponse])
-          .recover { case e: ConditionalCheckFailedException =>
-            Either.left(e)
-          }
-      case ConditionalUpdate(req) =>
-        run(JavaRequests.update(req))
-          .map(Either.right[ConditionalCheckFailedException, UpdateItemResponse])
-          .recover { case e: ConditionalCheckFailedException =>
-            Either.left(e)
-          }
-      case TransactWriteAll(req) =>
-        run(JavaRequests.transactItems(req))
-          .map(Either.right[TransactionCanceledException, TransactWriteItemsResponse])
-          .recover { case e: TransactionCanceledException =>
-            Either.left(e)
-          }
+      case ConditionalDelete(req) => runConditional(JavaRequests.delete(req))
+      case ConditionalPut(req) => runConditional(JavaRequests.put(req))
+      case ConditionalUpdate(req) => runConditional(JavaRequests.update(req))
+      case TransactWriteAll(req) => runTransact(JavaRequests.transactItems(req))
     }
 }
 
