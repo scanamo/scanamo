@@ -17,50 +17,38 @@
 package org.scanamo.ops
 
 import cats.~>
+import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
+
 import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{ Delete => _, Get => _, Put => _, Update => _, _ }
-import zio.{ IO, ZIO }
+import software.amazon.awssdk.services.dynamodb.model.{Delete as _, Get as _, Put as _, Update as _, *}
+import zio.{IO, ZIO}
 
 private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (ScanamoOpsA ~> IO[DynamoDbException, *]) {
   final private def eff[A](fut: => CompletableFuture[A]): IO[DynamoDbException, A] =
     ZIO.fromCompletionStage(fut).refineToOrDie[DynamoDbException]
 
-  final private def effEitherConditionalCheckFailed[A](
-    fut: => CompletableFuture[A]
-  ): IO[DynamoDbException, Either[ConditionalCheckFailedException, A]] =
-    eff(fut).map(Right(_)).catchSome { case e: ConditionalCheckFailedException => IO.succeed(Left(e)) }
+  private def effWithExposedException[T, ExposedEx](rF: PartialFunction[Throwable, ExposedEx])(fut: => CompletableFuture[T]): IO[DynamoDbException, Either[ExposedEx, T]] =
+    eff(fut).map(Right(_)).catchSome(rF.andThen(f => IO.succeed(Left(f))))
 
-  final private def effEitherTransactionCanceledFailed[A](
-    fut: => CompletableFuture[A]
-  ): IO[DynamoDbException, Either[TransactionCanceledException, A]] =
-    eff(fut).map(Right(_)).catchSome { case e: TransactionCanceledException => IO.succeed(Left(e)) }
+  final private def effConditional[A]: CompletableFuture[A] => IO[DynamoDbException, Conditional[A]] =
+    effWithExposedException { case e: ConditionalCheckFailedException => e } (_)
 
-  def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] =
-    op match {
-      case Put(req) =>
-        eff(client.putItem(JavaRequests.put(req)))
-      case ConditionalPut(req) =>
-        effEitherConditionalCheckFailed(client.putItem(JavaRequests.put(req)))
-      case Get(req) =>
-        eff(client.getItem(req))
-      case Delete(req) =>
-        eff(client.deleteItem(JavaRequests.delete(req)))
-      case ConditionalDelete(req) =>
-        effEitherConditionalCheckFailed(client.deleteItem(JavaRequests.delete(req)))
-      case Scan(req) =>
-        eff(client.scan(JavaRequests.scan(req)))
-      case Query(req) =>
-        eff(client.query(JavaRequests.query(req)))
-      case BatchWrite(req) =>
-        eff(client.batchWriteItem(req))
-      case BatchGet(req) =>
-        eff(client.batchGetItem(req))
-      case Update(req) =>
-        eff(client.updateItem(JavaRequests.update(req)))
-      case ConditionalUpdate(req) =>
-        effEitherConditionalCheckFailed(client.updateItem(JavaRequests.update(req)))
-      case TransactWriteAll(req) =>
-        effEitherTransactionCanceledFailed(client.transactWriteItems(JavaRequests.transactItems(req)))
-    }
+  final private def effTransact[A]: CompletableFuture[A] => IO[DynamoDbException, Transact[A]] =
+    effWithExposedException { case e: TransactionCanceledException => e } (_)
+
+  def apply[A](op: ScanamoOpsA[A]): IO[DynamoDbException, A] = op match {
+    case Put(req) => eff(client.putItem(JavaRequests.put(req)))
+    case ConditionalPut(req) => effConditional(client.putItem(JavaRequests.put(req)))
+    case Get(req) => eff(client.getItem(req))
+    case Delete(req) => eff(client.deleteItem(JavaRequests.delete(req)))
+    case ConditionalDelete(req) => effConditional(client.deleteItem(JavaRequests.delete(req)))
+    case Scan(req) => eff(client.scan(JavaRequests.scan(req)))
+    case Query(req) => eff(client.query(JavaRequests.query(req)))
+    case BatchWrite(req) => eff(client.batchWriteItem(req))
+    case BatchGet(req) => eff(client.batchGetItem(req))
+    case Update(req) => eff(client.updateItem(JavaRequests.update(req)))
+    case ConditionalUpdate(req) => effConditional(client.updateItem(JavaRequests.update(req)))
+    case TransactWriteAll(req) => effTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
+  }
 }

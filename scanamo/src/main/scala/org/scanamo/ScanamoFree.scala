@@ -103,9 +103,7 @@ object ScanamoFree {
 
   def transactPutAllTable[T](
     tableName: String
-  )(items: List[T])(implicit
-    f: DynamoFormat[T]
-  ): ScanamoOps[Transact[TransactWriteItemsResponse]] =
+  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     transactPutAll(items.map(tableName -> _))
 
   def transactPutAll[T](
@@ -120,9 +118,7 @@ object ScanamoFree {
 
   def transactUpdateAllTable(
     tableName: String
-  )(
-    items: List[(UniqueKey[_], UpdateExpression)]
-  ): ScanamoOps[Transact[TransactWriteItemsResponse]] =
+  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     transactUpdateAll(items.map(tableName -> _))
 
   def transactUpdateAll(

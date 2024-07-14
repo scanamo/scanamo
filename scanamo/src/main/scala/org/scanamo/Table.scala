@@ -183,9 +183,7 @@ case class Table[V: DynamoFormat](name: String) {
   ): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactUpdateAllTable(name)(vs)
 
-  def transactDeleteAll(
-    vs: List[UniqueKey[_]]
-  ): ScanamoOps[Transact[TransactWriteItemsResponse]] =
+  def transactDeleteAll(vs: List[UniqueKey[_]]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactDeleteAllTable(name)(vs)
 }
 
