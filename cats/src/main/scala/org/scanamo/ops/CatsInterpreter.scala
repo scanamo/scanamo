@@ -23,10 +23,13 @@ import cats.syntax.applicativeError.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.option.*
+import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
+
 import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+
 import java.util.concurrent.CompletionException
-import software.amazon.awssdk.services.dynamodb.model.{ ConditionalCheckFailedException, TransactionCanceledException }
+import software.amazon.awssdk.services.dynamodb.model.{ConditionalCheckFailedException, TransactionCanceledException}
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
   final private def eff[A](fut: => CompletableFuture[A]): F[A] =
@@ -44,68 +47,34 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
       F.delay(materialised.cancel(false)).void.some.pure[F]
     }
 
-  override def apply[A](fa: ScanamoOpsA[A]): F[A] =
-    fa match {
-      case Put(req) =>
-        eff(client.putItem(JavaRequests.put(req)))
-      case ConditionalPut(req) =>
-        eff(client.putItem(JavaRequests.put(req))).attempt
-          .flatMap(
-            _.fold(
-              {
-                case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-              },
-              a => F.delay(Right(a))
-            )
-          )
-      case Get(req) =>
-        eff(client.getItem(req))
-      case Delete(req) =>
-        eff(client.deleteItem(JavaRequests.delete(req)))
-      case ConditionalDelete(req) =>
-        eff(client.deleteItem(JavaRequests.delete(req))).attempt
-          .flatMap(
-            _.fold(
-              {
-                case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-              },
-              a => F.delay(Right(a))
-            )
-          )
-      case Scan(req) =>
-        eff(client.scan(JavaRequests.scan(req)))
-      case Query(req) =>
-        eff(client.query(JavaRequests.query(req)))
-      // Overloading means we need explicit parameter types here
-      case BatchWrite(req) =>
-        eff(client.batchWriteItem(req))
-      case BatchGet(req) =>
-        eff(client.batchGetItem(req))
-      case Update(req) =>
-        eff(client.updateItem(JavaRequests.update(req)))
-      case ConditionalUpdate(req) =>
-        eff(client.updateItem(JavaRequests.update(req))).attempt
-          .flatMap(
-            _.fold(
-              {
-                case e: ConditionalCheckFailedException => F.delay(Left(e))
-                case t                                  => F.raiseError(t) // raise error as opposed to swallowing
-              },
-              a => F.delay(Right(a))
-            )
-          )
-      case TransactWriteAll(req) =>
-        eff(client.transactWriteItems(JavaRequests.transactItems(req))).attempt
-          .flatMap(
-            _.fold(
-              {
-                case e: TransactionCanceledException => F.delay(Left(e))
-                case t                               => F.raiseError(t) // raise error as opposed to swallowing
-              },
-              a => F.delay(Right(a))
-            )
-          )
-    }
+  private def effWithExposedException[T, ExposedEx](value: CompletableFuture[T])(rF: PartialFunction[Throwable, ExposedEx]): F[Either[ExposedEx, T]] = {
+    eff(value).attempt.flatMap(
+      _.fold(
+        e => rF.andThen(exposed => F.delay[Either[ExposedEx, T]](Left(exposed))).applyOrElse(e, F.raiseError),
+        a => F.delay(Right(a))
+      )
+    )
+  }
+
+  private def effConditional[T](value: CompletableFuture[T]): F[Conditional[T]] =
+    effWithExposedException(value) { case e: ConditionalCheckFailedException => e }
+
+  private def effTransact[T](value: CompletableFuture[T]): F[Transact[T]] =
+    effWithExposedException(value) { case e: TransactionCanceledException => e }
+
+  override def apply[A](fa: ScanamoOpsA[A]): F[A] = fa match {
+    case Put(req) => eff(client.putItem(JavaRequests.put(req)))
+    case ConditionalPut(req) => effConditional(client.putItem(JavaRequests.put(req)))
+    case Get(req) => eff(client.getItem(req))
+    case Delete(req) => eff(client.deleteItem(JavaRequests.delete(req)))
+    case ConditionalDelete(req) => effConditional(client.deleteItem(JavaRequests.delete(req)))
+    case Scan(req) => eff(client.scan(JavaRequests.scan(req)))
+    case Query(req) => eff(client.query(JavaRequests.query(req)))
+    case BatchWrite(req) => eff(client.batchWriteItem(req))
+    case BatchGet(req) => eff(client.batchGetItem(req))
+    case Update(req) => eff(client.updateItem(JavaRequests.update(req)))
+    case ConditionalUpdate(req) => effConditional(client.updateItem(JavaRequests.update(req)))
+    case TransactWriteAll(req) => effTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
+  }
+
 }
