@@ -23,9 +23,10 @@ import org.apache.pekko.actor.ClassicActorSystemProvider
 import org.apache.pekko.stream.connectors.dynamodb.{DynamoDbOp, DynamoDbPaginatedOp}
 import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
 import org.apache.pekko.stream.scaladsl.Source
+import org.scanamo.ops.PekkoInterpreter.Pekko
 import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchGetItemResponse, BatchWriteItemRequest, BatchWriteItemResponse, ConditionalCheckFailedException, DeleteItemRequest, DeleteItemResponse, DynamoDbRequest, DynamoDbResponse, GetItemRequest, GetItemResponse, PutItemRequest, PutItemResponse, QueryRequest, QueryResponse, ScanRequest, ScanResponse, TransactionCanceledException, UpdateItemRequest, UpdateItemResponse}
+import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchGetItemResponse, BatchWriteItemRequest, BatchWriteItemResponse, ConditionalCheckFailedException, DeleteItemRequest, DeleteItemResponse, GetItemRequest, GetItemResponse, PutItemRequest, PutItemResponse, QueryRequest, QueryResponse, ScanRequest, ScanResponse, TransactionCanceledException, UpdateItemRequest, UpdateItemResponse, DynamoDbRequest as DReq, DynamoDbResponse as DResp}
 
 import java.util.concurrent.CompletionException
 
@@ -33,32 +34,26 @@ import java.util.concurrent.CompletionException
   * from the core Scanamo project.
   */
 private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, system: ClassicActorSystemProvider)
-    extends (ScanamoOpsA ~> PekkoInterpreter.Pekko) {
+    extends (ScanamoOpsA ~> Pekko) {
 
-  private[this] val unwrap: PartialFunction[Throwable, Throwable] = { case error: CompletionException =>
-    error.getCause
-  }
+  private[this] val unwrap: PartialFunction[Throwable, Throwable] = { case e: CompletionException => e.getCause }
 
-  final private def run[In <: DynamoDbRequest, Out <: DynamoDbResponse](
-    op: In
-  )(implicit operation: DynamoDbOp[In, Out]): PekkoInterpreter.Pekko[Out] =
+  private def run[In <: DReq, Out <: DResp](op: In)(implicit o: DynamoDbOp[In, Out]): Pekko[Out] =
     Source.future(DynamoDb.single(op)).mapError(unwrap)
 
-  final private def runPaginated[In <: DynamoDbRequest, Out <: DynamoDbResponse](
-    op: In
-  )(implicit operation: DynamoDbPaginatedOp[In, Out, _]): PekkoInterpreter.Pekko[Out] =
+  private def runPaginated[In <: DReq, Out <: DResp](op: In)(implicit o: DynamoDbPaginatedOp[In, Out, _]): Pekko[Out] =
     DynamoDb.source(op).mapError(unwrap)
 
-  def runAndExposeException[In <: DynamoDbRequest, Out <: DynamoDbResponse, ExposedEx](op: In)(rF: PartialFunction[Throwable, ExposedEx])(implicit operation: DynamoDbOp[In, Out]): Source[Either[ExposedEx, Out], NotUsed] =
-    run(op).map(Either.right[ExposedEx, Out]).recover(rF.andThen(Either.left))
+  def exposeException[Out <: DResp, E](o: Pekko[Out])(rF: PartialFunction[Throwable, E]): Pekko[Either[E, Out]] =
+    o.map(Either.right[E, Out]).recover(rF.andThen(Either.left))
 
-  def runConditional[In <: DynamoDbRequest, Out <: DynamoDbResponse](op: In)(implicit o: DynamoDbOp[In, Out]): Source[Conditional[Out], NotUsed] =
-    runAndExposeException(op) { case e: ConditionalCheckFailedException => e }
+  def runConditional[In <: DReq, Out <: DResp](op: In)(implicit o: DynamoDbOp[In, Out]): Pekko[Conditional[Out]] =
+    exposeException(run(op)) { case e: ConditionalCheckFailedException => e }
 
-  def runTransact[In <: DynamoDbRequest, Out <: DynamoDbResponse](op: In)(implicit o: DynamoDbOp[In, Out]): Source[Transact[Out], NotUsed] =
-    runAndExposeException(op) { case e: TransactionCanceledException => e }
+  def runTransact[In <: DReq, Out <: DResp](op: In)(implicit o: DynamoDbOp[In, Out]): Pekko[Transact[Out]] =
+    exposeException(run(op)) { case e: TransactionCanceledException => e }
 
-  def apply[A](ops: ScanamoOpsA[A]) = ops match {
+  def apply[A](ops: ScanamoOpsA[A]): Pekko[A] = ops match {
     case Put(req)        => run[PutItemRequest, PutItemResponse](JavaRequests.put(req))
     case Get(req)        => run[GetItemRequest, GetItemResponse](req)
     case Delete(req)     => run[DeleteItemRequest, DeleteItemResponse](JavaRequests.delete(req))

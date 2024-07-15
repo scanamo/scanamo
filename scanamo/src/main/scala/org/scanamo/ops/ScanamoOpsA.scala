@@ -18,7 +18,10 @@ package org.scanamo.ops
 
 import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
 import org.scanamo.request.*
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.*
+
+import java.util.concurrent.CompletableFuture
 
 sealed trait ScanamoOpsA[A] extends Product with Serializable
 final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResponse]
@@ -33,6 +36,39 @@ final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGet
 final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateItemResponse]
 final case class ConditionalUpdate(req: ScanamoUpdateRequest) extends ScanamoOpsA[Conditional[UpdateItemResponse]]
 final case class TransactWriteAll(req: ScanamoTransactWriteRequest) extends ScanamoOpsA[Transact[TransactWriteItemsResponse]]
+
+object AsyncPlatform {
+  trait PlatformSpecific[F[_]] {
+    def run[Out](fut: => CompletableFuture[Out]): F[Out]
+
+    def exposeException[Out, E](o: F[Out])(rF: PartialFunction[Throwable, E]): F[Either[E, Out]]
+
+    def runConditional[Out](fut: => CompletableFuture[Out]): F[Conditional[Out]] =
+      exposeException(run(fut)) { case e: ConditionalCheckFailedException => e }
+
+    def runTransact[Out](fut: => CompletableFuture[Out]): F[Transact[Out]] =
+      exposeException(run(fut)) { case e: TransactionCanceledException => e }
+  }
+
+  class AsyncFramework[F[_]](client: DynamoDbAsyncClient, platformSpecific: PlatformSpecific[F]) {
+    import platformSpecific.*
+    
+    def apply[A](ops: ScanamoOpsA[A]): F[A] = ops match {
+      case Put(req) => run(client.putItem(JavaRequests.put(req)))
+      case ConditionalPut(req) => runConditional(client.putItem(JavaRequests.put(req)))
+      case Get(req) => run(client.getItem(req))
+      case Delete(req) => run(client.deleteItem(JavaRequests.delete(req)))
+      case ConditionalDelete(req) => runConditional(client.deleteItem(JavaRequests.delete(req)))
+      case Scan(req) => run(client.scan(JavaRequests.scan(req)))
+      case Query(req) => run(client.query(JavaRequests.query(req)))
+      case BatchWrite(req) => run(client.batchWriteItem(req))
+      case BatchGet(req) => run(client.batchGetItem(req))
+      case Update(req) => run(client.updateItem(JavaRequests.update(req)))
+      case ConditionalUpdate(req) => runConditional(client.updateItem(JavaRequests.update(req)))
+      case TransactWriteAll(req) => runTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
+    }
+  }
+}
 
 object ScanamoOps {
   import cats.free.Free.liftF

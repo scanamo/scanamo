@@ -17,23 +17,21 @@
 package org.scanamo.ops
 
 import cats.effect.Async
-import cats.~>
 import cats.syntax.applicative.*
 import cats.syntax.applicativeError.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.option.*
-import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
-
-import java.util.concurrent.CompletableFuture
+import cats.~>
+import org.scanamo.ops.AsyncPlatform.AsyncFramework
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
-import java.util.concurrent.CompletionException
-import software.amazon.awssdk.services.dynamodb.model.{ConditionalCheckFailedException, TransactionCanceledException}
+import java.util.concurrent.{CompletableFuture, CompletionException}
 
 class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
-  final private def eff[A](fut: => CompletableFuture[A]): F[A] =
-    F.async { cb =>
+
+  private val topCat: AsyncFramework[F] = new AsyncFramework[F](client, new AsyncPlatform.PlatformSpecific[F] {
+    def run[Out](fut: => CompletableFuture[Out]): F[Out] = F.async { cb =>
       lazy val materialised = fut
       materialised.handle[Unit] { (a, x) =>
         if (a == null)
@@ -47,34 +45,14 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
       F.delay(materialised.cancel(false)).void.some.pure[F]
     }
 
-  private def effWithExposedException[T, ExposedEx](rF: PartialFunction[Throwable, ExposedEx])(value: CompletableFuture[T]): F[Either[ExposedEx, T]] = {
-    eff(value).attempt.flatMap(
-      _.fold(
-        e => rF.andThen(exposed => F.delay[Either[ExposedEx, T]](Left(exposed))).applyOrElse(e, F.raiseError),
-        a => F.delay(Right(a))
+    def exposeException[Out, E](value: F[Out])(rF: PartialFunction[Throwable, E]): F[Either[E, Out]] =
+      value.attempt.flatMap(
+        _.fold(
+          e => rF.andThen(exposed => F.delay[Either[E, Out]](Left(exposed))).applyOrElse(e, F.raiseError),
+          a => F.delay(Right(a))
+        )
       )
-    )
-  }
+  })
 
-  private def effConditional[T]: CompletableFuture[T] => F[Conditional[T]] =
-    effWithExposedException { case e: ConditionalCheckFailedException => e }
-
-  private def effTransact[T]: CompletableFuture[T] => F[Transact[T]] =
-    effWithExposedException { case e: TransactionCanceledException => e }
-
-  override def apply[A](fa: ScanamoOpsA[A]): F[A] = fa match {
-    case Put(req) => eff(client.putItem(JavaRequests.put(req)))
-    case ConditionalPut(req) => effConditional(client.putItem(JavaRequests.put(req)))
-    case Get(req) => eff(client.getItem(req))
-    case Delete(req) => eff(client.deleteItem(JavaRequests.delete(req)))
-    case ConditionalDelete(req) => effConditional(client.deleteItem(JavaRequests.delete(req)))
-    case Scan(req) => eff(client.scan(JavaRequests.scan(req)))
-    case Query(req) => eff(client.query(JavaRequests.query(req)))
-    case BatchWrite(req) => eff(client.batchWriteItem(req))
-    case BatchGet(req) => eff(client.batchGetItem(req))
-    case Update(req) => eff(client.updateItem(JavaRequests.update(req)))
-    case ConditionalUpdate(req) => effConditional(client.updateItem(JavaRequests.update(req)))
-    case TransactWriteAll(req) => effTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
-  }
-
+  override def apply[A](fa: ScanamoOpsA[A]): F[A] = topCat(fa)
 }
