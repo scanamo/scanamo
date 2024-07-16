@@ -16,8 +16,7 @@
 
 package org.scanamo.ops
 
-import cats.*
-import org.scanamo.ops.AsyncPlatform.AsyncFramework
+import org.scanamo.ops.AsyncPlatform.AsyncFrameworkInterpreter
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{Delete as _, Get as _, Put as _, Update as _}
 
@@ -29,15 +28,14 @@ import scala.concurrent.{ExecutionContext, Future}
  * Interpret Scanamo operations into a `Future` using the DynamoDbClient client
  * which doesn't block, using it's own thread pool for I/O requests internally
  */
-class ScanamoAsyncInterpreter(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) extends (ScanamoOpsA ~> Future) {
+class ScanamoAsyncInterpreter(val client: DynamoDbAsyncClient)(implicit ec: ExecutionContext)
+  extends AsyncFrameworkInterpreter[Future] {
 
-  val topCat: AsyncFramework[Future] = new AsyncFramework[Future](client, new AsyncPlatform.PlatformSpecific[Future] {
+  val platformSpecific = new AsyncPlatform.PlatformSpecific[Future] {
     def run[Out](fut: => CompletableFuture[Out]): Future[Out] =
       fut.toScala.recoverWith { case error: CompletionException => Future.failed(error.getCause) }
 
     def exposeException[Out, E](value: Future[Out])(rF: PartialFunction[Throwable, E]): Future[Either[E, Out]] =
       value.map(Right[E, Out]).recover(rF.andThen(Left(_)))
-  })
-
-  override def apply[A](op: ScanamoOpsA[A]): Future[A] = topCat(op)
+  }
 }

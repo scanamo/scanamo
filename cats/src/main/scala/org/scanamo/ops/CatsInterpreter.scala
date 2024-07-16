@@ -22,15 +22,14 @@ import cats.syntax.applicativeError.*
 import cats.syntax.flatMap.*
 import cats.syntax.functor.*
 import cats.syntax.option.*
-import cats.~>
-import org.scanamo.ops.AsyncPlatform.AsyncFramework
+import org.scanamo.ops.AsyncPlatform.AsyncFrameworkInterpreter
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 import java.util.concurrent.{CompletableFuture, CompletionException}
 
-class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) extends (ScanamoOpsA ~> F) {
+class CatsInterpreter[F[_]](val client: DynamoDbAsyncClient)(implicit F: Async[F]) extends AsyncFrameworkInterpreter[F] {
 
-  private val topCat: AsyncFramework[F] = new AsyncFramework[F](client, new AsyncPlatform.PlatformSpecific[F] {
+  val platformSpecific = new AsyncPlatform.PlatformSpecific[F] {
     def run[Out](fut: => CompletableFuture[Out]): F[Out] = F.async { cb =>
       lazy val materialised = fut
       materialised.handle[Unit] { (a, x) =>
@@ -52,7 +51,5 @@ class CatsInterpreter[F[_]](client: DynamoDbAsyncClient)(implicit F: Async[F]) e
           a => F.delay(Right(a))
         )
       )
-  })
-
-  override def apply[A](fa: ScanamoOpsA[A]): F[A] = topCat(fa)
+  }
 }

@@ -16,8 +16,7 @@
 
 package org.scanamo.ops
 
-import cats.~>
-import org.scanamo.ops.AsyncPlatform.AsyncFramework
+import org.scanamo.ops.AsyncPlatform.AsyncFrameworkInterpreter
 import org.scanamo.ops.ZioInterpreter.DIO
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{Delete as _, Get as _, Put as _, Update as _, *}
@@ -29,15 +28,13 @@ object ZioInterpreter {
   type DIO[+A] = IO[DynamoDbException, A]
 }
 
-private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (ScanamoOpsA ~> DIO[*]) {
+private[scanamo] class ZioInterpreter(val client: DynamoDbAsyncClient) extends AsyncFrameworkInterpreter[DIO] {
 
-  private val topCat: AsyncFramework[DIO] = new AsyncFramework[DIO](client, new AsyncPlatform.PlatformSpecific[DIO] {
+  val platformSpecific = new AsyncPlatform.PlatformSpecific[DIO] {
     def run[Out](fut: => CompletableFuture[Out]): DIO[Out] =
       ZIO.fromCompletionStage(fut).refineToOrDie[DynamoDbException]
 
-    def exposeException[Out, ExposedEx](value: DIO[Out])(rF: PartialFunction[Throwable, ExposedEx]): DIO[Either[ExposedEx, Out]] =
+    def exposeException[Out, E](value: DIO[Out])(rF: PartialFunction[Throwable, E]): DIO[Either[E, Out]] =
       value.map(Right(_)).catchSome(rF.andThen(f => IO.succeed(Left(f))))
-  })
-
-  override def apply[A](op: ScanamoOpsA[A]): DIO[A]  = topCat(op)
+  }
 }

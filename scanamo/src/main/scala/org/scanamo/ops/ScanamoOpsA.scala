@@ -16,6 +16,7 @@
 
 package org.scanamo.ops
 
+import cats.~>
 import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
 import org.scanamo.request.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
@@ -23,8 +24,13 @@ import software.amazon.awssdk.services.dynamodb.model.*
 
 import java.util.concurrent.CompletableFuture
 
-sealed trait ScanamoOpsA[A] extends Product with Serializable
-final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResponse]
+sealed trait ScanamoOpsA[A] extends Product with Serializable {
+  //val awsOp: AWSOps.Op[_, _]
+}
+final case class Put(req: ScanamoPutRequest) extends ScanamoOpsA[PutItemResponse] {
+  val javaRequest: PutItemRequest = JavaRequests.put(req)
+  val awsOp: AWSOps.Op[PutItemRequest, PutItemResponse] = AWSOps.putItem
+}
 final case class ConditionalPut(req: ScanamoPutRequest) extends ScanamoOpsA[Conditional[PutItemResponse]]
 final case class Get(req: GetItemRequest) extends ScanamoOpsA[GetItemResponse]
 final case class Delete(req: ScanamoDeleteRequest) extends ScanamoOpsA[DeleteItemResponse]
@@ -41,7 +47,7 @@ object AsyncPlatform {
   trait PlatformSpecific[F[_]] {
     def run[Out](fut: => CompletableFuture[Out]): F[Out]
 
-    def exposeException[Out, E](o: F[Out])(rF: PartialFunction[Throwable, E]): F[Either[E, Out]]
+    def exposeException[Out, E <: Exception](o: F[Out])(rF: PartialFunction[Throwable, E]): F[Either[E, Out]]
 
     def runConditional[Out](fut: => CompletableFuture[Out]): F[Conditional[Out]] =
       exposeException(run(fut)) { case e: ConditionalCheckFailedException => e }
@@ -50,7 +56,18 @@ object AsyncPlatform {
       exposeException(run(fut)) { case e: TransactionCanceledException => e }
   }
 
-  class AsyncFramework[F[_]](client: DynamoDbAsyncClient, platformSpecific: PlatformSpecific[F]) {
+  /**
+   * Helper for creating Scanamo interpreters for async frameworks like Future, Cats Effect, ZIO, all of which
+   * can use DynamoDbAsyncClient and translate the java.util.concurrent.CompletableFuture responses into their
+   * own data types for representing asynchronous processes.
+   *
+   * Note that PekkoInterpreter doesn't directly use DynamoDbAsyncClient
+   */
+  trait AsyncFrameworkInterpreter[F[_]] extends (ScanamoOpsA ~> F) {
+
+    val client: DynamoDbAsyncClient
+    val platformSpecific: PlatformSpecific[F]
+
     import platformSpecific.*
     
     def apply[A](ops: ScanamoOpsA[A]): F[A] = ops match {

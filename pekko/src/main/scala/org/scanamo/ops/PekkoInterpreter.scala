@@ -20,13 +20,13 @@ import cats.syntax.either.*
 import cats.~>
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ClassicActorSystemProvider
-import org.apache.pekko.stream.connectors.dynamodb.{DynamoDbOp, DynamoDbPaginatedOp}
 import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
+import org.apache.pekko.stream.connectors.dynamodb.{DynamoDbOp, DynamoDbPaginatedOp}
 import org.apache.pekko.stream.scaladsl.Source
 import org.scanamo.ops.PekkoInterpreter.Pekko
 import org.scanamo.ops.ScanamoOps.{Conditional, Transact}
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchGetItemResponse, BatchWriteItemRequest, BatchWriteItemResponse, ConditionalCheckFailedException, DeleteItemRequest, DeleteItemResponse, GetItemRequest, GetItemResponse, PutItemRequest, PutItemResponse, QueryRequest, QueryResponse, ScanRequest, ScanResponse, TransactionCanceledException, UpdateItemRequest, UpdateItemResponse, DynamoDbRequest as DReq, DynamoDbResponse as DResp}
+import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchGetItemResponse, BatchWriteItemRequest, BatchWriteItemResponse, ConditionalCheckFailedException, DeleteItemRequest, DeleteItemResponse, GetItemRequest, GetItemResponse, QueryRequest, QueryResponse, ScanRequest, ScanResponse, TransactionCanceledException, UpdateItemRequest, UpdateItemResponse, DynamoDbRequest as DReq, DynamoDbResponse as DResp}
 
 import java.util.concurrent.CompletionException
 
@@ -54,7 +54,7 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
     exposeException(run(op)) { case e: TransactionCanceledException => e }
 
   def apply[A](ops: ScanamoOpsA[A]): Pekko[A] = ops match {
-    case Put(req)        => run[PutItemRequest, PutItemResponse](JavaRequests.put(req))
+    case Put(req)        => run(JavaRequests.put(req))(DynamoDbOp.putItem)
     case Get(req)        => run[GetItemRequest, GetItemResponse](req)
     case Delete(req)     => run[DeleteItemRequest, DeleteItemResponse](JavaRequests.delete(req))
     case Scan(req)       => runPaginated[ScanRequest, ScanResponse](JavaRequests.scan(req))
