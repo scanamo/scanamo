@@ -16,12 +16,12 @@
 
 package org.scanamo.ops
 
-import cats._
+import cats.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{ Delete => _, Get => _, Put => _, Update => _, _ }
+import software.amazon.awssdk.services.dynamodb.model.{ Delete as _, Get as _, Put as _, Update as _, * }
 
 import java.util.concurrent.{ CompletionException, CompletionStage }
-import scala.compat.java8.FutureConverters._
+import scala.compat.java8.FutureConverters.*
 import scala.concurrent.{ ExecutionContext, Future }
 
 /*

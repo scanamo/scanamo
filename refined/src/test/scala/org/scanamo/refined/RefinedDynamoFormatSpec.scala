@@ -2,14 +2,12 @@ package org.scanamo
 package refined
 
 import eu.timepit.refined.api.Refined
-import eu.timepit.refined.auto._
+import eu.timepit.refined.auto.*
 import eu.timepit.refined.numeric.Positive
-
-import org.scanamo.TypeCoercionError
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import org.scanamo.TypeCoercionError
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 class RefinedDynamoFormatSpec extends AnyFlatSpec with Matchers {
   type PosInt = Int Refined Positive

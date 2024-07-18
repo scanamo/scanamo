@@ -17,19 +17,18 @@
 package org.scanamo.query
 
 import cats.data.State
-
+import cats.syntax.either.*
+import cats.syntax.functor.*
+import org.scanamo.ops.ScanamoOps
+import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
+import org.scanamo.update.UpdateExpression
+import org.scanamo.*
 import software.amazon.awssdk.services.dynamodb.model.{
   AttributeValue,
   ConditionalCheckFailedException,
   DeleteItemResponse,
   PutItemResponse
 }
-import org.scanamo.{ ConditionNotMet, DeleteReturn, DynamoFormat, DynamoObject, DynamoValue, PutReturn, ScanamoError }
-import org.scanamo.ops.ScanamoOps
-import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
-import org.scanamo.update.UpdateExpression
-import cats.syntax.either._
-import cats.syntax.functor._
 
 final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
   expr: ConditionExpression[T],

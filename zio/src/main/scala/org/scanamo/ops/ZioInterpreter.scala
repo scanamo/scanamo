@@ -17,10 +17,11 @@
 package org.scanamo.ops
 
 import cats.~>
-import java.util.concurrent.CompletableFuture
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{ Delete => _, Get => _, Put => _, Update => _, _ }
+import software.amazon.awssdk.services.dynamodb.model.{ ConditionalCheckFailedException, DynamoDbException }
 import zio.{ IO, ZIO }
+
+import java.util.concurrent.CompletableFuture
 
 private[scanamo] class ZioInterpreter(client: DynamoDbAsyncClient) extends (ScanamoOpsA ~> IO[DynamoDbException, *]) {
   final private def eff[A](fut: => CompletableFuture[A]): IO[DynamoDbException, A] =

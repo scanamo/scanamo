@@ -17,7 +17,7 @@
 package org.scanamo
 
 import cats.{ ~>, Id, Monad }
-import org.scanamo.ops._
+import org.scanamo.ops.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
 /** Provides a simplified interface for reading and writing case classes to DynamoDB

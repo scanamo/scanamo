@@ -19,7 +19,7 @@ package org.scanamo
 import cats.{ Monad, MonoidK }
 import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
-import org.scanamo.query.{ Condition, ConditionExpression, Query, UniqueKey, UniqueKeyCondition }
+import org.scanamo.query.*
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse }
 

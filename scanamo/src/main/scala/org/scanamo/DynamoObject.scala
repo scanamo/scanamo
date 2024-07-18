@@ -18,19 +18,17 @@ package org.scanamo
 
 import cats.Parallel
 import cats.kernel.Monoid
+import cats.syntax.apply.*
+import cats.syntax.semigroup.*
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import java.util.{ HashMap, Map as JMap }
-import cats.syntax.apply.*
-import cats.syntax.semigroup.*
-
 import scala.annotation.tailrec
-import scala.collection.immutable.Map
 
 /** A `DynamoObject` is a map of strings to values that can be embedded into an `AttributeValue`.
   */
 sealed abstract class DynamoObject extends Product with Serializable { self =>
-  import DynamoObject._
+  import DynamoObject.*
 
   protected def internalToMap: Map[String, DynamoValue]
 

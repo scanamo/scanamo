@@ -17,11 +17,10 @@
 package org.scanamo.generic
 
 import cats.data.NonEmptyChain
-import cats.syntax.bifunctor._
-import cats.syntax.parallel._
-import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
-import org.scanamo._
-import magnolia1._
+import cats.syntax.bifunctor.*
+import cats.syntax.parallel.*
+import magnolia1.*
+import org.scanamo.*
 
 private[scanamo] trait Derivation {
   type Typeclass[A] = DynamoFormat[A]

@@ -16,8 +16,9 @@
 
 package org
 
-import org.scanamo.query._
-import org.scanamo.update._
+import org.scanamo.query.*
+import org.scanamo.update.*
+
 import scala.language.implicitConversions
 
 package object scanamo {

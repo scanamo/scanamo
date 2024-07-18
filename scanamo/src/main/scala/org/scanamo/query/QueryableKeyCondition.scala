@@ -16,8 +16,8 @@
 
 package org.scanamo.query
 
-import org.scanamo.{ DynamoFormat, DynamoObject }
 import org.scanamo.request.RequestCondition
+import org.scanamo.{ DynamoFormat, DynamoObject }
 
 trait QueryableKeyCondition[T] {
   def apply(t: T): RequestCondition

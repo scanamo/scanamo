@@ -1,14 +1,14 @@
 package org.scanamo
 
-import scala.reflect.runtime.universe._
-
-import software.amazon.awssdk.services.dynamodb.model._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import org.scalacheck._
+import org.scalacheck.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
-import org.scanamo.generic.auto._
+import org.scanamo.generic.auto.*
+import software.amazon.awssdk.services.dynamodb.model.*
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
+
+import scala.reflect.runtime.universe.*
 
 class DynamoFormatTest extends AnyFunSpec with Matchers with ScalaCheckDrivenPropertyChecks {
   // Test that an arbitrary DynamoFormat can be written to dynamo, and then read, producing the same result

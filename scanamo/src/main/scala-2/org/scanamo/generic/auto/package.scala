@@ -16,9 +16,9 @@
 
 package org.scanamo.generic
 
-import scala.language.experimental.macros
-
 import org.scanamo.DynamoFormat
+
+import scala.language.experimental.macros
 
 /** Fully automatic format derivation.
   *

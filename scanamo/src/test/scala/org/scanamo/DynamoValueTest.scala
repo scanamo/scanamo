@@ -1,12 +1,12 @@
 package org.scanamo
 
-import java.nio.ByteBuffer
-
+import org.scalacheck.*
 import org.scalacheck.Arbitrary.arbitrary
 import org.scalacheck.Prop.forAll
-import org.scalacheck._
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+
+import java.nio.ByteBuffer
 
 class DynamoObjectTest extends Properties("DynamoValue") with DynamoValueInstances {
   ////

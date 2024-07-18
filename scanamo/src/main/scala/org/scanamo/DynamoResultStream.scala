@@ -16,13 +16,12 @@
 
 package org.scanamo
 
-import cats.{ Monad, MonoidK }
-import cats.MonoidK.ops._
 import cats.free.{ Free, FreeT }
-import cats.syntax.semigroupk._
-import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse }
+import cats.syntax.semigroupk.*
+import cats.{ Monad, MonoidK }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsA, ScanamoOpsT }
 import org.scanamo.request.{ ScanamoQueryRequest, ScanamoScanRequest }
+import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse }
 
 private[scanamo] trait DynamoResultStream[Req, Res] {
   def limit(req: Req): Option[Int]

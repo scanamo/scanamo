@@ -17,18 +17,17 @@
 package org.scanamo
 
 import cats.data.NonEmptyList
-import cats.free.Free
-import cats.free.FreeT
-import cats.syntax.apply._
-import software.amazon.awssdk.services.dynamodb.model._
-import org.scanamo.request._
+import cats.free.{ Free, FreeT }
+import cats.syntax.apply.*
+import org.scanamo.request.*
+import software.amazon.awssdk.services.dynamodb.model.*
 
 package object ops {
   type ScanamoOps[A] = Free[ScanamoOpsA, A]
   type ScanamoOpsT[M[_], A] = FreeT[ScanamoOpsA, M, A]
 
   private[ops] object JavaRequests {
-    import collection.JavaConverters._
+    import collection.JavaConverters.*
 
     def scan(req: ScanamoScanRequest): ScanRequest = {
       def queryRefinement[T](

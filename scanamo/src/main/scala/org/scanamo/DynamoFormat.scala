@@ -16,15 +16,14 @@
 
 package org.scanamo
 
+import cats.syntax.either.*
+import cats.syntax.traverse.*
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+
 import java.nio.ByteBuffer
 import java.time.format.{ DateTimeFormatter, DateTimeParseException }
 import java.time.{ Instant, OffsetDateTime, ZonedDateTime }
 import java.util.UUID
-
-import cats.syntax.either._
-import cats.syntax.traverse._
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-
 import scala.annotation.implicitNotFound
 import scala.reflect.ClassTag
 

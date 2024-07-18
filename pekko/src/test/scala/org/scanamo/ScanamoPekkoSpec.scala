@@ -1,18 +1,19 @@
 package org.scanamo
 
+import cats.implicits.*
 import org.apache.pekko.actor.ActorSystem
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import org.scanamo.query._
-import org.scanamo.syntax._
-import org.scanamo.fixtures._
-import org.scanamo.generic.auto._
-import org.scalatest.concurrent.ScalaFutures
-import org.scalatest.time.{ Millis, Seconds, Span }
 import org.scalatest.BeforeAndAfterAll
+import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpecLike
 import org.scalatest.matchers.should.Matchers
-import cats.implicits._
+import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.query.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
+
 import scala.concurrent.ExecutionContext
 
 class ScanamoPekkoSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {

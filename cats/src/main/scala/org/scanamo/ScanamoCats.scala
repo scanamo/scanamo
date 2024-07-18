@@ -16,11 +16,11 @@
 
 package org.scanamo
 
-import cats.{ ~>, Monad }
 import cats.effect.Async
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import cats.{ ~>, Monad }
 import fs2.Stream
 import org.scanamo.ops.{ CatsInterpreter, ScanamoOps, ScanamoOpsT }
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 class ScanamoCats[F[_]: Async](client: DynamoDbAsyncClient) {
   final private val interpreter = new CatsInterpreter(client)

@@ -16,9 +16,9 @@
 
 package org.scanamo.generic
 
-import magnolia1._
-
+import magnolia1.*
 import org.scanamo.DynamoFormat
+
 import scala.reflect.macros.whitebox
 
 trait AutoDerivation extends Derivation {

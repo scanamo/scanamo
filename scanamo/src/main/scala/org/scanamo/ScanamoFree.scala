@@ -17,19 +17,21 @@
 package org.scanamo
 
 import cats.{ Monad, MonoidK }
-import software.amazon.awssdk.services.dynamodb.model._
-import java.util.{ List => JList, Map => JMap }
 import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
-import org.scanamo.query._
-import org.scanamo.request._
+import org.scanamo.query.*
+import org.scanamo.request.*
 import org.scanamo.update.UpdateExpression
+import software.amazon.awssdk.services.dynamodb.model.*
+
+import java.util.{ List as JList, Map as JMap }
 
 object ScanamoFree {
-  import cats.syntax.functor._
-  import cats.syntax.applicative._
-  import cats.syntax.traverse._
-  import collection.JavaConverters._
+  import cats.syntax.applicative.*
+  import cats.syntax.functor.*
+  import cats.syntax.traverse.*
+
+  import collection.JavaConverters.*
 
   private val batchSize = 25
   private val batchGetSize = 100

@@ -16,17 +16,18 @@
 
 package org.scanamo
 
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
-import cats.syntax.apply._
-import java.nio.ByteBuffer
-import java.util.stream.Collectors
-import java.{ util => ju }
+import cats.syntax.apply.*
 import software.amazon.awssdk.core.SdkBytes
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+
+import java.nio.ByteBuffer
+import java.util as ju
+import java.util.stream.Collectors
 
 /** A `DynamoArray` is a pure representation of an array of `AttributeValue`s
   */
 sealed abstract class DynamoArray extends Product with Serializable { self =>
-  import DynamoArray._
+  import DynamoArray.*
 
   protected def toList: List[DynamoValue]
 

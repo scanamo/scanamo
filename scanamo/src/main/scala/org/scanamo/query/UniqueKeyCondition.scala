@@ -16,7 +16,7 @@
 
 package org.scanamo.query
 
-import cats.syntax.apply._
+import cats.syntax.apply.*
 import org.scanamo.{ DynamoFormat, DynamoObject }
 
 trait UniqueKeyCondition[T] {

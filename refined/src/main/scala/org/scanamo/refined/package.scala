@@ -16,8 +16,7 @@
 
 package org.scanamo
 
-import cats.syntax.either._
-
+import cats.syntax.either.*
 import eu.timepit.refined.api.{ RefType, Validate }
 
 package object refined {

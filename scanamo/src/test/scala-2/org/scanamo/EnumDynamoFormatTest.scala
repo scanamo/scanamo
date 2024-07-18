@@ -2,7 +2,7 @@ package org.scanamo
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.generic.auto._
+import org.scanamo.generic.auto.*
 
 class EnumDynamoFormatTest extends AnyFunSuite with Matchers {
   test("automatic derivation for case object should only work if treating it as an enum") {
