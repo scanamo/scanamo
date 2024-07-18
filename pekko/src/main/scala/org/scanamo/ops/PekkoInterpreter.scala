@@ -44,8 +44,7 @@ import software.amazon.awssdk.services.dynamodb.model.{
   QueryResponse,
   ScanRequest,
   ScanResponse,
-  TransactWriteItemsRequest,
-  TransactWriteItemsResponse,
+  TransactionCanceledException,
   UpdateItemRequest,
   UpdateItemResponse
 }
@@ -68,6 +67,9 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
   def runConditional[In <: DReq, Out <: DResp](op: In)(implicit o: DynamoDbOp[In, Out]): Pekko[Conditional[Out]] =
     exposeException(run(op)) { case e: ConditionalCheckFailedException => e }
 
+  def runTransact[In <: DReq, Out <: DResp](op: In)(implicit o: DynamoDbOp[In, Out]): Pekko[Transact[Out]] =
+    exposeException(run(op)) { case e: TransactionCanceledException => e }
+
   def apply[A](ops: ScanamoOpsA[A]): Pekko[A] = ops match {
     case Put(req)               => run[PutItemRequest, PutItemResponse](JavaRequests.put(req))
     case Get(req)               => run[GetItemRequest, GetItemResponse](req)
@@ -80,7 +82,6 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
     case ConditionalDelete(req) => runConditional(JavaRequests.delete(req))
     case ConditionalPut(req)    => runConditional(JavaRequests.put(req))
     case ConditionalUpdate(req) => runConditional(JavaRequests.update(req))
-    case TransactWriteAll(req) =>
-      run[TransactWriteItemsRequest, TransactWriteItemsResponse](JavaRequests.transactItems(req))
+    case TransactWriteAll(req)  => runTransact(JavaRequests.transactItems(req))
   }
 }
