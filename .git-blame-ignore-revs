@@ -1,2 +1,5 @@
 # Scala Steward: Reformat with scalafmt 3.8.1
 40de557da5c18b35987e7d4db9a3864b1ae02639
+
+# Organise imports
+f7566ae359566735c0a1f5f5c16155261f95139a
