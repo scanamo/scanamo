@@ -16,10 +16,11 @@
 
 package org.scanamo.update
 
-import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import cats.data.NonEmptyVector
+import org.scanamo.query.*
 import org.scanamo.{ DynamoFormat, DynamoValue }
-import org.scanamo.query._
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+
 import scala.collection.immutable.HashMap
 
 sealed trait UpdateExpression extends Product with Serializable { self =>

@@ -16,14 +16,13 @@
 
 package org.scanamo.ops
 
-import org.apache.pekko.NotUsed
-import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
-import org.apache.pekko.stream.connectors.dynamodb.DynamoDbOp
-import org.apache.pekko.stream.connectors.dynamodb.DynamoDbPaginatedOp
-import org.apache.pekko.stream.scaladsl.Source
 import cats.syntax.either.*
 import cats.~>
+import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ClassicActorSystemProvider
+import org.apache.pekko.stream.connectors.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
+import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
+import org.apache.pekko.stream.scaladsl.Source
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{
   BatchGetItemRequest,

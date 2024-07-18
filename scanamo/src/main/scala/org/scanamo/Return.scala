@@ -19,7 +19,7 @@ package org.scanamo
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue
 
 sealed abstract class PutReturn extends Product with Serializable { self =>
-  import PutReturn._
+  import PutReturn.*
 
   final def asDynamoValue: ReturnValue =
     self match {
@@ -36,7 +36,7 @@ object PutReturn {
 }
 
 sealed abstract class DeleteReturn extends Product with Serializable { self =>
-  import DeleteReturn._
+  import DeleteReturn.*
 
   final def asDynamoValue: ReturnValue =
     self match {

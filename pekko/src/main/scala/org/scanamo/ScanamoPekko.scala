@@ -16,23 +16,14 @@
 
 package org.scanamo
 
-import cats.~>
-import cats.Monad
+import cats.{ ~>, Monad }
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ClassicActorSystemProvider
-import org.apache.pekko.stream.scaladsl.Sink
-import org.apache.pekko.stream.scaladsl.Source
-import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
-import software.amazon.awssdk.services.dynamodb.model.InternalServerErrorException
-import software.amazon.awssdk.services.dynamodb.model.ItemCollectionSizeLimitExceededException
-import software.amazon.awssdk.services.dynamodb.model.LimitExceededException
-import software.amazon.awssdk.services.dynamodb.model.ProvisionedThroughputExceededException
-import software.amazon.awssdk.services.dynamodb.model.RequestLimitExceededException
+import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import org.scanamo.ops.PekkoInterpreter.Pekko
-import org.scanamo.ops.PekkoInterpreter
-import org.scanamo.ops.ScanamoOps
-import org.scanamo.ops.ScanamoOpsT
+import org.scanamo.ops.{ PekkoInterpreter, ScanamoOps, ScanamoOpsT }
+import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
+import software.amazon.awssdk.services.dynamodb.model.*
 
 import scala.concurrent.Future
 
@@ -48,7 +39,7 @@ import scala.concurrent.Future
   * the core Scanamo project.
   */
 class ScanamoPekko private (client: DynamoDbAsyncClient)(implicit system: ClassicActorSystemProvider) {
-  import ScanamoPekko._
+  import ScanamoPekko.*
 
   final private val interpreter = new PekkoInterpreter()(client, system)
 

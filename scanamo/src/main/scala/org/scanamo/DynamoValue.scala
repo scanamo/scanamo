@@ -18,14 +18,15 @@ package org.scanamo
 
 import software.amazon.awssdk.core.SdkBytes
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+
 import java.nio.ByteBuffer
-import java.{ util => ju }
+import java.util as ju
 import java.util.stream.Collectors
 
 /** A `DynamoValue` is a pure representation of an `AttributeValue` from the AWS SDK.
   */
 sealed abstract class DynamoValue extends Product with Serializable { self =>
-  import DynamoValue._
+  import DynamoValue.*
 
   /** Produces the `AttributeValue` isomorphic to this `DynamoValue`
     */

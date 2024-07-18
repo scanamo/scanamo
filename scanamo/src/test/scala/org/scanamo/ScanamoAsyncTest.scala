@@ -1,11 +1,11 @@
 package org.scanamo
 
 import cats.implicits.*
-import org.scalatest.{ BeforeAndAfterAll, NonImplicitAssertions }
 import org.scalatest.concurrent.ScalaFutures
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.time.{ Millis, Seconds, Span }
+import org.scalatest.{ BeforeAndAfterAll, NonImplicitAssertions }
 import org.scanamo.fixtures.*
 import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps

@@ -1,8 +1,9 @@
 package org.scanamo
 
-import java.time._
-import org.scalacheck._
-import Arbitrary.arbitrary
+import org.scalacheck.*
+import org.scalacheck.Arbitrary.arbitrary
+
+import java.time.*
 
 object TimeGenerators {
   implicit val offsetDateTimeArb: Arbitrary[OffsetDateTime] = Arbitrary {

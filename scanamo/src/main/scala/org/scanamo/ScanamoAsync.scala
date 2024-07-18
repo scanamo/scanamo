@@ -16,10 +16,10 @@
 
 package org.scanamo
 
-import cats.Monad
-import cats.~>
+import cats.{ ~>, Monad }
+import org.scanamo.ops.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import org.scanamo.ops._
+
 import scala.concurrent.{ ExecutionContext, Future }
 
 /** Interprets Scanamo operations in an asynchronous context: Scala futures.

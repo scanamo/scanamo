@@ -17,11 +17,11 @@
 package org.scanamo
 
 import cats.{ ~>, Monad }
+import org.scanamo.ops.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
-import org.scanamo.ops._
 import zio.IO
-import zio.interop.catz._
+import zio.interop.catz.*
 import zio.stream.{ Stream, ZStream }
 
 class ScanamoZio private (client: DynamoDbAsyncClient) {

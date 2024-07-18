@@ -49,7 +49,7 @@ case object GTE extends DynamoOperator(">=")
 
 final case class KeyIs[V: DynamoFormat](key: AttributeName, operator: DynamoOperator, v: V)
     extends RangeKeyCondition[V] {
-  import KeyIs._
+  import KeyIs.*
   override def keyConditionExpression(s: String): String = s"#${key.placeholder(s)} ${operator.op} :$placeholder"
   override def attributes: Map[String, V] = Map(placeholder -> v)
 }
@@ -59,7 +59,7 @@ object KeyIs {
 }
 
 final case class BeginsWith[V: DynamoFormat](key: AttributeName, v: V) extends RangeKeyCondition[V] {
-  import BeginsWith._
+  import BeginsWith.*
   override def keyConditionExpression(s: String): String = s"begins_with(#${key.placeholder(s)}, :$placeholder)"
   override def attributes: Map[String, V] = Map(placeholder -> v)
 }

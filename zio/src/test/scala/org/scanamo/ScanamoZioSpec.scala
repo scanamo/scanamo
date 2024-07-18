@@ -1,19 +1,18 @@
 package org.scanamo
 
+import cats.implicits.*
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
-import org.scanamo.query._
-import org.scanamo.fixtures._
-import org.scanamo.generic.auto._
-import org.scanamo.query._
-import org.scanamo.syntax._
-import cats.implicits._
-import zio.Runtime.default._
-import zio.stream.interop.catz._
-import zio.stream.{ Sink, Stream }
+import org.scanamo.fixtures.*
+import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.query.*
+import org.scanamo.syntax.*
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
+import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
+import zio.Runtime.default.*
+import zio.stream.interop.catz.*
+import zio.stream.{ Sink, Stream }
 
 class ScanamoZioSpec extends AnyFunSpec with Matchers {
   val client = LocalDynamoDB.client()

@@ -1,8 +1,8 @@
 package org.scanamo.joda
 
-import org.joda.time._
-import org.scalacheck._
-import Arbitrary.arbitrary
+import org.joda.time.*
+import org.scalacheck.*
+import org.scalacheck.Arbitrary.arbitrary
 
 object TimeGenerators {
   implicit val dateTimeArb: Arbitrary[DateTime] = Arbitrary {

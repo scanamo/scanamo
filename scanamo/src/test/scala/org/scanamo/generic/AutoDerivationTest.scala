@@ -2,12 +2,12 @@ package org.scanamo.generic
 
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
-import org.scanamo._
+import org.scanamo.*
 
 class AutoDerivationTest extends AnyFunSuite with Matchers {
 
   test("Derivation should correctly encode Option with Map inside") {
-    import org.scanamo.generic.auto._
+    import org.scanamo.generic.auto.*
 
     case class OptionWrapper(theOption: Option[InnerWrapper])
     case class InnerWrapper(innerMap: Map[String, String])
@@ -28,7 +28,7 @@ class AutoDerivationTest extends AnyFunSuite with Matchers {
   }
 
   test("Derivation should correctly encode Option with List inside") {
-    import org.scanamo.generic.auto._
+    import org.scanamo.generic.auto.*
 
     case class OptionWrapper(theOption: Option[InnerWrapper])
     case class InnerWrapper(innerList: List[String])

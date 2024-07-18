@@ -1,16 +1,15 @@
 package org.scanamo
 
-import java.util
-
-import cats._
+import cats.*
 import cats.data.State
-import cats.implicits._
-import software.amazon.awssdk.services.dynamodb.model.{ AttributeValue, QueryResponse, ScanResponse }
-import org.scanamo.ops.{ BatchGet, BatchWrite, Query, _ }
+import cats.implicits.*
 import org.scalatest.funsuite.AnyFunSuite
 import org.scalatest.matchers.should.Matchers
+import org.scanamo.ops.*
+import software.amazon.awssdk.services.dynamodb.model.{ AttributeValue, QueryResponse, ScanResponse }
 
-import collection.JavaConverters._
+import java.util
+import scala.collection.JavaConverters.*
 
 class ScanamoFreeTest extends AnyFunSuite with Matchers {
   test("unlimited scan, scans exhaustively") {

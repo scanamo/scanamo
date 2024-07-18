@@ -18,16 +18,15 @@ package org.scanamo
 
 import software.amazon.awssdk.auth.credentials.{ AwsBasicCredentials, StaticCredentialsProvider }
 import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration
+import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
 import software.amazon.awssdk.regions.Region
-import software.amazon.awssdk.services.dynamodb._
-import software.amazon.awssdk.services.dynamodb.model._
-
-import scala.collection.JavaConverters._
-import scala.concurrent.duration._
-import scala.compat.java8.DurationConverters._
+import software.amazon.awssdk.services.dynamodb.*
+import software.amazon.awssdk.services.dynamodb.model.*
 
 import java.net.URI
-import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient
+import scala.collection.JavaConverters.*
+import scala.compat.java8.DurationConverters.*
+import scala.concurrent.duration.*
 
 object LocalDynamoDB {
   def client(port: Int = 8042): DynamoDbAsyncClient =

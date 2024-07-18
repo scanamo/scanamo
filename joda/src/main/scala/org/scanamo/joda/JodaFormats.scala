@@ -16,8 +16,8 @@
 
 package org.scanamo.joda
 
-import org.scanamo.DynamoFormat
 import org.joda.time.{ DateTime, Instant }
+import org.scanamo.DynamoFormat
 
 object JodaFormats {
 
