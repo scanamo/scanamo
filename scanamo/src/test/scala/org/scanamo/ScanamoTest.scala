@@ -751,11 +751,7 @@ class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
           )
         } yield ()
 
-        assertThrows[TransactionCanceledException] {
-          scanamo.exec(ops1) should equal(
-            (List(Right(Gremlin(1, wet = false))), List(Right(Forecast("London", "Sun", None))))
-          )
-        }
+        scanamo.exec(ops1) shouldBe a[Left[TransactionCanceledException, _]]
 
         val ops2 = for {
           gremlins <- gremlinTable.scan()

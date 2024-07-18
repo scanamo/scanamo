@@ -18,6 +18,7 @@ package org.scanamo
 
 import cats.{ Monad, MonoidK }
 import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
+import org.scanamo.ops.ScanamoOps.Results.*
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.*
 import org.scanamo.request.*
@@ -80,7 +81,7 @@ object ScanamoFree {
 
   def transactionalWrite(
     actions: List[TransactionalWriteAction]
-  ): ScanamoOps[TransactWriteItemsResponse] = {
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
     val transactionWriteRequest =
       actions.foldLeft(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { case (acc, action) =>
         action match {
@@ -102,12 +103,12 @@ object ScanamoFree {
 
   def transactPutAllTable[T](
     tableName: String
-  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] =
+  )(items: List[T])(implicit f: DynamoFormat[T]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     transactPutAll(items.map(tableName -> _))
 
   def transactPutAll[T](
     tableAndItems: List[(String, T)]
-  )(implicit f: DynamoFormat[T]): ScanamoOps[TransactWriteItemsResponse] = {
+  )(implicit f: DynamoFormat[T]): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
     val dItems = tableAndItems.map { case (tableName, itm) =>
       TransactPutItem(tableName, f.write(itm), None)
     }
@@ -117,12 +118,12 @@ object ScanamoFree {
 
   def transactUpdateAllTable(
     tableName: String
-  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[TransactWriteItemsResponse] =
+  )(items: List[(UniqueKey[_], UpdateExpression)]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     transactUpdateAll(items.map(tableName -> _))
 
   def transactUpdateAll(
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
-  ): ScanamoOps[TransactWriteItemsResponse] = {
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
     val items = tableAndItems.map { case (tableName, (key, updateExpression)) =>
       TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
     }
@@ -132,12 +133,12 @@ object ScanamoFree {
 
   def transactDeleteAllTable(
     tableName: String
-  )(items: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResponse] =
+  )(items: List[UniqueKey[_]]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     transactDeleteAll(items.map(tableName -> _))
 
   def transactDeleteAll(
     tableAndItems: List[(String, UniqueKey[_])]
-  ): ScanamoOps[TransactWriteItemsResponse] = {
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
     val items = tableAndItems.map { case (tableName, key) =>
       TransactDeleteItem(tableName, key.toDynamoObject, None)
     }
