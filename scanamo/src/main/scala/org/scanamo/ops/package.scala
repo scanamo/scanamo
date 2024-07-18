@@ -166,13 +166,15 @@ package object ops {
 
     def transactItems(req: ScanamoTransactWriteRequest): TransactWriteItemsRequest = {
       val putItems = req.putItems.map { item =>
+        val putBuilder = software.amazon.awssdk.services.dynamodb.model.Put.builder
+          .item(item.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
+          .tableName(item.tableName)
+        val putBuilderWithCondition = item.condition.fold(putBuilder)(condition =>
+          putBuilder.conditionExpression(condition.expression).expressionAttributeNames(condition.attributeNames.asJava)
+        )
+
         TransactWriteItem.builder
-          .put(
-            software.amazon.awssdk.services.dynamodb.model.Put.builder
-              .item(item.item.asObject.getOrElse(DynamoObject.empty).toJavaMap)
-              .tableName(item.tableName)
-              .build
-          )
+          .put(putBuilderWithCondition.build)
           .build
       }
 
