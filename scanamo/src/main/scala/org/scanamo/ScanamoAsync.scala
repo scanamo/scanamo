@@ -21,10 +21,11 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
 import scala.concurrent.ExecutionContext
 
-/** Interprets Scanamo operations in an asynchronous context: Scala futures.
+/** Interprets Scanamo operations in an asynchronous context: Scala futures. Using the DynamoDbClient client which
+  * doesn't block, using it's own thread pool for I/O requests internally
   */
 final class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: ExecutionContext)
-    extends ScanamoClient(new ScanamoAsyncInterpreter(client))
+    extends ScanamoClient(new AsyncFrameworks.Interpreter(client, new ScalaFutureSpecific()))
 
 object ScanamoAsync {
   def apply(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext): ScanamoAsync = new ScanamoAsync(client)

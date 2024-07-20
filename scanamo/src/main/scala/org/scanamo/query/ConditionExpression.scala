@@ -19,41 +19,35 @@ package org.scanamo.query
 import cats.data.State
 import cats.syntax.either.*
 import cats.syntax.functor.*
+import org.scanamo.*
 import org.scanamo.ops.ScanamoOps
+import org.scanamo.ops.ScanamoOps.Results.*
 import org.scanamo.request.{ RequestCondition, ScanamoDeleteRequest, ScanamoPutRequest, ScanamoUpdateRequest }
 import org.scanamo.update.UpdateExpression
-import org.scanamo.*
-import software.amazon.awssdk.services.dynamodb.model.{
-  AttributeValue,
-  ConditionalCheckFailedException,
-  DeleteItemResponse,
-  PutItemResponse
-}
+import software.amazon.awssdk.services.dynamodb.model.{ AttributeValue, DeleteItemResponse, PutItemResponse }
 
 final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
   expr: ConditionExpression[T],
   format: DynamoFormat[V]
 ) {
   def put(item: V): ScanamoOps[Either[ScanamoError, Unit]] =
-    nativePut(PutReturn.Nothing, item).map(_.leftMap(ConditionNotMet(_)).void)
+    nativePut(PutReturn.Nothing, item).map(_.leftMap(ConditionNotMet.apply).void)
 
   def putAndReturn(ret: PutReturn)(item: V): ScanamoOps[Option[Either[ScanamoError, V]]] =
     nativePut(ret, item).map(decodeReturnValue[PutItemResponse](_, _.attributes))
 
-  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Either[ConditionalCheckFailedException, PutItemResponse]] =
+  private def nativePut(ret: PutReturn, item: V): ScanamoOps[Conditional[PutItemResponse]] =
     ScanamoOps.conditionalPut(
       ScanamoPutRequest(tableName, format.write(item), Some(expr(t).runEmptyA.value), ret)
     )
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =
-    nativeDelete(DeleteReturn.Nothing, key).map(_.leftMap(ConditionNotMet(_)).void)
+    nativeDelete(DeleteReturn.Nothing, key).map(_.leftMap(ConditionNotMet.apply).void)
 
   def deleteAndReturn(ret: DeleteReturn)(key: UniqueKey[_]): ScanamoOps[Option[Either[ScanamoError, V]]] =
     nativeDelete(ret, key).map(decodeReturnValue[DeleteItemResponse](_, _.attributes))
 
-  private def nativeDelete(ret: DeleteReturn,
-                           key: UniqueKey[_]
-  ): ScanamoOps[Either[ConditionalCheckFailedException, DeleteItemResponse]] =
+  private def nativeDelete(ret: DeleteReturn, key: UniqueKey[_]): ScanamoOps[Conditional[DeleteItemResponse]] =
     ScanamoOps
       .conditionalDelete(
         ScanamoDeleteRequest(
@@ -65,14 +59,14 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
       )
 
   private def decodeReturnValue[A](
-    either: Either[ConditionalCheckFailedException, A],
+    either: Conditional[A],
     attrs: A => java.util.Map[String, AttributeValue]
   ): Option[Either[ScanamoError, V]] = {
     import cats.data.EitherT
 
     EitherT
       .fromEither[Option](either)
-      .leftMap(ConditionNotMet(_))
+      .leftMap(ConditionNotMet.apply)
       .flatMap(DeleteItemResponse =>
         EitherT[Option, ScanamoError, V](
           Option(attrs(DeleteItemResponse))
@@ -98,7 +92,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
         )
       )
       .map(
-        _.leftMap(ConditionNotMet(_))
+        _.leftMap(ConditionNotMet.apply)
           .flatMap(r => format.read(DynamoObject(r.attributes).toDynamoValue))
       )
 }
