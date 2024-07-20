@@ -18,11 +18,11 @@ package org.scanamo.ops
 
 import cats.syntax.either.*
 import cats.~>
-import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ClassicActorSystemProvider
-import org.apache.pekko.stream.connectors.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
+import org.apache.pekko.stream.connectors.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import org.apache.pekko.stream.scaladsl.Source
+import org.scanamo.ScanamoPekko
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 import software.amazon.awssdk.services.dynamodb.model.{
   BatchGetItemRequest,
@@ -54,7 +54,7 @@ import java.util.concurrent.CompletionException
   * from the core Scanamo project.
   */
 private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, system: ClassicActorSystemProvider)
-    extends (ScanamoOpsA ~> PekkoInterpreter.Pekko) {
+    extends (ScanamoOpsA ~> ScanamoPekko.Pekko) {
 
   private[this] val unwrap: PartialFunction[Throwable, Throwable] = { case error: CompletionException =>
     error.getCause
@@ -62,12 +62,12 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
 
   final private def run[In <: DynamoDbRequest, Out <: DynamoDbResponse](
     op: In
-  )(implicit operation: DynamoDbOp[In, Out]): PekkoInterpreter.Pekko[Out] =
+  )(implicit operation: DynamoDbOp[In, Out]): ScanamoPekko.Pekko[Out] =
     Source.future(DynamoDb.single(op)).mapError(unwrap)
 
   final private def runPaginated[In <: DynamoDbRequest, Out <: DynamoDbResponse](
     op: In
-  )(implicit operation: DynamoDbPaginatedOp[In, Out, _]): PekkoInterpreter.Pekko[Out] =
+  )(implicit operation: DynamoDbPaginatedOp[In, Out, _]): ScanamoPekko.Pekko[Out] =
     DynamoDb.source(op).mapError(unwrap)
 
   def apply[A](ops: ScanamoOpsA[A]) =
@@ -101,8 +101,4 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
       case TransactWriteAll(req) =>
         run[TransactWriteItemsRequest, TransactWriteItemsResponse](JavaRequests.transactItems(req))
     }
-}
-
-object PekkoInterpreter {
-  type Pekko[A] = Source[A, NotUsed]
 }

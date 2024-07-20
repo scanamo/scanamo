@@ -16,27 +16,15 @@
 
 package org.scanamo
 
-import cats.{ ~>, Monad }
 import org.scanamo.ops.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
-import scala.concurrent.{ ExecutionContext, Future }
+import scala.concurrent.ExecutionContext
 
 /** Interprets Scanamo operations in an asynchronous context: Scala futures.
   */
-final class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: ExecutionContext) {
-
-  private val interpreter = new ScanamoAsyncInterpreter(client)
-
-  /** Execute the operations built with [[org.scanamo.Table]]
-    */
-  def exec[A](op: ScanamoOps[A]): Future[A] = op.foldMap(interpreter)
-
-  /** Execute the operations built with [[org.scanamo.Table]] with effects in the monad `M` threaded in.
-    */
-  def execT[M[_]: Monad, A](hoist: Future ~> M)(op: ScanamoOpsT[M, A]): M[A] =
-    op.foldMap(interpreter andThen hoist)
-}
+final class ScanamoAsync private (client: DynamoDbAsyncClient)(implicit ec: ExecutionContext)
+    extends ScanamoClient(new ScanamoAsyncInterpreter(client))
 
 object ScanamoAsync {
   def apply(client: DynamoDbAsyncClient)(implicit ec: ExecutionContext): ScanamoAsync = new ScanamoAsync(client)
