@@ -16,7 +16,7 @@
 
 package org.scanamo
 
-import cats.{ ~>, Id, Monad }
+import cats.{ ~>, Id }
 import org.scanamo.ops.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
 
@@ -24,17 +24,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClient
   *
   * To avoid blocking, use [[org.scanamo.ScanamoAsync]]
   */
-final class Scanamo private (client: DynamoDbClient) {
-  private val interpreter = new ScanamoSyncInterpreter(client)
-
-  /** Execute the operations built with [[org.scanamo.Table]]
-    */
-  def exec[A](op: ScanamoOps[A]): A = op.foldMap(interpreter)
-
-  /** Execute the operations built with [[org.scanamo.Table]] with effects in the monad `M` threaded in.
-    */
-  def execT[M[_]: Monad, A](hoist: Id ~> M)(op: ScanamoOpsT[M, A]): M[A] =
-    op.foldMap(interpreter andThen hoist)
+final class Scanamo private (client: DynamoDbClient) extends ScanamoClient(new ScanamoSyncInterpreter(client)) {
+  override def exec[A](op: ScanamoOps[A]): A = super.exec(op) // overridden to explicitly return `A` rather than `Id[A]`
 }
 
 object Scanamo {

@@ -16,74 +16,45 @@
 
 package org.scanamo
 
-import cats.{ ~>, Monad }
+import cats.Monad
 import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ClassicActorSystemProvider
 import org.apache.pekko.stream.scaladsl.{ Sink, Source }
-import org.scanamo.ops.PekkoInterpreter.Pekko
-import org.scanamo.ops.{ PekkoInterpreter, ScanamoOps, ScanamoOpsT }
+import org.scanamo.PekkoInstances.*
+import org.scanamo.ops.{ PekkoInterpreter, ScanamoOps }
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.*
 
 import scala.concurrent.Future
 
-/** Provides the same interface as [[org.scanamo.Scanamo]], except that it requires an
-  * [[https://github.com/apache/incubator-pekko-connectors Pekko connectors]] client, a
-  * [[org.scanamo.ops.retrypolicy.RetryPolicy]] and a predicate for which [[scala.Throwable]]s should be retried.
-  * `retryPolicy` defaults to [[org.scanamo.ops.retrypolicy.RetryPolicy.max]] with maximum 3 retries if not explicitly
-  * provided. `isRetryable` defaults to retry the most common retryable Dynamo exceptions. Moreover, the interface
-  * returns either a [[scala.concurrent.Future]] or [[org.apache.pekko.stream.scaladsl.Source]] based on the kind of
-  * execution used.
+/** `ScanamoPekko` is a `ScanamoClient` that uses Pekko (the Akka alternative), which returns either
+  * [[scala.concurrent.Future]] or [[org.apache.pekko.stream.scaladsl.Source]] based on the kind of execution used.
   *
   * This is a port of [[https://github.com/scanamo/scanamo/pull/151 ScanamoAlpakka]], which has since been removed from
   * the core Scanamo project.
   */
-class ScanamoPekko private (client: DynamoDbAsyncClient)(implicit system: ClassicActorSystemProvider) {
-  import ScanamoPekko.*
+class ScanamoPekko private (client: DynamoDbAsyncClient)(implicit system: ClassicActorSystemProvider)
+    extends ScanamoClient(new PekkoInterpreter()(client, system)) {
 
-  final private val interpreter = new PekkoInterpreter()(client, system)
-
-  def exec[A](op: ScanamoOps[A]): Pekko[A] =
-    run(op)
-
-  final def execT[M[_]: Monad, A](hoist: Pekko ~> M)(op: ScanamoOpsT[M, A]): M[A] =
-    op.foldMap(interpreter.andThen(hoist))
-
-  def execFuture[A](op: ScanamoOps[A]): Future[A] =
-    run(op).runWith(Sink.head[A])
-
-  private def run[A](op: ScanamoOps[A]): Pekko[A] =
-    op.foldMap(interpreter)
+  def execFuture[A](op: ScanamoOps[A]): Future[A] = exec(op).runWith(Sink.head[A])
 }
 
-object ScanamoPekko extends PekkoInstances {
+object ScanamoPekko {
+  type Pekko[A] = Source[A, NotUsed]
+
   def apply(client: DynamoDbAsyncClient)(implicit system: ClassicActorSystemProvider): ScanamoPekko =
     new ScanamoPekko(client)
-
-  def defaultRetryableCheck(throwable: Throwable): Boolean =
-    throwable match {
-      case _: InternalServerErrorException | _: ItemCollectionSizeLimitExceededException | _: LimitExceededException |
-          _: ProvisionedThroughputExceededException | _: RequestLimitExceededException =>
-        true
-      case e: DynamoDbException
-          if e.awsErrorDetails.errorCode.contains("ThrottlingException") |
-            e.awsErrorDetails.errorCode.contains("InternalFailure") =>
-        true
-      case _ => false
-    }
 }
 
-private[scanamo] trait PekkoInstances {
-  implicit def monad: Monad[Source[*, NotUsed]] =
-    new Monad[Source[*, NotUsed]] {
-      def pure[A](x: A): Source[A, NotUsed] = Source.single(x)
+private[scanamo] object PekkoInstances {
+  implicit val monad: Monad[Source[*, NotUsed]] = new Monad[Source[*, NotUsed]] {
+    def pure[A](x: A): Source[A, NotUsed] = Source.single(x)
 
-      def flatMap[A, B](fa: Source[A, NotUsed])(f: A => Source[B, NotUsed]): Source[B, NotUsed] = fa.flatMapConcat(f)
+    def flatMap[A, B](fa: Source[A, NotUsed])(f: A => Source[B, NotUsed]): Source[B, NotUsed] = fa.flatMapConcat(f)
 
-      def tailRecM[A, B](a: A)(f: A => Source[Either[A, B], NotUsed]): Source[B, NotUsed] =
-        f(a).flatMapConcat {
-          case Left(a)  => tailRecM(a)(f)
-          case Right(b) => Source.single(b)
-        }
-    }
+    def tailRecM[A, B](a: A)(f: A => Source[Either[A, B], NotUsed]): Source[B, NotUsed] =
+      f(a).flatMapConcat {
+        case Left(a)  => tailRecM(a)(f)
+        case Right(b) => Source.single(b)
+      }
+  }
 }

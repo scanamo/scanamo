@@ -657,13 +657,11 @@ class TableTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
         filteredStations <- stationTable.filter(AttributeName.of("line") contains "opo").scan()
       } yield filteredStations
 
-      scanamo.exec(ops) should contain theSameElementsAs (
-        List(
-          Right(Station("Metropolitan", "Chalfont & Latimer", 8)),
-          Right(Station("Metropolitan", "Chorleywood", 7)),
-          Right(Station("Metropolitan", "Rickmansworth", 7)),
-          Right(Station("Metropolitan", "Croxley", 7))
-        )
+      scanamo.exec(ops) should contain theSameElementsAs List(
+        Right(Station("Metropolitan", "Chalfont & Latimer", 8)),
+        Right(Station("Metropolitan", "Chorleywood", 7)),
+        Right(Station("Metropolitan", "Rickmansworth", 7)),
+        Right(Station("Metropolitan", "Croxley", 7))
       )
     }
   }
