@@ -14,7 +14,7 @@ val V = new {
 val scala2xVersions = Seq(V.scala212, V.scala213)
 val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
 
-val zioVersion = "1.0.18"
+val zioVersion = "2.1.6"
 
 lazy val stdOptions = Seq(
   "-release:8",
