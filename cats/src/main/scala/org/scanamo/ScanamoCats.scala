@@ -19,10 +19,11 @@ package org.scanamo
 import cats.effect.Async
 import cats.~>
 import fs2.Stream
-import org.scanamo.ops.CatsInterpreter
+import org.scanamo.ops.{ AsyncFrameworks, CatsAdapter }
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
-class ScanamoCats[F[_]: Async] private (client: DynamoDbAsyncClient) extends ScanamoClient(new CatsInterpreter(client))
+class ScanamoCats[F[_]: Async] private (client: DynamoDbAsyncClient)
+    extends ScanamoClient(new AsyncFrameworks.Interpreter(client, new CatsAdapter()))
 
 object ScanamoCats {
   def apply[F[_]: Async](client: DynamoDbAsyncClient): ScanamoCats[F] = new ScanamoCats(client)

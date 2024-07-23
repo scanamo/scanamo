@@ -24,9 +24,12 @@ import zio.IO
 import zio.interop.catz.*
 import zio.stream.{ Stream, ZStream }
 
-class ScanamoZio private (client: DynamoDbAsyncClient) extends ScanamoClient(new ZioInterpreter(client))
+class ScanamoZio private (client: DynamoDbAsyncClient)
+    extends ScanamoClient(new AsyncFrameworks.Interpreter(client, ZioAdapter))
 
 object ScanamoZio {
+  type DIO[+A] = IO[DynamoDbException, A]
+
   def apply(client: DynamoDbAsyncClient): ScanamoZio = new ScanamoZio(client)
 
   val ToStream: IO[DynamoDbException, *] ~> Stream[DynamoDbException, *] =
