@@ -19,7 +19,7 @@ package org.scanamo.ops
 import cats.*
 import cats.syntax.either.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
+import software.amazon.awssdk.services.dynamodb.model.{ ConditionalCheckFailedException, TransactionCanceledException }
 
 /** Interpret Scanamo operations using blocking requests to DynamoDB with any transport errors or semantic errors within
   * DynamoDB thrown as exceptions.
@@ -28,6 +28,9 @@ class ScanamoSyncInterpreter(client: DynamoDbClient) extends (ScanamoOpsA ~> Id)
 
   private def runConditional[T] =
     Either.catchOnly[ConditionalCheckFailedException]
+
+  private def runTransact[T] =
+    Either.catchOnly[TransactionCanceledException]
 
   def apply[A](op: ScanamoOpsA[A]): Id[A] = op match {
     case Put(req)               => client.putItem(JavaRequests.put(req))
@@ -41,6 +44,6 @@ class ScanamoSyncInterpreter(client: DynamoDbClient) extends (ScanamoOpsA ~> Id)
     case BatchGet(req)          => client.batchGetItem(req)
     case Update(req)            => client.updateItem(JavaRequests.update(req))
     case ConditionalUpdate(req) => runConditional(client.updateItem(JavaRequests.update(req)))
-    case TransactWriteAll(req)  => client.transactWriteItems(JavaRequests.transactItems(req))
+    case TransactWriteAll(req)  => runTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
   }
 }

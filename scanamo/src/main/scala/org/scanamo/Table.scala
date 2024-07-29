@@ -18,6 +18,7 @@ package org.scanamo
 
 import cats.{ Monad, MonoidK }
 import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
+import org.scanamo.ops.ScanamoOps.Results.*
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.*
 import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
@@ -174,15 +175,15 @@ case class Table[V: DynamoFormat](name: String) {
   def descending =
     TableWithOptions(name, ScanamoQueryOptions.default).descending
 
-  def transactPutAll(vs: List[V]): ScanamoOps[TransactWriteItemsResponse] =
+  def transactPutAll(vs: List[V]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactPutAllTable(name)(vs)
 
   def transactUpdateAll(
     vs: List[(UniqueKey[_], UpdateExpression)]
-  ): ScanamoOps[TransactWriteItemsResponse] =
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactUpdateAllTable(name)(vs)
 
-  def transactDeleteAll(vs: List[UniqueKey[_]]): ScanamoOps[TransactWriteItemsResponse] =
+  def transactDeleteAll(vs: List[UniqueKey[_]]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactDeleteAllTable(name)(vs)
 }
 

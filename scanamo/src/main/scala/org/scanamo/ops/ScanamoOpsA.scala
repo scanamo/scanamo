@@ -32,13 +32,15 @@ final case class BatchWrite(req: BatchWriteItemRequest) extends ScanamoOpsA[Batc
 final case class BatchGet(req: BatchGetItemRequest) extends ScanamoOpsA[BatchGetItemResponse]
 final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateItemResponse]
 final case class ConditionalUpdate(req: ScanamoUpdateRequest) extends ScanamoOpsA[Conditional[UpdateItemResponse]]
-final case class TransactWriteAll(req: ScanamoTransactWriteRequest) extends ScanamoOpsA[TransactWriteItemsResponse]
+final case class TransactWriteAll(req: ScanamoTransactWriteRequest)
+    extends ScanamoOpsA[Transact[TransactWriteItemsResponse]]
 
 object ScanamoOps {
   import cats.free.Free.liftF
 
   object Results {
     type Conditional[T] = Either[ConditionalCheckFailedException, T]
+    type Transact[T] = Either[TransactionCanceledException, T]
   }
 
   private def lF[Result](req: ScanamoOpsA[Result]): ScanamoOps[Result] = liftF[ScanamoOpsA, Result](req)
@@ -54,8 +56,11 @@ object ScanamoOps {
   def batchWrite(req: BatchWriteItemRequest): ScanamoOps[BatchWriteItemResponse] = lF(BatchWrite(req))
   def batchGet(req: BatchGetItemRequest): ScanamoOps[BatchGetItemResponse] = lF(BatchGet(req))
   def update(req: ScanamoUpdateRequest): ScanamoOps[UpdateItemResponse] = lF(Update(req))
-  def conditionalUpdate(req: ScanamoUpdateRequest): ScanamoOps[Conditional[UpdateItemResponse]] =
-    lF(ConditionalUpdate(req))
-  def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[TransactWriteItemsResponse] =
-    lF(TransactWriteAll(req))
+  def conditionalUpdate(req: ScanamoUpdateRequest): ScanamoOps[Conditional[UpdateItemResponse]] = lF(
+    ConditionalUpdate(req)
+  )
+  def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[Transact[TransactWriteItemsResponse]] = lF(
+    TransactWriteAll(req)
+  )
+
 }

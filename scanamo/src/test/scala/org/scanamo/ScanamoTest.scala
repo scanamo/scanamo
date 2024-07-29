@@ -740,7 +740,7 @@ class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
         val ops1 = for {
           _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false)))
           _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None)))
-          _ <- ScanamoFree.transactionalWrite(
+          result <- ScanamoFree.transactionalWrite(
             List(
               TransactionalWriteAction
                 .Put(t1, Gremlin(3, wet = true)),
@@ -749,13 +749,9 @@ class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
               TransactionalWriteAction.ConditionCheck(t1, UniqueKey(KeyEquals("number", 1)), "wet" === true)
             )
           )
-        } yield ()
+        } yield result
 
-        assertThrows[TransactionCanceledException] {
-          scanamo.exec(ops1) should equal(
-            (List(Right(Gremlin(1, wet = false))), List(Right(Forecast("London", "Sun", None))))
-          )
-        }
+        scanamo.exec(ops1) shouldBe a[Left[TransactionCanceledException, _]]
 
         val ops2 = for {
           gremlins <- gremlinTable.scan()
