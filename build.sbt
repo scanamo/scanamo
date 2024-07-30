@@ -141,7 +141,7 @@ lazy val refined = (project in file("refined"))
   .settings(
     libraryDependencies ++= Seq(
       "eu.timepit"    %% "refined"   % "0.11.2",
-      "org.scalatest" %% "scalatest" % "3.2.18" % Test
+      "org.scalatest" %% "scalatest" % "3.2.19" % Test
     )
   )
   .dependsOn(scanamo)
@@ -163,7 +163,7 @@ lazy val scanamo = (project in file("scanamo"))
       // Use Joda for custom conversion example
       "org.joda"           % "joda-convert"    % "2.2.3"    % Provided,
       "joda-time"          % "joda-time"       % "2.12.7"   % Test,
-      "org.scalatest"     %% "scalatest"       % "3.2.18"    % Test,
+      "org.scalatest"     %% "scalatest"       % "3.2.19"    % Test,
       "org.scalatestplus" %% "scalacheck-1-16" % "3.2.14.0" % Test,
       "org.scalacheck"    %% "scalacheck"      % "1.17.1"   % Test
     )
@@ -194,7 +194,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-core"   % V.catsVersion,
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
       "co.fs2"         %% "fs2-core"    % "3.10.2",
-      "org.scalatest"  %% "scalatest"   % "3.2.18"  % Test,
+      "org.scalatest"  %% "scalatest"   % "3.2.19"  % Test,
       "org.scalacheck" %% "scalacheck"  % "1.17.1" % Test
     ),
     Test / fork := true,
@@ -217,7 +217,7 @@ lazy val zio = (project in file("zio"))
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
       "dev.zio"        %% "zio-interop-cats" % "3.3.0",
-      "org.scalatest"  %% "scalatest"        % "3.2.18"    % Test,
+      "org.scalatest"  %% "scalatest"        % "3.2.19"    % Test,
       "org.scalacheck" %% "scalacheck"       % "1.17.1"   % Test
     ),
     Test / fork := true,
@@ -238,7 +238,7 @@ lazy val pekko = (project in file("pekko"))
       awsDynamoDB,
       "org.typelevel"    %% "cats-free"                 % V.catsVersion,
       "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.2",
-      "org.scalatest"    %% "scalatest"                 % "3.2.18"  % Test,
+      "org.scalatest"    %% "scalatest"                 % "3.2.19"  % Test,
       "org.scalacheck"   %% "scalacheck"                % "1.17.1" % Test
     ),
     Test / fork := true,
@@ -259,7 +259,7 @@ lazy val joda = (project in file("joda"))
     libraryDependencies ++= List(
       "org.joda"        % "joda-convert" % "2.2.3"  % Provided,
       "joda-time"       % "joda-time"    % "2.12.7",
-      "org.scalatest"  %% "scalatest"    % "3.2.18"  % Test,
+      "org.scalatest"  %% "scalatest"    % "3.2.19"  % Test,
       "org.scalacheck" %% "scalacheck"   % "1.17.1" % Test
     )
   )
