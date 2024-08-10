@@ -19,7 +19,7 @@ package org.scanamo.ops
 import cats.effect.Async
 import cats.syntax.applicative.*
 import cats.syntax.applicativeError.*
-import cats.syntax.flatMap.*
+import cats.syntax.either.*
 import cats.syntax.functor.*
 import cats.syntax.option.*
 import org.scanamo.ops.AsyncFrameworks.unwrapCompletionException
@@ -36,10 +36,5 @@ class CatsAdapter[F[_]](implicit F: Async[F]) extends AsyncFrameworks.Adapter[F]
   }
 
   def exposeException[Out, E <: Exception](value: F[Out])(rF: PartialFunction[Throwable, E]): F[Either[E, Out]] =
-    value.attempt.flatMap(
-      _.fold(
-        e => rF.andThen(exposed => F.delay[Either[E, Out]](Left(exposed))).applyOrElse(e, F.raiseError),
-        a => F.delay(Right(a))
-      )
-    )
+    value.map(Either.right[E, Out]).recover(rF.andThen(Left(_)))
 }
