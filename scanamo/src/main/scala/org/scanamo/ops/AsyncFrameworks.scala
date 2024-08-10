@@ -3,7 +3,7 @@ package org.scanamo.ops
 import cats.~>
 import org.scanamo.ops.ScanamoOps.Results.*
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.ConditionalCheckFailedException
+import software.amazon.awssdk.services.dynamodb.model.{ ConditionalCheckFailedException, TransactionCanceledException }
 
 import java.util.concurrent.{ CompletableFuture, CompletionException }
 
@@ -34,6 +34,9 @@ object AsyncFrameworks {
     def runConditional[Out](fut: => CompletableFuture[Out]): F[Conditional[Out]] =
       exposeException(run(fut)) { case e: ConditionalCheckFailedException => e }
 
+    def runTransact[Out](fut: => CompletableFuture[Out]): F[Transact[Out]] =
+      exposeException(run(fut)) { case e: TransactionCanceledException => e }
+
     def apply[A](ops: ScanamoOpsA[A]): F[A] = ops match {
       case Put(req)               => run(client.putItem(JavaRequests.put(req)))
       case ConditionalPut(req)    => runConditional(client.putItem(JavaRequests.put(req)))
@@ -46,7 +49,7 @@ object AsyncFrameworks {
       case BatchGet(req)          => run(client.batchGetItem(req))
       case Update(req)            => run(client.updateItem(JavaRequests.update(req)))
       case ConditionalUpdate(req) => runConditional(client.updateItem(JavaRequests.update(req)))
-      case TransactWriteAll(req)  => run(client.transactWriteItems(JavaRequests.transactItems(req)))
+      case TransactWriteAll(req)  => runTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
     }
   }
 }
