@@ -230,6 +230,7 @@ case class Table[V: DynamoFormat](name: String) {
 
   def transactDeleteAll(vs: List[UniqueKey[_]]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactDeleteAllTable(name)(vs)
+
 }
 
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {

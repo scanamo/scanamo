@@ -51,14 +51,15 @@ case class ScanamoDeleteRequest(
 }
 
 trait HasUpdateExpressionWithCondition {
-  def attributeNames: Map[String, String]
-
+  val updateExpression: UpdateExpression
   val condition: Option[RequestCondition]
+
+  def attributeNames: Map[String, String] = updateExpression.attributeNames
 
   def combinedAttributeNames: Map[String, String] =
     attributeNames ++ condition.map(_.attributeNames).getOrElse(Map.empty)
 
-  def dynamoValues: DynamoObject
+  def dynamoValues: DynamoObject = DynamoObject(updateExpression.dynamoValues)
   def combinedAttributeValues: DynamoObject =
     condition.flatMap(_.dynamoValues).fold(dynamoValues)(_ <> dynamoValues)
 }

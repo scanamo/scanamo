@@ -1,21 +1,18 @@
 package org.scanamo
 
 import cats.implicits.*
-import org.scalatest.{ EitherValues, NonImplicitAssertions, OptionValues }
+import org.scalatest.NonImplicitAssertions
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
-import org.scanamo.AlternativeTransacts.TransUpdateItem
 import org.scanamo.fixtures.*
 import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query.*
 import org.scanamo.syntax.*
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
-// import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException
+import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException
 
-import java.util.UUID
-
-class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions with OptionValues with EitherValues {
+class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
   val client = LocalDynamoDB.syncClient()
   val scanamo = Scanamo(client)
 
@@ -703,10 +700,10 @@ class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions wi
   }
 
   it("transact multiple write actions with a condition check action (where the condition check is satisfied)") {
-    LocalDynamoDB.usingRandomTable(client)("number" -> N) { gremTabName =>
-      LocalDynamoDB.usingRandomTable(client)("location" -> S) { foreTabName =>
-        val gremlinTable = Table[Gremlin](gremTabName)
-        val forecastTable = Table[Forecast](foreTabName)
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
 
         val ops = for {
           _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false)))
@@ -714,10 +711,10 @@ class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions wi
           _ <- ScanamoFree.transactionalWrite(
             List(
               TransactionalWriteAction
-                .Put(gremTabName, Gremlin(3, wet = true)),
+                .Put(t1, Gremlin(3, wet = true)),
               TransactionalWriteAction
-                .Put(foreTabName, Forecast("Berlin", "Wind", None)),
-              TransactionalWriteAction.ConditionCheck(gremTabName, UniqueKey(KeyEquals("number", 1)), "wet" === false)
+                .Put(t2, Forecast("Berlin", "Wind", None)),
+              TransactionalWriteAction.ConditionCheck(t1, UniqueKey(KeyEquals("number", 1)), "wet" === false)
             )
           )
           gremlins <- gremlinTable.scan()
@@ -734,58 +731,36 @@ class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions wi
     }
   }
 
-  it("use new Transaction DSL") {
-    LocalDynamoDB.usingRandomTable(client)("sortCode" -> N, "accountNumber" -> N) { accountTableName =>
-      LocalDynamoDB.usingRandomTable(client)("guid" -> S) { transferTableName =>
-        val accountTable = Table[Bank.Account](accountTableName)
-        val transferTable = Table[Bank.Transfer](transferTableName)
-        println(transferTable)
-        implicit val accountKF: KeyFinder[(Int, Int), Bank.Account] = KeyFinder.keyFinderOf("sortCode", "accountNumber")
-        implicit val transferKF: KeyFinder[String, Bank.Transfer] = KeyFinder.keyFinderOf("guid")
-
-        def makeTransfer(donorAccount: (Int, Int), recipientAccount: (Int, Int), amount: Int) = {
-          val guid = UUID.randomUUID().toString
-          println(guid)
-          ScanamoFree.transact(
-            Map(
-              accountTable.transForTable(
-                Map(
-                  donorAccount -> TransUpdateItem(add("balance", -amount) and add("transactionIds", Set(guid)))
-                    .requiring("balance" >= amount and "frozen" === false),
-                  recipientAccount -> TransUpdateItem(add("balance", amount) and add("transactionIds", Set(guid))) //
-                    .requiring("frozen" === false)
-                )
-              ),
-              transferTable.transForTable(
-                Map(
-                  AlternativeTransacts.put(Bank.Transfer(guid, donorAccount, recipientAccount, amount))
-                )
-              )
-            )
-          )
-        }
+  it("cancel the transaction if the condition check action fails") {
+    LocalDynamoDB.usingRandomTable(client)("number" -> N) { t1 =>
+      LocalDynamoDB.usingRandomTable(client)("location" -> S) { t2 =>
+        val gremlinTable = Table[Gremlin](t1)
+        val forecastTable = Table[Forecast](t2)
 
         val ops1 = for {
-          _ <- accountTable.putAll(
-            Set(Bank.Account(100000, 2000000, "Ada", 10), Bank.Account(300001, 4000001, "Byron", 2))
+          _ <- gremlinTable.putAll(Set(Gremlin(1, wet = false)))
+          _ <- forecastTable.putAll(Set(Forecast("London", "Sun", None)))
+          result <- ScanamoFree.transactionalWrite(
+            List(
+              TransactionalWriteAction
+                .Put(t1, Gremlin(3, wet = true)),
+              TransactionalWriteAction
+                .Put(t2, Forecast("Berlin", "Wind", None)),
+              TransactionalWriteAction.ConditionCheck(t1, UniqueKey(KeyEquals("number", 1)), "wet" === true)
+            )
           )
-          result <- makeTransfer((100000, 2000000), (300001, 4000001), 6)
         } yield result
 
-        scanamo.exec(ops1) // shouldBe a[Left[TransactionCanceledException, _]]
+        scanamo.exec(ops1) shouldBe a[Left[TransactionCanceledException, _]]
 
         val ops2 = for {
-          adaAccount <- accountTable.get("sortCode" === 100000 and "accountNumber" === 2000000)
-          byronAccount <- accountTable.get("sortCode" === 300001 and "accountNumber" === 4000001)
-          transfers <- transferTable.scan()
-        } yield (adaAccount, byronAccount, transfers)
+          gremlins <- gremlinTable.scan()
+          forecasts <- forecastTable.scan()
+        } yield (gremlins, forecasts)
 
-        val (adaAccount, byronAccount, transfers) = scanamo.exec(ops2)
-        println(adaAccount)
-
-        adaAccount.value.value.balance shouldBe 4
-        byronAccount.value.value.balance shouldBe 8
-        transfers.size shouldBe 1
+        scanamo.exec(ops2) should equal(
+          (List(Right(Gremlin(1, wet = false))), List(Right(Forecast("London", "Sun", None))))
+        )
       }
     }
   }
