@@ -25,9 +25,54 @@ import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoSc
 import org.scanamo.update.UpdateExpression
 import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse, TransactWriteItemsResponse }
 
+// Should K be more constrained? Each primary key attribute must be defined as type string, number, or binary.
+// Maybe K should be constrained to something that clearly contains either 1 or 2 values.
+// Or not? Maybe objects can have a useful key composed of 3 or more fields, only serialised as two?
+// We want keys to be written without
+trait KeyFinder[K, V] {
+  def dynamoValueForKey(k: K): UniqueKey[_]
+
+  def keyForValue(v: V): K
+}
+
+object KeyFinder {
+//  implicit val kf: KeyFinder[Int, Gremlin] = new KeyFinder[Int, Gremlin] {
+//    override def dynamoValueForKey(k: Int): UniqueKey[_] = "id" === k
+//    override def keyForValue(v: Gremlin): Int = v.number
+//  }
+  import org.scanamo.syntax._
+
+  def keyFinderFor[K: DynamoFormat, V](f: V => K, name: String): KeyFinder[K, V] = new KeyFinder[K, V] {
+    override def dynamoValueForKey(k: K): UniqueKey[_] = name === k
+    override def keyForValue(v: V): K = f(v)
+  }
+
+  def keyFinderOf[K: DynamoFormat, V: DynamoFormat](name: String): KeyFinder[K, V] = new KeyFinder[K, V] {
+    override def dynamoValueForKey(k: K): UniqueKey[_] = name === k
+    override def keyForValue(v: V): K = implicitly[DynamoFormat[V]].write(v).asObject.get(name).get.as[K].toOption.get
+  }
+
+  def keyFinderOf[K1: DynamoFormat, K2: DynamoFormat, V: DynamoFormat](name1: String,
+                                                                       name2: String
+  ): KeyFinder[(K1, K2), V] = new KeyFinder[(K1, K2), V] {
+    override def dynamoValueForKey(k: (K1, K2)): UniqueKey[_] = name1 === k._1 and name2 === k._2
+    override def keyForValue(v: V): (K1, K2) = {
+      val obj = implicitly[DynamoFormat[V]].write(v).asObject
+      (obj.get(name1).get.as[K1].toOption.get, obj.get(name2).get.as[K2].toOption.get)
+    }
+  }
+}
+
 /** Represents a DynamoDB table that operations can be performed against
   */
 case class Table[V: DynamoFormat](name: String) {
+
+  def transForTable[K](m: Map[K, AlternativeTransacts.TransAction])(implicit
+    keyFinder: KeyFinder[K, V]
+  ): (String, Map[UniqueKey[_], AlternativeTransacts.TransAction]) =
+    name -> ((m.map { case (k, v) =>
+      keyFinder.dynamoValueForKey(k) -> v
+    }).toMap)
 
   def put(v: V): ScanamoOps[Unit] = ScanamoFree.put(name)(v)
 

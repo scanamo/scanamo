@@ -18,3 +18,7 @@ case class Transport(mode: String, line: String, colour: String)
 case class Worker(firstName: String, surname: String, age: Option[Int])
 case class GithubProject(organisation: String, repository: String, language: String, license: String)
 case class Key(mode: String, line: String, colour: String)
+object Bank {
+  case class Account(sortCode: Int, accountNumber: Int, name: String, balance: Int, frozen: Boolean = false, transactionIds: Set[String] = Set.empty)
+  case class Transfer(guid: String, fromAccount: (Int, Int), toAccount: (Int, Int), amount: Int)
+}
