@@ -32,7 +32,7 @@ object QueryableKeyCondition {
         RequestCondition(
           s"#K = :${t.key.placeholder("")}",
           Map("#K" -> t.key.placeholder("")),
-          Some(DynamoObject(t.key.placeholder("") -> t.v))
+          DynamoObject(t.key.placeholder("") -> t.v)
         )
     }
 
@@ -43,10 +43,8 @@ object QueryableKeyCondition {
         RequestCondition(
           s"#K = :${t.hashCondition.key.placeholder("")} AND ${t.rangeCondition.keyConditionExpression("R")}",
           Map("#K" -> t.hashCondition.key.placeholder("")) ++ t.rangeCondition.key.attributeNames("#R"),
-          Some(
-            DynamoObject(t.hashCondition.key.placeholder("") -> t.hashCondition.v) <> DynamoObject(
-              t.rangeCondition.attributes.toSeq: _*
-            )
+          DynamoObject(t.hashCondition.key.placeholder("") -> t.hashCondition.v) <> DynamoObject(
+            t.rangeCondition.attributes.toSeq: _*
           )
         )
     }
@@ -64,7 +62,7 @@ object QueryableKeyCondition {
         RequestCondition(
           charWithKey.map { case (char, key) => s"$char = :$key" }.mkString(" AND "),
           charWithKey.toMap,
-          Some(m)
+          m
         )
       }
     }

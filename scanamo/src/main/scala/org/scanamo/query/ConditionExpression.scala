@@ -129,7 +129,7 @@ object ConditionExpression {
           RequestCondition(
             s"#$namePlaceholder = :$valuePlaceholder",
             attributeName.attributeNames(s"#$prefix"),
-            Some(DynamoObject(valuePlaceholder -> key.v))
+            DynamoObject(valuePlaceholder -> key.v)
           )
         }
     }
@@ -158,7 +158,7 @@ object ConditionExpression {
           RequestCondition(
             s"""#$namePlaceholder IN ${attributeValues.mapKeys(k => s":$k").keys.mkString("(", ",", ")")}""",
             attributeName.attributeNames(s"#$prefix"),
-            Some(attributeValues)
+            attributeValues
           )
         }
     }
@@ -168,7 +168,11 @@ object ConditionExpression {
       override def apply(t: AttributeExists): State[Int, RequestCondition] =
         State.inspect { cpt =>
           val prefix = s"attributeExists$cpt"
-          RequestCondition(s"attribute_exists(#${t.key.placeholder(prefix)})", t.key.attributeNames(s"#$prefix"), None)
+          RequestCondition(
+            s"attribute_exists(#${t.key.placeholder(prefix)})",
+            t.key.attributeNames(s"#$prefix"),
+            DynamoObject.empty
+          )
         }
     }
 
@@ -180,7 +184,7 @@ object ConditionExpression {
           RequestCondition(
             s"attribute_not_exists(#${t.key.placeholder(prefix)})",
             t.key.attributeNames(s"#$prefix"),
-            None
+            DynamoObject.empty
           )
         }
     }
@@ -194,7 +198,7 @@ object ConditionExpression {
           RequestCondition(
             s"contains(#${t.key.placeholder(prefix)}, :$valuePlaceholder)",
             t.key.attributeNames(s"#$prefix"),
-            Some(DynamoObject(valuePlaceholder -> DynamoValue.fromString(t.value)))
+            DynamoObject(valuePlaceholder -> DynamoValue.fromString(t.value))
           )
         }
     }
@@ -216,7 +220,7 @@ object ConditionExpression {
           RequestCondition(
             s"begins_with(#${b.key.placeholder(prefix)}, :$valuePlaceholder)",
             b.key.attributeNames(s"#$prefix"),
-            Some(DynamoObject(valuePlaceholder -> b.v))
+            DynamoObject(valuePlaceholder -> b.v)
           )
         }
     }
@@ -232,9 +236,7 @@ object ConditionExpression {
           RequestCondition(
             s"#${b.key.placeholder(prefix)} BETWEEN :$lowerPh and :$upperPh",
             b.key.attributeNames(s"#$prefix"),
-            Some(
-              DynamoObject(lowerPh -> b.lo, upperPh -> b.hi)
-            )
+            DynamoObject(lowerPh -> b.lo, upperPh -> b.hi)
           )
         }
     }
@@ -248,7 +250,7 @@ object ConditionExpression {
           RequestCondition(
             s"#${k.key.placeholder(prefix)} ${k.operator.op} :$valuePlaceholder",
             k.key.attributeNames(s"#$prefix"),
-            Some(DynamoObject(valuePlaceholder -> k.v))
+            DynamoObject(valuePlaceholder -> k.v)
           )
         }
     }
@@ -276,7 +278,7 @@ object ConditionExpression {
     } yield RequestCondition(
       s"(${l.expression} $combininingOperator ${r.expression})",
       l.attributeNames ++ r.attributeNames,
-      l.dynamoValues.flatMap(xs => r.dynamoValues.map(xs <> _)) orElse l.dynamoValues orElse r.dynamoValues
+      l.dynamoValues <> r.dynamoValues
     )
 }
 

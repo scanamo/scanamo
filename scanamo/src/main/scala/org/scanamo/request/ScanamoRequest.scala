@@ -71,7 +71,7 @@ object ScanamoQueryOptions {
 case class RequestCondition(
   expression: String,
   attributeNames: Map[String, String],
-  dynamoValues: Option[DynamoObject]
+  dynamoValues: DynamoObject
 )
 
 case class TransactPutItem(
