@@ -16,15 +16,8 @@
 
 package org.scanamo
 
-import org.scanamo.query.{ ConditionExpression, UniqueKey }
-import org.scanamo.request.{
-  RequestCondition,
-  TransactConditionCheck,
-  TransactDeleteItem,
-  TransactPunk,
-  TransactPutItem,
-  TransactUpdateItem
-}
+import org.scanamo.query.{ConditionExpression, UniqueKey}
+import org.scanamo.request.{RequestCondition, TransactConditionCheck, TransactDeleteItem, TransactPunk, TransactPutItem, TransactUpdateItem, UpdateExpressionWithCondition}
 import org.scanamo.update.UpdateExpression
 
 
@@ -92,37 +85,34 @@ object AlternativeTransacts {
     def toTransactPunk(tableName: String, key: UniqueKey[_]): TransactPunk
   }
 
-  def put[K, V: DynamoFormat](item: V, condition: Option[RequestCondition] = None)(implicit kf: KeyFinder[K,V]): (K, TransPutItem[V]) =
-    kf.keyForValue(item) -> TransPutItem(item, condition)
+  def put[K, V: DynamoFormat](item: V, condition: Option[RequestCondition] = None)(implicit kf: KeyFinder[K,V]): (K, Put[V]) =
+    kf.keyForValue(item) -> Put(item, condition)
 
-
-  case class TransPutItem[V](item: V, condition: Option[RequestCondition] = None)(implicit format: DynamoFormat[V])
+  case class Put[V](item: V, condition: Option[RequestCondition] = None)(implicit format: DynamoFormat[V])
       extends TransAction {
-    val dynamoValue: DynamoValue = format.write(item)
-
     override def toTransactPunk(tableName: String, key: UniqueKey[_]): TransactPunk =
-      TransactPutItem(tableName, dynamoValue, condition)
+      TransactPutItem(tableName, format.write(item), condition)
   }
 
-  case class TransUpdateItem(updateExpression: UpdateExpression, condition: Option[RequestCondition] = None)
+  case class Update(updateExpressionWithCondition: UpdateExpressionWithCondition)
       extends TransAction {
     override def toTransactPunk(tableName: String, key: UniqueKey[_]): TransactUpdateItem =
-      TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, condition)
+      TransactUpdateItem(tableName, key.toDynamoObject, updateExpressionWithCondition)
 
-    def requiring[T](condition: T)(implicit ce: ConditionExpression[T]): TransUpdateItem = copy(
-      condition = Some(ce(condition).runEmptyA.value)
+    def requiring[T](condition: T)(implicit ce: ConditionExpression[T]): Update = copy(
+      updateExpressionWithCondition = updateExpressionWithCondition.copy(condition=Some(ce(condition).runEmptyA.value))
     )
   }
 
-  case class TransDeleteItem(condition: Option[RequestCondition] = None) extends TransAction {
+  case class Delete(condition: Option[RequestCondition] = None) extends TransAction {
     override def toTransactPunk(tableName: String, key: UniqueKey[_]): TransactPunk =
       TransactDeleteItem(tableName, key.toDynamoObject, condition)
 
-    def requiring[T](condition: T)(implicit ce: ConditionExpression[T]): TransDeleteItem = copy(
+    def requiring[T](condition: T)(implicit ce: ConditionExpression[T]): Delete = copy(
       condition = Some(ce(condition).runEmptyA.value)
     )
   }
-  case class TransConditionCheck(condition: RequestCondition) extends TransAction {
+  case class ConditionCheck(condition: RequestCondition) extends TransAction {
     override def toTransactPunk(tableName: String, key: UniqueKey[_]): TransactPunk =
       TransactConditionCheck(tableName, key.toDynamoObject, condition)
   }

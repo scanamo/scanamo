@@ -3,9 +3,10 @@ package org.scanamo
 import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import org.scalatest.{EitherValues, NonImplicitAssertions, OptionValues}
-import org.scanamo.AlternativeTransacts.TransUpdateItem
+import org.scanamo.AlternativeTransacts.Update
 import org.scanamo.fixtures.*
 import org.scanamo.generic.auto.*
+import org.scanamo.request.UpdateExpressionWithCondition
 import org.scanamo.syntax.*
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 // import software.amazon.awssdk.services.dynamodb.model.TransactionCanceledException
@@ -26,20 +27,18 @@ class TransactionDSLTest
       LocalDynamoDB.usingRandomTable(client)("guid" -> S) { transferTableName =>
         val accountTable = Table[Bank.Account](accountTableName)
         val transferTable = Table[Bank.Transfer](transferTableName)
-        println(transferTable)
         implicit val accountKF: KeyFinder[(Int, Int), Bank.Account] = KeyFinder.keyFinderOf("sortCode", "accountNumber")
         implicit val transferKF: KeyFinder[String, Bank.Transfer] = KeyFinder.keyFinderOf("guid")
 
         def makeTransfer(donorAccount: (Int, Int), recipientAccount: (Int, Int), amount: Int) = {
           val guid = UUID.randomUUID().toString
-          println(guid)
           ScanamoFree.transact(
             Map(
               accountTable.transForTable(
                 Map(
-                  donorAccount -> TransUpdateItem(add("balance", -amount) and add("transactionIds", Set(guid)))
+                  donorAccount -> Update(UpdateExpressionWithCondition(add("balance", -amount) and add("transactionIds", Set(guid))))
                     .requiring("balance" >= amount and "frozen" === false),
-                  recipientAccount -> TransUpdateItem(add("balance", amount) and add("transactionIds", Set(guid))) //
+                  recipientAccount -> Update(UpdateExpressionWithCondition(add("balance", amount) and add("transactionIds", Set(guid)))) //
                     .requiring("frozen" === false)
                 )
               ),

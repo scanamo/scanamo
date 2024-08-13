@@ -106,7 +106,7 @@ object ScanamoFree {
           case r @ TransactionalWriteAction.Put(table, _) =>
             acc.copy(putItems = acc.putItems :+ TransactPutItem(table, r.asDynamoValue, None))
           case TransactionalWriteAction.Update(table, key, updateExpr) =>
-            acc.copy(updateItems = acc.updateItems :+ TransactUpdateItem(table, key.toDynamoObject, updateExpr, None))
+            acc.copy(updateItems = acc.updateItems :+ TransactUpdateItem(table, key.toDynamoObject, UpdateExpressionWithCondition(updateExpr, None)))
           case TransactionalWriteAction.Delete(table, key) =>
             acc.copy(deleteItems = acc.deleteItems :+ TransactDeleteItem(table, key.toDynamoObject, None))
           case r @ TransactionalWriteAction.ConditionCheck(table, key, _) =>

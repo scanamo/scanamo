@@ -26,6 +26,19 @@ import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import scala.collection.immutable.HashMap
 
+/**
+ *
+ * @param names a Map where the keys are expression attribute names (placeholders beginning with a '#'),
+ *              and the values are (possibly troublesome) actual attribute names
+ * @param values
+ */
+case class AttributeNamesAndValues(
+  names: Map[String, String],
+  values: DynamoObject
+) {
+  require(names.keys.forall(_.startsWith("#")))
+}
+
 sealed trait UpdateExpression extends Product with Serializable { self =>
   final def expression: String =
     typeExpressions.map { case (t, e) =>
