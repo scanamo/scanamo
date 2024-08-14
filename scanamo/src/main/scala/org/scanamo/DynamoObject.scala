@@ -16,10 +16,8 @@
 
 package org.scanamo
 
-import cats.Parallel
-import cats.kernel.Monoid
-import cats.syntax.apply.*
-import cats.syntax.semigroup.*
+import cats.implicits.*
+import cats.{ Monoid, Parallel }
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import java.util.{ HashMap, Map as JMap }
@@ -375,4 +373,9 @@ object DynamoObject {
     m.putAll(ys)
     m
   }
+
+  /** Technically, this isn't a Monoid - it's not strictly associative (combining `Map`s can arbitrarily annihilate
+    * different keys), making it just a 'unital magma'... practically though, the difference shouldn't be a problem.
+    */
+  implicit val m: Monoid[DynamoObject] = Monoid.instance(empty, _ <> _)
 }

@@ -46,11 +46,11 @@ class UpdateExpressionTest extends AnyFunSpec with Matchers with org.scalatestpl
   val stringList = DynamoFormat[List[String]]
 
   it("should have all value placeholders in the expression") {
-    check((ue: UpdateExpression) => ue.attributeValues.keys.forall(s => ue.expression.contains(s)))
+    check((ue: UpdateExpression) => ue.attributes.values.keys.forall(s => ue.expression.contains(s)))
   }
 
   it("should have all name placeholders in the expression") {
-    check((ue: UpdateExpression) => ue.attributeNames.keys.forall(s => ue.expression.contains(s)))
+    check((ue: UpdateExpression) => ue.attributes.names.keys.forall(s => ue.expression.contains(s)))
   }
 
   it("append/prepend should wrap scalar values in a list") {

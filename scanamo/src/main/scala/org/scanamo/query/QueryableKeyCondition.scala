@@ -16,7 +16,7 @@
 
 package org.scanamo.query
 
-import org.scanamo.request.RequestCondition
+import org.scanamo.request.{ AttributeNamesAndValues, RequestCondition }
 import org.scanamo.{ DynamoFormat, DynamoObject }
 
 trait QueryableKeyCondition[T] {
@@ -26,46 +26,37 @@ trait QueryableKeyCondition[T] {
 object QueryableKeyCondition {
   def apply[T](implicit Q: QueryableKeyCondition[T]): QueryableKeyCondition[T] = Q
 
-  implicit def equalsKeyCondition[V: DynamoFormat]: QueryableKeyCondition[KeyEquals[V]] =
-    new QueryableKeyCondition[KeyEquals[V]] {
-      final def apply(t: KeyEquals[V]) =
-        RequestCondition(
-          s"#K = :${t.key.placeholder("")}",
-          Map("#K" -> t.key.placeholder("")),
-          DynamoObject(t.key.placeholder("") -> t.v)
-        )
-    }
+  implicit def equalsKeyCondition[V: DynamoFormat]: QueryableKeyCondition[KeyEquals[V]] = (t: KeyEquals[V]) =>
+    RequestCondition(
+      s"#K = :${t.key.placeholder("")}",
+      AttributeNamesAndValues(Map("#K" -> t.key.placeholder("")), DynamoObject(t.key.placeholder("") -> t.v))
+    )
 
   implicit def hashAndRangeQueryCondition[H: DynamoFormat, R: DynamoFormat]
-    : QueryableKeyCondition[AndQueryCondition[H, R]] =
-    new QueryableKeyCondition[AndQueryCondition[H, R]] {
-      final def apply(t: AndQueryCondition[H, R]) =
-        RequestCondition(
-          s"#K = :${t.hashCondition.key.placeholder("")} AND ${t.rangeCondition.keyConditionExpression("R")}",
-          Map("#K" -> t.hashCondition.key.placeholder("")) ++ t.rangeCondition.key.attributeNames("#R"),
-          DynamoObject(t.hashCondition.key.placeholder("") -> t.hashCondition.v) <> DynamoObject(
-            t.rangeCondition.attributes.toSeq: _*
-          )
-        )
-    }
+    : QueryableKeyCondition[AndQueryCondition[H, R]] = { (t: AndQueryCondition[H, R]) =>
+    val tKey = t.hashCondition.key.placeholder("")
+    RequestCondition(
+      s"#K = :$tKey AND ${t.rangeCondition.keyConditionExpression("R")}",
+      AttributeNamesAndValues(
+        Map("#K" -> tKey) ++ t.rangeCondition.key.attributeNames("#R"),
+        DynamoObject(tKey -> t.hashCondition.v) <> DynamoObject(t.rangeCondition.attributes.toSeq: _*)
+      )
+    )
+  }
 
   implicit def andEqualsKeyCondition[H: UniqueKeyCondition, R: UniqueKeyCondition](implicit
     HR: UniqueKeyCondition[AndEqualsCondition[H, R]]
-  ): QueryableKeyCondition[AndEqualsCondition[H, R]] =
-    new QueryableKeyCondition[AndEqualsCondition[H, R]] {
-      final def apply(t: AndEqualsCondition[H, R]) = {
-        val m: DynamoObject = HR.toDynamoObject(t)
-        val charWithKey: Iterable[(String, String)] = m.keys.zipWithIndex map { case (k, v) =>
-          (s"#${('A'.toInt + v).toChar}", k)
-        }
-
-        RequestCondition(
-          charWithKey.map { case (char, key) => s"$char = :$key" }.mkString(" AND "),
-          charWithKey.toMap,
-          m
-        )
-      }
+  ): QueryableKeyCondition[AndEqualsCondition[H, R]] = (t: AndEqualsCondition[H, R]) => {
+    val m: DynamoObject = HR.toDynamoObject(t)
+    val charWithKey: Iterable[(String, String)] = m.keys.zipWithIndex map { case (k, v) =>
+      (s"#${('A'.toInt + v).toChar}", k)
     }
+
+    RequestCondition(
+      charWithKey.map { case (char, key) => s"$char = :$key" }.mkString(" AND "),
+      AttributeNamesAndValues(charWithKey.toMap, m)
+    )
+  }
 }
 
 case class Query[T](t: T)(implicit qkc: QueryableKeyCondition[T]) {

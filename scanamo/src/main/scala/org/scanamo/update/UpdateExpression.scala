@@ -18,7 +18,9 @@ package org.scanamo.update
 
 import cats.data.NonEmptyVector
 import org.scanamo.query.*
-import org.scanamo.{ DynamoFormat, DynamoValue }
+import org.scanamo.request.AttributeNamesAndValues
+import org.scanamo.update.UpdateExpression.prefixKeys
+import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import scala.collection.immutable.HashMap
@@ -41,33 +43,35 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
         }
     }
 
-  final def attributeNames: Map[String, String] =
-    unprefixedAttributeNames.map { case (k, v) =>
-      (s"#$k", v)
-    }
+  @deprecated("Use `attributes.names` - see https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  final def attributeNames: Map[String, String] = attributes.names
 
-  final def unprefixedAttributeNames: Map[String, String] =
-    self match {
-      case SimpleUpdate(leaf) => leaf.attributeNames
-      case AndUpdate(l, r)    => l.unprefixedAttributeNames ++ r.unprefixedAttributeNames
-    }
+  final def unprefixedAttributeNames: Map[String, String] = self match {
+    case SimpleUpdate(leaf) => leaf.attributeNames
+    case AndUpdate(l, r)    => l.unprefixedAttributeNames ++ r.unprefixedAttributeNames
+  }
 
+  @deprecated("Use `attributes` - see https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
   final def dynamoValues: Map[String, DynamoValue] = unprefixedDynamoValues
+
+  final def attributes: AttributeNamesAndValues = AttributeNamesAndValues(
+    names = unprefixedAttributeNames.map { case (k, v) => (s"#$k", v) },
+    values = DynamoObject(unprefixedDynamoValues)
+  )
 
   final val addEmptyList: Boolean = self match {
     case SimpleUpdate(leaf) => leaf.addEmptyList
     case AndUpdate(l, r)    => l.addEmptyList || r.addEmptyList
   }
 
-  final def attributeValues: Map[String, AttributeValue] = dynamoValues.mapValues(_.toAttributeValue).toMap
+  @deprecated("Use `attributes` - see https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  final def attributeValues: Map[String, AttributeValue] = unprefixedDynamoValues.mapValues(_.toAttributeValue).toMap
 
-  final def unprefixedDynamoValues: Map[String, DynamoValue] =
-    self match {
-      case SimpleUpdate(leaf) => leaf.dynamoValue.toMap
-      case AndUpdate(l, r) =>
-        UpdateExpression.prefixKeys(l.unprefixedDynamoValues, "l_") ++ UpdateExpression
-          .prefixKeys(r.unprefixedDynamoValues, "r_")
-    }
+  final def unprefixedDynamoValues: Map[String, DynamoValue] = self match {
+    case SimpleUpdate(leaf) => leaf.dynamoValue.toMap
+    case AndUpdate(l, r) =>
+      prefixKeys(l.unprefixedDynamoValues, "l_") ++ prefixKeys(r.unprefixedDynamoValues, "r_")
+  }
 
   final def unprefixedAttributeValues: Map[String, AttributeValue] =
     unprefixedDynamoValues.mapValues(_.toAttributeValue).toMap
@@ -80,9 +84,7 @@ final private[scanamo] case class AndUpdate(l: UpdateExpression, r: UpdateExpres
 
 object UpdateExpression {
   def prefixKeys[T](map: Map[String, T], prefix: String) =
-    map.map { case (k, v) =>
-      (s"$prefix$k", v)
-    }
+    map.map { case (k, v) => (s"$prefix$k", v) }
 
   def setFromAttribute(from: AttributeName, to: AttributeName): UpdateExpression =
     SetExpression.fromAttribute(from, to)

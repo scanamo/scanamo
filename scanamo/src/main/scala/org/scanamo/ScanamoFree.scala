@@ -22,7 +22,7 @@ import org.scanamo.ops.ScanamoOps.Results.*
 import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.*
 import org.scanamo.request.*
-import org.scanamo.update.UpdateExpression
+import org.scanamo.update.{ UpdateAndCondition, UpdateExpression }
 import software.amazon.awssdk.services.dynamodb.model.*
 
 import java.util.{ List as JList, Map as JMap }
@@ -88,7 +88,9 @@ object ScanamoFree {
           case r @ TransactionalWriteAction.Put(table, _) =>
             acc.copy(putItems = acc.putItems :+ TransactPutItem(table, r.asDynamoValue, None))
           case TransactionalWriteAction.Update(table, key, updateExpr) =>
-            acc.copy(updateItems = acc.updateItems :+ TransactUpdateItem(table, key.toDynamoObject, updateExpr, None))
+            acc.copy(updateItems =
+              acc.updateItems :+ TransactUpdateItem(table, key.toDynamoObject, UpdateAndCondition(updateExpr))
+            )
           case TransactionalWriteAction.Delete(table, key) =>
             acc.copy(deleteItems = acc.deleteItems :+ TransactDeleteItem(table, key.toDynamoObject, None))
           case r @ TransactionalWriteAction.ConditionCheck(table, key, _) =>
@@ -125,7 +127,7 @@ object ScanamoFree {
     tableAndItems: List[(String, (UniqueKey[_], UpdateExpression))]
   ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
     val items = tableAndItems.map { case (tableName, (key, updateExpression)) =>
-      TransactUpdateItem(tableName, key.toDynamoObject, updateExpression, None)
+      TransactUpdateItem(tableName, key.toDynamoObject, UpdateAndCondition(updateExpression))
     }
     ScanamoOps
       .transactWriteAll(ScanamoTransactWriteRequest(Seq.empty, items, Seq.empty, Seq.empty))
@@ -250,17 +252,7 @@ object ScanamoFree {
     tableName: String
   )(key: UniqueKey[_])(update: UpdateExpression): ScanamoOps[Either[DynamoReadError, T]] =
     ScanamoOps
-      .update(
-        ScanamoUpdateRequest(
-          tableName,
-          key.toDynamoObject,
-          update.expression,
-          update.attributeNames,
-          DynamoObject(update.dynamoValues),
-          update.addEmptyList,
-          None
-        )
-      )
+      .update(ScanamoUpdateRequest(tableName, key.toDynamoObject, UpdateAndCondition(update)))
       .map(r => read[T](DynamoObject(r.attributes)))
 
   def read[T](m: DynamoObject)(implicit f: DynamoFormat[T]): Either[DynamoReadError, T] =

@@ -16,8 +16,9 @@
 
 package org.scanamo.request
 
+import cats.implicits.*
 import org.scanamo.query.{ Condition, Query }
-import org.scanamo.update.UpdateExpression
+import org.scanamo.update.{ UpdateAndCondition, UpdateExpression }
 import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
 
 case class ScanamoPutRequest(
@@ -37,12 +38,19 @@ case class ScanamoDeleteRequest(
 case class ScanamoUpdateRequest(
   tableName: String,
   key: DynamoObject,
-  updateExpression: String,
-  attributeNames: Map[String, String],
-  dynamoValues: DynamoObject,
-  addEmptyList: Boolean,
-  condition: Option[RequestCondition]
-)
+  updateAndCondition: UpdateAndCondition
+) {
+  @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def updateExpression: String = updateAndCondition.update.expression
+  @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def attributeNames: Map[String, String] = updateAndCondition.update.attributes.names
+  @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def dynamoValues: DynamoObject = updateAndCondition.update.attributes.values
+  @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def addEmptyList: Boolean = updateAndCondition.update.addEmptyList
+  @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def condition: Option[RequestCondition] = updateAndCondition.condition
+}
 
 case class ScanamoScanRequest(
   tableName: String,
@@ -70,9 +78,19 @@ object ScanamoQueryOptions {
 
 case class RequestCondition(
   expression: String,
-  attributeNames: Map[String, String],
-  dynamoValues: DynamoObject
-)
+  attributes: AttributeNamesAndValues
+) {
+  @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def this(
+    expression: String,
+    attributeNames: Map[String, String],
+    dynamoValues: Option[DynamoObject]
+  ) = this(expression, AttributeNamesAndValues(attributeNames, dynamoValues.orEmpty))
+  @deprecated("Use `attributes.names` - see https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def attributeNames: Map[String, String] = attributes.names
+  @deprecated("Use `attributes.values` - see https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def dynamoValues: Option[DynamoObject] = Some(attributes.values)
+}
 
 case class TransactPutItem(
   tableName: String,
@@ -83,9 +101,20 @@ case class TransactPutItem(
 case class TransactUpdateItem(
   tableName: String,
   key: DynamoObject,
-  updateExpression: UpdateExpression,
-  condition: Option[RequestCondition]
-)
+  updateAndCondition: UpdateAndCondition
+) {
+  @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def this(
+    tableName: String,
+    key: DynamoObject,
+    updateExpression: UpdateExpression,
+    condition: Option[RequestCondition]
+  ) = this(tableName, key, UpdateAndCondition(updateExpression, condition))
+  @deprecated("Use `updateAndCondition.update` - see https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def updateExpression: UpdateExpression = updateAndCondition.update
+  @deprecated("Use `updateAndCondition.condition` - see https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
+  def condition: Option[RequestCondition] = updateAndCondition.condition
+}
 
 case class TransactDeleteItem(
   tableName: String,
