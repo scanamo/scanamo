@@ -22,6 +22,8 @@ import org.scanamo.request.AttributeNamesAndValues
 import org.scanamo.update.LeafUpdateExpression.EmptyListName
 import org.scanamo.update.UpdateExpression.{ prefixKeys, someEmptyList }
 import org.scanamo.{ DynamoArray, DynamoFormat, DynamoObject, DynamoValue }
+import org.scanamo.update.UpdateExpression.{ prefixKeys, someEmptyList }
+import org.scanamo.{ DynamoArray, DynamoFormat, DynamoObject, DynamoValue }
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import scala.collection.immutable.HashMap

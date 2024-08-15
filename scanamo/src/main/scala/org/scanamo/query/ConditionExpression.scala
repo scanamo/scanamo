@@ -21,7 +21,13 @@ import cats.implicits.*
 import org.scanamo.*
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.ops.ScanamoOps.Results.*
-import org.scanamo.request.*
+import org.scanamo.request.{
+  AttributeNamesAndValues,
+  RequestCondition,
+  ScanamoDeleteRequest,
+  ScanamoPutRequest,
+  ScanamoUpdateRequest
+}
 import org.scanamo.update.{ UpdateAndCondition, UpdateExpression }
 import software.amazon.awssdk.services.dynamodb.model.{ AttributeValue, DeleteItemResponse, PutItemResponse }
 
