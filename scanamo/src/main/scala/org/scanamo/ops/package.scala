@@ -18,7 +18,7 @@ package org.scanamo
 
 import cats.data.NonEmptyList
 import cats.free.{ Free, FreeT }
-import cats.syntax.apply.*
+import cats.implicits.*
 import org.scanamo.request.*
 import software.amazon.awssdk.services.dynamodb.model.*
 
@@ -43,13 +43,10 @@ package object ops {
           queryRefinement(_.options.exclusiveStartKey)((r, k) => r.exclusiveStartKey(k.toJavaMap)),
           queryRefinement(_.options.filter) { (r, f) =>
             val requestCondition = f.apply.runEmptyA.value
-            requestCondition.dynamoValues
-              .filter(_.nonEmpty)
-              .flatMap(_.toExpressionAttributeValues)
-              .foldLeft(
-                r.filterExpression(requestCondition.expression)
-                  .expressionAttributeNames(requestCondition.attributeNames.asJava)
-              )(_ expressionAttributeValues _)
+            val attributes = requestCondition.attributes
+            val builder =
+              r.filterExpression(requestCondition.expression).expressionAttributeNames(attributes.names.asJava)
+            attributes.values.toExpressionAttributeValues.foldLeft(builder)(_ expressionAttributeValues _)
           }
         )
         .reduceLeft(_.compose(_))(
@@ -83,24 +80,16 @@ package object ops {
         )
 
       requestCondition.fold {
-        val requestWithCondition = requestBuilder.expressionAttributeNames(queryCondition.attributeNames.asJava)
-        queryCondition.dynamoValues
-          .filter(_.nonEmpty)
-          .flatMap(_.toExpressionAttributeValues)
+        val requestWithCondition = requestBuilder.expressionAttributeNames(queryCondition.attributes.names.asJava)
+        queryCondition.attributes.values.toExpressionAttributeValues
           .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
       } { condition =>
+        val attributes = queryCondition.attributes |+| condition.attributes
+
         val requestWithCondition = requestBuilder
           .filterExpression(condition.expression)
-          .expressionAttributeNames((queryCondition.attributeNames ++ condition.attributeNames).asJava)
-        val attributeValues =
-          (
-            queryCondition.dynamoValues orElse Some(DynamoObject.empty),
-            condition.dynamoValues orElse Some(DynamoObject.empty)
-          ).mapN(_ <> _)
-
-        attributeValues
-          .flatMap(_.toExpressionAttributeValues)
-          .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
+          .expressionAttributeNames(attributes.names.asJava)
+        attributes.values.toExpressionAttributeValues.foldLeft(requestWithCondition)(_ expressionAttributeValues _)
       }.build
     }
 
@@ -114,10 +103,9 @@ package object ops {
         .fold(request) { condition =>
           val requestWithCondition = request
             .conditionExpression(condition.expression)
-            .expressionAttributeNames(condition.attributeNames.asJava)
+            .expressionAttributeNames(condition.attributes.names.asJava)
 
-          condition.dynamoValues
-            .flatMap(_.toExpressionAttributeValues)
+          condition.attributes.values.toExpressionAttributeValues
             .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
         }
         .build
@@ -133,33 +121,30 @@ package object ops {
         .fold(request) { condition =>
           val requestWithCondition = request
             .conditionExpression(condition.expression)
-            .expressionAttributeNames(condition.attributeNames.asJava)
+            .expressionAttributeNames(condition.attributes.names.asJava)
 
-          condition.dynamoValues
-            .flatMap(_.toExpressionAttributeValues)
+          condition.attributes.values.toExpressionAttributeValues
             .foldLeft(requestWithCondition)(_ expressionAttributeValues _)
         }
         .build
     }
 
     def update(req: ScanamoUpdateRequest): UpdateItemRequest = {
-      val attributeNames: Map[String, String] = req.condition.map(_.attributeNames).foldLeft(req.attributeNames)(_ ++ _)
-      val attributeValues: DynamoObject = req.condition.flatMap(_.dynamoValues).foldLeft(req.dynamoValues)(_ <> _)
       val request = UpdateItemRequest.builder
         .tableName(req.tableName)
         .key(req.key.toJavaMap)
-        .updateExpression(req.updateExpression)
+        .updateExpression(req.updateAndCondition.update.expression)
         .returnValues(ReturnValue.ALL_NEW)
-        .expressionAttributeNames(attributeNames.asJava)
+        .expressionAttributeNames(req.updateAndCondition.attributes.names.asJava)
 
       val requestWithCondition =
-        req.condition.fold(request)(condition => request.conditionExpression(condition.expression))
+        req.updateAndCondition.condition.fold(request)(condition => request.conditionExpression(condition.expression))
 
-      attributeValues.toExpressionAttributeValues
+      req.updateAndCondition.attributes.values.toExpressionAttributeValues
         .fold(requestWithCondition) { avs =>
-          if (req.addEmptyList)
+          if (req.updateAndCondition.update.addEmptyList)
             avs.put(":emptyList", DynamoValue.EmptyList)
-          requestWithCondition expressionAttributeValues avs
+          requestWithCondition.expressionAttributeValues(avs)
         }
         .build
     }
@@ -179,11 +164,11 @@ package object ops {
       val updateItems = req.updateItems.map { item =>
         val update = software.amazon.awssdk.services.dynamodb.model.Update.builder
           .tableName(item.tableName)
-          .updateExpression(item.updateExpression.expression)
-          .expressionAttributeNames(item.updateExpression.attributeNames.asJava)
+          .updateExpression(item.updateAndCondition.update.expression)
+          .expressionAttributeNames(item.updateAndCondition.update.attributes.names.asJava)
           .key(item.key.toJavaMap)
 
-        val updateWithAvs = DynamoObject(item.updateExpression.dynamoValues).toExpressionAttributeValues
+        val updateWithAvs = item.updateAndCondition.update.attributes.values.toExpressionAttributeValues
           .fold(update)(avs => update.expressionAttributeValues(avs))
           .build
 
@@ -205,10 +190,9 @@ package object ops {
           .key(item.key.toJavaMap)
           .tableName(item.tableName)
           .conditionExpression(item.condition.expression)
-          .expressionAttributeNames(item.condition.attributeNames.asJava)
+          .expressionAttributeNames(item.condition.attributes.names.asJava)
 
-        val checkWithAvs = item.condition.dynamoValues
-          .flatMap(_.toExpressionAttributeValues)
+        val checkWithAvs = item.condition.attributes.values.toExpressionAttributeValues
           .foldLeft(check)(_ expressionAttributeValues _)
           .build
 
