@@ -142,7 +142,6 @@ class TableTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
   }
 
   it("Appending or prepending creates the list if it does not yet exist:") {
-
     LocalDynamoDB.withRandomTable(client)("name" -> S) { t =>
       val characters = Table[Character](t)
       val operations = for {
