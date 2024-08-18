@@ -21,25 +21,41 @@ import org.scanamo.query.{ Condition, Query }
 import org.scanamo.update.{ UpdateAndCondition, UpdateExpression }
 import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
 
+trait HasAttributes {
+  def attributes: AttributeNamesAndValues
+}
+
+trait AttributesSummation {
+  def attributesSources: Seq[HasAttributes]
+  lazy val attributes: AttributeNamesAndValues =
+    attributesSources.foldLeft(AttributeNamesAndValues.Empty)(_ |+| _.attributes)
+}
+
 case class ScanamoPutRequest(
   tableName: String,
   item: DynamoValue,
   condition: Option[RequestCondition],
   ret: PutReturn
-)
+) extends AttributesSummation {
+  val attributesSources: Seq[HasAttributes] = condition.toSeq
+}
 
 case class ScanamoDeleteRequest(
   tableName: String,
   key: DynamoObject,
   condition: Option[RequestCondition],
   ret: DeleteReturn
-)
+) extends AttributesSummation {
+  val attributesSources: Seq[HasAttributes] = condition.toSeq
+}
 
 case class ScanamoUpdateRequest(
   tableName: String,
   key: DynamoObject,
   updateAndCondition: UpdateAndCondition
-) {
+) extends AttributesSummation {
+  val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
+
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
   def updateExpression: String = updateAndCondition.update.expression
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
@@ -56,14 +72,20 @@ case class ScanamoScanRequest(
   tableName: String,
   index: Option[String],
   options: ScanamoQueryOptions
-)
+) extends AttributesSummation {
+  lazy val attributesSources: Seq[HasAttributes] = options.filterCondition.toSeq
+}
 
 case class ScanamoQueryRequest(
   tableName: String,
   index: Option[String],
   query: Query[_],
   options: ScanamoQueryOptions
-)
+) extends AttributesSummation {
+  lazy val queryCondition: RequestCondition = query.apply
+
+  lazy val attributesSources: Seq[HasAttributes] = Seq(queryCondition) ++ options.filterCondition
+}
 
 case class ScanamoQueryOptions(
   consistent: Boolean,
@@ -71,7 +93,9 @@ case class ScanamoQueryOptions(
   limit: Option[Int],
   exclusiveStartKey: Option[DynamoObject],
   filter: Option[Condition[_]]
-)
+) {
+  lazy val filterCondition: Option[RequestCondition] = filter.map(_.apply.runEmptyA.value)
+}
 object ScanamoQueryOptions {
   val default = ScanamoQueryOptions(false, true, None, None, None)
 }
@@ -79,7 +103,7 @@ object ScanamoQueryOptions {
 case class RequestCondition(
   expression: String,
   attributes: AttributeNamesAndValues
-) {
+) extends HasAttributes {
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
   def this(
     expression: String,
@@ -96,13 +120,17 @@ case class TransactPutItem(
   tableName: String,
   item: DynamoValue,
   condition: Option[RequestCondition]
-)
+) extends AttributesSummation {
+  override val attributesSources: Seq[HasAttributes] = condition.toSeq
+}
 
 case class TransactUpdateItem(
   tableName: String,
   key: DynamoObject,
   updateAndCondition: UpdateAndCondition
-) {
+) extends AttributesSummation {
+  override val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
+
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
   def this(
     tableName: String,
@@ -120,12 +148,16 @@ case class TransactDeleteItem(
   tableName: String,
   key: DynamoObject,
   condition: Option[RequestCondition]
-)
+) extends AttributesSummation {
+  override val attributesSources: Seq[HasAttributes] = condition.toSeq
+}
 case class TransactConditionCheck(
   tableName: String,
   key: DynamoObject,
   condition: RequestCondition
-)
+) extends AttributesSummation {
+  override val attributesSources: Seq[HasAttributes] = Seq(condition)
+}
 
 case class ScanamoTransactWriteRequest(
   putItems: Seq[TransactPutItem],

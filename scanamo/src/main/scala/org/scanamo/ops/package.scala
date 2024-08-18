@@ -18,6 +18,10 @@ package org.scanamo
 
 import cats.free.{ Free, FreeT }
 import cats.implicits.*
+import org.scanamo.internal.aws.sdkv2.HasCondition.*
+import org.scanamo.internal.aws.sdkv2.HasExpressionAttributes.*
+import org.scanamo.internal.aws.sdkv2.HasUpdateAndCondition.*
+import org.scanamo.internal.aws.sdkv2.RichBuilder
 import org.scanamo.internal.aws.sdkv2.*
 import org.scanamo.request.*
 import software.amazon.awssdk.services.dynamodb.model.*
@@ -26,79 +30,65 @@ package object ops {
   type ScanamoOps[A] = Free[ScanamoOpsA, A]
   type ScanamoOpsT[M[_], A] = FreeT[ScanamoOpsA, M, A]
 
+  /** ScanRequest - Option[filterExpression] QueryRequest - keyConditionExpression + Option[filterExpression]
+    * PutItemRequest - Option[conditionExpression] DeleteItemRequest - Option[conditionExpression] UpdateItemRequest -
+    * updateExpression + Option[conditionExpression]
+    *
+    * TransactWriteItemsRequest
+    *   - Put - Option[conditionExpression]
+    *   - Delete - Option[conditionExpression]
+    *   - Update - updateExpression + Option[conditionExpression]
+    *   - ConditionCheck - conditionExpression
+    *
+    * filterExpression - Condition[_] -> RequestCondition keyConditionExpression - Query[_] -> RequestCondition
+    * conditionExpression - RequestCondition updateExpression - UpdateExpression (has attributes) projectionExpression ?
+    */
   private[ops] object JavaRequests {
-    import collection.JavaConverters.*
+    def scan(req: ScanamoScanRequest): ScanRequest = ScanRequest.builder
+      .tableName(req.tableName)
+      .setOpt(req.index)(_.indexName)
+      .consistentRead(req.options.consistent)
+      .setOpt(req.options.limit)(b => b.limit(_))
+      .setOpt(req.options.exclusiveStartKey.map(_.toJavaMap))(_.exclusiveStartKey)
+      .attributes(req.attributes)
+      .setOpt(req.options.filterCondition.map(_.expression))(_.filterExpression)
+      .build
 
-    def scan(req: ScanamoScanRequest): ScanRequest = {
-      val filterCondition: Option[RequestCondition] = req.options.filter.map(_.apply.runEmptyA.value)
-
-      ScanRequest.builder
-        .tableName(req.tableName)
-        .setOpt(req.index)(_.indexName)
-        .consistentRead(req.options.consistent)
-        .setOpt(req.options.limit)(b => b.limit(_))
-        .setOpt(req.options.exclusiveStartKey.map(_.toJavaMap))(_.exclusiveStartKey)
-        .setOpt(filterCondition) { b => condition =>
-          b.filterExpression(condition.expression)
-            .expressionAttributeNames(condition.attributes.names.asJava)
-            .setOpt(condition.attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
-        }
-        .build
-    }
-
-    def query(req: ScanamoQueryRequest): QueryRequest = {
-      val queryCondition: RequestCondition = req.query.apply
-      val filterCondition: Option[RequestCondition] = req.options.filter.map(_.apply.runEmptyA.value)
-      val attributes = queryCondition.attributes |+| filterCondition.map(_.attributes).orEmpty
-
-      QueryRequest.builder
-        .tableName(req.tableName)
-        .setOpt(req.index)(_.indexName)
-        .consistentRead(req.options.consistent)
-        .setOpt(req.options.limit)(b => b.limit(_))
-        .setOpt(req.options.exclusiveStartKey.map(_.toJavaMap))(_.exclusiveStartKey)
-        .setOpt(filterCondition.map(_.expression))(_.filterExpression)
-        .expressionAttributeNames(attributes.names.asJava)
-        .setOpt(attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
-        .scanIndexForward(req.options.ascending)
-        .keyConditionExpression(queryCondition.expression)
-        .build
-    }
+    def query(req: ScanamoQueryRequest): QueryRequest = QueryRequest.builder
+      .tableName(req.tableName)
+      .setOpt(req.index)(_.indexName)
+      .consistentRead(req.options.consistent)
+      .setOpt(req.options.limit)(b => b.limit(_))
+      .setOpt(req.options.exclusiveStartKey.map(_.toJavaMap))(_.exclusiveStartKey)
+      .setOpt(req.options.filterCondition.map(_.expression))(_.filterExpression)
+      .attributes(req.attributes)
+      .scanIndexForward(req.options.ascending)
+      .keyConditionExpression(req.queryCondition.expression)
+      .build
 
     def put(req: ScanamoPutRequest): PutItemRequest = PutItemRequest.builder
       .tableName(req.tableName)
       .item(req.item.asObject.orEmpty.toJavaMap)
       .returnValues(req.ret.asDynamoValue)
-      .setOpt(req.condition) { b => condition =>
-        b.conditionExpression(condition.expression)
-          .expressionAttributeNames(condition.attributes.names.asJava)
-          .setOpt(condition.attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
-      }
+      .attributes(req.attributes)
+      .setOpt(req.condition.map(_.expression))(_.conditionExpression)
       .build
 
     def delete(req: ScanamoDeleteRequest): DeleteItemRequest = DeleteItemRequest.builder
       .tableName(req.tableName)
       .key(req.key.toJavaMap)
       .returnValues(req.ret.asDynamoValue)
-      .setOpt(req.condition) { b => condition =>
-        b.conditionExpression(condition.expression)
-          .expressionAttributeNames(condition.attributes.names.asJava)
-          .setOpt(condition.attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
-      }
+      .attributes(req.attributes)
+      .setOpt(req.condition.map(_.expression))(_.conditionExpression)
       .build
 
-    def update(req: ScanamoUpdateRequest): UpdateItemRequest = {
-      val attributes = req.updateAndCondition.attributes
+    def update(req: ScanamoUpdateRequest): UpdateItemRequest =
       UpdateItemRequest.builder
         .tableName(req.tableName)
         .key(req.key.toJavaMap)
         .returnValues(ReturnValue.ALL_NEW)
-        .updateExpression(req.updateAndCondition.update.expression)
-        .setOpt(req.updateAndCondition.condition.map(_.expression))(_.conditionExpression)
-        .expressionAttributeNames(attributes.names.asJava)
-        .setOpt(attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
+        .updateAndCondition(req.updateAndCondition)
         .build
-    }
 
     def transactItems(req: ScanamoTransactWriteRequest): TransactWriteItemsRequest = {
       val putItems = req.putItems.map { item =>
@@ -107,21 +97,20 @@ package object ops {
             software.amazon.awssdk.services.dynamodb.model.Put.builder
               .tableName(item.tableName)
               .item(item.item.asObject.orEmpty.toJavaMap)
+              .attributes(item.attributes)
+              .setOpt(item.condition.map(_.expression))(_.conditionExpression)
               .build
           )
           .build
       }
 
       val updateItems = req.updateItems.map { item =>
-        val attributes = item.updateAndCondition.update.attributes
         TransactWriteItem.builder
           .update(
             software.amazon.awssdk.services.dynamodb.model.Update.builder
               .tableName(item.tableName)
               .key(item.key.toJavaMap)
-              .updateExpression(item.updateAndCondition.update.expression)
-              .expressionAttributeNames(attributes.names.asJava)
-              .setOpt(attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
+              .updateAndCondition(item.updateAndCondition)
               .build
           )
           .build
@@ -132,20 +121,20 @@ package object ops {
             software.amazon.awssdk.services.dynamodb.model.Delete.builder
               .tableName(item.tableName)
               .key(item.key.toJavaMap)
+              .attributes(item.attributes)
+              .setOpt(item.condition.map(_.expression))(_.conditionExpression)
               .build
           )
           .build
       }
 
       val conditionChecks = req.conditionCheck.map { item =>
-        val attributes = item.condition.attributes
         TransactWriteItem.builder
           .conditionCheck(
             software.amazon.awssdk.services.dynamodb.model.ConditionCheck.builder
               .tableName(item.tableName)
               .key(item.key.toJavaMap)
-              .expressionAttributeNames(attributes.names.asJava)
-              .setOpt(attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
+              .attributes(item.attributes)
               .conditionExpression(item.condition.expression)
               .build
           )
