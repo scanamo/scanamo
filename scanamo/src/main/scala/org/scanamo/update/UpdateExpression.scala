@@ -19,8 +19,9 @@ package org.scanamo.update
 import cats.data.NonEmptyVector
 import org.scanamo.query.*
 import org.scanamo.request.AttributeNamesAndValues
-import org.scanamo.update.UpdateExpression.prefixKeys
-import org.scanamo.{ DynamoFormat, DynamoObject, DynamoValue }
+import org.scanamo.update.LeafUpdateExpression.EmptyListName
+import org.scanamo.update.UpdateExpression.{ prefixKeys, someEmptyList }
+import org.scanamo.{ DynamoArray, DynamoFormat, DynamoObject, DynamoValue }
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import scala.collection.immutable.HashMap
@@ -56,7 +57,7 @@ sealed trait UpdateExpression extends Product with Serializable { self =>
 
   final def attributes: AttributeNamesAndValues = AttributeNamesAndValues(
     names = unprefixedAttributeNames.map { case (k, v) => (s"#$k", v) },
-    values = DynamoObject(unprefixedDynamoValues)
+    values = DynamoObject(unprefixedDynamoValues ++ (if (addEmptyList) someEmptyList else None))
   )
 
   final val addEmptyList: Boolean = self match {
@@ -83,6 +84,8 @@ final private[scanamo] case class SimpleUpdate(leaf: LeafUpdateExpression) exten
 final private[scanamo] case class AndUpdate(l: UpdateExpression, r: UpdateExpression) extends UpdateExpression
 
 object UpdateExpression {
+  private val someEmptyList: Some[(String, DynamoValue)] = Some(EmptyListName -> DynamoArray.empty.toDynamoValue)
+
   def prefixKeys[T](map: Map[String, T], prefix: String) =
     map.map { case (k, v) => (s"$prefix$k", v) }
 
@@ -165,9 +168,9 @@ sealed private[update] trait LeafUpdateExpression { self =>
     case LeafDeleteExpression(namePlaceholder, _, valuePlaceholder, _) => s"#$namePlaceholder :$valuePlaceholder"
     case LeafSetExpression(namePlaceholder, _, valuePlaceholder, _)    => s"#$namePlaceholder = :$valuePlaceholder"
     case LeafAppendExpression(namePlaceholder, _, valuePlaceholder, _) =>
-      s"#$namePlaceholder = list_append(if_not_exists(#$namePlaceholder, :emptyList), :$valuePlaceholder)"
+      s"#$namePlaceholder = list_append(if_not_exists(#$namePlaceholder, :$EmptyListName), :$valuePlaceholder)"
     case LeafPrependExpression(namePlaceholder, _, valuePlaceholder, _) =>
-      s"#$namePlaceholder = list_append(:$valuePlaceholder, if_not_exists(#$namePlaceholder, :emptyList))"
+      s"#$namePlaceholder = list_append(:$valuePlaceholder, if_not_exists(#$namePlaceholder, :$EmptyListName))"
     case LeafRemoveExpression(namePlaceholder, _)  => s"#$namePlaceholder"
     case LeafAttributeExpression(prefix, from, to) => s"#${to.placeholder(prefix)} = #${from.placeholder(prefix)}"
     case LeafSetIfNotExistsExpression(namePlaceholder, _, valuePlaceholder, _) =>
@@ -198,7 +201,9 @@ sealed private[update] trait LeafUpdateExpression { self =>
   def attributeNames: Map[String, String]
 }
 
-private[update] object LeafUpdateExpression
+private[update] object LeafUpdateExpression {
+  val EmptyListName = "emptyList"
+}
 
 final private[update] case class LeafSetExpression(
   namePlaceholder: String,
