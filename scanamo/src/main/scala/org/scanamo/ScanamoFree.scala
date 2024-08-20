@@ -16,6 +16,7 @@
 
 package org.scanamo
 
+import cats.implicits.*
 import cats.{ Monad, MonoidK }
 import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
 import org.scanamo.ops.ScanamoOps.Results.*
@@ -70,7 +71,7 @@ object ScanamoFree {
           batch,
           item =>
             WriteRequest.builder
-              .putRequest(PutRequest.builder.item(f.write(item).asObject.getOrElse(DynamoObject.empty).toJavaMap).build)
+              .putRequest(PutRequest.builder.item(f.write(item).asObject.orEmpty.toJavaMap).build)
               .build
         )
       }
