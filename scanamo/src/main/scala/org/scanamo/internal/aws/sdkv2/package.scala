@@ -9,6 +9,8 @@ package object sdkv2 {
       f(b)(v)
     }
 
+    def set[V](v: V)(f: B => V => B): B = f(builder)(v)
+
     def expression(c: RequestCondition)(f: B => String => B): B = f(builder)(c.expression)
   }
 }

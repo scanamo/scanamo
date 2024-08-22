@@ -2,6 +2,7 @@ package org.scanamo.internal.aws.sdkv2
 
 import org.scanamo.internal.aws.sdkv2.HasCondition.*
 import org.scanamo.internal.aws.sdkv2.HasExpressionAttributes.*
+import org.scanamo.internal.aws.sdkv2.HasUpdateAndCondition.*
 import org.scanamo.request.AttributeNamesAndValues
 import org.scanamo.update.UpdateAndCondition
 import software.amazon.awssdk.services.dynamodb.model
@@ -12,6 +13,15 @@ import java.util
 import scala.collection.JavaConverters.*
 
 object HasExpressionAttributes {
+
+  // type AR[x <: ActionRequest[x]] = ActionRequest[x]
+
+  // software.amazon.awssdk.services.dynamodb.model.DynamoDbRequest.Builder
+  // software.amazon.awssdk.utils.builder.SdkBuilder: public interface SdkBuilder<B extends SdkBuilder<B, T>, T> extends Buildable {
+
+  type Grrr[B] = software.amazon.awssdk.utils.builder.SdkBuilder[B, _]
+  type Boom[t, b <: software.amazon.awssdk.utils.builder.SdkBuilder[b, t]] =
+    software.amazon.awssdk.utils.builder.SdkBuilder[b, t]
 
   type BV[B, V] = B => V => B
 
@@ -32,13 +42,16 @@ object HasExpressionAttributes {
         .setOpt(attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
   }
 
-  implicit val qr: Has[QueryRequest.Builder] = Has(_.expressionAttributeNames, _.expressionAttributeValues)
-  implicit val sr: Has[ScanRequest.Builder] = Has(_.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val qr: Has[QueryRequest, QueryRequest.Builder] =
+    Has(_.tableName, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val sr: Has[ScanRequest, ScanRequest.Builder] =
+    Has(_.tableName, _.expressionAttributeNames, _.expressionAttributeValues)
 }
 
 trait HasExpressionAttributes[B <: Buildable] {
   type B2B[V] = BV[B, V]
 
+  val tableName: B2B[String]
   val expressionAttributeNames: B2B[util.Map[String, String]]
   val expressionAttributeValues: B2B[util.Map[String, AttributeValue]]
 }
@@ -48,7 +61,8 @@ trait HasCondition[B <: Buildable] extends HasExpressionAttributes[B] {
 }
 
 object HasCondition {
-  case class Has[B <: Buildable](
+  case class Has[T, B <: Boom[T, B]](
+    tableName: BV[B, String],
     conditionExpression: BV[B, String],
     expressionAttributeNames: BV[B, util.Map[String, String]],
     expressionAttributeValues: BV[B, util.Map[String, AttributeValue]]
@@ -58,24 +72,25 @@ object HasCondition {
     def conditionExpression(expression: String): B = h.conditionExpression(b)(expression)
   }
 
-  implicit val pir: Has[PutItemRequest.Builder] =
-    Has(_.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val pir: Has[PutItemRequest, PutItemRequest.Builder] =
+    Has(_.tableName, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 
-  implicit val p: Has[Put.Builder] =
-    Has(_.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val p: Has[Put, Put.Builder] =
+    Has(_.tableName, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 
-  implicit val cc: Has[model.ConditionCheck.Builder] =
-    Has(_.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val cc: Has[model.ConditionCheck, model.ConditionCheck.Builder] =
+    Has(_.tableName, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 
-  implicit val dir: Has[DeleteItemRequest.Builder] =
-    Has(_.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val dir: Has[DeleteItemRequest, DeleteItemRequest.Builder] =
+    Has(_.tableName, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 
-  implicit val d: Has[Delete.Builder] =
-    Has(_.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val d: Has[Delete, Delete.Builder] =
+    Has(_.tableName, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 }
 
 object HasUpdateAndCondition {
-  case class Has[B <: Buildable](
+  case class Has[T, B <: Boom[T, B]](
+    tableName: BV[B, String],
     updateExpression: BV[B, String],
     conditionExpression: BV[B, String],
     expressionAttributeNames: BV[B, util.Map[String, String]],
@@ -91,11 +106,11 @@ object HasUpdateAndCondition {
         .setOpt(uac.condition.map(_.expression))(_.conditionExpression)
   }
 
-  implicit val uir: Has[UpdateItemRequest.Builder] =
-    Has(_.updateExpression, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val uir: Has[UpdateItemRequest, UpdateItemRequest.Builder] =
+    Has(_.tableName, _.updateExpression, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 
-  implicit val u: Has[Update.Builder] =
-    Has(_.updateExpression, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
+  implicit val u: Has[Update, Update.Builder] =
+    Has(_.tableName, _.updateExpression, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 
 }
 
