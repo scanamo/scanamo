@@ -26,6 +26,7 @@ trait HasAttributes {
 }
 
 trait AttributesSummation {
+  val tableName: String
   def attributesSources: Seq[HasAttributes]
   lazy val attributes: AttributeNamesAndValues =
     attributesSources.foldLeft(AttributeNamesAndValues.Empty)(_ |+| _.attributes)

@@ -44,15 +44,22 @@ package object ops {
     * conditionExpression - RequestCondition updateExpression - UpdateExpression (has attributes) projectionExpression ?
     */
   private[ops] object JavaRequests {
-    def scan(req: ScanamoScanRequest): ScanRequest = ScanRequest.builder
-      .tableName(req.tableName)
-      .setOpt(req.index)(_.indexName)
-      .consistentRead(req.options.consistent)
-      .setOpt(req.options.limit)(b => b.limit(_))
-      .setOpt(req.options.exclusiveStartKey.map(_.toJavaMap))(_.exclusiveStartKey)
-      .attributes(req.attributes)
-      .setOpt(req.options.filterCondition.map(_.expression))(_.filterExpression)
-      .build
+//    def funk[T, B <: Moo[T]](as: AttributesSummation, b: B)(implicit h: HasExpressionAttributes[B]): T =
+//      b.tableName(as.tableName).attributes(as.attributes).build()
+
+    def scan(req: ScanamoScanRequest): ScanRequest = {
+      val builder: ScanRequest.Builder = ScanRequest.builder
+        .setOpt(req.index)(_.indexName)
+        .consistentRead(req.options.consistent)
+        .setOpt(req.options.limit)(b => b.limit(_))
+        .setOpt(req.options.exclusiveStartKey.map(_.toJavaMap))(_.exclusiveStartKey)
+        .setOpt(req.options.filterCondition.map(_.expression))(_.filterExpression)
+
+      val value = new RichBuilder2[ScanRequest, ScanRequest.Builder](builder)
+      value.funk(req)
+
+      // builder.funk(req)(HasExpressionAttributes.sr)
+    }
 
     def query(req: ScanamoQueryRequest): QueryRequest = QueryRequest.builder
       .tableName(req.tableName)
