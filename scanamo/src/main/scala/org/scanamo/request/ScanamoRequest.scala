@@ -135,6 +135,6 @@ case class ScanamoTransactWriteRequest(
 )
 
 case class ScanamoUpdateTimeToLiveRequest(
-                                           tableName: String,
-                                           ttlAttributeName: String
-                                         )
+  tableName: String,
+  ttlAttributeName: String
+)

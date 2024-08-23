@@ -63,6 +63,8 @@ object ScanamoOps {
   def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[Transact[TransactWriteItemsResponse]] = lF(
     TransactWriteAll(req)
   )
-  def updateTimeToLiveRequest(req: ScanamoUpdateTimeToLiveRequest): ScanamoOps[UpdateTimeToLiveResponse] = lF(UpdateTimeToLive(req))
+  def updateTimeToLiveRequest(req: ScanamoUpdateTimeToLiveRequest): ScanamoOps[UpdateTimeToLiveResponse] = lF(
+    UpdateTimeToLive(req)
+  )
 
 }

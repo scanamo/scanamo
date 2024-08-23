@@ -16,14 +16,19 @@
 
 package org.scanamo
 
-import cats.{Monad, MonoidK}
-import org.scanamo.DynamoResultStream.{QueryResponseStream, ScanResponseStream}
+import cats.{ Monad, MonoidK }
+import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
 import org.scanamo.ops.ScanamoOps.Results.*
-import org.scanamo.ops.{ScanamoOps, ScanamoOpsT}
+import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
 import org.scanamo.query.*
-import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
+import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
 import org.scanamo.update.UpdateExpression
-import software.amazon.awssdk.services.dynamodb.model.{QueryResponse, ScanResponse, TransactWriteItemsResponse, UpdateTimeToLiveResponse}
+import software.amazon.awssdk.services.dynamodb.model.{
+  QueryResponse,
+  ScanResponse,
+  TransactWriteItemsResponse,
+  UpdateTimeToLiveResponse
+}
 
 /** Represents a DynamoDB table that operations can be performed against
   */
