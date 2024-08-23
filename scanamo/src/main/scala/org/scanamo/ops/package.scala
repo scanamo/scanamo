@@ -111,6 +111,20 @@ package object ops {
         .build
     }
 
+    def updateTimeToLive(req: ScanamoUpdateTimeToLiveRequest): UpdateTimeToLiveRequest = {
+      val timeToLiveSpecification: TimeToLiveSpecification = TimeToLiveSpecification
+        .builder()
+        .enabled(true)
+        .attributeName(req.ttlAttributeName)
+        .build()
+      val updateTimeToLiveRequest: UpdateTimeToLiveRequest = UpdateTimeToLiveRequest
+        .builder()
+        .tableName(req.tableName)
+        .timeToLiveSpecification(timeToLiveSpecification)
+        .build()
+      updateTimeToLiveRequest
+    }
+
     def delete(req: ScanamoDeleteRequest): DeleteItemRequest = {
       val request = DeleteItemRequest.builder
         .tableName(req.tableName)

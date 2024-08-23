@@ -16,14 +16,14 @@
 
 package org.scanamo
 
-import cats.{ Monad, MonoidK }
-import org.scanamo.DynamoResultStream.{ QueryResponseStream, ScanResponseStream }
+import cats.{Monad, MonoidK}
+import org.scanamo.DynamoResultStream.{QueryResponseStream, ScanResponseStream}
 import org.scanamo.ops.ScanamoOps.Results.*
-import org.scanamo.ops.{ ScanamoOps, ScanamoOpsT }
+import org.scanamo.ops.{ScanamoOps, ScanamoOpsT}
 import org.scanamo.query.*
-import org.scanamo.request.{ ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest }
+import org.scanamo.request.{ScanamoQueryOptions, ScanamoQueryRequest, ScanamoScanRequest}
 import org.scanamo.update.UpdateExpression
-import software.amazon.awssdk.services.dynamodb.model.{ QueryResponse, ScanResponse, TransactWriteItemsResponse }
+import software.amazon.awssdk.services.dynamodb.model.{QueryResponse, ScanResponse, TransactWriteItemsResponse, UpdateTimeToLiveResponse}
 
 /** Represents a DynamoDB table that operations can be performed against
   */
@@ -185,6 +185,9 @@ case class Table[V: DynamoFormat](name: String) {
 
   def transactDeleteAll(vs: List[UniqueKey[_]]): ScanamoOps[Transact[TransactWriteItemsResponse]] =
     ScanamoFree.transactDeleteAllTable(name)(vs)
+
+  def updateTimeToLIve(attributeName: String): ScanamoOps[UpdateTimeToLiveResponse] =
+    ScanamoFree.updateTimeToLive(name)(attributeName)
 }
 
 private[scanamo] case class ConsistentlyReadTable[V: DynamoFormat](tableName: String) {

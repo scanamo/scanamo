@@ -50,6 +50,7 @@ object AsyncFrameworks {
       case Update(req)            => run(client.updateItem(JavaRequests.update(req)))
       case ConditionalUpdate(req) => runConditional(client.updateItem(JavaRequests.update(req)))
       case TransactWriteAll(req)  => runTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
+      case UpdateTimeToLive(req)  => run(client.updateTimeToLive(JavaRequests.updateTimeToLive(req)))
     }
   }
 }
