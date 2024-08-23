@@ -20,13 +20,34 @@ import cats.syntax.either.*
 import cats.~>
 import org.apache.pekko.actor.ClassicActorSystemProvider
 import org.apache.pekko.stream.connectors.dynamodb.scaladsl.DynamoDb
-import org.apache.pekko.stream.connectors.dynamodb.{DynamoDbOp, DynamoDbPaginatedOp}
+import org.apache.pekko.stream.connectors.dynamodb.{ DynamoDbOp, DynamoDbPaginatedOp }
 import org.apache.pekko.stream.scaladsl.Source
 import org.scanamo.ops.AsyncFrameworks.unwrapCompletionException
 import org.scanamo.ops.ScanamoOps.Results.*
 import org.scanamo.ScanamoPekko.Pekko
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
-import software.amazon.awssdk.services.dynamodb.model.{BatchGetItemRequest, BatchGetItemResponse, BatchWriteItemRequest, BatchWriteItemResponse, ConditionalCheckFailedException, DeleteItemRequest, DeleteItemResponse, GetItemRequest, GetItemResponse, PutItemRequest, PutItemResponse, QueryRequest, QueryResponse, ScanRequest, ScanResponse, TransactionCanceledException, UpdateItemRequest, UpdateItemResponse, UpdateTimeToLiveRequest, UpdateTimeToLiveResponse, DynamoDbRequest as DReq, DynamoDbResponse as DResp}
+import software.amazon.awssdk.services.dynamodb.model.{
+  BatchGetItemRequest,
+  BatchGetItemResponse,
+  BatchWriteItemRequest,
+  BatchWriteItemResponse,
+  ConditionalCheckFailedException,
+  DeleteItemRequest,
+  DeleteItemResponse,
+  DynamoDbRequest => DReq,
+  DynamoDbResponse => DResp,
+  GetItemRequest,
+  GetItemResponse,
+  PutItemRequest,
+  PutItemResponse,
+  QueryRequest,
+  QueryResponse,
+  ScanRequest,
+  ScanResponse,
+  TransactionCanceledException,
+  UpdateItemRequest,
+  UpdateItemResponse
+}
 
 /** This is a port of [[https://github.com/scanamo/scanamo/pull/151 AlpakkaInterpreter]], which has since been removed
   * from the core Scanamo project.
