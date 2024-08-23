@@ -133,3 +133,8 @@ case class ScanamoTransactWriteRequest(
   deleteItems: Seq[TransactDeleteItem],
   conditionCheck: Seq[TransactConditionCheck]
 )
+
+case class ScanamoUpdateTimeToLiveRequest(
+  tableName: String,
+  ttlAttributeName: String
+)

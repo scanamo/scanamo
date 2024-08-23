@@ -83,5 +83,6 @@ private[scanamo] class PekkoInterpreter(implicit client: DynamoDbAsyncClient, sy
     case ConditionalPut(req)    => runConditional(JavaRequests.put(req))
     case ConditionalUpdate(req) => runConditional(JavaRequests.update(req))
     case TransactWriteAll(req)  => runTransact(JavaRequests.transactItems(req))
+    case UpdateTimeToLive(req)  => run[UpdateTimeToLiveRequest, UpdateTimeToLiveResponse](JavaRequests.updateTimeToLive(req))
   }
 }

@@ -80,6 +80,9 @@ object ScanamoFree {
     loop(batches)
   }
 
+  def updateTimeToLive[T](tableName: String)(attributeName: String): ScanamoOps[UpdateTimeToLiveResponse] =
+    ScanamoOps.updateTimeToLiveRequest(ScanamoUpdateTimeToLiveRequest(tableName, attributeName))
+
   def transactionalWrite(
     actions: List[TransactionalWriteAction]
   ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {

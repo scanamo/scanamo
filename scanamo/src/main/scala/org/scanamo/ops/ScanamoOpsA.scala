@@ -34,6 +34,7 @@ final case class Update(req: ScanamoUpdateRequest) extends ScanamoOpsA[UpdateIte
 final case class ConditionalUpdate(req: ScanamoUpdateRequest) extends ScanamoOpsA[Conditional[UpdateItemResponse]]
 final case class TransactWriteAll(req: ScanamoTransactWriteRequest)
     extends ScanamoOpsA[Transact[TransactWriteItemsResponse]]
+final case class UpdateTimeToLive(req: ScanamoUpdateTimeToLiveRequest) extends ScanamoOpsA[UpdateTimeToLiveResponse]
 
 object ScanamoOps {
   import cats.free.Free.liftF
@@ -61,6 +62,9 @@ object ScanamoOps {
   )
   def transactWriteAll(req: ScanamoTransactWriteRequest): ScanamoOps[Transact[TransactWriteItemsResponse]] = lF(
     TransactWriteAll(req)
+  )
+  def updateTimeToLiveRequest(req: ScanamoUpdateTimeToLiveRequest): ScanamoOps[UpdateTimeToLiveResponse] = lF(
+    UpdateTimeToLive(req)
   )
 
 }
