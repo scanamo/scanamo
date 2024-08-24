@@ -113,7 +113,6 @@ object HasUpdateAndCondition {
 
     def updateAndCondition(uac: UpdateAndCondition): B =
       b.updateExpression(uac.update.expression)
-        .attributes(uac.attributes)
         .setOpt(uac.condition.map(_.expression))(_.conditionExpression)
   }
 
