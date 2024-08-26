@@ -139,11 +139,11 @@ lazy val refined = (project in file("refined"))
     commonSettings,
     publishingSettings,
     name := "scanamo-refined",
-    crossScalaVersions := scala2xVersions
+    crossScalaVersions := allCrossVersions
   )
   .settings(
     libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.11.1",
+      "eu.timepit"    %% "refined"   % "0.11.2",
       scalaTest
     )
   )
