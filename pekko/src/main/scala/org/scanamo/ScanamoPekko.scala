@@ -21,6 +21,7 @@ import org.apache.pekko.NotUsed
 import org.apache.pekko.actor.ClassicActorSystemProvider
 import org.apache.pekko.stream.scaladsl.{ Sink, Source }
 import org.scanamo.PekkoInstances.*
+import org.scanamo.ScanamoPekko.Pekko
 import org.scanamo.ops.{ PekkoInterpreter, ScanamoOps }
 import software.amazon.awssdk.services.dynamodb.DynamoDbAsyncClient
 
@@ -46,12 +47,12 @@ object ScanamoPekko {
 }
 
 private[scanamo] object PekkoInstances {
-  implicit val monad: Monad[Source[*, NotUsed]] = new Monad[Source[*, NotUsed]] {
-    def pure[A](x: A): Source[A, NotUsed] = Source.single(x)
+  implicit val monad: Monad[Pekko] = new Monad[Pekko] {
+    def pure[A](x: A): Pekko[A] = Source.single(x)
 
-    def flatMap[A, B](fa: Source[A, NotUsed])(f: A => Source[B, NotUsed]): Source[B, NotUsed] = fa.flatMapConcat(f)
+    def flatMap[A, B](fa: Pekko[A])(f: A => Pekko[B]): Pekko[B] = fa.flatMapConcat(f)
 
-    def tailRecM[A, B](a: A)(f: A => Source[Either[A, B], NotUsed]): Source[B, NotUsed] =
+    def tailRecM[A, B](a: A)(f: A => Pekko[Either[A, B]]): Pekko[B] =
       f(a).flatMapConcat {
         case Left(a)  => tailRecM(a)(f)
         case Right(b) => Source.single(b)
