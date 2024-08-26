@@ -5,7 +5,7 @@
 <!--
 As the project maintainer, I have to carefully balance new features with the limited time available for maintenance.
 While we highly value contributions, new features grow the codebase and increase the ongoing maintenance burden - so
-consider benefit vs maintenance cost - see https://github.com/scanamo/scanamo/blob/main/CONTRIBUTING.md#new-features
+consider user-benefit vs maintenance cost. See https://github.com/scanamo/scanamo/blob/main/CONTRIBUTING.md#new-features
 for more details.
 -->
 
@@ -15,8 +15,7 @@ for more details.
 ### Tests
 
 <!--
-Any new functionality should have at least one test, both to check correctness, and to
-demonstrate API use.
+Any new functionality should have at least one test, both to check correctness, and demonstrate API use.
 -->
 
 ### See also
