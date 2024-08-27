@@ -208,7 +208,7 @@ lazy val zio = (project in file("zio"))
   .settings(
     name := "scanamo-zio",
     commonSettings,
-    crossScalaVersions := scala2xVersions,
+    crossScalaVersions := allCrossVersions,
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,

@@ -7,7 +7,6 @@ import org.scanamo.fixtures.*
 import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query.*
-import org.scanamo.syntax.*
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 import zio.Runtime.default.*
@@ -15,6 +14,8 @@ import zio.stream.interop.catz.*
 import zio.stream.{ Sink, Stream }
 
 class ScanamoZioSpec extends AnyFunSpec with Matchers {
+  import org.scanamo.syntax.* // here for Scala 3, otherwise we get `===` from org.scalactic.TripleEqualsSupport
+
   val client = LocalDynamoDB.client()
   val zio = ScanamoZio(client)
 
