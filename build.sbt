@@ -229,7 +229,7 @@ lazy val zio = (project in file("zio"))
 lazy val pekko = (project in file("pekko"))
   .settings(
     commonSettings,
-    crossScalaVersions := scala2xVersions,
+    crossScalaVersions := allCrossVersions,
     publishingSettings,
     name := "scanamo-pekko"
   )

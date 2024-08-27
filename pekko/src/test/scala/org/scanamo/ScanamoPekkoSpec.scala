@@ -11,12 +11,13 @@ import org.scanamo.fixtures.*
 import org.scanamo.generic.auto.*
 import org.scanamo.ops.ScanamoOps
 import org.scanamo.query.*
-import org.scanamo.syntax.*
 import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType.*
 
 import scala.concurrent.ExecutionContext
 
 class ScanamoPekkoSpec extends AnyFunSpecLike with BeforeAndAfterAll with Matchers with ScalaFutures {
+  import org.scanamo.syntax.* // here for Scala 3, otherwise we get `===` from org.scalactic.TripleEqualsSupport
+
   implicit val system: ActorSystem = ActorSystem("scanamo-pekko")
 
   implicit val executor: ExecutionContext = system.dispatcher

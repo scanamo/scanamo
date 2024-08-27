@@ -53,7 +53,7 @@ jobs:
         run: >
           sbt ++${{ matrix.scala-version }}
           startDynamodbLocal
-          scanamo/test catsEffect/test joda/test
+          scanamo/test catsEffect/test joda/test pekko/test
           dynamodbLocalTestCleanup
           stopDynamodbLocal
       - name: cleanup
