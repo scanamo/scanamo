@@ -29,11 +29,11 @@ class ScanamoZio private (client: DynamoDbAsyncClient)
 
 object ScanamoZio {
   type DIO[+A] = IO[DynamoDbException, A]
+  type DStream[+A] = Stream[DynamoDbException, A]
 
   def apply(client: DynamoDbAsyncClient): ScanamoZio = new ScanamoZio(client)
 
-  val ToStream: IO[DynamoDbException, *] ~> Stream[DynamoDbException, *] =
-    new (IO[DynamoDbException, *] ~> Stream[DynamoDbException, *]) {
-      def apply[A](fa: IO[DynamoDbException, A]): Stream[DynamoDbException, A] = ZStream.fromEffect(fa)
-    }
+  val ToStream: DIO ~> DStream = new (DIO ~> DStream) {
+    def apply[A](fa: DIO[A]): DStream[A] = ZStream.fromEffect(fa)
+  }
 }
