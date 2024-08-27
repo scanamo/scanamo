@@ -1,3 +1,5 @@
+# This file is now redundant, as we have moved the release process to gha-scala-library-release-workflow. The new changelog can be found here: https://github.com/scanamo/scanamo/releases
+
 ## Version 1.0.0-M10
 
 - https://github.com/scanamo/scanamo/pull/295 Add missing floatFormat and floatSetFormat to DynamoFormat (@shtukas)

@@ -41,19 +41,11 @@ jobs:
           dynamodbLocalTestCleanup
           stopDynamodbLocal
       - name: test without coverage
-        if: matrix.scala-version == '2.13.14'
+        if: matrix.scala-version == '2.13.14' || matrix.scala-version == '3.3.3'
         run: >
           sbt ++${{ matrix.scala-version }}
           startDynamodbLocal
           test
-          dynamodbLocalTestCleanup
-          stopDynamodbLocal
-      - name: test without coverage
-        if: matrix.scala-version == '3.3.3'
-        run: >
-          sbt ++${{ matrix.scala-version }}
-          startDynamodbLocal
-          scanamo/test catsEffect/test joda/test pekko/test zio/test
           dynamodbLocalTestCleanup
           stopDynamodbLocal
       - name: cleanup

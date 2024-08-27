@@ -12,8 +12,7 @@ val V = new {
   val catsEffectVersion = "3.5.4"
 }
 
-val scala2xVersions = Seq(V.scala212, V.scala213)
-val allCrossVersions = Seq(V.scala212, V.scala213, V.scala3)
+ThisBuild / scalaVersion := V.scala3
 
 val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
 val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.0" % Test
@@ -76,7 +75,7 @@ lazy val scala2settings = Seq(
   })
 )
 
-lazy val kindprojectorSettings = Seq(
+lazy val kindProjectorSettings = Seq(
   Compile / scalacOptions ++= {
     CrossVersion.partialVersion(scalaVersion.value) match {
       case Some((3, _)) => Seq("-Ykind-projector:underscores")
@@ -95,6 +94,7 @@ lazy val macroSettings = Seq(
 val commonSettings = Seq(
   startYear := Some(2019),
   homepage := Some(url("https://www.scanamo.org/")),
+  crossScalaVersions := Seq(V.scala212, V.scala213, V.scala3),
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value).contains((2, 12)))
@@ -105,15 +105,12 @@ val commonSettings = Seq(
   Compile / console / scalacOptions := (Test / scalacOptions).value,
   autoAPIMappings := true,
   apiURL := Some(url("https://www.scanamo.org/latest/api/")),
-  dynamoDBLocalDownloadDir := file(".dynamodb-local"),
-  dynamoDBLocalPort := 8042,
   Test / parallelExecution := false
 )
 
 lazy val root = (project in file("."))
-  .aggregate(scanamo, testkit, refined, catsEffect, joda, zio, pekko)
+  .aggregate(scanamo, testkit, catsEffect, joda, zio, pekko)
   .settings(
-    commonSettings,
     publish / skip := true,
     releaseVersion := ReleaseVersion.fromAggregatedAssessedCompatibilityWithLatestRelease().value,
     releaseCrossBuild := true, // true if you cross-build the project for multiple Scala versions
@@ -127,6 +124,8 @@ lazy val root = (project in file("."))
       setNextVersion,
       commitNextVersion
     ),
+    dynamoDBLocalDownloadDir := file(".dynamodb-local"),
+    dynamoDBLocalPort := 8042,
     startDynamoDBLocal / aggregate := false,
     dynamoDBLocalTestCleanup / aggregate := false,
     stopDynamoDBLocal / aggregate := false
@@ -134,27 +133,11 @@ lazy val root = (project in file("."))
 
 val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.26.25"
 
-lazy val refined = (project in file("refined"))
-  .settings(
-    commonSettings,
-    publishingSettings,
-    name := "scanamo-refined",
-    crossScalaVersions := scala2xVersions
-  )
-  .settings(
-    libraryDependencies ++= Seq(
-      "eu.timepit"    %% "refined"   % "0.11.1",
-      scalaTest
-    )
-  )
-  .dependsOn(scanamo)
-
 lazy val scanamo = (project in file("scanamo"))
   .settings(
     commonSettings,
     publishingSettings,
-    name := "scanamo",
-    crossScalaVersions := allCrossVersions
+    name := "scanamo"
   )
   .settings(scala2settings)
   .settings(macroSettings)
@@ -176,7 +159,6 @@ lazy val scanamo = (project in file("scanamo"))
 lazy val testkit = (project in file("testkit"))
   .settings(
     commonSettings,
-    crossScalaVersions := allCrossVersions,
     publishingSettings,
     name := "scanamo-testkit",
     libraryDependencies ++= Seq(
@@ -189,7 +171,6 @@ lazy val catsEffect = (project in file("cats"))
   .settings(
     name := "scanamo-cats-effect",
     commonSettings,
-    crossScalaVersions := allCrossVersions,
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
@@ -204,14 +185,13 @@ lazy val catsEffect = (project in file("cats"))
     Compile / doc / scalacOptions += "-no-link-warnings"
   )
   .settings(scala2settings)
-  .settings(kindprojectorSettings)
+  .settings(kindProjectorSettings)
   .dependsOn(scanamo, testkit % "test->test")
 
 lazy val zio = (project in file("zio"))
   .settings(
     name := "scanamo-zio",
     commonSettings,
-    crossScalaVersions := allCrossVersions,
     publishingSettings,
     libraryDependencies ++= List(
       awsDynamoDB,
@@ -232,7 +212,6 @@ lazy val zio = (project in file("zio"))
 lazy val pekko = (project in file("pekko"))
   .settings(
     commonSettings,
-    crossScalaVersions := allCrossVersions,
     publishingSettings,
     name := "scanamo-pekko"
   )
@@ -254,7 +233,6 @@ lazy val pekko = (project in file("pekko"))
 lazy val joda = (project in file("joda"))
   .settings(
     commonSettings,
-    crossScalaVersions := allCrossVersions,
     publishingSettings,
     name := "scanamo-joda"
   )
@@ -278,7 +256,7 @@ lazy val docs = project
     )
   )
   .enablePlugins(MdocPlugin, DocusaurusPlugin)
-  .dependsOn(scanamo % "compile->test", refined % "compile")
+  .dependsOn(scanamo % "compile->test")
 
 val publishingSettings = Seq(
   organization := "org.scanamo",

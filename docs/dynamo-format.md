@@ -79,59 +79,6 @@ scanamo.exec {
 }.toList
 ```
 
-### Formats for Refined Types
-
-Scanamo supports Scala refined types via the `scanamo-refined` module, helping you to define custom formats
-for types built using the predicates provided by the [refined](https://github.com/fthomas/refined) project.
-Refined types give an extra layer of type safety to our programs making the compilation fail when we try to
-assign wrong values to them.
-
-To use them in your project you will need to include the dependency in your project:
-
-```
-libraryDependencies += "org.scanamo" %% "scanamo-refined" % "x.y.z"
-```
-
-And then import the support for refined types and define your model:
-
-```scala mdoc:silent:reset
-import org.scanamo._
-import eu.timepit.refined._
-import eu.timepit.refined.api.Refined
-import eu.timepit.refined.auto._
-import eu.timepit.refined.numeric._
-import software.amazon.awssdk.services.dynamodb.model.ScalarAttributeType._
-
-val client = LocalDynamoDB.syncClient()
-val scanamo = Scanamo(client)
-
-type PosInt = Int Refined Positive
-
-case class Customer(age: PosInt)
-
-LocalDynamoDB.createTable(client)("Customer")("age" -> N)
-```
-
-You just now use it like if the type `PosInt` was natively supported by `scanamo`:
-
-```scala mdoc
-import org.scanamo.refined._
-import org.scanamo.generic.auto._
-
-val customerTable = Table[Customer]("Customer")
-scanamo.exec {
-  for {
-    _       <- customerTable.put(Customer(67))
-    results <- customerTable.scan()
-  } yield results
-}.toList
-```
-
-```scala mdoc:invisible
-LocalDynamoDB.deleteTable(client)("foo")
-LocalDynamoDB.deleteTable(client)("Customer")
-```
-
 ### Derived Formats
 
 Scanamo uses [magnolia](https://magnolia.work/opensource/magnolia) and implicit derivation to automatically derive `DynamoFormat`s for case classes and sealed trait families. You may also see or hear sealed trait families referred to as Algebraic Data Types (ADTs) and co-products. Here is an example that could be used to support event sourcing (assuming a table with a partition key of `id` and sort key `seqNo`):
