@@ -42,12 +42,7 @@ comment: off
          flags: scalaz-zio		
          target: auto		
          threshold: 100		
-         base: auto		
-     refined:		
-         flags: refined		
-         target: auto		
-         threshold: 100		
-         base: auto		
+         base: auto
      patch:		
        default: off		
        scanamo:		
@@ -81,11 +76,7 @@ comment: off
        scalaz-zio:		
          flags: scalaz-zio		
          threshold: 100		
-         base: auto		
-       refined:		
-         flags: refined		
-         threshold: 100		
-         base: auto		
+         base: auto
  flags:		
    alpakka:		
      paths:		
@@ -101,10 +92,7 @@ comment: off
        - java-time/		
    joda:		
      paths:		
-       - joda/		
-   refined:		
-     paths:		
-       - refined/		
+       - joda/
    scalaz:		
      paths:		
        - scalaz/		
