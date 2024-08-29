@@ -32,12 +32,20 @@ trait AttributesSummation {
     attributesSources.foldLeft(AttributeNamesAndValues.Empty)(_ |+| _.attributes)
 }
 
+trait WithOptionalCondition extends AttributesSummation {
+  val condition: Option[RequestCondition]
+}
+
+trait WithUpdate extends AttributesSummation {
+  val updateAndCondition: UpdateAndCondition
+}
+
 case class ScanamoPutRequest(
   tableName: String,
   item: DynamoValue,
   condition: Option[RequestCondition],
   ret: PutReturn
-) extends AttributesSummation {
+) extends WithOptionalCondition {
   val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 
@@ -46,7 +54,7 @@ case class ScanamoDeleteRequest(
   key: DynamoObject,
   condition: Option[RequestCondition],
   ret: DeleteReturn
-) extends AttributesSummation {
+) extends WithOptionalCondition {
   val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 
@@ -54,7 +62,7 @@ case class ScanamoUpdateRequest(
   tableName: String,
   key: DynamoObject,
   updateAndCondition: UpdateAndCondition
-) extends AttributesSummation {
+) extends WithUpdate {
   val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
 
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
@@ -117,11 +125,14 @@ case class RequestCondition(
   def dynamoValues: Option[DynamoObject] = Some(attributes.values)
 }
 
+trait TransactWriteAction
+
 case class TransactPutItem(
   tableName: String,
   item: DynamoValue,
   condition: Option[RequestCondition]
-) extends AttributesSummation {
+) extends WithOptionalCondition
+    with TransactWriteAction {
   override val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 
@@ -129,7 +140,8 @@ case class TransactUpdateItem(
   tableName: String,
   key: DynamoObject,
   updateAndCondition: UpdateAndCondition
-) extends AttributesSummation {
+) extends WithUpdate
+    with TransactWriteAction {
   override val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
 
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
@@ -149,14 +161,16 @@ case class TransactDeleteItem(
   tableName: String,
   key: DynamoObject,
   condition: Option[RequestCondition]
-) extends AttributesSummation {
+) extends WithOptionalCondition
+    with TransactWriteAction {
   override val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 case class TransactConditionCheck(
   tableName: String,
   key: DynamoObject,
   condition: RequestCondition
-) extends AttributesSummation {
+) extends AttributesSummation
+    with TransactWriteAction {
   override val attributesSources: Seq[HasAttributes] = Seq(condition)
 }
 

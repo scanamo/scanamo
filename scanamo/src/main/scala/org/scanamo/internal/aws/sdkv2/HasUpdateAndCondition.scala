@@ -1,46 +1,28 @@
 package org.scanamo.internal.aws.sdkv2
 
-import org.scanamo.internal.aws.sdkv2.HasCondition.*
 import org.scanamo.internal.aws.sdkv2.HasExpressionAttributes.*
-// import org.scanamo.internal.aws.sdkv2.HasUpdateAndCondition.*
 import org.scanamo.request.AttributeNamesAndValues
 import org.scanamo.update.UpdateAndCondition
 import software.amazon.awssdk.services.dynamodb.model
 import software.amazon.awssdk.services.dynamodb.model.*
+import software.amazon.awssdk.utils.builder.SdkBuilder
 
 import java.util
 import scala.collection.JavaConverters.*
 
 object HasExpressionAttributes {
 
-  // type AR[x <: ActionRequest[x]] = ActionRequest[x]
-
-  // software.amazon.awssdk.services.dynamodb.model.DynamoDbRequest.Builder
-  // software.amazon.awssdk.utils.builder.SdkBuilder: public interface SdkBuilder<B extends SdkBuilder<B, T>, T> extends Foo {
-
-  // type Grrr[B] = software.amazon.awssdk.utils.builder.SdkBuilder[B, _]
-
-  type Moo[t] = software.amazon.awssdk.utils.builder.SdkBuilder[_, t]
-
-  type Boom[t, b <: software.amazon.awssdk.utils.builder.SdkBuilder[b, t]] =
-    software.amazon.awssdk.utils.builder.SdkBuilder[b, t]
-
-  type Boo[b <: software.amazon.awssdk.utils.builder.SdkBuilder[b, _]] =
-    software.amazon.awssdk.utils.builder.SdkBuilder[b, _]
-
-  type Foo = Boo[_]
-
   type BV[B, V] = B => V => B
 
-  case class Has[B <: Foo](
+  case class Has[T, B <: SdkBuilder[B, T]](
     tableName: BV[B, String],
     expressionAttributeNames: BV[B, util.Map[String, String]],
     expressionAttributeValues: BV[B, util.Map[String, AttributeValue]]
-  ) extends HasExpressionAttributes[B]
+  ) extends HasExpressionAttributes[T, B]
 
-  implicit class HasExpressionAttributesOps[B <: Foo](val b: B)(implicit h: HasExpressionAttributes[B]) {
-    b.build()
-
+  implicit class HasExpressionAttributesOps[T, B <: SdkBuilder[B, T]](val b: B)(implicit
+    h: HasExpressionAttributes[T, B]
+  ) {
     def tableName(name: String): B = h.tableName(b)(name)
     def expressionAttributeNames(names: util.Map[String, String]): B =
       h.expressionAttributeNames(b)(names)
@@ -49,17 +31,17 @@ object HasExpressionAttributes {
 
     def attributes(attributes: AttributeNamesAndValues): B = if (attributes.isEmpty) b
     else
-      b.expressionAttributeNames(attributes.names.asJava)
-        .setOpt(attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
+      expressionAttributeNames(attributes.names.asJava)
+        .setOpt(attributes.values.toExpressionAttributeValues)(h.expressionAttributeValues)
   }
 
-  implicit val qr: Has[QueryRequest.Builder] =
+  implicit val qr: Has[QueryRequest, QueryRequest.Builder] =
     Has(_.tableName, _.expressionAttributeNames, _.expressionAttributeValues)
-  implicit val sr: Has[ScanRequest.Builder] =
+  implicit val sr: Has[ScanRequest, ScanRequest.Builder] =
     Has(_.tableName, _.expressionAttributeNames, _.expressionAttributeValues)
 }
 
-trait HasExpressionAttributes[B <: Foo] {
+trait HasExpressionAttributes[T, B <: SdkBuilder[B, T]] {
   type B2B[V] = BV[B, V]
 
   val tableName: B2B[String]
@@ -67,19 +49,19 @@ trait HasExpressionAttributes[B <: Foo] {
   val expressionAttributeValues: B2B[util.Map[String, AttributeValue]]
 }
 
-trait HasCondition[B <: Foo] extends HasExpressionAttributes[B] {
+trait HasCondition[T, B <: SdkBuilder[B, T]] extends HasExpressionAttributes[T, B] {
   val conditionExpression: B2B[String]
 }
 
 object HasCondition {
-  case class Has[T, B <: Boom[T, B]](
+  case class Has[T, B <: SdkBuilder[B, T]](
     tableName: BV[B, String],
     conditionExpression: BV[B, String],
     expressionAttributeNames: BV[B, util.Map[String, String]],
     expressionAttributeValues: BV[B, util.Map[String, AttributeValue]]
-  ) extends HasCondition[B]
+  ) extends HasCondition[T, B]
 
-  implicit class HasConditionOps[B <: Foo](val b: B)(implicit h: HasCondition[B]) {
+  implicit class HasConditionOps[T, B <: SdkBuilder[B, T]](val b: B)(implicit h: HasCondition[T, B]) {
     def conditionExpression(expression: String): B = h.conditionExpression(b)(expression)
   }
 
@@ -100,20 +82,19 @@ object HasCondition {
 }
 
 object HasUpdateAndCondition {
-  case class Has[T, B <: Boom[T, B]](
+  case class Has[T, B <: SdkBuilder[B, T]](
     tableName: BV[B, String],
     updateExpression: BV[B, String],
     conditionExpression: BV[B, String],
     expressionAttributeNames: BV[B, util.Map[String, String]],
     expressionAttributeValues: BV[B, util.Map[String, AttributeValue]]
-  ) extends HasUpdateAndCondition[B]
+  ) extends HasUpdateAndCondition[T, B]
 
-  implicit class Ops[B <: Foo](val b: B)(implicit h: HasUpdateAndCondition[B]) {
+  implicit class HasUpdateAndConditionOps[T, B <: SdkBuilder[B, T]](val b: B)(implicit h: HasUpdateAndCondition[T, B]) {
     def updateExpression(expression: String): B = h.updateExpression(b)(expression)
 
     def updateAndCondition(uac: UpdateAndCondition): B =
-      b.updateExpression(uac.update.expression)
-        .setOpt(uac.condition.map(_.expression))(_.conditionExpression)
+      updateExpression(uac.update.expression).setOpt(uac.condition.map(_.expression))(h.conditionExpression)
   }
 
   implicit val uir: Has[UpdateItemRequest, UpdateItemRequest.Builder] =
@@ -124,6 +105,6 @@ object HasUpdateAndCondition {
 
 }
 
-trait HasUpdateAndCondition[B <: Foo] extends HasCondition[B] {
+trait HasUpdateAndCondition[T, B <: SdkBuilder[B, T]] extends HasCondition[T, B] {
   val updateExpression: B2B[String]
 }
