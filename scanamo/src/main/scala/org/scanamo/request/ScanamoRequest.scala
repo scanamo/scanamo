@@ -36,8 +36,18 @@ trait WithOptionalCondition extends AttributesSummation {
   val condition: Option[RequestCondition]
 }
 
-trait WithUpdate extends AttributesSummation {
+sealed trait CRUD extends Keyed
+
+trait Putting extends CRUD with WithOptionalCondition with KeyedByItem {
+  val attributesSources: Seq[HasAttributes] = condition.toSeq
+}
+trait Updating extends CRUD with AttributesSummation with KeyedByKey {
   val updateAndCondition: UpdateAndCondition
+
+  val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
+}
+trait Deleting extends CRUD with WithOptionalCondition with KeyedByKey {
+  val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 
 case class ScanamoPutRequest(
@@ -45,26 +55,20 @@ case class ScanamoPutRequest(
   item: DynamoValue,
   condition: Option[RequestCondition],
   ret: PutReturn
-) extends WithOptionalCondition {
-  val attributesSources: Seq[HasAttributes] = condition.toSeq
-}
+) extends Putting
 
 case class ScanamoDeleteRequest(
   tableName: String,
   key: DynamoObject,
   condition: Option[RequestCondition],
   ret: DeleteReturn
-) extends WithOptionalCondition {
-  val attributesSources: Seq[HasAttributes] = condition.toSeq
-}
+) extends Deleting
 
 case class ScanamoUpdateRequest(
   tableName: String,
   key: DynamoObject,
   updateAndCondition: UpdateAndCondition
-) extends WithUpdate {
-  val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
-
+) extends Updating {
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
   def updateExpression: String = updateAndCondition.update.expression
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
@@ -106,7 +110,7 @@ case class ScanamoQueryOptions(
   lazy val filterCondition: Option[RequestCondition] = filter.map(_.apply.runEmptyA.value)
 }
 object ScanamoQueryOptions {
-  val default = ScanamoQueryOptions(false, true, None, None, None)
+  val default = ScanamoQueryOptions(consistent = false, ascending = true, None, None, None)
 }
 
 case class RequestCondition(
@@ -125,25 +129,21 @@ case class RequestCondition(
   def dynamoValues: Option[DynamoObject] = Some(attributes.values)
 }
 
-trait TransactWriteAction
+sealed trait TransactWriteAction
 
 case class TransactPutItem(
   tableName: String,
   item: DynamoValue,
   condition: Option[RequestCondition]
-) extends WithOptionalCondition
-    with TransactWriteAction {
-  override val attributesSources: Seq[HasAttributes] = condition.toSeq
-}
+) extends Putting
+    with TransactWriteAction
 
 case class TransactUpdateItem(
   tableName: String,
   key: DynamoObject,
   updateAndCondition: UpdateAndCondition
-) extends WithUpdate
+) extends Updating
     with TransactWriteAction {
-  override val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
-
   @deprecated("See https://github.com/scanamo/scanamo/pull/1796", "3.0.0")
   def this(
     tableName: String,
@@ -162,15 +162,16 @@ case class TransactDeleteItem(
   key: DynamoObject,
   condition: Option[RequestCondition]
 ) extends WithOptionalCondition
-    with TransactWriteAction {
-  override val attributesSources: Seq[HasAttributes] = condition.toSeq
-}
+    with TransactWriteAction
+    with Deleting
+
 case class TransactConditionCheck(
   tableName: String,
   key: DynamoObject,
   condition: RequestCondition
 ) extends AttributesSummation
-    with TransactWriteAction {
+    with TransactWriteAction
+    with KeyedByKey {
   override val attributesSources: Seq[HasAttributes] = Seq(condition)
 }
 
