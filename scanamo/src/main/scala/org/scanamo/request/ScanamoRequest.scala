@@ -50,6 +50,19 @@ case class ScanamoDeleteRequest(
   val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 
+case class UpdateExpressionWithCondition(updateExpression: UpdateExpression,
+                                         condition: Option[RequestCondition] = None
+) {
+  def attributeNames: Map[String, String] = updateExpression.attributeNamesAndValues.names
+
+  def combinedAttributeNames: Map[String, String] =
+    attributeNames ++ condition.map(_.attributeNames).getOrElse(Map.empty)
+
+  def dynamoValues: DynamoObject = updateExpression.attributeNamesAndValues.values
+  def combinedAttributeValues: DynamoObject =
+    condition.map(_.dynamoValues).fold(dynamoValues)(_ <> dynamoValues)
+}
+
 case class ScanamoUpdateRequest(
   tableName: String,
   key: DynamoObject,
@@ -117,11 +130,15 @@ case class RequestCondition(
   def dynamoValues: Option[DynamoObject] = Some(attributes.values)
 }
 
+trait TransactPunk {
+  val tableName: String
+}
+
 case class TransactPutItem(
   tableName: String,
   item: DynamoValue,
   condition: Option[RequestCondition]
-) extends AttributesSummation {
+) extends TransactPunk with AttributesSummation {
   override val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 
@@ -149,14 +166,14 @@ case class TransactDeleteItem(
   tableName: String,
   key: DynamoObject,
   condition: Option[RequestCondition]
-) extends AttributesSummation {
+) extends TransactPunk with AttributesSummation {
   override val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
 case class TransactConditionCheck(
   tableName: String,
   key: DynamoObject,
   condition: RequestCondition
-) extends AttributesSummation {
+) extends TransactPunk with AttributesSummation {
   override val attributesSources: Seq[HasAttributes] = Seq(condition)
 }
 

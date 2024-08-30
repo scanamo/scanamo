@@ -244,8 +244,5 @@ case class Condition[T](t: T)(implicit T: ConditionExpression[T]) {
 }
 
 object Condition {
-  implicit def conditionExpression[T]: ConditionExpression[Condition[T]] =
-    new ConditionExpression[Condition[T]] {
-      override def apply(condition: Condition[T]): State[Int, RequestCondition] = condition.apply
-    }
+  implicit def conditionExpression[T]: ConditionExpression[Condition[T]] = _.apply
 }

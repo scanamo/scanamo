@@ -80,6 +80,45 @@ object ScanamoFree {
     loop(batches)
   }
 
+  def transact(
+    boof: Map[String, Map[UniqueKey[_], AlternativeTransacts.TransAction]]
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
+    val items = (for {
+      (tableName, tableItem) <- boof
+      (key, item) <- tableItem
+    } yield item.toTransactPunk(tableName, key)).toSeq
+    ScanamoOps.transactWriteAll(
+      ScanamoTransactWriteRequest(
+        putItems = items.collect { case p: TransactPutItem => p },
+        updateItems = items.collect { case u: TransactUpdateItem => u },
+        deleteItems = items.collect { case d: TransactDeleteItem => d },
+        conditionCheck = items.collect { case c: TransactConditionCheck => c }
+      )
+    )
+  }
+
+  def transactionalFight(
+    actions: List[TransactionalWriteAction]
+  ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
+    val transactionWriteRequest =
+      actions.foldLeft(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { case (acc, action) =>
+        action match {
+          case r @ TransactionalWriteAction.Put(table, _) =>
+            acc.copy(putItems = acc.putItems :+ TransactPutItem(table, r.asDynamoValue, None))
+          case TransactionalWriteAction.Update(table, key, updateExpr) =>
+            acc.copy(updateItems = acc.updateItems :+ TransactUpdateItem(table, key.toDynamoObject, UpdateExpressionWithCondition(updateExpr, None)))
+          case TransactionalWriteAction.Delete(table, key) =>
+            acc.copy(deleteItems = acc.deleteItems :+ TransactDeleteItem(table, key.toDynamoObject, None))
+          case r @ TransactionalWriteAction.ConditionCheck(table, key, _) =>
+            acc.copy(conditionCheck =
+              acc.conditionCheck :+ TransactConditionCheck(table, key.toDynamoObject, r.asRequestCondition)
+            )
+        }
+      }
+    ScanamoOps
+      .transactWriteAll(transactionWriteRequest)
+  }
+
   def transactionalWrite(
     actions: List[TransactionalWriteAction]
   ): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
