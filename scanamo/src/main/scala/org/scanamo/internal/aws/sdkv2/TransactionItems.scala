@@ -4,7 +4,6 @@ import cats.Endo
 import org.scanamo.internal.aws.sdkv2.HasCondition.*
 import org.scanamo.request.*
 import software.amazon.awssdk.services.dynamodb.model.*
-import software.amazon.awssdk.utils.builder.SdkBuilder
 
 object TransactionItems {
   import Transformations.*

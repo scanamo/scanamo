@@ -24,7 +24,6 @@ import org.scanamo.internal.aws.sdkv2.HasUpdateAndCondition.*
 import org.scanamo.request.*
 import software.amazon.awssdk.services.dynamodb.model.*
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue.ALL_NEW
-import software.amazon.awssdk.utils.builder.SdkBuilder
 
 package object ops {
   type ScanamoOps[A] = Free[ScanamoOpsA, A]
