@@ -15,6 +15,11 @@ package object sdkv2 {
   implicit def javaKeyFor(k: KeyedByKey): util.Map[String, AttributeValue] = k.key.toJavaMap
   implicit def javaKeyFor(k: KeyedByItem): util.Map[String, AttributeValue] = k.item.asObject.orEmpty.toJavaMap
 
+  case class Dresser[C <: CRUD]() {
+  }
+
+  implicit val deleteDresser: Dresser[Deleting] = Dresser()
+
   def baseSettings[T, B <: SdkBuilder[B, T]](as: AttributesSummation)(
     builder: B
   )(implicit h: HasExpressionAttributes[T, B]): T =

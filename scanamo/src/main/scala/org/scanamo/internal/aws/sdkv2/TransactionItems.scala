@@ -4,6 +4,7 @@ import cats.Endo
 import org.scanamo.internal.aws.sdkv2.HasCondition.*
 import org.scanamo.request.*
 import software.amazon.awssdk.services.dynamodb.model.*
+import software.amazon.awssdk.utils.builder.SdkBuilder
 
 object TransactionItems {
   import Transformations.*
@@ -18,6 +19,25 @@ object TransactionItems {
 }
 
 private object Transformations {
+
+//  case class X[T](v: TransactWriteItem.Builder => T => TransactWriteItem.Builder)
+
+  // call the correct method on TransactWriteItem.Builder - .put, .update, etc
+  // make a Put/Update/etc builder
+  // given a Put/Update/etc builder, populate it with 'standard' stuff for the item - ie every Putting gets this.
+  // given a Put/Update/etc builder, populate it with custom stuff
+  // type parameter just needs to be the TWA
+
+  // TransactPutItem extends Putting - so can it take advantage of a type-class for Putting?
+
+//  def grump[CR <: CRUD, T, B <: SdkBuilder[B, T]](
+//    twiMethod: TransactWriteItem.Builder => T => TransactWriteItem.Builder, // make a Put/Update/etc builder
+//    builderMaker: () => B, // make a builder
+//    f: CR => Endo[B] // modify builder with custom stuff
+//  ): CR => TransactWriteItem = cr => twiMethod(TransactWriteItem.builder())(f(cr)(builderMaker()).build()).build()
+//
+//  implicit val tcp: C[TransactPutItem] = grump[Putting, Put, Put.Builder](_.put, Put.builder, item => _.item(item))
+//  implicit val tcd: C[TransactDeleteItem] = grump[Deleting, Delete, Delete.Builder](_.delete, Delete.builder, item => _.key(item))
 
   case class B[TWA <: TransactWriteAction](v: TWA => Endo[TransactWriteItem.Builder])
 

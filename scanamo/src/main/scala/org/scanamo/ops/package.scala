@@ -16,7 +16,7 @@
 
 package org.scanamo
 
-import cats.free.{ Free, FreeT }
+import cats.free.{Free, FreeT}
 import org.scanamo.internal.aws.sdkv2.*
 import org.scanamo.internal.aws.sdkv2.HasCondition.*
 import org.scanamo.internal.aws.sdkv2.HasExpressionAttributes.*
@@ -65,6 +65,11 @@ package object ops {
         .scanIndexForward(req.options.ascending)
         .keyConditionExpression(req.queryCondition.expression)
     )
+
+
+
+//    def crud[C <: CRUD, T, B <: SdkBuilder[B, T]](c: C)(builder: B)(implicit d: Dresser[C]) =
+//      d.dress[T, B](c)(builder)
 
     def put(req: ScanamoPutRequest): PutItemRequest =
       baseWithOptCond[PutItemRequest, PutItemRequest.Builder](req)(
