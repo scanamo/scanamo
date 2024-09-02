@@ -30,8 +30,8 @@ object HasExpressionAttributes {
 
     def attributes(attributes: AttributeNamesAndValues): B = if (attributes.isEmpty) b
     else
-      expressionAttributeNames(attributes.names.asJava)
-        .setOpt(attributes.values.toExpressionAttributeValues)(h.expressionAttributeValues)
+      b.expressionAttributeNames(attributes.names.asJava)
+        .setOpt(attributes.values.toExpressionAttributeValues)(_.expressionAttributeValues)
   }
 
   implicit val qr: Has[QueryRequest.Builder] =
@@ -101,7 +101,6 @@ object HasUpdateAndCondition {
 
   implicit val u: Has[Update.Builder] =
     Has(_.tableName, _.updateExpression, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
-
 }
 
 trait HasUpdateAndCondition[B] extends HasCondition[B] {
