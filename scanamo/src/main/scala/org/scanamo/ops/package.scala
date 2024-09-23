@@ -16,12 +16,13 @@
 
 package org.scanamo
 
-import cats.free.{Free, FreeT}
+import cats.Endo
+import cats.free.{ Free, FreeT }
 import org.scanamo.internal.aws.sdkv2.*
 import org.scanamo.internal.aws.sdkv2.HasCondition.*
 import org.scanamo.internal.aws.sdkv2.HasExpressionAttributes.*
 import org.scanamo.internal.aws.sdkv2.HasUpdateAndCondition.*
-import org.scanamo.request.*
+import org.scanamo.request.{ CRUD, * }
 import software.amazon.awssdk.services.dynamodb.model.*
 import software.amazon.awssdk.services.dynamodb.model.ReturnValue.ALL_NEW
 
@@ -65,15 +66,22 @@ package object ops {
         .keyConditionExpression(req.queryCondition.expression)
     )
 
-
-
 //    def crud[C <: CRUD, T, B <: SdkBuilder[B, T]](c: C)(builder: B)(implicit d: Dresser[C]) =
 //      d.dress[T, B](c)(builder)
 
-    def put(req: ScanamoPutRequest): PutItemRequest =
+//    def vorg(C <: CRUD, T[_])
+
+    def put(req: ScanamoPutRequest): PutItemRequest = {
+      import org.scanamo.internal.aws.sdkv2.*
+
+//      val value: Endo[PutItemRequest.Builder] = implicitly[Dresser[Putting, HasCondition]].blast[PutItemRequest.Builder](req)
+//
+//      value(PutItemRequest.builder)
+
       baseWithOptCond[PutItemRequest, PutItemRequest.Builder](req)(
         PutItemRequest.builder.item(req).returnValues(req.ret.asDynamoValue)
       )
+    }
 
     def delete(req: ScanamoDeleteRequest): DeleteItemRequest =
       baseWithOptCond[DeleteItemRequest, DeleteItemRequest.Builder](req)(

@@ -2,23 +2,19 @@ package org.scanamo.internal.aws
 
 import cats.implicits.*
 import org.scanamo.internal.aws.sdkv2.HasCondition.HasConditionOps
-import org.scanamo.internal.aws.sdkv2.HasExpressionAttributes.HasExpressionAttributesOps
-import org.scanamo.internal.aws.sdkv2.HasUpdateAndCondition.HasUpdateAndConditionOps
+import org.scanamo.internal.aws.sdkv2.HasExpressionAttributes.*
+import org.scanamo.internal.aws.sdkv2.HasUpdateAndCondition.*
 import org.scanamo.request.*
+import org.scanamo.request.AWSSdkV2.{HasCondition, HasExpressionAttributes, HasUpdateAndCondition}
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 import software.amazon.awssdk.utils.builder.SdkBuilder
-import scala.language.implicitConversions
 
 import java.util
+import scala.language.implicitConversions
 
 package object sdkv2 {
   implicit def javaKeyFor(k: KeyedByKey): util.Map[String, AttributeValue] = k.key.toJavaMap
   implicit def javaKeyFor(k: KeyedByItem): util.Map[String, AttributeValue] = k.item.asObject.orEmpty.toJavaMap
-
-//  case class Dresser[C <: CRUD]() {
-//  }
-//
-//  implicit val deleteDresser: Dresser[Deleting] = Dresser()
 
   def baseSettings[T, B <: SdkBuilder[B, T]: HasExpressionAttributes](as: AttributesSummation)(
     builder: B
@@ -26,7 +22,7 @@ package object sdkv2 {
 
   def baseWithOptCond[T, B <: SdkBuilder[B, T]: HasCondition](req: WithOptionalCondition)(
     builder: B
-  ): T = baseSettings[T, B](req)(builder.setOpt(req.condition.map(_.expression))(_.conditionExpression))
+  ): T = baseSettings[T, B](req)(builder.setOptionalCondition(req))
 
   def baseWithUpdate[T, B <: SdkBuilder[B, T]: HasUpdateAndCondition](req: Updating)(builder: B): T =
     baseSettings[T, B](req)(builder.updateAndCondition(req.updateAndCondition))
@@ -38,6 +34,6 @@ package object sdkv2 {
 
     def set[V](v: V)(f: B => V => B): B = f(builder)(v)
 
-    def expression(c: RequestCondition)(f: B => String => B): B = f(builder)(c.expression)
+    // def expression(c: RequestCondition)(f: B => String => B): B = f(builder)(c.expression)
   }
 }

@@ -17,9 +17,16 @@
 package org.scanamo.request
 
 import cats.implicits.*
-import org.scanamo.query.{ Condition, Query }
-import org.scanamo.update.{ UpdateAndCondition, UpdateExpression }
-import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
+import org.scanamo.internal.aws.sdkv2.BuilderStuff.BV
+import org.scanamo.internal.aws.sdkv2.RichBuilder
+import org.scanamo.query.{Condition, Query}
+import org.scanamo.request.AWSSdkV2.{ANameMap, AValueMap}
+import org.scanamo.update.{UpdateAndCondition, UpdateExpression}
+import org.scanamo.{DeleteReturn, DynamoObject, DynamoValue, PutReturn}
+import software.amazon.awssdk.services.dynamodb.model.AttributeValue
+
+import java.util
+import scala.collection.JavaConverters.*
 
 trait HasAttributes {
   def attributes: AttributeNamesAndValues
@@ -36,18 +43,105 @@ trait WithOptionalCondition extends AttributesSummation {
   val condition: Option[RequestCondition]
 }
 
+/** We can try to think of this trait as being a Scala-optimised model of the idealised DynamoDB API model - ie it
+  * reflects:
+  *
+  * https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.API.html#HowItWorks.API.DataPlane
+  * https://docs.aws.amazon.com/amazondynamodb/latest/APIReference/API_Operations_Amazon_DynamoDB.html
+  *
+  * ...rather than the AWS SDK for Java:
+  *
+  * https://sdk.amazonaws.com/java/api/latest/software/amazon/awssdk/services/dynamodb/package-summary.html
+  *
+  * CRUD (Create, read, update and delete) in DynamoDB is Put, Get, Update, Delete - and actually in Scanamo we haven't
+  * wrapped Get, so we are only concerned with Put, Update, Delete.
+  *
+  * All three of PUD are duplicated in DynamoDB - they have transactional *and* non-transactional forms that are almost
+  * identical. It feels reasonable to give a common trait to both the transactional & non-transactional form of each
+  * one.
+  */
 sealed trait CRUD extends Keyed
 
-trait Putting extends CRUD with WithOptionalCondition with KeyedByItem {
+trait Putting extends CRUD with KeyedByItem with WithOptionalCondition {
   val attributesSources: Seq[HasAttributes] = condition.toSeq
 }
-trait Updating extends CRUD with AttributesSummation with KeyedByKey {
+trait Updating extends CRUD with KeyedByKey with AttributesSummation {
   val updateAndCondition: UpdateAndCondition
 
   val attributesSources: Seq[HasAttributes] = Seq(updateAndCondition)
 }
-trait Deleting extends CRUD with WithOptionalCondition with KeyedByKey {
+trait Deleting extends CRUD with KeyedByKey with WithOptionalCondition {
   val attributesSources: Seq[HasAttributes] = condition.toSeq
+}
+
+/* For any SDK - eg SDK v1 or v2, maybe we could have an instance of DynamoSDK that can populate the common fields
+ * of PUD requests...?
+ *
+ */
+
+trait DynamoSDK {
+  type ANameMap
+  type AValueMap
+
+  def forSdk(names: Map[String, String]): ANameMap
+  def forSdk(values: DynamoObject): AValueMap
+
+  trait HasKey[B] {
+    val key: BV[B, AValueMap]
+  }
+
+  trait HasItem[B] {
+    val item: BV[B, AValueMap]
+  }
+
+  trait HasExpressionAttributes[B] {
+    type B2B[V] = BV[B, V]
+
+    val tableName: B2B[String]
+    val expressionAttributeNames: B2B[ANameMap]
+    val expressionAttributeValues: B2B[AValueMap]
+  }
+
+  trait HasCondition[B] extends HasExpressionAttributes[B] {
+    val conditionExpression: B2B[String]
+  }
+
+  trait HasUpdateAndCondition[B] extends HasCondition[B] {
+    val updateExpression: B2B[String]
+  }
+
+  trait De[B] extends HasKey[B] with HasCondition[B]
+  trait Up[B] extends HasKey[B] with HasUpdateAndCondition[B]
+  trait Pu[B] extends HasItem[B] with HasCondition[B]
+
+  implicit class HasExpressionAttributesOps[B](val b: B)(implicit h: HasExpressionAttributes[B]) {
+    def tableName(name: String): B = h.tableName(b)(name)
+    def expressionAttributeNames(names: ANameMap): B = h.expressionAttributeNames(b)(names)
+    def expressionAttributeValues(values: AValueMap): B = h.expressionAttributeValues(b)(values)
+
+    def attributes(attributes: AttributeNamesAndValues): B = if (attributes.isEmpty) b
+    else
+      b.expressionAttributeNames(forSdk(attributes.names))
+        .setOpt(forSdk(attributes.values))(_.expressionAttributeValues)
+  }
+
+  implicit class HasKeyOps[B](val b: B)(implicit h: HasKey[B]) {
+    def key(key: AValueMap): B = h.key(b)(key)
+  }
+
+
+  def delete[B: De](r: Deleting)(builder: B): B =
+    builder.tableName(r.tableName).key(r.key).attributes(r.attributes)
+}
+
+object AWSSdkV2 extends DynamoSDK {
+  override type ANameMap = util.Map[String, String]
+  override type AValueMap = util.Map[String, AttributeValue]
+
+  override def forSdk(names: Map[String, String]): ANameMap = names.asJava
+
+  override def forSdk(values: DynamoObject): AValueMap =
+    values.toExpressionAttributeValues
 }
 
 case class ScanamoPutRequest(

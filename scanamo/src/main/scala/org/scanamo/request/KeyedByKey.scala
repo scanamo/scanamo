@@ -4,7 +4,7 @@ import org.scanamo.{DynamoObject, DynamoValue}
 
 trait Keyed
 
-trait KeyedByKey extends Keyed{
+trait KeyedByKey extends Keyed {
   val key: DynamoObject
 }
 
