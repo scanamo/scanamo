@@ -19,10 +19,10 @@ package org.scanamo.request
 import cats.implicits.*
 import org.scanamo.internal.aws.sdkv2.BuilderStuff.BV
 import org.scanamo.internal.aws.sdkv2.RichBuilder
-import org.scanamo.query.{Condition, Query}
-import org.scanamo.request.AWSSdkV2.{ANameMap, AValueMap}
-import org.scanamo.update.{UpdateAndCondition, UpdateExpression}
-import org.scanamo.{DeleteReturn, DynamoObject, DynamoValue, PutReturn}
+import org.scanamo.query.{ Condition, Query }
+import org.scanamo.request.AWSSdkV2.{ ANameMap, AValueMap }
+import org.scanamo.update.{ UpdateAndCondition, UpdateExpression }
+import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
 import java.util
@@ -85,6 +85,8 @@ trait DynamoSDK {
 
   def forSdk(names: Map[String, String]): ANameMap
   def forSdk(values: DynamoObject): AValueMap
+  def forSdk(r: KeyedByKey): AValueMap = forSdk(r.key)
+  def forSdk(r: KeyedByItem): AValueMap = forSdk(r.key)
 
   trait HasKey[B] {
     val key: BV[B, AValueMap]
@@ -114,6 +116,10 @@ trait DynamoSDK {
   trait Up[B] extends HasKey[B] with HasUpdateAndCondition[B]
   trait Pu[B] extends HasItem[B] with HasCondition[B]
 
+  implicit class HasItemOps[B](val b: B)(implicit h: HasItem[B]) {
+    def item(item: AValueMap): B = h.item(b)(item)
+  }
+
   implicit class HasExpressionAttributesOps[B](val b: B)(implicit h: HasExpressionAttributes[B]) {
     def tableName(name: String): B = h.tableName(b)(name)
     def expressionAttributeNames(names: ANameMap): B = h.expressionAttributeNames(b)(names)
@@ -129,9 +135,29 @@ trait DynamoSDK {
     def key(key: AValueMap): B = h.key(b)(key)
   }
 
+  implicit class HasConditionOps[B](val b: B)(implicit h: HasCondition[B]) {
+    def conditionExpression(expression: String): B = h.conditionExpression(b)(expression)
+
+    def setOptionalCondition(r: WithOptionalCondition): B =
+      b.setOpt(r.condition.map(_.expression))(_.conditionExpression)
+  }
+
+  implicit class HasUpdateAndConditionOps[B](val b: B)(implicit h: HasUpdateAndCondition[B]) {
+    def updateExpression(expression: String): B = h.updateExpression(b)(expression)
+
+    def updateAndCondition(uac: UpdateAndCondition): B =
+      updateExpression(uac.update.expression).setOpt(uac.condition.map(_.expression))(h.conditionExpression)
+  }
 
   def delete[B: De](r: Deleting)(builder: B): B =
-    builder.tableName(r.tableName).key(r.key).attributes(r.attributes)
+    builder.tableName(r.tableName).key(forSdk(r)).attributes(r.attributes).setOptionalCondition(r)
+
+  def update[B: Up](r: Updating)(builder: B): B =
+    builder.tableName(r.tableName).key(forSdk(r)).attributes(r.attributes).updateAndCondition(r.updateAndCondition)
+
+  def putting[B: Pu](r: Putting)(builder: B): B =
+    builder.tableName(r.tableName).item(forSdk(r)).attributes(r.attributes).setOptionalCondition(r)
+
 }
 
 object AWSSdkV2 extends DynamoSDK {

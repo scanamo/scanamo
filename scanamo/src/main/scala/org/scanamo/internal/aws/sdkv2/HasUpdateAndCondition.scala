@@ -28,10 +28,6 @@ object HasKey {
 object HasItem {
   case class Has[B](item: BV[B, AValueMap]) extends HasItem[B]
 
-  implicit class HasItemOps[B](val b: B)(implicit h: HasItem[B]) {
-    def item(item: AValueMap): B = h.item(b)(item)
-  }
-
   implicit val pir: Has[PutItemRequest.Builder] = Has(_.item)
 }
 
@@ -71,13 +67,6 @@ object HasCondition {
     expressionAttributeValues: BV[B, AValueMap]
   ) extends HasCondition[B]
 
-  implicit class HasConditionOps[B](val b: B)(implicit h: HasCondition[B]) {
-    def conditionExpression(expression: String): B = h.conditionExpression(b)(expression)
-
-    def setOptionalCondition(r: WithOptionalCondition): B =
-      b.setOpt(r.condition.map(_.expression))(_.conditionExpression)
-  }
-
   implicit val pir: Has[PutItemRequest.Builder] =
     Has(_.tableName, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
 
@@ -103,12 +92,7 @@ object HasUpdateAndCondition {
     expressionAttributeValues: BV[B, AValueMap]
   ) extends HasUpdateAndCondition[B]
 
-  implicit class HasUpdateAndConditionOps[B](val b: B)(implicit h: HasUpdateAndCondition[B]) {
-    def updateExpression(expression: String): B = h.updateExpression(b)(expression)
 
-    def updateAndCondition(uac: UpdateAndCondition): B =
-      updateExpression(uac.update.expression).setOpt(uac.condition.map(_.expression))(h.conditionExpression)
-  }
 
   implicit val uir: Has[UpdateItemRequest.Builder] =
     Has(_.tableName, _.updateExpression, _.conditionExpression, _.expressionAttributeNames, _.expressionAttributeValues)
