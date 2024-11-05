@@ -37,7 +37,7 @@ final case class ConditionalOperation[V, T](tableName: String, t: T)(implicit
 
   private def nativePut(ret: PutReturn, item: V): ScanamoOps[Conditional[PutItemResponse]] =
     ScanamoOps.conditionalPut(
-      ScanamoPutRequest(tableName, format.write(item), Some(expr(t).runEmptyA.value), ret)
+      ScanamoPutRequest(tableName, format.write(item).asObject.orEmpty, Some(expr(t).runEmptyA.value), ret)
     )
 
   def delete(key: UniqueKey[_]): ScanamoOps[Either[ScanamoError, Unit]] =

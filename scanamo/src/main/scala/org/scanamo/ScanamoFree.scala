@@ -50,7 +50,7 @@ object ScanamoFree {
   private def nativePut[T](tableName: String, ret: PutReturn, item: T)(implicit
     f: DynamoFormat[T]
   ): ScanamoOps[PutItemResponse] =
-    ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item), None, ret))
+    ScanamoOps.put(ScanamoPutRequest(tableName, f.write(item).asObject.orEmpty, None, ret))
 
   def putAll[T](tableName: String)(items: Set[T])(implicit f: DynamoFormat[T]): ScanamoOps[Unit] = {
     def loop(items: List[JMap[String, JList[WriteRequest]]]): ScanamoOps[Unit] =
@@ -87,7 +87,7 @@ object ScanamoFree {
       actions.foldLeft(ScanamoTransactWriteRequest(Seq.empty, Seq.empty, Seq.empty, Seq.empty)) { case (acc, action) =>
         action match {
           case r @ TransactionalWriteAction.Put(table, _) =>
-            acc.copy(putItems = acc.putItems :+ TransactPutItem(table, r.asDynamoValue, None))
+            acc.copy(putItems = acc.putItems :+ TransactPutItem(table, r.asDynamoObject, None))
           case TransactionalWriteAction.Update(table, key, updateExpr) =>
             acc.copy(updateItems =
               acc.updateItems :+ TransactUpdateItem(table, key.toDynamoObject, UpdateAndCondition(updateExpr))
@@ -113,7 +113,7 @@ object ScanamoFree {
     tableAndItems: List[(String, T)]
   )(implicit f: DynamoFormat[T]): ScanamoOps[Transact[TransactWriteItemsResponse]] = {
     val dItems = tableAndItems.map { case (tableName, itm) =>
-      TransactPutItem(tableName, f.write(itm), None)
+      TransactPutItem(tableName, f.write(itm).asObject.orEmpty, None)
     }
     ScanamoOps
       .transactWriteAll(ScanamoTransactWriteRequest(dItems, Seq.empty, Seq.empty, Seq.empty))
