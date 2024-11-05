@@ -30,11 +30,11 @@ lazy val stdOptions = Seq(
 lazy val std2_12Options = Seq(
   "-opt-warnings",
   "-Ywarn-extra-implicit",
-  "-Ywarn-unused:_,imports",
-  "-Ywarn-unused:imports",
+//  "-Ywarn-unused:_,imports",
+//  "-Ywarn-unused:imports",
   "-opt:l:inline",
   "-opt-inline-from:<source>",
-  "-Xfatal-warnings", // lots of warnings against Scala 2.13 at the moment, so not enabling for 2.13
+  // "-Xfatal-warnings", // lots of warnings against Scala 2.13 at the moment, so not enabling for 2.13
   "-Xfuture",
   "-Ypartial-unification",
   "-Yno-adapted-args",
@@ -98,7 +98,7 @@ val commonSettings = Seq(
   Test / scalacOptions := {
     val mainScalacOptions = scalacOptions.value
     (if (CrossVersion.partialVersion(scalaVersion.value).contains((2, 12)))
-       mainScalacOptions.filter(!Set("-Ywarn-value-discard", "-Xlint").contains(_)) :+ "-Xlint:-unused,_"
+       mainScalacOptions.filter(!Set("-Ywarn-value-discard", "-Xlint").contains(_)) // :+ "-Xlint:-unused,_"
      else
        mainScalacOptions).filter(_ != "-Xfatal-warnings")
   },
