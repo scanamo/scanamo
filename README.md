@@ -4,7 +4,7 @@
 [![CI](https://github.com/scanamo/scanamo/actions/workflows/ci.yml/badge.svg)](https://github.com/scanamo/scanamo/actions/workflows/ci.yml)
 
 Scanamo is a library to make using [DynamoDB](https://aws.amazon.com/documentation/dynamodb/) with Scala 
-simpler and less error-prone.
+simpler and less error-prone. The library is currently maintained by Roberto Tyley (@rtyley).
 
 The main focus is on making it easier to avoid mistakes and typos by leveraging Scala's type system and some
 higher level abstractions.
