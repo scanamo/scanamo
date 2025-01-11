@@ -45,5 +45,6 @@ class ScanamoSyncInterpreter(client: DynamoDbClient) extends (ScanamoOpsA ~> Id)
     case Update(req)            => client.updateItem(JavaRequests.update(req))
     case ConditionalUpdate(req) => runConditional(client.updateItem(JavaRequests.update(req)))
     case TransactWriteAll(req)  => runTransact(client.transactWriteItems(JavaRequests.transactItems(req)))
+    case UpdateTimeToLive(req)  => client.updateTimeToLive(JavaRequests.updateTimeToLive(req))
   }
 }
