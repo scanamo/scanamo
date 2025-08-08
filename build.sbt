@@ -3,19 +3,19 @@ import sbtversionpolicy.withsbtrelease.ReleaseVersion
 
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
-  val scala212 = "2.12.19"
-  val scala213 = "2.13.14"
-  val scala3 = "3.3.3"
+  val scala212 = "2.12.20"
+  val scala213 = "2.13.16"
+  val scala3 = "3.3.6"
   val magnolia = "1.1.8"
   val magnoliaFor3 = "1.3.4"
-  val catsVersion = "2.10.0"
-  val catsEffectVersion = "3.5.4"
+  val catsVersion = "2.13.0"
+  val catsEffectVersion = "3.6.3"
 }
 
 ThisBuild / scalaVersion := V.scala3
 
 val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
-val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.0" % Test
+val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
 val zioVersion = "1.0.18"
 
 lazy val stdOptions = Seq(
@@ -131,7 +131,7 @@ lazy val root = (project in file("."))
     stopDynamoDBLocal / aggregate := false
   )
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.26.31"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.32.16"
 
 lazy val scanamo = (project in file("scanamo"))
   .settings(
@@ -147,8 +147,8 @@ lazy val scanamo = (project in file("scanamo"))
       "org.scala-lang.modules" %% "scala-java8-compat" % "1.0.2",
       "org.typelevel"          %% "cats-free"          % V.catsVersion,
       // Use Joda for custom conversion example
-      "org.joda"           % "joda-convert"    % "2.2.3"    % Provided,
-      "joda-time"          % "joda-time"       % "2.12.7"   % Test,
+      "org.joda"           % "joda-convert"    % "3.0.1"    % Provided,
+      "joda-time"          % "joda-time"       % "2.14.0"   % Test,
       scalaTest,
       "org.scalatestplus" %% "scalacheck-1-16" % "3.2.14.0" % Test,
       scalaCheck
@@ -177,7 +177,7 @@ lazy val catsEffect = (project in file("cats"))
       "org.typelevel"  %% "cats-free"   % V.catsVersion,
       "org.typelevel"  %% "cats-core"   % V.catsVersion,
       "org.typelevel"  %% "cats-effect" % V.catsEffectVersion,
-      "co.fs2"         %% "fs2-core"    % "3.10.2",
+      "co.fs2"         %% "fs2-core"    % "3.12.0",
       scalaTest,
       scalaCheck
     ),
@@ -219,7 +219,7 @@ lazy val pekko = (project in file("pekko"))
     libraryDependencies ++= Seq(
       awsDynamoDB,
       "org.typelevel"    %% "cats-free"                 % V.catsVersion,
-      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.0.2",
+      "org.apache.pekko" %% "pekko-connectors-dynamodb" % "1.1.0",
       scalaTest,
       scalaCheck
     ),
@@ -238,8 +238,8 @@ lazy val joda = (project in file("joda"))
   )
   .settings(
     libraryDependencies ++= List(
-      "org.joda"        % "joda-convert" % "2.2.3"  % Provided,
-      "joda-time"       % "joda-time"    % "2.12.7",
+      "org.joda"        % "joda-convert" % "3.0.1"  % Provided,
+      "joda-time"       % "joda-time"    % "2.14.0",
       scalaTest,
       scalaCheck
     )
