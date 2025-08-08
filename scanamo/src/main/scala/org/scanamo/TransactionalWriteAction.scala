@@ -16,6 +16,7 @@
 
 package org.scanamo
 
+import cats.implicits.*
 import org.scanamo.query.{ ConditionExpression, UniqueKey }
 import org.scanamo.update.UpdateExpression
 
@@ -23,7 +24,7 @@ sealed trait TransactionalWriteAction
 
 object TransactionalWriteAction {
   case class Put[V](tableName: String, item: V)(implicit format: DynamoFormat[V]) extends TransactionalWriteAction {
-    def asDynamoValue = format.write(item)
+    def asDynamoObject = format.write(item).asObject.orEmpty
   }
 
   case class Update(tableName: String, key: UniqueKey[_], expression: UpdateExpression) extends TransactionalWriteAction
