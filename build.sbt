@@ -16,7 +16,7 @@ ThisBuild / scalaVersion := V.scala3
 
 val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
 val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
-val zioVersion = "1.0.18"
+val zioVersion = "2.1.20"
 
 lazy val stdOptions = Seq(
   "-release:8",
