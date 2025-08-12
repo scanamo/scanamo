@@ -6,7 +6,7 @@ val V = new {
   val scala212 = "2.12.20"
   val scala213 = "2.13.16"
   val scala3 = "3.3.6"
-  val magnolia = "1.1.8"
+  val magnolia = "1.1.10"
   val magnoliaFor3 = "1.3.18"
   val catsVersion = "2.13.0"
   val catsEffectVersion = "3.6.3"
@@ -16,7 +16,7 @@ ThisBuild / scalaVersion := V.scala3
 
 val scalaTest = "org.scalatest" %% "scalatest" % "3.2.19" % Test
 val scalaCheck = "org.scalacheck" %% "scalacheck" % "1.18.1" % Test
-val zioVersion = "1.0.18"
+val zioVersion = "2.1.20"
 
 lazy val stdOptions = Seq(
   "-release:8",
@@ -199,7 +199,7 @@ lazy val zio = (project in file("zio"))
       "org.typelevel"  %% "cats-effect"      % V.catsEffectVersion,
       "dev.zio"        %% "zio"              % zioVersion,
       "dev.zio"        %% "zio-streams"      % zioVersion % Provided,
-      "dev.zio"        %% "zio-interop-cats" % "3.1.1.0",
+      "dev.zio"        %% "zio-interop-cats" % "3.3.0",
       scalaTest,
       scalaCheck
     ),
