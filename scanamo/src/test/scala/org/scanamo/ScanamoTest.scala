@@ -790,4 +790,15 @@ class ScanamoTest extends AnyFunSpec with Matchers with NonImplicitAssertions {
       scanamo.exec(ops) should equal(List(Right(Forecast("London", "Sun", Some("shades")))))
     }
   }
+
+  it("should enable ttl") {
+    LocalDynamoDB.usingRandomTable(client)("location" -> S) { t =>
+      val forecasts = Table[Forecast](t)
+      val ops = for {
+        fs <- forecasts.updateTimeToLIve("expire_at")
+      } yield fs
+
+      scanamo.exec(ops).timeToLiveSpecification().enabled() should equal(true)
+    }
+  }
 }
