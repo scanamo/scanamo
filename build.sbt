@@ -131,7 +131,7 @@ lazy val root = (project in file("."))
     stopDynamoDBLocal / aggregate := false
   )
 
-val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.32.33"
+val awsDynamoDB = "software.amazon.awssdk" % "dynamodb" % "2.40.3"
 
 lazy val scanamo = (project in file("scanamo"))
   .settings(
