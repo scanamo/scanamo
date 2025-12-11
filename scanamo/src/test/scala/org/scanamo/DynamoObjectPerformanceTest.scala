@@ -49,7 +49,7 @@ class DynamoObjectPerformanceTest extends AnyFunSpec with Matchers {
       // In the buggy version, this causes internalToMap to be called repeatedly
 
       // Access fields many times to amplify the problem
-      val iterations = 50000
+      val iterations = 500000
 
       val startTime = System.nanoTime()
 
