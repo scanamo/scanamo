@@ -295,9 +295,32 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   final override def equals(that: Any): Boolean =
-    that.isInstanceOf[DynamoObject] && (internalToMap == that.asInstanceOf[DynamoObject].internalToMap)
+    that match {
+      case other: DynamoObject =>
+        // Pure FP approach: pattern match on types without extracting fields
+        // This avoids calling the case class's auto-generated equals() which causes recursion
+        (self, other) match {
+          case (_: Empty.type, _: Empty.type) =>
+            true
+          case (self: Strict, other: Strict) =>
+            // Access fields after matching to avoid case class equals recursion
+            self.xs == other.xs
+          case (self: Pure, other: Pure) =>
+            self.xs == other.xs
+          case _ =>
+            // Fall back for mixed types (e.g., Strict vs Concat)
+            internalToMap == other.internalToMap
+        }
+      case _ => false
+    }
 
-  final override def hashCode(): Int = internalToMap.hashCode
+  final override def hashCode(): Int =
+    self match {
+      case _: Empty.type => 0
+      case self: Strict => self.xs.hashCode()
+      case self: Pure => self.xs.hashCode()
+      case _ => internalToMap.hashCode
+    }
 }
 
 object DynamoObject {
@@ -305,8 +328,12 @@ object DynamoObject {
     final def internalToMap: Map[String, DynamoValue] = Map.empty
   }
   final private[DynamoObject] case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
-    final def internalToMap: Map[String, DynamoValue] =
-      unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue).toMap
+    // Lazy memoization - only computed if internalToMap is actually needed (e.g., mixed-type comparison)
+    // This is a safety net for the rare case where Strict is compared to Concat or other mixed types
+    @transient private[this] lazy val _internalToMap: Map[String, DynamoValue] =
+      unsafeToScalaMap(xs).view.mapValues(DynamoValue.fromAttributeValue).toMap
+
+    final def internalToMap: Map[String, DynamoValue] = _internalToMap
   }
   final private[DynamoObject] case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject {
     final def internalToMap: Map[String, DynamoValue] = xs
