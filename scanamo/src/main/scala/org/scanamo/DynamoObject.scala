@@ -323,12 +323,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     }
 
   final override def hashCode(): Int =
-    self match {
-      case _: Empty.type => 0
-      case self: Strict => self.xs.hashCode()
-      case self: Pure => self.xs.hashCode()
-      case _ => internalToMap.hashCode
-    }
+    internalToMap.hashCode()
 }
 
 object DynamoObject {
@@ -339,7 +334,7 @@ object DynamoObject {
     // Lazy memoization - only computed if internalToMap is actually needed (e.g., mixed-type comparison)
     // This is a safety net for the rare case where Strict is compared to Concat or other mixed types
     @transient private[this] lazy val _internalToMap: Map[String, DynamoValue] =
-      unsafeToScalaMap(xs).view.mapValues(DynamoValue.fromAttributeValue).toMap
+      unsafeToScalaMap(xs).map { case (k, v) => (k, DynamoValue.fromAttributeValue(v)) }
 
     final def internalToMap: Map[String, DynamoValue] = _internalToMap
   }
