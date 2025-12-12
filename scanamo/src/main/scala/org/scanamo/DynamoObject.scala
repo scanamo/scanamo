@@ -302,6 +302,14 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
         (self, other) match {
           case (_: Empty.type, _: Empty.type) =>
             true
+          case (_: Empty.type, other: Strict) =>
+            other.xs.isEmpty
+          case (self: Strict, _: Empty.type) =>
+            self.xs.isEmpty
+          case (_: Empty.type, other: Pure) =>
+            other.xs.isEmpty
+          case (self: Pure, _: Empty.type) =>
+            self.xs.isEmpty
           case (self: Strict, other: Strict) =>
             // Access fields after matching to avoid case class equals recursion
             self.xs == other.xs
