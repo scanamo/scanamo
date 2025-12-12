@@ -298,7 +298,7 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
     that match {
       case other: DynamoObject =>
         // Pure FP approach: pattern match on types without extracting fields
-        // This avoids calling the case class's auto-generated equals() which causes recursion
+        // This avoids triggering the expensive internalToMap conversion when comparing objects of the same concrete type
         (self, other) match {
           case (_: Empty.type, _: Empty.type) =>
             true
