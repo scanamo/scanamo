@@ -310,11 +310,17 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
             other.xs.isEmpty
           case (self: Pure, _: Empty.type) =>
             self.xs.isEmpty
+          case (_: Empty.type, other: Concat) =>
+            other.xs.isEmpty && other.ys.isEmpty
+          case (self: Concat, _: Empty.type) =>
+            self.xs.isEmpty && other.ys.isEmpty
           case (self: Strict, other: Strict) =>
             // Access fields after matching to avoid case class equals recursion
             self.xs == other.xs
           case (self: Pure, other: Pure) =>
             self.xs == other.xs
+          case (self: Concat, other: Concat) =>
+            self.xs == other.xs && self.ys == other.ys
           case _ =>
             // Fall back for mixed types (e.g., Strict vs Concat)
             internalToMap == other.internalToMap
