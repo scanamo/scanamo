@@ -297,8 +297,8 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   final override def equals(that: Any): Boolean =
     that match {
       case other: DynamoObject =>
-        // Pure FP approach: pattern match on types without extracting fields
-        // This avoids triggering the expensive internalToMap conversion when comparing objects of the same concrete type
+        // Having all these explicit cases is a performance optimization to avoid, if possible,
+        // falling into the final case which calls the expensive internalToMap on both sides.
         (self, other) match {
           case (_: Empty.type, _: Empty.type) =>
             true
@@ -315,7 +315,6 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
           case (self: Concat, _: Empty.type) =>
             self.xs.isEmpty && self.ys.isEmpty
           case (self: Strict, other: Strict) =>
-            // Access fields after matching to avoid case class equals recursion
             self.xs == other.xs
           case (self: Pure, other: Pure) =>
             self.xs == other.xs
