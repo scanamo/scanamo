@@ -20,7 +20,7 @@ import org.scalatest.funspec.AnyFunSpec
 import org.scalatest.matchers.should.Matchers
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue
 
-import java.util.{HashMap => JHashMap}
+import java.util.{ HashMap => JHashMap }
 
 class DynamoObjectPerformanceTest extends AnyFunSpec with Matchers {
 
@@ -126,4 +126,3 @@ class DynamoObjectPerformanceTest extends AnyFunSpec with Matchers {
     }
   }
 }
-
