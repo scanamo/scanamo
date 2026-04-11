@@ -9,7 +9,7 @@ val V = new {
   val magnolia = "1.1.13"
   val magnoliaFor3 = "1.3.18"
   val catsVersion = "2.13.0"
-  val catsEffectVersion = "3.6.3"
+  val catsEffectVersion = "3.7.0"
 }
 
 ThisBuild / scalaVersion := V.scala3
