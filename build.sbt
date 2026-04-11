@@ -4,7 +4,7 @@ import sbtversionpolicy.withsbtrelease.ReleaseVersion
 Global / onChangedBuildSource := ReloadOnSourceChanges
 val V = new {
   val scala212 = "2.12.21"
-  val scala213 = "2.13.16"
+  val scala213 = "2.13.18"
   val scala3 = "3.3.6"
   val magnolia = "1.1.13"
   val magnoliaFor3 = "1.3.18"
