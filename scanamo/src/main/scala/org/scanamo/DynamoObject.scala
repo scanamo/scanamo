@@ -295,9 +295,40 @@ sealed abstract class DynamoObject extends Product with Serializable { self =>
   }
 
   final override def equals(that: Any): Boolean =
-    that.isInstanceOf[DynamoObject] && (internalToMap == that.asInstanceOf[DynamoObject].internalToMap)
+    that match {
+      case other: DynamoObject =>
+        // Having all these explicit cases is a performance optimization to avoid, if possible,
+        // falling into the final case which calls the expensive internalToMap on both sides.
+        (self, other) match {
+          case (_: Empty.type, _: Empty.type) =>
+            true
+          case (_: Empty.type, other: Strict) =>
+            other.xs.isEmpty
+          case (self: Strict, _: Empty.type) =>
+            self.xs.isEmpty
+          case (_: Empty.type, other: Pure) =>
+            other.xs.isEmpty
+          case (self: Pure, _: Empty.type) =>
+            self.xs.isEmpty
+          case (_: Empty.type, other: Concat) =>
+            other.xs.isEmpty && other.ys.isEmpty
+          case (self: Concat, _: Empty.type) =>
+            self.xs.isEmpty && self.ys.isEmpty
+          case (self: Strict, other: Strict) =>
+            self.xs == other.xs
+          case (self: Pure, other: Pure) =>
+            self.xs == other.xs
+          case (self: Concat, other: Concat) =>
+            self.xs == other.xs && self.ys == other.ys
+          case _ =>
+            // Fall back for mixed types (e.g., Strict vs Concat)
+            internalToMap == other.internalToMap
+        }
+      case _ => false
+    }
 
-  final override def hashCode(): Int = internalToMap.hashCode
+  final override def hashCode(): Int =
+    internalToMap.hashCode()
 }
 
 object DynamoObject {
@@ -305,8 +336,12 @@ object DynamoObject {
     final def internalToMap: Map[String, DynamoValue] = Map.empty
   }
   final private[DynamoObject] case class Strict(xs: JMap[String, AttributeValue]) extends DynamoObject {
-    final def internalToMap: Map[String, DynamoValue] =
-      unsafeToScalaMap(xs).mapValues(DynamoValue.fromAttributeValue).toMap
+    // Lazy memoization - only computed if internalToMap is actually needed (e.g., mixed-type comparison)
+    // This is a safety net for the rare case where Strict is compared to Concat or other mixed types
+    @transient private[this] lazy val _internalToMap: Map[String, DynamoValue] =
+      unsafeToScalaMap(xs).map { case (k, v) => (k, DynamoValue.fromAttributeValue(v)) }
+
+    final def internalToMap: Map[String, DynamoValue] = _internalToMap
   }
   final private[DynamoObject] case class Pure(xs: Map[String, DynamoValue]) extends DynamoObject {
     final def internalToMap: Map[String, DynamoValue] = xs

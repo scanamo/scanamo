@@ -19,6 +19,10 @@ class DynamoObjectTest extends Properties("DynamoValue") with DynamoValueInstanc
   property("associativity") = forAll { (x: DynamoObject, y: DynamoObject, z: DynamoObject) =>
     (x <> y) <> z == x <> (y <> z)
   }
+
+  property("equals/hashCode contract") = forAll { (x: DynamoObject, y: DynamoObject) =>
+    if (x == y) x.hashCode == y.hashCode else true
+  }
 }
 
 private[scanamo] trait DynamoValueInstances extends DynamoObjectInstances with DynamoArrayInstances {
