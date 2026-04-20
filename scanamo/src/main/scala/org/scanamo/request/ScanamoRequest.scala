@@ -19,11 +19,11 @@ package org.scanamo.request
 import cats.implicits.*
 import org.scanamo.query.{ Condition, Query }
 import org.scanamo.update.{ UpdateAndCondition, UpdateExpression }
-import org.scanamo.{ DeleteReturn, DynamoObject, DynamoValue, PutReturn }
+import org.scanamo.{ DeleteReturn, DynamoObject, PutReturn }
 
 case class ScanamoPutRequest(
   tableName: String,
-  item: DynamoValue,
+  item: DynamoObject,
   condition: Option[RequestCondition],
   ret: PutReturn
 )
@@ -94,7 +94,7 @@ case class RequestCondition(
 
 case class TransactPutItem(
   tableName: String,
-  item: DynamoValue,
+  item: DynamoObject,
   condition: Option[RequestCondition]
 )
 
